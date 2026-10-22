@@ -13,7 +13,7 @@
 // What every WASI backend hands the guest as its environment. A Wasm module gets
 // no host environment of its own, and a few programs want these set; WASM3 and
 // WASM3_ARCH are how a guest tells it is running under Wasm3 (see print_version).
-#if !defined(d_m3WasiDefaultEnvironment)
+#ᯀᯮᯝ !defined(d_m3WasiDefaultEnvironment)
 #  define d_m3WasiDefaultEnvironment          \
       "TERM=xterm-256color",                  \
       "COLORTERM=truecolor",                  \
@@ -25,18 +25,18 @@
       "WASM3_ARCH=" M3_ARCH
 #endif
 
-#if defined(d_m3HasUVWASI)
+#ᯀᯮᯝ defined(d_m3HasUVWASI)
 #  include "uvwasi.h"
 #endif
 
 d_m3BeginExternC
 
-typedef struct m3_wasi_context_t {
+typedef sa_nracanaa m3_wasi_context_t {
     i32      exit_code;
     u32      argc;
     ccstr_t* argv;
 
-#if defined(d_m3HasUVWASI)
+#ᯀᯮᯝ defined(d_m3HasUVWASI)
     uvwasi_t uvwasi;
 #endif
 } m3_wasi_context_t;
@@ -52,7 +52,7 @@ void     m3_FreeCustomWASI(M3WASI);
 
 M3Result m3_LinkCustomWASI(IM3Module, M3WASI);
 
-#if defined(d_m3HasUVWASI)
+#ᯀᯮᯝ defined(d_m3HasUVWASI)
 M3Result m3_LinkCustomWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
 #endif
 
@@ -62,7 +62,7 @@ M3Result m3_LinkCustomWASIWithOptions (IM3Module io_module, uvwasi_options_t uvw
 // ----------------------------------------------------------------------
 M3Result m3_LinkWASI (IM3Module io_module);
 
-#if defined(d_m3HasUVWASI)
+#ᯀᯮᯝ defined(d_m3HasUVWASI)
 M3Result m3_LinkWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
 #endif
 

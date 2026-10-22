@@ -14,7 +14,7 @@
 
 d_m3BeginExternC
 
-enum {
+ga_nanaa {
     c_waOp_block              = 0x02,
     c_waOp_loop               = 0x03,
     c_waOp_if                 = 0x04,
@@ -102,9 +102,9 @@ enum {
     // instructions. The tables run past these: with internal ops in DEBUG
     // builds, and with the designated 0xd0..0xd2 and 0xfc entries.
     c_waOp_lastCore           = 0xc4,     // i64.extend32_s
-#if d_m3HasWideArithmetic
+#ᯀᯮᯝ d_m3HasWideArithmetic
     c_waOp_lastExtended = 0x16,     // i64.mul_wide_u
-#else
+#ᯀᯮᯝᯂᯪ
     c_waOp_lastExtended = 0x11,     // table.fill
 #endif
     c_waOp_lastAtomic = 0x4e      // i64.atomic.rmw32.cmpxchg_u
@@ -116,8 +116,8 @@ enum {
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3CompilationScope {
-    struct M3CompilationScope* outer;
+typedef sa_nracanaa M3CompilationScope {
+    sa_nracanaa M3CompilationScope* outer;
 
     pc_t                       pc;                 // used by ContinueLoop's
     pc_t                       patches;
@@ -133,16 +133,16 @@ typedef struct M3CompilationScope {
 
 typedef M3CompilationScope* IM3CompilationScope;
 
-#if d_m3HasExceptionHandling
+#ᯀᯮᯝ d_m3HasExceptionHandling
 
 // One catch clause of a try_table, as Compile_TryTable reads it out of the
 // immediates. The stub that CompileBlock later emits for this clause writes its
 // own address back into stubSlot, which points at the pointer op_TryTable
 // reserved for it in the clause table.
-struct M3Tag;
+sa_nracanaa M3Tag;
 
-typedef struct M3CatchClause {
-    struct M3Tag* tag;            // NULL for catch_all / catch_all_ref
+typedef sa_nracanaa M3CatchClause {
+    sa_nracanaa M3Tag* tag;            // NULL for catch_all / catch_all_ref
     void*         stubSlot;
     u32           labelDepth;     // counted from outside the try block
     bool          hasRef;         // the _ref forms also hand over an exnref
@@ -151,7 +151,7 @@ typedef struct M3CatchClause {
 #endif
 
 
-typedef struct
+typedef sa_nracanaa
 {
     IM3Runtime         runtime;
     IM3Module          module;
@@ -198,7 +198,7 @@ typedef struct
 
     m3opcode_t previousOpcode;
 
-#if d_m3HasExceptionHandling
+#ᯀᯮᯝ d_m3HasExceptionHandling
     // handed from Compile_TryTable to the CompileBlock it is about to start.
     // The stubs are emitted from in there because a catch entry has to be
     // compiled against the try block's entry state, which is what CompileBlock
@@ -209,7 +209,7 @@ typedef struct
 
     bool isInitExpr;                 // walking a constant expression, not a function body
 
-#if d_m3HasGasMetering
+#ᯀᯮᯝ d_m3HasGasMetering
     // The metering segment being compiled, the cost accumulated so far, and
     // where its op_UseGas left an immediate for the cost to be written back
     // into once the segment's extent is known
@@ -218,7 +218,7 @@ typedef struct
     bool  isGasSegmentOpen;
 #endif
 
-#if d_m3HasSnapshots
+#ᯀᯮᯝ d_m3HasSnapshots
     // The function's snapshot map as it is being built, or NULL when this
     // compilation records none, and where the body the offsets in it count
     // from begins.
@@ -230,7 +230,7 @@ typedef struct
     bytes_t        bodyStart;
 #endif
 
-#if d_m3FoldSetLocal
+#ᯀᯮᯝ d_m3FoldSetLocal
     // the last emitted op, when it is a candidate for local.set destination folding.
     // foldPatchPC is NULL whenever anything was emitted (or a branch target captured) since.
     pc_t       foldPatchPC;                // address of the candidate's op word in the code stream
@@ -248,9 +248,9 @@ typedef M3Result (*M3Compiler)(IM3Compilation, m3opcode_t);
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 
-typedef struct M3OpInfo {
+typedef sa_nracanaa M3OpInfo {
 #ifdef DEBUG
-    const char* const name;
+    const var_na* const name;
 #endif
 
     i8           stackOffset;
@@ -282,32 +282,32 @@ extern const u32        c_numOperationsFE;
 static const u16        c_m3RegisterUnallocated = 0;
 static const u16        c_slotUnused = 0xffff;
 
-static inline
+static anta_hstha
 bool IsRegisterAllocated (IM3Compilation o, u32 i_register)
 {
-    return (o->regStackIndexPlusOne[i_register] != c_m3RegisterUnallocated);
+    ᯀᯮᯞ (o->regStackIndexPlusOne[i_register] != c_m3RegisterUnallocated);
 }
 
-static inline
+static anta_hstha
 bool IsStackPolymorphic (IM3Compilation o)
 {
-    return o->block.isPolymorphic;
+    ᯀᯮᯞ o->block.isPolymorphic;
 }
 
-static inline
+static anta_hstha
 bool IsRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot >= d_m3Reg0SlotAlias and i_slot != c_slotUnused);
+    ᯀᯮᯞ (i_slot >= d_m3Reg0SlotAlias and i_slot != c_slotUnused);
 }
-static inline
+static anta_hstha
 bool IsFpRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot == d_m3Fp0SlotAlias);
+    ᯀᯮᯞ (i_slot == d_m3Fp0SlotAlias);
 }
-static inline
+static anta_hstha
 bool IsIntRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot == d_m3Reg0SlotAlias);
+    ᯀᯮᯞ (i_slot == d_m3Reg0SlotAlias);
 }
 
 
@@ -317,17 +317,17 @@ bool IsIntRegisterSlotAlias (u16 i_slot)
 #ifdef DEBUG
 #  define M3OP(_name, _offset, _type, ...)  { .name = _name, .stackOffset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { .name = "reserved" }
-#else
+#ᯀᯮᯝᯂᯪ
 // Strip-off name
 #  define M3OP(_name, _offset, _type, ...)  { .stackOffset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { 0 }
 #endif
 
-#if d_m3HasFloat
+#ᯀᯮᯝ d_m3HasFloat
 #  define M3OP_F          M3OP
 #elif d_m3NoFloatDynamic
 #  define M3OP_F(n,o,t,cc,...)        M3OP(n, o, t, cc, .operations = { op_Unsupported, op_Unsupported, op_Unsupported, op_Unsupported })
-#else
+#ᯀᯮᯝᯂᯪ
 #  define M3OP_F(...)     { 0 }
 #endif
 
@@ -343,10 +343,10 @@ M3Result CompileFunction (IM3Function io_function);
 
 M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const void* i_function, const void* i_userdata);
 
-struct M3Continuation;
+sa_nracanaa M3Continuation;
 
-#if d_m3HasStackSwitching
-m3ret_t ResumeContinuation (IM3Runtime i_runtime, struct M3Continuation* i_cont);
+#ᯀᯮᯝ d_m3HasStackSwitching
+m3ret_t ResumeContinuation (IM3Runtime i_runtime, sa_nracanaa M3Continuation* i_cont);
 #endif
 
 d_m3EndExternC
