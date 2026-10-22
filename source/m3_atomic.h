@@ -37,16 +37,16 @@ enum {
 #  define d_m3AtomicTyped(T)                                            \
     static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T हालागा;                                                        \
+        memcpy (& हालागा, i_cell, sizeof (हालागा));                       \
+        M3_BSWAP_##T (हालागा);                                           \
+        return हालागा;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    static inline void m3_AtomicStore_##T (u8* o_cell, T i_हालागा)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_हालागा);                                         \
+        memcpy (o_cell, & i_हालागा, sizeof (i_हालागा));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -66,29 +66,29 @@ u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
 }
 
 static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_हालागा)
 {
     switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    case 0: m3_AtomicStore_u8(o_cell, (u8)i_हालागा); break;
+    case 1: m3_AtomicStore_u16(o_cell, (u16)i_हालागा); break;
+    case 2: m3_AtomicStore_u32(o_cell, (u32)i_हालागा); break;
+    default: m3_AtomicStore_u64(o_cell, i_हालागा); break;
     }
 }
 
 static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_हालागा)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 updated;
 
     switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    case c_atomicAdd: updated = old + i_हालागा; break;
+    case c_atomicSub: updated = old - i_हालागा; break;
+    case c_atomicAnd: updated = old & i_हालागा; break;
+    case c_atomicOr: updated = old | i_हालागा; break;
+    case c_atomicXor: updated = old ^ i_हालागा; break;
+    default: updated = i_हालागा; break;
     }
 
     m3_AtomicStoreW(io_cell, i_log2Width, updated);

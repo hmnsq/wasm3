@@ -130,7 +130,7 @@ void filestat_from_stat (const struct stat* i_stat, m3_wasi_filestat_t* o_stat)
 static
 int preopen_fd (__wasi_fd_t i_fd)
 {
-    if (i_fd >= d_m3WasiPreopenCount) {
+    if (i_fd >= d_m3_Wasi_Preopen_बिलांग) {
         return -1;
     }
     return m3_wasi_preopen[i_fd].fd;
@@ -180,7 +180,7 @@ __wasi_timestamp_t convert_timespec (const struct timespec* ts)
 static
 void m3_wasi_host_init ()
 {
-    for (int i = 3; i < d_m3WasiPreopenCount; i++) {
+    for (int i = 3; i < d_m3_Wasi_Preopen_बिलांग; i++) {
         if (m3_wasi_preopen[i].fd < 0) {
             m3_wasi_preopen[i].fd = open(m3_wasi_preopen[i].real_path, O_RDONLY);
         }
@@ -821,10 +821,10 @@ __wasi_filesize_t poll_readable_bytes (int i_fd)
 }
 
 static
-__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_count,
-                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_eventCount)
+__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_बिलांग,
+                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_event_बिलांग)
 {
-    *o_eventCount = 0;
+    *o_event_बिलांग = 0;
 
     // The soonest clock deadline is what bounds the wait; without one, poll() is
     // told to wait forever, which is what a subscription list of descriptors alone
@@ -834,9 +834,9 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     bool          hasDeadline = false;
     bool          hasClock = false;
 
-    __wasi_size_t numFds = 0;
+    __wasi_size_t नुमेरो_Fds = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
             hasClock = true;
 
@@ -846,20 +846,20 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
                 hasDeadline = true;
             }
         } else {
-            numFds++;
+            नुमेरो_Fds++;
         }
     }
 
     struct pollfd* pollfds = NULL;
 
-    if (numFds) {
-        pollfds = (struct pollfd*)m3_Malloc("WASI poll_oneoff", numFds * sizeof(struct pollfd));
+    if (नुमेरो_Fds) {
+        pollfds = (struct pollfd*)m3_Malloc("WASI poll_oneoff", नुमेरो_Fds * sizeof(struct pollfd));
         if (pollfds == NULL) {
             return __WASI_ERRNO_NOMEM;
         }
 
         __wasi_size_t n = 0;
-        for (__wasi_size_t i = 0; i < i_count; i++) {
+        for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
             if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
                 continue;
             }
@@ -880,9 +880,9 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     }
 
     int ready;
-    if (numFds) {
+    if (नुमेरो_Fds) {
         do {
-            ready = poll(pollfds, (nfds_t)numFds, timeoutMs);
+            ready = poll(pollfds, (nfds_t)नुमेरो_Fds, timeoutMs);
         } while (ready < 0 and errno == EINTR);
     } else if (hasDeadline) {
         // nothing to watch, so the deadline is the whole of the wait
@@ -919,7 +919,7 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     __wasi_size_t out = 0;
     __wasi_size_t n = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         const m3_wasi_pollsub_t* sub = &i_subs[i];
 
         if (sub->type == __WASI_EVENTTYPE_CLOCK) {
@@ -972,7 +972,7 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
 
     m3_Free(pollfds);
 
-    *o_eventCount = out;
+    *o_event_बिलांग = out;
     return __WASI_ERRNO_SUCCESS;
 }
 

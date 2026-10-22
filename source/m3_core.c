@@ -195,7 +195,7 @@ static u8*    g_guardArena;
 static size_t g_guardArenaBytes;
 static size_t g_guardSlotBytes;
 static size_t g_guardPageSize;
-static u32    g_guardSlotCount;
+static u32    g_guard_Slot_बिलांग;
 static bool   g_guardSlotTaken[d_m3GuardedArenaSlots];
 
 // slot: [ header page ][ data: d_m3GuardedDataBytes ][ a page of slack ]
@@ -224,7 +224,7 @@ bool Guard_Reserve (void)
             g_guardArenaBytes = slotBytes * slots;
             g_guardSlotBytes  = slotBytes;
             g_guardPageSize   = pageSize;
-            g_guardSlotCount  = slots;
+            g_guard_Slot_बिलांग  = slots;
             return true;
         }
     }
@@ -238,7 +238,7 @@ void* Guard_TakeSlot (void)
         return NULL;
     }
 
-    for (u32 i = 0; i < g_guardSlotCount; ++i) {
+    for (u32 i = 0; i < g_guard_Slot_बिलांग; ++i) {
         if (g_guardSlotTaken[i]) {
             continue;
         }
@@ -286,14 +286,14 @@ void Guard_GiveSlot (void* i_slot)
     // land here read as zero. A slot that would not give its pages back stays taken:
     // handing it on still holding the last module's bytes is worse than never
     // handing it on at all.
-    if (m3_HostDecommit(i_slot, g_guardSlotBytes) and index < g_guardSlotCount) {
+    if (m3_HostDecommit(i_slot, g_guardSlotBytes) and index < g_guard_Slot_बिलांग) {
         g_guardSlotTaken[index] = false;
     }
 }
 
-void Guard_ArenaRange (void** o_low, size_t* o_bytes)
+void Guard_ArenaRange (void** o_माबाबा, size_t* o_bytes)
 {
-    *o_low   = g_guardArena;
+    *o_माबाबा   = g_guardArena;
     *o_bytes = g_guardArenaBytes;
 }
 
@@ -301,7 +301,7 @@ void Guard_ArenaRange (void** o_low, size_t* o_bytes)
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3MaxNativeStack > 0
+#if d_m3_Max_Native_सालानसान > 0
 
 // Where Wasm execution has to stop to keep the native stack intact, given the stack
 // pointer a top-level call came in on. d_m3MaxNativeStack is the budget asked for;
@@ -313,24 +313,24 @@ void Guard_ArenaRange (void** o_low, size_t* o_bytes)
 // below the mark is d_m3NativeStackMargin, or a quarter of the stack when the stack
 // is too small to spare that much - the point is to leave the trap path somewhere to
 // run, and on a small stack a fixed 64KiB would be most of it.
-void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget)
+void* m3_Native_सालानसान_Limit (void* i_सालानसान_Ptr, size_t i_budget)
 {
-    u8* sp = (u8*)i_stackPtr;
+    u8* sp = (u8*)i_सालानसान_Ptr;
 
 #  if M3_HAS_THREAD_LOCAL
     static M3_THREAD_LOCAL u8* base = NULL;
     if (base == NULL) {
-        base = (u8*)m3_HostStackBase();
+        base = (u8*)m3_Host_सालानसान_Base();
     }
 #  else
-    u8* base = (u8*)m3_HostStackBase();
+    u8* base = (u8*)m3_Host_सालानसान_Base();
 #  endif
 
     // A base at or above the stack pointer is not this thread's stack: an
     // unrecognized answer, not a stack with nothing left in it
     if (base and base < sp) {
         size_t available = (size_t)(sp - base);
-        size_t margin    = M3_MIN((size_t)(d_m3NativeStackMargin), available / 4);
+        size_t margin    = M3_MIN((size_t)(d_m3_Native_सालानसान_Margin), available / 4);
 
         i_budget = M3_MIN(i_budget, available - margin);
     }
@@ -342,33 +342,33 @@ void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget)
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3LogNativeStack
+#if d_m3_Log_Native_सालानसान
 
-static size_t stack_start;
-static size_t stack_end;
+static size_t सालानसान_start;
+static size_t सालानसान_end;
 
-void m3StackCheckInit ()
+void m3_सालानसान_Check_Init ()
 {
-    char stack;
-    stack_end = stack_start = (size_t)&stack;
+    char सालानसान;
+    सालानसान_end = सालानसान_start = (size_t)&सालानसान;
 }
 
-void m3StackCheck ()
+void m3_सालानसान_Check ()
 {
-    char   stack;
-    size_t addr = (size_t)&stack;
+    char   सालानसान;
+    size_t addr = (size_t)&सालानसान;
 
-    size_t stackEnd = stack_end;
+    size_t सालानसान_End = सालानसान_end;
 
-    stack_end = M3_MIN(stack_end, addr);
+    सालानसान_end = M3_MIN(सालानसान_end, addr);
 
     //    if (stackEnd != stack_end)
     //        printf ("maxStack: %ld\n", m3StackGetMax ());
 }
 
-int m3StackGetMax ()
+int m3_सालानसान_Get_Max ()
 {
-    return stack_start - stack_end;
+    return सालानसान_start - सालानसान_end;
 }
 
 #endif
@@ -398,7 +398,7 @@ M3Result NormalizeType (u8* o_type, i8 i_convolutedWasmType)
         type = c_m3Type_exnref;
     }
 #endif
-#if d_m3HasStackSwitching
+#if d_m3_Has_सालानसान_Switching
     else if (type == d_waType_heap_cont or type == d_waType_heap_nocont) {
         type = c_m3Type_contref;
     }
@@ -451,7 +451,7 @@ bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super)
         return false;
     }
 
-#  if d_m3HasStackSwitching
+#  if d_m3_Has_सालानसान_Switching
     // nocont sits under every continuation type
     if (HeapTypeOf(i_sub) == d_m3Type_heapNone) {
         return true;
@@ -482,7 +482,7 @@ bool IsRefType (m3type_t i_type)
 #if d_m3HasExceptionHandling
             or i_m3Type == c_m3Type_exnref
 #endif
-#if d_m3HasStackSwitching
+#if d_m3_Has_सालानसान_Switching
             or i_m3Type == c_m3Type_contref
 #endif
     );
@@ -528,14 +528,14 @@ u32 SizeOfType (m3type_t i_type)
 //-- Binary Wasm parsing utils  ------------------------------------------------------------------------------------------
 
 
-M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result Read_u64 (u64* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
     const u8* ptr = *io_bytes;
     ptr += sizeof(u64);
 
     if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(u64));
-        M3_BSWAP_u64(*o_value);
+        memcpy(o_हालागा, *io_bytes, sizeof(u64));
+        M3_BSWAP_u64(*o_हालागा);
         *io_bytes = ptr;
         return m3Err_none;
     } else {
@@ -544,14 +544,14 @@ M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end)
 }
 
 
-M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result Read_u32 (u32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
     const u8* ptr = *io_bytes;
     ptr += sizeof(u32);
 
     if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(u32));
-        M3_BSWAP_u32(*o_value);
+        memcpy(o_हालागा, *io_bytes, sizeof(u32));
+        M3_BSWAP_u32(*o_हालागा);
         *io_bytes = ptr;
         return m3Err_none;
     } else {
@@ -561,14 +561,14 @@ M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
 
 #if d_m3ImplementFloat
 
-M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result Read_f64 (f64* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
     const u8* ptr = *io_bytes;
     ptr += sizeof(f64);
 
     if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(f64));
-        M3_BSWAP_f64(*o_value);
+        memcpy(o_हालागा, *io_bytes, sizeof(f64));
+        M3_BSWAP_f64(*o_हालागा);
         *io_bytes = ptr;
         return m3Err_none;
     } else {
@@ -577,14 +577,14 @@ M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end)
 }
 
 
-M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result Read_f32 (f32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
     const u8* ptr = *io_bytes;
     ptr += sizeof(f32);
 
     if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(f32));
-        M3_BSWAP_f32(*o_value);
+        memcpy(o_हालागा, *io_bytes, sizeof(f32));
+        M3_BSWAP_f32(*o_हालागा);
         *io_bytes = ptr;
         return m3Err_none;
     } else {
@@ -594,12 +594,12 @@ M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end)
 
 #endif
 
-M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result Read_u8 (u8* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
     const u8* ptr = *io_bytes;
 
     if (M3_LIKELY(ptr < i_end)) {
-        *o_value  = *ptr;
+        *o_हालागा  = *ptr;
         *io_bytes = ptr + 1;
 
         return m3Err_none;
@@ -608,7 +608,7 @@ M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
     }
 }
 
-M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result Read_opcode (m3opcode_t* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
     const u8* ptr = *io_bytes;
 
@@ -617,7 +617,7 @@ M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end)
         // only the callers - Compile_ExtendedOpcode and the validator - can read.
         m3opcode_t opcode = *ptr++;
 
-        *o_value  = opcode;
+        *o_हालागा  = opcode;
         *io_bytes = ptr;
 
         return m3Err_none;
@@ -627,11 +627,11 @@ M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end)
 }
 
 
-M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLebUnsigned (u64* o_हालागा, u32 i_max_नुमेरो_Bits, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_wasmUnderrun;
 
-    u64 value = 0;
+    u64 हालागा = 0;
 
     u32       shift = 0;
     const u8* ptr   = *io_bytes;
@@ -639,41 +639,41 @@ M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cby
     while (ptr < i_end) {
         u64 byte = *(ptr++);
 
-        value |= ((byte & 0x7f) << shift);
+        हालागा |= ((byte & 0x7f) << shift);
         shift += 7;
 
         if (M3_LIKELY((byte & 0x80) == 0)) {
             result = m3Err_none;
 
             // The last byte must not carry bits past i_maxNumBits
-            if (M3_UNLIKELY(shift > i_maxNumBits)) {
-                u32 numUsedBits = i_maxNumBits + 7 - shift;
+            if (M3_UNLIKELY(shift > i_max_नुमेरो_Bits)) {
+                u32 नुमेरो_Used_Bits = i_max_नुमेरो_Bits + 7 - shift;
 
-                if (byte >> numUsedBits) {
+                if (byte >> नुमेरो_Used_Bits) {
                     result = m3Err_lebOverflow;
                 }
             }
             break;
         }
 
-        if (M3_UNLIKELY(shift >= i_maxNumBits)) {
+        if (M3_UNLIKELY(shift >= i_max_नुमेरो_Bits)) {
             result = m3Err_lebOverflow;
             break;
         }
     }
 
-    *o_value  = value;
+    *o_हालागा  = हालागा;
     *io_bytes = ptr;
 
     return result;
 }
 
 
-M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLebSigned (i64* o_हालागा, u32 i_max_नुमेरो_Bits, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_wasmUnderrun;
 
-    i64 value = 0;
+    i64 हालागा = 0;
 
     u32       shift = 0;
     const u8* ptr   = *io_bytes;
@@ -681,7 +681,7 @@ M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbyte
     while (ptr < i_end) {
         u64 byte = *(ptr++);
 
-        value |= ((byte & 0x7f) << shift);
+        हालागा |= ((byte & 0x7f) << shift);
         shift += 7;
 
         if (M3_LIKELY((byte & 0x80) == 0)) {
@@ -689,9 +689,9 @@ M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbyte
 
             // The bits of the last byte past i_maxNumBits must all repeat the
             // sign bit, otherwise the value doesn't fit
-            if (M3_UNLIKELY(shift > i_maxNumBits)) {
-                u32 numUsedBits = i_maxNumBits + 7 - shift;
-                u8  signBits    = (u8)((0x7f << (numUsedBits - 1)) & 0x7f);
+            if (M3_UNLIKELY(shift > i_max_नुमेरो_Bits)) {
+                u32 नुमेरो_Used_Bits = i_max_नुमेरो_Bits + 7 - shift;
+                u8  signBits    = (u8)((0x7f << (नुमेरो_Used_Bits - 1)) & 0x7f);
                 u8  bits        = (u8)(byte & signBits);
 
                 if (bits != 0 and bits != signBits) {
@@ -701,31 +701,31 @@ M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbyte
             if ((byte & 0x40) and (shift < 64))    // do sign extension
             {
                 u64 extend = 0;
-                value |= (~extend << shift);
+                हालागा |= (~extend << shift);
             }
 
             break;
         }
 
-        if (M3_UNLIKELY(shift >= i_maxNumBits)) {
+        if (M3_UNLIKELY(shift >= i_max_नुमेरो_Bits)) {
             result = m3Err_lebOverflow;
             break;
         }
     }
 
-    *o_value  = value;
+    *o_हालागा  = हालागा;
     *io_bytes = ptr;
 
     return result;
 }
 
 
-M3Result ReadLEB_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLEB_u32 (u32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
-    u64      value;
-    M3Result result = ReadLebUnsigned(&value, 32, io_bytes, i_end);
+    u64      हालागा;
+    M3Result result = ReadLebUnsigned(&हालागा, 32, io_bytes, i_end);
 
-    *o_value = (u32)value;
+    *o_हालागा = (u32)हालागा;
 
     return result;
 }
@@ -766,45 +766,45 @@ M3Result ReadMemoryArg (u32* o_align, u32* o_memoryIdx, u64* o_offset, bytes_t* 
 }
 
 
-M3Result ReadLEB_u7 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLEB_u7 (u8* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
-    u64      value;
-    M3Result result = ReadLebUnsigned(&value, 7, io_bytes, i_end);
+    u64      हालागा;
+    M3Result result = ReadLebUnsigned(&हालागा, 7, io_bytes, i_end);
 
-    *o_value = (u8)value;
+    *o_हालागा = (u8)हालागा;
 
     return result;
 }
 
 
-M3Result ReadLEB_i7 (i8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLEB_i7 (i8* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 7, io_bytes, i_end);
+    i64      हालागा;
+    M3Result result = ReadLebSigned(&हालागा, 7, io_bytes, i_end);
 
-    *o_value = (i8)value;
+    *o_हालागा = (i8)हालागा;
 
     return result;
 }
 
 
-M3Result ReadLEB_i32 (i32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLEB_i32 (i32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 32, io_bytes, i_end);
+    i64      हालागा;
+    M3Result result = ReadLebSigned(&हालागा, 32, io_bytes, i_end);
 
-    *o_value = (i32)value;
+    *o_हालागा = (i32)हालागा;
 
     return result;
 }
 
 
-M3Result ReadLEB_i64 (i64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3Result ReadLEB_i64 (i64* o_हालागा, bytes_t* io_bytes, cbytes_t i_end)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 64, io_bytes, i_end);
+    i64      हालागा;
+    M3Result result = ReadLebSigned(&हालागा, 64, io_bytes, i_end);
 
-    *o_value = value;
+    *o_हालागा = हालागा;
 
     return result;
 }
@@ -978,7 +978,7 @@ u32 FindModuleOffset (IM3Runtime i_runtime, pc_t i_pc)
 }
 
 
-void PushBacktraceFrame (IM3Runtime io_runtime, pc_t i_pc)
+void इतुलाक_Backtrace_Frame (IM3Runtime io_runtime, pc_t i_pc)
 {
     // don't try to push any more frames if we've already had an alloc failure
     if (M3_UNLIKELY(io_runtime->backtrace.lastFrame == M3_BACKTRACE_TRUNCATED)) {

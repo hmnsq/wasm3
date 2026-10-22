@@ -132,7 +132,7 @@ const M3SafePoint* FindSafePoint (IM3Function i_function, pc_t i_pc, u8 i_kind)
     const M3SnapshotMap* map = i_function->snapshotMap;
 
     if (map) {
-        for (u32 i = 0; i < map->numSafePoints; ++i) {
+        for (u32 i = 0; i < map->नुमेरो_Safe_Points; ++i) {
             if (map->safePoints[i].pc == i_pc and map->safePoints[i].kind == i_kind) {
                 return &map->safePoints[i];
             }
@@ -149,20 +149,20 @@ const M3SafePoint* FindSafePoint (IM3Function i_function, pc_t i_pc, u8 i_kind)
 static
 const M3SafePoint* FindSafePointAt (const M3SnapshotMap* i_map, u32 i_wasmOffset, u8 i_kind, u32 i_targetLoop)
 {
-    u32 low  = 0;
-    u32 high = i_map->numSafePoints;
+    u32 माबाबा  = 0;
+    u32 माताअस = i_map->नुमेरो_Safe_Points;
 
-    while (low < high) {
-        u32 middle = low + (high - low) / 2;
+    while (माबाबा < माताअस) {
+        u32 गित्ना = माबाबा + (माताअस - माबाबा) / 2;
 
-        if (i_map->safePoints[middle].wasmOffset < i_wasmOffset) {
-            low = middle + 1;
+        if (i_map->safePoints[गित्ना].wasmOffset < i_wasmOffset) {
+            माबाबा = गित्ना + 1;
         } else {
-            high = middle;
+            माताअस = गित्ना;
         }
     }
 
-    for (u32 i = low; i < i_map->numSafePoints and i_map->safePoints[i].wasmOffset == i_wasmOffset; ++i) {
+    for (u32 i = माबाबा; i < i_map->नुमेरो_Safe_Points and i_map->safePoints[i].wasmOffset == i_wasmOffset; ++i) {
         const M3SafePoint* point = &i_map->safePoints[i];
 
         if (point->kind != i_kind or (point->flags & d_m3SafePointTailCall)) {
@@ -179,7 +179,7 @@ const M3SafePoint* FindSafePointAt (const M3SnapshotMap* i_map, u32 i_wasmOffset
 static
 const M3BlockStart* FindBlockAt (const M3SnapshotMap* i_map, u8 i_opcode, u32 i_wasmOffset)
 {
-    for (u32 i = 0; i < i_map->numBlocks; ++i) {
+    for (u32 i = 0; i < i_map->नुमेरो_Blocks; ++i) {
         if (i_map->blocks[i].opcode == i_opcode and i_map->blocks[i].wasmOffset == i_wasmOffset) {
             return &i_map->blocks[i];
         }
@@ -228,11 +228,11 @@ _   (Read_opcode(&opcode, &pos, end));
 _   (ReadLEB_u32(&index, &pos, end));
 
     if (opcode == c_waOp_call) {
-        _throwif(m3Err_wasmMalformed, index >= module->numFunctions);
+        _throwif(m3Err_wasmMalformed, index >= module->नुमेरो_Functions);
         *o_type = module->functions[index].funcType;
     } else {
         _throwif(m3Err_wasmMalformed, opcode != c_waOp_callIndirect and opcode != c_waOp_callRef);
-        _throwif(m3Err_wasmMalformed, index >= module->numFuncTypes);
+        _throwif(m3Err_wasmMalformed, index >= module->नुमेरो_Func_Types);
         *o_type = module->funcTypes[index];
     }
 
@@ -246,13 +246,13 @@ _catch:
 static
 bool ReturnsWhat (IM3FuncType i_type, IM3FuncType i_expected)
 {
-    u16 numResults = GetFuncTypeNumResults(i_expected);
+    u16 नुमेरो_Results = Get_Func_Type_नुमेरो_Results(i_expected);
 
-    if (not i_type or GetFuncTypeNumResults(i_type) != numResults) {
+    if (not i_type or Get_Func_Type_नुमेरो_Results(i_type) != नुमेरो_Results) {
         return false;
     }
 
-    for (u16 i = 0; i < numResults; ++i) {
+    for (u16 i = 0; i < नुमेरो_Results; ++i) {
         if (not IsSubTypeOf(GetFuncTypeResultType(i_type, i), GetFuncTypeResultType(i_expected, i))) {
             return false;
         }
@@ -277,14 +277,14 @@ typedef struct M3FrameRegisters {
 
 // The stack a continuation's frames are on: the runtime's own for the root
 static
-M3Result ContinuationStack (IM3Runtime i_runtime, IM3Continuation i_cont, m3slot_t** o_base, u32* o_numSlots)
+M3Result Continuation_सालानसान (IM3Runtime i_runtime, IM3Continuation i_cont, m3slot_t** o_base, u32* o_नुमेरो_Slots)
 {
-    if (i_cont == i_runtime->rootContinuation) {
-        *o_base     = (m3slot_t*)i_runtime->originStack;
-        *o_numSlots = i_runtime->numStackSlots;
+    if (i_cont == i_runtime->उगात_Continuation) {
+        *o_base     = (m3slot_t*)i_runtime->origin_सालानसान;
+        *o_नुमेरो_Slots = i_runtime->नुमेरो_सालानसान_Slots;
     } else {
-        *o_base     = i_cont->valStack;
-        *o_numSlots = i_cont->numStackSlots;
+        *o_base     = i_cont->val_सालानसान;
+        *o_नुमेरो_Slots = i_cont->नुमेरो_सालानसान_Slots;
     }
 
     return (*o_base) ? m3Err_none : "a suspended continuation has no stack";
@@ -293,25 +293,25 @@ M3Result ContinuationStack (IM3Runtime i_runtime, IM3Continuation i_cont, m3slot
 // Where a value is kept, or NULL for a register; o_bytes is how much of the
 // frame it takes, which has to be inside the stack the frame is on
 static
-M3Result LocateValue (m3slot_t* i_base, u32 i_numSlots, m3stack_t i_sp, const M3SlotValue* i_value, u8** o_where)
+M3Result Locate_हालागा (m3slot_t* i_base, u32 i_नुमेरो_Slots, m3stack_t i_sp, const M3_Slot_हालागा* i_हालागा, u8** o_where)
 {
     M3Result result = m3Err_none;
-    u8       type   = BaseTypeOf(i_value->type);
+    u8       type   = BaseTypeOf(i_हालागा->type);
 
     *o_where = NULL;
 
     _throwif(m3Err_wasmMalformed, type == c_m3Type_none or type > c_m3Type_contref);
 
     // no operation reads or writes one, so a v128 only ever sits in slots
-    _throwif("a v128 value is kept in a register", type == c_m3Type_v128 and IsRegisterSlotAlias(i_value->slot));
+    _throwif("a v128 value is kept in a register", type == c_m3Type_v128 and IsRegisterSlotAlias(i_हालागा->slot));
 
-    if (not IsRegisterSlotAlias(i_value->slot)) {
+    if (not IsRegisterSlotAlias(i_हालागा->slot)) {
         size_t size   = (type == c_m3Type_v128) ? 16
                                                 : (IsRefType(type) ? sizeof(void*)
                                                                    : (Is64BitType(type) ? sizeof(u64) : sizeof(u32)));
-        size_t offset = (size_t)((m3slot_t*)i_sp - i_base + i_value->slot) * sizeof(m3slot_t);
+        size_t offset = (size_t)((m3slot_t*)i_sp - i_base + i_हालागा->slot) * sizeof(m3slot_t);
 
-        _throwif("a value is outside the stack its frame is on", offset + size > (size_t)i_numSlots * sizeof(m3slot_t));
+        _throwif("a value is outside the stack its frame is on", offset + size > (size_t)i_नुमेरो_Slots * sizeof(m3slot_t));
 
         *o_where = (u8*)i_base + offset;
     }
@@ -323,11 +323,11 @@ _catch:
 // A value as the file holds it before a reference is named: a number's bits,
 // zero-extended to 64, or the reference itself
 static
-M3Result ReadValue (u8* i_where, const M3FrameRegisters* i_registers, const M3SlotValue* i_value, u64* o_bits,
+M3Result Read_हालागा (u8* i_where, const M3FrameRegisters* i_registers, const M3_Slot_हालागा* i_हालागा, u64* o_bits,
                     void** o_reference)
 {
     M3Result result = m3Err_none;
-    u8       type   = BaseTypeOf(i_value->type);
+    u8       type   = BaseTypeOf(i_हालागा->type);
 
     *o_bits      = 0;
     *o_reference = NULL;
@@ -342,7 +342,7 @@ M3Result ReadValue (u8* i_where, const M3FrameRegisters* i_registers, const M3Sl
             memcpy(&narrow, i_where, sizeof(narrow));
             *o_bits = narrow;
         }
-    } else if (IsFpRegisterSlotAlias(i_value->slot)) {
+    } else if (IsFpRegisterSlotAlias(i_हालागा->slot)) {
 #  if d_m3HasFloat
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->fp0);
 
@@ -377,11 +377,11 @@ _catch:
 }
 
 static
-M3Result WriteValue (u8* o_where, const M3FrameRegisters* i_registers, const M3SlotValue* i_value, u64 i_bits,
+M3Result Write_हालागा (u8* o_where, const M3FrameRegisters* i_registers, const M3_Slot_हालागा* i_हालागा, u64 i_bits,
                      void* i_reference)
 {
     M3Result result = m3Err_none;
-    u8       type   = BaseTypeOf(i_value->type);
+    u8       type   = BaseTypeOf(i_हालागा->type);
 
     if (o_where) {
         if (IsRefType(type)) {
@@ -392,7 +392,7 @@ M3Result WriteValue (u8* o_where, const M3FrameRegisters* i_registers, const M3S
             u32 narrow = (u32)i_bits;
             memcpy(o_where, &narrow, sizeof(narrow));
         }
-    } else if (IsFpRegisterSlotAlias(i_value->slot)) {
+    } else if (IsFpRegisterSlotAlias(i_हालागा->slot)) {
 #  if d_m3HasFloat
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->fp0);
 
@@ -425,13 +425,13 @@ _catch:
 // The value a safepoint lists at i_index: the function's locals first, then
 // the operand stack
 static
-const M3SlotValue* FrameValue (const M3SnapshotMap* i_map, const M3SafePoint* i_point, u32 i_index)
+const M3_Slot_हालागा* Frame_हालागा (const M3SnapshotMap* i_map, const M3SafePoint* i_point, u32 i_index)
 {
-    if (i_index < i_map->numLocals) {
-        return i_point->firstLocalValue == UINT32_MAX ? &i_map->locals[i_index]
-                                                      : &i_map->values[i_point->firstLocalValue + i_index];
+    if (i_index < i_map->नुमेरो_Locals) {
+        return i_point->first_Local_हालागा == UINT32_MAX ? &i_map->locals[i_index]
+                                                      : &i_map->मगा_हालागा[i_point->first_Local_हालागा + i_index];
     }
-    return &i_map->values[i_point->firstValue + i_index - i_map->numLocals];
+    return &i_map->मगा_हालागा[i_point->first_हालागा + i_index - i_map->नुमेरो_Locals];
 }
 
 // A frame's constants are copied in by op_Entry, and op_Entry already ran
@@ -439,9 +439,9 @@ static
 void RestoreConstants (IM3Function i_function, m3stack_t i_sp)
 {
     if (i_function->constants) {
-        u8* where = (u8*)((m3slot_t*)i_sp + i_function->numRetAndArgSlots) + i_function->numLocalBytes;
+        u8* where = (u8*)((m3slot_t*)i_sp + i_function->नुमेरो_Ret_And_Arg_Slots) + i_function->नुमेरो_Local_Bytes;
 
-        memcpy(where, i_function->constants, i_function->numConstantBytes);
+        memcpy(where, i_function->constants, i_function->नुमेरो_Constant_Bytes);
     }
 }
 
@@ -453,8 +453,8 @@ void RestoreConstants (IM3Function i_function, m3stack_t i_sp)
 // Pointers numbered in the order they were first added, with a hash index so
 // the lookup does not have to walk them
 typedef struct M3PointerIds {
-    void** items;
-    u32    count;
+    void** मगा_बागाय;
+    u32    बिलांग;
     u32    capacity;
 
     u32* index;               // id + 1, or 0 for an empty bucket
@@ -478,7 +478,7 @@ u32 PointerIds_Find (const M3PointerIds* i_ids, void* i_pointer)
         while (i_ids->index[bucket]) {
             u32 id = i_ids->index[bucket] - 1;
 
-            if (i_ids->items[id] == i_pointer) {
+            if (i_ids->मगा_बागाय[id] == i_pointer) {
                 return id;
             }
 
@@ -499,19 +499,19 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
         return m3Err_none;
     }
 
-    if (io_ids->count == io_ids->capacity) {
+    if (io_ids->बिलांग == io_ids->capacity) {
         u32    capacity = io_ids->capacity ? io_ids->capacity * 2 : 16;
-        void** items    = m3_ReallocArray(void*, io_ids->items, capacity, io_ids->capacity);
+        void** मगा_बागाय    = m3_ReallocArray(void*, io_ids->मगा_बागाय, capacity, io_ids->capacity);
 
-        if (not items) {
+        if (not मगा_बागाय) {
             return m3Err_mallocFailed;
         }
 
-        io_ids->items    = items;
+        io_ids->मगा_बागाय    = मगा_बागाय;
         io_ids->capacity = capacity;
     }
 
-    if ((io_ids->count + 1) * 2 > io_ids->indexCapacity) {
+    if ((io_ids->बिलांग + 1) * 2 > io_ids->indexCapacity) {
         u32  capacity = io_ids->indexCapacity ? io_ids->indexCapacity * 2 : 32;
         u32* index    = m3_AllocArray(u32, capacity);
 
@@ -519,8 +519,8 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
             return m3Err_mallocFailed;
         }
 
-        for (u32 i = 0; i < io_ids->count; ++i) {
-            u32 bucket = PointerBucket(io_ids->items[i], capacity);
+        for (u32 i = 0; i < io_ids->बिलांग; ++i) {
+            u32 bucket = PointerBucket(io_ids->मगा_बागाय[i], capacity);
 
             while (index[bucket]) {
                 bucket = (bucket + 1) & (capacity - 1);
@@ -534,8 +534,8 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
         io_ids->indexCapacity = capacity;
     }
 
-    id                = io_ids->count++;
-    io_ids->items[id] = i_pointer;
+    id                = io_ids->बिलांग++;
+    io_ids->मगा_बागाय[id] = i_pointer;
 
     u32 bucket = PointerBucket(i_pointer, io_ids->indexCapacity);
 
@@ -553,7 +553,7 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
 static
 void PointerIds_Free (M3PointerIds* io_ids)
 {
-    m3_Free(io_ids->items);
+    m3_Free(io_ids->मगा_बागाय);
     m3_Free(io_ids->index);
     memset(io_ids, 0, sizeof(*io_ids));
 }
@@ -686,59 +686,59 @@ M3Result Put (M3SnapshotSave* s, const void* i_data, size_t i_size)
 }
 
 static
-M3Result PutU8 (M3SnapshotSave* s, u8 i_value)
+M3Result PutU8 (M3SnapshotSave* s, u8 i_हालागा)
 {
-    return Put(s, &i_value, sizeof(i_value));
+    return Put(s, &i_हालागा, sizeof(i_हालागा));
 }
 
 
 static
-M3Result PutLEB_u32 (M3SnapshotSave* s, u32 i_value)
+M3Result PutLEB_u32 (M3SnapshotSave* s, u32 i_हालागा)
 {
     u8  bytes[5];
     u32 len = 0;
 
     do {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if (i_value != 0) {
+        u8 byte = i_हालागा & 0x7F;
+        i_हालागा >>= 7;
+        if (i_हालागा != 0) {
             byte |= 0x80;
         }
         bytes[len++] = byte;
-    } while (i_value != 0);
+    } while (i_हालागा != 0);
 
     return Put(s, bytes, len);
 }
 
 static
-M3Result PutLEB_u64 (M3SnapshotSave* s, u64 i_value)
+M3Result PutLEB_u64 (M3SnapshotSave* s, u64 i_हालागा)
 {
     u8  bytes[10];
     u32 len = 0;
 
     do {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if (i_value != 0) {
+        u8 byte = i_हालागा & 0x7F;
+        i_हालागा >>= 7;
+        if (i_हालागा != 0) {
             byte |= 0x80;
         }
         bytes[len++] = byte;
-    } while (i_value != 0);
+    } while (i_हालागा != 0);
 
     return Put(s, bytes, len);
 }
 
 static
-M3Result PutLEB_i64 (M3SnapshotSave* s, i64 i_value)
+M3Result PutLEB_i64 (M3SnapshotSave* s, i64 i_हालागा)
 {
     u8   bytes[10];
     u32  len  = 0;
     bool more = true;
 
     while (more) {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if ((i_value == 0 && !(byte & 0x40)) || (i_value == -1 && (byte & 0x40))) {
+        u8 byte = i_हालागा & 0x7F;
+        i_हालागा >>= 7;
+        if ((i_हालागा == 0 && !(byte & 0x40)) || (i_हालागा == -1 && (byte & 0x40))) {
             more = false;
         } else {
             byte |= 0x80;
@@ -795,7 +795,7 @@ _catch:
 static
 u32 FunctionIndex (IM3Module i_module, IM3Function i_function)
 {
-    if (i_function and i_function >= i_module->functions and i_function < i_module->functions + i_module->numFunctions) {
+    if (i_function and i_function >= i_module->functions and i_function < i_module->functions + i_module->नुमेरो_Functions) {
         return (u32)(i_function - i_module->functions);
     }
 
@@ -805,7 +805,7 @@ u32 FunctionIndex (IM3Module i_module, IM3Function i_function)
 static
 u32 FuncTypeIndex (IM3Module i_module, IM3FuncType i_type)
 {
-    for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
+    for (u32 i = 0; i < i_module->नुमेरो_Func_Types; ++i) {
         if (i_module->funcTypes[i] == i_type) {
             return i;
         }
@@ -829,7 +829,7 @@ IM3Tag TagOfIndex (IM3Module i_module, u32 i_index)
 static
 u32 TagIndex (IM3Module i_module, IM3Tag i_tag)
 {
-    for (u32 i = 0; i < i_module->numTags; ++i) {
+    for (u32 i = 0; i < i_module->नुमेरो_Tags; ++i) {
         if (TagOfIndex(i_module, i) == i_tag) {
             return i;
         }
@@ -874,18 +874,18 @@ _       (hooks->nameExternRef(hooks->userdata, i_reference, &name));
         _throwif("an exnref names an exception that no longer exists",
                  PointerIds_Find(&s->liveExceptions, i_reference) == d_m3SnapshotNone);
 
-        u32 count = s->exceptions.count;
+        u32 बिलांग = s->exceptions.बिलांग;
 _       (PointerIds_Add(&s->exceptions, i_reference, &id));
-        _throwif("internal: an exception was found only while writing", s->writing and s->exceptions.count != count);
+        _throwif("internal: an exception was found only while writing", s->writing and s->exceptions.बिलांग != बिलांग);
     }
 #  endif
     else if (i_type == c_m3Type_contref) {
         _throwif("a contref names a continuation that no longer exists",
                  PointerIds_Find(&s->liveContinuations, i_reference) == d_m3SnapshotNone);
 
-        u32 count = s->continuations.count;
+        u32 बिलांग = s->continuations.बिलांग;
 _       (PointerIds_Add(&s->continuations, i_reference, &id));
-        _throwif("internal: a continuation was found only while writing", s->writing and s->continuations.count != count);
+        _throwif("internal: a continuation was found only while writing", s->writing and s->continuations.बिलांग != बिलांग);
     } else {
         _throw("a reference of an unknown type");
     }
@@ -900,7 +900,7 @@ _catch:
 // holds it: a reference by name, a 64-bit value whole, anything narrower
 // zero-extended
 static
-M3Result PutRefValue (M3SnapshotSave* s, u8 i_type, void* i_reference)
+M3Result Put_Ref_हालागा (M3SnapshotSave* s, u8 i_type, void* i_reference)
 {
     M3Result result = m3Err_none;
     u64      word   = 0;
@@ -943,24 +943,24 @@ _catch:
 // payloads and all, and the version has to sit where a reader can find it
 // before it knows anything else about the file.
 static
-M3Result PutLE32 (M3SnapshotSave* s, u32 i_value)
+M3Result PutLE32 (M3SnapshotSave* s, u32 i_हालागा)
 {
     u8 bytes[4];
 
     for (u32 i = 0; i < sizeof(bytes); ++i) {
-        bytes[i] = (u8)(i_value >> (8 * i));
+        bytes[i] = (u8)(i_हालागा >> (8 * i));
     }
 
     return Put(s, bytes, sizeof(bytes));
 }
 
 static
-M3Result PutLE64 (M3SnapshotSave* s, u64 i_value)
+M3Result PutLE64 (M3SnapshotSave* s, u64 i_हालागा)
 {
     u8 bytes[8];
 
     for (u32 i = 0; i < sizeof(bytes); ++i) {
-        bytes[i] = (u8)(i_value >> (8 * i));
+        bytes[i] = (u8)(i_हालागा >> (8 * i));
     }
 
     return Put(s, bytes, sizeof(bytes));
@@ -971,10 +971,10 @@ M3Result PutLE64 (M3SnapshotSave* s, u64 i_value)
 // exception payload is. Bits rather than a location: on a big-endian host the
 // low half of a u64 is not the half its address points at.
 static
-M3Result PutValueBody (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
+M3Result Put_हालागा_Body (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
 {
     if (IsRefType(i_type)) {
-        return PutRefValue(s, BaseTypeOf(i_type), (void*)(uintptr_t)i_bits);
+        return Put_Ref_हालागा(s, BaseTypeOf(i_type), (void*)(uintptr_t)i_bits);
     }
 
     switch (BaseTypeOf(i_type)) {
@@ -987,7 +987,7 @@ M3Result PutValueBody (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
 }
 
 static
-M3Result PutValueTag (M3SnapshotSave* s, m3type_t i_type)
+M3Result Put_हालागा_Tag (M3SnapshotSave* s, m3type_t i_type)
 {
     u8 valtype = M3TypeToValType(i_type);
 
@@ -999,12 +999,12 @@ M3Result PutValueTag (M3SnapshotSave* s, m3type_t i_type)
 }
 
 static
-M3Result PutValueBits (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
+M3Result Put_हालागा_Bits (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
 {
     M3Result result = m3Err_none;
 
-_   (PutValueTag(s, i_type));
-_   (PutValueBody(s, i_type, i_bits));
+_   (Put_हालागा_Tag(s, i_type));
+_   (Put_हालागा_Body(s, i_type, i_bits));
 
 _catch:
     return result;
@@ -1014,16 +1014,16 @@ _catch:
 // table element. Narrow types are read at their own width first, so what goes
 // on the wire is the value and not the bytes around it.
 static
-M3Result PutValue (M3SnapshotSave* s, m3type_t i_type, const void* i_where)
+M3Result Put_हालागा (M3SnapshotSave* s, m3type_t i_type, const void* i_where)
 {
     M3Result result = m3Err_none;
 
-_   (PutValueTag(s, i_type));
+_   (Put_हालागा_Tag(s, i_type));
 
     if (IsRefType(i_type)) {
         void* reference;
         memcpy(&reference, i_where, sizeof(reference));
-_       (PutValueBody(s, i_type, (u64)(uintptr_t)reference));
+_       (Put_हालागा_Body(s, i_type, (u64)(uintptr_t)reference));
     } else if (BaseTypeOf(i_type) == c_m3Type_v128) {
         // a v128 is a vector of bytes, and has no byte order of its own
         u8 bytes[16];
@@ -1032,11 +1032,11 @@ _       (Put(s, bytes, sizeof(bytes)));
     } else if (Is64BitType(i_type)) {
         u64 bits;
         memcpy(&bits, i_where, sizeof(bits));
-_       (PutValueBody(s, i_type, bits));
+_       (Put_हालागा_Body(s, i_type, bits));
     } else {
         u32 narrow;
         memcpy(&narrow, i_where, sizeof(narrow));
-_       (PutValueBody(s, i_type, narrow));
+_       (Put_हालागा_Body(s, i_type, narrow));
     }
 
 _catch:
@@ -1128,14 +1128,14 @@ M3Result SaveMemories (M3SnapshotSave* s)
     M3Result  result = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numMemories));
+_   (PutLEB_u32(s, module->नुमेरो_Memories));
 
-    for (u32 m = 0; m < module->numMemories; ++m) {
+    for (u32 m = 0; m < module->नुमेरो_Memories; ++m) {
         IM3Memory memory   = module->memories[m];
         u32       first    = Memory_FirstIndex(module, m);
         bool      hasData  = memory and memory->mallocated;
         u32       pageSize = memory ? Memory_PageSize(memory) : d_m3DefaultMemPageSize;
-        u64       bytes    = memory ? memory->numPages * (u64)pageSize : 0;
+        u64       bytes    = memory ? memory->नुमेरो_Pages * (u64)pageSize : 0;
         u32       pageBits = 0;
 
 _       (PutLEB_u32(s, m));
@@ -1162,7 +1162,7 @@ _       (PutLEB_u32(s, first));
         }
 
 _       (PutLEB_u32(s, pageBits));
-_       (PutLEB_u32(s, memory ? (u32)memory->numPages : 0));
+_       (PutLEB_u32(s, memory ? (u32)memory->नुमेरो_Pages : 0));
 
         // linear memory is little endian whatever the host is, and nothing in
         // it is a reference, so the discovery pass has no reason to read it
@@ -1187,14 +1187,14 @@ M3Result SaveGlobals (M3SnapshotSave* s)
     M3Result  result = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numGlobals));
+_   (PutLEB_u32(s, module->नुमेरो_Globals));
 
-    for (u32 g = 0; g < module->numGlobals; ++g) {
+    for (u32 g = 0; g < module->नुमेरो_Globals; ++g) {
         M3Global* global = &module->globals[g];
         M3Global* cell   = global->resolved ? global->resolved : global;
 
 _       (PutLEB_u32(s, g));
-_       (PutValue(s, global->type, &cell->i64Value));
+_       (Put_हालागा(s, global->type, &cell->i64_हालागा));
     }
 
 _catch:
@@ -1207,9 +1207,9 @@ M3Result SaveTables (M3SnapshotSave* s)
     M3Result  result = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numTables));
+_   (PutLEB_u32(s, module->नुमेरो_Tables));
 
-    for (u32 t = 0; t < module->numTables; ++t) {
+    for (u32 t = 0; t < module->नुमेरो_Tables; ++t) {
         IM3Table table = module->tables[t];
         u32      first = Table_FirstIndex(module, t);
 
@@ -1226,7 +1226,7 @@ _       (PutU8(s, M3TypeToValType(table->type)));
 _       (PutLEB_u32(s, table->size));
 
         for (u32 e = 0; e < table->size; ++e) {
-_           (PutRefValue(s, BaseTypeOf(table->type), table->elements[e]));
+_           (Put_Ref_हालागा(s, BaseTypeOf(table->type), table->elements[e]));
         }
     }
 
@@ -1240,15 +1240,15 @@ M3Result SaveSegments (M3SnapshotSave* s)
     M3Result  result = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numDataSegments));
+_   (PutLEB_u32(s, module->नुमेरो_Data_Segments));
 
-    for (u32 i = 0; i < module->numDataSegments; ++i) {
+    for (u32 i = 0; i < module->नुमेरो_Data_Segments; ++i) {
 _       (PutU8(s, module->dataSegments[i].dropped));
     }
 
-_   (PutLEB_u32(s, module->numElementSegments));
+_   (PutLEB_u32(s, module->नुमेरो_Element_Segments));
 
-    for (u32 i = 0; i < module->numElementSegments; ++i) {
+    for (u32 i = 0; i < module->नुमेरो_Element_Segments; ++i) {
 _       (PutU8(s, module->elementSegments[i].dropped));
     }
 
@@ -1263,20 +1263,20 @@ M3Result SaveExceptions (M3SnapshotSave* s)
 {
     M3Result result = m3Err_none;
 
-_   (PutLEB_u32(s, s->exceptions.count));
+_   (PutLEB_u32(s, s->exceptions.बिलांग));
 
-    for (u32 i = 0; i < s->exceptions.count; ++i) {
-        M3Exception* exn  = (M3Exception*)s->exceptions.items[i];
+    for (u32 i = 0; i < s->exceptions.बिलांग; ++i) {
+        M3Exception* exn  = (M3Exception*)s->exceptions.मगा_बागाय[i];
         IM3FuncType  type = exn->tag->type;
 
-        _throwif(m3Err_wasmMalformed, exn->numArgs != GetFuncTypeNumParams(type));
+        _throwif(m3Err_wasmMalformed, exn->नुमेरो_मगा_कातविरान != Get_Func_Type_नुमेरो_Params(type));
 
 _       (PutLEB_u32(s, i));
-_       (PutLEB_u32(s, exn->numArgs));
+_       (PutLEB_u32(s, exn->नुमेरो_मगा_कातविरान));
 
-        for (u32 a = 0; a < exn->numArgs; ++a) {
+        for (u32 a = 0; a < exn->नुमेरो_मगा_कातविरान; ++a) {
             m3type_t argType = GetFuncTypeParamType(type, (u16)a);
-_           (PutValueBits(s, argType, exn->args[a]));
+_           (Put_हालागा_Bits(s, argType, exn->मगा_कातविरान[a]));
         }
     }
 
@@ -1308,7 +1308,7 @@ const M3SafePoint* FindFrameSafePoint (IM3Module i_module, IM3Function* io_funct
 {
     const M3SafePoint* point = *io_function ? FindSafePoint(*io_function, i_pc, i_kind) : NULL;
 
-    for (u32 i = 0; not point and i < i_module->numFunctions; ++i) {
+    for (u32 i = 0; not point and i < i_module->नुमेरो_Functions; ++i) {
         point = FindSafePoint(&i_module->functions[i], i_pc, i_kind);
         if (point) {
             *io_function = &i_module->functions[i];
@@ -1395,14 +1395,14 @@ _catch:
 // A function's frame: which function, the safepoint it waits at, and every
 // value it holds there
 static
-M3Result SaveActivation (M3SnapshotSave* s, m3slot_t* i_base, u32 i_numSlots, const M3Activation* i_act)
+M3Result SaveActivation (M3SnapshotSave* s, m3slot_t* i_base, u32 i_नुमेरो_Slots, const M3Activation* i_act)
 {
     M3Result             result        = m3Err_none;
     IM3Function          function      = i_act->function;
     const M3SnapshotMap* map           = function->snapshotMap;
     u32                  functionIndex = FunctionIndex(s->module, function);
     const M3SafePoint*   point         = i_act->point;
-    u32                  numValues;
+    u32                  नुमेरो_मगा_हालागा;
 
     _throwif("a suspended frame belongs to another module", functionIndex == d_m3SnapshotNone);
 
@@ -1414,32 +1414,32 @@ _   (PutLEB_u32(s, point->wasmOffset));
 _       (PutLEB_u32(s, map->blocks[point->aux].wasmOffset));
     }
 
-    numValues = map->numLocals + point->numValues;
+    नुमेरो_मगा_हालागा = map->नुमेरो_Locals + point->नुमेरो_मगा_हालागा;
 
-_   (PutLEB_u32(s, numValues));
+_   (PutLEB_u32(s, नुमेरो_मगा_हालागा));
 
-    for (u32 v = 0; v < numValues; ++v) {
-        const M3SlotValue* value = FrameValue(map, point, v);
+    for (u32 v = 0; v < नुमेरो_मगा_हालागा; ++v) {
+        const M3_Slot_हालागा* हालागा = Frame_हालागा(map, point, v);
         u8*                where;
         u64                word;
         void*              reference;
 
-_       (LocateValue(i_base, i_numSlots, i_act->sp, value, &where));
+_       (Locate_हालागा(i_base, i_नुमेरो_Slots, i_act->sp, हालागा, &where));
 
         // a v128 has no byte order of its own, and no bits path can carry it
-        if (BaseTypeOf(value->type) == c_m3Type_v128) {
-_           (PutValueTag(s, value->type));
+        if (BaseTypeOf(हालागा->type) == c_m3Type_v128) {
+_           (Put_हालागा_Tag(s, हालागा->type));
 _           (Put(s, where, 16));
             continue;
         }
 
-_       (ReadValue(where, &i_act->registers, value, &word, &reference));
+_       (Read_हालागा(where, &i_act->registers, हालागा, &word, &reference));
 
-_       (PutValueBits(s, value->type, IsRefType(value->type) ? (u64)(uintptr_t)reference : word));
+_       (Put_हालागा_Bits(s, हालागा->type, IsRefType(हालागा->type) ? (u64)(uintptr_t)reference : word));
     }
 
     if (point->kind == safepoint_resume) {
-_       (PutRefValue(s, c_m3Type_contref, i_act->resume->resume.cont));
+_       (Put_Ref_हालागा(s, c_m3Type_contref, i_act->resume->resume.cont));
     }
 
 _catch:
@@ -1459,35 +1459,35 @@ M3Result SaveSuspendedBody (M3SnapshotSave* s, IM3Continuation i_cont)
 {
     M3Result      result   = m3Err_none;
     M3Activation* acts     = NULL;
-    u32           numActs  = 0;
+    u32           नुमेरो_Acts  = 0;
     IM3Function   function = i_cont->entryFunction;
-    i32           first    = (i32)i_cont->numFrames - 1;
+    i32           first    = (i32)i_cont->नुमेरो_Frames - 1;
     m3slot_t*     base;
-    u32           numSlots;
+    u32           नुमेरो_Slots;
     m3stack_t     sp;
 
-_   (ContinuationStack(s->runtime, i_cont, &base, &numSlots));
+_   (Continuation_सालानसान(s->runtime, i_cont, &base, &नुमेरो_Slots));
 
     // one activation for each call frame at most, and the innermost
-    acts = m3_AllocArray(M3Activation, i_cont->numFrames + 1);
+    acts = m3_AllocArray(M3Activation, i_cont->नुमेरो_Frames + 1);
     _throwifnull(acts);
 
     sp = base;
 
     while (true) {
-        M3Activation* act = &acts[numActs];
+        M3Activation* act = &acts[नुमेरो_Acts];
 
 _       (NextActivation(s->module, i_cont, function, sp, first, act));
 
         if (act->kind != safepoint_call) {
-            numActs++;
+            नुमेरो_Acts++;
             break;
         }
 
         _throwif("a suspended continuation stops at a call", act->lastFrame < 0);
 
         if (not (act->point->flags & d_m3SafePointTailCall)) {
-            numActs++;
+            नुमेरो_Acts++;
         }
 
         function = i_cont->frames[act->lastFrame].call.function;
@@ -1495,10 +1495,10 @@ _       (NextActivation(s->module, i_cont, function, sp, first, act));
         first    = act->lastFrame - 1;
     }
 
-_   (PutLEB_u32(s, numActs));
+_   (PutLEB_u32(s, नुमेरो_Acts));
 
-    for (u32 a = 0; a < numActs; ++a) {
-_       (SaveActivation(s, base, numSlots, &acts[a]));
+    for (u32 a = 0; a < नुमेरो_Acts; ++a) {
+_       (SaveActivation(s, base, नुमेरो_Slots, &acts[a]));
     }
 
 _catch:
@@ -1511,9 +1511,9 @@ M3Result SaveContinuation (M3SnapshotSave* s, u32 i_id, IM3Continuation i_cont)
 {
     M3Result  result    = m3Err_none;
     IM3Module module    = s->module;
-    bool      isRoot    = (i_cont == s->runtime->rootContinuation);
+    bool      is_उगात    = (i_cont == s->runtime->उगात_Continuation);
     u8        state     = snapshot_contFinished;
-    u32       typeIndex = isRoot ? d_m3SnapshotNone : FuncTypeIndex(module, i_cont->type);
+    u32       typeIndex = is_उगात ? d_m3SnapshotNone : FuncTypeIndex(module, i_cont->type);
 
     if (i_cont->state == cont_allocated) {
         state = snapshot_contAllocated;
@@ -1526,17 +1526,17 @@ M3Result SaveContinuation (M3SnapshotSave* s, u32 i_id, IM3Continuation i_cont)
     _throwif("a continuation was made with no function", not i_cont->entryFunction);
     _throwif("a continuation belongs to another module", FunctionIndex(module, i_cont->entryFunction) == d_m3SnapshotNone);
 
-    _throwif("a continuation has a type of another module", not isRoot and typeIndex == d_m3SnapshotNone);
+    _throwif("a continuation has a type of another module", not is_उगात and typeIndex == d_m3SnapshotNone);
 
 _   (PutLEB_u32(s, i_id));
 _   (PutU8(s, state));
-_   (PutU8(s, isRoot));
+_   (PutU8(s, is_उगात));
 _   (PutLEB_u32(s, typeIndex));
 _   (PutLEB_u32(s, FunctionIndex(module, i_cont->entryFunction)));
 #  if d_m3HasExceptionHandling
-_   (PutRefValue(s, c_m3Type_exnref, i_cont->resumeThrow));
+_   (Put_Ref_हालागा(s, c_m3Type_exnref, i_cont->resumeThrow));
 #  else
-_   (PutRefValue(s, c_m3Type_exnref, NULL));
+_   (Put_Ref_हालागा(s, c_m3Type_exnref, NULL));
 #  endif
 
     // a postmortem has nothing to resume, so it does not say how
@@ -1546,19 +1546,19 @@ _   (PutRefValue(s, c_m3Type_exnref, NULL));
 
     if (state == snapshot_contAllocated) {
         IM3FuncType inner   = i_cont->entryFunction ? i_cont->entryFunction->funcType : NULL;
-        u16         numRets = inner ? GetFuncTypeNumResults(inner) : 0;
+        u16         नुमेरो_Rets = inner ? Get_Func_Type_नुमेरो_Results(inner) : 0;
 
-        _throwif(m3Err_wasmMalformed, not inner or i_cont->boundArgsCount > GetFuncTypeNumParams(inner));
+        _throwif(m3Err_wasmMalformed, not inner or i_cont->bound_मगा_कातविरान_बिलांग > Get_Func_Type_नुमेरो_Params(inner));
 
-_       (PutLEB_u32(s, i_cont->boundArgsCount));
+_       (PutLEB_u32(s, i_cont->bound_मगा_कातविरान_बिलांग));
 
-        for (u32 i = 0; i < i_cont->boundArgsCount; ++i) {
+        for (u32 i = 0; i < i_cont->bound_मगा_कातविरान_बिलांग; ++i) {
             m3type_t type = GetFuncTypeParamType(inner, (u16)i);
 
-_           (PutValue(s, type, i_cont->valStack + (numRets + i) * c_ioSlotCount));
+_           (Put_हालागा(s, type, i_cont->val_सालानसान + (नुमेरो_Rets + i) * c_io_Slot_बिलांग));
         }
     } else if (state == snapshot_contSuspended) {
-_       (PutLEB_u32(s, i_cont->boundArgsCount));
+_       (PutLEB_u32(s, i_cont->bound_मगा_कातविरान_बिलांग));
 _       (SaveSuspendedBody(s, i_cont));
     } else {
 _       (PutLEB_u32(s, 0));
@@ -1573,10 +1573,10 @@ M3Result SaveContinuations (M3SnapshotSave* s)
 {
     M3Result result = m3Err_none;
 
-_   (PutLEB_u32(s, s->continuations.count));
+_   (PutLEB_u32(s, s->continuations.बिलांग));
 
-    for (u32 i = 0; i < s->continuations.count; ++i) {
-_       (SaveContinuation(s, i, (IM3Continuation)s->continuations.items[i]));
+    for (u32 i = 0; i < s->continuations.बिलांग; ++i) {
+_       (SaveContinuation(s, i, (IM3Continuation)s->continuations.मगा_बागाय[i]));
     }
 
 _catch:
@@ -1611,13 +1611,13 @@ static
 void SnapshotResourceTotals (IM3Module module, u64* memoryBytes, u64* tableElements)
 {
     *memoryBytes = *tableElements = 0;
-    for (u32 i = 0; i < module->numMemories; ++i) {
+    for (u32 i = 0; i < module->नुमेरो_Memories; ++i) {
         IM3Memory memory = module->memories[i];
         if (Memory_FirstIndex(module, i) == i and memory) {
-            *memoryBytes += memory->numPages * (u64)Memory_PageSize(memory);
+            *memoryBytes += memory->नुमेरो_Pages * (u64)Memory_PageSize(memory);
         }
     }
-    for (u32 i = 0; i < module->numTables; ++i) {
+    for (u32 i = 0; i < module->नुमेरो_Tables; ++i) {
         IM3Table table = module->tables[i];
         if (Table_FirstIndex(module, i) == i and table) {
             *tableElements += table->size;
@@ -1632,9 +1632,9 @@ M3Result SaveMeta (M3SnapshotSave* s)
     u64      hash   = 0;
     u64      memoryBytes, tableElements;
     u32      activeStacks = 0;
-    for (u32 i = 0; i < s->continuations.count; ++i) {
-        IM3Continuation cont = (IM3Continuation)s->continuations.items[i];
-        if (cont != s->runtime->rootContinuation and
+    for (u32 i = 0; i < s->continuations.बिलांग; ++i) {
+        IM3Continuation cont = (IM3Continuation)s->continuations.मगा_बागाय[i];
+        if (cont != s->runtime->उगात_Continuation and
             (cont->state == cont_allocated or cont->state == cont_suspended)) {
             activeStacks++;
         }
@@ -1646,8 +1646,8 @@ _   (ModuleFingerprint(s->module, &hash));
 _   (PutLEB_u32(s, s->postmortem ? d_m3SnapshotFlagPostmortem : 0));
 _   (PutLEB_u64(s, m3_HostTimeMs()));
 _   (PutLEB_u64(s, hash));
-_   (PutLEB_u32(s, s->continuations.count));
-_   (PutLEB_u32(s, s->exceptions.count));
+_   (PutLEB_u32(s, s->continuations.बिलांग));
+_   (PutLEB_u32(s, s->exceptions.बिलांग));
 _   (PutLEB_u64(s, memoryBytes));
 _   (PutLEB_u64(s, tableElements));
 _   (PutLEB_u32(s, activeStacks));
@@ -1655,8 +1655,8 @@ _   (PutLEB_u32(s, activeStacks));
 #  if d_m3HasExceptionHandling
     // each exception's tag before any of their payloads, so a reader can make
     // all of them before resolving a reference to one
-    for (u32 i = 0; i < s->exceptions.count; ++i) {
-        M3Exception* exception = (M3Exception*)s->exceptions.items[i];
+    for (u32 i = 0; i < s->exceptions.बिलांग; ++i) {
+        M3Exception* exception = (M3Exception*)s->exceptions.मगा_बागाय[i];
         u32          tagIndex  = TagIndex(s->module, exception->tag);
 
         _throwif("an exception was thrown with another module's tag", tagIndex == d_m3SnapshotNone);
@@ -1684,22 +1684,22 @@ _   (SaveGlobals(s));
 _   (SaveTables(s));
 _   (SaveSegments(s));
 
-    while (doneContinuations < s->continuations.count or doneExceptions < s->exceptions.count) {
+    while (doneContinuations < s->continuations.बिलांग or doneExceptions < s->exceptions.बिलांग) {
 #  if d_m3HasExceptionHandling
-        while (doneExceptions < s->exceptions.count) {
-            M3Exception* exception = (M3Exception*)s->exceptions.items[doneExceptions++];
+        while (doneExceptions < s->exceptions.बिलांग) {
+            M3Exception* exception = (M3Exception*)s->exceptions.मगा_बागाय[doneExceptions++];
             IM3FuncType  type      = exception->tag->type;
 
-            _throwif(m3Err_wasmMalformed, exception->numArgs != GetFuncTypeNumParams(type));
+            _throwif(m3Err_wasmMalformed, exception->नुमेरो_मगा_कातविरान != Get_Func_Type_नुमेरो_Params(type));
 
-            for (u32 a = 0; a < exception->numArgs; ++a) {
-_               (PutValueBits(s, GetFuncTypeParamType(type, (u16)a), exception->args[a]));
+            for (u32 a = 0; a < exception->नुमेरो_मगा_कातविरान; ++a) {
+_               (Put_हालागा_Bits(s, GetFuncTypeParamType(type, (u16)a), exception->मगा_कातविरान[a]));
             }
         }
 #  endif
-        while (doneContinuations < s->continuations.count and doneExceptions == s->exceptions.count) {
+        while (doneContinuations < s->continuations.बिलांग and doneExceptions == s->exceptions.बिलांग) {
             u32 id = doneContinuations++;
-_           (SaveContinuation(s, id, (IM3Continuation)s->continuations.items[id]));
+_           (SaveContinuation(s, id, (IM3Continuation)s->continuations.मगा_बागाय[id]));
         }
     }
 
@@ -1725,26 +1725,26 @@ _       (PutLE32(s, c_snapshotVersion));
     // no Memory section, rather than one that lists none
 _   (SaveSection(s, d_m3SnapshotSection_Meta, SaveMeta));
 
-    if (s->module->numMemories) {
+    if (s->module->नुमेरो_Memories) {
 _       (SaveSection(s, d_m3SnapshotSection_Memory, SaveMemories));
     }
-    if (s->module->numTables) {
+    if (s->module->नुमेरो_Tables) {
 _       (SaveSection(s, d_m3SnapshotSection_Table, SaveTables));
     }
-    if (s->module->numGlobals) {
+    if (s->module->नुमेरो_Globals) {
 _       (SaveSection(s, d_m3SnapshotSection_Global, SaveGlobals));
     }
-    if (s->module->numDataSegments or s->module->numElementSegments) {
+    if (s->module->नुमेरो_Data_Segments or s->module->नुमेरो_Element_Segments) {
 _       (SaveSection(s, d_m3SnapshotSection_Segment, SaveSegments));
     }
 
 #  if d_m3HasExceptionHandling
-    if (s->exceptions.count) {
+    if (s->exceptions.बिलांग) {
 _       (SaveSection(s, d_m3SnapshotSection_Exception, SaveExceptions));
     }
 #  endif
 
-    if (s->continuations.count) {
+    if (s->continuations.बिलांग) {
 _       (SaveSection(s, d_m3SnapshotSection_Continuation, SaveContinuations));
     }
 
@@ -1774,11 +1774,11 @@ typedef struct M3SnapshotLoad {
     void*            userdata;
 
     bool      started;              // past the header, and so changing the runtime
-    m3slot_t* checkStack;
+    m3slot_t* check_सालानसान;
     bool      changed;              // past Meta: a section has been applied to the module
 
     IM3Continuation*       continuations;
-    u32                    numContinuations;
+    u32                    नुमेरो_Continuations;
     u64                    requiredMemoryBytes;
     u64                    requiredTableElements;
     u64                    loadedMemoryBytes;
@@ -1790,7 +1790,7 @@ typedef struct M3SnapshotLoad {
 #  if d_m3HasExceptionHandling
     M3Exception** exceptions;
 #  endif
-    u32 numExceptions;
+    u32 नुमेरो_Exceptions;
 
     M3Frame* frames;           // a suspended continuation's frames as they are put together, outermost first
 
@@ -1819,23 +1819,23 @@ M3Result Get (M3SnapshotLoad* l, void* o_data, size_t i_size)
 }
 
 static
-M3Result GetU8 (M3SnapshotLoad* l, u8* o_value)
+M3Result GetU8 (M3SnapshotLoad* l, u8* o_हालागा)
 {
-    return Get(l, o_value, sizeof(*o_value));
+    return Get(l, o_हालागा, sizeof(*o_हालागा));
 }
 
 static
-M3Result GetBool (M3SnapshotLoad* l, u8* o_value)
+M3Result GetBool (M3SnapshotLoad* l, u8* o_हालागा)
 {
-    M3Result result = GetU8(l, o_value);
-    return result ? result : (*o_value <= 1 ? m3Err_none : m3Err_wasmMalformed);
+    M3Result result = GetU8(l, o_हालागा);
+    return result ? result : (*o_हालागा <= 1 ? m3Err_none : m3Err_wasmMalformed);
 }
 
 static
-M3Result GetLEB_u32 (M3SnapshotLoad* l, u32* o_value)
+M3Result GetLEB_u32 (M3SnapshotLoad* l, u32* o_हालागा)
 {
     if (l->inSection) {
-        return ReadLEB_u32(o_value, &l->pos, l->end);
+        return ReadLEB_u32(o_हालागा, &l->pos, l->end);
     }
 
     // Only the section envelope is streamed. Collect its length and let the
@@ -1848,22 +1848,22 @@ M3Result GetLEB_u32 (M3SnapshotLoad* l, u32* o_value)
         }
         if (not (encoded[i] & 0x80)) {
             bytes_t pos = encoded;
-            return ReadLEB_u32(o_value, &pos, encoded + i + 1);
+            return ReadLEB_u32(o_हालागा, &pos, encoded + i + 1);
         }
     }
     return m3Err_lebOverflow;
 }
 
 static
-M3Result GetLEB_u64 (M3SnapshotLoad* l, u64* o_value)
+M3Result GetLEB_u64 (M3SnapshotLoad* l, u64* o_हालागा)
 {
-    return ReadLebUnsigned(o_value, 64, &l->pos, l->end);
+    return ReadLebUnsigned(o_हालागा, 64, &l->pos, l->end);
 }
 
 static
-M3Result GetLEB_i64 (M3SnapshotLoad* l, i64* o_value)
+M3Result GetLEB_i64 (M3SnapshotLoad* l, i64* o_हालागा)
 {
-    return ReadLEB_i64(o_value, &l->pos, l->end);
+    return ReadLEB_i64(o_हालागा, &l->pos, l->end);
 }
 
 static
@@ -1878,7 +1878,7 @@ M3Result SkipBytes (M3SnapshotLoad* l, size_t i_size)
 
 
 static
-M3Result GetRefValue (M3SnapshotLoad* l, m3type_t i_type, void** o_reference)
+M3Result Get_Ref_हालागा (M3SnapshotLoad* l, m3type_t i_type, void** o_reference)
 {
     M3Result result = m3Err_none;
     u8       kind   = 0;
@@ -1895,7 +1895,7 @@ _   (GetLEB_u64(l, &id));
 
     if (kind == 0x01) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_funcref);
-        _throwif(m3Err_wasmMalformed, id >= l->module->numFunctions);
+        _throwif(m3Err_wasmMalformed, id >= l->module->नुमेरो_Functions);
 #  if d_m3HasTypedRefs
         _throwif("a snapshot function reference has the wrong type", not IsSubTypeOf(RefTypeOfFuncType(l->module->functions[id].funcType, true), i_type));
 #  endif
@@ -1912,13 +1912,13 @@ _           (hooks->bindExternRef(hooks->userdata, id, o_reference));
 #  if d_m3HasExceptionHandling
     else if (kind == 0x03) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_exnref);
-        _throwif(m3Err_wasmMalformed, id >= l->numExceptions);
+        _throwif(m3Err_wasmMalformed, id >= l->नुमेरो_Exceptions);
         *o_reference = l->exceptions[id];
     }
 #  endif
     else if (kind == 0x04) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_contref);
-        _throwif(m3Err_wasmMalformed, id == 0 or id >= l->numContinuations);
+        _throwif(m3Err_wasmMalformed, id == 0 or id >= l->नुमेरो_Continuations);
         *o_reference = l->continuations[id];
 #  if d_m3HasTypedRefs
         // The record may appear later, even in another section. Check its
@@ -1939,30 +1939,30 @@ _catch:
 }
 
 static
-M3Result GetLE32 (M3SnapshotLoad* l, u32* o_value)
+M3Result GetLE32 (M3SnapshotLoad* l, u32* o_हालागा)
 {
     u8       bytes[4];
     M3Result result = Get(l, bytes, sizeof(bytes));
 
-    *o_value = 0;
+    *o_हालागा = 0;
 
     for (u32 i = 0; i < sizeof(bytes); ++i) {
-        *o_value |= (u32)bytes[i] << (8 * i);
+        *o_हालागा |= (u32)bytes[i] << (8 * i);
     }
 
     return result;
 }
 
 static
-M3Result GetLE64 (M3SnapshotLoad* l, u64* o_value)
+M3Result GetLE64 (M3SnapshotLoad* l, u64* o_हालागा)
 {
     u8       bytes[8];
     M3Result result = Get(l, bytes, sizeof(bytes));
 
-    *o_value = 0;
+    *o_हालागा = 0;
 
     for (u32 i = 0; i < sizeof(bytes); ++i) {
-        *o_value |= (u64)bytes[i] << (8 * i);
+        *o_हालागा |= (u64)bytes[i] << (8 * i);
     }
 
     return result;
@@ -1971,7 +1971,7 @@ M3Result GetLE64 (M3SnapshotLoad* l, u64* o_value)
 // Reads the tag of a value and says what it holds, refusing one the file's
 // type does not agree with. c_m3Type_none expects anything.
 static
-M3Result GetValueTag (M3SnapshotLoad* l, m3type_t i_expectedType, m3type_t* o_type)
+M3Result Get_हालागा_Tag (M3SnapshotLoad* l, m3type_t i_expectedType, m3type_t* o_type)
 {
     M3Result result  = m3Err_none;
     u8       valtype = 0;
@@ -1993,7 +1993,7 @@ _catch:
 
 // The mirror of PutValueBody: narrow types come back in the low bits
 static
-M3Result GetValueBody (M3SnapshotLoad* l, m3type_t i_type, u64* o_bits)
+M3Result Get_हालागा_Body (M3SnapshotLoad* l, m3type_t i_type, u64* o_bits)
 {
     M3Result result = m3Err_none;
 
@@ -2001,16 +2001,16 @@ M3Result GetValueBody (M3SnapshotLoad* l, m3type_t i_type, u64* o_bits)
 
     if (IsRefType(i_type)) {
         void* reference = NULL;
-_       (GetRefValue(l, i_type, &reference));
+_       (Get_Ref_हालागा(l, i_type, &reference));
         *o_bits = (u64)(uintptr_t)reference;
     } else if (BaseTypeOf(i_type) == c_m3Type_i32) {
-        i32 value = 0;
-_       (ReadLEB_i32(&value, &l->pos, l->end));
-        *o_bits = (u32)value;
+        i32 हालागा = 0;
+_       (ReadLEB_i32(&हालागा, &l->pos, l->end));
+        *o_bits = (u32)हालागा;
     } else if (BaseTypeOf(i_type) == c_m3Type_i64) {
-        i64 value = 0;
-_       (GetLEB_i64(l, &value));
-        *o_bits = (u64)value;
+        i64 हालागा = 0;
+_       (GetLEB_i64(l, &हालागा));
+        *o_bits = (u64)हालागा;
     } else if (BaseTypeOf(i_type) == c_m3Type_f32) {
         u32 bits = 0;
 _       (GetLE32(l, &bits));
@@ -2026,20 +2026,20 @@ _catch:
 }
 
 static
-M3Result GetValueBits (M3SnapshotLoad* l, m3type_t i_expectedType, u64* o_bits)
+M3Result Get_हालागा_Bits (M3SnapshotLoad* l, m3type_t i_expectedType, u64* o_bits)
 {
     M3Result result = m3Err_none;
     m3type_t type;
 
-_   (GetValueTag(l, i_expectedType, &type));
-_   (GetValueBody(l, type, o_bits));
+_   (Get_हालागा_Tag(l, i_expectedType, &type));
+_   (Get_हालागा_Body(l, type, o_bits));
 
 _catch:
     return result;
 }
 
 static
-M3Result GetValue (M3SnapshotLoad* l, m3type_t i_expectedType, void* o_where)
+M3Result Get_हालागा (M3SnapshotLoad* l, m3type_t i_expectedType, void* o_where)
 {
     M3Result result = m3Err_none;
     m3type_t type;
@@ -2048,19 +2048,19 @@ M3Result GetValue (M3SnapshotLoad* l, m3type_t i_expectedType, void* o_where)
         o_where = scratch;
     }
 
-_   (GetValueTag(l, i_expectedType, &type));
+_   (Get_हालागा_Tag(l, i_expectedType, &type));
 
     if (IsRefType(type)) {
         void* reference = NULL;
         u64   bits      = 0;
-_       (GetValueBody(l, type, &bits));
+_       (Get_हालागा_Body(l, type, &bits));
         reference = (void*)(uintptr_t)bits;
         memcpy(o_where, &reference, sizeof(reference));
     } else if (BaseTypeOf(type) == c_m3Type_v128) {
 _       (Get(l, o_where, 16));
     } else {
         u64 bits = 0;
-_       (GetValueBody(l, type, &bits));
+_       (Get_हालागा_Body(l, type, &bits));
 
         if (Is64BitType(type)) {
             memcpy(o_where, &bits, sizeof(bits));
@@ -2082,7 +2082,7 @@ M3Result GetFunction (M3SnapshotLoad* l, IM3Function* o_function)
 
 _   (GetLEB_u32(l, &index));
 
-    _throwif(m3Err_wasmMalformed, index >= l->module->numFunctions);
+    _throwif(m3Err_wasmMalformed, index >= l->module->नुमेरो_Functions);
     *o_function = &l->module->functions[index];
 
 _catch:
@@ -2133,15 +2133,15 @@ M3Result LoadMemories (M3SnapshotLoad* l)
 {
     M3Result  result      = m3Err_none;
     IM3Module module      = l->module;
-    u32       numMemories = 0;
+    u32       नुमेरो_Memories = 0;
     l->loadedMemoryBytes  = 0;
 
-_   (GetLEB_u32(l, &numMemories));
+_   (GetLEB_u32(l, &नुमेरो_Memories));
     // a section is present only when it has something to say
-    _throwif(m3Err_wasmMalformed, numMemories == 0 or numMemories != module->numMemories);
+    _throwif(m3Err_wasmMalformed, नुमेरो_Memories == 0 or नुमेरो_Memories != module->नुमेरो_Memories);
 
-    for (u32 m = 0; m < numMemories; ++m) {
-        u32       memIndex = 0, firstIndex = 0, pageBits = 0, numPages = 0;
+    for (u32 m = 0; m < नुमेरो_Memories; ++m) {
+        u32       memIndex = 0, firstIndex = 0, pageBits = 0, नुमेरो_Pages = 0;
         IM3Memory memory;
 
 _       (GetLEB_u32(l, &memIndex));
@@ -2159,7 +2159,7 @@ _       (GetLEB_u32(l, &firstIndex));
         }
 
 _       (GetLEB_u32(l, &pageBits));
-_       (GetLEB_u32(l, &numPages));
+_       (GetLEB_u32(l, &नुमेरो_Pages));
 
         memory = module->memories[memIndex];
         _throwif("a shared memory cannot be restored from a snapshot", memory and memory->isShared);
@@ -2169,16 +2169,16 @@ _       (GetLEB_u32(l, &numPages));
 
         if (memory) {
             _throwif(m3Err_wasmMalformed, pageBits >= 32 or (1u << pageBits) != Memory_PageSize(memory));
-            _throwif(m3Err_wasmMalformed, numPages < memory->numPages or numPages > memory->maxPages);
-            _throwif(m3Err_wasmMalformed, numPages > SIZE_MAX / Memory_PageSize(memory));
-            bytes = (size_t)numPages * Memory_PageSize(memory);
+            _throwif(m3Err_wasmMalformed, नुमेरो_Pages < memory->नुमेरो_Pages or नुमेरो_Pages > memory->maxPages);
+            _throwif(m3Err_wasmMalformed, नुमेरो_Pages > SIZE_MAX / Memory_PageSize(memory));
+            bytes = (size_t)नुमेरो_Pages * Memory_PageSize(memory);
 
             _throwif("shrunken memory cannot be restored from a snapshot",
                      l->runtime->memoryLimit and bytes > (size_t)l->runtime->memoryLimit);
 
             if (not l->checking) {
-                if (memory->numPages < numPages) {
-_                   (ResizeMemory(l->runtime, memory, numPages));
+                if (memory->नुमेरो_Pages < नुमेरो_Pages) {
+_                   (ResizeMemory(l->runtime, memory, नुमेरो_Pages));
                 }
                 _throwif("shrunken memory cannot be restored from a snapshot",
                          memory->mallocated and memory->mallocated->length < bytes);
@@ -2190,7 +2190,7 @@ _                   (ResizeMemory(l->runtime, memory, numPages));
                 data = m3MemData(memory->mallocated);
             }
         } else {
-            _throwif(m3Err_wasmMalformed, numPages != 0);
+            _throwif(m3Err_wasmMalformed, नुमेरो_Pages != 0);
         }
 
         // every memory carries a chunk stream, an unbacked one an empty stream,
@@ -2212,12 +2212,12 @@ M3Result LoadGlobals (M3SnapshotLoad* l)
 {
     M3Result  result     = m3Err_none;
     IM3Module module     = l->module;
-    u32       numGlobals = 0;
+    u32       नुमेरो_Globals = 0;
 
-_   (GetLEB_u32(l, &numGlobals));
-    _throwif(m3Err_wasmMalformed, numGlobals == 0 or numGlobals != module->numGlobals);
+_   (GetLEB_u32(l, &नुमेरो_Globals));
+    _throwif(m3Err_wasmMalformed, नुमेरो_Globals == 0 or नुमेरो_Globals != module->नुमेरो_Globals);
 
-    for (u32 g = 0; g < numGlobals; ++g) {
+    for (u32 g = 0; g < नुमेरो_Globals; ++g) {
         u32       globalIndex = 0;
         M3Global* global;
         M3Global* cell;
@@ -2228,7 +2228,7 @@ _       (GetLEB_u32(l, &globalIndex));
         global = &module->globals[globalIndex];
         cell   = global->resolved ? global->resolved : global;
 
-_       (GetValue(l, global->type, &cell->i64Value));
+_       (Get_हालागा(l, global->type, &cell->i64_हालागा));
     }
 
 _catch:
@@ -2240,13 +2240,13 @@ M3Result LoadTables (M3SnapshotLoad* l)
 {
     M3Result  result       = m3Err_none;
     IM3Module module       = l->module;
-    u32       numTables    = 0;
+    u32       नुमेरो_Tables    = 0;
     l->loadedTableElements = 0;
 
-_   (GetLEB_u32(l, &numTables));
-    _throwif(m3Err_wasmMalformed, numTables == 0 or numTables != module->numTables);
+_   (GetLEB_u32(l, &नुमेरो_Tables));
+    _throwif(m3Err_wasmMalformed, नुमेरो_Tables == 0 or नुमेरो_Tables != module->नुमेरो_Tables);
 
-    for (u32 t = 0; t < numTables; ++t) {
+    for (u32 t = 0; t < नुमेरो_Tables; ++t) {
         u32      tableIndex = 0, firstIndex = 0, size = 0;
         u8       valtype = 0;
         IM3Table table;
@@ -2289,7 +2289,7 @@ _       (GetLEB_u32(l, &size));
 
         for (u32 e = 0; e < size; ++e) {
             void* reference = NULL;
-_           (GetRefValue(l, table->type, &reference));
+_           (Get_Ref_हालागा(l, table->type, &reference));
             if (not l->checking) {
                 table->elements[e] = reference;
             }
@@ -2306,13 +2306,13 @@ M3Result LoadSegments (M3SnapshotLoad* l)
 {
     M3Result  result = m3Err_none;
     IM3Module module = l->module;
-    u32       count  = 0;
+    u32       बिलांग  = 0;
 
-_   (GetLEB_u32(l, &count));
-    _throwif(m3Err_wasmMalformed, count != module->numDataSegments);
-    _throwif(m3Err_wasmMalformed, module->numDataSegments == 0 and module->numElementSegments == 0);
+_   (GetLEB_u32(l, &बिलांग));
+    _throwif(m3Err_wasmMalformed, बिलांग != module->नुमेरो_Data_Segments);
+    _throwif(m3Err_wasmMalformed, module->नुमेरो_Data_Segments == 0 and module->नुमेरो_Element_Segments == 0);
 
-    for (u32 i = 0; i < count; ++i) {
+    for (u32 i = 0; i < बिलांग; ++i) {
         u8 dropped = 0;
 _       (GetBool(l, &dropped));
         if (not l->checking) {
@@ -2320,10 +2320,10 @@ _       (GetBool(l, &dropped));
         }
     }
 
-_   (GetLEB_u32(l, &count));
-    _throwif(m3Err_wasmMalformed, count != module->numElementSegments);
+_   (GetLEB_u32(l, &बिलांग));
+    _throwif(m3Err_wasmMalformed, बिलांग != module->नुमेरो_Element_Segments);
 
-    for (u32 i = 0; i < count; ++i) {
+    for (u32 i = 0; i < बिलांग; ++i) {
         u8 dropped = 0;
 _       (GetBool(l, &dropped));
         if (not l->checking) {
@@ -2337,13 +2337,13 @@ _catch:
 
 // A frame for the continuation being put together, outermost first
 static
-M3Result AddFrame (M3SnapshotLoad* l, u32* io_numFrames, M3FrameKind i_kind, m3stack_t i_sp, M3Frame** o_frame)
+M3Result AddFrame (M3SnapshotLoad* l, u32* io_नुमेरो_Frames, M3FrameKind i_kind, m3stack_t i_sp, M3Frame** o_frame)
 {
-    if (*io_numFrames >= d_m3ContinuationMaxFrames) {
+    if (*io_नुमेरो_Frames >= d_m3ContinuationMaxFrames) {
         return "the snapshot's frames do not fit this build's";
     }
 
-    M3Frame* frame = &l->frames[(*io_numFrames)++];
+    M3Frame* frame = &l->frames[(*io_नुमेरो_Frames)++];
 
     memset(frame, 0, sizeof(*frame));
     frame->kind   = (u8)i_kind;
@@ -2377,11 +2377,11 @@ _catch:
 // the snapshot does not list them: they come from this build's own map.
 static
 M3Result AddBlockFrames (M3SnapshotLoad* l, const M3SnapshotMap* i_map, const M3SafePoint* i_point, m3stack_t i_sp,
-                         u32* io_numFrames)
+                         u32* io_नुमेरो_Frames)
 {
     M3Result result = m3Err_none;
 
-    for (u32 b = 0; b < i_map->numBlocks; ++b) {
+    for (u32 b = 0; b < i_map->नुमेरो_Blocks; ++b) {
         const M3BlockStart* block = &i_map->blocks[b];
         M3Frame*            frame;
 
@@ -2390,14 +2390,14 @@ M3Result AddBlockFrames (M3SnapshotLoad* l, const M3SnapshotMap* i_map, const M3
         }
 
         if (block->opcode == c_waOp_loop) {
-_           (AddFrame(l, io_numFrames, frame_loop, i_sp, &frame));
+_           (AddFrame(l, io_नुमेरो_Frames, frame_loop, i_sp, &frame));
             frame->pc = block->pc;
         }
 #  if d_m3HasExceptionHandling
         else {
-_           (AddFrame(l, io_numFrames, frame_try, i_sp, &frame));
+_           (AddFrame(l, io_नुमेरो_Frames, frame_try, i_sp, &frame));
             frame->pc                = block->pc;
-            frame->try_.numClauses   = block->numClauses;
+            frame->try_.नुमेरो_Clauses   = block->नुमेरो_Clauses;
             frame->try_.handlersLive = HandlersLiveAt(i_map, i_point, block);
         }
 #  endif
@@ -2409,27 +2409,27 @@ _catch:
 
 // Puts a function's values where this build keeps them at the safepoint
 static
-M3Result LoadValues (M3SnapshotLoad* l, m3slot_t* i_base, u32 i_numSlots, m3stack_t i_sp,
+M3Result Load_मगा_हालागा (M3SnapshotLoad* l, m3slot_t* i_base, u32 i_नुमेरो_Slots, m3stack_t i_sp,
                      const M3SnapshotMap* i_map, const M3SafePoint* i_point, const M3FrameRegisters* i_registers)
 {
     M3Result result    = m3Err_none;
-    u32      numValues = 0;
+    u32      नुमेरो_मगा_हालागा = 0;
 
-_   (GetLEB_u32(l, &numValues));
-    _throwif("the snapshot's frame does not match what this build compiled", numValues != i_map->numLocals + i_point->numValues);
+_   (GetLEB_u32(l, &नुमेरो_मगा_हालागा));
+    _throwif("the snapshot's frame does not match what this build compiled", नुमेरो_मगा_हालागा != i_map->नुमेरो_Locals + i_point->नुमेरो_मगा_हालागा);
 
-    for (u32 v = 0; v < numValues; ++v) {
-        const M3SlotValue* value     = FrameValue(i_map, i_point, v);
+    for (u32 v = 0; v < नुमेरो_मगा_हालागा; ++v) {
+        const M3_Slot_हालागा* हालागा     = Frame_हालागा(i_map, i_point, v);
         u64                word      = 0;
         void*              reference = NULL;
         u8*                where;
 
-_       (LocateValue(i_base, i_numSlots, i_sp, value, &where));
+_       (Locate_हालागा(i_base, i_नुमेरो_Slots, i_sp, हालागा, &where));
 
         // a v128 has no byte order of its own, and no bits path can carry it
-        if (BaseTypeOf(value->type) == c_m3Type_v128) {
+        if (BaseTypeOf(हालागा->type) == c_m3Type_v128) {
             m3type_t type;
-_           (GetValueTag(l, value->type, &type));
+_           (Get_हालागा_Tag(l, हालागा->type, &type));
             if (l->checking) {
 _               (SkipBytes(l, 16));
             } else {
@@ -2439,16 +2439,16 @@ _               (Get(l, where, 16));
         }
 
         l->allowUnfilledRef = i_point->kind == safepoint_suspend and
-                              v >= numValues - i_point->numResults;
-_       (GetValueBits(l, value->type, &word));
+                              v >= नुमेरो_मगा_हालागा - i_point->नुमेरो_Results;
+_       (Get_हालागा_Bits(l, हालागा->type, &word));
         l->allowUnfilledRef = false;
 
-        if (IsRefType(value->type)) {
+        if (IsRefType(हालागा->type)) {
             reference = (void*)(uintptr_t)word;
         }
 
         if (not l->checking) {
-_           (WriteValue(where, i_registers, value, word, reference));
+_           (Write_हालागा(where, i_registers, हालागा, word, reference));
         }
     }
 
@@ -2464,23 +2464,23 @@ static
 M3Result LoadSuspendedBody (M3SnapshotLoad* l, IM3Continuation io_cont, u32 i_id)
 {
     M3Result    result    = m3Err_none;
-    u32         numFrames = 0;
+    u32         नुमेरो_Frames = 0;
     M3Frame*    callFrame = NULL;
     IM3Function function  = NULL;
     m3slot_t*   base;
-    u32         numSlots;
-    u32         numActivations = 0;
+    u32         नुमेरो_Slots;
+    u32         नुमेरो_Activations = 0;
     IM3FuncType expected       = io_cont->entryFunction->funcType;
     m3stack_t   sp;
 
-_   (ContinuationStack(l->runtime, io_cont, &base, &numSlots));
+_   (Continuation_सालानसान(l->runtime, io_cont, &base, &नुमेरो_Slots));
 
-_   (GetLEB_u32(l, &numActivations));
-    _throwif(m3Err_wasmMalformed, numActivations == 0 or numActivations > d_m3ContinuationMaxFrames);
+_   (GetLEB_u32(l, &नुमेरो_Activations));
+    _throwif(m3Err_wasmMalformed, नुमेरो_Activations == 0 or नुमेरो_Activations > d_m3ContinuationMaxFrames);
 
     io_cont->pc                = NULL;
     io_cont->r0                = 0;
-    io_cont->numSuspendResults = 0;
+    io_cont->नुमेरो_Suspend_Results = 0;
     io_cont->suspendPoint      = safepoint_op;
 #  if d_m3HasFloat
     io_cont->fp0 = 0.;
@@ -2488,8 +2488,8 @@ _   (GetLEB_u32(l, &numActivations));
 
     sp = base;
 
-    for (u32 a = 0; a < numActivations; ++a) {
-        bool                 isInnermost = (a + 1 == numActivations);
+    for (u32 a = 0; a < नुमेरो_Activations; ++a) {
+        bool                 isInnermost = (a + 1 == नुमेरो_Activations);
         const M3SafePoint*   point;
         M3FrameRegisters     registers;
         u8                   kind       = 0;
@@ -2512,7 +2512,7 @@ _       (PrepareFunction(function));
         map = function->snapshotMap;
 
         _throwif("the snapshot's stack does not fit this runtime's",
-                 (u32)(sp - base) + function->maxStackSlots > numSlots);
+                 (u32)(sp - base) + function->max_सालानसान_Slots > नुमेरो_Slots);
 
         // the call the frame outside this one is waiting on
         if (callFrame) {
@@ -2522,7 +2522,7 @@ _       (PrepareFunction(function));
 #  if d_m3EntryKeepsFrame
         {
             M3Frame* entry;
-_           (AddFrame(l, &numFrames, frame_entry, sp, &entry));
+_           (AddFrame(l, &नुमेरो_Frames, frame_entry, sp, &entry));
             entry->pc             = function->compiled;
             entry->entry.function = function;
         }
@@ -2548,12 +2548,12 @@ _           (GetLEB_u32(l, &targetLoop));
         point = FindSafePointAt(map, wasmOffset, kind, targetLoop);
         _throwif("a frame in the snapshot is not at a safepoint of this build's", not point);
 
-_       (AddBlockFrames(l, map, point, sp, &numFrames));
+_       (AddBlockFrames(l, map, point, sp, &नुमेरो_Frames));
 
         if (not isInnermost) {
             _throwif(m3Err_wasmMalformed, kind != safepoint_call);
 
-_           (AddFrame(l, &numFrames, frame_call, sp, &callFrame));
+_           (AddFrame(l, &नुमेरो_Frames, frame_call, sp, &callFrame));
             callFrame->pc = point->pc;
             registers.r0  = &callFrame->call.r0;
 #  if d_m3HasFloat
@@ -2561,14 +2561,14 @@ _           (AddFrame(l, &numFrames, frame_call, sp, &callFrame));
 #  endif
         } else if (kind == safepoint_resume) {
             M3Frame* frame;
-            u32      numResults = point->numResults;
-            pc_t     resultsPC  = point->pc - 2 * numResults;
+            u32      नुमेरो_Results = point->नुमेरो_Results;
+            pc_t     resultsPC  = point->pc - 2 * नुमेरो_Results;
 
-_           (AddFrame(l, &numFrames, frame_resume, sp, &frame));
+_           (AddFrame(l, &नुमेरो_Frames, frame_resume, sp, &frame));
             frame->pc                 = point->pc;
             frame->resume.resultsPC   = resultsPC;
-            frame->resume.numResults  = numResults;
-            frame->resume.numHandlers = point->aux;
+            frame->resume.नुमेरो_Results  = नुमेरो_Results;
+            frame->resume.नुमेरो_Handlers = point->aux;
             frame->resume.handlersPC  = resultsPC - 1 - 3 * point->aux;
 
             // a replayed resume carries on with clear registers, so the frame
@@ -2585,7 +2585,7 @@ _           (AddFrame(l, &numFrames, frame_resume, sp, &frame));
 #  endif
         }
 
-_       (LoadValues(l, base, numSlots, sp, map, point, &registers));
+_       (Load_मगा_हालागा(l, base, नुमेरो_Slots, sp, map, point, &registers));
 
         if (not l->checking) {
             RestoreConstants(function, sp);
@@ -2596,13 +2596,13 @@ _       (LoadValues(l, base, numSlots, sp, map, point, &registers));
 _           (CallSiteType(function, point, &expected));
         } else if (kind == safepoint_resume) {
             void* cont = NULL;
-_           (GetRefValue(l, c_m3Type_contref, &cont));
+_           (Get_Ref_हालागा(l, c_m3Type_contref, &cont));
             _throwif(m3Err_wasmMalformed, cont == NULL);
 
             callFrame->resume.cont = (IM3Continuation)cont;
             if (not l->checking) {
                 l->suspendSites[i_id].point = point;
-                for (u32 i = 1; i < l->numContinuations; ++i) {
+                for (u32 i = 1; i < l->नुमेरो_Continuations; ++i) {
                     if (l->continuations[i] == cont) {
                         // a continuation runs under one resume at a time
                         _throwif("a snapshot continuation is resumed by two frames", l->suspendSites[i].resumed);
@@ -2623,22 +2623,22 @@ _           (GetRefValue(l, c_m3Type_contref, &cont));
             // a suspend waits for its results in the slots at the top of what
             // it holds, which is where whatever resumes it writes them
             if (kind == safepoint_suspend) {
-                _throwif(m3Err_wasmMalformed, point->numResults > point->numValues or
-                                                point->numResults > d_m3MaxContinuationPayload);
+                _throwif(m3Err_wasmMalformed, point->नुमेरो_Results > point->नुमेरो_मगा_हालागा or
+                                                point->नुमेरो_Results > d_m3MaxContinuationPayload);
 
-                io_cont->numSuspendResults = point->numResults;
+                io_cont->नुमेरो_Suspend_Results = point->नुमेरो_Results;
                 if (not l->checking) {
                     l->suspendSites[i_id].map   = map;
                     l->suspendSites[i_id].point = point;
                 }
 
-                for (u32 i = 0; i < point->numResults; ++i) {
-                    const M3SlotValue* value = &map->values[point->firstValue + point->numValues - point->numResults + i];
+                for (u32 i = 0; i < point->नुमेरो_Results; ++i) {
+                    const M3_Slot_हालागा* हालागा = &map->मगा_हालागा[point->first_हालागा + point->नुमेरो_मगा_हालागा - point->नुमेरो_Results + i];
 
-                    _throwif(m3Err_wasmMalformed, IsRegisterSlotAlias(value->slot));
+                    _throwif(m3Err_wasmMalformed, IsRegisterSlotAlias(हालागा->slot));
 
-                    io_cont->suspendResultOffsets[i] = value->slot;
-                    io_cont->suspendResultIs64[i]    = Is64BitType(value->type);
+                    io_cont->suspendResultOffsets[i] = हालागा->slot;
+                    io_cont->suspendResultIs64[i]    = Is64BitType(हालागा->type);
                 }
             }
         }
@@ -2650,19 +2650,19 @@ _           (GetRefValue(l, c_m3Type_contref, &cont));
     }
 
     // held innermost first
-    if (numFrames > io_cont->framesCap) {
-        M3Frame* frames = m3_ReallocArray(M3Frame, io_cont->frames, numFrames, io_cont->framesCap);
+    if (नुमेरो_Frames > io_cont->framesCap) {
+        M3Frame* frames = m3_ReallocArray(M3Frame, io_cont->frames, नुमेरो_Frames, io_cont->framesCap);
         _throwifnull(frames);
 
         io_cont->frames    = frames;
-        io_cont->framesCap = numFrames;
+        io_cont->framesCap = नुमेरो_Frames;
     }
 
-    for (u32 k = 0; k < numFrames; ++k) {
-        io_cont->frames[numFrames - 1 - k] = l->frames[k];
+    for (u32 k = 0; k < नुमेरो_Frames; ++k) {
+        io_cont->frames[नुमेरो_Frames - 1 - k] = l->frames[k];
     }
 
-    io_cont->numFrames = numFrames;
+    io_cont->नुमेरो_Frames = नुमेरो_Frames;
 
 _catch:
     return result;
@@ -2677,106 +2677,106 @@ M3Result LoadContinuation (M3SnapshotLoad* l, u32 i_id)
     M3Continuation  scratch;
     if (l->checking) {
         scratch          = *cont;
-        scratch.valStack = l->checkStack;
+        scratch.val_सालानसान = l->check_सालानसान;
         if (i_id == 0) {
-            scratch.valStack = (m3slot_t*)l->runtime->originStack;
+            scratch.val_सालानसान = (m3slot_t*)l->runtime->origin_सालानसान;
         }
         cont = &scratch;
     }
 
-    u32 contId = 0, typeIndex = 0, entryIndex = 0, boundArgsCount = 0;
-    u8  state = 0, isRoot = 0;
+    u32 contId = 0, typeIndex = 0, entryIndex = 0, bound_मगा_कातविरान_बिलांग = 0;
+    u8  state = 0, is_उगात = 0;
 
 _   (GetLEB_u32(l, &contId));
 _   (GetU8(l, &state));
-_   (GetBool(l, &isRoot));
+_   (GetBool(l, &is_उगात));
 _   (GetLEB_u32(l, &typeIndex));
 _   (GetLEB_u32(l, &entryIndex));
 
     _throwif(m3Err_wasmMalformed, contId != i_id);
-    _throwif(m3Err_wasmMalformed, (bool)isRoot != (i_id == 0));
-    _throwif(m3Err_wasmMalformed, isRoot and state != snapshot_contSuspended);
-    if (not isRoot and (state == snapshot_contAllocated or state == snapshot_contSuspended)) {
+    _throwif(m3Err_wasmMalformed, (bool)is_उगात != (i_id == 0));
+    _throwif(m3Err_wasmMalformed, is_उगात and state != snapshot_contSuspended);
+    if (not is_उगात and (state == snapshot_contAllocated or state == snapshot_contSuspended)) {
         l->loadedStacks++;
     }
-    _throwif(m3Err_wasmMalformed, typeIndex != d_m3SnapshotNone and typeIndex >= module->numFuncTypes);
+    _throwif(m3Err_wasmMalformed, typeIndex != d_m3SnapshotNone and typeIndex >= module->नुमेरो_Func_Types);
     // every continuation, the root included, was made with a function
-    _throwif(m3Err_wasmMalformed, entryIndex >= module->numFunctions);
-    _throwif(m3Err_wasmMalformed, isRoot ? typeIndex != d_m3SnapshotNone : (typeIndex == d_m3SnapshotNone or not module->funcTypes[typeIndex]->isContinuation));
+    _throwif(m3Err_wasmMalformed, entryIndex >= module->नुमेरो_Functions);
+    _throwif(m3Err_wasmMalformed, is_उगात ? typeIndex != d_m3SnapshotNone : (typeIndex == d_m3SnapshotNone or not module->funcTypes[typeIndex]->isContinuation));
 
-    if (not l->checking and not isRoot and state != snapshot_contFinished) {
-_       (Continuation_AcquireStack(l->runtime, cont));
+    if (not l->checking and not is_उगात and state != snapshot_contFinished) {
+_       (Continuation_Acquire_सालानसान(l->runtime, cont));
     }
     cont->type          = (typeIndex != d_m3SnapshotNone) ? module->funcTypes[typeIndex] : NULL;
     cont->entryFunction = &module->functions[entryIndex];
-    cont->numHandlers   = 0;
+    cont->नुमेरो_Handlers   = 0;
     cont->handlersPC    = NULL;
     cont->parent        = NULL;
-    cont->numFrames     = 0;
+    cont->नुमेरो_Frames     = 0;
 
 #  if d_m3HasExceptionHandling
     {
         void* ref = NULL;
-_       (GetRefValue(l, c_m3Type_exnref, &ref));
+_       (Get_Ref_हालागा(l, c_m3Type_exnref, &ref));
         cont->resumeThrow = (M3Exception*)ref;
     }
     // the root was not resumed by anything, and a finished continuation has
     // nowhere left to raise an exception
-    _throwif(m3Err_wasmMalformed, (isRoot or state == snapshot_contFinished) and cont->resumeThrow != NULL);
+    _throwif(m3Err_wasmMalformed, (is_उगात or state == snapshot_contFinished) and cont->resumeThrow != NULL);
 #  else
     {
         void* ref = NULL;
-_       (GetRefValue(l, c_m3Type_exnref, &ref));
+_       (Get_Ref_हालागा(l, c_m3Type_exnref, &ref));
         _throwif(m3Err_wasmMalformed, ref != NULL);
     }
 #  endif
 
     if (state == snapshot_contAllocated) {
         IM3FuncType inner;
-        u16         numRets;
+        u16         नुमेरो_Rets;
 
-_       (GetLEB_u32(l, &boundArgsCount));
-        cont->boundArgsCount = boundArgsCount;
+_       (GetLEB_u32(l, &bound_मगा_कातविरान_बिलांग));
+        cont->bound_मगा_कातविरान_बिलांग = bound_मगा_कातविरान_बिलांग;
         inner                = cont->entryFunction->funcType;
 
-        _throwif(m3Err_wasmMalformed, boundArgsCount > GetFuncTypeNumParams(inner));
+        _throwif(m3Err_wasmMalformed, bound_मगा_कातविरान_बिलांग > Get_Func_Type_नुमेरो_Params(inner));
 
         {
             IM3FuncType remaining = cont->type->contFuncType;
             _throwif(m3Err_wasmMalformed, not remaining or
-                                            GetFuncTypeNumParams(remaining) != GetFuncTypeNumParams(inner) - boundArgsCount or
-                                            GetFuncTypeNumResults(remaining) != GetFuncTypeNumResults(inner));
-            for (u16 i = 0; i < GetFuncTypeNumResults(inner); ++i) {
+                                            Get_Func_Type_नुमेरो_Params(remaining) != Get_Func_Type_नुमेरो_Params(inner) - bound_मगा_कातविरान_बिलांग or
+                                            Get_Func_Type_नुमेरो_Results(remaining) != Get_Func_Type_नुमेरो_Results(inner));
+            for (u16 i = 0; i < Get_Func_Type_नुमेरो_Results(inner); ++i) {
                 _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(inner, i) != GetFuncTypeResultType(remaining, i));
             }
-            for (u16 i = 0; i < GetFuncTypeNumParams(remaining); ++i) {
-                _throwif(m3Err_wasmMalformed, GetFuncTypeParamType(inner, (u16)(boundArgsCount + i)) != GetFuncTypeParamType(remaining, i));
+            for (u16 i = 0; i < Get_Func_Type_नुमेरो_Params(remaining); ++i) {
+                _throwif(m3Err_wasmMalformed, GetFuncTypeParamType(inner, (u16)(bound_मगा_कातविरान_बिलांग + i)) != GetFuncTypeParamType(remaining, i));
             }
         }
 
-        numRets = GetFuncTypeNumResults(inner);
+        नुमेरो_Rets = Get_Func_Type_नुमेरो_Results(inner);
 
-        _throwif(m3Err_wasmMalformed, (numRets + boundArgsCount) * c_ioSlotCount > cont->numStackSlots);
+        _throwif(m3Err_wasmMalformed, (नुमेरो_Rets + bound_मगा_कातविरान_बिलांग) * c_io_Slot_बिलांग > cont->नुमेरो_सालानसान_Slots);
 
-        for (u32 i = 0; i < boundArgsCount; ++i) {
-_           (GetValue(l, GetFuncTypeParamType(inner, (u16)i), cont->valStack + (numRets + i) * c_ioSlotCount));
+        for (u32 i = 0; i < bound_मगा_कातविरान_बिलांग; ++i) {
+_           (Get_हालागा(l, GetFuncTypeParamType(inner, (u16)i), cont->val_सालानसान + (नुमेरो_Rets + i) * c_io_Slot_बिलांग));
         }
 
         cont->state = cont_allocated;
-        cont->sp    = cont->valStack;
+        cont->sp    = cont->val_सालानसान;
         cont->pc    = cont->entryFunction->compiled;
     } else if (state == snapshot_contSuspended) {
-_       (GetLEB_u32(l, &boundArgsCount));
-        _throwif(m3Err_wasmMalformed, isRoot and boundArgsCount != 0);
-        cont->boundArgsCount = boundArgsCount;
+_       (GetLEB_u32(l, &bound_मगा_कातविरान_बिलांग));
+        _throwif(m3Err_wasmMalformed, is_उगात and bound_मगा_कातविरान_बिलांग != 0);
+        cont->bound_मगा_कातविरान_बिलांग = bound_मगा_कातविरान_बिलांग;
 
 _       (LoadSuspendedBody(l, cont, i_id));
 
         cont->state = cont_suspended;
     } else if (state == snapshot_contFinished) {
-_       (GetLEB_u32(l, &boundArgsCount));
-        _throwif(m3Err_wasmMalformed, boundArgsCount != 0);
-        cont->boundArgsCount = 0;
+_       (GetLEB_u32(l, &bound_मगा_कातविरान_बिलांग));
+        _throwif(m3Err_wasmMalformed, bound_मगा_कातविरान_बिलांग != 0);
+        cont->bound_मगा_कातविरान_बिलांग = 0;
         cont->state          = cont_consumed;
     } else {
         _throw(m3Err_wasmMalformed);
@@ -2784,7 +2784,7 @@ _       (GetLEB_u32(l, &boundArgsCount));
 
 _catch:
     if (result) {
-        cont->numFrames = 0;
+        cont->नुमेरो_Frames = 0;
     }
 
     return result;
@@ -2794,13 +2794,13 @@ static
 M3Result LoadContinuations (M3SnapshotLoad* l)
 {
     M3Result result = m3Err_none;
-    u32      count  = 0;
+    u32      बिलांग  = 0;
     l->loadedStacks = 0;
 
-_   (GetLEB_u32(l, &count));
-    _throwif(m3Err_wasmMalformed, count == 0 or count != l->numContinuations);
+_   (GetLEB_u32(l, &बिलांग));
+    _throwif(m3Err_wasmMalformed, बिलांग == 0 or बिलांग != l->नुमेरो_Continuations);
 
-    for (u32 i = 0; i < count; ++i) {
+    for (u32 i = 0; i < बिलांग; ++i) {
 _       (LoadContinuation(l, i));
     }
     _throwif(m3Err_wasmMalformed, l->loadedStacks != l->requiredStacks);
@@ -2816,7 +2816,7 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
 {
     M3Result result = m3Err_none;
 
-    for (u32 id = 0; id < l->numContinuations; ++id) {
+    for (u32 id = 0; id < l->नुमेरो_Continuations; ++id) {
         IM3Continuation cont  = l->continuations[id];
         u32             leaf  = id;
         u32             depth = 0;
@@ -2833,14 +2833,14 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
             IM3FuncType     actual   = child->entryFunction ? child->entryFunction->funcType : NULL;
             _throwif(m3Err_wasmMalformed, not expected or not actual);
             expected = expected->contFuncType;
-            _throwif(m3Err_wasmMalformed, GetFuncTypeNumResults(actual) != GetFuncTypeNumResults(expected));
-            for (u16 i = 0; i < GetFuncTypeNumResults(expected); ++i) {
+            _throwif(m3Err_wasmMalformed, Get_Func_Type_नुमेरो_Results(actual) != Get_Func_Type_नुमेरो_Results(expected));
+            for (u16 i = 0; i < Get_Func_Type_नुमेरो_Results(expected); ++i) {
                 _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(actual, i) != GetFuncTypeResultType(expected, i));
             }
         }
         while (l->suspendSites[leaf].target) {
             leaf = l->suspendSites[leaf].target;
-            _throwif(m3Err_wasmMalformed, ++depth >= l->numContinuations or
+            _throwif(m3Err_wasmMalformed, ++depth >= l->नुमेरो_Continuations or
                                             l->continuations[leaf]->state != cont_suspended);
         }
         if (cont->state != cont_suspended or id == 0) {
@@ -2851,7 +2851,7 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
         // received its arguments. Only an independently captured suspension
         // (possibly containing nested resumes) still expects the tag's results.
         if (l->suspendSites[id].resumed) {
-            _throwif(m3Err_wasmMalformed, cont->boundArgsCount != 0);
+            _throwif(m3Err_wasmMalformed, cont->bound_मगा_कातविरान_बिलांग != 0);
             continue;
         }
 
@@ -2859,27 +2859,27 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
         IM3Continuation              inner     = l->continuations[leaf];
         IM3FuncType                  remaining = cont->type->contFuncType;
         _throwif("a captured continuation has no suspension point", not site->point or not remaining);
-        _throwif("a captured continuation has the wrong binding count", cont->boundArgsCount > inner->numSuspendResults or
-                                                                          GetFuncTypeNumParams(remaining) != inner->numSuspendResults - cont->boundArgsCount);
+        _throwif("a captured continuation has the wrong binding count", cont->bound_मगा_कातविरान_बिलांग > inner->नुमेरो_Suspend_Results or
+                                                                          Get_Func_Type_नुमेरो_Params(remaining) != inner->नुमेरो_Suspend_Results - cont->bound_मगा_कातविरान_बिलांग);
         _throwif(m3Err_wasmMalformed,
-                 GetFuncTypeNumResults(remaining) != GetFuncTypeNumResults(cont->entryFunction->funcType));
-        for (u16 i = 0; i < GetFuncTypeNumResults(remaining); ++i) {
+                 Get_Func_Type_नुमेरो_Results(remaining) != Get_Func_Type_नुमेरो_Results(cont->entryFunction->funcType));
+        for (u16 i = 0; i < Get_Func_Type_नुमेरो_Results(remaining); ++i) {
             _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(remaining, i) !=
                                             GetFuncTypeResultType(cont->entryFunction->funcType, i));
         }
 
-        for (u32 i = 0; i < inner->numSuspendResults; ++i) {
-            const M3SlotValue* value = &site->map->values[site->point->firstValue +
-                                                          site->point->numValues - site->point->numResults + i];
-            if (i < cont->boundArgsCount) {
-                if (IsRefType(value->type) and not IsNullableRef(value->type)) {
+        for (u32 i = 0; i < inner->नुमेरो_Suspend_Results; ++i) {
+            const M3_Slot_हालागा* हालागा = &site->map->मगा_हालागा[site->point->first_हालागा +
+                                                          site->point->नुमेरो_मगा_हालागा - site->point->नुमेरो_Results + i];
+            if (i < cont->bound_मगा_कातविरान_बिलांग) {
+                if (IsRefType(हालागा->type) and not IsNullableRef(हालागा->type)) {
                     void* ref = NULL;
-                    memcpy(&ref, inner->sp + value->slot, sizeof(ref));
+                    memcpy(&ref, inner->sp + हालागा->slot, sizeof(ref));
                     _throwif(m3Err_wasmMalformed, not ref);
                 }
             } else {
-                _throwif("a captured continuation has the wrong parameter type", value->type !=
-                                                                                   GetFuncTypeParamType(remaining, (u16)(i - cont->boundArgsCount)));
+                _throwif("a captured continuation has the wrong parameter type", हालागा->type !=
+                                                                                   GetFuncTypeParamType(remaining, (u16)(i - cont->bound_मगा_कातविरान_बिलांग)));
             }
         }
     }
@@ -2894,32 +2894,32 @@ static
 M3Result LoadExceptions (M3SnapshotLoad* l)
 {
     M3Result result        = m3Err_none;
-    u32      numExceptions = 0;
+    u32      नुमेरो_Exceptions = 0;
 
-_   (GetLEB_u32(l, &numExceptions));
-    _throwif(m3Err_wasmMalformed, numExceptions == 0 or numExceptions != l->numExceptions);
+_   (GetLEB_u32(l, &नुमेरो_Exceptions));
+    _throwif(m3Err_wasmMalformed, नुमेरो_Exceptions == 0 or नुमेरो_Exceptions != l->नुमेरो_Exceptions);
 
-    for (u32 i = 0; i < numExceptions; ++i) {
-        u32          exnId = 0, numArgs = 0;
+    for (u32 i = 0; i < नुमेरो_Exceptions; ++i) {
+        u32          exnId = 0, नुमेरो_मगा_कातविरान = 0;
         M3Exception* exn;
         IM3FuncType  type;
 
 _       (GetLEB_u32(l, &exnId));
-_       (GetLEB_u32(l, &numArgs));
+_       (GetLEB_u32(l, &नुमेरो_मगा_कातविरान));
 
         _throwif(m3Err_wasmMalformed, exnId != i);
 
         exn  = l->exceptions[i];
         type = exn->tag->type;
 
-        _throwif(m3Err_wasmMalformed, numArgs != exn->numArgs);
+        _throwif(m3Err_wasmMalformed, नुमेरो_मगा_कातविरान != exn->नुमेरो_मगा_कातविरान);
 
-        for (u32 a = 0; a < numArgs; ++a) {
+        for (u32 a = 0; a < नुमेरो_मगा_कातविरान; ++a) {
             m3type_t argType = GetFuncTypeParamType(type, (u16)a);
             u64      bits    = 0;
-_           (GetValueBits(l, argType, &bits));
+_           (Get_हालागा_Bits(l, argType, &bits));
             if (not l->checking) {
-                exn->args[a] = bits;
+                exn->मगा_कातविरान[a] = bits;
             }
         }
     }
@@ -3018,8 +3018,8 @@ _   (ModuleFingerprint(l->module, &ownHash));
     // a flag this build does not know changes what the rest of the file means
     _throwif("the snapshot sets a flag this build does not know", *o_flags & ~(u32)d_m3SnapshotFlagPostmortem);
 
-_   (GetLEB_u32(l, &l->numContinuations));
-_   (GetLEB_u32(l, &l->numExceptions));
+_   (GetLEB_u32(l, &l->नुमेरो_Continuations));
+_   (GetLEB_u32(l, &l->नुमेरो_Exceptions));
 _   (GetLEB_u64(l, &memoryBytes));
 _   (GetLEB_u64(l, &tableElements));
 _   (GetLEB_u32(l, &activeStacks));
@@ -3027,13 +3027,13 @@ _   (GetLEB_u32(l, &activeStacks));
     l->requiredMemoryBytes   = memoryBytes;
     l->requiredTableElements = tableElements;
     _throwif(m3Err_wasmMalformed, memoryBytes < currentMemory or tableElements < currentTables);
-    _throwif(m3Err_wasmMalformed, not l->module->numMemories and memoryBytes != 0);
-    _throwif(m3Err_wasmMalformed, not l->module->numTables and tableElements != 0);
+    _throwif(m3Err_wasmMalformed, not l->module->नुमेरो_Memories and memoryBytes != 0);
+    _throwif(m3Err_wasmMalformed, not l->module->नुमेरो_Tables and tableElements != 0);
 
     // the rest of Meta means the same thing in a postmortem, so it is read
     // whole and the refusal to resume comes after the section, not inside it
     if (*o_flags & d_m3SnapshotFlagPostmortem) {
-        for (u32 i = 0; i < l->numExceptions; ++i) {
+        for (u32 i = 0; i < l->नुमेरो_Exceptions; ++i) {
             u32 tagIndex = 0;
 _           (GetLEB_u32(l, &tagIndex));
         }
@@ -3047,72 +3047,72 @@ _           (GetLEB_u32(l, &tagIndex));
     _throwif(m3Err_continuationLimitExceeded, l->runtime->continuationsLimit and
                                                 activeStacks > l->runtime->continuationsLimit - l->runtime->continuationsAllocated);
 
-    _throwif(m3Err_wasmMalformed, l->numContinuations == 0 or activeStacks >= l->numContinuations);
+    _throwif(m3Err_wasmMalformed, l->नुमेरो_Continuations == 0 or activeStacks >= l->नुमेरो_Continuations);
 #  if !d_m3HasExceptionHandling
-    _throwif("the snapshot holds exceptions, and this build has none", l->numExceptions != 0);
+    _throwif("the snapshot holds exceptions, and this build has none", l->नुमेरो_Exceptions != 0);
 #  endif
 
     if (l->checking) {
-        for (u32 i = 0; i < l->numExceptions; ++i) {
+        for (u32 i = 0; i < l->नुमेरो_Exceptions; ++i) {
             u32 tagIndex = 0;
 _           (GetLEB_u32(l, &tagIndex));
 #  if d_m3HasExceptionHandling
-            _throwif(m3Err_wasmMalformed, tagIndex >= l->module->numTags);
+            _throwif(m3Err_wasmMalformed, tagIndex >= l->module->नुमेरो_Tags);
 #  endif
         }
         return m3Err_none;
     }
 
-    l->checkStack = m3_AllocArray(m3slot_t, d_m3ContinuationStackSlots + 4);
-    _throwifnull(l->checkStack);
+    l->check_सालानसान = m3_AllocArray(m3slot_t, d_m3_Continuation_सालानसान_Slots + 4);
+    _throwifnull(l->check_सालानसान);
     l->frames = m3_AllocArray(M3Frame, d_m3ContinuationMaxFrames);
     _throwifnull(l->frames);
 
-    l->continuations = m3_AllocArray(IM3Continuation, l->numContinuations);
+    l->continuations = m3_AllocArray(IM3Continuation, l->नुमेरो_Continuations);
     _throwifnull(l->continuations);
-    l->suspendSites = m3_AllocArray(M3SnapshotSuspendSite, l->numContinuations);
+    l->suspendSites = m3_AllocArray(M3SnapshotSuspendSite, l->नुमेरो_Continuations);
     _throwifnull(l->suspendSites);
 
-    if (not l->runtime->rootContinuation) {
-        IM3Continuation root = Continuation_New(l->runtime, NULL, NULL);
-        _throwifnull(root);
+    if (not l->runtime->उगात_Continuation) {
+        IM3Continuation उगात = Continuation_New(l->runtime, NULL, NULL);
+        _throwifnull(उगात);
 
         // the root borrows the runtime's stack, so it holds none of its own
-        root->numStackSlots          = l->runtime->numStackSlots;
-        l->runtime->rootContinuation = root;
+        उगात->नुमेरो_सालानसान_Slots          = l->runtime->नुमेरो_सालानसान_Slots;
+        l->runtime->उगात_Continuation = उगात;
     }
 
-    l->continuations[0] = l->runtime->rootContinuation;
+    l->continuations[0] = l->runtime->उगात_Continuation;
 
-    for (u32 i = 1; i < l->numContinuations; ++i) {
+    for (u32 i = 1; i < l->नुमेरो_Continuations; ++i) {
         l->continuations[i] = Continuation_New(l->runtime, NULL, NULL);
         _throwifnull(l->continuations[i]);
     }
 
 #  if d_m3HasExceptionHandling
-    if (l->numExceptions) {
-        l->exceptions = m3_AllocArray(M3Exception*, l->numExceptions);
+    if (l->नुमेरो_Exceptions) {
+        l->exceptions = m3_AllocArray(M3Exception*, l->नुमेरो_Exceptions);
         _throwifnull(l->exceptions);
     }
 
-    for (u32 i = 0; i < l->numExceptions; ++i) {
+    for (u32 i = 0; i < l->नुमेरो_Exceptions; ++i) {
         u32    tagIndex = 0;
         IM3Tag tag;
-        u32    numArgs;
+        u32    नुमेरो_मगा_कातविरान;
 
 _       (GetLEB_u32(l, &tagIndex));
-        _throwif(m3Err_wasmMalformed, tagIndex >= l->module->numTags);
+        _throwif(m3Err_wasmMalformed, tagIndex >= l->module->नुमेरो_Tags);
 
         tag     = TagOfIndex(l->module, tagIndex);
-        numArgs = GetFuncTypeNumParams(tag->type);
+        नुमेरो_मगा_कातविरान = Get_Func_Type_नुमेरो_Params(tag->type);
 
-        l->exceptions[i] = NewException(l->runtime, tag, numArgs);
+        l->exceptions[i] = NewException(l->runtime, tag, नुमेरो_मगा_कातविरान);
         _throwifnull(l->exceptions[i]);
 
         l->exceptions[i]->reified = true;
     }
 #  else
-    for (u32 i = 0; i < l->numExceptions; ++i) {
+    for (u32 i = 0; i < l->नुमेरो_Exceptions; ++i) {
         u32 tagIndex = 0;
 _       (GetLEB_u32(l, &tagIndex));
     }
@@ -3236,18 +3236,18 @@ _       (LoadSection(l, sectionId));
     _throwif("the snapshot has no continuation section",
              not l->seenSections[d_m3SnapshotSection_Continuation]);
     _throwif("the snapshot names exceptions it does not hold",
-             l->numExceptions and not l->seenSections[d_m3SnapshotSection_Exception]);
+             l->नुमेरो_Exceptions and not l->seenSections[d_m3SnapshotSection_Exception]);
 
     // a store section left out is not "unchanged": it would resume against
     // whatever instantiation happened to leave behind
     _throwif("the snapshot has no memory section",
-             l->module->numMemories and not l->seenSections[d_m3SnapshotSection_Memory]);
+             l->module->नुमेरो_Memories and not l->seenSections[d_m3SnapshotSection_Memory]);
     _throwif("the snapshot has no table section",
-             l->module->numTables and not l->seenSections[d_m3SnapshotSection_Table]);
+             l->module->नुमेरो_Tables and not l->seenSections[d_m3SnapshotSection_Table]);
     _throwif("the snapshot has no global section",
-             l->module->numGlobals and not l->seenSections[d_m3SnapshotSection_Global]);
+             l->module->नुमेरो_Globals and not l->seenSections[d_m3SnapshotSection_Global]);
     _throwif("the snapshot has no segment section",
-             (l->module->numDataSegments or l->module->numElementSegments) and
+             (l->module->नुमेरो_Data_Segments or l->module->नुमेरो_Element_Segments) and
                not l->seenSections[d_m3SnapshotSection_Segment]);
 
 _   (CheckContinuationReferences(l));
@@ -3275,7 +3275,7 @@ M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i
 
     memset(&save, 0, sizeof(save));
 
-    IM3Continuation root = io_runtime->rootContinuation;
+    IM3Continuation उगात = io_runtime->उगात_Continuation;
 
     // Anything but a paused invocation is saved as a postmortem: the state of
     // the module the last call entered, which needs no continuation and so no
@@ -3284,9 +3284,9 @@ M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i
     save.writer     = i_writer;
     save.userdata   = i_userdata;
     save.embedded   = i_embedded;
-    save.postmortem = not root or root->state != cont_suspended;
+    save.postmortem = not उगात or उगात->state != cont_suspended;
 
-    IM3Function entry = save.postmortem ? io_runtime->entered : root->entryFunction;
+    IM3Function entry = save.postmortem ? io_runtime->entered : उगात->entryFunction;
 
     if (o_module) {
         *o_module = NULL;
@@ -3317,7 +3317,7 @@ _       (PointerIds_Add(&save.liveExceptions, exception, &id));
 
     if (not save.postmortem) {
         u32 id;
-_       (PointerIds_Add(&save.continuations, root, &id));
+_       (PointerIds_Add(&save.continuations, उगात, &id));
     }
 
 _   (SaveSections(&save));
@@ -3383,7 +3383,7 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
 
         result = LoadSections(&load, i_embedded);
 
-        IM3Continuation root = io_runtime->rootContinuation;
+        IM3Continuation उगात = io_runtime->उगात_Continuation;
 
         if (result) {
             if (load.changed) {
@@ -3392,9 +3392,9 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
                 // saved again; the embedder has to throw it away.
                 i_module->isUnusable = true;
 
-                if (root) {
-                    root->state     = cont_returned;
-                    root->numFrames = 0;
+                if (उगात) {
+                    उगात->state     = cont_returned;
+                    उगात->नुमेरो_Frames = 0;
                 }
             }
         } else {
@@ -3405,9 +3405,9 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
             i_module->hasRun        = true;
         }
 
-        Runtime_PlaceCallStack(io_runtime);
+        Runtime_Place_Call_सालानसान(io_runtime);
 
-        m3_Free(load.checkStack);
+        m3_Free(load.check_सालानसान);
         m3_Free(load.frames);
         m3_Free(load.suspendSites);
         m3_Free(load.continuations);
@@ -3476,29 +3476,29 @@ M3Result m3_SaveSnapshotToBuffer (IM3Runtime io_runtime, void** o_bytes, size_t*
 
 // Appends one LEB128-encoded u32 to a plain byte cursor
 static
-u8* EmitLEB_u32 (u8* o_where, u32 i_value)
+u8* EmitLEB_u32 (u8* o_where, u32 i_हालागा)
 {
     do {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if (i_value != 0) {
+        u8 byte = i_हालागा & 0x7F;
+        i_हालागा >>= 7;
+        if (i_हालागा != 0) {
             byte |= 0x80;
         }
         *o_where++ = byte;
-    } while (i_value != 0);
+    } while (i_हालागा != 0);
 
     return o_where;
 }
 
 static
-u32 SizeOfLEB_u32 (u32 i_value)
+u32 SizeOfLEB_u32 (u32 i_हालागा)
 {
     u32 size = 0;
 
     do {
-        i_value >>= 7;
+        i_हालागा >>= 7;
         ++size;
-    } while (i_value != 0);
+    } while (i_हालागा != 0);
 
     return size;
 }
@@ -3758,7 +3758,7 @@ _   (SnapshotSectionName(i_name, secName, sizeof(secName)));
     // just by running the module - and a postmortem cannot be. With nothing
     // paused, a save is a postmortem.
     _throwif("a postmortem cannot be embedded in a module",
-             not io_runtime->rootContinuation or io_runtime->rootContinuation->state != cont_suspended);
+             not io_runtime->उगात_Continuation or io_runtime->उगात_Continuation->state != cont_suspended);
 
 _   (SaveSnapshot(io_runtime, BufferWriter_Write, &bw, &saved, true));
 

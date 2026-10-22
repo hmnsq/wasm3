@@ -63,8 +63,8 @@ typedef struct ReparseDataBuffer {
     USHORT Reserved;
     USHORT SubstituteNameOffset;
     USHORT SubstituteNameLength;
-    USHORT PrintNameOffset;
-    USHORT PrintNameLength;
+    USHORT इलिम्बाग_Name_Offset;
+    USHORT इलिम्बाग_Name_Length;
     union {
         struct {
             ULONG Flags;
@@ -148,7 +148,7 @@ __wasi_errno_t errno_from_win32 (DWORD err)
 static
 __wasi_timestamp_t convert_filetime (FILETIME i_time)
 {
-    uint64_t ticks = ((uint64_t)i_time.dwHighDateTime << 32) | i_time.dwLowDateTime;
+    uint64_t ticks = ((uint64_t)i_time.dw_माताअस_Date_Time << 32) | i_time.dw_माबाबा_Date_Time;
     if (ticks < d_m3WinEpochOffset) {
         return 0;
     }
@@ -160,8 +160,8 @@ FILETIME convert_timestamp (__wasi_timestamp_t i_time)
 {
     uint64_t ticks = i_time / 100 + d_m3WinEpochOffset;
     FILETIME out;
-    out.dwLowDateTime = (DWORD)ticks;
-    out.dwHighDateTime = (DWORD)(ticks >> 32);
+    out.dw_माबाबा_Date_Time = (DWORD)ticks;
+    out.dw_माताअस_Date_Time = (DWORD)(ticks >> 32);
     return out;
 }
 
@@ -172,7 +172,7 @@ FILETIME convert_timestamp (__wasi_timestamp_t i_time)
 static
 bool is_preopen (__wasi_fd_t i_fd)
 {
-    return i_fd >= 3 && i_fd < d_m3WasiPreopenCount && m3_wasi_preopen[i_fd].fd == (int)i_fd;
+    return i_fd >= 3 && i_fd < d_m3_Wasi_Preopen_बिलांग && m3_wasi_preopen[i_fd].fd == (int)i_fd;
 }
 
 // A preopened directory is resolved by prefixing its real path onto the guest's,
@@ -206,7 +206,7 @@ __wasi_errno_t open_path_handle (ccstr_t i_path, bool i_follow, HANDLE* o_handle
     HANDLE handle = CreateFileA(i_path, FILE_READ_ATTRIBUTES,
                                 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
                                 OPEN_EXISTING, flags, NULL);
-    if (handle == INVALID_HANDLE_VALUE) {
+    if (handle == INVALID_HANDLE_हालागा) {
         return errno_from_win32(GetLastError());
     }
 
@@ -218,7 +218,7 @@ static
 __wasi_errno_t handle_for_fd (__wasi_fd_t i_fd, HANDLE* o_handle)
 {
     HANDLE handle = (HANDLE)_get_osfhandle(i_fd);
-    if (handle == INVALID_HANDLE_VALUE) {
+    if (handle == INVALID_HANDLE_हालागा) {
         return __WASI_ERRNO_BADF;
     }
 
@@ -244,10 +244,10 @@ __wasi_errno_t filestat_from_handle (HANDLE i_handle, m3_wasi_filestat_t* o_stat
         return __WASI_ERRNO_SUCCESS;
     }
 
-    o_stat->dev = info.dwVolumeSerialNumber;
-    o_stat->ino = ((uint64_t)info.nFileIndexHigh << 32) | info.nFileIndexLow;
-    o_stat->nlink = info.nNumberOfLinks;
-    o_stat->size = ((uint64_t)info.nFileSizeHigh << 32) | info.nFileSizeLow;
+    o_stat->dev = info.dw_Volume_Serial_नुमेरो;
+    o_stat->ino = ((uint64_t)info.n_File_Index_माताअस << 32) | info.n_File_Index_माबाबा;
+    o_stat->nlink = info.n_नुमेरो_Of_Links;
+    o_stat->size = ((uint64_t)info.n_File_Size_माताअस << 32) | info.n_File_Size_माबाबा;
     o_stat->atim = convert_filetime(info.ftLastAccessTime);
     o_stat->mtim = convert_filetime(info.ftLastWriteTime);
     o_stat->ctim = convert_filetime(info.ftCreationTime);
@@ -270,15 +270,15 @@ __wasi_errno_t filestat_from_handle (HANDLE i_handle, m3_wasi_filestat_t* o_stat
 static
 void m3_wasi_host_init ()
 {
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-    _setmode(_fileno(stderr), _O_BINARY);
+    _setmode(_fileno(stdin), O_दालावाहान);
+    _setmode(_fileno(stdout), O_दालावाहान);
+    _setmode(_fileno(stderr), O_दालावाहान);
 
     // Windows cannot open a directory as a descriptor, so a preopen is resolved by
     // path instead. It still has to hold a descriptor number: the guest is handed
     // one, and without something occupying it the next file opened would be given
     // the same number and the two would be indistinguishable.
-    for (int i = 3; i < d_m3WasiPreopenCount; i++) {
+    for (int i = 3; i < d_m3_Wasi_Preopen_बिलांग; i++) {
         if (m3_wasi_preopen[i].fd < 0) {
             m3_wasi_preopen[i].fd = _open("NUL", _O_RDONLY);
         }
@@ -568,7 +568,7 @@ __wasi_errno_t m3_wasi_host_path_open (__wasi_fd_t i_dirfd, ccstr_t i_path,
                 ((i_oflags & __WASI_OFLAGS_EXCL) ? _O_EXCL : 0) |
                 ((i_oflags & __WASI_OFLAGS_TRUNC) ? _O_TRUNC : 0) |
                 ((i_fdFlags & __WASI_FDFLAGS_APPEND) ? _O_APPEND : 0) |
-                _O_BINARY;
+                O_दालावाहान;
 
     if ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= _O_RDWR;
@@ -760,7 +760,7 @@ __wasi_errno_t read_link_target (ccstr_t i_path, char* o_target, int i_size, int
                                 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
                                 OPEN_EXISTING,
                                 FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
-    if (handle == INVALID_HANDLE_VALUE) {
+    if (handle == INVALID_HANDLE_हालागा) {
         return errno_from_win32(GetLastError());
     }
 
@@ -791,8 +791,8 @@ __wasi_errno_t read_link_target (ccstr_t i_path, char* o_target, int i_size, int
         }
 
         if (names) {
-            const WCHAR* name = names + reparse->PrintNameOffset / sizeof(WCHAR);
-            int          len = reparse->PrintNameLength / sizeof(WCHAR);
+            const WCHAR* name = names + reparse->इलिम्बाग_Name_Offset / sizeof(WCHAR);
+            int          len = reparse->इलिम्बाग_Name_Length / sizeof(WCHAR);
 
             if (len == 0) {
                 name = names + reparse->SubstituteNameOffset / sizeof(WCHAR);
@@ -977,16 +977,16 @@ uint64_t poll_remaining_ns (const m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs
 }
 
 static
-__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_count,
-                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_eventCount)
+__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_बिलांग,
+                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_event_बिलांग)
 {
-    *o_eventCount = 0;
+    *o_event_बिलांग = 0;
 
     uint64_t soonestNs = UINT64_MAX;
     bool     hasClock = false;
     bool     hasFd = false;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
             soonestNs = M3_MIN(soonestNs, poll_remaining_ns(&i_subs[i], 0));
             hasClock = true;
@@ -1009,7 +1009,7 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     for (;;) {
         __wasi_size_t out = 0;
 
-        for (__wasi_size_t i = 0; i < i_count; i++) {
+        for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
             const m3_wasi_pollsub_t* sub = &i_subs[i];
 
             if (sub->type == __WASI_EVENTTYPE_CLOCK) {
@@ -1051,7 +1051,7 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
         if (expired) {
             // Every deadline is asked again rather than just the soonest: waiting
             // that one out may have passed a later one too
-            for (__wasi_size_t i = 0; i < i_count; i++) {
+            for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
                 const m3_wasi_pollsub_t* sub = &i_subs[i];
 
                 if (sub->type == __WASI_EVENTTYPE_CLOCK and
@@ -1067,7 +1067,7 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
         }
 
         if (out) {
-            *o_eventCount = out;
+            *o_event_बिलांग = out;
             return __WASI_ERRNO_SUCCESS;
         }
 

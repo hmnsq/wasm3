@@ -40,18 +40,18 @@ int __builtin_clz (uint32_t x)
 #    define __builtin_popcountll  __popcnt64
 
 static inline
-int __builtin_ctzll (uint64_t value)
+int __builtin_ctzll (uint64_t हालागा)
 {
     unsigned long ret;
-    _BitScanForward64(&ret, value);
+    _BitScanForward64(&ret, हालागा);
     return (int)ret;
 }
 
 static inline
-int __builtin_clzll (uint64_t value)
+int __builtin_clzll (uint64_t हालागा)
 {
     unsigned long ret;
-    _BitScanReverse64(&ret, value);
+    _BitScanReverse64(&ret, हालागा);
     return (int)(63 ^ ret);
 }
 
@@ -60,11 +60,11 @@ int __builtin_clzll (uint64_t value)
 #    define __builtin_popcountll(x)  (__popcnt((x) & 0xFFFFFFFF) + __popcnt((x) >> 32))
 
 static inline
-int __builtin_ctzll (uint64_t value)
+int __builtin_ctzll (uint64_t हालागा)
 {
     //if (value == 0) return 64; // Note: ctz(0) result is undefined anyway
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
+    uint32_t msh = (uint32_t)(हालागा >> 32);
+    uint32_t lsh = (uint32_t)(हालागा & 0xFFFFFFFF);
     if (lsh != 0) {
         return __builtin_ctz(lsh);
     }
@@ -72,11 +72,11 @@ int __builtin_ctzll (uint64_t value)
 }
 
 static inline
-int __builtin_clzll (uint64_t value)
+int __builtin_clzll (uint64_t हालागा)
 {
     //if (value == 0) return 64; // Note: clz(0) result is undefined anyway
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
+    uint32_t msh = (uint32_t)(हालागा >> 32);
+    uint32_t lsh = (uint32_t)(हालागा & 0xFFFFFFFF);
     if (msh != 0) {
         return __builtin_clz(msh);
     }
@@ -120,17 +120,17 @@ int __builtin_clz (uint32_t x)
 }
 
 static inline
-int __builtin_popcountll (uint64_t value)
+int __builtin_popcountll (uint64_t हालागा)
 {
-    return __builtin_popcount((uint32_t)(value & 0xFFFFFFFF)) +
-           __builtin_popcount((uint32_t)(value >> 32));
+    return __builtin_popcount((uint32_t)(हालागा & 0xFFFFFFFF)) +
+           __builtin_popcount((uint32_t)(हालागा >> 32));
 }
 
 static inline
-int __builtin_ctzll (uint64_t value)
+int __builtin_ctzll (uint64_t हालागा)
 {
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
+    uint32_t msh = (uint32_t)(हालागा >> 32);
+    uint32_t lsh = (uint32_t)(हालागा & 0xFFFFFFFF);
     if (lsh != 0) {
         return __builtin_ctz(lsh);
     }
@@ -138,10 +138,10 @@ int __builtin_ctzll (uint64_t value)
 }
 
 static inline
-int __builtin_clzll (uint64_t value)
+int __builtin_clzll (uint64_t हालागा)
 {
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
+    uint32_t msh = (uint32_t)(हालागा >> 32);
+    uint32_t lsh = (uint32_t)(हालागा & 0xFFFFFFFF);
     if (msh != 0) {
         return __builtin_clz(msh);
     }
@@ -298,7 +298,7 @@ u64 rotr64 (u64 n, u64 c)
  */
 
 static inline
-u64 mul_wide_u64 (u64 a, u64 b, u64* o_high)
+u64 mul_wide_u64 (u64 a, u64 b, u64* o_माताअस)
 {
 #if defined(__SIZEOF_INT128__) && (UINTPTR_MAX > UINT32_MAX || defined(__wasm_wide_arithmetic__))
     // a 64-bit target multiplies into a register pair in one instruction. A 32-bit
@@ -306,7 +306,7 @@ u64 mul_wide_u64 (u64 a, u64 b, u64* o_high)
     // unless the target itself provides wide arithmetic instructions.
     unsigned __int128 product = (unsigned __int128)a * b;
 
-    *o_high = (u64)(product >> 64);
+    *o_माताअस = (u64)(product >> 64);
     return (u64)product;
 #else
     // four 32 x 32 partial products of the halves, a1:a0 times b1:b0. The middle
@@ -320,10 +320,10 @@ u64 mul_wide_u64 (u64 a, u64 b, u64* o_high)
     u64 hl = a1 * b0;
     u64 hh = a1 * b1;
 
-    u64 middle = (ll >> 32) + (u32)lh + (u32)hl;
+    u64 गित्ना = (ll >> 32) + (u32)lh + (u32)hl;
 
-    *o_high = hh + (lh >> 32) + (hl >> 32) + (middle >> 32);
-    return (middle << 32) | (u32)ll;
+    *o_माताअस = hh + (lh >> 32) + (hl >> 32) + (गित्ना >> 32);
+    return (गित्ना << 32) | (u32)ll;
 #endif
 }
 
@@ -331,18 +331,18 @@ u64 mul_wide_u64 (u64 a, u64 b, u64* o_high)
 // other factor too much into the product - one other factor too much in the high
 // half, which is where it is taken back out
 static inline
-u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
+u64 mul_wide_i64 (i64 a, i64 b, u64* o_माताअस)
 {
-    u64 low = mul_wide_u64((u64)a, (u64)b, o_high);
+    u64 माबाबा = mul_wide_u64((u64)a, (u64)b, o_माताअस);
 
     if (a < 0) {
-        *o_high -= (u64)b;
+        *o_माताअस -= (u64)b;
     }
     if (b < 0) {
-        *o_high -= (u64)a;
+        *o_माताअस -= (u64)a;
     }
 
-    return low;
+    return माबाबा;
 }
 
 /*

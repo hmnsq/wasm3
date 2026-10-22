@@ -52,9 +52,9 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 
     IM3FuncType funcType = i_function->funcType;
     if (funcType) {
-        u32 numArgs = funcType->numArgs;
+        u32 नुमेरो_मगा_कातविरान = funcType->नुमेरो_मगा_कातविरान;
 
-        for (u32 i = 0; i < numArgs; ++i) {
+        for (u32 i = 0; i < नुमेरो_मगा_कातविरान; ++i) {
             m3type_t type = d_FuncArgType(funcType, i);
 
             ret = snprintf(s, e - s, "%s: ", c_waTypes[BaseTypeOf(type)]);
@@ -62,7 +62,7 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 
             s += SPrintArg(s, e - s, argSp + i, type);
 
-            if (i != numArgs - 1) {
+            if (i != नुमेरो_मगा_कातविरान - 1) {
                 ret = snprintf(s, e - s, ", ");
                 s += M3_MAX(0, ret);
             }
@@ -94,12 +94,12 @@ cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 
     u64* retSp = (u64*)i_sp;
 
-    u32 numRets = i_funcType ? i_funcType->numRets : 0;
+    u32 नुमेरो_Rets = i_funcType ? i_funcType->नुमेरो_Rets : 0;
 
-    for (u32 i = 0; i < numRets; ++i) {
+    for (u32 i = 0; i < नुमेरो_Rets; ++i) {
         s += SPrintArg(s, e - s, retSp + i, d_FuncRetType(i_funcType, i));
 
-        if (i != numRets - 1) {
+        if (i != नुमेरो_Rets - 1) {
             ret = snprintf(s, e - s, ", ");
             s += M3_MAX(0, ret);
         }
@@ -125,7 +125,7 @@ typedef struct OpInfo {
     m3opcode_t opcode;
 } OpInfo;
 
-void m3_PrintM3Info ()
+void m3_इलिम्बाग_M3_Info ()
 {
     printf("\n-- m3 configuration --------------------------------------------\n");
     //  printf (" sizeof M3CodePage    : %zu bytes  (%d slots) \n", sizeof (M3CodePage), c_m3CodePageNumSlots);
@@ -136,23 +136,23 @@ void m3_PrintM3Info ()
 }
 
 
-void* v_PrintEnvModuleInfo (IM3Module i_module, void* i_info)
+void* v_इलिम्बाग_Env_Module_Info (IM3Module i_module, void* i_info)
 {
     u32* io_index = (u32*)i_info;
-    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->numFunctions);
+    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->नुमेरो_Functions);
 
     return NULL;
 }
 
 
-void m3_PrintRuntimeInfo (IM3Runtime i_runtime)
+void m3_इलिम्बाग_Runtime_Info (IM3Runtime i_runtime)
 {
     printf("\n-- m3 runtime -------------------------------------------------\n");
 
-    printf(" stack-size: %zu   \n\n", i_runtime->numStackSlots * sizeof(m3slot_t));
+    printf(" stack-size: %zu   \n\n", i_runtime->नुमेरो_सालानसान_Slots * sizeof(m3slot_t));
 
     u32 moduleIndex = 0;
-    ForEachModule(i_runtime, v_PrintEnvModuleInfo, &moduleIndex);
+    ForEachModule(i_runtime, v_इलिम्बाग_Env_Module_Info, &moduleIndex);
 
     printf("----------------------------------------------------------------\n\n");
 }
@@ -180,10 +180,10 @@ size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, cc
         return i_len;
     }
 
-    va_list args;
-    va_start(args, i_format);
-    int ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
-    va_end(args);
+    va_list मगा_कातविरान;
+    va_start(मगा_कातविरान, i_format);
+    int ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, मगा_कातविरान);
+    va_end(मगा_कातविरान);
 
     return M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
 }
@@ -198,14 +198,14 @@ cstr_t SPrintFuncTypeSignature (IM3FuncType i_funcType)
 
     size_t len = SPrintAppend(string, sizeof(string), 0, "(");
 
-    for (u32 i = 0; i < i_funcType->numArgs; ++i) {
+    for (u32 i = 0; i < i_funcType->नुमेरो_मगा_कातविरान; ++i) {
         len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncArgType(i_funcType, i)));
     }
 
     len = SPrintAppend(string, sizeof(string), len, ") -> ");
 
-    for (u32 i = 0; i < i_funcType->numRets; ++i) {
+    for (u32 i = 0; i < i_funcType->नुमेरो_Rets; ++i) {
         len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncRetType(i_funcType, i)));
     }
@@ -214,19 +214,19 @@ cstr_t SPrintFuncTypeSignature (IM3FuncType i_funcType)
 }
 
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type)
+cstr_t SPrint_हालागा (void* i_हालागा, m3type_t i_type)
 {
     static char string[100];
-    SPrintArg(string, 100, (m3stack_t)i_value, i_type);
+    SPrintArg(string, 100, (m3stack_t)i_हालागा, i_type);
     return string;
 }
 
 // Finds i_operation in one operation table. i_opcodeBase tags the result, so an
 // extended entry comes back as the 0xFCxx opcode the rest of the code speaks.
 static
-bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_numOps, m3opcode_t i_opcodeBase, IM3Operation i_operation)
+bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_नुमेरो_Ops, m3opcode_t i_opcodeBase, IM3Operation i_operation)
 {
-    for (u32 i = 0; i < i_numOps; ++i) {
+    for (u32 i = 0; i < i_नुमेरो_Ops; ++i) {
         IM3OpInfo oi = &i_table[i];
 
         for (u32 o = 0; o < 4; ++o) {
@@ -255,11 +255,11 @@ OpInfo find_operation_info (IM3Operation i_operation)
     // Reserved slots are zeroed, so they never match a real operation here.
     // c_operationsHigh is not scanned: every entry in it is compiler-driven with
     // an empty operation list, so nothing there could match.
-    if (not ScanOperationTable(&opInfo, c_operations, c_numOperations, 0, i_operation)) {
-        if (not ScanOperationTable(&opInfo, c_operationsFC, c_numOperationsFC, c_waOp_extended << 8, i_operation)) {
+    if (not ScanOperationTable(&opInfo, c_operations, c_नुमेरो_Operations, 0, i_operation)) {
+        if (not ScanOperationTable(&opInfo, c_operationsFC, c_नुमेरो_Operations_FC, c_waOp_extended << 8, i_operation)) {
 #  if d_m3HasAtomics
             // one entry serves a whole kind, so the opcode it comes back with is only the entry's index
-            ScanOperationTable(&opInfo, c_operationsFE, c_numOperationsFE, c_waOp_atomic << 8, i_operation);
+            ScanOperationTable(&opInfo, c_operationsFE, c_नुमेरो_Operations_FE, c_waOp_atomic << 8, i_operation);
 #  endif
         }
     }
@@ -276,9 +276,9 @@ OpInfo find_operation_info (IM3Operation i_operation)
 d_m3Decoder(Call)
 {
     void* function    = fetch(void*);
-    i32   stackOffset = fetch(i32);
+    i32   सालानसान_Offset = fetch(i32);
 
-    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, stackOffset);
+    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, सालानसान_Offset);
 }
 
 
@@ -330,9 +330,9 @@ d_m3Decoder(BranchTable)
 
 d_m3Decoder(Const)
 {
-    u64 value  = fetch(u64);
+    u64 हालागा  = fetch(u64);
     i32 offset = fetch(i32);
-    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, value);
+    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, हालागा);
 }
 
 
@@ -383,11 +383,11 @@ void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
 
     m3log(code, "---------------------------------------------------------------------------------------");
 
-    m3log(code, "free-lines: %d", i_codePage->info.numLines - i_codePage->info.lineIndex);
+    m3log(code, "free-lines: %d", i_codePage->info.नुमेरो_मगा_लिन्या - i_codePage->info.लिन्या_Index);
 }
 
 
-void dump_type_stack (IM3Compilation o)
+void dump_type_सालानसान (IM3Compilation o)
 {
     /* Reminders about how the stack works! :)
      -- args & locals remain on the type stack for duration of the function. Denoted with a constant 'A' and 'L' in this dump.
@@ -408,28 +408,28 @@ void dump_type_stack (IM3Compilation o)
     i32 regAllocated[2] = { (i32)IsRegisterAllocated(o, 0), (i32)IsRegisterAllocated(o, 1) };
 
     // display whether r0 or fp0 is allocated. these should then also be reflected somewhere in the stack too.
-    d_m3Log(stack, "\n");
-    d_m3Log(stack, "        ");
+    d_m3Log(सालानसान, "\n");
+    d_m3Log(सालानसान, "        ");
     printf("%s %s    ", regAllocated[0] ? "(r0)" : "    ", regAllocated[1] ? "(fp0)" : "     ");
     printf("\n");
 
     for (u32 p = 1; p <= 2; ++p) {
-        d_m3Log(stack, "        ");
+        d_m3Log(सालानसान, "        ");
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            if (i > 0 and i == o->stackFirstDynamicIndex) {
+        for (u16 i = 0; i < o->सालानसान_Index; ++i) {
+            if (i > 0 and i == o->सालानसान_First_Dynamic_Index) {
                 printf("#");
             }
 
-            if (i == o->block.blockStackIndex) {
+            if (i == o->block.block_सालानसान_Index) {
                 printf(">");
             }
 
-            const char* type = c_waCompactTypes[BaseTypeOf(o->typeStack[i])];
+            const char* type = c_waCompactTypes[BaseTypeOf(o->type_सालानसान[i])];
 
             const char* location = "";
 
-            i32 slot = o->wasmStack[i];
+            i32 slot = o->wasm_सालानसान[i];
 
             if (IsRegisterSlotAlias(slot)) {
                 bool isFp = IsFpRegisterSlotAlias(slot);
@@ -441,7 +441,7 @@ void dump_type_stack (IM3Compilation o)
                 if (slot < o->slotFirstDynamicIndex) {
                     if (slot >= o->slotFirstConstIndex) {
                         location = "c";
-                    } else if (slot >= o->function->numRetAndArgSlots) {
+                    } else if (slot >= o->function->नुमेरो_Ret_And_Arg_Slots) {
                         location = "L";
                     } else {
                         location = "a";
@@ -478,7 +478,7 @@ void dump_type_stack (IM3Compilation o)
     u16 maxSlot = GetMaxUsedSlotPlusOne(o);
 
     if (maxSlot > o->slotFirstDynamicIndex) {
-        d_m3Log(stack, "                      -");
+        d_m3Log(सालानसान, "                      -");
 
         for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("----");
@@ -486,13 +486,13 @@ void dump_type_stack (IM3Compilation o)
 
         printf("\n");
 
-        d_m3Log(stack, "                 slot |");
+        d_m3Log(सालानसान, "                 slot |");
         for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", i);
         }
 
         printf("\n");
-        d_m3Log(stack, "                alloc |");
+        d_m3Log(सालानसान, "                alloc |");
 
         for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", o->m3Slots[i]);
@@ -500,7 +500,7 @@ void dump_type_stack (IM3Compilation o)
 
         printf("\n");
     }
-    d_m3Log(stack, "\n");
+    d_m3Log(सालानसान, "\n");
 }
 
 
@@ -539,7 +539,7 @@ void log_opcode (IM3Compilation o, m3opcode_t i_opcode)
     }
     (void)depth;
 
-    m3log(compile, "%4d | 0x%02x  %s %s", o->numOpcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
+    m3log(compile, "%4d | 0x%02x  %s %s", o->नुमेरो_Opcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
 }
 
 
@@ -562,7 +562,7 @@ void log_emit (IM3Compilation o, IM3Operation i_operation)
 
 typedef struct M3ProfilerSlot {
     cstr_t opName;
-    u64    hitCount;
+    u64    hit_बिलांग;
 } M3ProfilerSlot;
 
 static M3ProfilerSlot s_opProfilerCounts[d_m3ProfilerSlotMask + 1] = {};
@@ -580,37 +580,37 @@ void ProfileHit (cstr_t i_operationName)
     }
 
     slot->opName = i_operationName;
-    slot->hitCount++;
+    slot->hit_बिलांग++;
 }
 
 
-void m3_PrintProfilerInfo ()
+void m3_इलिम्बाग_Profiler_Info ()
 {
     M3ProfilerSlot  dummy;
     M3ProfilerSlot* maxSlot = &dummy;
 
     do {
-        maxSlot->hitCount = 0;
+        maxSlot->hit_बिलांग = 0;
 
         for (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
             M3ProfilerSlot* slot = &s_opProfilerCounts[i];
 
             if (slot->opName) {
-                if (slot->hitCount > maxSlot->hitCount) {
+                if (slot->hit_बिलांग > maxSlot->hit_बिलांग) {
                     maxSlot = slot;
                 }
             }
         }
 
         if (maxSlot->opName) {
-            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hitCount, maxSlot->opName);
+            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hit_बिलांग, maxSlot->opName);
             maxSlot->opName = NULL;
         }
-    } while (maxSlot->hitCount);
+    } while (maxSlot->hit_बिलांग);
 }
 
 #else
 
-void m3_PrintProfilerInfo () {}
+void m3_इलिम्बाग_Profiler_Info () {}
 
 #endif

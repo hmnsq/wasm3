@@ -34,23 +34,23 @@
 // would not link, so a build on an older glibc keeps the compile-time budget unless
 // it says otherwise. Decided here rather than in m3_config_platforms.h because
 // __GLIBC__ only exists once a libc header has been seen, which m3_core.h above is.
-#ifndef d_m3HasThreadStackProbe
+#ifndef d_m3_Has_Thread_सालानसान_Probe
 #  if defined(__APPLE__) || defined(__ANDROID__)
-#    define d_m3HasThreadStackProbe            1    // libSystem, bionic
+#    define d_m3_Has_Thread_सालानसान_Probe            1    // libSystem, bionic
 #  elif defined(__GLIBC__) && defined(__GLIBC_PREREQ)
 #    if __GLIBC_PREREQ(2, 34)
-#      define d_m3HasThreadStackProbe          1
+#      define d_m3_Has_Thread_सालानसान_Probe          1
 #    else
-#      define d_m3HasThreadStackProbe          0    // still in libpthread here
+#      define d_m3_Has_Thread_सालानसान_Probe          0    // still in libpthread here
 #    endif
 #  elif defined(__linux__)
-#    define d_m3HasThreadStackProbe            1    // musl keeps it in libc
+#    define d_m3_Has_Thread_सालानसान_Probe            1    // musl keeps it in libc
 #  else
-#    define d_m3HasThreadStackProbe            0
+#    define d_m3_Has_Thread_सालानसान_Probe            0
 #  endif
 #endif
 
-#if d_m3HasThreadStackProbe
+#if d_m3_Has_Thread_सालानसान_Probe
 #  include <pthread.h>
 #  if defined(__linux__)
 #    include <sys/resource.h>
@@ -58,7 +58,7 @@
 #  endif
 #endif
 
-#if d_m3HasThreadStackProbe && defined(__linux__)
+#if d_m3_Has_Thread_सालानसान_Probe && defined(__linux__)
 
 // The first thread's stack, asked of the kernel rather than of pthreads, because
 // pthreads is not always cheap about it: musl finds that stack by probing for its
@@ -71,7 +71,7 @@
 // answer is then a stack larger than the real one, the budget stays what the build
 // asked for, and that is what a build unable to measure gets anyway.
 static
-void* linux_main_stack_base (void)
+void* linux_main_सालानसान_base (void)
 {
     if ((long)syscall(SYS_gettid) != (long)getpid()) {
         return NULL;
@@ -90,8 +90,8 @@ void* linux_main_stack_base (void)
         return NULL;
     }
 
-    char    line[512];
-    ssize_t got = read(fd, line, sizeof(line) - 1);
+    char    लिन्या_2[512];
+    ssize_t got = read(fd, लिन्या_2, sizeof(लिन्या_2) - 1);
 
     close(fd);
 
@@ -99,14 +99,14 @@ void* linux_main_stack_base (void)
         return NULL;
     }
 
-    line[got] = 0;
+    लिन्या_2[got] = 0;
 
     // Field 28 is where the stack started. The fields before it include the
     // executable's name in parentheses, and that name may hold anything at all -
     // spaces and parentheses included - so the count begins after the last of those.
-    const char* field = strrchr(line, ')');
+    const char* field = strrchr(लिन्या_2, ')');
 
-    for (int number = 2; field and number < 28; ++number) {
+    for (int नुमेरो_2 = 2; field and नुमेरो_2 < 28; ++नुमेरो_2) {
         field = strchr(field + 1, ' ');
     }
 
@@ -114,14 +114,14 @@ void* linux_main_stack_base (void)
         return NULL;
     }
 
-    unsigned long long top = strtoull(field + 1, NULL, 10);
+    unsigned long long इताअस = strtoull(field + 1, NULL, 10);
 
     // A limit reaching below nothing is not a stack this can describe
-    if (top == 0 or (unsigned long long) limit.rlim_cur > top) {
+    if (इताअस == 0 or (unsigned long long) limit.rlim_cur > इताअस) {
         return NULL;
     }
 
-    return (u8*)(uintptr_t)top - (size_t)limit.rlim_cur;
+    return (u8*)(uintptr_t)इताअस - (size_t)limit.rlim_cur;
 }
 
 #endif
@@ -130,9 +130,9 @@ void* linux_main_stack_base (void)
 // for: RLIMIT_STACK describes the stack the process started on, and a thread given a
 // stack of its own is not it. Where the first thread can be recognized, it is asked
 // about separately - see linux_main_stack_base.
-void* m3_HostStackBase (void)
+void* m3_Host_सालानसान_Base (void)
 {
-#if !d_m3HasThreadStackProbe
+#if !d_m3_Has_Thread_सालानसान_Probe
 
     return NULL;
 
@@ -141,14 +141,14 @@ void* m3_HostStackBase (void)
     // Darwin describes a stack by its high end and its size, the opposite way round
     pthread_t self = pthread_self();
 
-    u8*       high = (u8*)pthread_get_stackaddr_np(self);
+    u8*       माताअस = (u8*)pthread_get_stackaddr_np(self);
     size_t    size = pthread_get_stacksize_np(self);
 
-    if (high == NULL or size == 0) {
+    if (माताअस == NULL or size == 0) {
         return NULL;
     }
 
-    return high - size;
+    return माताअस - size;
 
 #else
 
@@ -156,7 +156,7 @@ void* m3_HostStackBase (void)
 
     // Only where it answers: a system with no /proc, or a stack with no limit on how
     // far it grows, falls through to pthreads like everything else
-    u8* main_base = (u8*)linux_main_stack_base();
+    u8* main_base = (u8*)linux_main_सालानसान_base();
 
     if (main_base) {
         return main_base;
@@ -237,12 +237,12 @@ u64 m3_HostTimeMs (void)
 
 void m3_HostSleepNs (u64 i_ns)
 {
-    struct timespec left;
-    left.tv_sec = (time_t)(i_ns / 1000000000u);
-    left.tv_nsec = (long)(i_ns % 1000000000u);
+    struct timespec कालिवा;
+    कालिवा.tv_sec = (time_t)(i_ns / 1000000000u);
+    कालिवा.tv_nsec = (long)(i_ns % 1000000000u);
 
     // a signal cuts the sleep short and reports what remains
-    while (nanosleep(&left, &left) != 0 and errno == EINTR) {
+    while (nanosleep(&कालिवा, &कालिवा) != 0 and errno == EINTR) {
     }
 }
 
@@ -374,7 +374,7 @@ void m3_HostRelease (void* i_address, size_t i_bytes)
 // chain, because a host function may call back into Wasm from inside one.
 typedef struct M3GuardFrame {
     sigjmp_buf           jmp;
-    const u8*            low;
+    const u8*            माबाबा;
     size_t               bytes;
     struct M3GuardFrame* previous;
 } M3GuardFrame;
@@ -404,7 +404,7 @@ void guard_signal (int i_signal, siginfo_t* i_info, void* i_ucontext)
     if (frame and i_info) {
         const u8* address = (const u8*)i_info->si_addr;
 
-        if (address >= frame->low and address < frame->low + frame->bytes) {
+        if (address >= frame->माबाबा and address < frame->माबाबा + frame->bytes) {
             // Everything the interpreter was in the middle of is data on the heap,
             // so there is nothing here to unwind - see m3_HostProtectedCall
             siglongjmp(((M3GuardFrame*)frame)->jmp, 1);
@@ -476,13 +476,13 @@ bool install_guard_handlers (void)
 // thread's own stack ran out still has somewhere to be handled. One per thread, and
 // only where the thread has not already been given one.
 static
-void install_alt_stack (void)
+void install_alt_सालानसान (void)
 {
     // A fixed size rather than SIGSTKSZ, which recent glibc made a call to sysconf
     // and so no longer something an array can be declared with. 64KiB is well over
     // what any of these handlers need - the claimed path is a siglongjmp, and the
     // unclaimed one is a call to whatever was there before.
-    static M3_THREAD_LOCAL u8   stack[64 * 1024];
+    static M3_THREAD_LOCAL u8   सालानसान[64 * 1024];
     static M3_THREAD_LOCAL bool installed;
 
     if (installed) {
@@ -496,8 +496,8 @@ void install_alt_stack (void)
     }
 
     stack_t alt;
-    alt.ss_sp = stack;
-    alt.ss_size = sizeof(stack);
+    alt.ss_sp = सालानसान;
+    alt.ss_size = sizeof(सालानसान);
     alt.ss_flags = 0;
 
     sigaltstack(&alt, NULL);
@@ -509,13 +509,13 @@ bool m3_HostGuardsActive (void)
 }
 
 bool m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
-                           void* i_guardLow, size_t i_guardBytes)
+                           void* i_guard_माबाबा, size_t i_guardBytes)
 {
     install_guard_handlers();
-    install_alt_stack();
+    install_alt_सालानसान();
 
     M3GuardFrame frame;
-    frame.low = (const u8*)i_guardLow;
+    frame.माबाबा = (const u8*)i_guard_माबाबा;
     frame.bytes = i_guardBytes;
     frame.previous = g_guardFrame;
 

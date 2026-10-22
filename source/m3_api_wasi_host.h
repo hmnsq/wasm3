@@ -57,7 +57,7 @@ d_m3BeginExternC
 // the same wherever it runs; the descriptor each one holds is the host's to fill in,
 // and what sits behind that descriptor is the host's business - POSIX opens the
 // directory, Win32 cannot and keeps a placeholder.
-#  define d_m3WasiPreopenCount  5
+#  define d_m3_Wasi_Preopen_बिलांग  5
 
 typedef struct m3_wasi_preopen_t {
     int     fd;
@@ -66,7 +66,7 @@ typedef struct m3_wasi_preopen_t {
 } m3_wasi_preopen_t;
 
 // Defined here rather than declared because this header has exactly one includer
-static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
+static m3_wasi_preopen_t m3_wasi_preopen[d_m3_Wasi_Preopen_बिलांग] = {
     { 0,  "<stdin>",  ""  },
     { 1,  "<stdout>", ""  },
     { 2,  "<stderr>", ""  },

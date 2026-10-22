@@ -85,14 +85,14 @@ void write_filestat (uint8_t* o_buf, const m3_wasi_filestat_t* i_stat)
 // the result and never sees a guest offset.
 static
 const void* resolve_iovs (IM3Runtime runtime, void* _mem, m3_wasi_iovec_t* o_iovs,
-                          const wasi_iovec_t* i_wasiIovs, __wasi_size_t i_count,
+                          const wasi_iovec_t* i_wasiIovs, __wasi_size_t i_बिलांग,
                           __wasi_size_t* o_want)
 {
     *o_want = 0;
 
     __wasi_size_t want = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         o_iovs[i].buf = m3ApiOffsetToPtr(m3ApiReadMem32(&i_wasiIovs[i].buf));
         o_iovs[i].len = m3ApiReadMem32(&i_wasiIovs[i].buf_len);
         m3ApiCheckMem(o_iovs[i].buf, o_iovs[i].len);
@@ -107,7 +107,7 @@ const void* resolve_iovs (IM3Runtime runtime, void* _mem, m3_wasi_iovec_t* o_iov
  * WASI API implementation
  */
 
-m3ApiRawFunction(m3_wasi_p1_args_get)
+m3ApiRawFunction(m3_wasi_p1_मगा_कातविरान_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, argv)
@@ -135,7 +135,7 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
 }
 
-m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
+m3ApiRawFunction(m3_wasi_p1_मगा_कातविरान_sizes_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(__wasi_size_t*, argc)
@@ -167,14 +167,14 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     m3ApiGetArgMem(uint32_t*, env)
     m3ApiGetArgMem(char*, env_buf)
 
-    __wasi_size_t count = 0;
+    __wasi_size_t बिलांग = 0;
     for (const char** e = DEFAULT_ENVIRONMENT; *e; ++e) {
-        count++;
+        बिलांग++;
     }
 
-    m3ApiCheckMem(env, count * sizeof(uint32_t));
+    m3ApiCheckMem(env, बिलांग * sizeof(uint32_t));
 
-    for (u32 i = 0; i < count; ++i) {
+    for (u32 i = 0; i < बिलांग; ++i) {
         m3ApiWriteMem32(&env[i], m3ApiPtrToOffset(env_buf));
 
         size_t len = strlen(DEFAULT_ENVIRONMENT[i]);
@@ -191,19 +191,19 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(__wasi_size_t*, env_count)
+    m3ApiGetArgMem(__wasi_size_t*, env_बिलांग)
     m3ApiGetArgMem(__wasi_size_t*, env_buf_size)
 
-    m3ApiCheckMem(env_count, sizeof(__wasi_size_t));
+    m3ApiCheckMem(env_बिलांग, sizeof(__wasi_size_t));
     m3ApiCheckMem(env_buf_size, sizeof(__wasi_size_t));
 
-    __wasi_size_t count = 0, buf_len = 0;
+    __wasi_size_t बिलांग = 0, buf_len = 0;
     for (const char** e = DEFAULT_ENVIRONMENT; *e; ++e) {
-        count++;
+        बिलांग++;
         buf_len += (__wasi_size_t)strlen(*e) + 1;
     }
 
-    m3ApiWriteMem32(env_count, count);
+    m3ApiWriteMem32(env_बिलांग, बिलांग);
     m3ApiWriteMem32(env_buf_size, buf_len);
 
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
@@ -218,7 +218,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_dir_name)
 
     m3ApiCheckMem(path, path_len);
 
-    if (fd < 3 || fd >= d_m3WasiPreopenCount) {
+    if (fd < 3 || fd >= d_m3_Wasi_Preopen_बिलांग) {
         m3ApiReturn(__WASI_ERRNO_BADF);
     }
     size_t slen = strlen(m3_wasi_preopen[fd].path) + 1;
@@ -234,7 +234,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
 
     m3ApiCheckMem(buf, 8);
 
-    if (fd < 3 || fd >= d_m3WasiPreopenCount) {
+    if (fd < 3 || fd >= d_m3_Wasi_Preopen_बिलांग) {
         m3ApiReturn(__WASI_ERRNO_BADF);
     }
 
@@ -616,15 +616,15 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     __wasi_size_t   total = 0;
 
     for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
-        __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
+        __wasi_size_t बिलांग = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
-        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
+        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, बिलांग, &want);
         if (mem_check != m3Err_none) {
             return mem_check;
         }
 
-        __wasi_errno_t err = m3_wasi_host_fd_read(fd, iovs, count, &done);
+        __wasi_errno_t err = m3_wasi_host_fd_read(fd, iovs, बिलांग, &done);
         if (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
@@ -654,15 +654,15 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     __wasi_size_t   total = 0;
 
     for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
-        __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
+        __wasi_size_t बिलांग = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
-        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
+        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, बिलांग, &want);
         if (mem_check != m3Err_none) {
             return mem_check;
         }
 
-        __wasi_errno_t err = m3_wasi_host_fd_write(fd, iovs, count, &done);
+        __wasi_errno_t err = m3_wasi_host_fd_write(fd, iovs, बिलांग, &done);
         if (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
@@ -693,16 +693,16 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     __wasi_size_t   total = 0;
 
     for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
-        __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
+        __wasi_size_t बिलांग = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
-        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
+        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, बिलांग, &want);
         if (mem_check != m3Err_none) {
             return mem_check;
         }
 
         // the offset walks with the data, so a short batch leaves no hole behind it
-        __wasi_errno_t err = m3_wasi_host_fd_pread(fd, iovs, count, offset + total, &done);
+        __wasi_errno_t err = m3_wasi_host_fd_pread(fd, iovs, बिलांग, offset + total, &done);
         if (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
@@ -733,15 +733,15 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     __wasi_size_t   total = 0;
 
     for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
-        __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
+        __wasi_size_t बिलांग = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
-        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
+        const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, बिलांग, &want);
         if (mem_check != m3Err_none) {
             return mem_check;
         }
 
-        __wasi_errno_t err = m3_wasi_host_fd_pwrite(fd, iovs, count, offset + total, &done);
+        __wasi_errno_t err = m3_wasi_host_fd_pwrite(fd, iovs, बिलांग, offset + total, &done);
         if (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
@@ -875,16 +875,16 @@ m3ApiRawFunction(m3_wasi_p1_sched_yield)
 // another event, and waiting exactly as long as asked is always a valid answer to
 // that, so it is not read.
 static
-m3_wasi_pollsub_t* read_subscriptions (const uint8_t* i_subs, __wasi_size_t i_count)
+m3_wasi_pollsub_t* read_subscriptions (const uint8_t* i_subs, __wasi_size_t i_बिलांग)
 {
     m3_wasi_pollsub_t* subs =
-      (m3_wasi_pollsub_t*)m3_Malloc("WASI subscriptions", i_count * sizeof(m3_wasi_pollsub_t));
+      (m3_wasi_pollsub_t*)m3_Malloc("WASI subscriptions", i_बिलांग * sizeof(m3_wasi_pollsub_t));
 
     if (subs == NULL) {
         return NULL;
     }
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         const uint8_t* s = i_subs + (size_t)i * d_m3WasiSubscriptionSize;
 
         memset(&subs[i], 0, sizeof(subs[i]));
@@ -931,14 +931,14 @@ void write_event (uint8_t* o_rec, const m3_wasi_pollevent_t* i_event)
 // guest sleeping still sees the time it slept for.
 static
 void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_subs,
-                             __wasi_size_t i_count, m3_wasi_pollevent_t* o_events,
-                             __wasi_size_t* o_numEvents)
+                             __wasi_size_t i_बिलांग, m3_wasi_pollevent_t* o_events,
+                             __wasi_size_t* o_नुमेरो_Events)
 {
     __wasi_size_t out     = 0;
     uint64_t      soonest = UINT64_MAX;
     uint64_t      now     = io_runtime->virtualTimeNs;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         const m3_wasi_pollsub_t* sub = &i_subs[i];
 
         if (sub->type != __WASI_EVENTTYPE_CLOCK) {
@@ -959,7 +959,7 @@ void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_s
     // Something is ready already, so no time passes - which is what poll() would
     // have done too
     if (out) {
-        *o_numEvents = out;
+        *o_नुमेरो_Events = out;
         return;
     }
 
@@ -969,7 +969,7 @@ void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_s
 
     now = io_runtime->virtualTimeNs;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    for (__wasi_size_t i = 0; i < i_बिलांग; i++) {
         const m3_wasi_pollsub_t* sub = &i_subs[i];
 
         if (sub->type != __WASI_EVENTTYPE_CLOCK) {
@@ -988,7 +988,7 @@ void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_s
         }
     }
 
-    *o_numEvents = out;
+    *o_नुमेरो_Events = out;
 }
 
 #  endif // d_m3DeterministicProfile
@@ -1003,32 +1003,32 @@ void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_s
 // long as the first half took.
 static
 __wasi_errno_t poll_subscriptions (IM3Runtime i_runtime, const m3_wasi_pollsub_t* i_subs,
-                                   uint8_t* o_events, __wasi_size_t i_count,
-                                   __wasi_size_t* o_numEvents)
+                                   uint8_t* o_events, __wasi_size_t i_बिलांग,
+                                   __wasi_size_t* o_नुमेरो_Events)
 {
-    *o_numEvents = 0;
+    *o_नुमेरो_Events = 0;
 
     m3_wasi_pollevent_t* evts =
-      (m3_wasi_pollevent_t*)m3_Malloc("WASI events", i_count * sizeof(m3_wasi_pollevent_t));
+      (m3_wasi_pollevent_t*)m3_Malloc("WASI events", i_बिलांग * sizeof(m3_wasi_pollevent_t));
 
     if (evts == NULL) {
         return __WASI_ERRNO_NOMEM;
     }
 
-    __wasi_size_t  numEvents = 0;
+    __wasi_size_t  नुमेरो_Events = 0;
     __wasi_errno_t err       = __WASI_ERRNO_SUCCESS;
 
 #  if d_m3DeterministicProfile
-    poll_deterministically(i_runtime, i_subs, i_count, evts, &numEvents);
+    poll_deterministically(i_runtime, i_subs, i_बिलांग, evts, &नुमेरो_Events);
 #  else
-    err = m3_wasi_host_poll_oneoff(i_subs, i_count, evts, &numEvents);
+    err = m3_wasi_host_poll_oneoff(i_subs, i_बिलांग, evts, &नुमेरो_Events);
 #  endif
 
     if (err == __WASI_ERRNO_SUCCESS) {
-        for (__wasi_size_t i = 0; i < numEvents; i++) {
+        for (__wasi_size_t i = 0; i < नुमेरो_Events; i++) {
             write_event(o_events + (size_t)i * d_m3WasiEventSize, &evts[i]);
         }
-        *o_numEvents = numEvents;
+        *o_नुमेरो_Events = नुमेरो_Events;
     }
 
     m3_Free(evts);
@@ -1058,8 +1058,8 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
         m3ApiReturn(__WASI_ERRNO_NOMEM);
     }
 
-    __wasi_size_t  numEvents = 0;
-    __wasi_errno_t err       = poll_subscriptions(runtime, subs, out, nsubscriptions, &numEvents);
+    __wasi_size_t  नुमेरो_Events = 0;
+    __wasi_errno_t err       = poll_subscriptions(runtime, subs, out, nsubscriptions, &नुमेरो_Events);
 
     m3_Free(subs);
 
@@ -1067,7 +1067,7 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
         m3ApiReturn(err);
     }
 
-    m3ApiWriteMem32(nevents, numEvents);
+    m3ApiWriteMem32(nevents, नुमेरो_Events);
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
 }
 
@@ -1103,11 +1103,11 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
+    for (size_t i = 0; i < M3_बिलांग_OF(namespaces); i++) {
         const char* wasi = namespaces[i];
 
-_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
-_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_args_sizes_get, wasi_context)));
+_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_मगा_कातविरान_get, wasi_context)));
+_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_मगा_कातविरान_sizes_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "clock_res_get",        "i(i*)",   &m3_wasi_p1_clock_res_get)));
 _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "clock_time_get",       "i(iI*)",  &m3_wasi_p1_clock_time_get)));
 _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "environ_get",          "i(**)",   &m3_wasi_p1_environ_get)));

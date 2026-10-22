@@ -23,8 +23,8 @@
 typedef struct {
     m3opcode_t  opcode;
     u16         height;         // operand stack height at block entry
-    u16         param_count;
-    u16         result_count;
+    u16         param_बिलांग;
+    u16         result_बिलांग;
     IM3FuncType type;           // block type (for params/results)
     bool        is_unreachable;
 } ValCtrlFrame;
@@ -37,21 +37,21 @@ struct ValCtx {
     IM3Module   module;
     IM3Function function;
 
-    m3type_t    opd [d_m3ValStack];
-    u16         opdTop;
+    m3type_t    opd [d_m3_Val_सालानसान];
+    u16         opd_इताअस;
 
     ValCtrlFrame ctrl [d_m3ValCtrlDepth];
-    u16          ctrlTop;
+    u16          ctrl_इताअस;
 
-    m3type_t    localTypes [d_m3ValStack];
-    u16         numLocals;
+    m3type_t    localTypes [d_m3_Val_सालानसान];
+    u16         नुमेरो_Locals;
 };
 
 // A memory op is only valid if the memory it names is in the module's index
 // space; for a module that declares none, every index is out of range.
 static bool v_has_memory_idx (ValCtx * v, u32 i_memoryIdx)
 {
-    return v->module and i_memoryIdx < v->module->numMemories;
+    return v->module and i_memoryIdx < v->module->नुमेरो_Memories;
 }
 
 // The type of the addresses, sizes and page counts a memory instruction takes:
@@ -112,7 +112,7 @@ static u32 v_max_align (m3opcode_t opcode)
 //
 // Outside notify and wait, the accesses come in runs of seven, one per pairing of
 // value type and cell width: i32/32, i64/64, i32/8, i32/16, i64/8, i64/16, i64/32.
-static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_numOperands, m3type_t * o_valueType, m3type_t * o_resultType)
+static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_नुमेरो_Operands, m3type_t * o_हालागा_Type, m3type_t * o_resultType)
 {
     static const u8 c_widths [7] = { 4, 8, 1, 2, 1, 2, 4 };
     static const m3type_t c_types [7] = {
@@ -125,8 +125,8 @@ static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_numOperands, m3type_
 
     if (sub <= 0x02) {              // memory.atomic.notify, wait32, wait64
         *o_width       = (sub == 0x02) ? 8 : 4;
-        *o_numOperands = (sub == 0x00) ? 2 : 3;
-        *o_valueType   = (sub == 0x02) ? c_m3Type_i64 : c_m3Type_i32;
+        *o_नुमेरो_Operands = (sub == 0x00) ? 2 : 3;
+        *o_हालागा_Type   = (sub == 0x02) ? c_m3Type_i64 : c_m3Type_i32;
         *o_resultType  = c_m3Type_i32;
         return true;
     }
@@ -134,17 +134,17 @@ static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_numOperands, m3type_
     if (sub < 0x10 or sub > c_waOp_lastAtomic) return false;
 
     if (sub <= 0x16) {              // loads
-        variant = sub - 0x10;       *o_numOperands = 1;
+        variant = sub - 0x10;       *o_नुमेरो_Operands = 1;
     } else if (sub <= 0x1d) {       // stores
-        variant = sub - 0x17;       *o_numOperands = 2;
+        variant = sub - 0x17;       *o_नुमेरो_Operands = 2;
     } else if (sub <= 0x47) {       // add, sub, and, or, xor, xchg
-        variant = (sub - 0x1e) % 7; *o_numOperands = 2;
+        variant = (sub - 0x1e) % 7; *o_नुमेरो_Operands = 2;
     } else {                        // cmpxchg
-        variant = sub - 0x48;       *o_numOperands = 3;
+        variant = sub - 0x48;       *o_नुमेरो_Operands = 3;
     }
 
     *o_width      = c_widths [variant];
-    *o_valueType  = c_types [variant];
+    *o_हालागा_Type  = c_types [variant];
     *o_resultType = (sub >= 0x17 and sub <= 0x1d) ? c_m3Type_none : c_types [variant];
     return true;
 }
@@ -153,29 +153,29 @@ static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_numOperands, m3type_
 
 // ---------- Operand stack ----------
 
-static M3Result v_push (ValCtx * v, m3type_t type)
+static M3Result v_इतुलाक (ValCtx * v, m3type_t type)
 {
-    if (M3_UNLIKELY(v->opdTop >= d_m3ValStack))
-        return m3Err_functionStackOverflow;
-    v->opd[v->opdTop++] = type;
+    if (M3_UNLIKELY(v->opd_इताअस >= d_m3_Val_सालानसान))
+        return m3_Err_function_सालानसान_Overflow;
+    v->opd[v->opd_इताअस++] = type;
     return m3Err_none;
 }
 
-static M3Result v_pop (ValCtx * v, m3type_t * o_type)
+static M3Result v_आलिसिन (ValCtx * v, m3type_t * o_type)
 {
-    ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
-    if (M3_UNLIKELY(v->opdTop == f->height)) {
+    ValCtrlFrame * f = &v->ctrl[v->ctrl_इताअस - 1];
+    if (M3_UNLIKELY(v->opd_इताअस == f->height)) {
         if (f->is_unreachable) { *o_type = c_valBottom; return m3Err_none; }
-        return m3Err_functionStackUnderrun;
+        return m3_Err_function_सालानसान_Underrun;
     }
-    *o_type = v->opd[--v->opdTop];
+    *o_type = v->opd[--v->opd_इताअस];
     return m3Err_none;
 }
 
-static M3Result v_pop_expect (ValCtx * v, m3type_t expect, m3type_t * o_actual)
+static M3Result v_आलिसिन_expect (ValCtx * v, m3type_t expect, m3type_t * o_actual)
 {
     m3type_t actual = c_valBottom;
-    M3Result r = v_pop(v, &actual);
+    M3Result r = v_आलिसिन(v, &actual);
     if (M3_UNLIKELY(r)) return r;
     if (M3_UNLIKELY(expect != c_valBottom && actual != c_valBottom && actual != expect))
         return m3Err_typeMismatch;
@@ -185,58 +185,58 @@ static M3Result v_pop_expect (ValCtx * v, m3type_t expect, m3type_t * o_actual)
 
 // ---------- Control stack ----------
 
-static M3Result v_push_ctrl (ValCtx * v, m3opcode_t op, IM3FuncType type)
+static M3Result v_इतुलाक_ctrl (ValCtx * v, m3opcode_t op, IM3FuncType type)
 {
-    if (M3_UNLIKELY(v->ctrlTop >= d_m3ValCtrlDepth))
-        return m3Err_functionStackOverflow;
-    ValCtrlFrame * f = &v->ctrl[v->ctrlTop++];
+    if (M3_UNLIKELY(v->ctrl_इताअस >= d_m3ValCtrlDepth))
+        return m3_Err_function_सालानसान_Overflow;
+    ValCtrlFrame * f = &v->ctrl[v->ctrl_इताअस++];
     f->opcode       = op;
     f->type         = type;
-    f->param_count  = type ? type->numArgs : 0;
-    f->result_count = type ? type->numRets : 0;
-    f->height       = v->opdTop;
+    f->param_बिलांग  = type ? type->नुमेरो_मगा_कातविरान : 0;
+    f->result_बिलांग = type ? type->नुमेरो_Rets : 0;
+    f->height       = v->opd_इताअस;
     f->is_unreachable = false;
     return m3Err_none;
 }
 
-static M3Result v_pop_ctrl (ValCtx * v, ValCtrlFrame * o_frame)
+static M3Result v_आलिसिन_ctrl (ValCtx * v, ValCtrlFrame * o_frame)
 {
-    if (M3_UNLIKELY(v->ctrlTop == 0))
+    if (M3_UNLIKELY(v->ctrl_इताअस == 0))
         return m3Err_wasmMalformed;
-    ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
+    ValCtrlFrame * f = &v->ctrl[v->ctrl_इताअस - 1];
     // pop result types
     if (f->type) {
-        for (u16 i = f->result_count; i > 0; i--) {
+        for (u16 i = f->result_बिलांग; i > 0; i--) {
             m3type_t a;
-            M3Result r = v_pop_expect(v, BaseTypeOf(f->type->types[i - 1]), &a);
+            M3Result r = v_आलिसिन_expect(v, BaseTypeOf(f->type->types[i - 1]), &a);
             if (M3_UNLIKELY(r)) return r;
         }
     }
-    if (M3_UNLIKELY(v->opdTop != f->height))
-        return m3Err_typeCountMismatch;
+    if (M3_UNLIKELY(v->opd_इताअस != f->height))
+        return m3_Err_type_बिलांग_Mismatch;
     if (o_frame) *o_frame = *f;
-    v->ctrlTop--;
+    v->ctrl_इताअस--;
     return m3Err_none;
 }
 
 static void v_unreachable (ValCtx * v)
 {
-    ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
-    v->opdTop = f->height;
+    ValCtrlFrame * f = &v->ctrl[v->ctrl_इताअस - 1];
+    v->opd_इताअस = f->height;
     f->is_unreachable = true;
 }
 
 // Label types: loop -> params, block/if/else/func -> results
 static u16 v_label_n (ValCtrlFrame * f)
 {
-    return (f->opcode == 0x03) ? f->param_count : f->result_count;
+    return (f->opcode == 0x03) ? f->param_बिलांग : f->result_बिलांग;
 }
 
 static m3type_t v_label_t (ValCtrlFrame * f, u16 i)
 {
     if (!f->type) return c_m3Type_none;
     if (f->opcode == 0x03)
-        return BaseTypeOf(f->type->types[f->type->numRets + i]); // params
+        return BaseTypeOf(f->type->types[f->type->नुमेरो_Rets + i]); // params
     return BaseTypeOf(f->type->types[i]); // results
 }
 
@@ -245,32 +245,32 @@ static m3type_t v_label_t (ValCtrlFrame * f, u16 i)
 // unknown there defers a genuine underrun to the pop that follows.
 static m3type_t v_peek (ValCtx * v, u16 i_depth)
 {
-    ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
+    ValCtrlFrame * f = &v->ctrl[v->ctrl_इताअस - 1];
 
-    if (v->opdTop <= i_depth || (u16)(v->opdTop - i_depth - 1) < f->height)
+    if (v->opd_इताअस <= i_depth || (u16)(v->opd_इताअस - i_depth - 1) < f->height)
         return c_valBottom;
 
-    return v->opd[v->opdTop - i_depth - 1];
+    return v->opd[v->opd_इताअस - i_depth - 1];
 }
 
 // Pop label types for branch target
-static M3Result v_pop_labels (ValCtx * v, ValCtrlFrame * tgt)
+static M3Result v_आलिसिन_labels (ValCtx * v, ValCtrlFrame * tgt)
 {
     u16 n = v_label_n(tgt);
     for (u16 i = n; i > 0; i--) {
         m3type_t a;
-        M3Result r = v_pop_expect(v, v_label_t(tgt, i - 1), &a);
+        M3Result r = v_आलिसिन_expect(v, v_label_t(tgt, i - 1), &a);
         if (M3_UNLIKELY(r)) return r;
     }
     return m3Err_none;
 }
 
 // Push label types back
-static M3Result v_push_labels (ValCtx * v, ValCtrlFrame * tgt)
+static M3Result v_इतुलाक_labels (ValCtx * v, ValCtrlFrame * tgt)
 {
     u16 n = v_label_n(tgt);
     for (u16 i = 0; i < n; i++) {
-        M3Result r = v_push(v, v_label_t(tgt, i));
+        M3Result r = v_इतुलाक(v, v_label_t(tgt, i));
         if (M3_UNLIKELY(r)) return r;
     }
     return m3Err_none;
@@ -286,12 +286,12 @@ static M3Result v_read_blocktype (ValCtx * v, IM3FuncType * o_type)
 #if d_m3HasTypedRefs
     if (*v->wasm == d_waEncode_ref or *v->wasm == d_waEncode_refNull) {
         m3type_t refType;
-        M3Result rr = ParseValueType(v->module, &refType, &v->wasm, v->wasmEnd);
+        M3Result rr = Parse_हालागा_Type(v->module, &refType, &v->wasm, v->wasmEnd);
         if (rr) return rr;
         IM3FuncType ftype = NULL;
         rr = AllocFuncType(&ftype, 1);
         if (rr) return rr;
-        ftype->numRets = 1;
+        ftype->नुमेरो_Rets = 1;
         ftype->types[0] = refType;
         // on failure this leaves ftype NULL, which would read downstream as a
         // block that returns nothing
@@ -314,7 +314,7 @@ static M3Result v_read_blocktype (ValCtx * v, IM3FuncType * o_type)
         IM3Environment env = v->module->environment;
         *o_type = env->retFuncTypes[valtype];
     } else {
-        if ((u32)type >= v->module->numFuncTypes)
+        if ((u32)type >= v->module->नुमेरो_Func_Types)
             return m3Err_unknownType;
         *o_type = v->module->funcTypes[(u32)type];
     }
@@ -325,9 +325,9 @@ static M3Result v_read_blocktype (ValCtx * v, IM3FuncType * o_type)
 
 static M3Result v_unop (ValCtx * v, m3type_t in, m3type_t out)
 {
-    m3type_t a; M3Result r = v_pop_expect(v, in, &a);
+    m3type_t a; M3Result r = v_आलिसिन_expect(v, in, &a);
     if (M3_UNLIKELY(r)) return r;
-    return v_push(v, out);
+    return v_इतुलाक(v, out);
 }
 
 // return_call/return_call_indirect return the callee's results straight to the enclosing
@@ -336,13 +336,13 @@ static M3Result v_check_tail_results (ValCtx * v, IM3FuncType i_calleeType)
 {
     IM3FuncType ft = v->function ? v->function->funcType : NULL;
 
-    u16 numCalleeRets = i_calleeType ? i_calleeType->numRets : 0;
-    u16 numFuncRets   = ft ? ft->numRets : 0;
+    u16 नुमेरो_Callee_Rets = i_calleeType ? i_calleeType->नुमेरो_Rets : 0;
+    u16 नुमेरो_Func_Rets   = ft ? ft->नुमेरो_Rets : 0;
 
-    if (numCalleeRets != numFuncRets)
+    if (नुमेरो_Callee_Rets != नुमेरो_Func_Rets)
         return m3Err_typeMismatch;
 
-    for (u16 i = 0; i < numCalleeRets; i++) {
+    for (u16 i = 0; i < नुमेरो_Callee_Rets; i++) {
         if (i_calleeType->types[i] != ft->types[i])
             return m3Err_typeMismatch;
     }
@@ -353,17 +353,17 @@ static M3Result v_check_tail_results (ValCtx * v, IM3FuncType i_calleeType)
 static M3Result v_binop (ValCtx * v, m3type_t t)
 {
     m3type_t a; M3Result r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    return v_push(v, t);
+    r = v_आलिसिन_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
+    r = v_आलिसिन_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
+    return v_इतुलाक(v, t);
 }
 
 static M3Result v_relop (ValCtx * v, m3type_t t)
 {
     m3type_t a; M3Result r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    return v_push(v, c_m3Type_i32);
+    r = v_आलिसिन_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
+    r = v_आलिसिन_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
+    return v_इतुलाक(v, c_m3Type_i32);
 }
 
 static M3Result v_testop (ValCtx * v, m3type_t t)
@@ -401,29 +401,29 @@ static M3Result v_catch_clause (ValCtx * v)
         u32 tagIndex;
         r = ReadLEB_u32(&tagIndex, &v->wasm, v->wasmEnd);
         if (r) return r;
-        if (!v->module || tagIndex >= v->module->numTags) return m3Err_unknownTag;
+        if (!v->module || tagIndex >= v->module->नुमेरो_Tags) return m3Err_unknownTag;
         tagType = v->module->tags[tagIndex].type;
     }
 
     u32 depth;
     r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd);
     if (r) return r;
-    if (depth >= v->ctrlTop) return m3Err_unknownLabel;
+    if (depth >= v->ctrl_इताअस) return m3Err_unknownLabel;
 
-    ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
+    ValCtrlFrame * tgt = &v->ctrl[v->ctrl_इताअस - 1 - depth];
 
-    u16 numPayload = tagType ? tagType->numArgs : 0;
-    u16 numLabel   = v_label_n(tgt);
+    u16 नुमेरो_Payload = tagType ? tagType->नुमेरो_मगा_कातविरान : 0;
+    u16 नुमेरो_Label   = v_label_n(tgt);
 
-    if (numLabel != numPayload + (hasRef ? 1u : 0u))
-        return m3Err_typeCountMismatch;
+    if (नुमेरो_Label != नुमेरो_Payload + (hasRef ? 1u : 0u))
+        return m3_Err_type_बिलांग_Mismatch;
 
-    for (u16 i = 0; i < numPayload; i++) {
-        if (v_label_t(tgt, i) != BaseTypeOf(tagType->types[tagType->numRets + i]))
+    for (u16 i = 0; i < नुमेरो_Payload; i++) {
+        if (v_label_t(tgt, i) != BaseTypeOf(tagType->types[tagType->नुमेरो_Rets + i]))
             return m3Err_typeMismatch;
     }
 
-    if (hasRef and v_label_t(tgt, numPayload) != c_m3Type_exnref)
+    if (hasRef and v_label_t(tgt, नुमेरो_Payload) != c_m3Type_exnref)
         return m3Err_typeMismatch;
 
     return m3Err_none;
@@ -431,36 +431,36 @@ static M3Result v_catch_clause (ValCtx * v)
 
 #endif // d_m3HasExceptionHandling
 
-#if d_m3HasStackSwitching
+#if d_m3_Has_सालानसान_Switching
 
 static M3Result v_resume_clause (ValCtx * v, u8 kind, u32 tagIdx, IM3FuncType ct)
 {
     if (kind > 0x01) return m3Err_wasmMalformed;
-    if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+    if (!v->module || tagIdx >= v->module->नुमेरो_Tags) return m3Err_unknownTag;
     IM3FuncType tagType = v->module->tags[tagIdx].type;
 
     if (kind == 0x00) {
         u32 depth;
         M3Result r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd); if (r) return r;
-        if (depth >= v->ctrlTop) return m3Err_unknownLabel;
+        if (depth >= v->ctrl_इताअस) return m3Err_unknownLabel;
 
-        ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
-        u16 numPayload = tagType ? tagType->numArgs : 0;
-        u16 numLabel   = v_label_n(tgt);
+        ValCtrlFrame * tgt = &v->ctrl[v->ctrl_इताअस - 1 - depth];
+        u16 नुमेरो_Payload = tagType ? tagType->नुमेरो_मगा_कातविरान : 0;
+        u16 नुमेरो_Label   = v_label_n(tgt);
 
-        if (numLabel != numPayload + 1u) return m3Err_typeCountMismatch;
+        if (नुमेरो_Label != नुमेरो_Payload + 1u) return m3_Err_type_बिलांग_Mismatch;
 
-        for (u16 j = 0; j < numPayload; j++) {
-            if (v_label_t(tgt, j) != BaseTypeOf(tagType->types[tagType->numRets + j]))
+        for (u16 j = 0; j < नुमेरो_Payload; j++) {
+            if (v_label_t(tgt, j) != BaseTypeOf(tagType->types[tagType->नुमेरो_Rets + j]))
                 return m3Err_typeMismatch;
         }
-        if (v_label_t(tgt, numPayload) != c_m3Type_contref)
+        if (v_label_t(tgt, नुमेरो_Payload) != c_m3Type_contref)
             return m3Err_typeMismatch;
 
 #if d_m3HasTypedRefs
         m3type_t labelContType = (tgt->opcode == 0x03)
-            ? tgt->type->types[tgt->type->numRets + numPayload]
-            : tgt->type->types[numPayload];
+            ? tgt->type->types[tgt->type->नुमेरो_Rets + नुमेरो_Payload]
+            : tgt->type->types[नुमेरो_Payload];
 
         if (HeapTypeOf(labelContType) == d_m3Type_heapAbstract ||
             HeapTypeOf(labelContType) == d_m3Type_heapNone) {
@@ -469,7 +469,7 @@ static M3Result v_resume_clause (ValCtx * v, u8 kind, u32 tagIdx, IM3FuncType ct
 
         u32 heapType = HeapTypeOf(labelContType);
         IM3FuncType labelCt = NULL;
-        for (u32 idx = 0; idx < v->module->numFuncTypes; ++idx) {
+        for (u32 idx = 0; idx < v->module->नुमेरो_Func_Types; ++idx) {
             if (v->module->funcTypes[idx]->canonicalIndex == heapType &&
                 v->module->funcTypes[idx]->isContinuation) {
                 labelCt = v->module->funcTypes[idx];
@@ -481,22 +481,22 @@ static M3Result v_resume_clause (ValCtx * v, u8 kind, u32 tagIdx, IM3FuncType ct
         IM3FuncType labelFt = labelCt->contFuncType ? labelCt->contFuncType : labelCt;
         IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
 
-        u16 expectedNumParams = tagType ? tagType->numRets : 0;
-        if (labelFt->numArgs != expectedNumParams) return m3Err_typeMismatch;
-        for (u16 p = 0; p < expectedNumParams; ++p) {
-            if (labelFt->types[labelFt->numRets + p] != tagType->types[p])
+        u16 expected_नुमेरो_Params = tagType ? tagType->नुमेरो_Rets : 0;
+        if (labelFt->नुमेरो_मगा_कातविरान != expected_नुमेरो_Params) return m3Err_typeMismatch;
+        for (u16 p = 0; p < expected_नुमेरो_Params; ++p) {
+            if (labelFt->types[labelFt->नुमेरो_Rets + p] != tagType->types[p])
                 return m3Err_typeMismatch;
         }
 
-        u16 expectedNumRets = ft ? ft->numRets : 0;
-        if (labelFt->numRets != expectedNumRets) return m3Err_typeMismatch;
-        for (u16 r_idx = 0; r_idx < expectedNumRets; ++r_idx) {
+        u16 expected_नुमेरो_Rets = ft ? ft->नुमेरो_Rets : 0;
+        if (labelFt->नुमेरो_Rets != expected_नुमेरो_Rets) return m3Err_typeMismatch;
+        for (u16 r_idx = 0; r_idx < expected_नुमेरो_Rets; ++r_idx) {
             if (labelFt->types[r_idx] != ft->types[r_idx])
                 return m3Err_typeMismatch;
         }
 #endif
     } else {
-        if (tagType && tagType->numArgs != 0) return m3Err_typeMismatch;
+        if (tagType && tagType->नुमेरो_मगा_कातविरान != 0) return m3Err_typeMismatch;
     }
     return m3Err_none;
 }
@@ -532,22 +532,22 @@ static M3Result v_validate_body (ValCtx * v)
             r = v_read_blocktype(v, &bt);
             if (r) return r;
             if (opcode == 0x04) {
-                r = v_pop_expect(v, c_m3Type_i32, &a);
+                r = v_आलिसिन_expect(v, c_m3Type_i32, &a);
                 if (r) return r;
             }
             // Pop block params from caller stack
             if (bt) {
-                for (u16 i = bt->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(bt->types[bt->numRets + i - 1]), &a);
+                for (u16 i = bt->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(bt->types[bt->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
             }
-            r = v_push_ctrl(v, opcode, bt);
+            r = v_इतुलाक_ctrl(v, opcode, bt);
             if (r) return r;
             // Push params inside block
             if (bt) {
-                for (u16 i = 0; i < bt->numArgs; i++) {
-                    r = v_push(v, BaseTypeOf(bt->types[bt->numRets + i]));
+                for (u16 i = 0; i < bt->नुमेरो_मगा_कातविरान; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(bt->types[bt->नुमेरो_Rets + i]));
                     if (r) return r;
                 }
             }
@@ -561,27 +561,27 @@ static M3Result v_validate_body (ValCtx * v)
             r = v_read_blocktype(v, &bt);
             if (r) return r;
             if (bt) {
-                for (u16 i = bt->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(bt->types[bt->numRets + i - 1]), &a);
+                for (u16 i = bt->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(bt->types[bt->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
             }
             // the clauses are checked before the frame goes on, so their
             // labels count from outside the try block
-            u32 numCatch;
-            r = ReadLEB_u32(&numCatch, &v->wasm, v->wasmEnd);
+            u32 नुमेरो_Catch;
+            r = ReadLEB_u32(&नुमेरो_Catch, &v->wasm, v->wasmEnd);
             if (r) return r;
-            for (u32 i = 0; i < numCatch; i++) {
+            for (u32 i = 0; i < नुमेरो_Catch; i++) {
                 r = v_catch_clause(v);
                 if (r) return r;
             }
 
-            r = v_push_ctrl(v, opcode, bt);
+            r = v_इतुलाक_ctrl(v, opcode, bt);
             if (r) return r;
 
             if (bt) {
-                for (u16 i = 0; i < bt->numArgs; i++) {
-                    r = v_push(v, BaseTypeOf(bt->types[bt->numRets + i]));
+                for (u16 i = 0; i < bt->नुमेरो_मगा_कातविरान; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(bt->types[bt->नुमेरो_Rets + i]));
                     if (r) return r;
                 }
             }
@@ -593,11 +593,11 @@ static M3Result v_validate_body (ValCtx * v)
             u32 tagIndex;
             r = ReadLEB_u32(&tagIndex, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (!v->module || tagIndex >= v->module->numTags) return m3Err_unknownTag;
+            if (!v->module || tagIndex >= v->module->नुमेरो_Tags) return m3Err_unknownTag;
             IM3FuncType tt = v->module->tags[tagIndex].type;
             if (tt) {
-                for (u16 i = tt->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(tt->types[tt->numRets + i - 1]), &a);
+                for (u16 i = tt->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(tt->types[tt->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
             }
@@ -606,7 +606,7 @@ static M3Result v_validate_body (ValCtx * v)
         }
 
         case 0x0a: // throw_ref
-            r = v_pop_expect(v, c_m3Type_exnref, &a);
+            r = v_आलिसिन_expect(v, c_m3Type_exnref, &a);
             if (r) return r;
             v_unreachable(v);
             break;
@@ -615,15 +615,15 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x05: // else
         {
             ValCtrlFrame frame;
-            r = v_pop_ctrl(v, &frame);
+            r = v_आलिसिन_ctrl(v, &frame);
             if (r) return r;
             if (frame.opcode != 0x04)
                 return m3Err_wasmMalformed;
-            r = v_push_ctrl(v, 0x05, frame.type);
+            r = v_इतुलाक_ctrl(v, 0x05, frame.type);
             if (r) return r;
             if (frame.type) {
-                for (u16 i = 0; i < frame.type->numArgs; i++) {
-                    r = v_push(v, BaseTypeOf(frame.type->types[frame.type->numRets + i]));
+                for (u16 i = 0; i < frame.type->नुमेरो_मगा_कातविरान; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(frame.type->types[frame.type->नुमेरो_Rets + i]));
                     if (r) return r;
                 }
             }
@@ -633,17 +633,17 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x0b: // end
         {
             ValCtrlFrame frame;
-            r = v_pop_ctrl(v, &frame);
+            r = v_आलिसिन_ctrl(v, &frame);
             if (r) return r;
             // Push results
             if (frame.type) {
-                for (u16 i = 0; i < frame.result_count; i++) {
-                    r = v_push(v, BaseTypeOf(frame.type->types[i]));
+                for (u16 i = 0; i < frame.result_बिलांग; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(frame.type->types[i]));
                     if (r) return r;
                 }
             }
             // If this was the outermost frame, we're done
-            if (v->ctrlTop == 0)
+            if (v->ctrl_इताअस == 0)
                 return m3Err_none;
             break;
         }
@@ -653,9 +653,9 @@ static M3Result v_validate_body (ValCtx * v)
             u32 depth;
             r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (depth >= v->ctrlTop) return m3Err_unknownLabel;
-            ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
-            r = v_pop_labels(v, tgt);
+            if (depth >= v->ctrl_इताअस) return m3Err_unknownLabel;
+            ValCtrlFrame * tgt = &v->ctrl[v->ctrl_इताअस - 1 - depth];
+            r = v_आलिसिन_labels(v, tgt);
             if (r) return r;
             v_unreachable(v);
             break;
@@ -666,49 +666,49 @@ static M3Result v_validate_body (ValCtx * v)
             u32 depth;
             r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (depth >= v->ctrlTop) return m3Err_unknownLabel;
-            r = v_pop_expect(v, c_m3Type_i32, &a);
+            if (depth >= v->ctrl_इताअस) return m3Err_unknownLabel;
+            r = v_आलिसिन_expect(v, c_m3Type_i32, &a);
             if (r) return r;
-            ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
-            r = v_pop_labels(v, tgt);
+            ValCtrlFrame * tgt = &v->ctrl[v->ctrl_इताअस - 1 - depth];
+            r = v_आलिसिन_labels(v, tgt);
             if (r) return r;
-            r = v_push_labels(v, tgt);
+            r = v_इतुलाक_labels(v, tgt);
             if (r) return r;
             break;
         }
 
         case 0x0e: // br_table
         {
-            u32 count;
-            r = ReadLEB_u32(&count, &v->wasm, v->wasmEnd);
+            u32 बिलांग;
+            r = ReadLEB_u32(&बिलांग, &v->wasm, v->wasmEnd);
             if (r) return r;
             u32 defDepth = 0;
             u16 arity = 0;
             // First pass: read all depths and validate arity + types match default
             bytes_t savedPos = v->wasm;
             // Read all targets to find the default (last one)
-            for (u32 i = 0; i <= count; i++) {
+            for (u32 i = 0; i <= बिलांग; i++) {
                 u32 d;
                 r = ReadLEB_u32(&d, &v->wasm, v->wasmEnd);
                 if (r) return r;
-                if (d >= v->ctrlTop) return m3Err_unknownLabel;
-                if (i == count) defDepth = d;
+                if (d >= v->ctrl_इताअस) return m3Err_unknownLabel;
+                if (i == बिलांग) defDepth = d;
             }
             // Now validate all labels match the default's types
-            ValCtrlFrame * defTgt = &v->ctrl[v->ctrlTop - 1 - defDepth];
+            ValCtrlFrame * defTgt = &v->ctrl[v->ctrl_इताअस - 1 - defDepth];
             arity = v_label_n(defTgt);
             v->wasm = savedPos;
 
-            r = v_pop_expect(v, c_m3Type_i32, &a);      // the index, before the labels are inspected
+            r = v_आलिसिन_expect(v, c_m3Type_i32, &a);      // the index, before the labels are inspected
             if (r) return r;
 
-            for (u32 i = 0; i <= count; i++) {
+            for (u32 i = 0; i <= बिलांग; i++) {
                 u32 d;
                 r = ReadLEB_u32(&d, &v->wasm, v->wasmEnd);
                 if (r) return r;
-                ValCtrlFrame * t = &v->ctrl[v->ctrlTop - 1 - d];
+                ValCtrlFrame * t = &v->ctrl[v->ctrl_इताअस - 1 - d];
                 u16 n = v_label_n(t);
-                if (n != arity) return m3Err_typeCountMismatch;
+                if (n != arity) return m3_Err_type_बिलांग_Mismatch;
                 // Spec: each target's types must be compatible with the operand
                 // stack, not identical to the default's. In unreachable code the
                 // operands are bottom, so the targets may legitimately differ.
@@ -719,8 +719,8 @@ static M3Result v_validate_body (ValCtx * v)
                         return m3Err_typeMismatch;
                 }
             }
-            ValCtrlFrame * dt = &v->ctrl[v->ctrlTop - 1 - defDepth];
-            r = v_pop_labels(v, dt);
+            ValCtrlFrame * dt = &v->ctrl[v->ctrl_इताअस - 1 - defDepth];
+            r = v_आलिसिन_labels(v, dt);
             if (r) return r;
             v_unreachable(v);
             break;
@@ -730,8 +730,8 @@ static M3Result v_validate_body (ValCtx * v)
         {
             IM3FuncType ft = v->function->funcType;
             if (ft) {
-                for (u16 i = ft->numRets; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[i - 1]), &a);
+                for (u16 i = ft->नुमेरो_Rets; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[i - 1]), &a);
                     if (r) return r;
                 }
             }
@@ -745,15 +745,15 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->module->numFunctions) return m3Err_unknownFunction;
+            if (idx >= v->module->नुमेरो_Functions) return m3Err_unknownFunction;
             IM3FuncType ft = v->module->functions[idx].funcType;
             if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+                for (u16 i = ft->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
-                for (u16 i = 0; i < ft->numRets; i++) {
-                    r = v_push(v, BaseTypeOf(ft->types[i]));
+                for (u16 i = 0; i < ft->नुमेरो_Rets; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(ft->types[i]));
                     if (r) return r;
                 }
             }
@@ -768,20 +768,20 @@ static M3Result v_validate_body (ValCtx * v)
             u32 tableIdx;
             r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             // the table must exist and hold funcrefs
-            if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
+            if (tableIdx >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
             if (v->module->tables[tableIdx]->type != c_m3Type_funcref) return m3Err_typeMismatch;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
-            r = v_pop_expect(v, v_table_addrtype(v, tableIdx), &a); // table index operand
+            r = v_आलिसिन_expect(v, v_table_addrtype(v, tableIdx), &a); // table index operand
             if (r) return r;
             if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+                for (u16 i = ft->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
-                for (u16 i = 0; i < ft->numRets; i++) {
-                    r = v_push(v, BaseTypeOf(ft->types[i]));
+                for (u16 i = 0; i < ft->नुमेरो_Rets; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(ft->types[i]));
                     if (r) return r;
                 }
             }
@@ -793,13 +793,13 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->module->numFunctions) return m3Err_unknownFunction;
+            if (idx >= v->module->नुमेरो_Functions) return m3Err_unknownFunction;
             IM3FuncType ft = v->module->functions[idx].funcType;
             r = v_check_tail_results(v, ft);
             if (r) return r;
             if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+                for (u16 i = ft->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
             }
@@ -815,18 +815,18 @@ static M3Result v_validate_body (ValCtx * v)
             u32 tableIdx;
             r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             // the table must exist and hold funcrefs
-            if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
+            if (tableIdx >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
             if (v->module->tables[tableIdx]->type != c_m3Type_funcref) return m3Err_typeMismatch;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
             r = v_check_tail_results(v, ft);
             if (r) return r;
-            r = v_pop_expect(v, v_table_addrtype(v, tableIdx), &a); // table index operand
+            r = v_आलिसिन_expect(v, v_table_addrtype(v, tableIdx), &a); // table index operand
             if (r) return r;
             if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+                for (u16 i = ft->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
             }
@@ -841,7 +841,7 @@ static M3Result v_validate_body (ValCtx * v)
             u32 typeIdx;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
             bool isTail = (opcode == 0x15);
             if (isTail) {
@@ -849,16 +849,16 @@ static M3Result v_validate_body (ValCtx * v)
                 if (r) return r;
             }
             // the callee itself, as a reference to a function of this type
-            r = v_pop_expect(v, c_m3Type_funcref, &a);
+            r = v_आलिसिन_expect(v, c_m3Type_funcref, &a);
             if (r) return r;
             if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+                for (u16 i = ft->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
                 if (not isTail) {
-                    for (u16 i = 0; i < ft->numRets; i++) {
-                        r = v_push(v, BaseTypeOf(ft->types[i]));
+                    for (u16 i = 0; i < ft->नुमेरो_Rets; i++) {
+                        r = v_इतुलाक(v, BaseTypeOf(ft->types[i]));
                         if (r) return r;
                     }
                 }
@@ -869,9 +869,9 @@ static M3Result v_validate_body (ValCtx * v)
 
         case 0xd4: // ref.as_non_null
         {
-            r = v_pop_expect(v, c_m3Type_funcref, &a);
+            r = v_आलिसिन_expect(v, c_m3Type_funcref, &a);
             if (r) return r;
-            r = v_push(v, (a == c_valBottom) ? c_m3Type_funcref : a);
+            r = v_इतुलाक(v, (a == c_valBottom) ? c_m3Type_funcref : a);
             if (r) return r;
             break;
         }
@@ -879,23 +879,23 @@ static M3Result v_validate_body (ValCtx * v)
 
         // ---- Parametric ----
         case 0x1a: // drop
-            r = v_pop(v, &a);
+            r = v_आलिसिन(v, &a);
             if (r) return r;
             break;
 
         case 0x1b: // select
         {
-            r = v_pop_expect(v, c_m3Type_i32, &a);
+            r = v_आलिसिन_expect(v, c_m3Type_i32, &a);
             if (r) return r;
             m3type_t t2 = c_valBottom;
-            r = v_pop(v, &t2);
+            r = v_आलिसिन(v, &t2);
             if (r) return r;
             m3type_t t1;
-            r = v_pop_expect(v, t2, &t1);
+            r = v_आलिसिन_expect(v, t2, &t1);
             if (r) return r;
             // untyped select is numeric only; references need the 0x1c form
             if (t2 != c_valBottom && IsRefType(t2)) return m3Err_typeMismatch;
-            r = v_push(v, (t2 == c_valBottom) ? t1 : t2);
+            r = v_इतुलाक(v, (t2 == c_valBottom) ? t1 : t2);
             if (r) return r;
             break;
         }
@@ -903,19 +903,19 @@ static M3Result v_validate_body (ValCtx * v)
 #if d_m3HasRefTypes
         case 0x1c: // select with an explicit result type
         {
-            u32 numTypes;
-            r = ReadLEB_u32(&numTypes, &v->wasm, v->wasmEnd);
+            u32 नुमेरो_Types;
+            r = ReadLEB_u32(&नुमेरो_Types, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (numTypes != 1) return m3Err_wasmMalformed;
+            if (नुमेरो_Types != 1) return m3Err_wasmMalformed;
 
             m3type_t selType;
-            r = ParseValueType(v->module, &selType, &v->wasm, v->wasmEnd);  if (r) return r;
+            r = Parse_हालागा_Type(v->module, &selType, &v->wasm, v->wasmEnd);  if (r) return r;
             u8 t = BaseTypeOf(selType);
 
-            r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;
-            r = v_pop_expect(v, t, &a);            if (r) return r;
-            r = v_pop_expect(v, t, &a);            if (r) return r;
-            r = v_push(v, t);                      if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_i32, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, t, &a);            if (r) return r;
+            r = v_आलिसिन_expect(v, t, &a);            if (r) return r;
+            r = v_इतुलाक(v, t);                      if (r) return r;
             break;
         }
 
@@ -925,16 +925,16 @@ static M3Result v_validate_body (ValCtx * v)
             u32 tableIdx;
             r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
+            if (tableIdx >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
             u8 t = BaseTypeOf(v->module->tables[tableIdx]->type);
             m3type_t at = v_table_addrtype(v, tableIdx);
 
             if (opcode == 0x26) {
-                r = v_pop_expect(v, t, &a);   if (r) return r;
-                r = v_pop_expect(v, at, &a);  if (r) return r;
+                r = v_आलिसिन_expect(v, t, &a);   if (r) return r;
+                r = v_आलिसिन_expect(v, at, &a);  if (r) return r;
             } else {
-                r = v_pop_expect(v, at, &a);  if (r) return r;
-                r = v_push(v, t);             if (r) return r;
+                r = v_आलिसिन_expect(v, at, &a);  if (r) return r;
+                r = v_इतुलाक(v, t);             if (r) return r;
             }
             break;
         }
@@ -945,7 +945,7 @@ static M3Result v_validate_body (ValCtx * v)
             m3type_t heapBits;
             r = ParseHeapType(v->module, &heapBits, &v->wasm, v->wasmEnd);  if (r) return r;
             u8 t = (heapBits & d_m3Type_refExtern) ? c_m3Type_externref :
-# if d_m3HasStackSwitching
+# if d_m3_Has_सालानसान_Switching
                    (heapBits & d_m3Type_refCont)   ? c_m3Type_contref :
 # endif
                    c_m3Type_funcref;
@@ -956,17 +956,17 @@ static M3Result v_validate_body (ValCtx * v)
             r = NormalizeType(&t, waType);                   if (r) return r;
             if (!IsRefType(t)) return m3Err_wasmMalformed;
 #endif
-            r = v_push(v, t);                                if (r) return r;
+            r = v_इतुलाक(v, t);                                if (r) return r;
             break;
         }
 
         case 0xd1: // ref.is_null
         {
             m3type_t t = c_valBottom;
-            r = v_pop(v, &t);
+            r = v_आलिसिन(v, &t);
             if (r) return r;
             if (t != c_valBottom && !IsRefType(t)) return m3Err_typeMismatch;
-            r = v_push(v, c_m3Type_i32);
+            r = v_इतुलाक(v, c_m3Type_i32);
             if (r) return r;
             break;
         }
@@ -976,9 +976,9 @@ static M3Result v_validate_body (ValCtx * v)
             u32 funcIdx;
             r = ReadLEB_u32(&funcIdx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (funcIdx >= v->module->numFunctions) return m3Err_unknownFunction;
+            if (funcIdx >= v->module->नुमेरो_Functions) return m3Err_unknownFunction;
             if (!Module_IsFunctionDeclared(v->module, funcIdx)) return m3Err_undeclaredFuncRef;
-            r = v_push(v, c_m3Type_funcref);
+            r = v_इतुलाक(v, c_m3Type_funcref);
             if (r) return r;
             break;
         }
@@ -990,8 +990,8 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->numLocals) return m3Err_unknownLocal;
-            r = v_push(v, v->localTypes[idx]);
+            if (idx >= v->नुमेरो_Locals) return m3Err_unknownLocal;
+            r = v_इतुलाक(v, v->localTypes[idx]);
             if (r) return r;
             break;
         }
@@ -1001,8 +1001,8 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->numLocals) return m3Err_unknownLocal;
-            r = v_pop_expect(v, v->localTypes[idx], &a);
+            if (idx >= v->नुमेरो_Locals) return m3Err_unknownLocal;
+            r = v_आलिसिन_expect(v, v->localTypes[idx], &a);
             if (r) return r;
             break;
         }
@@ -1012,10 +1012,10 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->numLocals) return m3Err_unknownLocal;
-            r = v_pop_expect(v, v->localTypes[idx], &a);
+            if (idx >= v->नुमेरो_Locals) return m3Err_unknownLocal;
+            r = v_आलिसिन_expect(v, v->localTypes[idx], &a);
             if (r) return r;
-            r = v_push(v, v->localTypes[idx]);
+            r = v_इतुलाक(v, v->localTypes[idx]);
             if (r) return r;
             break;
         }
@@ -1025,8 +1025,8 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->module->numGlobals) return m3Err_unknownGlobal;
-            r = v_push(v, BaseTypeOf(v->module->globals[idx].type));
+            if (idx >= v->module->नुमेरो_Globals) return m3Err_unknownGlobal;
+            r = v_इतुलाक(v, BaseTypeOf(v->module->globals[idx].type));
             if (r) return r;
             break;
         }
@@ -1036,8 +1036,8 @@ static M3Result v_validate_body (ValCtx * v)
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
             if (r) return r;
-            if (idx >= v->module->numGlobals) return m3Err_unknownGlobal;
-            r = v_pop_expect(v, BaseTypeOf(v->module->globals[idx].type), &a);
+            if (idx >= v->module->नुमेरो_Globals) return m3Err_unknownGlobal;
+            r = v_आलिसिन_expect(v, BaseTypeOf(v->module->globals[idx].type), &a);
             if (r) return r;
             break;
         }
@@ -1053,7 +1053,7 @@ static M3Result v_validate_body (ValCtx * v)
             if (align > v_max_align(opcode)) return m3Err_invalidAlignment;
             if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
             if (not v_offset_in_range(v, memidx, offset)) return m3Err_wasmMalformed;
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
+            r = v_आलिसिन_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
             u8 result;
             if      (opcode == 0x28) result = c_m3Type_i32;
             else if (opcode == 0x29) result = c_m3Type_i64;
@@ -1061,7 +1061,7 @@ static M3Result v_validate_body (ValCtx * v)
             else if (opcode == 0x2b) result = c_m3Type_f64;
             else if (opcode <= 0x2f) result = c_m3Type_i32;
             else                     result = c_m3Type_i64;
-            r = v_push(v, result);
+            r = v_इतुलाक(v, result);
             if (r) return r;
             break;
         }
@@ -1083,8 +1083,8 @@ static M3Result v_validate_body (ValCtx * v)
             else if (opcode == 0x39) valtype = c_m3Type_f64;
             else if (opcode <= 0x3b) valtype = c_m3Type_i32;
             else                     valtype = c_m3Type_i64;
-            r = v_pop_expect(v, valtype, &a); if (r) return r;
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
+            r = v_आलिसिन_expect(v, valtype, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
             break;
         }
 
@@ -1094,7 +1094,7 @@ static M3Result v_validate_body (ValCtx * v)
             u32 memidx;
             r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
             if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            r = v_push(v, v_memory_addrtype(v, memidx)); if (r) return r;
+            r = v_इतुलाक(v, v_memory_addrtype(v, memidx)); if (r) return r;
             break;
         }
         case 0x40: // memory.grow
@@ -1102,8 +1102,8 @@ static M3Result v_validate_body (ValCtx * v)
             u32 memidx;
             r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
             if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
-            r = v_push(v, v_memory_addrtype(v, memidx)); if (r) return r;
+            r = v_आलिसिन_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
+            r = v_इतुलाक(v, v_memory_addrtype(v, memidx)); if (r) return r;
             break;
         }
 
@@ -1111,25 +1111,25 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x41: { // i32.const
             i32 val;
             r = ReadLEB_i32(&val, &v->wasm, v->wasmEnd); if (r) return r;
-            r = v_push(v, c_m3Type_i32); if (r) return r;
+            r = v_इतुलाक(v, c_m3Type_i32); if (r) return r;
             break;
         }
         case 0x42: { // i64.const
             i64 val;
             r = ReadLEB_i64(&val, &v->wasm, v->wasmEnd); if (r) return r;
-            r = v_push(v, c_m3Type_i64); if (r) return r;
+            r = v_इतुलाक(v, c_m3Type_i64); if (r) return r;
             break;
         }
         case 0x43: { // f32.const
             if (v->wasm + 4 > v->wasmEnd) return m3Err_wasmUnderrun;
             v->wasm += 4;
-            r = v_push(v, c_m3Type_f32); if (r) return r;
+            r = v_इतुलाक(v, c_m3Type_f32); if (r) return r;
             break;
         }
         case 0x44: { // f64.const
             if (v->wasm + 8 > v->wasmEnd) return m3Err_wasmUnderrun;
             v->wasm += 8;
-            r = v_push(v, c_m3Type_f64); if (r) return r;
+            r = v_इतुलाक(v, c_m3Type_f64); if (r) return r;
             break;
         }
 
@@ -1255,13 +1255,13 @@ static M3Result v_validate_body (ValCtx * v)
                 r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
                 if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
                 // the segments must have been declared up front by a data count section
-                if (not v->module->hasDataCount) return m3Err_dataCountRequired;
-                if (dataidx >= v->module->numDataSegments) return m3Err_unknownDataSegment;
+                if (not v->module->has_Data_बिलांग) return m3_Err_data_बिलांग_Required;
+                if (dataidx >= v->module->नुमेरो_Data_Segments) return m3Err_unknownDataSegment;
                 // the segment is indexed as an i32 no matter how the memory is
                 // addressed; only the destination follows the address type
-                r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r; // n
-                r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r; // src
-                r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r; // dst
+                r = v_आलिसिन_expect(v, c_m3Type_i32, &a); if (r) return r; // n
+                r = v_आलिसिन_expect(v, c_m3Type_i32, &a); if (r) return r; // src
+                r = v_आलिसिन_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r; // dst
                 break;
             }
             case 0x09: // data.drop
@@ -1269,8 +1269,8 @@ static M3Result v_validate_body (ValCtx * v)
                 u32 dataidx;
                 r = ReadLEB_u32(&dataidx, &v->wasm, v->wasmEnd); if (r) return r;
                 // needs the segment, but not a memory
-                if (not v->module->hasDataCount) return m3Err_dataCountRequired;
-                if (dataidx >= v->module->numDataSegments) return m3Err_unknownDataSegment;
+                if (not v->module->has_Data_बिलांग) return m3_Err_data_बिलांग_Required;
+                if (dataidx >= v->module->नुमेरो_Data_Segments) return m3Err_unknownDataSegment;
                 break;
             }
 #if d_m3HasRefTypes
@@ -1284,13 +1284,13 @@ static M3Result v_validate_body (ValCtx * v)
                 if (sub == 0x0c) {                                          // elemidx, tableidx
                     // the immediates are encoded elem-then-table, but the spec's
                     // rule requires the table to be defined before the segment
-                    if (a2 >= v->module->numTables) return m3Err_unknownTable;
-                    if (a1 >= v->module->numElementSegments) return m3Err_unknownElemSegment;
+                    if (a2 >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
+                    if (a1 >= v->module->नुमेरो_Element_Segments) return m3Err_unknownElemSegment;
                     if (v->module->elementSegments[a1].type != v->module->tables[a2]->type)
                         return m3Err_typeMismatch;
                 } else {                                                    // dst, src
-                    if (a1 >= v->module->numTables) return m3Err_unknownTable;
-                    if (a2 >= v->module->numTables) return m3Err_unknownTable;
+                    if (a1 >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
+                    if (a2 >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
                     if (v->module->tables[a1]->type != v->module->tables[a2]->type)
                         return m3Err_typeMismatch;
                 }
@@ -1298,9 +1298,9 @@ static M3Result v_validate_body (ValCtx * v)
                 if (sub == 0x0c) {
                     // table.init indexes the segment as an i32 whatever the
                     // table is; only the destination follows the table
-                    r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;             // n
-                    r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;             // s
-                    r = v_pop_expect(v, v_table_addrtype(v, a2), &a); if (r) return r;  // d
+                    r = v_आलिसिन_expect(v, c_m3Type_i32, &a); if (r) return r;             // n
+                    r = v_आलिसिन_expect(v, c_m3Type_i32, &a); if (r) return r;             // s
+                    r = v_आलिसिन_expect(v, v_table_addrtype(v, a2), &a); if (r) return r;  // d
                 } else {
                     // table.copy: each index follows its own table, and the
                     // length the narrower of the two
@@ -1308,9 +1308,9 @@ static M3Result v_validate_body (ValCtx * v)
                     m3type_t sType = v_table_addrtype(v, a2);
                     m3type_t nType = (dType == c_m3Type_i64 and sType == c_m3Type_i64)
                                        ? c_m3Type_i64 : c_m3Type_i32;
-                    r = v_pop_expect(v, nType, &a); if (r) return r;  // n
-                    r = v_pop_expect(v, sType, &a); if (r) return r;  // s
-                    r = v_pop_expect(v, dType, &a); if (r) return r;  // d
+                    r = v_आलिसिन_expect(v, nType, &a); if (r) return r;  // n
+                    r = v_आलिसिन_expect(v, sType, &a); if (r) return r;  // s
+                    r = v_आलिसिन_expect(v, dType, &a); if (r) return r;  // d
                 }
                 break;
             }
@@ -1318,7 +1318,7 @@ static M3Result v_validate_body (ValCtx * v)
             {
                 u32 elemIdx;
                 r = ReadLEB_u32(&elemIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                if (elemIdx >= v->module->numElementSegments) return m3Err_unknownElemSegment;
+                if (elemIdx >= v->module->नुमेरो_Element_Segments) return m3Err_unknownElemSegment;
                 break;
             }
             case 0x0f: // table.grow
@@ -1327,20 +1327,20 @@ static M3Result v_validate_body (ValCtx * v)
             {
                 u32 tableIdx;
                 r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
+                if (tableIdx >= v->module->नुमेरो_Tables) return m3Err_unknownTable;
                 u8 t = BaseTypeOf(v->module->tables[tableIdx]->type);
                 m3type_t at = v_table_addrtype(v, tableIdx);
 
                 if (sub == 0x10) {                                          // table.size
-                    r = v_push(v, at); if (r) return r;
+                    r = v_इतुलाक(v, at); if (r) return r;
                 } else if (sub == 0x0f) {                                   // table.grow
-                    r = v_pop_expect(v, at, &a); if (r) return r;  // n
-                    r = v_pop_expect(v, t, &a);  if (r) return r;  // init
-                    r = v_push(v, at);           if (r) return r;
+                    r = v_आलिसिन_expect(v, at, &a); if (r) return r;  // n
+                    r = v_आलिसिन_expect(v, t, &a);  if (r) return r;  // init
+                    r = v_इतुलाक(v, at);           if (r) return r;
                 } else {                                                    // table.fill
-                    r = v_pop_expect(v, at, &a); if (r) return r;  // n
-                    r = v_pop_expect(v, t, &a);  if (r) return r;  // val
-                    r = v_pop_expect(v, at, &a); if (r) return r;  // i
+                    r = v_आलिसिन_expect(v, at, &a); if (r) return r;  // n
+                    r = v_आलिसिन_expect(v, t, &a);  if (r) return r;  // val
+                    r = v_आलिसिन_expect(v, at, &a); if (r) return r;  // i
                 }
                 break;
             }
@@ -1358,9 +1358,9 @@ static M3Result v_validate_body (ValCtx * v)
                 m3type_t srcType = v_memory_addrtype(v, src);
                 m3type_t lenType = (dstType == c_m3Type_i64 and srcType == c_m3Type_i64)
                                      ? c_m3Type_i64 : c_m3Type_i32;
-                r = v_pop_expect(v, lenType, &a); if (r) return r; // n
-                r = v_pop_expect(v, srcType, &a); if (r) return r; // src
-                r = v_pop_expect(v, dstType, &a); if (r) return r; // dst
+                r = v_आलिसिन_expect(v, lenType, &a); if (r) return r; // n
+                r = v_आलिसिन_expect(v, srcType, &a); if (r) return r; // src
+                r = v_आलिसिन_expect(v, dstType, &a); if (r) return r; // dst
                 break;
             }
             case 0x0b: // memory.fill
@@ -1369,9 +1369,9 @@ static M3Result v_validate_body (ValCtx * v)
                 r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
                 if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
                 m3type_t addrType = v_memory_addrtype(v, memidx);
-                r = v_pop_expect(v, addrType, &a); if (r) return r;      // n
-                r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;  // val
-                r = v_pop_expect(v, addrType, &a); if (r) return r;      // dst
+                r = v_आलिसिन_expect(v, addrType, &a); if (r) return r;      // n
+                r = v_आलिसिन_expect(v, c_m3Type_i32, &a); if (r) return r;  // val
+                r = v_आलिसिन_expect(v, addrType, &a); if (r) return r;      // dst
                 break;
             }
 #if d_m3HasWideArithmetic
@@ -1380,12 +1380,12 @@ static M3Result v_validate_body (ValCtx * v)
             {
                 // two 128-bit operands of two i64 halves each, or two i64 factors;
                 // either way a 128-bit result, the low half pushed first
-                u32 numOperands = (sub <= 0x14) ? 4 : 2;
-                for (u32 i = 0; i < numOperands; ++i) {
-                    r = v_pop_expect(v, c_m3Type_i64, &a); if (r) return r;
+                u32 नुमेरो_Operands = (sub <= 0x14) ? 4 : 2;
+                for (u32 i = 0; i < नुमेरो_Operands; ++i) {
+                    r = v_आलिसिन_expect(v, c_m3Type_i64, &a); if (r) return r;
                 }
-                r = v_push(v, c_m3Type_i64); if (r) return r;
-                r = v_push(v, c_m3Type_i64); if (r) return r;
+                r = v_इतुलाक(v, c_m3Type_i64); if (r) return r;
+                r = v_इतुलाक(v, c_m3Type_i64); if (r) return r;
                 break;
             }
 #endif
@@ -1411,8 +1411,8 @@ static M3Result v_validate_body (ValCtx * v)
                 break;
             }
 
-            u32 width, numOperands; m3type_t valueType, resultType;
-            if (not v_atomic_shape(sub, &width, &numOperands, &valueType, &resultType)) return m3Err_unknownOpcode;
+            u32 width, नुमेरो_Operands; m3type_t हालागा_Type, resultType;
+            if (not v_atomic_shape(sub, &width, &नुमेरो_Operands, &हालागा_Type, &resultType)) return m3Err_unknownOpcode;
 
             u32 align, memidx; u64 offset;
             r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); if (r) return r;
@@ -1424,31 +1424,31 @@ static M3Result v_validate_body (ValCtx * v)
             // the operands above the address are all of the one type, except a
             // wait, whose timeout is an i64 whatever it is waiting on
             if (sub == 0x01 or sub == 0x02) {
-                r = v_pop_expect(v, c_m3Type_i64, &a); if (r) return r;
-                numOperands--;
+                r = v_आलिसिन_expect(v, c_m3Type_i64, &a); if (r) return r;
+                नुमेरो_Operands--;
             }
-            for (u32 i = 1; i < numOperands; ++i) {
-                r = v_pop_expect(v, valueType, &a); if (r) return r;
+            for (u32 i = 1; i < नुमेरो_Operands; ++i) {
+                r = v_आलिसिन_expect(v, हालागा_Type, &a); if (r) return r;
             }
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
+            r = v_आलिसिन_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
             if (resultType != c_m3Type_none) {
-                r = v_push(v, resultType); if (r) return r;
+                r = v_इतुलाक(v, resultType); if (r) return r;
             }
             break;
         }
 #endif
 
-#if d_m3HasStackSwitching
+#if d_m3_Has_सालानसान_Switching
         // ---- Stack Switching ----
         case 0xe0: // cont.new
         {
             u32 typeIdx;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
             if (!ft || !ft->isContinuation) return m3Err_typeMismatch;
-            r = v_pop_expect(v, c_m3Type_funcref, &a); if (r) return r;
-            r = v_push(v, c_m3Type_contref); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_funcref, &a); if (r) return r;
+            r = v_इतुलाक(v, c_m3Type_contref); if (r) return r;
             break;
         }
 
@@ -1457,7 +1457,7 @@ static M3Result v_validate_body (ValCtx * v)
             u32 typeIdx1, typeIdx2;
             r = ReadLEB_u32(&typeIdx1, &v->wasm, v->wasmEnd); if (r) return r;
             r = ReadLEB_u32(&typeIdx2, &v->wasm, v->wasmEnd); if (r) return r;
-            if (typeIdx1 >= v->module->numFuncTypes || typeIdx2 >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx1 >= v->module->नुमेरो_Func_Types || typeIdx2 >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             IM3FuncType ct1 = v->module->funcTypes[typeIdx1];
             IM3FuncType ct2 = v->module->funcTypes[typeIdx2];
             if (!ct1 || !ct2 || !ct1->isContinuation || !ct2->isContinuation) return m3Err_typeMismatch;
@@ -1465,27 +1465,27 @@ static M3Result v_validate_body (ValCtx * v)
             IM3FuncType ft1 = ct1->contFuncType ? ct1->contFuncType : ct1;
             IM3FuncType ft2 = ct2->contFuncType ? ct2->contFuncType : ct2;
 
-            u16 numParams1 = ft1->numArgs;
-            u16 numParams2 = ft2->numArgs;
-            if (numParams1 < numParams2) return m3Err_typeMismatch;
-            u32 numBound = numParams1 - numParams2;
+            u16 नुमेरो_Params1 = ft1->नुमेरो_मगा_कातविरान;
+            u16 नुमेरो_Params2 = ft2->नुमेरो_मगा_कातविरान;
+            if (नुमेरो_Params1 < नुमेरो_Params2) return m3Err_typeMismatch;
+            u32 नुमेरो_Bound = नुमेरो_Params1 - नुमेरो_Params2;
 
-            if (ft1->numRets != ft2->numRets) return m3Err_typeMismatch;
-            for (u16 i = 0; i < ft1->numRets; ++i) {
+            if (ft1->नुमेरो_Rets != ft2->नुमेरो_Rets) return m3Err_typeMismatch;
+            for (u16 i = 0; i < ft1->नुमेरो_Rets; ++i) {
                 if (ft1->types[i] != ft2->types[i]) return m3Err_typeMismatch;
             }
-            for (u16 i = 0; i < numParams2; ++i) {
-                if (ft1->types[ft1->numRets + numBound + i] != ft2->types[ft2->numRets + i]) return m3Err_typeMismatch;
+            for (u16 i = 0; i < नुमेरो_Params2; ++i) {
+                if (ft1->types[ft1->नुमेरो_Rets + नुमेरो_Bound + i] != ft2->types[ft2->नुमेरो_Rets + i]) return m3Err_typeMismatch;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_contref, &a); if (r) return r;
 
-            for (u32 i = numBound; i > 0; i--) {
-                r = v_pop_expect(v, BaseTypeOf(ft1->types[ft1->numRets + i - 1]), &a);
+            for (u32 i = नुमेरो_Bound; i > 0; i--) {
+                r = v_आलिसिन_expect(v, BaseTypeOf(ft1->types[ft1->नुमेरो_Rets + i - 1]), &a);
                 if (r) return r;
             }
 
-            r = v_push(v, c_m3Type_contref); if (r) return r;
+            r = v_इतुलाक(v, c_m3Type_contref); if (r) return r;
             break;
         }
 
@@ -1493,15 +1493,15 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 tagIdx;
             r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+            if (!v->module || tagIdx >= v->module->नुमेरो_Tags) return m3Err_unknownTag;
             IM3FuncType tt = v->module->tags[tagIdx].type;
             if (tt) {
-                for (u16 i = tt->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(tt->types[tt->numRets + i - 1]), &a);
+                for (u16 i = tt->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(tt->types[tt->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
-                for (u16 i = 0; i < tt->numRets; i++) {
-                    r = v_push(v, BaseTypeOf(tt->types[i]));
+                for (u16 i = 0; i < tt->नुमेरो_Rets; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(tt->types[i]));
                     if (r) return r;
                 }
             }
@@ -1512,14 +1512,14 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 typeIdx;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
             if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
 
-            u32 numClauses;
-            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); if (r) return r;
+            u32 नुमेरो_Clauses;
+            r = ReadLEB_u32(&नुमेरो_Clauses, &v->wasm, v->wasmEnd); if (r) return r;
 
-            for (u32 i = 0; i < numClauses; i++) {
+            for (u32 i = 0; i < नुमेरो_Clauses; i++) {
                 u8 kind;
                 r = Read_u8(&kind, &v->wasm, v->wasmEnd); if (r) return r;
                 u32 tagIdx;
@@ -1527,16 +1527,16 @@ static M3Result v_validate_body (ValCtx * v)
                 r = v_resume_clause(v, kind, tagIdx, ct); if (r) return r;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_contref, &a); if (r) return r;
 
             IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
             if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+                for (u16 i = ft->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
-                for (u16 i = 0; i < ft->numRets; i++) {
-                    r = v_push(v, BaseTypeOf(ft->types[i]));
+                for (u16 i = 0; i < ft->नुमेरो_Rets; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(ft->types[i]));
                     if (r) return r;
                 }
             }
@@ -1545,22 +1545,22 @@ static M3Result v_validate_body (ValCtx * v)
 
         case 0xe4: // resume_throw
         {
-            u32 typeIdx, tagIdx, numClauses;
+            u32 typeIdx, tagIdx, नुमेरो_Clauses;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
             r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadLEB_u32(&नुमेरो_Clauses, &v->wasm, v->wasmEnd); if (r) return r;
 
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
-            if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
+            if (!v->module || tagIdx >= v->module->नुमेरो_Tags) return m3Err_unknownTag;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
             if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
             IM3FuncType tagType = v->module->tags[tagIdx].type;
 
             // it is an exception that gets raised, so the tag has to be one
             // throw could have raised: no results
-            if (tagType && tagType->numRets != 0) return m3Err_typeMismatch;
+            if (tagType && tagType->नुमेरो_Rets != 0) return m3Err_typeMismatch;
 
-            for (u32 i = 0; i < numClauses; i++) {
+            for (u32 i = 0; i < नुमेरो_Clauses; i++) {
                 u8 kind;
                 r = Read_u8(&kind, &v->wasm, v->wasmEnd); if (r) return r;
                 u32 cTagIdx;
@@ -1568,19 +1568,19 @@ static M3Result v_validate_body (ValCtx * v)
                 r = v_resume_clause(v, kind, cTagIdx, ct); if (r) return r;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_contref, &a); if (r) return r;
 
             if (tagType) {
-                for (u16 i = tagType->numArgs; i > 0; i--) {
-                    r = v_pop_expect(v, BaseTypeOf(tagType->types[tagType->numRets + i - 1]), &a);
+                for (u16 i = tagType->नुमेरो_मगा_कातविरान; i > 0; i--) {
+                    r = v_आलिसिन_expect(v, BaseTypeOf(tagType->types[tagType->नुमेरो_Rets + i - 1]), &a);
                     if (r) return r;
                 }
             }
 
             IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
             if (ft) {
-                for (u16 i = 0; i < ft->numRets; i++) {
-                    r = v_push(v, BaseTypeOf(ft->types[i]));
+                for (u16 i = 0; i < ft->नुमेरो_Rets; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(ft->types[i]));
                     if (r) return r;
                 }
             }
@@ -1589,15 +1589,15 @@ static M3Result v_validate_body (ValCtx * v)
 
         case 0xe5: // resume_throw_ref
         {
-            u32 typeIdx, numClauses;
+            u32 typeIdx, नुमेरो_Clauses;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadLEB_u32(&नुमेरो_Clauses, &v->wasm, v->wasmEnd); if (r) return r;
 
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
             if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
 
-            for (u32 i = 0; i < numClauses; i++) {
+            for (u32 i = 0; i < नुमेरो_Clauses; i++) {
                 u8 kind;
                 r = Read_u8(&kind, &v->wasm, v->wasmEnd); if (r) return r;
                 u32 cTagIdx;
@@ -1605,13 +1605,13 @@ static M3Result v_validate_body (ValCtx * v)
                 r = v_resume_clause(v, kind, cTagIdx, ct); if (r) return r;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
-            r = v_pop_expect(v, c_m3Type_exnref, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_exnref, &a); if (r) return r;
 
             IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
             if (ft) {
-                for (u16 i = 0; i < ft->numRets; i++) {
-                    r = v_push(v, BaseTypeOf(ft->types[i]));
+                for (u16 i = 0; i < ft->नुमेरो_Rets; i++) {
+                    r = v_इतुलाक(v, BaseTypeOf(ft->types[i]));
                     if (r) return r;
                 }
             }
@@ -1624,35 +1624,35 @@ static M3Result v_validate_body (ValCtx * v)
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
             r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
 
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
-            if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+            if (typeIdx >= v->module->नुमेरो_Func_Types) return m3Err_unknownType;
+            if (!v->module || tagIdx >= v->module->नुमेरो_Tags) return m3Err_unknownTag;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
             if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
 
             // a switch tag carries no payload of its own
             IM3FuncType tagType = v->module->tags[tagIdx].type;
-            if (tagType && tagType->numArgs != 0) return m3Err_typeMismatch;
+            if (tagType && tagType->नुमेरो_मगा_कातविरान != 0) return m3Err_typeMismatch;
 
             // switch $ct1 : [t1* (ref null $ct1)] -> [t2*], where $ct1's last
             // parameter names $ct2 - the continuation this instruction
             // suspends - and t2* is $ct2's parameters, not $ct1's results
             IM3FuncType ft = ct->contFuncType;
-            if (!ft || ft->numArgs == 0) return m3Err_typeMismatch;
+            if (!ft || ft->नुमेरो_मगा_कातविरान == 0) return m3Err_typeMismatch;
 
-            IM3FuncType peer = Module_ContTypeOfRef(v->module, ft->types[ft->numRets + ft->numArgs - 1]);
+            IM3FuncType peer = Module_ContTypeOfRef(v->module, ft->types[ft->नुमेरो_Rets + ft->नुमेरो_मगा_कातविरान - 1]);
             if (!peer || !peer->contFuncType) return m3Err_typeMismatch;
 
             IM3FuncType self = peer->contFuncType;
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_आलिसिन_expect(v, c_m3Type_contref, &a); if (r) return r;
 
-            for (u16 i = (u16)(ft->numArgs - 1); i > 0; i--) {
-                r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
+            for (u16 i = (u16)(ft->नुमेरो_मगा_कातविरान - 1); i > 0; i--) {
+                r = v_आलिसिन_expect(v, BaseTypeOf(ft->types[ft->नुमेरो_Rets + i - 1]), &a);
                 if (r) return r;
             }
 
-            for (u16 i = 0; i < self->numArgs; i++) {
-                r = v_push(v, BaseTypeOf(self->types[self->numRets + i]));
+            for (u16 i = 0; i < self->नुमेरो_मगा_कातविरान; i++) {
+                r = v_इतुलाक(v, BaseTypeOf(self->types[self->नुमेरो_Rets + i]));
                 if (r) return r;
             }
             break;
@@ -1705,35 +1705,35 @@ M3Result  ValidateFunction  (IM3Function i_function)
     if (r) return r;
 
     // Parse locals
-    u32 numLocalBlocks;
-    r = ReadLEB_u32(&numLocalBlocks, &v->wasm, v->wasmEnd);
+    u32 नुमेरो_Local_Blocks;
+    r = ReadLEB_u32(&नुमेरो_Local_Blocks, &v->wasm, v->wasmEnd);
     if (r) return r;
 
     // First: params. Running out of room has to be an error, not a truncation:
     // a short localTypes would make later local.get indices read as unknown
-    u16 numParams = funcType ? funcType->numArgs : 0;
-    if (numParams > d_m3ValStack) return m3Err_functionStackOverflow;
-    for (u16 i = 0; i < numParams; i++) {
-        v->localTypes[v->numLocals++] = BaseTypeOf(funcType->types[funcType->numRets + i]);
+    u16 नुमेरो_Params = funcType ? funcType->नुमेरो_मगा_कातविरान : 0;
+    if (नुमेरो_Params > d_m3_Val_सालानसान) return m3_Err_function_सालानसान_Overflow;
+    for (u16 i = 0; i < नुमेरो_Params; i++) {
+        v->localTypes[v->नुमेरो_Locals++] = BaseTypeOf(funcType->types[funcType->नुमेरो_Rets + i]);
     }
 
     // Then: declared locals
-    for (u32 b = 0; b < numLocalBlocks; b++) {
-        u32 count;
-        r = ReadLEB_u32(&count, &v->wasm, v->wasmEnd);
+    for (u32 b = 0; b < नुमेरो_Local_Blocks; b++) {
+        u32 बिलांग;
+        r = ReadLEB_u32(&बिलांग, &v->wasm, v->wasmEnd);
         if (r) return r;
         m3type_t localType;
-        r = ParseValueType(v->module, &localType, &v->wasm, v->wasmEnd);
+        r = Parse_हालागा_Type(v->module, &localType, &v->wasm, v->wasmEnd);
         if (r) return r;
         u8 normalized = BaseTypeOf(localType);
-        if (count > (u32) (d_m3ValStack - v->numLocals)) return m3Err_functionStackOverflow;
-        for (u32 c = 0; c < count; c++) {
-            v->localTypes[v->numLocals++] = normalized;
+        if (बिलांग > (u32) (d_m3_Val_सालानसान - v->नुमेरो_Locals)) return m3_Err_function_सालानसान_Overflow;
+        for (u32 c = 0; c < बिलांग; c++) {
+            v->localTypes[v->नुमेरो_Locals++] = normalized;
         }
     }
 
     // Push the function-level control frame
-    r = v_push_ctrl(v, 0x00, funcType); // opcode 0x00 marks function frame
+    r = v_इतुलाक_ctrl(v, 0x00, funcType); // opcode 0x00 marks function frame
     if (r) return r;
 
     // Push params onto operand stack (they're part of the function body's initial stack)
@@ -1748,7 +1748,7 @@ M3Result  ValidateFunction  (IM3Function i_function)
     if (r) return r;
 
     // After validation, control stack should be empty and all declared bytes consumed
-    if (v->ctrlTop != 0)
+    if (v->ctrl_इताअस != 0)
         return m3Err_wasmMalformed;
 
     if (v->wasm != v->wasmEnd)

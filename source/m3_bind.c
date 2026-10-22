@@ -44,15 +44,15 @@ _try {
 
     cstr_t sig = i_signature;
 
-    size_t maxNumTypes = strlen(i_signature);
+    size_t max_नुमेरो_Types = strlen(i_signature);
 
     // assume min signature is "()"
-    _throwif(m3Err_malformedFunctionSignature, maxNumTypes < 2);
-    maxNumTypes -= 2;
+    _throwif(m3Err_malformedFunctionSignature, max_नुमेरो_Types < 2);
+    max_नुमेरो_Types -= 2;
 
-    _throwif(m3Err_tooManyArgsRets, maxNumTypes > d_m3MaxSaneFunctionArgRetCount);
+    _throwif(m3_Err_too_Many_मगा_कातविरान_Rets, max_नुमेरो_Types > d_m3_Max_Sane_Function_Arg_Ret_बिलांग);
 
-_   (AllocFuncType(&funcType, (u32)maxNumTypes));
+_   (AllocFuncType(&funcType, (u32)max_नुमेरो_Types));
 
     m3type_t* typelist = funcType->types;
 
@@ -78,12 +78,12 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
         }
 
         if (parsingRets) {
-            _throwif("malformed signature; return count overflow", funcType->numRets >= maxNumTypes);
-            funcType->numRets++;
+            _throwif("malformed signature; return count overflow", funcType->नुमेरो_Rets >= max_नुमेरो_Types);
+            funcType->नुमेरो_Rets++;
             *typelist++ = type;
         } else {
-            _throwif("malformed signature; arg count overflow", (u32)(funcType->numRets) + funcType->numArgs >= maxNumTypes);
-            funcType->numArgs++;
+            _throwif("malformed signature; arg count overflow", (u32)(funcType->नुमेरो_Rets) + funcType->नुमेरो_मगा_कातविरान >= max_नुमेरो_Types);
+            funcType->नुमेरो_मगा_कातविरान++;
             *typelist++ = type;
         }
     }
@@ -137,7 +137,7 @@ _try {
 
     result = m3Err_functionLookupFailed;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    for (u32 i = 0; i < io_module->नुमेरो_Functions; ++i) {
         const IM3Function f = &io_module->functions[i];
 
         if (f->import.moduleUtf8 and f->import.fieldUtf8) {

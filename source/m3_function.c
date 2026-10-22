@@ -9,9 +9,9 @@
 #include "m3_env.h"
 
 
-M3Result AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes)
+M3Result AllocFuncType (IM3FuncType* o_functionType, u32 i_नुमेरो_Types)
 {
-    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", sizeof(M3FuncType) + i_numTypes * sizeof(m3type_t));
+    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", sizeof(M3FuncType) + i_नुमेरो_Types * sizeof(m3type_t));
     if (*o_functionType) {
         (*o_functionType)->isContinuation = false;
         (*o_functionType)->contFuncType   = NULL;
@@ -53,17 +53,17 @@ bool AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB)
                (i_typeA->contFuncType and i_typeB->contFuncType and
                 AreFuncTypesEqual(i_typeA->contFuncType, i_typeB->contFuncType));
     }
-    if (i_typeA->numRets == i_typeB->numRets and i_typeA->numArgs == i_typeB->numArgs) {
+    if (i_typeA->नुमेरो_Rets == i_typeB->नुमेरो_Rets and i_typeA->नुमेरो_मगा_कातविरान == i_typeB->नुमेरो_मगा_कातविरान) {
         return (memcmp(i_typeA->types, i_typeB->types,
-                       (i_typeA->numRets + i_typeA->numArgs) * sizeof(m3type_t)) == 0);
+                       (i_typeA->नुमेरो_Rets + i_typeA->नुमेरो_मगा_कातविरान) * sizeof(m3type_t)) == 0);
     }
 
     return false;
 }
 
-u16 GetFuncTypeNumParams (const IM3FuncType i_funcType)
+u16 Get_Func_Type_नुमेरो_Params (const IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numArgs : 0;
+    return i_funcType ? i_funcType->नुमेरो_मगा_कातविरान : 0;
 }
 
 
@@ -72,8 +72,8 @@ m3type_t GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index)
     m3type_t type = c_m3Type_unknown;
 
     if (i_funcType) {
-        if (i_index < i_funcType->numArgs) {
-            type = i_funcType->types[i_funcType->numRets + i_index];
+        if (i_index < i_funcType->नुमेरो_मगा_कातविरान) {
+            type = i_funcType->types[i_funcType->नुमेरो_Rets + i_index];
         }
     }
 
@@ -81,9 +81,9 @@ m3type_t GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index)
 }
 
 
-u16 GetFuncTypeNumResults (const IM3FuncType i_funcType)
+u16 Get_Func_Type_नुमेरो_Results (const IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numRets : 0;
+    return i_funcType ? i_funcType->नुमेरो_Rets : 0;
 }
 
 
@@ -92,7 +92,7 @@ m3type_t GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index)
     m3type_t type = c_m3Type_unknown;
 
     if (i_funcType) {
-        if (i_index < i_funcType->numRets) {
+        if (i_index < i_funcType->नुमेरो_Rets) {
             type = i_funcType->types[i_index];
         }
     }
@@ -118,7 +118,7 @@ void SnapshotMap_Free (M3SnapshotMap* i_map)
     if (i_map) {
         m3_Free(i_map->locals);
         m3_Free(i_map->safePoints);
-        m3_Free(i_map->values);
+        m3_Free(i_map->मगा_हालागा);
         m3_Free(i_map->blocks);
         m3_Free(i_map);
     }
@@ -135,7 +135,7 @@ void Function_Release (IM3Function i_function)
     i_function->snapshotMap = NULL;
 #endif
 
-    for (int i = 0; i < i_function->numNames; i++) {
+    for (int i = 0; i < i_function->नुमेरो_Names; i++) {
         // name can be an alias of fieldUtf8
         if (i_function->names[i] != i_function->import.fieldUtf8) {
             m3_Free(i_function->names[i]);
@@ -153,7 +153,7 @@ void Function_Release (IM3Function i_function)
 #if (d_m3EnableCodePageRefCounting)
     {
         m3_Free(i_function->codePageRefs);
-        i_function->numCodePageRefs = 0;
+        i_function->नुमेरो_Code_Page_Refs = 0;
     }
 #endif
 }
@@ -165,10 +165,10 @@ void Function_FreeCompiledCode (IM3Function i_function)
     {
         i_function->compiled = NULL;
 
-        while (i_function->numCodePageRefs--) {
-            IM3CodePage page = i_function->codePageRefs[i_function->numCodePageRefs];
+        while (i_function->नुमेरो_Code_Page_Refs--) {
+            IM3CodePage page = i_function->codePageRefs[i_function->नुमेरो_Code_Page_Refs];
 
-            if (--(page->info.usageCount) == 0) {
+            if (--(page->info.usage_बिलांग) == 0) {
                 //                printf ("free %p\n", page);
             }
         }
@@ -183,9 +183,9 @@ void Function_FreeCompiledCode (IM3Function i_function)
 
 cstr_t m3_GetFunctionName (IM3Function i_function)
 {
-    u16     numNames = 0;
-    cstr_t* names    = GetFunctionNames(i_function, &numNames);
-    if (numNames > 0) {
+    u16     नुमेरो_Names = 0;
+    cstr_t* names    = GetFunctionNames(i_function, &नुमेरो_Names);
+    if (नुमेरो_Names > 0) {
         return names[0];
     } else {
         return "<unnamed>";
@@ -199,17 +199,17 @@ IM3Module m3_GetFunctionModule (IM3Function i_function)
 }
 
 
-cstr_t* GetFunctionNames (IM3Function i_function, u16* o_numNames)
+cstr_t* GetFunctionNames (IM3Function i_function, u16* o_नुमेरो_Names)
 {
-    if (!i_function || !o_numNames) {
+    if (!i_function || !o_नुमेरो_Names) {
         return NULL;
     }
 
     if (i_function->import.fieldUtf8) {
-        *o_numNames = 1;
+        *o_नुमेरो_Names = 1;
         return &i_function->import.fieldUtf8;
     } else {
-        *o_numNames = i_function->numNames;
+        *o_नुमेरो_Names = i_function->नुमेरो_Names;
         return i_function->names;
     }
 }
@@ -221,44 +221,44 @@ cstr_t GetFunctionImportModuleName (IM3Function i_function)
 }
 
 
-u16 GetFunctionNumArgs (IM3Function i_function)
+u16 Get_Function_नुमेरो_मगा_कातविरान (IM3Function i_function)
 {
-    u16 numArgs = 0;
+    u16 नुमेरो_मगा_कातविरान = 0;
 
     if (i_function) {
         if (i_function->funcType) {
-            numArgs = i_function->funcType->numArgs;
+            नुमेरो_मगा_कातविरान = i_function->funcType->नुमेरो_मगा_कातविरान;
         }
     }
 
-    return numArgs;
+    return नुमेरो_मगा_कातविरान;
 }
 
 m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_index < GetFunctionNumArgs(i_function)) {
-        u32 numReturns = i_function->funcType->numRets;
+    if (i_index < Get_Function_नुमेरो_मगा_कातविरान(i_function)) {
+        u32 नुमेरो_Returns = i_function->funcType->नुमेरो_Rets;
 
-        type = i_function->funcType->types[numReturns + i_index];
+        type = i_function->funcType->types[नुमेरो_Returns + i_index];
     }
 
     return type;
 }
 
 
-u16 GetFunctionNumReturns (IM3Function i_function)
+u16 Get_Function_नुमेरो_Returns (IM3Function i_function)
 {
-    u16 numReturns = 0;
+    u16 नुमेरो_Returns = 0;
 
     if (i_function) {
         if (i_function->funcType) {
-            numReturns = i_function->funcType->numRets;
+            नुमेरो_Returns = i_function->funcType->नुमेरो_Rets;
         }
     }
 
-    return numReturns;
+    return नुमेरो_Returns;
 }
 
 
@@ -268,10 +268,10 @@ u8 GetFunctionReturnType (const IM3Function i_function, u16 i_index)
 }
 
 
-u32 GetFunctionNumArgsAndLocals (IM3Function i_function)
+u32 Get_Function_नुमेरो_मगा_कातविरान_And_Locals (IM3Function i_function)
 {
     if (i_function) {
-        return i_function->numLocals + GetFunctionNumArgs(i_function);
+        return i_function->नुमेरो_Locals + Get_Function_नुमेरो_मगा_कातविरान(i_function);
     } else {
         return 0;
     }

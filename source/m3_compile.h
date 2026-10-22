@@ -112,7 +112,7 @@ enum {
 
 
 #define d_FuncRetType(ftype,i)  ((ftype)->types[(i)])
-#define d_FuncArgType(ftype,i)  ((ftype)->types[(ftype)->numRets + (i)])
+#define d_FuncArgType(ftype,i)  ((ftype)->types[(ftype)->नुमेरो_Rets + (i)])
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -122,8 +122,8 @@ typedef struct M3CompilationScope {
     pc_t                       pc;                 // used by ContinueLoop's
     pc_t                       patches;
     i32                        depth;
-    u16                        exitStackIndex;
-    u16                        blockStackIndex;
+    u16                        exit_सालानसान_Index;
+    u16                        block_सालानसान_Index;
     //    u16                             topSlot;
     IM3FuncType                type;
     m3opcode_t                 opcode;
@@ -167,13 +167,13 @@ typedef struct
     IM3CodePage        page;
 
 #ifdef DEBUG
-    u32 numEmits;
-    u32 numOpcodes;
+    u32 नुमेरो_Emits;
+    u32 नुमेरो_Opcodes;
 #endif
 
-    u16        stackFirstDynamicIndex;     // args and locals are pushed to the stack so that their slot locations can be tracked. the wasm model itself doesn't
+    u16        सालानसान_First_Dynamic_Index;     // args and locals are pushed to the stack so that their slot locations can be tracked. the wasm model itself doesn't
                                                     // treat these values as being on the stack, so stackFirstDynamicIndex marks the start of the real Wasm stack
-    u16        stackIndex;                 // current stack top
+    u16        सालानसान_Index;                 // current stack top
 
     u16        slotFirstConstIndex;
     u16        slotMaxConstIndex;          // as const's are encountered during compilation this tracks their location in the "real" stack
@@ -181,20 +181,20 @@ typedef struct
     u16        slotFirstLocalIndex;
     u16        slotFirstDynamicIndex;      // numArgs + numLocals + numReservedConstants. the first mutable slot available to the compiler.
 
-    u16        maxStackSlots;
+    u16        max_सालानसान_Slots;
 
     m3slot_t   constants[d_m3MaxConstantTableSize];
 
     // 'wasmStack' holds slot locations
-    u16        wasmStack[d_m3MaxFunctionStackHeight];
-    m3type_t   typeStack[d_m3MaxFunctionStackHeight];
+    u16        wasm_सालानसान[d_m3_Max_Function_सालानसान_Height];
+    m3type_t   type_सालानसान[d_m3_Max_Function_सालानसान_Height];
 
     // 'm3Slots' contains allocation usage counts
     u8         m3Slots[d_m3MaxFunctionSlots];
 
     u16        slotMaxAllocatedIndexPlusOne;
 
-    u16        regStackIndexPlusOne[2];
+    u16        reg_सालानसान_Index_Plus_One[2];
 
     m3opcode_t previousOpcode;
 
@@ -204,10 +204,10 @@ typedef struct
     // compiled against the try block's entry state, which is what CompileBlock
     // sets up
     M3CatchClause* tryClauses;
-    u32            numTryClauses;
+    u32            नुमेरो_Try_Clauses;
 #endif
 
-    bool isInitExpr;                 // walking a constant expression, not a function body
+    bool is_Init_पाहायाग;                 // walking a constant expression, not a function body
 
 #if d_m3HasGasMetering
     // The metering segment being compiled, the cost accumulated so far, and
@@ -225,7 +225,7 @@ typedef struct
     M3SnapshotMap* snapshotMap;
     u32*           localInitDepth; // lexical scope that initialized each non-defaultable local
     u32            safePointsCapacity;
-    u32            valuesCapacity;
+    u32            मगा_हालागा_Capacity;
     u32            blocksCapacity;
     bytes_t        bodyStart;
 #endif
@@ -235,7 +235,7 @@ typedef struct
     // foldPatchPC is NULL whenever anything was emitted (or a branch target captured) since.
     pc_t       foldPatchPC;                // address of the candidate's op word in the code stream
     m3opcode_t foldOpcode;
-    u16        foldStackIndex;             // stack index of the candidate's pushed result
+    u16        fold_सालानसान_Index;             // stack index of the candidate's pushed result
     u8         foldForm;                   // operand-form index the candidate was emitted with
 #endif
 } M3Compilation;
@@ -253,7 +253,7 @@ typedef struct M3OpInfo {
     const char* const name;
 #endif
 
-    i8           stackOffset;
+    i8           सालानसान_Offset;
     u8           type;
 
     // index into c_compilers [], 0 for an opcode with no compiler. An index
@@ -275,9 +275,9 @@ IM3OpInfo               GetOpInfo (m3opcode_t opcode);
 extern const M3OpInfo   c_operations[];
 extern const M3OpInfo   c_operationsFC[];
 extern const M3OpInfo   c_operationsFE[];
-extern const u32        c_numOperations;
-extern const u32        c_numOperationsFC;
-extern const u32        c_numOperationsFE;
+extern const u32        c_नुमेरो_Operations;
+extern const u32        c_नुमेरो_Operations_FC;
+extern const u32        c_नुमेरो_Operations_FE;
 
 static const u16        c_m3RegisterUnallocated = 0;
 static const u16        c_slotUnused = 0xffff;
@@ -285,11 +285,11 @@ static const u16        c_slotUnused = 0xffff;
 static inline
 bool IsRegisterAllocated (IM3Compilation o, u32 i_register)
 {
-    return (o->regStackIndexPlusOne[i_register] != c_m3RegisterUnallocated);
+    return (o->reg_सालानसान_Index_Plus_One[i_register] != c_m3RegisterUnallocated);
 }
 
 static inline
-bool IsStackPolymorphic (IM3Compilation o)
+bool Is_सालानसान_Polymorphic (IM3Compilation o)
 {
     return o->block.isPolymorphic;
 }
@@ -315,11 +315,11 @@ bool IsIntRegisterSlotAlias (u16 i_slot)
 // and positional initializers is not valid C++, which the maintenance builds
 // compile this as.
 #ifdef DEBUG
-#  define M3OP(_name, _offset, _type, ...)  { .name = _name, .stackOffset = _offset, .type = _type, __VA_ARGS__ }
+#  define M3OP(_name, _offset, _type, ...)  { .name = _name, .सालानसान_Offset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { .name = "reserved" }
 #else
 // Strip-off name
-#  define M3OP(_name, _offset, _type, ...)  { .stackOffset = _offset, .type = _type, __VA_ARGS__ }
+#  define M3OP(_name, _offset, _type, ...)  { .सालानसान_Offset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { 0 }
 #endif
 
@@ -345,7 +345,7 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
 
 struct M3Continuation;
 
-#if d_m3HasStackSwitching
+#if d_m3_Has_सालानसान_Switching
 m3ret_t ResumeContinuation (IM3Runtime i_runtime, struct M3Continuation* i_cont);
 #endif
 

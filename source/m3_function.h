@@ -17,8 +17,8 @@ d_m3BeginExternC
 typedef struct M3FuncType {
     struct M3FuncType* next;
 
-    u16                numRets;
-    u16                numArgs;
+    u16                नुमेरो_Rets;
+    u16                नुमेरो_मगा_कातविरान;
 
     // Position in the environment's list of distinct function types. Equal
     // types share one M3FuncType, so this doubles as the canonical heap type
@@ -40,13 +40,13 @@ typedef struct M3FuncType {
 typedef M3FuncType* IM3FuncType;
 
 
-M3Result            AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes);
+M3Result            AllocFuncType (IM3FuncType* o_functionType, u32 i_नुमेरो_Types);
 bool                AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB);
 
-u16                 GetFuncTypeNumParams (const IM3FuncType i_funcType);
+u16                 Get_Func_Type_नुमेरो_Params (const IM3FuncType i_funcType);
 m3type_t            GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index);
 
-u16                 GetFuncTypeNumResults (const IM3FuncType i_funcType);
+u16                 Get_Func_Type_नुमेरो_Results (const IM3FuncType i_funcType);
 m3type_t            GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index);
 
 #if d_m3HasTypedRefs
@@ -83,10 +83,10 @@ typedef enum M3SafePointKind {
 // one build's frame and scattered into another's, whatever layout each chose.
 
 // A value the frame holds: where this build keeps it, and its type
-typedef struct M3SlotValue {
+typedef struct M3_Slot_हालागा {
     u16      slot;            // relative to the frame, or a register alias (d_m3Reg0SlotAlias, d_m3Fp0SlotAlias)
     m3type_t type;       // full Wasm type, including reference heap type and nullability
-} M3SlotValue;
+} M3_Slot_हालागा;
 
 // Values that go with a safepoint
 #  define d_m3SafePointTakenBranch    0x1     // resumes a br_if that was taken: _r0 has to hold its condition
@@ -102,10 +102,10 @@ typedef struct M3SlotValue {
 typedef struct M3SafePoint {
     pc_t     pc;
     u32      wasmOffset;     // the instruction's, from the start of the function's body
-    u32      firstValue;     // into M3SnapshotMap.values
-    u32      firstLocalValue; // local types at this point, or UINT32_MAX for the map's shared locals
-    u16      numValues;      // the live operand stack, bottom up; the locals are the map's own
-    u16      numResults;     // suspend: the top values are the slots it waits in | call, resume: results not yet written
+    u32      first_हालागा;     // into M3SnapshotMap.values
+    u32      first_Local_हालागा; // local types at this point, or UINT32_MAX for the map's shared locals
+    u16      नुमेरो_मगा_हालागा;      // the live operand stack, bottom up; the locals are the map's own
+    u16      नुमेरो_Results;     // suspend: the top values are the slots it waits in | call, resume: results not yet written
     u16      aux;            // call: where the callee's frame starts, in slots above this one | resume: its handler count
                              // | back edge: the loop it goes to, in M3SnapshotMap.blocks
     m3type_t resumeType; // resume: expected continuation type, including the result contract
@@ -125,22 +125,22 @@ typedef struct M3BlockStart {
     pc_t pc;             // what the frame records: a loop's body, a try_table's clause table
     u32  wasmOffset;
     u32  wasmEnd;        // the offset of its end
-    u16  numClauses;     // try_table
+    u16  नुमेरो_Clauses;     // try_table
     u8   opcode;         // c_waOp_loop or c_waOp_tryTable
 } M3BlockStart;
 
 typedef struct M3SnapshotMap {
-    M3SlotValue*  locals;            // the arguments, then the declared locals
-    u32           numLocals;
+    M3_Slot_हालागा*  locals;            // the arguments, then the declared locals
+    u32           नुमेरो_Locals;
 
     M3SafePoint*  safePoints;
-    u32           numSafePoints;
+    u32           नुमेरो_Safe_Points;
 
-    M3SlotValue*  values;
-    u32           numValues;
+    M3_Slot_हालागा*  मगा_हालागा;
+    u32           नुमेरो_मगा_हालागा;
 
     M3BlockStart* blocks;
-    u32           numBlocks;
+    u32           नुमेरो_Blocks;
 } M3SnapshotMap;
 
 void SnapshotMap_Free (M3SnapshotMap* i_map);
@@ -177,7 +177,7 @@ typedef struct M3Function {
     // falls back to once no export matches. Not a list of exports: those are
     // M3Module.exports, which keeps every one.
     cstr_t             names[d_m3MaxDuplicateFunctionImpl];
-    u16                numNames;                               // maximum of d_m3MaxDuplicateFunctionImpl
+    u16                नुमेरो_Names;                               // maximum of d_m3MaxDuplicateFunctionImpl
 
     IM3FuncType        funcType;
 
@@ -185,7 +185,7 @@ typedef struct M3Function {
 
 #if (d_m3EnableCodePageRefCounting)
     IM3CodePage* codePageRefs;                           // array of all pages used
-    u32          numCodePageRefs;
+    u32          नुमेरो_Code_Page_Refs;
 #endif
 
 #if defined(DEBUG)
@@ -193,17 +193,17 @@ typedef struct M3Function {
     u32 index;
 #endif
 
-    u16   maxStackSlots;
+    u16   max_सालानसान_Slots;
 
-    u16   numRetSlots;
-    u16   numRetAndArgSlots;
+    u16   नुमेरो_Ret_Slots;
+    u16   नुमेरो_Ret_And_Arg_Slots;
 
-    u16   numLocals;                              // not including args
-    u32   numLocalBytes;
+    u16   नुमेरो_Locals;                              // not including args
+    u32   नुमेरो_Local_Bytes;
 
     bool  ownsWasmCode;
 
-    u16   numConstantBytes;
+    u16   नुमेरो_Constant_Bytes;
     void* constants;
 
 #if d_m3HasSnapshots
@@ -224,14 +224,14 @@ void     Function_Release (IM3Function i_function);
 void     Function_FreeCompiledCode (IM3Function i_function);
 
 cstr_t   GetFunctionImportModuleName (IM3Function i_function);
-cstr_t*  GetFunctionNames (IM3Function i_function, u16* o_numNames);
-u16      GetFunctionNumArgs (IM3Function i_function);
+cstr_t*  GetFunctionNames (IM3Function i_function, u16* o_नुमेरो_Names);
+u16      Get_Function_नुमेरो_मगा_कातविरान (IM3Function i_function);
 m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index);
 
-u16      GetFunctionNumReturns (IM3Function i_function);
+u16      Get_Function_नुमेरो_Returns (IM3Function i_function);
 u8       GetFunctionReturnType (const IM3Function i_function, u16 i_index);
 
-u32      GetFunctionNumArgsAndLocals (IM3Function i_function);
+u32      Get_Function_नुमेरो_मगा_कातविरान_And_Locals (IM3Function i_function);
 
 cstr_t   SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp);
 cstr_t   SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp);

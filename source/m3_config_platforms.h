@@ -124,12 +124,12 @@
 // __builtin_frame_address reads the real machine stack even when ASan relocates
 // locals to its heap "fake stack".
 #if defined(__GNUC__) || defined(__clang__)
-#  define m3_NativeStackPtr()   ((void*) __builtin_frame_address (0))
+#  define m3_Native_सालानसान_Ptr()   ((void*) __builtin_frame_address (0))
 #elif defined(_MSC_VER)
 #  include <intrin.h>
-#  define m3_NativeStackPtr()   (_AddressOfReturnAddress ())
+#  define m3_Native_सालानसान_Ptr()   (_AddressOfReturnAddress ())
 #else
-#  define m3_NativeStackPtr()   ((void*) & (volatile char){ 0 })
+#  define m3_Native_सालानसान_Ptr()   ((void*) & (volatile char){ 0 })
 #endif
 
 #ifndef M3_MIN
@@ -141,7 +141,7 @@
 
 #define M3_INIT(field) memset(&field, 0, sizeof(field))
 
-#define M3_COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+#define M3_बिलांग_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
 #if defined(__AVR__)
 
@@ -217,9 +217,9 @@ typedef int8_t         i8;
  * Device-specific defaults
  */
 
-#ifndef d_m3MaxFunctionStackHeight
+#ifndef d_m3_Max_Function_सालानसान_Height
 #  if defined(ESP8266) || defined(ESP32) || defined(ARDUINO_AMEBA) || defined(TEENSYDUINO)
-#    define d_m3MaxFunctionStackHeight          256
+#    define d_m3_Max_Function_सालानसान_Height          256
 #  endif
 #endif
 
@@ -299,11 +299,11 @@ typedef int8_t         i8;
 #  ifndef d_m3MaxConstantTableSize
 #    define d_m3MaxConstantTableSize             64
 #  endif
-#  ifndef d_m3MaxFunctionStackHeight
-#    define d_m3MaxFunctionStackHeight           128
+#  ifndef d_m3_Max_Function_सालानसान_Height
+#    define d_m3_Max_Function_सालानसान_Height           128
 #  endif
-#  ifndef d_m3MaxNativeStack
-#    define d_m3MaxNativeStack                   0
+#  ifndef d_m3_Max_Native_सालानसान
+#    define d_m3_Max_Native_सालानसान                   0
 #  endif
 #  ifndef d_m3CodePageAlignSize
 #    define d_m3CodePageAlignSize                1024
@@ -323,8 +323,8 @@ typedef int8_t         i8;
 #  ifndef d_m3HasAtomics
 #    define d_m3HasAtomics                       0
 #  endif
-#  ifndef d_m3HasStackSwitching
-#    define d_m3HasStackSwitching                0
+#  ifndef d_m3_Has_सालानसान_Switching
+#    define d_m3_Has_सालानसान_Switching                0
 #  endif
 #endif
 

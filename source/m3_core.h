@@ -74,7 +74,7 @@ typedef u64 m3slot_t;
 
 typedef m3slot_t* m3stack_t;
 
-#define c_ioSlotCount ((u16)(sizeof(u64) / sizeof(m3slot_t)))
+#define c_io_Slot_बिलांग ((u16)(sizeof(u64) / sizeof(m3slot_t)))
 
 typedef const void* const cvptr_t;
 
@@ -143,7 +143,7 @@ typedef code_t const* /*__restrict__*/ pc_t;
 // prerequisite for a runtime holding more than one memory.
 typedef struct M3MemoryHeader {
     IM3Runtime       runtime;
-    void*            maxStack;
+    void*            max_सालानसान;
     size_t           length;
     struct M3Memory* memory;         // the M3Memory this block belongs to
 } M3MemoryHeader;
@@ -153,10 +153,10 @@ struct M3CodeMappingPage;
 typedef struct M3CodePageHeader {
     struct M3CodePage* next;
 
-    u32                lineIndex;
-    u32                numLines;
+    u32                लिन्या_Index;
+    u32                नुमेरो_मगा_लिन्या;
     u32                sequence;       // this is just used for debugging; could be removed
-    u32                usageCount;
+    u32                usage_बिलांग;
 
 #if d_m3RecordBacktraces
     struct M3CodeMappingPage* mapping;
@@ -164,7 +164,7 @@ typedef struct M3CodePageHeader {
 } M3CodePageHeader;
 
 
-#define d_m3CodePageFreeLinesThreshold      7+2       // max is: ReturnCallIndirect (op + 6 immediates) + 2 for bridge
+#define d_m3_Code_Page_Free_मगा_लिन्या_Threshold      7+2       // max is: ReturnCallIndirect (op + 6 immediates) + 2 for bridge
 
 #define d_m3DefaultMemPageSize              65536
 
@@ -187,28 +187,28 @@ typedef struct M3CodePageHeader {
 
 #if d_m3HasTypedRefs
 // a heap type index has to fit in the spare bits of an m3type_t, see below
-#  define d_m3MaxSaneTypesCount             4094
+#  define d_m3_Max_Sane_Types_बिलांग             4094
 #else
 // M3Environment.numFuncTypes is the u16 that hands out M3FuncType.canonicalIndex,
 // so the count has to stay below 65536 here as well
-#  define d_m3MaxSaneTypesCount             65500
+#  define d_m3_Max_Sane_Types_बिलांग             65500
 #endif
-#define d_m3MaxSaneFunctionsCount           1000000
-#define d_m3MaxSaneImportsCount             100000
-#define d_m3MaxSaneExportsCount             100000
-#define d_m3MaxSaneGlobalsCount             1000000
-#define d_m3MaxSaneTagsCount                100000
+#define d_m3_Max_Sane_Functions_बिलांग           1000000
+#define d_m3_Max_Sane_Imports_बिलांग             100000
+#define d_m3_Max_Sane_Exports_बिलांग             100000
+#define d_m3_Max_Sane_Globals_बिलांग             1000000
+#define d_m3_Max_Sane_Tags_बिलांग                100000
 #define d_m3MaxSaneElementSegments          10000000
 #define d_m3MaxSaneDataSegments             100000
 #define d_m3MaxSaneTableSize                10000000
-#define d_m3MaxSaneMemoriesCount            10000
+#define d_m3_Max_Sane_Memories_बिलांग            10000
 #if d_m3HasRefTypes
-#  define d_m3MaxSaneTableCount             1000
+#  define d_m3_Max_Sane_Table_बिलांग             1000
 #else
-#  define d_m3MaxSaneTableCount             1           // MVP: a single table
+#  define d_m3_Max_Sane_Table_बिलांग             1           // MVP: a single table
 #endif
 #define d_m3MaxSaneUtf8Length               10000
-#define d_m3MaxSaneFunctionArgRetCount      1000    // still insane, but whatever
+#define d_m3_Max_Sane_Function_Arg_Ret_बिलांग      1000    // still insane, but whatever
 
 #define d_externalKind_function             0
 #define d_externalKind_table                1
@@ -249,13 +249,13 @@ static const char* const c_waCompactTypes[] = { "_", "i", "I", "f", "F", "V", "r
 #if d_m3VerboseErrorMessages
 
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...);
+                  const char* const i_file, u32 i_लिन्या_नुमेरो, const char* const i_errorMessage, ...);
 
-#  define _m3Error(RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ...) \
-            m3Error (RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ##__VA_ARGS__)
+#  define _m3Error(RESULT, RT, MOD, FUN, FILE, लिन्या, FORMAT, ...) \
+            m3Error (RESULT, RT, MOD, FUN, FILE, लिन्या, FORMAT, ##__VA_ARGS__)
 
 #else
-#  define _m3Error(RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ...) (RESULT)
+#  define _m3Error(RESULT, RT, MOD, FUN, FILE, लिन्या, FORMAT, ...) (RESULT)
 #endif
 
 #define ErrorRuntime(RESULT, RUNTIME, FORMAT, ...)      _m3Error (RESULT, RUNTIME, NULL, NULL,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
@@ -288,25 +288,25 @@ void            Guard_GiveSlot (void* i_slot);
 
 // The whole arena, for a fault to be held against - see m3_HostProtectedCall. Answers
 // (NULL, 0) before anything has asked for a slot.
-void            Guard_ArenaRange (void** o_low, size_t* o_bytes);
+void            Guard_ArenaRange (void** o_माबाबा, size_t* o_bytes);
 
 #endif // d_m3GuardedMemory
 
-#if d_m3MaxNativeStack > 0
+#if d_m3_Max_Native_सालानसान > 0
 // The native-stack low-water mark for a top-level call that came in at i_stackPtr,
 // clamped to what the calling thread's stack really is where that can be measured.
 // See d_m3MaxNativeStack and d_m3StackLimitEnter.
-void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget);
+void* m3_Native_सालानसान_Limit (void* i_सालानसान_Ptr, size_t i_budget);
 #endif
 
-#if d_m3LogNativeStack
-void m3StackCheckInit ();
-void m3StackCheck ();
-int  m3StackGetMax ();
+#if d_m3_Log_Native_सालानसान
+void m3_सालानसान_Check_Init ();
+void m3_सालानसान_Check ();
+int  m3_सालानसान_Get_Max ();
 #else
-#  define     m3StackCheckInit()
-#  define     m3StackCheck()
-#  define     m3StackGetMax()         0
+#  define     m3_सालानसान_Check_Init()
+#  define     m3_सालानसान_Check()
+#  define     m3_सालानसान_Get_Max()         0
 #endif
 
 #if d_m3LogTimestamps
@@ -336,18 +336,18 @@ void* m3_AllocStruct_Impl (ccstr_t name, size_t i_size)
 }
 
 static inline
-void* m3_AllocArray_Impl (ccstr_t name, size_t i_num, size_t i_size)
+void* m3_AllocArray_Impl (ccstr_t name, size_t i_नुमेरो, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size * i_num);
-    fprintf(stderr, PRIts ";heap:AllocArr;%s;%zu;%zu;%p;;\n", m3_GetTimestamp(), name, i_size, i_num, result);
+    void* result = m3_Malloc_Impl(i_size * i_नुमेरो);
+    fprintf(stderr, PRIts ";heap:AllocArr;%s;%zu;%zu;%p;;\n", m3_GetTimestamp(), name, i_size, i_नुमेरो, result);
     return result;
 }
 
 static inline
-void* m3_ReallocArray_Impl (ccstr_t name, void* i_ptr_old, size_t i_num_new, size_t i_num_old, size_t i_size)
+void* m3_ReallocArray_Impl (ccstr_t name, void* i_ptr_old, size_t i_नुमेरो_new, size_t i_नुमेरो_old, size_t i_size)
 {
-    void* result = m3_Realloc_Impl(i_ptr_old, i_size * i_num_new, i_size * i_num_old);
-    fprintf(stderr, PRIts ";heap:ReallocArr;%s;%zu;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_size, i_num_new, result, i_num_old, i_ptr_old);
+    void* result = m3_Realloc_Impl(i_ptr_old, i_size * i_नुमेरो_new, i_size * i_नुमेरो_old);
+    fprintf(stderr, PRIts ";heap:ReallocArr;%s;%zu;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_size, i_नुमेरो_new, result, i_नुमेरो_old, i_ptr_old);
     return result;
 }
 
@@ -367,7 +367,7 @@ void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
 }
 
 #  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_AllocStruct_Impl  (#STRUCT, sizeof (STRUCT))
-#  define     m3_AllocArray(STRUCT, NUM)              (STRUCT *)m3_AllocArray_Impl   (#STRUCT, NUM, sizeof (STRUCT))
+#  define     m3_AllocArray(STRUCT, नुमेरो)              (STRUCT *)m3_AllocArray_Impl   (#STRUCT, नुमेरो, sizeof (STRUCT))
 #  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_ReallocArray_Impl (#STRUCT, (void *)(PTR), (NEW), (OLD), sizeof (STRUCT))
 #  define     m3_Free(P)                              do { void* p = (void*)(P);                                  \
                                                           if (p) { fprintf(stderr, PRIts ";heap:FreeMem;;;;%p;\n", m3_GetTimestamp(), p); }     \
@@ -376,7 +376,7 @@ void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
 #  define     m3_Malloc(NAME, SIZE)                   m3_Malloc_Impl(SIZE)
 #  define     m3_Realloc(NAME, PTR, NEW, OLD)         m3_Realloc_Impl(PTR, NEW, OLD)
 #  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT))
-#  define     m3_AllocArray(STRUCT, NUM)              (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT) * (NUM))
+#  define     m3_AllocArray(STRUCT, नुमेरो)              (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT) * (नुमेरो))
 #  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_Realloc_Impl ((void *)(PTR), sizeof (STRUCT) * (NEW), sizeof (STRUCT) * (OLD))
 #  define     m3_Free(P)                              do { m3_Free_Impl ((void*)(P)); (P) = NULL; } while(0)
 #endif
@@ -467,28 +467,28 @@ bool     IsRefType (m3type_t i_m3Type);
 bool     Is64BitType (m3type_t i_m3Type);
 u32      SizeOfType (m3type_t i_m3Type);
 
-M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u64 (u64* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u32 (u32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
 #if d_m3ImplementFloat
-M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_f64 (f64* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_f32 (f32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
 #endif
-M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u8 (u8* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_opcode (m3opcode_t* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
 
-M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLebUnsigned (u64* o_हालागा, u32 i_max_नुमेरो_Bits, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLebSigned (i64* o_हालागा, u32 i_max_नुमेरो_Bits, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_u32 (u32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
 
 // The memarg immediate of a load or store: an alignment hint, then a static
 // offset. Multi-memory reinterprets the alignment as a bitfield -- bit 6 says a
 // memory index sits between the two -- so the hint is returned with that bit
 // masked off and the index defaults to 0 when it is clear.
 M3Result ReadMemoryArg (u32* o_align, u32* o_memoryIdx, u64* o_offset, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_u7 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i7 (i8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i32 (i32* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i64 (i64* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_u7 (u8* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i7 (i8* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i32 (i32* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i64 (i64* o_हालागा, bytes_t* io_bytes, cbytes_t i_end);
 M3Result Read_utf8 (cstr_t* o_utf8, bytes_t* io_bytes, cbytes_t i_end);
 
 #if d_m3HasSnapshots
@@ -510,13 +510,13 @@ void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size);
 u64  Xxh64_Digest (const Xxh64* i_state);
 #endif // d_m3HasSnapshots
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type);
+cstr_t SPrint_हालागा (void* i_हालागा, m3type_t i_type);
 size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type);
 
-void   ReportError (IM3Runtime io_runtime, IM3Module i_module, IM3Function i_function, ccstr_t i_errorMessage, ccstr_t i_file, u32 i_lineNum);
+void   ReportError (IM3Runtime io_runtime, IM3Module i_module, IM3Function i_function, ccstr_t i_errorMessage, ccstr_t i_file, u32 i_लिन्या_नुमेरो);
 
 #if d_m3RecordBacktraces
-void PushBacktraceFrame (IM3Runtime io_runtime, pc_t i_pc);
+void इतुलाक_Backtrace_Frame (IM3Runtime io_runtime, pc_t i_pc);
 void FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function);
 void ClearBacktrace (IM3Runtime io_runtime);
 #endif

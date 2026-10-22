@@ -21,7 +21,7 @@
 #include "m3_core.h"
 #include "m3_host.h"
 
-void* m3_HostStackBase (void)
+void* m3_Host_सालानसान_Base (void)
 {
     return NULL;
 }

@@ -43,7 +43,7 @@ d_m3BeginExternC
 // is the system's business - a guard page usually - so the answer bounds the
 // stack rather than describing what is safe to touch; d_m3NativeStackMargin is
 // what keeps the difference.
-void* m3_HostStackBase (void);
+void* m3_Host_सालानसान_Base (void);
 
 // Suspension interrupt handlers (Ctrl+Z / SIGTSTP / SIGINT / Console Ctrl)
 void  m3_HostInstallInterruptHandler (IM3Runtime io_runtime);
@@ -207,7 +207,7 @@ void   m3_HostRelease (void* i_address, size_t i_bytes);
 // the caller has to be able to carry on without it, which for the interpreter means
 // the Wasm stack and the memory, both of which are just data.
 bool   m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
-                             void* i_guardLow, size_t i_guardBytes);
+                             void* i_guard_माबाबा, size_t i_guardBytes);
 
 // Whether m3_HostProtectedCall can actually catch that fault, which is not a given:
 // a sanitizer takes the signal exclusively and a process is free to install whatever

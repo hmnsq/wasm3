@@ -55,7 +55,7 @@ typedef struct M3ErrorInfo {
     IM3Function function;
 
     const char* file;
-    uint32_t    line;
+    uint32_t    लिन्या_2;
 
     const char* message;
 } M3ErrorInfo;
@@ -82,7 +82,7 @@ typedef enum M3ResourceLimit {
     c_m3Limit_Continuations,     // Concurrent active cont.new stacks, recycled on completion.
 } M3ResourceLimit;
 
-typedef enum M3ValueType {
+typedef enum M3_हालागा_Type {
     c_m3Type_none      = 0,
     c_m3Type_i32       = 1,
     c_m3Type_i64       = 2,
@@ -118,22 +118,22 @@ typedef enum M3ValueType {
     c_m3Type_contref   = 9,
 
     // the number of concrete value types
-    c_m3Type_count,
+    c_m3_Type_बिलांग,
 
     // "not a valid type" - returned where a lookup or a mapping failed.
-    c_m3Type_unknown = c_m3Type_count
-} M3ValueType;
+    c_m3Type_unknown = c_m3_Type_बिलांग
+} M3_हालागा_Type;
 
-typedef struct M3TaggedValue {
-    M3ValueType type;
-    union M3ValueUnion {
+typedef struct M3_Tagged_हालागा {
+    M3_हालागा_Type type;
+    union M3_हालागा_Union {
         uint32_t    i32;
         uint64_t    i64;
         float       f32;
         double      f64;
         const void* ref;        // funcref / externref; NULL is the null reference
-    } value;
-} M3TaggedValue, *IM3TaggedValue;
+    } हालागा;
+} M3_Tagged_हालागा, *IM3_Tagged_हालागा;
 
 typedef struct M3ImportInfo {
     const char* moduleUtf8;
@@ -178,14 +178,14 @@ d_m3ErrorConst(wasmMalformed,                  "malformed Wasm binary")
 d_m3ErrorConst(misorderedWasmSection,          "out of order Wasm section")
 d_m3ErrorConst(wasmUnderrun,                   "underrun while parsing Wasm binary")
 d_m3ErrorConst(wasmOverrun,                    "overrun while parsing Wasm binary")
-d_m3ErrorConst(wasmMissingInitExpr,            "missing init_expr in Wasm binary")
+d_m3ErrorConst(wasm_Missing_Init_पाहायाग,            "missing init_expr in Wasm binary")
 d_m3ErrorConst(lebOverflow,                    "LEB encoded value overflow")
 d_m3ErrorConst(missingUTF8,                    "invalid length UTF-8 string")
 d_m3ErrorConst(wasmSectionUnderrun,            "section underrun while parsing Wasm binary")
 d_m3ErrorConst(wasmSectionOverrun,             "section overrun while parsing Wasm binary")
 d_m3ErrorConst(invalidTypeId,                  "unknown value_type")
 d_m3ErrorConst(tooManyMemorySections,          "only one memory per module is supported")
-d_m3ErrorConst(tooManyArgsRets,                "too many arguments or return values")
+d_m3ErrorConst(too_Many_मगा_कातविरान_Rets,                "too many arguments or return values")
 
 // link errors
 d_m3ErrorConst(moduleNotLinked,                "attempting to use module that is not loaded")
@@ -203,12 +203,12 @@ d_m3ErrorConst(functionSignatureMismatch,      "function signature mismatch")
 d_m3ErrorConst(noCompiler,                     "no compiler found for opcode")
 d_m3ErrorConst(unknownOpcode,                  "unknown opcode")
 d_m3ErrorConst(restrictedOpcode,               "restricted opcode")
-d_m3ErrorConst(functionStackOverflow,          "compiling function overran its stack height limit")
-d_m3ErrorConst(functionStackUnderrun,          "compiling function underran the stack")
+d_m3ErrorConst(function_सालानसान_Overflow,          "compiling function overran its stack height limit")
+d_m3ErrorConst(function_सालानसान_Underrun,          "compiling function underran the stack")
 d_m3ErrorConst(mallocFailedCodePage,           "memory allocation failed when acquiring a new M3 code page")
 d_m3ErrorConst(settingImmutableGlobal,         "attempting to set an immutable global")
 d_m3ErrorConst(typeMismatch,                   "incorrect type on stack")
-d_m3ErrorConst(typeCountMismatch,              "incorrect value count on stack")
+d_m3ErrorConst(type_बिलांग_Mismatch,              "incorrect value count on stack")
 
 // validation errors. The wording follows the spec's own assert_invalid failure
 d_m3ErrorConst(unknownType,                    "unknown type")
@@ -221,7 +221,7 @@ d_m3ErrorConst(unknownTag,                     "unknown tag")
 d_m3ErrorConst(unknownMemory,                  "unknown memory")
 d_m3ErrorConst(unknownDataSegment,             "unknown data segment")
 d_m3ErrorConst(unknownElemSegment,             "unknown elem segment")
-d_m3ErrorConst(dataCountRequired,              "data count section required")
+d_m3ErrorConst(data_बिलांग_Required,              "data count section required")
 d_m3ErrorConst(invalidAlignment,               "alignment must not be larger than natural")
 d_m3ErrorConst(invalidAtomicAlignment,         "atomic alignment must be natural")
 d_m3ErrorConst(undeclaredFuncRef,              "undeclared function reference")
@@ -231,7 +231,7 @@ d_m3ErrorConst(missingCompiledCode,            "function is missing compiled m3 
 d_m3ErrorConst(wasmMemoryOverflow,             "runtime ran out of memory")
 d_m3ErrorConst(globalMemoryNotAllocated,       "global memory is missing from a module")
 d_m3ErrorConst(globaIndexOutOfBounds,          "global index is too large")
-d_m3ErrorConst(argumentCountMismatch,          "argument count mismatch")
+d_m3ErrorConst(argument_बिलांग_Mismatch,          "argument count mismatch")
 d_m3ErrorConst(argumentTypeMismatch,           "argument type mismatch")
 d_m3ErrorConst(globalLookupFailed,             "global lookup failed")
 d_m3ErrorConst(globalTypeMismatch,             "global type mismatch")
@@ -267,7 +267,7 @@ d_m3ErrorConst(trapExit,                       "[trap] program called exit")
 d_m3ErrorConst(trapAbort,                      "[trap] program called abort")
 d_m3ErrorConst(trapUnreachable,                "[trap] unreachable")
 d_m3ErrorConst(trapUnsupportedInstruction,     "[trap] unsupported instruction")
-d_m3ErrorConst(trapStackOverflow,              "[trap] stack overflow")
+d_m3ErrorConst(trap_सालानसान_Overflow,              "[trap] stack overflow")
 d_m3ErrorConst(trapOutOfGas,                   "[trap] out of gas")
 d_m3ErrorConst(trapUncaughtException,          "[trap] uncaught exception")
 d_m3ErrorConst(trapContinuationConsumed,       "[trap] continuation already consumed")
@@ -301,7 +301,7 @@ void           m3_SetCustomSectionHandler (IM3Environment i_environment, M3Secti
 //-------------------------------------------------------------------------------------------------------------------------------
 
 IM3Runtime     m3_NewRuntime (IM3Environment io_environment,
-                              uint32_t       i_stackSizeInBytes,
+                              uint32_t       i_सालानसान_Size_In_Bytes,
                               void*          i_userdata);
 
 void           m3_FreeRuntime (IM3Runtime i_runtime);
@@ -319,7 +319,7 @@ void           m3_SetValidation (IM3Runtime i_runtime, bool i_enable);
 // a positive budget before compilation to instrument metered code. Gas saturates
 // at INT64_MAX, continuations at UINT32_MAX. Setting an allocation limit leaves
 // usage unchanged; setting gas starts a fresh execution budget.
-M3Result       m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_value);
+M3Result       m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_हालागा);
 // Returns the effective (possibly saturated) limit; unsupported/unset limits are zero.
 uint64_t       m3_GetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit);
 // Usage is tracked even without a limit (for gas, requires arming before compilation).
@@ -373,7 +373,7 @@ M3Result       m3_BindImportMemory (IM3Module         io_module,
 M3Result       m3_ParseModule (IM3Environment       i_environment,
                                IM3Module*           o_module,
                                const uint8_t* const i_wasmBytes,
-                               uint32_t             i_numWasmBytes);
+                               uint32_t             i_नुमेरो_Wasm_Bytes);
 
 // Only a module that was never handed to m3_LoadModule needs to be freed.
 void           m3_FreeModule (IM3Module i_module);
@@ -412,7 +412,7 @@ M3Result       m3_LinkRawFunctionEx (IM3Module         io_module,
 M3Result       m3_LinkGlobal (IM3Module            io_module,
                               const char* const    i_moduleName,
                               const char* const    i_globalName,
-                              const IM3TaggedValue i_value);
+                              const IM3_Tagged_हालागा i_हालागा);
 
 const char*    m3_GetModuleName (IM3Module i_module);
 void           m3_SetModuleName (IM3Module i_module, const char* name);
@@ -430,12 +430,12 @@ IM3Global      m3_FindGlobal (IM3Module         io_module,
                               const char* const i_globalName);
 
 M3Result       m3_GetGlobal (IM3Global      i_global,
-                             IM3TaggedValue o_value);
+                             IM3_Tagged_हालागा o_हालागा);
 
 M3Result       m3_SetGlobal (IM3Global            i_global,
-                             const IM3TaggedValue i_value);
+                             const IM3_Tagged_हालागा i_हालागा);
 
-M3ValueType    m3_GetGlobalType (IM3Global i_global);
+M3_हालागा_Type    m3_GetGlobalType (IM3Global i_global);
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //  functions
@@ -456,13 +456,13 @@ M3Result       m3_GetTableFunction (IM3Function* o_function,
                                     IM3Module    i_module,
                                     uint32_t     i_index);
 
-uint32_t       m3_GetArgCount (IM3Function i_function);
-uint32_t       m3_GetRetCount (IM3Function i_function);
-M3ValueType    m3_GetArgType (IM3Function i_function, uint32_t i_index);
-M3ValueType    m3_GetRetType (IM3Function i_function, uint32_t i_index);
+uint32_t       m3_Get_Arg_बिलांग (IM3Function i_function);
+uint32_t       m3_Get_Ret_बिलांग (IM3Function i_function);
+M3_हालागा_Type    m3_GetArgType (IM3Function i_function, uint32_t i_index);
+M3_हालागा_Type    m3_GetRetType (IM3Function i_function, uint32_t i_index);
 
 M3Result       m3_CallV (IM3Function i_function, ...);
-M3Result       m3_CallVL (IM3Function i_function, va_list i_args);
+M3Result       m3_CallVL (IM3Function i_function, va_list i_मगा_कातविरान);
 M3Result       m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[]);
 M3Result       m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_argv[]);
 
@@ -504,8 +504,8 @@ M3Result       m3_LinkTag (IM3Module         io_module,
                            const char* const i_tagName,
                            IM3Tag            i_tag);
 
-uint32_t       m3_GetTagArgCount (IM3Tag i_tag);
-M3ValueType    m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index);
+uint32_t       m3_Get_Tag_Arg_बिलांग (IM3Tag i_tag);
+M3_हालागा_Type    m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index);
 
 // Throws an exception from inside a raw host function, which returns what this
 // returns: the exception, on its way to the nearest try_table that catches it, or
@@ -520,7 +520,7 @@ M3Result       m3_ThrowException (IM3Runtime  io_runtime,
 // it ended with m3Err_trapUncaughtException; NULL after any other outcome. The
 // payload is a copy, so it outlives the call, but an exnref within it does not.
 IM3Tag         m3_GetExceptionTag (IM3Runtime i_runtime);
-M3Result       m3_GetExceptionArgs (IM3Runtime  i_runtime,
+M3Result       m3_Get_Exception_मगा_कातविरान (IM3Runtime  i_runtime,
                                     uint32_t    i_argc,
                                     const void* o_argptrs[]);
 
@@ -607,9 +607,9 @@ M3Result         m3_ResumeRuntime (IM3Runtime io_runtime);
 //  debug info
 //-------------------------------------------------------------------------------------------------------------------------------
 
-void             m3_PrintRuntimeInfo (IM3Runtime i_runtime);
-void             m3_PrintM3Info (void);
-void             m3_PrintProfilerInfo (void);
+void             m3_इलिम्बाग_Runtime_Info (IM3Runtime i_runtime);
+void             m3_इलिम्बाग_M3_Info (void);
+void             m3_इलिम्बाग_Profiler_Info (void);
 
 // The runtime owns the backtrace, do not free the backtrace you obtain. Returns NULL if there's no backtrace.
 IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
@@ -626,7 +626,7 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
 // value - which is why the declarations carry M3_UNUSED rather than the build
 // turning the warning off for everything.
 #define m3ApiReturnType(TYPE)                 TYPE* raw_return M3_UNUSED = ((TYPE*) (_sp++));
-#define m3ApiMultiValueReturnType(TYPE, NAME) TYPE* NAME M3_UNUSED = ((TYPE*) (_sp++));
+#define m3_Api_Multi_हालागा_Return_Type(TYPE, NAME) TYPE* NAME M3_UNUSED = ((TYPE*) (_sp++));
 #define m3ApiGetArg(TYPE, NAME)               TYPE NAME M3_UNUSED = \
    (sizeof(TYPE) >= sizeof(uint32_t)) ? \
    (*((TYPE *)(_sp++))) : \
@@ -651,9 +651,9 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
    }
 
 #define m3ApiRawFunction(NAME)               const void * NAME (IM3Runtime runtime, IM3ImportContext _ctx, uint64_t * _sp, void * _mem)
-#define m3ApiReturn(VALUE)                   { *raw_return = (VALUE); return m3Err_none;}
-#define m3ApiMultiValueReturn(NAME, VALUE)   { *NAME = (VALUE); }
-#define m3ApiTrap(VALUE)                     { return VALUE; }
+#define m3ApiReturn(हालागा_2)                   { *raw_return = (हालागा_2); return m3Err_none;}
+#define m3_Api_Multi_हालागा_Return(NAME, हालागा_2)   { *NAME = (हालागा_2); }
+#define m3ApiTrap(हालागा_2)                     { return हालागा_2; }
 #define m3ApiThrow(TAG, ARGC, ARGPTRS)       { return m3_ThrowException(runtime, TAG, ARGC, ARGPTRS); }
 #define m3ApiSuccess()                       { return m3Err_none; }
 

@@ -173,7 +173,7 @@ const char* wasi_whence2str (__wasi_whence_t whence)
  * WASI API implementation
  */
 
-m3ApiRawFunction(m3_wasi_p1_args_get)
+m3ApiRawFunction(m3_wasi_p1_मगा_कातविरान_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, argv)
@@ -201,7 +201,7 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
 }
 
-m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
+m3ApiRawFunction(m3_wasi_p1_मगा_कातविरान_sizes_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(__wasi_size_t*, argc)
@@ -234,14 +234,14 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     m3ApiGetArgMem(char*, env_buf)
 
     __wasi_errno_t ret;
-    __wasi_size_t  env_count, env_buf_size;
+    __wasi_size_t  env_बिलांग, env_buf_size;
 
-    ret = __wasi_environ_sizes_get(&env_count, &env_buf_size);
+    ret = __wasi_environ_sizes_get(&env_बिलांग, &env_buf_size);
     if (ret != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(ret);
     }
 
-    m3ApiCheckMem(env, env_count * sizeof(uint32_t));
+    m3ApiCheckMem(env, env_बिलांग * sizeof(uint32_t));
     m3ApiCheckMem(env_buf, env_buf_size);
 
     // the array is the guest's, but the host fills it with its own pointers, which
@@ -253,7 +253,7 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
         m3ApiReturn(ret);
     }
 
-    for (u32 i = 0; i < env_count; ++i) {
+    for (u32 i = 0; i < env_बिलांग; ++i) {
         m3ApiWriteMem32(&env[i], m3ApiPtrToOffset(host_env[i]));
     }
 
@@ -263,13 +263,13 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(__wasi_size_t*, env_count)
+    m3ApiGetArgMem(__wasi_size_t*, env_बिलांग)
     m3ApiGetArgMem(__wasi_size_t*, env_buf_size)
 
-    m3ApiCheckMem(env_count, sizeof(__wasi_size_t));
+    m3ApiCheckMem(env_बिलांग, sizeof(__wasi_size_t));
     m3ApiCheckMem(env_buf_size, sizeof(__wasi_size_t));
 
-    __wasi_errno_t ret = __wasi_environ_sizes_get(env_count, env_buf_size);
+    __wasi_errno_t ret = __wasi_environ_sizes_get(env_बिलांग, env_buf_size);
 
     m3ApiReturn(ret);
 }
@@ -1004,11 +1004,11 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
+    for (size_t i = 0; i < M3_बिलांग_OF(namespaces); i++) {
         const char* wasi = namespaces[i];
 
-_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
-_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_args_sizes_get, wasi_context)));
+_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_मगा_कातविरान_get, wasi_context)));
+_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_मगा_कातविरान_sizes_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "clock_res_get",        "i(i*)",   &m3_wasi_p1_clock_res_get)));
 _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "clock_time_get",       "i(iI*)",  &m3_wasi_p1_clock_time_get)));
 _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "environ_get",          "i(**)",   &m3_wasi_p1_environ_get)));

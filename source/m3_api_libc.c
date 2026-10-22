@@ -37,12 +37,12 @@ m3ApiRawFunction(m3_libc_memset)
     m3ApiReturnType(int32_t)
 
     m3ApiGetArgMem(void*, i_ptr)
-    m3ApiGetArg(int32_t, i_value)
+    m3ApiGetArg(int32_t, i_हालागा)
     m3ApiGetArg(wasm_size_t, i_size)
 
     m3ApiCheckMem(i_ptr, i_size);
 
-    u32 result = m3ApiPtrToOffset(memset(i_ptr, i_value, i_size));
+    u32 result = m3ApiPtrToOffset(memset(i_ptr, i_हालागा, i_size));
     m3ApiReturn(result);
 }
 
@@ -61,7 +61,7 @@ m3ApiRawFunction(m3_libc_memmove)
     m3ApiReturn(result);
 }
 
-m3ApiRawFunction(m3_libc_print)
+m3ApiRawFunction(m3_libc_इलिम्बाग)
 {
     m3ApiReturnType(uint32_t)
 
@@ -113,7 +113,7 @@ m3ApiRawFunction(m3_libc_printf)
     m3ApiReturnType(int32_t)
 
     m3ApiGetArgMem(const char*, i_fmt)
-    m3ApiGetArgMem(wasm_ptr_t*, i_args)
+    m3ApiGetArgMem(wasm_ptr_t*, i_मगा_कातविरान)
 
     if (m3ApiIsNullPtr(i_fmt)) {
         m3ApiReturn(0);
@@ -142,16 +142,16 @@ m3ApiRawFunction(m3_libc_printf)
         ch = *i_fmt++;
         switch (ch) {
         case 'c': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            char char_temp = *i_args++;
+            m3ApiCheckMem(i_मगा_कातविरान, sizeof(wasm_ptr_t));
+            char char_temp = *i_मगा_कातविरान++;
             fputc(char_temp, file);
             length++;
             break;
         }
         case 'd':
         case 'x': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            int  int_temp   = *i_args++;
+            m3ApiCheckMem(i_मगा_कातविरान, sizeof(wasm_ptr_t));
+            int  int_temp   = *i_मगा_कातविरान++;
             char buffer[32] = { 0 };
             internal_itoa(int_temp, buffer, (ch == 'x') ? 16 : 10);
             fputs(buffer, file);
@@ -159,11 +159,11 @@ m3ApiRawFunction(m3_libc_printf)
             break;
         }
         case 's': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
+            m3ApiCheckMem(i_मगा_कातविरान, sizeof(wasm_ptr_t));
             const char* string_temp;
             size_t      string_len;
 
-            string_temp = (const char*)m3ApiOffsetToPtr(*i_args++);
+            string_temp = (const char*)m3ApiOffsetToPtr(*i_मगा_कातविरान++);
             if (m3ApiIsNullPtr(string_temp)) {
                 string_temp = "(null)";
                 string_len  = 6;
@@ -249,7 +249,7 @@ M3Result m3_LinkLibC (IM3Module module)
     const char* env = "env";
     // clang-format off
 
-_   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_debug",            "i(*i)",   &m3_libc_print)));
+_   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_debug",            "i(*i)",   &m3_libc_इलिम्बाग)));
 _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_memset",           "*(*ii)",  &m3_libc_memset)));
 _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_memmove",          "*(**i)",  &m3_libc_memmove)));
 _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_memcpy",           "*(**i)",  &m3_libc_memmove))); // just alias of memmove

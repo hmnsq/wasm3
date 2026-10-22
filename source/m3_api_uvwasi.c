@@ -144,7 +144,7 @@ uvwasi_t* _get_uvwasi_p (IM3ImportContext _ctx)
  * WASI API implementation
  */
 
-m3ApiRawFunction(m3_wasi_p1_args_get)
+m3ApiRawFunction(m3_wasi_p1_मगा_कातविरान_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, argv)
@@ -172,7 +172,7 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
     m3ApiReturn(UVWASI_ESUCCESS);
 }
 
-m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
+m3ApiRawFunction(m3_wasi_p1_मगा_कातविरान_sizes_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uvwasi_size_t*, argc)
@@ -206,17 +206,17 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 
     char**         environment;
     uvwasi_errno_t ret;
-    uvwasi_size_t  env_count, env_buf_size;
+    uvwasi_size_t  env_बिलांग, env_buf_size;
 
-    ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_count, &env_buf_size);
+    ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_बिलांग, &env_buf_size);
     if (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
-    m3ApiCheckMem(env, env_count * sizeof(uint32_t));
+    m3ApiCheckMem(env, env_बिलांग * sizeof(uint32_t));
     m3ApiCheckMem(env_buf, env_buf_size);
 
-    environment = calloc(env_count, sizeof(char*));
+    environment = calloc(env_बिलांग, sizeof(char*));
     if (environment == NULL) {
         m3ApiReturn(UVWASI_ENOMEM);
     }
@@ -229,7 +229,7 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 
     uint32_t environ_buf_offset = m3ApiPtrToOffset(env_buf);
 
-    for (u32 i = 0; i < env_count; ++i) {
+    for (u32 i = 0; i < env_बिलांग; ++i) {
         uint32_t offset = environ_buf_offset +
                           (uint32_t)(environment[i] - environment[0]);
         m3ApiWriteMem32(&env[i], offset);
@@ -242,18 +242,18 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(uvwasi_size_t*, env_count)
+    m3ApiGetArgMem(uvwasi_size_t*, env_बिलांग)
     m3ApiGetArgMem(uvwasi_size_t*, env_buf_size)
 
-    m3ApiCheckMem(env_count, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(env_बिलांग, sizeof(uvwasi_size_t));
     m3ApiCheckMem(env_buf_size, sizeof(uvwasi_size_t));
 
-    uvwasi_size_t count;
+    uvwasi_size_t बिलांग;
     uvwasi_size_t buf_size;
 
-    uvwasi_errno_t ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &count, &buf_size);
+    uvwasi_errno_t ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &बिलांग, &buf_size);
 
-    m3ApiWriteMem32(env_count, count);
+    m3ApiWriteMem32(env_बिलांग, बिलांग);
     m3ApiWriteMem32(env_buf_size, buf_size);
 
     m3ApiReturn(ret);
@@ -696,13 +696,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
         //fprintf(stderr, "> fd_pread fd:%d iov%d.len:%d\n", fd, i, iovs[i].buf_len);
     }
 
-    uvwasi_size_t num_read;
+    uvwasi_size_t नुमेरो_read;
 
-    uvwasi_errno_t ret = uvwasi_fd_pread(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &num_read);
+    uvwasi_errno_t ret = uvwasi_fd_pread(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &नुमेरो_read);
 
-    WASI_TRACE("fd:%d | nread:%d", fd, num_read);
+    WASI_TRACE("fd:%d | nread:%d", fd, नुमेरो_read);
 
-    m3ApiWriteMem32(nread, num_read);
+    m3ApiWriteMem32(nread, नुमेरो_read);
     m3ApiReturn(ret);
 }
 
@@ -728,7 +728,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     }
     uvwasi_iovec_t iovs[32];
 #  endif
-    uvwasi_size_t  num_read;
+    uvwasi_size_t  नुमेरो_read;
     uvwasi_errno_t ret;
 
     for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
@@ -738,11 +738,11 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
         //fprintf(stderr, "> fd_read fd:%d iov%d.len:%d\n", fd, i, iovs[i].buf_len);
     }
 
-    ret = uvwasi_fd_read(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &num_read);
+    ret = uvwasi_fd_read(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &नुमेरो_read);
 
-    WASI_TRACE("fd:%d | nread:%d", fd, num_read);
+    WASI_TRACE("fd:%d | nread:%d", fd, नुमेरो_read);
 
-    m3ApiWriteMem32(nread, num_read);
+    m3ApiWriteMem32(nread, नुमेरो_read);
     m3ApiReturn(ret);
 }
 
@@ -768,7 +768,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     }
     uvwasi_ciovec_t iovs[32];
 #  endif
-    uvwasi_size_t  num_written;
+    uvwasi_size_t  नुमेरो_written;
     uvwasi_errno_t ret;
 
     for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
@@ -777,11 +777,11 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
     }
 
-    ret = uvwasi_fd_write(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &num_written);
+    ret = uvwasi_fd_write(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &नुमेरो_written);
 
-    WASI_TRACE("fd:%d | nwritten:%d", fd, num_written);
+    WASI_TRACE("fd:%d | nwritten:%d", fd, नुमेरो_written);
 
-    m3ApiWriteMem32(nwritten, num_written);
+    m3ApiWriteMem32(nwritten, नुमेरो_written);
     m3ApiReturn(ret);
 }
 
@@ -808,7 +808,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     }
     uvwasi_ciovec_t iovs[32];
 #  endif
-    uvwasi_size_t  num_written;
+    uvwasi_size_t  नुमेरो_written;
     uvwasi_errno_t ret;
 
     for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
@@ -817,11 +817,11 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
     }
 
-    ret = uvwasi_fd_pwrite(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &num_written);
+    ret = uvwasi_fd_pwrite(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &नुमेरो_written);
 
-    WASI_TRACE("fd:%d | nwritten:%d", fd, num_written);
+    WASI_TRACE("fd:%d | nwritten:%d", fd, नुमेरो_written);
 
-    m3ApiWriteMem32(nwritten, num_written);
+    m3ApiWriteMem32(nwritten, नुमेरो_written);
     m3ApiReturn(ret);
 }
 
@@ -969,9 +969,9 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
 // fd 16, and a clock's fields from 16.
 static
 void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
-                         uvwasi_size_t i_count)
+                         uvwasi_size_t i_बिलांग)
 {
-    for (uvwasi_size_t i = 0; i < i_count; ++i) {
+    for (uvwasi_size_t i = 0; i < i_बिलांग; ++i) {
         const uint8_t* s = i_in + (size_t)i * d_m3WasiSubscriptionSize;
 
         memset(&o_subs[i], 0, sizeof(o_subs[i]));
@@ -1012,24 +1012,24 @@ void write_event (uint8_t* o_rec, const uvwasi_event_t* i_event)
 // same in both. i_subs is NULL when there are none, which uvwasi answers for itself.
 static
 uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscription_t* i_subs,
-                                        uint8_t* o_out, uvwasi_size_t i_count,
+                                        uint8_t* o_out, uvwasi_size_t i_बिलांग,
                                         uvwasi_size_t* o_written)
 {
     *o_written = 0;
 
-    uvwasi_event_t* events = i_count ? m3_AllocArray(uvwasi_event_t, i_count) : NULL;
+    uvwasi_event_t* events = i_बिलांग ? m3_AllocArray(uvwasi_event_t, i_बिलांग) : NULL;
 
-    if (i_count and not events) {
+    if (i_बिलांग and not events) {
         return UVWASI_ENOMEM;
     }
 
     uvwasi_size_t  written = 0;
-    uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_count, &written);
+    uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_बिलांग, &written);
 
     if (ret == UVWASI_ESUCCESS) {
         // One event per subscription is the most that was checked for, and the most
         // there can be; clamping keeps a surprise from reaching past that
-        written = M3_MIN(written, i_count);
+        written = M3_MIN(written, i_बिलांग);
 
         for (uvwasi_size_t i = 0; i < written; ++i) {
             write_event(o_out + (size_t)i * d_m3WasiEventSize, &events[i]);
@@ -1064,16 +1064,16 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
         read_subscriptions(subs, in, nsubscriptions);
     }
 
-    uvwasi_size_t count = 0;
+    uvwasi_size_t बिलांग = 0;
 
     uvwasi_errno_t ret =
-      poll_wasi_subscriptions(_get_uvwasi_p(_ctx), subs, out, nsubscriptions, &count);
+      poll_wasi_subscriptions(_get_uvwasi_p(_ctx), subs, out, nsubscriptions, &बिलांग);
 
     m3_Free(subs);
 
-    WASI_TRACE("nsubscriptions:%d | nevents:%d", nsubscriptions, count);
+    WASI_TRACE("nsubscriptions:%d | nevents:%d", nsubscriptions, बिलांग);
 
-    m3ApiWriteMem32(nevents, count);
+    m3ApiWriteMem32(nevents, बिलांग);
 
     m3ApiReturn(ret);
 }
@@ -1159,11 +1159,11 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
+    for (size_t i = 0; i < M3_बिलांग_OF(namespaces); i++) {
         const char* wasi = namespaces[i];
 
-_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
-_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_args_sizes_get, wasi_context)));
+_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_मगा_कातविरान_get, wasi_context)));
+_       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_मगा_कातविरान_sizes_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "clock_res_get",        "i(i*)",   &m3_wasi_p1_clock_res_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "clock_time_get",       "i(iI*)",  &m3_wasi_p1_clock_time_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "environ_get",          "i(**)",   &m3_wasi_p1_environ_get, wasi_context)));
