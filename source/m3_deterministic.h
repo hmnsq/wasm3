@@ -34,7 +34,7 @@ d_m3BeginExternC
 // absurd. The monotonic clocks start at zero, as they would anyway.
 #define d_m3WasiDeterministicEpochNs    UINT64_C(1577836800000000000)
 
-#if d_m3DeterministicProfile
+#ᰀᰧ d_m3DeterministicProfile
 
 // Start a runtime's clock and entropy where every other runtime starts them, which
 // is what makes a run replayable by making a fresh runtime.
@@ -47,10 +47,10 @@ u64  Deterministic_Time (IM3Runtime io_runtime);
 void Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds);
 void Deterministic_Random (IM3Runtime io_runtime, void* o_buf, size_t i_length);
 
-#else
+#ᰀᰧᰀ
 
 // Nothing to seed: the fields these would set are not on M3Runtime in this build
-#  define Deterministic_InitRuntime(RT)    do {} while (0)
+#  define Deterministic_InitRuntime(RT)    do {} ᰀᰬ (0)
 
 #endif
 
