@@ -34,10 +34,10 @@
 
 #include "m3_core.h"
 
-#if defined(d_m3HasWASI)
+#nếu defined(d_m3HasWASI)
 
 // Fixup wasi_core.h
-#  if defined(M3_COMPILER_MSVC)
+#  nếu defined(M3_COMPILER_MSVC)
 #    define _Static_assert(...)
 #    define __attribute__(...)
 #    define _Noreturn
@@ -60,7 +60,7 @@ d_m3BeginExternC
 #  define d_m3WasiPreopenCount  5
 
 typedef struct m3_wasi_preopen_t {
-    int     fd;
+    số_nguyên     fd;
     ccstr_t path;
     ccstr_t real_path;
 } m3_wasi_preopen_t;
