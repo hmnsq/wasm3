@@ -10,7 +10,7 @@
 #include "m3_env.h"
 #include "m3_exception.h"
 
-#if defined(d_m3HasUVWASI)
+#ᬬᬾᬦ᭄ defined(d_m3HasUVWASI)
 
 #  include <stdio.h>
 #  include <string.h>
@@ -19,125 +19,125 @@
 #    include <crt_externs.h>
 #    define environ (*_NSGetEnviron())
 #  elif !defined(_MSC_VER)
-extern char** environ;
+extern var_na** environ;
 #  endif
 
 static m3_wasi_context_t* wasi_context = NULL;
 
-typedef struct wasi_iovec_t {
+typedef sa_nracanaa wasi_iovec_t {
     uvwasi_size_t buf;
     uvwasi_size_t buf_len;
 } wasi_iovec_t;
 
-#  if d_m3EnableWasiTracing
+#  ᬬᬾᬦ᭄ d_m3EnableWasiTracing
 
-const char* wasi_errno2str (uvwasi_errno_t err)
+const var_na* wasi_errno2str (uvwasi_errno_t err)
 {
     // clang-format off
     switch (err) {
-    case  0: return "ESUCCESS";
-    case  1: return "E2BIG";
-    case  2: return "EACCES";
-    case  3: return "EADDRINUSE";
-    case  4: return "EADDRNOTAVAIL";
-    case  5: return "EAFNOSUPPORT";
-    case  6: return "EAGAIN";
-    case  7: return "EALREADY";
-    case  8: return "EBADF";
-    case  9: return "EBADMSG";
-    case 10: return "EBUSY";
-    case 11: return "ECANCELED";
-    case 12: return "ECHILD";
-    case 13: return "ECONNABORTED";
-    case 14: return "ECONNREFUSED";
-    case 15: return "ECONNRESET";
-    case 16: return "EDEADLK";
-    case 17: return "EDESTADDRREQ";
-    case 18: return "EDOM";
-    case 19: return "EDQUOT";
-    case 20: return "EEXIST";
-    case 21: return "EFAULT";
-    case 22: return "EFBIG";
-    case 23: return "EHOSTUNREACH";
-    case 24: return "EIDRM";
-    case 25: return "EILSEQ";
-    case 26: return "EINPROGRESS";
-    case 27: return "EINTR";
-    case 28: return "EINVAL";
-    case 29: return "EIO";
-    case 30: return "EISCONN";
-    case 31: return "EISDIR";
-    case 32: return "ELOOP";
-    case 33: return "EMFILE";
-    case 34: return "EMLINK";
-    case 35: return "EMSGSIZE";
-    case 36: return "EMULTIHOP";
-    case 37: return "ENAMETOOLONG";
-    case 38: return "ENETDOWN";
-    case 39: return "ENETRESET";
-    case 40: return "ENETUNREACH";
-    case 41: return "ENFILE";
-    case 42: return "ENOBUFS";
-    case 43: return "ENODEV";
-    case 44: return "ENOENT";
-    case 45: return "ENOEXEC";
-    case 46: return "ENOLCK";
-    case 47: return "ENOLINK";
-    case 48: return "ENOMEM";
-    case 49: return "ENOMSG";
-    case 50: return "ENOPROTOOPT";
-    case 51: return "ENOSPC";
-    case 52: return "ENOSYS";
-    case 53: return "ENOTCONN";
-    case 54: return "ENOTDIR";
-    case 55: return "ENOTEMPTY";
-    case 56: return "ENOTRECOVERABLE";
-    case 57: return "ENOTSOCK";
-    case 58: return "ENOTSUP";
-    case 59: return "ENOTTY";
-    case 60: return "ENXIO";
-    case 61: return "EOVERFLOW";
-    case 62: return "EOWNERDEAD";
-    case 63: return "EPERM";
-    case 64: return "EPIPE";
-    case 65: return "EPROTO";
-    case 66: return "EPROTONOSUPPORT";
-    case 67: return "EPROTOTYPE";
-    case 68: return "ERANGE";
-    case 69: return "EROFS";
-    case 70: return "ESPIPE";
-    case 71: return "ESRCH";
-    case 72: return "ESTALE";
-    case 73: return "ETIMEDOUT";
-    case 74: return "ETXTBSY";
-    case 75: return "EXDEV";
-    case 76: return "ENOTCAPABLE";
-    default: return "<unknown>";
+    pak_sa  0: ᬯᬮᬶ "ESUCCESS";
+    pak_sa  1: ᬯᬮᬶ "E2BIG";
+    pak_sa  2: ᬯᬮᬶ "EACCES";
+    pak_sa  3: ᬯᬮᬶ "EADDRINUSE";
+    pak_sa  4: ᬯᬮᬶ "EADDRNOTAVAIL";
+    pak_sa  5: ᬯᬮᬶ "EAFNOSUPPORT";
+    pak_sa  6: ᬯᬮᬶ "EAGAIN";
+    pak_sa  7: ᬯᬮᬶ "EALREADY";
+    pak_sa  8: ᬯᬮᬶ "EBADF";
+    pak_sa  9: ᬯᬮᬶ "EBADMSG";
+    pak_sa 10: ᬯᬮᬶ "EBUSY";
+    pak_sa 11: ᬯᬮᬶ "ECANCELED";
+    pak_sa 12: ᬯᬮᬶ "ECHILD";
+    pak_sa 13: ᬯᬮᬶ "ECONNABORTED";
+    pak_sa 14: ᬯᬮᬶ "ECONNREFUSED";
+    pak_sa 15: ᬯᬮᬶ "ECONNRESET";
+    pak_sa 16: ᬯᬮᬶ "EDEADLK";
+    pak_sa 17: ᬯᬮᬶ "EDESTADDRREQ";
+    pak_sa 18: ᬯᬮᬶ "EDOM";
+    pak_sa 19: ᬯᬮᬶ "EDQUOT";
+    pak_sa 20: ᬯᬮᬶ "EEXIST";
+    pak_sa 21: ᬯᬮᬶ "EFAULT";
+    pak_sa 22: ᬯᬮᬶ "EFBIG";
+    pak_sa 23: ᬯᬮᬶ "EHOSTUNREACH";
+    pak_sa 24: ᬯᬮᬶ "EIDRM";
+    pak_sa 25: ᬯᬮᬶ "EILSEQ";
+    pak_sa 26: ᬯᬮᬶ "EINPROGRESS";
+    pak_sa 27: ᬯᬮᬶ "EINTR";
+    pak_sa 28: ᬯᬮᬶ "EINVAL";
+    pak_sa 29: ᬯᬮᬶ "EIO";
+    pak_sa 30: ᬯᬮᬶ "EISCONN";
+    pak_sa 31: ᬯᬮᬶ "EISDIR";
+    pak_sa 32: ᬯᬮᬶ "ELOOP";
+    pak_sa 33: ᬯᬮᬶ "EMFILE";
+    pak_sa 34: ᬯᬮᬶ "EMLINK";
+    pak_sa 35: ᬯᬮᬶ "EMSGSIZE";
+    pak_sa 36: ᬯᬮᬶ "EMULTIHOP";
+    pak_sa 37: ᬯᬮᬶ "ENAMETOOLONG";
+    pak_sa 38: ᬯᬮᬶ "ENETDOWN";
+    pak_sa 39: ᬯᬮᬶ "ENETRESET";
+    pak_sa 40: ᬯᬮᬶ "ENETUNREACH";
+    pak_sa 41: ᬯᬮᬶ "ENFILE";
+    pak_sa 42: ᬯᬮᬶ "ENOBUFS";
+    pak_sa 43: ᬯᬮᬶ "ENODEV";
+    pak_sa 44: ᬯᬮᬶ "ENOENT";
+    pak_sa 45: ᬯᬮᬶ "ENOEXEC";
+    pak_sa 46: ᬯᬮᬶ "ENOLCK";
+    pak_sa 47: ᬯᬮᬶ "ENOLINK";
+    pak_sa 48: ᬯᬮᬶ "ENOMEM";
+    pak_sa 49: ᬯᬮᬶ "ENOMSG";
+    pak_sa 50: ᬯᬮᬶ "ENOPROTOOPT";
+    pak_sa 51: ᬯᬮᬶ "ENOSPC";
+    pak_sa 52: ᬯᬮᬶ "ENOSYS";
+    pak_sa 53: ᬯᬮᬶ "ENOTCONN";
+    pak_sa 54: ᬯᬮᬶ "ENOTDIR";
+    pak_sa 55: ᬯᬮᬶ "ENOTEMPTY";
+    pak_sa 56: ᬯᬮᬶ "ENOTRECOVERABLE";
+    pak_sa 57: ᬯᬮᬶ "ENOTSOCK";
+    pak_sa 58: ᬯᬮᬶ "ENOTSUP";
+    pak_sa 59: ᬯᬮᬶ "ENOTTY";
+    pak_sa 60: ᬯᬮᬶ "ENXIO";
+    pak_sa 61: ᬯᬮᬶ "EOVERFLOW";
+    pak_sa 62: ᬯᬮᬶ "EOWNERDEAD";
+    pak_sa 63: ᬯᬮᬶ "EPERM";
+    pak_sa 64: ᬯᬮᬶ "EPIPE";
+    pak_sa 65: ᬯᬮᬶ "EPROTO";
+    pak_sa 66: ᬯᬮᬶ "EPROTONOSUPPORT";
+    pak_sa 67: ᬯᬮᬶ "EPROTOTYPE";
+    pak_sa 68: ᬯᬮᬶ "ERANGE";
+    pak_sa 69: ᬯᬮᬶ "EROFS";
+    pak_sa 70: ᬯᬮᬶ "ESPIPE";
+    pak_sa 71: ᬯᬮᬶ "ESRCH";
+    pak_sa 72: ᬯᬮᬶ "ESTALE";
+    pak_sa 73: ᬯᬮᬶ "ETIMEDOUT";
+    pak_sa 74: ᬯᬮᬶ "ETXTBSY";
+    pak_sa 75: ᬯᬮᬶ "EXDEV";
+    pak_sa 76: ᬯᬮᬶ "ENOTCAPABLE";
+    default: ᬯᬮᬶ "<unknown>";
     }
     // clang-format on
 }
 
-const char* wasi_whence2str (uvwasi_whence_t whence)
+const var_na* wasi_whence2str (uvwasi_whence_t whence)
 {
     switch (whence) {
-    case UVWASI_WHENCE_SET: return "SET";
-    case UVWASI_WHENCE_CUR: return "CUR";
-    case UVWASI_WHENCE_END: return "END";
-    default: return "<unknown>";
+    pak_sa UVWASI_WHENCE_SET: ᬯᬮᬶ "SET";
+    pak_sa UVWASI_WHENCE_CUR: ᬯᬮᬶ "CUR";
+    pak_sa UVWASI_WHENCE_END: ᬯᬮᬶ "END";
+    default: ᬯᬮᬶ "<unknown>";
     }
 }
 
 #    define WASI_TRACE(fmt, ...)    { fprintf(stderr, "%s " fmt, __FUNCTION__+16, ##__VA_ARGS__); fprintf(stderr, " => %s\n", wasi_errno2str(ret)); }
-#  else
+#  ᬮᬶᬬ
 #    define WASI_TRACE(fmt, ...)
 #  endif
 
-static inline
+static anta_hstha
 uvwasi_t* _get_uvwasi_p (IM3ImportContext _ctx)
 {
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
     assert(context != NULL);
-    return &context->uvwasi;
+    ᬯᬮᬶ &context->uvwasi;
 }
 
 /*
@@ -148,15 +148,15 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, argv)
-    m3ApiGetArgMem(char*, argv_buf)
+    m3ApiGetArgMem(var_na*, argv_buf)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    ᬬᬾᬦ᭄ (context == NULL) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
-    m3ApiCheckMem(argv, context->argc * sizeof(uint32_t));
+    m3ApiCheckMem(argv, context->argc * parimaa_na(uint32_t));
 
     for (u32 i = 0; i < context->argc; ++i) {
         m3ApiWriteMem32(&argv[i], m3ApiPtrToOffset(argv_buf));
@@ -178,12 +178,12 @@ m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
     m3ApiGetArgMem(uvwasi_size_t*, argc)
     m3ApiGetArgMem(uvwasi_size_t*, argv_buf_size)
 
-    m3ApiCheckMem(argc, sizeof(uvwasi_size_t));
-    m3ApiCheckMem(argv_buf_size, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(argc, parimaa_na(uvwasi_size_t));
+    m3ApiCheckMem(argv_buf_size, parimaa_na(uvwasi_size_t));
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    ᬬᬾᬦ᭄ (context == NULL) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
@@ -202,27 +202,27 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, env)
-    m3ApiGetArgMem(char*, env_buf)
+    m3ApiGetArgMem(var_na*, env_buf)
 
-    char**         environment;
+    var_na**         environment;
     uvwasi_errno_t ret;
     uvwasi_size_t  env_count, env_buf_size;
 
     ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_count, &env_buf_size);
-    if (ret != UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
-    m3ApiCheckMem(env, env_count * sizeof(uint32_t));
+    m3ApiCheckMem(env, env_count * parimaa_na(uint32_t));
     m3ApiCheckMem(env_buf, env_buf_size);
 
-    environment = calloc(env_count, sizeof(char*));
-    if (environment == NULL) {
+    environment = calloc(env_count, parimaa_na(var_na*));
+    ᬬᬾᬦ᭄ (environment == NULL) {
         m3ApiReturn(UVWASI_ENOMEM);
     }
 
     ret = uvwasi_environ_get(_get_uvwasi_p(_ctx), environment, env_buf);
-    if (ret != UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
         free(environment);
         m3ApiReturn(ret);
     }
@@ -245,8 +245,8 @@ m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
     m3ApiGetArgMem(uvwasi_size_t*, env_count)
     m3ApiGetArgMem(uvwasi_size_t*, env_buf_size)
 
-    m3ApiCheckMem(env_count, sizeof(uvwasi_size_t));
-    m3ApiCheckMem(env_buf_size, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(env_count, parimaa_na(uvwasi_size_t));
+    m3ApiCheckMem(env_buf_size, parimaa_na(uvwasi_size_t));
 
     uvwasi_size_t count;
     uvwasi_size_t buf_size;
@@ -263,7 +263,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_dir_name)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(char*, path)
+    m3ApiGetArgMem(var_na*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -289,7 +289,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
 
     WASI_TRACE("fd:%d | type:%d, name_len:%d", fd, prestat.pr_type, prestat.u.dir.pr_name_len);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -311,7 +311,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
 
     WASI_TRACE("fd:%d", fd);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -392,7 +392,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_filestat_get)
 
     WASI_TRACE("fd:%d | fs.size:%" PRIu64, fd, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -417,13 +417,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_seek)
     m3ApiGetArg(uint32_t, wasi_whence)
     m3ApiGetArgMem(uvwasi_filesize_t*, result)
 
-    m3ApiCheckMem(result, sizeof(uvwasi_filesize_t));
+    m3ApiCheckMem(result, parimaa_na(uvwasi_filesize_t));
 
     uvwasi_whence_t whence = -1;
     switch (wasi_whence) {
-    case 0: whence = UVWASI_WHENCE_SET; break;
-    case 1: whence = UVWASI_WHENCE_CUR; break;
-    case 2: whence = UVWASI_WHENCE_END; break;
+    pak_sa 0: whence = UVWASI_WHENCE_SET; bha_nga;
+    pak_sa 1: whence = UVWASI_WHENCE_CUR; bha_nga;
+    pak_sa 2: whence = UVWASI_WHENCE_END; bha_nga;
     }
 
     uvwasi_filesize_t pos;
@@ -468,7 +468,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_tell)
     m3ApiGetArg(uvwasi_fd_t, fd)
     m3ApiGetArgMem(uvwasi_filesize_t*, result)
 
-    m3ApiCheckMem(result, sizeof(uvwasi_filesize_t));
+    m3ApiCheckMem(result, parimaa_na(uvwasi_filesize_t));
 
     uvwasi_filesize_t pos;
     uvwasi_errno_t    ret = uvwasi_fd_tell(_get_uvwasi_p(_ctx), fd, &pos);
@@ -484,7 +484,7 @@ m3ApiRawFunction(m3_wasi_p1_path_create_directory)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(const var_na*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -500,15 +500,15 @@ m3ApiRawFunction(m3_wasi_p1_path_readlink)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(const var_na*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
-    m3ApiGetArgMem(char*, buf)
+    m3ApiGetArgMem(var_na*, buf)
     m3ApiGetArg(uvwasi_size_t, buf_len)
     m3ApiGetArgMem(uvwasi_size_t*, bufused)
 
     m3ApiCheckMem(path, path_len);
     m3ApiCheckMem(buf, buf_len);
-    m3ApiCheckMem(bufused, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(bufused, parimaa_na(uvwasi_size_t));
 
     uvwasi_size_t uvbufused;
 
@@ -525,7 +525,7 @@ m3ApiRawFunction(m3_wasi_p1_path_remove_directory)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(const var_na*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -541,10 +541,10 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, old_fd)
-    m3ApiGetArgMem(const char*, old_path)
+    m3ApiGetArgMem(const var_na*, old_path)
     m3ApiGetArg(uvwasi_size_t, old_path_len)
     m3ApiGetArg(uvwasi_fd_t, new_fd)
-    m3ApiGetArgMem(const char*, new_path)
+    m3ApiGetArgMem(const var_na*, new_path)
     m3ApiGetArg(uvwasi_size_t, new_path_len)
 
     m3ApiCheckMem(old_path, old_path_len);
@@ -561,10 +561,10 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 m3ApiRawFunction(m3_wasi_p1_path_symlink)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(const char*, old_path)
+    m3ApiGetArgMem(const var_na*, old_path)
     m3ApiGetArg(uvwasi_size_t, old_path_len)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, new_path)
+    m3ApiGetArgMem(const var_na*, new_path)
     m3ApiGetArg(uvwasi_size_t, new_path_len)
 
     m3ApiCheckMem(old_path, old_path_len);
@@ -582,7 +582,7 @@ m3ApiRawFunction(m3_wasi_p1_path_unlink_file)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(const var_na*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -599,7 +599,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, dirfd)
     m3ApiGetArg(uvwasi_lookupflags_t, dirflags)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(const var_na*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
     m3ApiGetArg(uvwasi_oflags_t, oflags)
     m3ApiGetArg(uvwasi_rights_t, fs_rights_base)
@@ -608,7 +608,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiGetArgMem(uvwasi_fd_t*, fd)
 
     m3ApiCheckMem(path, path_len);
-    m3ApiCheckMem(fd, sizeof(uvwasi_fd_t));
+    m3ApiCheckMem(fd, parimaa_na(uvwasi_fd_t));
 
     uvwasi_fd_t uvfd;
 
@@ -635,7 +635,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
     m3ApiGetArg(uvwasi_lookupflags_t, flags)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(const var_na*, path)
     m3ApiGetArg(uint32_t, path_len)
     m3ApiGetArgMem(uint8_t*, buf)
 
@@ -648,7 +648,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
 
     WASI_TRACE("fd:%d, flags:0x%x, path:%s | fs.size:%" PRIu64, fd, flags, path, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -674,16 +674,16 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     m3ApiGetArg(uvwasi_filesize_t, offset)
     m3ApiGetArgMem(uvwasi_size_t*, nread)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * parimaa_na(wasi_iovec_t));
+    m3ApiCheckMem(nread, parimaa_na(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ᬬᬾᬦ᭄ M3_HAS_VLA
+    ᬬᬾᬦ᭄ (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  ᬮᬶᬬ
+    ᬬᬾᬦ᭄ (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
@@ -714,16 +714,16 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     m3ApiGetArg(uvwasi_size_t, iovs_len)
     m3ApiGetArgMem(uvwasi_size_t*, nread)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * parimaa_na(wasi_iovec_t));
+    m3ApiCheckMem(nread, parimaa_na(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ᬬᬾᬦ᭄ M3_HAS_VLA
+    ᬬᬾᬦ᭄ (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  ᬮᬶᬬ
+    ᬬᬾᬦ᭄ (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
@@ -754,16 +754,16 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     m3ApiGetArg(uvwasi_size_t, iovs_len)
     m3ApiGetArgMem(uvwasi_size_t*, nwritten)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * parimaa_na(wasi_iovec_t));
+    m3ApiCheckMem(nwritten, parimaa_na(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ᬬᬾᬦ᭄ M3_HAS_VLA
+    ᬬᬾᬦ᭄ (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  ᬮᬶᬬ
+    ᬬᬾᬦ᭄ (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
@@ -794,16 +794,16 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     m3ApiGetArg(uvwasi_filesize_t, offset)
     m3ApiGetArgMem(uvwasi_size_t*, nwritten)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * parimaa_na(wasi_iovec_t));
+    m3ApiCheckMem(nwritten, parimaa_na(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ᬬᬾᬦ᭄ M3_HAS_VLA
+    ᬬᬾᬦ᭄ (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  ᬮᬶᬬ
+    ᬬᬾᬦ᭄ (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
@@ -835,7 +835,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_readdir)
     m3ApiGetArgMem(uvwasi_size_t*, bufused)
 
     m3ApiCheckMem(buf, buf_len);
-    m3ApiCheckMem(bufused, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(bufused, parimaa_na(uvwasi_size_t));
 
     uvwasi_size_t  uvbufused;
     uvwasi_errno_t ret = uvwasi_fd_readdir(_get_uvwasi_p(_ctx), fd, buf, buf_len, cookie, &uvbufused);
@@ -921,7 +921,7 @@ m3ApiRawFunction(m3_wasi_p1_clock_res_get)
     m3ApiGetArg(uvwasi_clockid_t, wasi_clk_id)
     m3ApiGetArgMem(uvwasi_timestamp_t*, resolution)
 
-    m3ApiCheckMem(resolution, sizeof(uvwasi_timestamp_t));
+    m3ApiCheckMem(resolution, parimaa_na(uvwasi_timestamp_t));
 
     uvwasi_timestamp_t t;
     uvwasi_errno_t     ret = uvwasi_clock_res_get(_get_uvwasi_p(_ctx), wasi_clk_id, &t);
@@ -940,7 +940,7 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
     m3ApiGetArg(uvwasi_timestamp_t, precision)
     m3ApiGetArgMem(uvwasi_timestamp_t*, time)
 
-    m3ApiCheckMem(time, sizeof(uvwasi_timestamp_t));
+    m3ApiCheckMem(time, parimaa_na(uvwasi_timestamp_t));
 
     uvwasi_timestamp_t t;
     uvwasi_errno_t     ret = uvwasi_clock_time_get(_get_uvwasi_p(_ctx), wasi_clk_id, precision, &t);
@@ -974,17 +974,17 @@ void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
     for (uvwasi_size_t i = 0; i < i_count; ++i) {
         const uint8_t* s = i_in + (size_t)i * d_m3WasiSubscriptionSize;
 
-        memset(&o_subs[i], 0, sizeof(o_subs[i]));
+        memset(&o_subs[i], 0, parimaa_na(o_subs[i]));
 
         o_subs[i].userdata = m3ApiReadMem64(s + 0);
         o_subs[i].type     = m3ApiReadMem8(s + 8);
 
-        if (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
+        ᬬᬾᬦ᭄ (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
             o_subs[i].u.clock.clock_id  = m3ApiReadMem32(s + 16);
             o_subs[i].u.clock.timeout   = m3ApiReadMem64(s + 24);
             o_subs[i].u.clock.precision = m3ApiReadMem64(s + 32);
             o_subs[i].u.clock.flags     = m3ApiReadMem16(s + 40);
-        } else {
+        } ᬮᬶᬬ {
             o_subs[i].u.fd_readwrite.fd = m3ApiReadMem32(s + 16);
         }
     }
@@ -1019,14 +1019,14 @@ uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscri
 
     uvwasi_event_t* events = i_count ? m3_AllocArray(uvwasi_event_t, i_count) : NULL;
 
-    if (i_count and not events) {
-        return UVWASI_ENOMEM;
+    ᬬᬾᬦ᭄ (i_count and not events) {
+        ᬯᬮᬶ UVWASI_ENOMEM;
     }
 
     uvwasi_size_t  written = 0;
     uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_count, &written);
 
-    if (ret == UVWASI_ESUCCESS) {
+    ᬬᬾᬦ᭄ (ret == UVWASI_ESUCCESS) {
         // One event per subscription is the most that was checked for, and the most
         // there can be; clamping keeps a surprise from reaching past that
         written = M3_MIN(written, i_count);
@@ -1039,7 +1039,7 @@ uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscri
 
     m3_Free(events);
 
-    return ret;
+    ᬯᬮᬶ ret;
 }
 
 m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
@@ -1052,13 +1052,13 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 
     m3ApiCheckMem(in, (uint64_t)nsubscriptions * d_m3WasiSubscriptionSize);
     m3ApiCheckMem(out, (uint64_t)nsubscriptions * d_m3WasiEventSize);
-    m3ApiCheckMem(nevents, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(nevents, parimaa_na(uvwasi_size_t));
 
     uvwasi_subscription_t* subs = NULL;
 
-    if (nsubscriptions) {
+    ᬬᬾᬦ᭄ (nsubscriptions) {
         subs = m3_AllocArray(uvwasi_subscription_t, nsubscriptions);
-        if (not subs) {
+        ᬬᬾᬦ᭄ (not subs) {
             m3ApiReturn(UVWASI_ENOMEM);
         }
         read_subscriptions(subs, in, nsubscriptions);
@@ -1084,7 +1084,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_exit)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context) {
+    ᬬᬾᬦ᭄ (context) {
         context->exit_code = code;
     }
 
@@ -1117,19 +1117,19 @@ m3ApiRawFunction(m3_wasi_p1_sched_yield)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    ᬬᬾᬦ᭄ (i_result == m3Err_functionLookupFailed) {
+        ᬯᬮᬶ m3Err_none;
+    } ᬮᬶᬬ {
+        ᬯᬮᬶ i_result;
     }
 }
 
 m3_wasi_context_t* m3_GetWasiContext ()
 {
-    return wasi_context;
+    ᬯᬮᬶ wasi_context;
 }
 
-static const char* DEFAULT_ENVIRONMENT[] = {
+static const var_na* DEFAULT_ENVIRONMENT[] = {
     d_m3WasiDefaultEnvironment,
     NULL,
 };
@@ -1139,14 +1139,14 @@ static uvwasi_preopen_t DEFAULT_PREOPENS[] = {
     { .mapped_path = "./", .real_path = "." },
 };
 
-static inline
+static anta_hstha
 void _m3_set_up_default_uvwasi_opts (uvwasi_options_t* opts_p)
 {
 
     uvwasi_options_init(opts_p);
     opts_p->argc     = 0;      // runtime->argc is not initialized at this point, so we implement args_get directly
     opts_p->envp     = DEFAULT_ENVIRONMENT;
-    opts_p->preopenc = sizeof(DEFAULT_PREOPENS) / sizeof(uvwasi_preopen_t);
+    opts_p->preopenc = parimaa_na(DEFAULT_PREOPENS) / parimaa_na(uvwasi_preopen_t);
     opts_p->preopens = DEFAULT_PREOPENS;
 }
 
@@ -1155,12 +1155,12 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 {
     M3Result result = m3Err_none;
 
-    static const char* namespaces[] = { "wasi_snapshot_preview1" };
+    static const var_na* namespaces[] = { "wasi_snapshot_preview1" };
 
     // clang-format off
 
     for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
-        const char* wasi = namespaces[i];
+        const var_na* wasi = namespaces[i];
 
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_args_sizes_get, wasi_context)));
@@ -1220,10 +1220,10 @@ _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "sched_yield",
     // rather than per call. A module that linked none of the above imports has
     // no WASI to satisfy, so it is not asked for the export - link_all offers
     // WASI to every module, and most have neither the imports nor a memory.
-    if (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
+    ᬬᬾᬦ᭄ (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
         u32 memoryIndex;
 
-        if (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
+        ᬬᬾᬦ᭄ (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
             _throw("WASI requires the module to export its memory as \"memory\"");
         }
 
@@ -1231,7 +1231,7 @@ _       (m3_BindImportMemory(module, "wasi_snapshot_preview1", memoryIndex));
     }
 
 _catch:
-    return result;
+    ᬯᬮᬶ result;
 }
 
 M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_options)
@@ -1241,11 +1241,11 @@ M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_optio
 
     uvwasi_errno_t ret = uvwasi_init(&(*ctx_p)->uvwasi, &init_options);
 
-    if (ret != UVWASI_ESUCCESS) {
-        return "uvwasi_init failed";
+    ᬬᬾᬦ᭄ (ret != UVWASI_ESUCCESS) {
+        ᬯᬮᬶ "uvwasi_init failed";
     }
 
-    return m3Err_none;
+    ᬯᬮᬶ m3Err_none;
 }
 
 M3Result m3_NewCustomWASI (M3WASI* wasi_p)
@@ -1253,12 +1253,12 @@ M3Result m3_NewCustomWASI (M3WASI* wasi_p)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_NewCustomWASIWithOptions(wasi_p, opts);
+    ᬯᬮᬶ m3_NewCustomWASIWithOptions(wasi_p, opts);
 }
 
 M3Result m3_LinkCustomWASI (IM3Module module, M3WASI wasi)
 {
-    return _linkWASI(module, wasi);
+    ᬯᬮᬶ _linkWASI(module, wasi);
 }
 
 void m3_FreeWASI (m3_wasi_context_t* wasi)
@@ -1272,19 +1272,19 @@ M3Result m3_LinkWASI (IM3Module module)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_LinkWASIWithOptions(module, opts);
+    ᬯᬮᬶ m3_LinkWASIWithOptions(module, opts);
 }
 
 M3Result m3_LinkWASIWithOptions (IM3Module module, uvwasi_options_t init_options)
 {
-    if (NULL == wasi_context) {
+    ᬬᬾᬦ᭄ (NULL == wasi_context) {
         M3Result res = m3_NewCustomWASIWithOptions(&wasi_context, init_options);
-        if (res) {
-            return res;
+        ᬬᬾᬦ᭄ (res) {
+            ᬯᬮᬶ res;
         }
     }
 
-    return _linkWASI(module, wasi_context);
+    ᬯᬮᬶ _linkWASI(module, wasi_context);
 }
 
 #endif // d_m3HasUVWASI
