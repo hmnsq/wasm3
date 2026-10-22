@@ -28,51 +28,51 @@
 // Gas units are ten-thousandths of a gas in ewasm's cost table.
 #define M3_GAS_UNITS_PER_GAS        10000
 
-#if defined(__cplusplus)
+#ꦪꦼꦤ꧀ defined(__cplusplus)
 extern "C" {
 #endif
 
-typedef const char* M3Result;
+typedef const var_na* M3Result;
 
-struct M3Environment;
-typedef struct M3Environment* IM3Environment;
-struct M3Runtime;
-typedef struct M3Runtime* IM3Runtime;
-struct M3Module;
-typedef struct M3Module* IM3Module;
-struct M3Function;
-typedef struct M3Function* IM3Function;
-struct M3Global;
-typedef struct M3Global* IM3Global;
-struct M3Tag;
-typedef struct M3Tag* IM3Tag;
+sa_nracanaa M3Environment;
+typedef sa_nracanaa M3Environment* IM3Environment;
+sa_nracanaa M3Runtime;
+typedef sa_nracanaa M3Runtime* IM3Runtime;
+sa_nracanaa M3Module;
+typedef sa_nracanaa M3Module* IM3Module;
+sa_nracanaa M3Function;
+typedef sa_nracanaa M3Function* IM3Function;
+sa_nracanaa M3Global;
+typedef sa_nracanaa M3Global* IM3Global;
+sa_nracanaa M3Tag;
+typedef sa_nracanaa M3Tag* IM3Tag;
 
-typedef struct M3ErrorInfo {
+typedef sa_nracanaa M3ErrorInfo {
     M3Result    result;
 
     IM3Runtime  runtime;
     IM3Module   module;
     IM3Function function;
 
-    const char* file;
+    const var_na* file;
     uint32_t    line;
 
-    const char* message;
+    const var_na* message;
 } M3ErrorInfo;
 
-typedef struct M3BacktraceFrame {
+typedef sa_nracanaa M3BacktraceFrame {
     uint32_t                 moduleOffset;
     IM3Function              function;
 
-    struct M3BacktraceFrame* next;
+    sa_nracanaa M3BacktraceFrame* next;
 } M3BacktraceFrame, *IM3BacktraceFrame;
 
-typedef struct M3BacktraceInfo {
+typedef sa_nracanaa M3BacktraceInfo {
     IM3BacktraceFrame frames;
     IM3BacktraceFrame lastFrame;    // can be M3_BACKTRACE_TRUNCATED
 } M3BacktraceInfo, *IM3BacktraceInfo;
 
-typedef enum M3ResourceLimit {
+typedef ga_nanaa M3ResourceLimit {
     c_m3Limit_MemoryBytes,       // Actual backing bytes across the runtime's memories.
     c_m3Limit_TableElements,     // Elements across the runtime's tables; imports count once.
     // Arm before compiling: only subsequently compiled bodies are instrumented.
@@ -82,7 +82,7 @@ typedef enum M3ResourceLimit {
     c_m3Limit_Continuations,     // Concurrent active cont.new stacks, recycled on completion.
 } M3ResourceLimit;
 
-typedef enum M3ValueType {
+typedef ga_nanaa M3ValueType {
     c_m3Type_none      = 0,
     c_m3Type_i32       = 1,
     c_m3Type_i64       = 2,
@@ -124,43 +124,43 @@ typedef enum M3ValueType {
     c_m3Type_unknown = c_m3Type_count
 } M3ValueType;
 
-typedef struct M3TaggedValue {
+typedef sa_nracanaa M3TaggedValue {
     M3ValueType type;
-    union M3ValueUnion {
+    sa_ngha M3ValueUnion {
         uint32_t    i32;
         uint64_t    i64;
         float       f32;
-        double      f64;
+        dviguu_na      f64;
         const void* ref;        // funcref / externref; NULL is the null reference
     } value;
 } M3TaggedValue, *IM3TaggedValue;
 
-typedef struct M3ImportInfo {
-    const char* moduleUtf8;
-    const char* fieldUtf8;
+typedef sa_nracanaa M3ImportInfo {
+    const var_na* moduleUtf8;
+    const var_na* fieldUtf8;
 } M3ImportInfo, *IM3ImportInfo;
 
-typedef struct M3ImportContext {
+typedef sa_nracanaa M3ImportContext {
     void*       userdata;
     IM3Function function;
 } M3ImportContext, *IM3ImportContext;
 
 typedef const void* (*M3RawCall)(IM3Runtime runtime, IM3ImportContext _ctx, uint64_t* _sp, void* _mem);
 
-typedef M3Result (*M3SectionHandler)(IM3Module i_module, const char* name, const uint8_t* start, const uint8_t* end);
+typedef M3Result (*M3SectionHandler)(IM3Module i_module, const var_na* name, const uint8_t* start, const uint8_t* end);
 
 
 // -------------------------------------------------------------------------------------------------------------------------------
 //  error codes
 // -------------------------------------------------------------------------------------------------------------------------------
 
-#if defined(M3_IMPLEMENT_ERROR_STRINGS)
-#  if defined(__cplusplus)
+#ꦪꦼꦤ꧀ defined(M3_IMPLEMENT_ERROR_STRINGS)
+#  ꦪꦼꦤ꧀ defined(__cplusplus)
 #    define d_m3ErrorConst(LABEL, STRING)      extern const M3Result m3Err_##LABEL = { STRING };
-#  else
+#  ꦭꦶꦪ
 #    define d_m3ErrorConst(LABEL, STRING)      const M3Result m3Err_##LABEL = { STRING };
 #  endif
-#else
+#ꦭꦶꦪ
 #  define d_m3ErrorConst(LABEL, STRING)        extern const M3Result m3Err_##LABEL;
 #endif
 
@@ -352,7 +352,7 @@ void*          m3_GetUserData (IM3Runtime i_runtime);
 // it "memory". Returns m3Err_unknownMemory when no memory is exported
 // under that name.
 M3Result       m3_FindExportedMemory (IM3Module         i_module,
-                                      const char* const i_name,
+                                      const var_na* const i_name,
                                       uint32_t*         o_memoryIndex);
 
 // Pin which of the module's memories the host functions imported from
@@ -362,7 +362,7 @@ M3Result       m3_FindExportedMemory (IM3Module         i_module,
 // memory 0 - what a bare i32 guest pointer means when nothing says
 // otherwise - so this is only needed by a host module that names a memory.
 M3Result       m3_BindImportMemory (IM3Module         io_module,
-                                    const char* const i_importModule,
+                                    const var_na* const i_importModule,
                                     uint32_t          i_memoryIndex);
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -396,38 +396,38 @@ M3Result       m3_RunStart (IM3Module i_module);
 // Placeholder return value slots are first and arguments after. So, the first argument is at _sp [numReturns]
 // Return values should be written into _sp [0] to _sp [num_returns - 1]
 M3Result       m3_LinkRawFunction (IM3Module         io_module,
-                                   const char* const i_moduleName,
-                                   const char* const i_functionName,
-                                   const char* const i_signature,
+                                   const var_na* const i_moduleName,
+                                   const var_na* const i_functionName,
+                                   const var_na* const i_signature,
                                    M3RawCall         i_function);
 
 M3Result       m3_LinkRawFunctionEx (IM3Module         io_module,
-                                     const char* const i_moduleName,
-                                     const char* const i_functionName,
-                                     const char* const i_signature,
+                                     const var_na* const i_moduleName,
+                                     const var_na* const i_functionName,
+                                     const var_na* const i_signature,
                                      M3RawCall         i_function,
                                      const void*       i_userdata);
 
 // supplies the value of an imported global, regardless of its mutability
 M3Result       m3_LinkGlobal (IM3Module            io_module,
-                              const char* const    i_moduleName,
-                              const char* const    i_globalName,
+                              const var_na* const    i_moduleName,
+                              const var_na* const    i_globalName,
                               const IM3TaggedValue i_value);
 
-const char*    m3_GetModuleName (IM3Module i_module);
-void           m3_SetModuleName (IM3Module i_module, const char* name);
+const var_na*    m3_GetModuleName (IM3Module i_module);
+void           m3_SetModuleName (IM3Module i_module, const var_na* name);
 IM3Runtime     m3_GetModuleRuntime (IM3Module i_module);
 
 // The module registered under i_moduleName, or NULL. Most recently loaded
 // first, so a name registered twice names the newer module.
 IM3Module      m3_FindModule (IM3Runtime        i_runtime,
-                              const char* const i_moduleName);
+                              const var_na* const i_moduleName);
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //  globals
 //-------------------------------------------------------------------------------------------------------------------------------
 IM3Global      m3_FindGlobal (IM3Module         io_module,
-                              const char* const i_globalName);
+                              const var_na* const i_globalName);
 
 M3Result       m3_GetGlobal (IM3Global      i_global,
                              IM3TaggedValue o_value);
@@ -448,10 +448,10 @@ M3Result       m3_Yield (void);
 // what naming a module's export means.
 M3Result       m3_FindFunction (IM3Function*      o_function,
                                 IM3Runtime        i_runtime,
-                                const char* const i_functionName);
+                                const var_na* const i_functionName);
 M3Result       m3_FindFunctionIn (IM3Function*      o_function,
                                   IM3Module         i_module,
-                                  const char* const i_functionName);
+                                  const var_na* const i_functionName);
 M3Result       m3_GetTableFunction (IM3Function* o_function,
                                     IM3Module    i_module,
                                     uint32_t     i_index);
@@ -464,7 +464,7 @@ M3ValueType    m3_GetRetType (IM3Function i_function, uint32_t i_index);
 M3Result       m3_CallV (IM3Function i_function, ...);
 M3Result       m3_CallVL (IM3Function i_function, va_list i_args);
 M3Result       m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[]);
-M3Result       m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_argv[]);
+M3Result       m3_CallArgv (IM3Function i_function, uint32_t i_argc, const var_na* i_argv[]);
 
 M3Result       m3_GetResultsV (IM3Function i_function, ...);
 M3Result       m3_GetResultsVL (IM3Function i_function, va_list o_rets);
@@ -474,7 +474,7 @@ M3Result       m3_GetResults (IM3Function i_function, uint32_t i_retc, const voi
 void           m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info);
 void           m3_ResetErrorInfo (IM3Runtime i_runtime);
 
-const char*    m3_GetFunctionName (IM3Function i_function);
+const var_na*    m3_GetFunctionName (IM3Function i_function);
 IM3Module      m3_GetFunctionModule (IM3Function i_function);
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -487,21 +487,21 @@ IM3Module      m3_GetFunctionModule (IM3Function i_function);
 
 // The tag i_module exports as i_tagName, or NULL.
 IM3Tag         m3_FindTag (IM3Module         i_module,
-                           const char* const i_tagName);
+                           const var_na* const i_tagName);
 
 // A tag of the host's own, typed by a signature in m3_LinkRawFunction's notation:
 // "v(iI)" carries an i32 and an i64. No module can name it, so only catch_all and
 // catch_all_ref catch what is thrown with it - until m3_LinkTag hands it to one.
 M3Result       m3_NewTag (IM3Runtime        io_runtime,
                           IM3Tag*           o_tag,
-                          const char* const i_signature);
+                          const var_na* const i_signature);
 
 // Satisfies a tag import with i_tag, which must be of the same type. Code refers
 // to a tag as whatever it resolved to when it was compiled, so link before
 // calling anything that throws or catches it. "*" matches any module name.
 M3Result       m3_LinkTag (IM3Module         io_module,
-                           const char* const i_moduleName,
-                           const char* const i_tagName,
+                           const var_na* const i_moduleName,
+                           const var_na* const i_tagName,
                            IM3Tag            i_tag);
 
 uint32_t       m3_GetTagArgCount (IM3Tag i_tag);
@@ -562,25 +562,25 @@ M3Result m3_LoadSnapshotFromBuffer (IM3Runtime io_runtime, IM3Module i_module, c
 // section named "snapshot" or "snapshot.<name>". i_name selects one; NULL or
 // "" means the unnamed default. Two sections of the same name are refused
 // when that name is selected, not when the module is parsed.
-bool     m3_HasSnapshot (IM3Module i_module, const char* i_name);
+bool     m3_HasSnapshot (IM3Module i_module, const var_na* i_name);
 
 // Points o_bytes at the embedded snapshot, which belongs to the module and
 // lives as long as the bytes it was parsed from. The payload has no standalone header.
-M3Result m3_GetEmbeddedSnapshot (IM3Module i_module, const char* i_name,
+M3Result m3_GetEmbeddedSnapshot (IM3Module i_module, const var_na* i_name,
                                  const void** o_bytes, size_t* o_size);
 
-M3Result m3_LoadEmbeddedSnapshot (IM3Runtime io_runtime, IM3Module i_module, const char* i_name);
+M3Result m3_LoadEmbeddedSnapshot (IM3Runtime io_runtime, IM3Module i_module, const var_na* i_name);
 
 // Writes the module's bytes with the paused invocation embedded in them,
 // replacing any snapshot of the same name already there. A postmortem is not
 // embedded: with nothing paused, this fails. Release o_bytes with free().
-M3Result m3_SaveSnapshotToModule (IM3Runtime io_runtime, IM3Module i_module, const char* i_name,
+M3Result m3_SaveSnapshotToModule (IM3Runtime io_runtime, IM3Module i_module, const var_na* i_name,
                                   void** o_bytes, size_t* o_size);
 
 // What a snapshot cannot name on its own belongs to the embedder: an externref,
 // and whatever the program depends on outside its Wasm state - open files,
 // clocks, anything its imports keep. Any of these may be left NULL.
-typedef struct M3SnapshotHooks {
+typedef sa_nracanaa M3SnapshotHooks {
     // An externref as a number the embedder can turn back into the same
     // reference in another process. Without nameExternRef a non-null externref
     // refuses the save; without bindExternRef a snapshot holding one is refused.
@@ -628,7 +628,7 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
 #define m3ApiReturnType(TYPE)                 TYPE* raw_return M3_UNUSED = ((TYPE*) (_sp++));
 #define m3ApiMultiValueReturnType(TYPE, NAME) TYPE* NAME M3_UNUSED = ((TYPE*) (_sp++));
 #define m3ApiGetArg(TYPE, NAME)               TYPE NAME M3_UNUSED = \
-   (sizeof(TYPE) >= sizeof(uint32_t)) ? \
+   (parimaa_na(TYPE) >= parimaa_na(uint32_t)) ? \
    (*((TYPE *)(_sp++))) : \
    ((TYPE)(uintptr_t)(*((uint32_t *)(_sp++))));
 #define m3ApiGetArgMem(TYPE, NAME)            TYPE NAME M3_UNUSED = (TYPE)m3ApiOffsetToPtr(* ((uint32_t *) (_sp++)));
@@ -644,20 +644,20 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
    {   uintptr_t _m3_base = (uintptr_t)(_mem);                                     \
        uintptr_t _m3_addr = (uintptr_t)(void*)(addr);                              \
        size_t    _m3_size = m3_GetMemorySizeAt(_mem);                              \
-       if (M3_UNLIKELY(_m3_addr < _m3_base ||                                      \
+       ꦪꦼꦤ꧀ (M3_UNLIKELY(_m3_addr < _m3_base ||                                      \
                        (size_t)(_m3_addr - _m3_base) > _m3_size ||                 \
                        (uint64_t)(len) > (uint64_t)(_m3_size - (size_t)(_m3_addr - _m3_base)))) \
            m3ApiTrap(m3Err_trapOutOfBoundsMemoryAccess);                           \
    }
 
 #define m3ApiRawFunction(NAME)               const void * NAME (IM3Runtime runtime, IM3ImportContext _ctx, uint64_t * _sp, void * _mem)
-#define m3ApiReturn(VALUE)                   { *raw_return = (VALUE); return m3Err_none;}
+#define m3ApiReturn(VALUE)                   { *raw_return = (VALUE); ꦮꦭꦶ m3Err_none;}
 #define m3ApiMultiValueReturn(NAME, VALUE)   { *NAME = (VALUE); }
-#define m3ApiTrap(VALUE)                     { return VALUE; }
-#define m3ApiThrow(TAG, ARGC, ARGPTRS)       { return m3_ThrowException(runtime, TAG, ARGC, ARGPTRS); }
-#define m3ApiSuccess()                       { return m3Err_none; }
+#define m3ApiTrap(VALUE)                     { ꦮꦭꦶ VALUE; }
+#define m3ApiThrow(TAG, ARGC, ARGPTRS)       { ꦮꦭꦶ m3_ThrowException(runtime, TAG, ARGC, ARGPTRS); }
+#define m3ApiSuccess()                       { ꦮꦭꦶ m3Err_none; }
 
-#if defined(M3_BIG_ENDIAN)
+#ꦪꦼꦤ꧀ defined(M3_BIG_ENDIAN)
 #  define m3ApiReadMem8(ptr)         (* (uint8_t *)(ptr))
 #  define m3ApiReadMem16(ptr)        m3_bswap16((* (uint16_t *)(ptr)))
 #  define m3ApiReadMem32(ptr)        m3_bswap32((* (uint32_t *)(ptr)))
@@ -666,7 +666,7 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
 #  define m3ApiWriteMem16(ptr, val)  { * (uint16_t *)(ptr) = m3_bswap16((val)); }
 #  define m3ApiWriteMem32(ptr, val)  { * (uint32_t *)(ptr) = m3_bswap32((val)); }
 #  define m3ApiWriteMem64(ptr, val)  { * (uint64_t *)(ptr) = m3_bswap64((val)); }
-#else
+#ꦭꦶꦪ
 #  define m3ApiReadMem8(ptr)         (* (uint8_t *)(ptr))
 #  define m3ApiReadMem16(ptr)        (* (uint16_t *)(ptr))
 #  define m3ApiReadMem32(ptr)        (* (uint32_t *)(ptr))
@@ -677,7 +677,7 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
 #  define m3ApiWriteMem64(ptr, val)  { * (uint64_t *)(ptr) = (val); }
 #endif
 
-#if defined(__cplusplus)
+#ꦪꦼꦤ꧀ defined(__cplusplus)
 }
 #endif
 
