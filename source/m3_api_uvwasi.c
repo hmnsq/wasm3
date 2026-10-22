@@ -10,7 +10,7 @@
 #include "m3_env.h"
 #include "m3_exception.h"
 
-#if defined(d_m3HasUVWASI)
+#ако defined(d_m3HasUVWASI)
 
 #  include <stdio.h>
 #  include <string.h>
@@ -29,90 +29,90 @@ typedef struct wasi_iovec_t {
     uvwasi_size_t buf_len;
 } wasi_iovec_t;
 
-#  if d_m3EnableWasiTracing
+#  ако d_m3EnableWasiTracing
 
 const char* wasi_errno2str (uvwasi_errno_t err)
 {
     // clang-format off
     switch (err) {
-    case  0: return "ESUCCESS";
-    case  1: return "E2BIG";
-    case  2: return "EACCES";
-    case  3: return "EADDRINUSE";
-    case  4: return "EADDRNOTAVAIL";
-    case  5: return "EAFNOSUPPORT";
-    case  6: return "EAGAIN";
-    case  7: return "EALREADY";
-    case  8: return "EBADF";
-    case  9: return "EBADMSG";
-    case 10: return "EBUSY";
-    case 11: return "ECANCELED";
-    case 12: return "ECHILD";
-    case 13: return "ECONNABORTED";
-    case 14: return "ECONNREFUSED";
-    case 15: return "ECONNRESET";
-    case 16: return "EDEADLK";
-    case 17: return "EDESTADDRREQ";
-    case 18: return "EDOM";
-    case 19: return "EDQUOT";
-    case 20: return "EEXIST";
-    case 21: return "EFAULT";
-    case 22: return "EFBIG";
-    case 23: return "EHOSTUNREACH";
-    case 24: return "EIDRM";
-    case 25: return "EILSEQ";
-    case 26: return "EINPROGRESS";
-    case 27: return "EINTR";
-    case 28: return "EINVAL";
-    case 29: return "EIO";
-    case 30: return "EISCONN";
-    case 31: return "EISDIR";
-    case 32: return "ELOOP";
-    case 33: return "EMFILE";
-    case 34: return "EMLINK";
-    case 35: return "EMSGSIZE";
-    case 36: return "EMULTIHOP";
-    case 37: return "ENAMETOOLONG";
-    case 38: return "ENETDOWN";
-    case 39: return "ENETRESET";
-    case 40: return "ENETUNREACH";
-    case 41: return "ENFILE";
-    case 42: return "ENOBUFS";
-    case 43: return "ENODEV";
-    case 44: return "ENOENT";
-    case 45: return "ENOEXEC";
-    case 46: return "ENOLCK";
-    case 47: return "ENOLINK";
-    case 48: return "ENOMEM";
-    case 49: return "ENOMSG";
-    case 50: return "ENOPROTOOPT";
-    case 51: return "ENOSPC";
-    case 52: return "ENOSYS";
-    case 53: return "ENOTCONN";
-    case 54: return "ENOTDIR";
-    case 55: return "ENOTEMPTY";
-    case 56: return "ENOTRECOVERABLE";
-    case 57: return "ENOTSOCK";
-    case 58: return "ENOTSUP";
-    case 59: return "ENOTTY";
-    case 60: return "ENXIO";
-    case 61: return "EOVERFLOW";
-    case 62: return "EOWNERDEAD";
-    case 63: return "EPERM";
-    case 64: return "EPIPE";
-    case 65: return "EPROTO";
-    case 66: return "EPROTONOSUPPORT";
-    case 67: return "EPROTOTYPE";
-    case 68: return "ERANGE";
-    case 69: return "EROFS";
-    case 70: return "ESPIPE";
-    case 71: return "ESRCH";
-    case 72: return "ESTALE";
-    case 73: return "ETIMEDOUT";
-    case 74: return "ETXTBSY";
-    case 75: return "EXDEV";
-    case 76: return "ENOTCAPABLE";
-    default: return "<unknown>";
+    case  0: върни "ESUCCESS";
+    case  1: върни "E2BIG";
+    case  2: върни "EACCES";
+    case  3: върни "EADDRINUSE";
+    case  4: върни "EADDRNOTAVAIL";
+    case  5: върни "EAFNOSUPPORT";
+    case  6: върни "EAGAIN";
+    case  7: върни "EALREADY";
+    case  8: върни "EBADF";
+    case  9: върни "EBADMSG";
+    case 10: върни "EBUSY";
+    case 11: върни "ECANCELED";
+    case 12: върни "ECHILD";
+    case 13: върни "ECONNABORTED";
+    case 14: върни "ECONNREFUSED";
+    case 15: върни "ECONNRESET";
+    case 16: върни "EDEADLK";
+    case 17: върни "EDESTADDRREQ";
+    case 18: върни "EDOM";
+    case 19: върни "EDQUOT";
+    case 20: върни "EEXIST";
+    case 21: върни "EFAULT";
+    case 22: върни "EFBIG";
+    case 23: върни "EHOSTUNREACH";
+    case 24: върни "EIDRM";
+    case 25: върни "EILSEQ";
+    case 26: върни "EINPROGRESS";
+    case 27: върни "EINTR";
+    case 28: върни "EINVAL";
+    case 29: върни "EIO";
+    case 30: върни "EISCONN";
+    case 31: върни "EISDIR";
+    case 32: върни "ELOOP";
+    case 33: върни "EMFILE";
+    case 34: върни "EMLINK";
+    case 35: върни "EMSGSIZE";
+    case 36: върни "EMULTIHOP";
+    case 37: върни "ENAMETOOLONG";
+    case 38: върни "ENETDOWN";
+    case 39: върни "ENETRESET";
+    case 40: върни "ENETUNREACH";
+    case 41: върни "ENFILE";
+    case 42: върни "ENOBUFS";
+    case 43: върни "ENODEV";
+    case 44: върни "ENOENT";
+    case 45: върни "ENOEXEC";
+    case 46: върни "ENOLCK";
+    case 47: върни "ENOLINK";
+    case 48: върни "ENOMEM";
+    case 49: върни "ENOMSG";
+    case 50: върни "ENOPROTOOPT";
+    case 51: върни "ENOSPC";
+    case 52: върни "ENOSYS";
+    case 53: върни "ENOTCONN";
+    case 54: върни "ENOTDIR";
+    case 55: върни "ENOTEMPTY";
+    case 56: върни "ENOTRECOVERABLE";
+    case 57: върни "ENOTSOCK";
+    case 58: върни "ENOTSUP";
+    case 59: върни "ENOTTY";
+    case 60: върни "ENXIO";
+    case 61: върни "EOVERFLOW";
+    case 62: върни "EOWNERDEAD";
+    case 63: върни "EPERM";
+    case 64: върни "EPIPE";
+    case 65: върни "EPROTO";
+    case 66: върни "EPROTONOSUPPORT";
+    case 67: върни "EPROTOTYPE";
+    case 68: върни "ERANGE";
+    case 69: върни "EROFS";
+    case 70: върни "ESPIPE";
+    case 71: върни "ESRCH";
+    case 72: върни "ESTALE";
+    case 73: върни "ETIMEDOUT";
+    case 74: върни "ETXTBSY";
+    case 75: върни "EXDEV";
+    case 76: върни "ENOTCAPABLE";
+    default: върни "<unknown>";
     }
     // clang-format on
 }
@@ -120,15 +120,15 @@ const char* wasi_errno2str (uvwasi_errno_t err)
 const char* wasi_whence2str (uvwasi_whence_t whence)
 {
     switch (whence) {
-    case UVWASI_WHENCE_SET: return "SET";
-    case UVWASI_WHENCE_CUR: return "CUR";
-    case UVWASI_WHENCE_END: return "END";
-    default: return "<unknown>";
+    case UVWASI_WHENCE_SET: върни "SET";
+    case UVWASI_WHENCE_CUR: върни "CUR";
+    case UVWASI_WHENCE_END: върни "END";
+    default: върни "<unknown>";
     }
 }
 
 #    define WASI_TRACE(fmt, ...)    { fprintf(stderr, "%s " fmt, __FUNCTION__+16, ##__VA_ARGS__); fprintf(stderr, " => %s\n", wasi_errno2str(ret)); }
-#  else
+#  иначе
 #    define WASI_TRACE(fmt, ...)
 #  endif
 
@@ -137,7 +137,7 @@ uvwasi_t* _get_uvwasi_p (IM3ImportContext _ctx)
 {
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
     assert(context != NULL);
-    return &context->uvwasi;
+    върни &context->uvwasi;
 }
 
 /*
@@ -152,13 +152,13 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    ако (context == NULL) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
     m3ApiCheckMem(argv, context->argc * sizeof(uint32_t));
 
-    for (u32 i = 0; i < context->argc; ++i) {
+    за (u32 i = 0; i < context->argc; ++i) {
         m3ApiWriteMem32(&argv[i], m3ApiPtrToOffset(argv_buf));
 
         size_t len = strlen(context->argv[i]);
@@ -183,12 +183,12 @@ m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    ако (context == NULL) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
     uvwasi_size_t buf_len = 0;
-    for (u32 i = 0; i < context->argc; ++i) {
+    за (u32 i = 0; i < context->argc; ++i) {
         buf_len += (uvwasi_size_t)strlen(context->argv[i]) + 1;
     }
 
@@ -209,7 +209,7 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     uvwasi_size_t  env_count, env_buf_size;
 
     ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_count, &env_buf_size);
-    if (ret != UVWASI_ESUCCESS) {
+    ако (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -217,19 +217,19 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     m3ApiCheckMem(env_buf, env_buf_size);
 
     environment = calloc(env_count, sizeof(char*));
-    if (environment == NULL) {
+    ако (environment == NULL) {
         m3ApiReturn(UVWASI_ENOMEM);
     }
 
     ret = uvwasi_environ_get(_get_uvwasi_p(_ctx), environment, env_buf);
-    if (ret != UVWASI_ESUCCESS) {
+    ако (ret != UVWASI_ESUCCESS) {
         free(environment);
         m3ApiReturn(ret);
     }
 
     uint32_t environ_buf_offset = m3ApiPtrToOffset(env_buf);
 
-    for (u32 i = 0; i < env_count; ++i) {
+    за (u32 i = 0; i < env_count; ++i) {
         uint32_t offset = environ_buf_offset +
                           (uint32_t)(environment[i] - environment[0]);
         m3ApiWriteMem32(&env[i], offset);
@@ -289,7 +289,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
 
     WASI_TRACE("fd:%d | type:%d, name_len:%d", fd, prestat.pr_type, prestat.u.dir.pr_name_len);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ако (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -311,7 +311,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
 
     WASI_TRACE("fd:%d", fd);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ако (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -392,7 +392,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_filestat_get)
 
     WASI_TRACE("fd:%d | fs.size:%" PRIu64, fd, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ако (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -648,7 +648,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
 
     WASI_TRACE("fd:%d, flags:0x%x, path:%s | fs.size:%" PRIu64, fd, flags, path, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    ако (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -677,19 +677,19 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ако M3_HAS_VLA
+    ако (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  иначе
+    ако (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
 #  endif
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    за (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -717,13 +717,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ако M3_HAS_VLA
+    ако (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  иначе
+    ако (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
@@ -731,7 +731,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     uvwasi_size_t  num_read;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    за (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -757,13 +757,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ако M3_HAS_VLA
+    ако (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  иначе
+    ако (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
@@ -771,7 +771,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     uvwasi_size_t  num_written;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    за (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -797,13 +797,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  ако M3_HAS_VLA
+    ако (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  иначе
+    ако (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
@@ -811,7 +811,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     uvwasi_size_t  num_written;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    за (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -971,7 +971,7 @@ static
 void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
                          uvwasi_size_t i_count)
 {
-    for (uvwasi_size_t i = 0; i < i_count; ++i) {
+    за (uvwasi_size_t i = 0; i < i_count; ++i) {
         const uint8_t* s = i_in + (size_t)i * d_m3WasiSubscriptionSize;
 
         memset(&o_subs[i], 0, sizeof(o_subs[i]));
@@ -979,12 +979,12 @@ void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
         o_subs[i].userdata = m3ApiReadMem64(s + 0);
         o_subs[i].type     = m3ApiReadMem8(s + 8);
 
-        if (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
+        ако (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
             o_subs[i].u.clock.clock_id  = m3ApiReadMem32(s + 16);
             o_subs[i].u.clock.timeout   = m3ApiReadMem64(s + 24);
             o_subs[i].u.clock.precision = m3ApiReadMem64(s + 32);
             o_subs[i].u.clock.flags     = m3ApiReadMem16(s + 40);
-        } else {
+        } иначе {
             o_subs[i].u.fd_readwrite.fd = m3ApiReadMem32(s + 16);
         }
     }
@@ -1019,19 +1019,19 @@ uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscri
 
     uvwasi_event_t* events = i_count ? m3_AllocArray(uvwasi_event_t, i_count) : NULL;
 
-    if (i_count and not events) {
-        return UVWASI_ENOMEM;
+    ако (i_count and not events) {
+        върни UVWASI_ENOMEM;
     }
 
     uvwasi_size_t  written = 0;
     uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_count, &written);
 
-    if (ret == UVWASI_ESUCCESS) {
+    ако (ret == UVWASI_ESUCCESS) {
         // One event per subscription is the most that was checked for, and the most
         // there can be; clamping keeps a surprise from reaching past that
         written = M3_MIN(written, i_count);
 
-        for (uvwasi_size_t i = 0; i < written; ++i) {
+        за (uvwasi_size_t i = 0; i < written; ++i) {
             write_event(o_out + (size_t)i * d_m3WasiEventSize, &events[i]);
         }
         *o_written = written;
@@ -1039,7 +1039,7 @@ uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscri
 
     m3_Free(events);
 
-    return ret;
+    върни ret;
 }
 
 m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
@@ -1056,9 +1056,9 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 
     uvwasi_subscription_t* subs = NULL;
 
-    if (nsubscriptions) {
+    ако (nsubscriptions) {
         subs = m3_AllocArray(uvwasi_subscription_t, nsubscriptions);
-        if (not subs) {
+        ако (not subs) {
             m3ApiReturn(UVWASI_ENOMEM);
         }
         read_subscriptions(subs, in, nsubscriptions);
@@ -1084,7 +1084,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_exit)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context) {
+    ако (context) {
         context->exit_code = code;
     }
 
@@ -1117,16 +1117,16 @@ m3ApiRawFunction(m3_wasi_p1_sched_yield)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    ако (i_result == m3Err_functionLookupFailed) {
+        върни m3Err_none;
+    } иначе {
+        върни i_result;
     }
 }
 
 m3_wasi_context_t* m3_GetWasiContext ()
 {
-    return wasi_context;
+    върни wasi_context;
 }
 
 static const char* DEFAULT_ENVIRONMENT[] = {
@@ -1159,7 +1159,7 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
+    за (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
         const char* wasi = namespaces[i];
 
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
@@ -1220,10 +1220,10 @@ _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "sched_yield",
     // rather than per call. A module that linked none of the above imports has
     // no WASI to satisfy, so it is not asked for the export - link_all offers
     // WASI to every module, and most have neither the imports nor a memory.
-    if (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
+    ако (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
         u32 memoryIndex;
 
-        if (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
+        ако (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
             _throw("WASI requires the module to export its memory as \"memory\"");
         }
 
@@ -1231,7 +1231,7 @@ _       (m3_BindImportMemory(module, "wasi_snapshot_preview1", memoryIndex));
     }
 
 _catch:
-    return result;
+    върни result;
 }
 
 M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_options)
@@ -1241,11 +1241,11 @@ M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_optio
 
     uvwasi_errno_t ret = uvwasi_init(&(*ctx_p)->uvwasi, &init_options);
 
-    if (ret != UVWASI_ESUCCESS) {
-        return "uvwasi_init failed";
+    ако (ret != UVWASI_ESUCCESS) {
+        върни "uvwasi_init failed";
     }
 
-    return m3Err_none;
+    върни m3Err_none;
 }
 
 M3Result m3_NewCustomWASI (M3WASI* wasi_p)
@@ -1253,12 +1253,12 @@ M3Result m3_NewCustomWASI (M3WASI* wasi_p)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_NewCustomWASIWithOptions(wasi_p, opts);
+    върни m3_NewCustomWASIWithOptions(wasi_p, opts);
 }
 
 M3Result m3_LinkCustomWASI (IM3Module module, M3WASI wasi)
 {
-    return _linkWASI(module, wasi);
+    върни _linkWASI(module, wasi);
 }
 
 void m3_FreeWASI (m3_wasi_context_t* wasi)
@@ -1272,19 +1272,19 @@ M3Result m3_LinkWASI (IM3Module module)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_LinkWASIWithOptions(module, opts);
+    върни m3_LinkWASIWithOptions(module, opts);
 }
 
 M3Result m3_LinkWASIWithOptions (IM3Module module, uvwasi_options_t init_options)
 {
-    if (NULL == wasi_context) {
+    ако (NULL == wasi_context) {
         M3Result res = m3_NewCustomWASIWithOptions(&wasi_context, init_options);
-        if (res) {
-            return res;
+        ако (res) {
+            върни res;
         }
     }
 
-    return _linkWASI(module, wasi_context);
+    върни _linkWASI(module, wasi_context);
 }
 
 #endif // d_m3HasUVWASI
