@@ -8,59 +8,59 @@
 #ifndef m3_code_h
 #define m3_code_h
 
-#include "m3_core.h"
+#अन्तर्भाव "m3_core.h"
 
 d_m3BeginExternC
 
-typedef struct M3CodePage {
+प्रकारनिर्देश संरचना M3CodePage {
     M3CodePageHeader info;
     code_t           code[1];
 } M3CodePage;
 
-typedef M3CodePage* IM3CodePage;
+प्रकारनिर्देश M3CodePage* IM3CodePage;
 
 
-IM3CodePage         NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines);
+IM3CodePage         NewCodePage (IM3Runtime i_runtime, u32 i_min_अङ्क_पङ्क्तिहरू);
 
-void                FreeCodePages (IM3CodePage* io_list);
+शून्य                FreeCodePages (IM3CodePage* io_list);
 
-u32                 NumFreeLines (IM3CodePage i_page);
+u32                 अङ्क_Free_पङ्क्तिहरू (IM3CodePage i_page);
 pc_t                GetPageStartPC (IM3CodePage i_page);
 pc_t                GetPagePC (IM3CodePage i_page);
-void                EmitWord_impl (IM3CodePage i_page, void* i_word);
-void                EmitWord32 (IM3CodePage i_page, u32 i_word);
-void                EmitWord64 (IM3CodePage i_page, u64 i_word);
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
+शून्य                EmitWord_impl (IM3CodePage i_page, शून्य* i_word);
+शून्य                EmitWord32 (IM3CodePage i_page, u32 i_word);
+शून्य                EmitWord64 (IM3CodePage i_page, u64 i_word);
+#यदि d_m3RecordBacktraces
+शून्य EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
 #endif // d_m3RecordBacktraces
 
-void        PushCodePage (IM3CodePage* io_list, IM3CodePage i_codePage);
-IM3CodePage PopCodePage (IM3CodePage* io_list);
+शून्य        थप_Code_Page (IM3CodePage* io_list, IM3CodePage i_codePage);
+IM3CodePage झिक_Code_Page (IM3CodePage* io_list);
 
 IM3CodePage GetEndCodePage (IM3CodePage i_list); // i_list = NULL is valid
-u32         CountCodePages (IM3CodePage i_list); // i_list = NULL is valid
+u32         गन्ती_Code_Pages (IM3CodePage i_list); // i_list = NULL is valid
 
-#if d_m3RecordBacktraces
+#यदि d_m3RecordBacktraces
 bool ContainsPC (IM3CodePage i_page, pc_t i_pc);
 bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset);
 #endif // d_m3RecordBacktraces
 
 #ifdef DEBUG
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
+शून्य dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
 #endif
 
-#define EmitWord(page, val) EmitWord_impl(page, (void*)(val))
+#define EmitWord(page, val) EmitWord_impl(page, (शून्य*)(val))
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3RecordBacktraces
+#यदि d_m3RecordBacktraces
 
-typedef struct M3CodeMapEntry {
+प्रकारनिर्देश संरचना M3CodeMapEntry {
     u32 pcOffset;
     u32 moduleOffset;
 } M3CodeMapEntry;
 
-typedef struct M3CodeMappingPage {
+प्रकारनिर्देश संरचना M3CodeMappingPage {
     pc_t           basePC;
     u32            size;
     u32            capacity;

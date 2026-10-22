@@ -26,8 +26,8 @@
 #ifndef __wasi_api_h
 #define __wasi_api_h
 
-#include <stddef.h>
-#include <stdint.h>
+#अन्तर्भाव <stddef.h>
+#अन्तर्भाव <stdint.h>
 
 #ifdef __cplusplus
 // Hacks alert
@@ -48,13 +48,13 @@ _Static_assert(_Alignof(uint64_t) == 8, "non-wasi data layout");
 // _Static_assert(_Alignof(void*) == 4, "non-wasi data layout");
 
 #ifdef __cplusplus
-extern "C" {
+बाह्य "C" {
 #endif
 
 // TODO: Encoding this in witx.
 #define __WASI_DIRCOOKIE_START (UINT64_C(0))
 // typedef __SIZE_TYPE__ __wasi_size_t;
-typedef uint32_t __wasi_size_t; // fixme for wasm64
+प्रकारनिर्देश uint32_t __wasi_size_t; // fixme for wasm64
 
 // _Static_assert(sizeof(__wasi_size_t) == 4, "witx calculated size");
 // _Static_assert(_Alignof(__wasi_size_t) == 4, "witx calculated align");
@@ -62,23 +62,23 @@ typedef uint32_t __wasi_size_t; // fixme for wasm64
 /**
  * Non-negative file size or length of a region within a file.
  */
-typedef uint64_t __wasi_filesize_t;
+प्रकारनिर्देश uint64_t __wasi_filesize_t;
 
-_Static_assert(sizeof(__wasi_filesize_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_filesize_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filesize_t) == 8, "witx calculated align");
 
 /**
  * Timestamp in nanoseconds.
  */
-typedef uint64_t __wasi_timestamp_t;
+प्रकारनिर्देश uint64_t __wasi_timestamp_t;
 
-_Static_assert(sizeof(__wasi_timestamp_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_timestamp_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_timestamp_t) == 8, "witx calculated align");
 
 /**
  * Identifiers for clocks.
  */
-typedef uint32_t __wasi_clockid_t;
+प्रकारनिर्देश uint32_t __wasi_clockid_t;
 
 /**
  * The clock measuring real time. Time value zero corresponds with
@@ -104,7 +104,7 @@ typedef uint32_t __wasi_clockid_t;
  */
 #define __WASI_CLOCKID_THREAD_CPUTIME_ID (UINT32_C(3))
 
-_Static_assert(sizeof(__wasi_clockid_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_clockid_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_clockid_t) == 4, "witx calculated align");
 
 /**
@@ -113,7 +113,7 @@ _Static_assert(_Alignof(__wasi_clockid_t) == 4, "witx calculated align");
  * API; some are used in higher-level library layers, and others are provided
  * merely for alignment with POSIX.
  */
-typedef uint16_t __wasi_errno_t;
+प्रकारनिर्देश uint16_t __wasi_errno_t;
 
 /**
  * No error occurred. System call completed successfully.
@@ -500,13 +500,13 @@ typedef uint16_t __wasi_errno_t;
  */
 #define __WASI_ERRNO_NOTCAPABLE (UINT16_C(76))
 
-_Static_assert(sizeof(__wasi_errno_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_errno_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_errno_t) == 2, "witx calculated align");
 
 /**
  * File descriptor rights, determining which actions may be performed.
  */
-typedef uint64_t __wasi_rights_t;
+प्रकारनिर्देश uint64_t __wasi_rights_t;
 
 /**
  * The right to invoke `fd_datasync`.
@@ -665,21 +665,21 @@ typedef uint64_t __wasi_rights_t;
  */
 #define __WASI_RIGHTS_SOCK_SHUTDOWN (UINT64_C(268435456))
 
-_Static_assert(sizeof(__wasi_rights_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_rights_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_rights_t) == 8, "witx calculated align");
 
 /**
  * A file descriptor index.
  */
-typedef uint32_t __wasi_fd_t;
+प्रकारनिर्देश uint32_t __wasi_fd_t;
 
-_Static_assert(sizeof(__wasi_fd_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_fd_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fd_t) == 4, "witx calculated align");
 
 /**
  * A region of memory for scatter/gather reads.
  */
-typedef struct __wasi_iovec_t {
+प्रकारनिर्देश संरचना __wasi_iovec_t {
     /**
      * The address of the buffer to be filled.
      */
@@ -700,11 +700,11 @@ typedef struct __wasi_iovec_t {
 /**
  * A region of memory for scatter/gather writes.
  */
-typedef struct __wasi_ciovec_t {
+प्रकारनिर्देश संरचना __wasi_ciovec_t {
     /**
      * The address of the buffer to be written.
      */
-    const uint8_t * buf;
+    अचर uint8_t * buf;
 
     /**
      * The length of the buffer to be written.
@@ -721,15 +721,15 @@ typedef struct __wasi_ciovec_t {
 /**
  * Relative offset within a file.
  */
-typedef int64_t __wasi_filedelta_t;
+प्रकारनिर्देश int64_t __wasi_filedelta_t;
 
-_Static_assert(sizeof(__wasi_filedelta_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_filedelta_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filedelta_t) == 8, "witx calculated align");
 
 /**
  * The position relative to which to set the offset of the file descriptor.
  */
-typedef uint8_t __wasi_whence_t;
+प्रकारनिर्देश uint8_t __wasi_whence_t;
 
 /**
  * Seek relative to start-of-file.
@@ -746,7 +746,7 @@ typedef uint8_t __wasi_whence_t;
  */
 #define __WASI_WHENCE_END (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_whence_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_whence_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
 
 /**
@@ -754,31 +754,31 @@ _Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
  *
  * The value 0 signifies the start of the directory.
  */
-typedef uint64_t __wasi_dircookie_t;
+प्रकारनिर्देश uint64_t __wasi_dircookie_t;
 
-_Static_assert(sizeof(__wasi_dircookie_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_dircookie_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_dircookie_t) == 8, "witx calculated align");
 
 /**
  * The type for the $d_namlen field of $dirent.
  */
-typedef uint32_t __wasi_dirnamlen_t;
+प्रकारनिर्देश uint32_t __wasi_dirnamlen_t;
 
-_Static_assert(sizeof(__wasi_dirnamlen_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_dirnamlen_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_dirnamlen_t) == 4, "witx calculated align");
 
 /**
  * File serial number that is unique within its file system.
  */
-typedef uint64_t __wasi_inode_t;
+प्रकारनिर्देश uint64_t __wasi_inode_t;
 
-_Static_assert(sizeof(__wasi_inode_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_inode_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_inode_t) == 8, "witx calculated align");
 
 /**
  * The type of a file descriptor or file.
  */
-typedef uint8_t __wasi_filetype_t;
+प्रकारनिर्देश uint8_t __wasi_filetype_t;
 
 /**
  * The type of the file descriptor or file is unknown or is different from any of the other types specified.
@@ -820,13 +820,13 @@ typedef uint8_t __wasi_filetype_t;
  */
 #define __WASI_FILETYPE_SYMBOLIC_LINK (UINT8_C(7))
 
-_Static_assert(sizeof(__wasi_filetype_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_filetype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filetype_t) == 1, "witx calculated align");
 
 /**
  * A directory entry.
  */
-typedef struct __wasi_dirent_t {
+प्रकारनिर्देश संरचना __wasi_dirent_t {
     /**
      * The offset of the next directory entry stored in this directory.
      */
@@ -849,17 +849,17 @@ typedef struct __wasi_dirent_t {
 
 } __wasi_dirent_t;
 
-_Static_assert(sizeof(__wasi_dirent_t) == 24, "witx calculated size");
+_Static_assert(परिमाण(__wasi_dirent_t) == 24, "witx calculated size");
 _Static_assert(_Alignof(__wasi_dirent_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_dirent_t, d_next) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_dirent_t, d_ino) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_dirent_t, d_namlen) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_dirent_t, d_type) == 20, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_dirent_t, d_next) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_dirent_t, d_ino) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_dirent_t, d_namlen) == 16, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_dirent_t, d_type) == 20, "witx calculated offset");
 
 /**
  * File or memory access pattern advisory information.
  */
-typedef uint8_t __wasi_advice_t;
+प्रकारनिर्देश uint8_t __wasi_advice_t;
 
 /**
  * The application has no advice to give on its behavior with respect to the specified data.
@@ -891,13 +891,13 @@ typedef uint8_t __wasi_advice_t;
  */
 #define __WASI_ADVICE_NOREUSE (UINT8_C(5))
 
-_Static_assert(sizeof(__wasi_advice_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_advice_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_advice_t) == 1, "witx calculated align");
 
 /**
  * File descriptor flags.
  */
-typedef uint16_t __wasi_fdflags_t;
+प्रकारनिर्देश uint16_t __wasi_fdflags_t;
 
 /**
  * Append mode: Data written to the file is always appended to the file's end.
@@ -926,13 +926,13 @@ typedef uint16_t __wasi_fdflags_t;
  */
 #define __WASI_FDFLAGS_SYNC (UINT16_C(16))
 
-_Static_assert(sizeof(__wasi_fdflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_fdflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fdflags_t) == 2, "witx calculated align");
 
 /**
  * File descriptor attributes.
  */
-typedef struct __wasi_fdstat_t {
+प्रकारनिर्देश संरचना __wasi_fdstat_t {
     /**
      * File type.
      */
@@ -956,26 +956,26 @@ typedef struct __wasi_fdstat_t {
 
 } __wasi_fdstat_t;
 
-_Static_assert(sizeof(__wasi_fdstat_t) == 24, "witx calculated size");
+_Static_assert(परिमाण(__wasi_fdstat_t) == 24, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fdstat_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_filetype) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_flags) == 2, "witx calculated offset");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_rights_base) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_fdstat_t, fs_rights_inheriting) == 16, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_fdstat_t, fs_filetype) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_fdstat_t, fs_flags) == 2, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_fdstat_t, fs_rights_base) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_fdstat_t, fs_rights_inheriting) == 16, "witx calculated offset");
 
 /**
  * Identifier for a device containing a file system. Can be used in combination
  * with `inode` to uniquely identify a file or directory in the filesystem.
  */
-typedef uint64_t __wasi_device_t;
+प्रकारनिर्देश uint64_t __wasi_device_t;
 
-_Static_assert(sizeof(__wasi_device_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_device_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_device_t) == 8, "witx calculated align");
 
 /**
  * Which file time attributes to adjust.
  */
-typedef uint16_t __wasi_fstflags_t;
+प्रकारनिर्देश uint16_t __wasi_fstflags_t;
 
 /**
  * Adjust the last data access timestamp to the value stored in `filestat::atim`.
@@ -997,26 +997,26 @@ typedef uint16_t __wasi_fstflags_t;
  */
 #define __WASI_FSTFLAGS_MTIM_NOW (UINT16_C(8))
 
-_Static_assert(sizeof(__wasi_fstflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_fstflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fstflags_t) == 2, "witx calculated align");
 
 /**
  * Flags determining the method of how paths are resolved.
  */
-typedef uint32_t __wasi_lookupflags_t;
+प्रकारनिर्देश uint32_t __wasi_lookupflags_t;
 
 /**
  * As long as the resolved path corresponds to a symbolic link, it is expanded.
  */
 #define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW (UINT32_C(1))
 
-_Static_assert(sizeof(__wasi_lookupflags_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_lookupflags_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_lookupflags_t) == 4, "witx calculated align");
 
 /**
  * Open flags used by `path_open`.
  */
-typedef uint16_t __wasi_oflags_t;
+प्रकारनिर्देश uint16_t __wasi_oflags_t;
 
 /**
  * Create file if it does not exist.
@@ -1038,21 +1038,21 @@ typedef uint16_t __wasi_oflags_t;
  */
 #define __WASI_OFLAGS_TRUNC (UINT16_C(8))
 
-_Static_assert(sizeof(__wasi_oflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_oflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_oflags_t) == 2, "witx calculated align");
 
 /**
  * Number of hard links to an inode.
  */
-typedef uint64_t __wasi_linkcount_t;
+प्रकारनिर्देश uint64_t __wasi_linkcount_t;
 
-_Static_assert(sizeof(__wasi_linkcount_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_linkcount_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_linkcount_t) == 8, "witx calculated align");
 
 /**
  * File attributes.
  */
-typedef struct __wasi_filestat_t {
+प्रकारनिर्देश संरचना __wasi_filestat_t {
     /**
      * Device ID of device containing the file.
      */
@@ -1095,30 +1095,30 @@ typedef struct __wasi_filestat_t {
 
 } __wasi_filestat_t;
 
-_Static_assert(sizeof(__wasi_filestat_t) == 64, "witx calculated size");
+_Static_assert(परिमाण(__wasi_filestat_t) == 64, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filestat_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_filestat_t, dev) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, ino) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, filetype) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, nlink) == 24, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, size) == 32, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, atim) == 40, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, mtim) == 48, "witx calculated offset");
-_Static_assert(offsetof(__wasi_filestat_t, ctim) == 56, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, dev) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, ino) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, filetype) == 16, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, nlink) == 24, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, size) == 32, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, atim) == 40, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, mtim) == 48, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_filestat_t, ctim) == 56, "witx calculated offset");
 
 /**
  * User-provided value that may be attached to objects that is retained when
  * extracted from the implementation.
  */
-typedef uint64_t __wasi_userdata_t;
+प्रकारनिर्देश uint64_t __wasi_userdata_t;
 
-_Static_assert(sizeof(__wasi_userdata_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_userdata_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_userdata_t) == 8, "witx calculated align");
 
 /**
  * Type of a subscription to an event or its occurrence.
  */
-typedef uint8_t __wasi_eventtype_t;
+प्रकारनिर्देश uint8_t __wasi_eventtype_t;
 
 /**
  * The time value of clock `subscription_clock::id` has
@@ -1138,28 +1138,28 @@ typedef uint8_t __wasi_eventtype_t;
  */
 #define __WASI_EVENTTYPE_FD_WRITE (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_eventtype_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_eventtype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_eventtype_t) == 1, "witx calculated align");
 
 /**
  * The state of the file descriptor subscribed to with
  * `eventtype::fd_read` or `eventtype::fd_write`.
  */
-typedef uint16_t __wasi_eventrwflags_t;
+प्रकारनिर्देश uint16_t __wasi_eventrwflags_t;
 
 /**
  * The peer of this socket has closed or disconnected.
  */
 #define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP (UINT16_C(1))
 
-_Static_assert(sizeof(__wasi_eventrwflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_eventrwflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_eventrwflags_t) == 2, "witx calculated align");
 
 /**
  * The contents of an $event when type is `eventtype::fd_read` or
  * `eventtype::fd_write`.
  */
-typedef struct __wasi_event_fd_readwrite_t {
+प्रकारनिर्देश संरचना __wasi_event_fd_readwrite_t {
     /**
      * The number of bytes available for reading or writing.
      */
@@ -1172,15 +1172,15 @@ typedef struct __wasi_event_fd_readwrite_t {
 
 } __wasi_event_fd_readwrite_t;
 
-_Static_assert(sizeof(__wasi_event_fd_readwrite_t) == 16, "witx calculated size");
+_Static_assert(परिमाण(__wasi_event_fd_readwrite_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_fd_readwrite_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_event_fd_readwrite_t, nbytes) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_fd_readwrite_t, flags) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_event_fd_readwrite_t, nbytes) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_event_fd_readwrite_t, flags) == 8, "witx calculated offset");
 
 /**
  * The contents of an $event.
  */
-typedef union __wasi_event_u_t {
+प्रकारनिर्देश सङ्घ __wasi_event_u_t {
     /**
      * When type is `eventtype::fd_read` or `eventtype::fd_write`:
      */
@@ -1188,13 +1188,13 @@ typedef union __wasi_event_u_t {
 
 } __wasi_event_u_t;
 
-_Static_assert(sizeof(__wasi_event_u_t) == 16, "witx calculated size");
+_Static_assert(परिमाण(__wasi_event_u_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_u_t) == 8, "witx calculated align");
 
 /**
  * An event that occurred.
  */
-typedef struct __wasi_event_t {
+प्रकारनिर्देश संरचना __wasi_event_t {
     /**
      * User-provided value that got attached to `subscription::userdata`.
      */
@@ -1217,18 +1217,18 @@ typedef struct __wasi_event_t {
 
 } __wasi_event_t;
 
-_Static_assert(sizeof(__wasi_event_t) == 32, "witx calculated size");
+_Static_assert(परिमाण(__wasi_event_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_event_t, userdata) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, error) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, type) == 10, "witx calculated offset");
-_Static_assert(offsetof(__wasi_event_t, u) == 16, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_event_t, userdata) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_event_t, error) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_event_t, type) == 10, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_event_t, u) == 16, "witx calculated offset");
 
 /**
  * Flags determining how to interpret the timestamp provided in
  * `subscription_clock::timeout`.
  */
-typedef uint16_t __wasi_subclockflags_t;
+प्रकारनिर्देश uint16_t __wasi_subclockflags_t;
 
 /**
  * If set, treat the timestamp provided in
@@ -1239,13 +1239,13 @@ typedef uint16_t __wasi_subclockflags_t;
  */
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(1))
 
-_Static_assert(sizeof(__wasi_subclockflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_subclockflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subclockflags_t) == 2, "witx calculated align");
 
 /**
  * The contents of a $subscription when type is `eventtype::clock`.
  */
-typedef struct __wasi_subscription_clock_t {
+प्रकारनिर्देश संरचना __wasi_subscription_clock_t {
     /**
      * The clock against which to compare the timestamp.
      */
@@ -1269,18 +1269,18 @@ typedef struct __wasi_subscription_clock_t {
 
 } __wasi_subscription_clock_t;
 
-_Static_assert(sizeof(__wasi_subscription_clock_t) == 32, "witx calculated size");
+_Static_assert(परिमाण(__wasi_subscription_clock_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_clock_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_subscription_clock_t, id) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_clock_t, timeout) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_clock_t, precision) == 16, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_clock_t, flags) == 24, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_clock_t, id) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_clock_t, timeout) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_clock_t, precision) == 16, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_clock_t, flags) == 24, "witx calculated offset");
 
 /**
  * The contents of a $subscription when type is type is
  * `eventtype::fd_read` or `eventtype::fd_write`.
  */
-typedef struct __wasi_subscription_fd_readwrite_t {
+प्रकारनिर्देश संरचना __wasi_subscription_fd_readwrite_t {
     /**
      * The file descriptor on which to wait for it to become ready for reading or writing.
      */
@@ -1288,18 +1288,18 @@ typedef struct __wasi_subscription_fd_readwrite_t {
 
 } __wasi_subscription_fd_readwrite_t;
 
-_Static_assert(sizeof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_subscription_fd_readwrite_t, file_descriptor) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_fd_readwrite_t, file_descriptor) == 0, "witx calculated offset");
 
 /**
  * The contents of a $subscription.
  */
-typedef union __wasi_subscription_u_t {
+प्रकारनिर्देश सङ्घ __wasi_subscription_u_t {
     /**
      * When type is `eventtype::clock`:
      */
-    __wasi_subscription_clock_t clock;
+    __wasi_subscription_clock_t घड़ी;
 
     /**
      * When type is `eventtype::fd_read` or `eventtype::fd_write`:
@@ -1308,13 +1308,13 @@ typedef union __wasi_subscription_u_t {
 
 } __wasi_subscription_u_t;
 
-_Static_assert(sizeof(__wasi_subscription_u_t) == 32, "witx calculated size");
+_Static_assert(परिमाण(__wasi_subscription_u_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_u_t) == 8, "witx calculated align");
 
 /**
  * Subscription to an event.
  */
-typedef struct __wasi_subscription_t {
+प्रकारनिर्देश संरचना __wasi_subscription_t {
     /**
      * User-provided value that is attached to the subscription in the
      * implementation and returned through `event::userdata`.
@@ -1333,24 +1333,24 @@ typedef struct __wasi_subscription_t {
 
 } __wasi_subscription_t;
 
-_Static_assert(sizeof(__wasi_subscription_t) == 48, "witx calculated size");
+_Static_assert(परिमाण(__wasi_subscription_t) == 48, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_t) == 8, "witx calculated align");
-_Static_assert(offsetof(__wasi_subscription_t, userdata) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_t, type) == 8, "witx calculated offset");
-_Static_assert(offsetof(__wasi_subscription_t, u) == 16, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_t, userdata) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_t, type) == 8, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_subscription_t, u) == 16, "witx calculated offset");
 
 /**
  * Exit code generated by a process when exiting.
  */
-typedef uint32_t __wasi_exitcode_t;
+प्रकारनिर्देश uint32_t __wasi_exitcode_t;
 
-_Static_assert(sizeof(__wasi_exitcode_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_exitcode_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_exitcode_t) == 4, "witx calculated align");
 
 /**
  * Signal condition.
  */
-typedef uint8_t __wasi_signal_t;
+प्रकारनिर्देश uint8_t __wasi_signal_t;
 
 /**
  * No signal. Note that POSIX has special semantics for `kill(pid, 0)`,
@@ -1538,13 +1538,13 @@ typedef uint8_t __wasi_signal_t;
  */
 #define __WASI_SIGNAL_SYS (UINT8_C(30))
 
-_Static_assert(sizeof(__wasi_signal_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_signal_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_signal_t) == 1, "witx calculated align");
 
 /**
  * Flags provided to `sock_recv`.
  */
-typedef uint16_t __wasi_riflags_t;
+प्रकारनिर्देश uint16_t __wasi_riflags_t;
 
 /**
  * Returns the message without removing it from the socket's receive queue.
@@ -1556,35 +1556,35 @@ typedef uint16_t __wasi_riflags_t;
  */
 #define __WASI_RIFLAGS_RECV_WAITALL (UINT16_C(2))
 
-_Static_assert(sizeof(__wasi_riflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_riflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_riflags_t) == 2, "witx calculated align");
 
 /**
  * Flags returned by `sock_recv`.
  */
-typedef uint16_t __wasi_roflags_t;
+प्रकारनिर्देश uint16_t __wasi_roflags_t;
 
 /**
  * Returned by `sock_recv`: Message data has been truncated.
  */
 #define __WASI_ROFLAGS_RECV_DATA_TRUNCATED (UINT16_C(1))
 
-_Static_assert(sizeof(__wasi_roflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_roflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_roflags_t) == 2, "witx calculated align");
 
 /**
  * Flags provided to `sock_send`. As there are currently no flags
  * defined, it must be set to zero.
  */
-typedef uint16_t __wasi_siflags_t;
+प्रकारनिर्देश uint16_t __wasi_siflags_t;
 
-_Static_assert(sizeof(__wasi_siflags_t) == 2, "witx calculated size");
+_Static_assert(परिमाण(__wasi_siflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_siflags_t) == 2, "witx calculated align");
 
 /**
  * Which channels on a socket to shut down.
  */
-typedef uint8_t __wasi_sdflags_t;
+प्रकारनिर्देश uint8_t __wasi_sdflags_t;
 
 /**
  * Disables further receive operations.
@@ -1596,26 +1596,26 @@ typedef uint8_t __wasi_sdflags_t;
  */
 #define __WASI_SDFLAGS_WR (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_sdflags_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_sdflags_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sdflags_t) == 1, "witx calculated align");
 
 /**
  * Identifiers for preopened capabilities.
  */
-typedef uint8_t __wasi_preopentype_t;
+प्रकारनिर्देश uint8_t __wasi_preopentype_t;
 
 /**
  * A pre-opened directory.
  */
 #define __WASI_PREOPENTYPE_DIR (UINT8_C(0))
 
-_Static_assert(sizeof(__wasi_preopentype_t) == 1, "witx calculated size");
+_Static_assert(परिमाण(__wasi_preopentype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_preopentype_t) == 1, "witx calculated align");
 
 /**
  * The contents of a $prestat when type is `preopentype::dir`.
  */
-typedef struct __wasi_prestat_dir_t {
+प्रकारनिर्देश संरचना __wasi_prestat_dir_t {
     /**
      * The length of the directory name for use with `fd_prestat_dir_name`.
      */
@@ -1623,14 +1623,14 @@ typedef struct __wasi_prestat_dir_t {
 
 } __wasi_prestat_dir_t;
 
-_Static_assert(sizeof(__wasi_prestat_dir_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_prestat_dir_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_dir_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_prestat_dir_t, pr_name_len) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_prestat_dir_t, pr_name_len) == 0, "witx calculated offset");
 
 /**
  * The contents of an $prestat.
  */
-typedef union __wasi_prestat_u_t {
+प्रकारनिर्देश सङ्घ __wasi_prestat_u_t {
     /**
      * When type is `preopentype::dir`:
      */
@@ -1638,13 +1638,13 @@ typedef union __wasi_prestat_u_t {
 
 } __wasi_prestat_u_t;
 
-_Static_assert(sizeof(__wasi_prestat_u_t) == 4, "witx calculated size");
+_Static_assert(परिमाण(__wasi_prestat_u_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_u_t) == 4, "witx calculated align");
 
 /**
  * Information about a pre-opened capability.
  */
-typedef struct __wasi_prestat_t {
+प्रकारनिर्देश संरचना __wasi_prestat_t {
     /**
      * The type of the pre-opened capability.
      */
@@ -1657,10 +1657,10 @@ typedef struct __wasi_prestat_t {
 
 } __wasi_prestat_t;
 
-_Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
+_Static_assert(परिमाण(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
-_Static_assert(offsetof(__wasi_prestat_t, pr_type) == 0, "witx calculated offset");
-_Static_assert(offsetof(__wasi_prestat_t, u) == 4, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_prestat_t, pr_type) == 0, "witx calculated offset");
+_Static_assert(दुरत्व(__wasi_prestat_t, u) == 4, "witx calculated offset");
 
 /**
  * @defgroup wasi_snapshot_preview1
@@ -1771,7 +1771,7 @@ __wasi_errno_t __wasi_clock_time_get(
     /**
      * The time value of the clock.
      */
-    __wasi_timestamp_t *time
+    __wasi_timestamp_t *समय
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("clock_time_get"),
@@ -1974,12 +1974,12 @@ __wasi_errno_t __wasi_fd_pread(
     /**
      * List of scatter/gather vectors in which to store data.
      */
-    const __wasi_iovec_t *iovs,
+    अचर __wasi_iovec_t *iovs,
 
     /**
      * The length of the array pointed to by `iovs`.
      */
-    size_t iovs_len,
+    माप_प्रकार iovs_len,
 
     /**
      * The offset within the file at which to read.
@@ -2040,12 +2040,12 @@ __wasi_errno_t __wasi_fd_pwrite(
     /**
      * List of scatter/gather vectors from which to retrieve data.
      */
-    const __wasi_ciovec_t *iovs,
+    अचर __wasi_ciovec_t *iovs,
 
     /**
      * The length of the array pointed to by `iovs`.
      */
-    size_t iovs_len,
+    माप_प्रकार iovs_len,
 
     /**
      * The offset within the file at which to write.
@@ -2072,12 +2072,12 @@ __wasi_errno_t __wasi_fd_read(
     /**
      * List of scatter/gather vectors to which to store data.
      */
-    const __wasi_iovec_t *iovs,
+    अचर __wasi_iovec_t *iovs,
 
     /**
      * The length of the array pointed to by `iovs`.
      */
-    size_t iovs_len,
+    माप_प्रकार iovs_len,
 
     /**
      * The number of bytes read.
@@ -2214,12 +2214,12 @@ __wasi_errno_t __wasi_fd_write(
     /**
      * List of scatter/gather vectors from which to retrieve data.
      */
-    const __wasi_ciovec_t *iovs,
+    अचर __wasi_ciovec_t *iovs,
 
     /**
      * The length of the array pointed to by `iovs`.
      */
-    size_t iovs_len,
+    माप_प्रकार iovs_len,
 
     /**
      * The number of bytes written.
@@ -2241,12 +2241,12 @@ __wasi_errno_t __wasi_path_create_directory(
     /**
      * The path at which to create the directory.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len
+    माप_प्रकार path_len
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("path_create_directory"),
@@ -2268,12 +2268,12 @@ __wasi_errno_t __wasi_path_filestat_get(
     /**
      * The path of the file or directory to inspect.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len,
+    माप_प्रकार path_len,
 
     /**
      * The buffer where the file's attributes are stored.
@@ -2300,12 +2300,12 @@ __wasi_errno_t __wasi_path_filestat_set_times(
     /**
      * The path of the file or directory to operate on.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len,
+    माप_प्रकार path_len,
 
     /**
      * The desired values of the data access timestamp.
@@ -2342,12 +2342,12 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The source path from which to link.
      */
-    const char *old_path,
+    अचर वर्ण *old_path,
 
     /**
      * The length of the buffer pointed to by `old_path`.
      */
-    size_t old_path_len,
+    माप_प्रकार old_path_len,
 
     /**
      * The working directory at which the resolution of the new path starts.
@@ -2357,12 +2357,12 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The destination path at which to create the hard link.
      */
-    const char *new_path,
+    अचर वर्ण *new_path,
 
     /**
      * The length of the buffer pointed to by `new_path`.
      */
-    size_t new_path_len
+    माप_प्रकार new_path_len
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("path_link"),
@@ -2390,12 +2390,12 @@ __wasi_errno_t __wasi_path_open(
      * The relative path of the file or directory to open, relative to the
      * `path_open::fd` directory.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len,
+    माप_प्रकार path_len,
 
     /**
      * The method by which to open the file.
@@ -2437,12 +2437,12 @@ __wasi_errno_t __wasi_path_readlink(
     /**
      * The path of the symbolic link from which to read.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len,
+    माप_प्रकार path_len,
 
     /**
      * The buffer to which to write the contents of the symbolic link.
@@ -2472,12 +2472,12 @@ __wasi_errno_t __wasi_path_remove_directory(
     /**
      * The path to a directory to remove.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len
+    माप_प्रकार path_len
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("path_remove_directory"),
@@ -2494,12 +2494,12 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The source path of the file or directory to rename.
      */
-    const char *old_path,
+    अचर वर्ण *old_path,
 
     /**
      * The length of the buffer pointed to by `old_path`.
      */
-    size_t old_path_len,
+    माप_प्रकार old_path_len,
 
     /**
      * The working directory at which the resolution of the new path starts.
@@ -2509,12 +2509,12 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The destination path to which to rename the file or directory.
      */
-    const char *new_path,
+    अचर वर्ण *new_path,
 
     /**
      * The length of the buffer pointed to by `new_path`.
      */
-    size_t new_path_len
+    माप_प्रकार new_path_len
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("path_rename"),
@@ -2529,24 +2529,24 @@ __wasi_errno_t __wasi_path_symlink(
     /**
      * The contents of the symbolic link.
      */
-    const char *old_path,
+    अचर वर्ण *old_path,
 
     /**
      * The length of the buffer pointed to by `old_path`.
      */
-    size_t old_path_len,
+    माप_प्रकार old_path_len,
 
     __wasi_fd_t fd,
 
     /**
      * The destination path at which to create the symbolic link.
      */
-    const char *new_path,
+    अचर वर्ण *new_path,
 
     /**
      * The length of the buffer pointed to by `new_path`.
      */
-    size_t new_path_len
+    माप_प्रकार new_path_len
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("path_symlink"),
@@ -2564,12 +2564,12 @@ __wasi_errno_t __wasi_path_unlink_file(
     /**
      * The path to a file to unlink.
      */
-    const char *path,
+    अचर वर्ण *path,
 
     /**
      * The length of the buffer pointed to by `path`.
      */
-    size_t path_len
+    माप_प्रकार path_len
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("path_unlink_file"),
@@ -2583,7 +2583,7 @@ __wasi_errno_t __wasi_poll_oneoff(
     /**
      * The events to which to subscribe.
      */
-    const __wasi_subscription_t * in,
+    अचर __wasi_subscription_t * in,
 
     /**
      * The events that have occurred.
@@ -2610,7 +2610,7 @@ __wasi_errno_t __wasi_poll_oneoff(
  * termination of the program. The meanings of other values is dependent on
  * the environment.
  */
-_Noreturn void __wasi_proc_exit(
+_Noreturn शून्य __wasi_proc_exit(
     /**
      * The exit code returned by the process.
      */
@@ -2640,7 +2640,7 @@ __wasi_errno_t __wasi_proc_raise(
  * Note: This is similar to `sched_yield` in POSIX.
  */
 __wasi_errno_t __wasi_sched_yield(
-    void
+    शून्य
 ) __attribute__((
     // __import_module__("wasi_snapshot_preview1"),
     // __import_name__("sched_yield"),
@@ -2679,12 +2679,12 @@ __wasi_errno_t __wasi_sock_recv(
     /**
      * List of scatter/gather vectors to which to store data.
      */
-    const __wasi_iovec_t *ri_data,
+    अचर __wasi_iovec_t *ri_data,
 
     /**
      * The length of the array pointed to by `ri_data`.
      */
-    size_t ri_data_len,
+    माप_प्रकार ri_data_len,
 
     /**
      * Message flags.
@@ -2716,12 +2716,12 @@ __wasi_errno_t __wasi_sock_send(
     /**
      * List of scatter/gather vectors to which to retrieve data
      */
-    const __wasi_ciovec_t *si_data,
+    अचर __wasi_ciovec_t *si_data,
 
     /**
      * The length of the array pointed to by `si_data`.
      */
-    size_t si_data_len,
+    माप_प्रकार si_data_len,
 
     /**
      * Message flags.

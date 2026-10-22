@@ -5,40 +5,40 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <stdarg.h>
-#include <limits.h>
-#include <errno.h>
-#include <float.h>
-#include <ctype.h>
+#अन्तर्भाव <stdarg.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <float.h>
+#अन्तर्भाव <ctype.h>
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_deterministic.h"
-#include "m3_compile.h"
-#include "m3_host.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#अन्तर्भाव "m3_env.h"
+#अन्तर्भाव "m3_bind.h"
+#अन्तर्भाव "m3_deterministic.h"
+#अन्तर्भाव "m3_compile.h"
+#अन्तर्भाव "m3_host.h"
+#अन्तर्भाव "m3_exception.h"
+#अन्तर्भाव "m3_info.h"
 
 
 IM3Environment m3_NewEnvironment ()
 {
     IM3Environment env = m3_AllocStruct(M3Environment);
 
-    if (env) {
+    यदि (env) {
         _try
         {
             // create FuncTypes for all simple block return ValueTypes.
             // v128 is skipped: it parses as a slot but has no operations.
-            for (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
-                if (t == c_m3Type_v128) {
-                    continue;
+            लागि (u8 t = c_m3Type_none; t < c_m3_Type_गन्ती; t++) {
+                यदि (t == c_m3Type_v128) {
+                    जारी;
                 }
 
                 IM3FuncType ftype;
 _               (AllocFuncType(&ftype, 1));
 
-                ftype->numArgs  = 0;
-                ftype->numRets  = (t == c_m3Type_none) ? 0 : 1;
+                ftype->अङ्क_Args  = 0;
+                ftype->अङ्क_Rets  = (t == c_m3Type_none) ? 0 : 1;
                 ftype->types[0] = t;
 
                 Environment_AddFuncType(env, &ftype);
@@ -48,43 +48,43 @@ _               (AllocFuncType(&ftype, 1));
         }
 
         _catch:
-        if (result) {
+        यदि (result) {
             m3_FreeEnvironment(env);
-            env = NULL;
+            env = रिक्त;
         }
     }
 
-    return env;
+    फर्काऊ env;
 }
 
 
-void Environment_Release (IM3Environment i_environment)
+शून्य Environment_Release (IM3Environment i_environment)
 {
     IM3FuncType ftype = i_environment->funcTypes;
 
-    while (ftype) {
+    जबसम्म (ftype) {
         IM3FuncType next = ftype->next;
         m3_Free(ftype);
         ftype = next;
     }
 
-    m3log(runtime, "freeing %d pages from environment", CountCodePages(i_environment->pagesReleased));
+    m3log(runtime, "freeing %d pages from environment", गन्ती_Code_Pages(i_environment->pagesReleased));
     FreeCodePages(&i_environment->pagesReleased);
 }
 
 
-void m3_FreeEnvironment (IM3Environment i_environment)
+शून्य m3_FreeEnvironment (IM3Environment i_environment)
 {
-    if (i_environment) {
+    यदि (i_environment) {
         Environment_Release(i_environment);
         m3_Free(i_environment);
     }
 }
 
 
-void m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
+शून्य m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
 {
-    if (i_environment) {
+    यदि (i_environment) {
         i_environment->customSectionHandler = i_handler;
     }
 }
@@ -96,32 +96,32 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
     IM3FuncType addType = *io_funcType;
     IM3FuncType newType = i_environment->funcTypes;
 
-    while (newType) {
-        if (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
+    जबसम्म (newType) {
+        यदि (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
             m3_Free(addType);
-            break;
+            रोक;
         }
 
         newType = newType->next;
     }
 
-    if (newType == NULL) {
+    यदि (newType == रिक्त) {
         // a type index has to fit in the heap type field of an m3type_t
-        if (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
+        यदि (i_environment->अङ्क_Func_Types >= d_m3_Max_Sane_Types_गन्ती) {
             m3_Free(addType);
-            *io_funcType = NULL;
-            return "too many distinct function types";
+            *io_funcType = रिक्त;
+            फर्काऊ "too many distinct function types";
         }
 
         newType                  = addType;
-        newType->canonicalIndex  = i_environment->numFuncTypes++;
+        newType->canonicalIndex  = i_environment->अङ्क_Func_Types++;
         newType->next            = i_environment->funcTypes;
         i_environment->funcTypes = newType;
     }
 
     *io_funcType = newType;
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 
@@ -133,20 +133,20 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 // the same way are still two groups, and a type inside one is never the type
 // outside it that matches field for field. Reserving the indices up front is
 // also what lets the members refer to each other while they are being read.
-M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_count, u16* o_firstIndex)
+M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_गन्ती, u16* o_firstIndex)
 {
-    if ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
-        return "too many distinct function types";
+    यदि ((u64)i_environment->अङ्क_Func_Types + i_गन्ती > d_m3_Max_Sane_Types_गन्ती) {
+        फर्काऊ "too many distinct function types";
     }
 
-    *o_firstIndex = i_environment->numFuncTypes;
-    i_environment->numFuncTypes += (u16)i_count;
+    *o_firstIndex = i_environment->अङ्क_Func_Types;
+    i_environment->अङ्क_Func_Types += (u16)i_गन्ती;
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 
-void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
+शून्य Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
 {
     i_funcType->inRecGroup     = true;
     i_funcType->canonicalIndex = i_canonicalIndex;
@@ -155,56 +155,56 @@ void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_func
 }
 
 
-IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimumLineCount)
+IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimum_पङ्क्ति_गन्ती)
 {
-    IM3CodePage prev = NULL;
+    IM3CodePage prev = रिक्त;
     IM3CodePage page = *io_list;
 
-    while (page) {
-        if (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
+    जबसम्म (page) {
+        यदि (अङ्क_Free_पङ्क्तिहरू(page) >= i_minimum_पङ्क्ति_गन्ती) {             d_m3Assert (page->info.usage_गन्ती == 0);
             IM3CodePage next = page->info.next;
-            if (prev) {
+            यदि (prev) {
                 prev->info.next = next; // mid-list
-            } else {
+            } अन्यथा {
                 *io_list = next;       // front of list
             }
 
-            break;
+            रोक;
         }
 
         prev = page;
         page = page->info.next;
     }
 
-    return page;
+    फर्काऊ page;
 }
 
 
-IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimumLineCount)
+IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimum_पङ्क्ति_गन्ती)
 {
-    return RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
+    फर्काऊ RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimum_पङ्क्ति_गन्ती);
 }
 
 
-void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
+शून्य Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
 {
     IM3CodePage end = i_codePageList;
 
-    while (end) {
-        end->info.lineIndex = 0; // reset page
-#if d_m3RecordBacktraces
+    जबसम्म (end) {
+        end->info.पङ्क्ति_Index = 0; // reset page
+#यदि d_m3RecordBacktraces
         end->info.mapping->size = 0;
 #endif // d_m3RecordBacktraces
 
         IM3CodePage next = end->info.next;
-        if (not next) {
-            break;
+        यदि (not next) {
+            रोक;
         }
 
         end = next;
     }
 
-    if (end) {
+    यदि (end) {
         // push list to front
         end->info.next               = i_environment->pagesReleased;
         i_environment->pagesReleased = i_codePageList;
@@ -212,11 +212,11 @@ void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_c
 }
 
 
-IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, void* i_userdata)
+IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_थाक_Size_In_Bytes, शून्य* i_userdata)
 {
     IM3Runtime runtime = m3_AllocStruct(M3Runtime);
 
-    if (runtime) {
+    यदि (runtime) {
         m3_ResetErrorInfo(runtime);
 
         runtime->environment = i_environment;
@@ -224,138 +224,138 @@ IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, 
 
         Deterministic_InitRuntime(runtime);
 
-        runtime->originStack = m3_Malloc("Wasm Stack", i_stackSizeInBytes + 4 * sizeof(m3slot_t)); // TODO: more precise stack checks
+        runtime->origin_थाक = m3_Malloc("Wasm Stack", i_थाक_Size_In_Bytes + 4 * परिमाण(m3slot_t)); // TODO: more precise stack checks
 
-        if (runtime->originStack) {
-            runtime->stack         = runtime->originStack;
-            runtime->numStackSlots = i_stackSizeInBytes / sizeof(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->originStack, runtime->numStackSlots);
-        } else {
+        यदि (runtime->origin_थाक) {
+            runtime->थाक         = runtime->origin_थाक;
+            runtime->अङ्क_थाक_Slots = i_थाक_Size_In_Bytes / परिमाण(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->origin_थाक, runtime->अङ्क_थाक_Slots);
+        } अन्यथा {
             m3_Free(runtime);
         }
     }
 
-    return runtime;
+    फर्काऊ runtime;
 }
 
-void m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
+शून्य m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
 {
-#if d_m3EnableValidation
-    if (i_runtime) {
+#यदि d_m3EnableValidation
+    यदि (i_runtime) {
         i_runtime->skipValidation = not i_enable;
     }
-#else
-    (void)i_runtime;
-    (void)i_enable;              // nothing to skip: the validator was compiled out
+#अन्यथा
+    (शून्य)i_runtime;
+    (शून्य)i_enable;              // nothing to skip: the validator was compiled out
 #endif
 }
 
-M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_value)
+M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_मान)
 {
-    if (not i_runtime) {
-        return m3Err_mallocFailed;
+    यदि (not i_runtime) {
+        फर्काऊ m3Err_mallocFailed;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes:
-        if (i_value and i_value < i_runtime->memoryBytesUsed) {
-            return m3Err_resourceLimitBelowUsage;
+    विकल्प (i_limit) {
+    पक्ष c_m3Limit_MemoryBytes:
+        यदि (i_मान and i_मान < i_runtime->memoryBytesUsed) {
+            फर्काऊ m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->memoryBytesLimit = i_value;
-        return m3Err_none;
-    case c_m3Limit_TableElements:
-        if (i_value and i_value < i_runtime->tableElementsUsed) {
-            return m3Err_resourceLimitBelowUsage;
+        i_runtime->memoryBytesLimit = i_मान;
+        फर्काऊ m3Err_none;
+    पक्ष c_m3Limit_TableElements:
+        यदि (i_मान and i_मान < i_runtime->tableElementsUsed) {
+            फर्काऊ m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->tableElementsLimit = i_value;
-        return m3Err_none;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations:
-        if (i_value and i_value < i_runtime->continuationsAllocated) {
-            return m3Err_resourceLimitBelowUsage;
+        i_runtime->tableElementsLimit = i_मान;
+        फर्काऊ m3Err_none;
+#यदि d_m3_Has_थाक_Switching
+    पक्ष c_m3Limit_Continuations:
+        यदि (i_मान and i_मान < i_runtime->continuationsAllocated) {
+            फर्काऊ m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->continuationsLimit = (u32)M3_MIN(i_value, (u64)UINT32_MAX);
-        while (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
-            m3_Free(i_runtime->valStackPool[--i_runtime->valStackPoolCount]);
+        i_runtime->continuationsLimit = (u32)M3_MIN(i_मान, (u64)UINT32_MAX);
+        जबसम्म (i_मान and i_runtime->val_थाक_Pool_गन्ती > i_मान - i_runtime->continuationsAllocated) {
+            m3_Free(i_runtime->val_थाक_Pool[--i_runtime->val_थाक_Pool_गन्ती]);
         }
-        return m3Err_none;
-#else
-    case c_m3Limit_Continuations: return m3Err_resourceLimitNotSupported;
+        फर्काऊ m3Err_none;
+#अन्यथा
+    पक्ष c_m3Limit_Continuations: फर्काऊ m3Err_resourceLimitNotSupported;
 #endif
-    case c_m3Limit_GasUnits:
-#if d_m3HasGasMetering
-        i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_value, (u64)INT64_MAX);
-        return m3Err_none;
-#else
-        return m3Err_resourceLimitNotSupported;
+    पक्ष c_m3Limit_GasUnits:
+#यदि d_m3HasGasMetering
+        i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_मान, (u64)INT64_MAX);
+        फर्काऊ m3Err_none;
+#अन्यथा
+        फर्काऊ m3Err_resourceLimitNotSupported;
 #endif
-    default: return m3Err_unknownResourceLimit;
+    स्वभाव: फर्काऊ m3Err_unknownResourceLimit;
     }
 }
 
 uint64_t m3_GetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    यदि (not i_runtime) {
+        फर्काऊ 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesLimit;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsLimit;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsLimit;
+    विकल्प (i_limit) {
+    पक्ष c_m3Limit_MemoryBytes: फर्काऊ i_runtime->memoryBytesLimit;
+    पक्ष c_m3Limit_TableElements: फर्काऊ i_runtime->tableElementsLimit;
+#यदि d_m3_Has_थाक_Switching
+    पक्ष c_m3Limit_Continuations: फर्काऊ i_runtime->continuationsLimit;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit;
+#यदि d_m3HasGasMetering
+    पक्ष c_m3Limit_GasUnits: फर्काऊ (u64)i_runtime->gasLimit;
 #endif
-    default: return 0;
+    स्वभाव: फर्काऊ 0;
     }
 }
 
 uint64_t m3_GetResourceUsage (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    यदि (not i_runtime) {
+        फर्काऊ 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesUsed;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsUsed;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsAllocated;
+    विकल्प (i_limit) {
+    पक्ष c_m3Limit_MemoryBytes: फर्काऊ i_runtime->memoryBytesUsed;
+    पक्ष c_m3Limit_TableElements: फर्काऊ i_runtime->tableElementsUsed;
+#यदि d_m3_Has_थाक_Switching
+    पक्ष c_m3Limit_Continuations: फर्काऊ i_runtime->continuationsAllocated;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
+#यदि d_m3HasGasMetering
+    पक्ष c_m3Limit_GasUnits: फर्काऊ (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
 #endif
-    default: return 0;
+    स्वभाव: फर्काऊ 0;
     }
 }
 
-void* m3_GetUserData (IM3Runtime i_runtime)
+शून्य* m3_GetUserData (IM3Runtime i_runtime)
 {
-    return i_runtime ? i_runtime->userdata : NULL;
+    फर्काऊ i_runtime ? i_runtime->userdata : रिक्त;
 }
 
 
-void* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, void* i_info)
+शून्य* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, शून्य* i_info)
 {
-    void* r = NULL;
+    शून्य* r = रिक्त;
 
     IM3Module module = i_runtime->modules;
 
-    while (module) {
+    जबसम्म (module) {
         IM3Module next = module->next;
-        if ((r = i_visitor(module, i_info))) {
-            break;
+        यदि ((r = i_visitor(module, i_info))) {
+            रोक;
         }
 
         module = next;
     }
 
-    return r;
+    फर्काऊ r;
 }
 
 
-void* _FreeModule (IM3Module i_module, void* i_info)
+शून्य* _FreeModule (IM3Module i_module, शून्य* i_info)
 {
     m3_FreeModule(i_module);
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 
@@ -367,63 +367,63 @@ void* _FreeModule (IM3Module i_module, void* i_info)
 // the modules borrowing from it. So clear the borrowed slots first, in a pass
 // that frees nothing; the walk then skips them on the NULL check it already
 // does, instead of reading a memory some earlier module has freed.
-void* _ReleaseBorrowedSlots (IM3Module i_module, void* i_info)
+शून्य* _ReleaseBorrowedSlots (IM3Module i_module, शून्य* i_info)
 {
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    लागि (u32 i = 0; i < i_module->अङ्क_Memories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
-        if (memory and memory->owner != i_module) {
-            i_module->memories[i] = NULL;
+        यदि (memory and memory->owner != i_module) {
+            i_module->memories[i] = रिक्त;
         }
     }
 
-    for (u32 i = 0; i < i_module->numTables; ++i) {
+    लागि (u32 i = 0; i < i_module->अङ्क_Tables; ++i) {
         IM3Table table = i_module->tables[i];
 
-        if (table and table->owner != i_module) {
-            i_module->tables[i] = NULL;
+        यदि (table and table->owner != i_module) {
+            i_module->tables[i] = रिक्त;
         }
     }
 
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 
-void Runtime_Release (IM3Runtime i_runtime)
+शून्य Runtime_Release (IM3Runtime i_runtime)
 {
-    ForEachModule(i_runtime, _ReleaseBorrowedSlots, NULL);
-    ForEachModule(i_runtime, _FreeModule, NULL);                    d_m3Assert (i_runtime->numActiveCodePages == 0);
+    ForEachModule(i_runtime, _ReleaseBorrowedSlots, रिक्त);
+    ForEachModule(i_runtime, _FreeModule, रिक्त);                    d_m3Assert (i_runtime->अङ्क_Active_Code_Pages == 0);
 
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesOpen);
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesFull);
 
-    m3_Free(i_runtime->originStack);
+    m3_Free(i_runtime->origin_थाक);
 
-#if d_m3EnableValidation
+#यदि d_m3EnableValidation
     m3_Free(i_runtime->validator);
 #endif
 
-#if d_m3HasExceptionHandling
+#यदि d_m3HasExceptionHandling
     // a runtime let go of while suspended still holds its exceptions
     FreeExceptions(i_runtime);
     m3_Free(i_runtime->uncaughtException);
 #endif
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    while (i_runtime->hostTags) {
+#यदि d_m3HasExceptionHandling || d_m3_Has_थाक_Switching
+    जबसम्म (i_runtime->hostTags) {
         M3HostTag* next = i_runtime->hostTags->next;
         m3_Free(i_runtime->hostTags);
         i_runtime->hostTags = next;
     }
 #endif
-#if d_m3HasStackSwitching
+#यदि d_m3_Has_थाक_Switching
     Continuation_ReleaseAll(i_runtime);
 #endif
 }
 
 
-void m3_FreeRuntime (IM3Runtime i_runtime)
+शून्य m3_FreeRuntime (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    यदि (i_runtime) {
         m3_PrintProfilerInfo();
 
         Runtime_Release(i_runtime);
@@ -432,162 +432,162 @@ void m3_FreeRuntime (IM3Runtime i_runtime)
 }
 
 
-#if d_m3HasStackSwitching
+#यदि d_m3_Has_थाक_Switching
 
 IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3Function i_function)
 {
     IM3Continuation cont = m3_AllocStruct(M3Continuation);
-    if (!cont) {
-        return NULL;
+    यदि (!cont) {
+        फर्काऊ रिक्त;
     }
 
     cont->type          = i_type;
     cont->entryFunction = i_function;
     cont->state         = cont_allocated;
 
-    cont->numStackSlots = d_m3ContinuationStackSlots;
+    cont->अङ्क_थाक_Slots = d_m3_Continuation_थाक_Slots;
     // frames are recorded only when this continuation actually suspends, and
     // only as deep as it got, so the array starts out unallocated
-    cont->frames    = NULL;
+    cont->frames    = रिक्त;
     cont->framesCap = 0;
-    cont->numFrames = 0;
+    cont->अङ्क_Frames = 0;
 
-    cont->sp = cont->valStack;
-    cont->pc = i_function ? i_function->compiled : NULL;
+    cont->sp = cont->val_थाक;
+    cont->pc = i_function ? i_function->compiled : रिक्त;
     cont->r0 = 0;
-#  if d_m3HasFloat
+#  यदि d_m3HasFloat
     cont->fp0 = 0;
 #  endif
-    cont->boundArgsCount    = 0;
-    cont->numSuspendResults = 0;
-    cont->numHandlers       = 0;
-    cont->handlersPC        = NULL;
-    cont->parent            = NULL;
+    cont->bound_Args_गन्ती    = 0;
+    cont->अङ्क_Suspend_Results = 0;
+    cont->अङ्क_Handlers       = 0;
+    cont->handlersPC        = रिक्त;
+    cont->parent            = रिक्त;
 
     cont->next               = i_runtime->continuations;
     i_runtime->continuations = cont;
 
-    return cont;
+    फर्काऊ cont;
 }
 
 IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
     IM3Continuation newCont = Continuation_New(i_runtime, i_cont->type, i_cont->entryFunction);
-    if (M3_UNLIKELY(not newCont)) {
-        return NULL;
+    यदि (M3_UNLIKELY(not newCont)) {
+        फर्काऊ रिक्त;
     }
 
-    newCont->valStack      = i_cont->valStack;
-    newCont->numStackSlots = i_cont->numStackSlots;
+    newCont->val_थाक      = i_cont->val_थाक;
+    newCont->अङ्क_थाक_Slots = i_cont->अङ्क_थाक_Slots;
     newCont->sp            = i_cont->sp;
     newCont->pc            = i_cont->pc;
     newCont->suspendPoint  = i_cont->suspendPoint;
     newCont->r0            = i_cont->r0;
-#  if d_m3HasFloat
+#  यदि d_m3HasFloat
     newCont->fp0 = i_cont->fp0;
 #  endif
     newCont->frames    = i_cont->frames;
     newCont->framesCap = i_cont->framesCap;
-    newCont->numFrames = i_cont->numFrames;
+    newCont->अङ्क_Frames = i_cont->अङ्क_Frames;
 
-    newCont->boundArgsCount = 0;
-#  if d_m3HasExceptionHandling
+    newCont->bound_Args_गन्ती = 0;
+#  यदि d_m3HasExceptionHandling
     newCont->resumeThrow = i_cont->resumeThrow;
-    i_cont->resumeThrow  = NULL;
+    i_cont->resumeThrow  = रिक्त;
 #  endif
-    newCont->numSuspendResults = i_cont->numSuspendResults;
-    for (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
+    newCont->अङ्क_Suspend_Results = i_cont->अङ्क_Suspend_Results;
+    लागि (u32 i = 0; i < i_cont->अङ्क_Suspend_Results; ++i) {
         newCont->suspendResultOffsets[i] = i_cont->suspendResultOffsets[i];
         newCont->suspendResultIs64[i]    = i_cont->suspendResultIs64[i];
     }
 
-    newCont->numHandlers = i_cont->numHandlers;
+    newCont->अङ्क_Handlers = i_cont->अङ्क_Handlers;
     newCont->handlersPC  = i_cont->handlersPC;
     newCont->parent      = i_cont->parent;
     newCont->state       = cont_suspended;
 
-    i_cont->valStack  = NULL;
-    i_cont->frames    = NULL;
+    i_cont->val_थाक  = रिक्त;
+    i_cont->frames    = रिक्त;
     i_cont->framesCap = 0;
-    i_cont->numFrames = 0;
+    i_cont->अङ्क_Frames = 0;
     i_cont->state     = cont_consumed;
 
-    return newCont;
+    फर्काऊ newCont;
 }
 
 // Only cont.new and snapshot restoration acquire stacks. Binding and suspension
 // transfer them between records without changing the active count.
-M3Result Continuation_AcquireStack (IM3Runtime runtime, IM3Continuation cont)
+M3Result Continuation_Acquire_थाक (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not Continuation_CanAcquireStack(runtime)) {
-        return m3Err_continuationLimitExceeded;
+    यदि (not Continuation_Can_Acquire_थाक(runtime)) {
+        फर्काऊ m3Err_continuationLimitExceeded;
     }
-    if (runtime->valStackPoolCount) {
-        cont->valStack = runtime->valStackPool[--runtime->valStackPoolCount];
-        memset(cont->valStack, 0, (cont->numStackSlots + 4) * sizeof(m3slot_t));
-    } else {
-        cont->valStack = m3_AllocArray(m3slot_t, cont->numStackSlots + 4);
+    यदि (runtime->val_थाक_Pool_गन्ती) {
+        cont->val_थाक = runtime->val_थाक_Pool[--runtime->val_थाक_Pool_गन्ती];
+        स_रखो(cont->val_थाक, 0, (cont->अङ्क_थाक_Slots + 4) * परिमाण(m3slot_t));
+    } अन्यथा {
+        cont->val_थाक = m3_AllocArray(m3slot_t, cont->अङ्क_थाक_Slots + 4);
     }
-    if (not cont->valStack) {
-        return m3Err_mallocFailed;
+    यदि (not cont->val_थाक) {
+        फर्काऊ m3Err_mallocFailed;
     }
-    cont->sp = cont->valStack;
+    cont->sp = cont->val_थाक;
     runtime->continuationsAllocated++;
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
-void Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont)
+शून्य Continuation_Recycle_थाक (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not cont->valStack or cont == runtime->rootContinuation) {
-        return;
+    यदि (not cont->val_थाक or cont == runtime->जरा_Continuation) {
+        फर्काऊ;
     }
-    if (not runtime->valStackPool) {
-        runtime->valStackPool = m3_AllocArray(m3slot_t*, 16);
-        if (runtime->valStackPool) {
-            runtime->valStackPoolCap = 16;
+    यदि (not runtime->val_थाक_Pool) {
+        runtime->val_थाक_Pool = m3_AllocArray(m3slot_t*, 16);
+        यदि (runtime->val_थाक_Pool) {
+            runtime->val_थाक_Pool_Cap = 16;
         }
     }
-    if (runtime->valStackPoolCount < runtime->valStackPoolCap and
-        (not runtime->continuationsLimit or runtime->valStackPoolCount <
+    यदि (runtime->val_थाक_Pool_गन्ती < runtime->val_थाक_Pool_Cap and
+        (not runtime->continuationsLimit or runtime->val_थाक_Pool_गन्ती <
                                               runtime->continuationsLimit - runtime->continuationsAllocated + 1)) {
-        runtime->valStackPool[runtime->valStackPoolCount++] = cont->valStack;
-        cont->valStack                                      = NULL;
-    } else {
-        m3_Free(cont->valStack);
+        runtime->val_थाक_Pool[runtime->val_थाक_Pool_गन्ती++] = cont->val_थाक;
+        cont->val_थाक                                      = रिक्त;
+    } अन्यथा {
+        m3_Free(cont->val_थाक);
     }
-    cont->sp = NULL;
+    cont->sp = रिक्त;
     runtime->continuationsAllocated--;
 }
 
-void Continuation_ReleaseAll (IM3Runtime io_runtime)
+शून्य Continuation_ReleaseAll (IM3Runtime io_runtime)
 {
     // Records live until teardown: a consumed reference can still be in a table
     // or on a Wasm stack. Its value stack has already been recycled.
     IM3Continuation cont = io_runtime->continuations;
 
-    while (cont) {
+    जबसम्म (cont) {
         IM3Continuation next = cont->next;
 
-        m3_Free(cont->valStack);
+        m3_Free(cont->val_थाक);
         m3_Free(cont->frames);
         m3_Free(cont);
 
         cont = next;
     }
 
-    for (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
-        m3_Free(io_runtime->valStackPool[i]);
+    लागि (u32 i = 0; i < io_runtime->val_थाक_Pool_गन्ती; ++i) {
+        m3_Free(io_runtime->val_थाक_Pool[i]);
     }
-    m3_Free(io_runtime->valStackPool);
-    io_runtime->valStackPoolCount = io_runtime->valStackPoolCap = 0;
+    m3_Free(io_runtime->val_थाक_Pool);
+    io_runtime->val_थाक_Pool_गन्ती = io_runtime->val_थाक_Pool_Cap = 0;
     io_runtime->continuationsAllocated                          = 0;
-    io_runtime->continuations                                   = NULL;
-    io_runtime->activeContinuation                              = NULL;
-    io_runtime->rootContinuation                                = NULL;
+    io_runtime->continuations                                   = रिक्त;
+    io_runtime->activeContinuation                              = रिक्त;
+    io_runtime->जरा_Continuation                                = रिक्त;
 }
 
 
-m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
+m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, अचर M3Frame* i_frame)
 {
     IM3Continuation cont = i_runtime->activeContinuation;
 
@@ -595,53 +595,53 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
     // and that whole stretch has an active continuation
     d_m3Assert(cont);
 
-    if (cont->numFrames == cont->framesCap) {
+    यदि (cont->अङ्क_Frames == cont->framesCap) {
         u32 newCap = cont->framesCap ? cont->framesCap * 2 : 8;
 
-        if (newCap > d_m3ContinuationMaxFrames) {
+        यदि (newCap > d_m3ContinuationMaxFrames) {
             newCap = d_m3ContinuationMaxFrames;
         }
 
-        if (newCap == cont->framesCap) {
-            return m3Err_trapStackOverflow;
+        यदि (newCap == cont->framesCap) {
+            फर्काऊ m3_Err_trap_थाक_Overflow;
         }
 
         M3Frame* frames = m3_ReallocArray(M3Frame, cont->frames, newCap, cont->framesCap);
 
-        if (not frames) {
-            return m3Err_mallocFailed;
+        यदि (not frames) {
+            फर्काऊ m3Err_mallocFailed;
         }
 
         cont->frames    = frames;
         cont->framesCap = newCap;
     }
 
-    cont->frames[cont->numFrames++] = *i_frame;
+    cont->frames[cont->अङ्क_Frames++] = *i_frame;
 
-    return m3Err_continuationSuspended;
+    फर्काऊ m3Err_continuationSuspended;
 }
 
 #endif // d_m3HasStackSwitching
 
-M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
+M3Result EvaluateExpression (IM3Module i_module, शून्य* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
 
     // OPTZ: use a simplified interpreter for expressions
 
     // create a temporary runtime context
-#if defined(d_m3PreferStaticAlloc)
-    static M3Runtime runtime;
-#else
+#यदि defined(d_m3PreferStaticAlloc)
+    स्थिर M3Runtime runtime;
+#अन्यथा
     M3Runtime runtime;
 #endif
     M3_INIT(runtime);
 
     runtime.environment   = i_module->runtime->environment;
-    runtime.numStackSlots = i_module->runtime->numStackSlots;
-    runtime.stack         = i_module->runtime->stack;
+    runtime.अङ्क_थाक_Slots = i_module->runtime->अङ्क_थाक_Slots;
+    runtime.थाक         = i_module->runtime->थाक;
 
-    m3stack_t stack = (m3stack_t)runtime.stack;
+    m3stack_t थाक = (m3stack_t)runtime.थाक;
 
     IM3Runtime savedRuntime = i_module->runtime;
     i_module->runtime       = &runtime;
@@ -658,23 +658,23 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
     // empty and the next expression reuses it rather than burning fresh lines.
     o->page = AcquireCodePage(&runtime);
 
-    if (o->page) {
-        IM3FuncType ftype = NULL;
+    यदि (o->page) {
+        IM3FuncType ftype = रिक्त;
 
-#if d_m3HasTypedRefs
+#यदि d_m3HasTypedRefs
         // A reference type has to be checked as the type it is: the shared
         // return types are one per storage class, so borrowing one of those
         // would let any reference at all satisfy a particular one.
-        if (IsSpelledRefType(i_type)) {
+        यदि (IsSpelledRefType(i_type)) {
             result = AllocFuncType(&ftype, 1);
 
-            if (not result) {
-                ftype->numRets  = 1;
+            यदि (not result) {
+                ftype->अङ्क_Rets  = 1;
                 ftype->types[0] = i_type;
 
                 result = Environment_AddFuncType(runtime.environment, &ftype);
             }
-        } else
+        } अन्यथा
 #endif
         {
             ftype = runtime.environment->retFuncTypes[BaseTypeOf(i_type)];
@@ -682,42 +682,42 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 
         pc_t m3code = GetPagePC(o->page);
 
-        if (not result) {
+        यदि (not result) {
             result = CompileExpression(o, ftype);
         }
 
-        if (not result && o->maxStackSlots >= runtime.numStackSlots) {
-            result = m3Err_trapStackOverflow;
+        यदि (not result && o->max_थाक_Slots >= runtime.अङ्क_थाक_Slots) {
+            result = m3_Err_trap_थाक_Overflow;
         }
 
-        if (not result) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs);
+        यदि (not result) {
+#यदि (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+            m3ret_t r = RunCode(m3code, थाक, रिक्त, d_m3OpDefaultArgs, d_m3BaseCstr);
+#अन्यथा
+            m3ret_t r = RunCode(m3code, थाक, रिक्त, d_m3OpDefaultArgs);
 #endif
 
-            if (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
-                if (SizeOfType(BaseTypeOf(i_type)) == sizeof(u32)) {
-                    *(u32*)o_expressed = *((u32*)stack);
-                } else {
-                    *(u64*)o_expressed = *((u64*)stack);
+            यदि (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrint_मान (थाक, i_type));
+                यदि (SizeOfType(BaseTypeOf(i_type)) == परिमाण(u32)) {
+                    *(u32*)o_expressed = *((u32*)थाक);
+                } अन्यथा {
+                    *(u64*)o_expressed = *((u64*)थाक);
                 }
             }
         }
 
         ReleaseCodePage(&runtime, o->page);
-    } else {
+    } अन्यथा {
         result = m3Err_mallocFailedCodePage;
     }
 
-    runtime.originStack = NULL;        // prevent free(stack) in ReleaseRuntime
+    runtime.origin_थाक = रिक्त;        // prevent free(stack) in ReleaseRuntime
     Runtime_Release(&runtime);
     i_module->runtime = savedRuntime;
 
     *io_bytes = o->wasm;
 
-    return result;
+    फर्काऊ result;
 }
 
 
@@ -735,92 +735,92 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 // Whether an exporting memory or table satisfies what an import asks for. The
 // exporter's *current* size is its minimum - one that has been grown satisfies
 // a larger import than its declaration would - and it may be no less bounded.
-static
+स्थिर
 bool LimitsSatisfy (u64 i_exportedSize, bool i_exportedHasMax, u64 i_exportedMax,
                     u64 i_importMin, bool i_importHasMax, u64 i_importMax)
 {
-    if (i_exportedSize < i_importMin) {
-        return false;
+    यदि (i_exportedSize < i_importMin) {
+        फर्काऊ false;
     }
 
-    if (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
-        return false;
+    यदि (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
+        फर्काऊ false;
     }
 
-    return true;
+    फर्काऊ true;
 }
 
 
 // The export of this kind under this name, or NULL. The index it carries is
 // resolved by the caller, against the module's index space as it stands then -
 // after linking, a re-exported import's slot holds the entity it was linked to.
-static
-const M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
+स्थिर
+अचर M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        const M3Export* e = &i_module->exports[i];
+    लागि (u32 i = 0; i < i_module->अङ्क_Exports; ++i) {
+        अचर M3Export* e = &i_module->exports[i];
 
-        if (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
-            return e;
+        यदि (e->kind == i_kind and म_भेद(e->name, i_name) == 0) {
+            फर्काऊ e;
         }
     }
 
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 
-static
+स्थिर
 IM3Function Module_FindExportedFunction (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
+    अचर M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
 
     // A module that re-exports an import names the placeholder here. Resolve to
     // the function that actually runs, or a host-side call would run it against
     // the importing module's memory.
-    return e ? Function_Implementation(&i_module->functions[e->index]) : NULL;
+    फर्काऊ e ? Function_Implementation(&i_module->functions[e->index]) : रिक्त;
 }
 
 
-static
+स्थिर
 IM3Memory Module_FindExportedMemory (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    अचर M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    return e ? i_module->memories[e->index] : NULL;
+    फर्काऊ e ? i_module->memories[e->index] : रिक्त;
 }
 
 
-static
+स्थिर
 IM3Table Module_FindExportedTable (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
+    अचर M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
 
-    return e ? i_module->tables[e->index] : NULL;
+    फर्काऊ e ? i_module->tables[e->index] : रिक्त;
 }
 
 
-static
+स्थिर
 IM3Global Module_FindExportedGlobal (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
+    अचर M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
 
-    return e ? &i_module->globals[e->index] : NULL;
+    फर्काऊ e ? &i_module->globals[e->index] : रिक्त;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-static
+#यदि d_m3HasExceptionHandling || d_m3_Has_थाक_Switching
+स्थिर
 IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
+    अचर M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
 
-    if (not e) {
-        return NULL;
+    यदि (not e) {
+        फर्काऊ रिक्त;
     }
 
     IM3Tag tag = &i_module->tags[e->index];
 
-    return tag->resolved ? tag->resolved : tag;
+    फर्काऊ tag->resolved ? tag->resolved : tag;
 }
 #endif
 
@@ -829,16 +829,16 @@ IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 // unique within a module, so a name one of the lookups above missed but this
 // one finds is exported as something else - a kind the import cannot be
 // satisfied by, rather than a name the module never exported.
-static
+स्थिर
 bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        if (strcmp(i_module->exports[i].name, i_name) == 0) {
-            return true;
+    लागि (u32 i = 0; i < i_module->अङ्क_Exports; ++i) {
+        यदि (म_भेद(i_module->exports[i].name, i_name) == 0) {
+            फर्काऊ true;
         }
     }
 
-    return false;
+    फर्काऊ false;
 }
 
 
@@ -846,25 +846,25 @@ bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 // it. Runs before anything is allocated or initialized: a memory import has to
 // be resolved before InitMemory would give it pages of its own, and a global
 // import before InitGlobals runs an initializer that reads it.
-static
+स्थिर
 M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
 
-        if (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
-            continue;
+        यदि (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
+            जारी;
         }
 
         IM3Module from = m3_FindModule(io_runtime, f->import.moduleUtf8);
-        if (not from) {
-            continue;
+        यदि (not from) {
+            जारी;
         }
 
         IM3Function exported = Module_FindExportedFunction(from, f->import.fieldUtf8);
-        if (not exported) {
+        यदि (not exported) {
             // the import names a module that is loaded, so its exports settle the
             // question: a name it exports as something else is a type mismatch, and
             // one it does not export at all is an unknown import
@@ -879,20 +879,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         f->resolved = Function_Implementation(exported);
     }
 
-    for (u32 i = 0; i < io_module->numMemories; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Memories; ++i) {
         IM3Memory memory = io_module->memories[i];
 
-        if (not memory->imported or memory->owner != io_module) {
-            continue;
+        यदि (not memory->imported or memory->owner != io_module) {
+            जारी;
         }
 
         IM3Module from = m3_FindModule(io_runtime, memory->import.moduleUtf8);
-        if (not from) {
-            continue;
+        यदि (not from) {
+            जारी;
         }
 
         IM3Memory exported = Module_FindExportedMemory(from, memory->import.fieldUtf8);
-        if (not exported) {
+        यदि (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, memory->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -907,7 +907,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         _throwif(m3Err_incompatibleImportType, exported->isShared != memory->isShared);
 
         _throwif(m3Err_incompatibleImportType,
-                 not LimitsSatisfy(exported->numPages, exported->hasMax, exported->maxPages,
+                 not LimitsSatisfy(exported->अङ्क_Pages, exported->hasMax, exported->maxPages,
                                    memory->initPages, memory->hasMax, memory->maxPages));
 
         // hand the slot over to the exporter's memory, and drop the placeholder
@@ -918,20 +918,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->memories[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Tables; ++i) {
         IM3Table table = io_module->tables[i];
 
-        if (not table->imported or table->owner != io_module) {
-            continue;
+        यदि (not table->imported or table->owner != io_module) {
+            जारी;
         }
 
         IM3Module from = m3_FindModule(io_runtime, table->import.moduleUtf8);
-        if (not from) {
-            continue;
+        यदि (not from) {
+            जारी;
         }
 
         IM3Table exported = Module_FindExportedTable(from, table->import.fieldUtf8);
-        if (not exported) {
+        यदि (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, table->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -953,20 +953,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->tables[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
-            continue;
+        यदि (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+            जारी;
         }
 
         IM3Module from = m3_FindModule(io_runtime, g->import.moduleUtf8);
-        if (not from) {
-            continue;
+        यदि (not from) {
+            जारी;
         }
 
         IM3Global exported = Module_FindExportedGlobal(from, g->import.fieldUtf8);
-        if (not exported) {
+        यदि (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, g->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -977,21 +977,21 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         g->resolved = exported->resolved ? exported->resolved : exported;
     }
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+#यदि d_m3HasExceptionHandling || d_m3_Has_थाक_Switching
+    लागि (u32 i = 0; i < io_module->अङ्क_Tags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
-            continue;
+        यदि (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
+            जारी;
         }
 
         IM3Module from = m3_FindModule(io_runtime, tag->import.moduleUtf8);
-        if (not from) {
-            continue;
+        यदि (not from) {
+            जारी;
         }
 
         IM3Tag exported = Module_FindExportedTag(from, tag->import.fieldUtf8);
-        if (not exported) {
+        यदि (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, tag->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -1002,7 +1002,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
     }
 #endif
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 
@@ -1016,10 +1016,10 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 
     // Fixed from here on: the index space stops changing after parse, and
     // linking has already repointed any slot it was going to.
-    i_module->memory0 = i_module->numMemories ? i_module->memories[0]
+    i_module->memory0 = i_module->अङ्क_Memories ? i_module->memories[0]
                                               : &i_module->emptyMemory;
 
-    if (i_module->numMemories == 0) {
+    यदि (i_module->अङ्क_Memories == 0) {
         // nothing addressable, but _mem still has to point somewhere
         i_module->emptyMemory.owner    = i_module;
         i_module->emptyMemory.pageSize = d_m3DefaultMemPageSize;
@@ -1027,13 +1027,13 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
     }
 
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    लागि (u32 i = 0; i < i_module->अङ्क_Memories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
         // a slot that already points at another module's memory is that
         // module's to allocate
-        if (memory->owner != i_module or memory->mallocated) {
-            continue;
+        यदि (memory->owner != i_module or memory->mallocated) {
+            जारी;
         }
 
         u32 pageSize = Memory_PageSize(memory);
@@ -1049,7 +1049,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
         // 2^64/pagesize overflows a u64 only when a page is a single byte, and
         // a power-of-two page size divides the address space exactly, so the
         // 64-bit division below is 2^64/pagesize written so that it fits.
-        if (not memory->hasMax) {
+        यदि (not memory->hasMax) {
             memory->maxPages = memory->isMemory64
                                  ? (pageSize > 1 ? (UINT64_MAX / pageSize) + 1 : UINT64_MAX)
                                  : (0x100000000ull / pageSize);
@@ -1058,52 +1058,52 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
 _       (ResizeMemory(io_runtime, memory, memory->initPages));
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 
-M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
+M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_अङ्क_Pages)
 {
     M3Result result = m3Err_none;
 
-    u64 numPagesToAlloc = i_numPages;
+    u64 अङ्क_Pages_To_Alloc = i_अङ्क_Pages;
 
-    if (numPagesToAlloc <= memory->maxPages) {
+    यदि (अङ्क_Pages_To_Alloc <= memory->maxPages) {
         // A 64-bit memory may ask for up to 2^48 pages, which overflows a u64
         // of bytes. Nothing that large can be backed, so refuse it up front
         // rather than multiplying into a wrapped size.
         _throwif("linear memory limitation exceeded",
-                 numPagesToAlloc > d_m3AddressLimit / memory->pageSize);
+                 अङ्क_Pages_To_Alloc > d_m3AddressLimit / memory->pageSize);
 
-        u64 numPageBytes = numPagesToAlloc * memory->pageSize;
+        u64 अङ्क_Page_Bytes = अङ्क_Pages_To_Alloc * memory->pageSize;
 
-#if d_m3MaxLinearMemoryPages > 0
+#यदि d_m3MaxLinearMemoryPages > 0
         // the limit is a memory size, counted in default-sized pages; comparing
         // it against a raw page count would make it 65536 times stricter for a
         // module whose pages are one byte
         _throwif("linear memory limitation exceeded",
-                 numPageBytes > (u64)d_m3MaxLinearMemoryPages * d_m3DefaultMemPageSize);
+                 अङ्क_Page_Bytes > (u64)d_m3MaxLinearMemoryPages * d_m3DefaultMemPageSize);
 #endif
 
         // Limit the amount of memory that gets actually allocated
-        if (io_runtime->memoryLimit) {
-            numPageBytes = M3_MIN(numPageBytes, (u64)io_runtime->memoryLimit);
+        यदि (io_runtime->memoryLimit) {
+            अङ्क_Page_Bytes = M3_MIN(अङ्क_Page_Bytes, (u64)io_runtime->memoryLimit);
         }
 
         u64 oldLength = memory->mallocated ? memory->mallocated->length : 0;
         u64 otherUsed = io_runtime->memoryBytesUsed - oldLength;
         _throwif(m3Err_memoryLimitExceeded, io_runtime->memoryBytesLimit and
-                                              (numPageBytes > io_runtime->memoryBytesLimit or
-                                               otherUsed > io_runtime->memoryBytesLimit - numPageBytes));
+                                              (अङ्क_Page_Bytes > io_runtime->memoryBytesLimit or
+                                               otherUsed > io_runtime->memoryBytesLimit - अङ्क_Page_Bytes));
 
-        _throwif("linear memory limitation exceeded", numPageBytes > (u64)SIZE_MAX - sizeof(M3MemoryHeader));
+        _throwif("linear memory limitation exceeded", अङ्क_Page_Bytes > (u64)SIZE_MAX - परिमाण(M3MemoryHeader));
 
-#if d_m3GuardedMemory
+#यदि d_m3GuardedMemory
 
         // A slot holds every address a Wasm access can name, and nothing beyond
         // that: a memory larger than the data part of one would put addresses past
         // the guard, where a fault is nobody's to recognize
-        _throwif("linear memory limitation exceeded", numPageBytes > d_m3GuardedDataBytes);
+        _throwif("linear memory limitation exceeded", अङ्क_Page_Bytes > d_m3GuardedDataBytes);
 
         // What makes an access past the end fault is the page after the memory not
         // being committed, so the end has to fall on one of the system's page
@@ -1116,20 +1116,20 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         _throwif("guarded memory needs a page size the system's divides into",
                  (memory->pageSize % m3_HostPageSize()) != 0);
 
-        if (memory->guardSlot == NULL) {
+        यदि (memory->guardSlot == रिक्त) {
             memory->guardSlot = Guard_TakeSlot();
             _throwifnull(memory->guardSlot);
         }
 
         // Growing only ever commits more of the same slot, so the memory never
         // moves - which the interpreter does not rely on, but nothing minds
-        _throwif(m3Err_mallocFailed, not Guard_CommitSlot(memory->guardSlot, (size_t)numPageBytes));
+        _throwif(m3Err_mallocFailed, not Guard_CommitSlot(memory->guardSlot, (माप_प्रकार)अङ्क_Page_Bytes));
 
         memory->mallocated = Guard_SlotHeader(memory->guardSlot);
 
-#else
+#अन्यथा
 
-        size_t numBytes = (size_t)numPageBytes + sizeof(M3MemoryHeader);
+        माप_प्रकार अङ्क_Bytes = (माप_प्रकार)अङ्क_Page_Bytes + परिमाण(M3MemoryHeader);
 
         // What is really there, which is not numPages * pageSize: the limit above
         // caps the bytes without capping the page count, so a memory can be short
@@ -1137,48 +1137,48 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         // MCU has. Measuring the old block by the page count would overstate it,
         // and then realloc never sees the size it already has and copies the
         // whole limit again on every grow past it.
-        size_t numPreviousBytes = memory->mallocated ? memory->mallocated->length + sizeof(M3MemoryHeader) : 0;
+        माप_प्रकार अङ्क_Previous_Bytes = memory->mallocated ? memory->mallocated->length + परिमाण(M3MemoryHeader) : 0;
 
-        void* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, numBytes, numPreviousBytes);
+        शून्य* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, अङ्क_Bytes, अङ्क_Previous_Bytes);
         _throwifnull(newMem);
 
         memory->mallocated = (M3MemoryHeader*)newMem;
 
 #endif
 
-#if d_m3LogRuntime
+#यदि d_m3LogRuntime
         M3MemoryHeader* oldMallocated = memory->mallocated;
 #endif
 
-        io_runtime->memoryBytesUsed = otherUsed + numPageBytes;
-        memory->numPages            = numPagesToAlloc;
+        io_runtime->memoryBytesUsed = otherUsed + अङ्क_Page_Bytes;
+        memory->अङ्क_Pages            = अङ्क_Pages_To_Alloc;
 
-        memory->mallocated->length  = (size_t)numPageBytes;
+        memory->mallocated->length  = (माप_प्रकार)अङ्क_Page_Bytes;
         memory->mallocated->runtime = io_runtime;
         memory->mallocated->memory  = memory;
 
-        memory->mallocated->maxStack = (m3slot_t*)io_runtime->originStack + io_runtime->numStackSlots;
+        memory->mallocated->max_थाक = (m3slot_t*)io_runtime->origin_थाक + io_runtime->अङ्क_थाक_Slots;
 
-        m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->numPages);
-    } else {
+        m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (अचिन्हित दीर्घ दीर्घ)memory->अङ्क_Pages);
+    } अन्यथा {
         result = m3Err_wasmMemoryOverflow;
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 
-void FreeMemoryBlock (IM3Memory io_memory)
+शून्य FreeMemoryBlock (IM3Memory io_memory)
 {
-    if (io_memory->mallocated and io_memory->mallocated->runtime) {
+    यदि (io_memory->mallocated and io_memory->mallocated->runtime) {
         io_memory->mallocated->runtime->memoryBytesUsed -= io_memory->mallocated->length;
     }
-#if d_m3GuardedMemory
+#यदि d_m3GuardedMemory
     Guard_GiveSlot(io_memory->guardSlot);
-    io_memory->guardSlot = NULL;
+    io_memory->guardSlot = रिक्त;
 
-    io_memory->mallocated = NULL;
-#else
+    io_memory->mallocated = रिक्त;
+#अन्यथा
     m3_Free(io_memory->mallocated);
 #endif
 }
@@ -1188,7 +1188,7 @@ M3Result InitGlobals (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (io_module->numGlobals) {
+    यदि (io_module->अङ्क_Globals) {
         // placing the globals in their structs isn't good for cache locality, but i don't really know what the global
         // access patterns typically look like yet.
 
@@ -1196,27 +1196,27 @@ M3Result InitGlobals (IM3Module io_module)
 
         //          if (io_module->globalMemory)
         {
-            for (u32 i = 0; i < io_module->numGlobals; ++i) {
+            लागि (u32 i = 0; i < io_module->अङ्क_Globals; ++i) {
                 M3Global* g = &io_module->globals[i];                           m3log (runtime, "initializing global: %d", i);
 
-                if (g->initExpr) {
-                    bytes_t start = g->initExpr;
+                यदि (g->init_अभिव्यक्ति) {
+                    bytes_t start = g->init_अभिव्यक्ति;
 
-                    result = EvaluateExpression(io_module, &g->i64Value, g->type, &start, g->initExpr + g->initExprSize);
+                    result = EvaluateExpression(io_module, &g->i64_मान, g->type, &start, g->init_अभिव्यक्ति + g->init_अभिव्यक्ति_Size);
 
-                    if (not result) {
+                    यदि (not result) {
                         // io_module->globalMemory [i] = initValue;
-                    } else {
-                        break;
+                    } अन्यथा {
+                        रोक;
                     }
-                } else {                                                        m3log (runtime, "importing global");
+                } अन्यथा {                                                        m3log (runtime, "importing global");
                 }
             }
         }
         //          else result = ErrorModule (m3Err_mallocFailed, io_module, "could allocate globals for module: '%s", io_module->name);
     }
 
-    return result;
+    फर्काऊ result;
 }
 
 
@@ -1224,17 +1224,17 @@ M3Result InitDataSegments (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numDataSegments; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Data_Segments; ++i) {
         M3DataSegment* segment = &io_module->dataSegments[i];
 
         // A passive segment stays available for memory.init until data.drop.
         // An active one is copied here and then counts as dropped.
-        if (segment->isPassive) {
-            continue;
+        यदि (segment->isPassive) {
+            जारी;
         }
 
         _throwif("data segment memory index out of range",
-                 segment->memoryRegion >= io_module->numMemories);
+                 segment->memoryRegion >= io_module->अङ्क_Memories);
 
         IM3Memory io_memory = io_module->memories[segment->memoryRegion];
 
@@ -1244,69 +1244,69 @@ M3Result InitDataSegments (IM3Module io_module)
         // unsigned: an i32 offset of -1 is 4294967295, way out of bounds
         // rather than negative.
         u64     segmentOffset = 0;
-        bytes_t start         = segment->initExpr;
+        bytes_t start         = segment->init_अभिव्यक्ति;
 
-        if (io_memory->isMemory64) {
-_           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->initExpr + segment->initExprSize));
-        } else {
+        यदि (io_memory->isMemory64) {
+_           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->init_अभिव्यक्ति + segment->init_अभिव्यक्ति_Size));
+        } अन्यथा {
             u32 offset32;
-_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->initExpr + segment->initExprSize));
+_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->init_अभिव्यक्ति + segment->init_अभिव्यक्ति_Size));
             segmentOffset = offset32;
         }
 
-        m3log(runtime, "loading data segment: %d; size: %d; offset: %llu", i, segment->size, (unsigned long long)segmentOffset);
+        m3log(runtime, "loading data segment: %d; size: %d; offset: %llu", i, segment->size, (अचिन्हित दीर्घ दीर्घ)segmentOffset);
 
-        if (segmentOffset <= io_memory->mallocated->length &&
+        यदि (segmentOffset <= io_memory->mallocated->length &&
             (u64)segment->size <= io_memory->mallocated->length - segmentOffset) {
             u8* dest = m3MemData(io_memory->mallocated) + segmentOffset;
-            memcpy(dest, segment->data, segment->size);
-        } else {
+            स_नकल(dest, segment->data, segment->size);
+        } अन्यथा {
             _throw("data segment out of bounds");
         }
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 
 // Turns a segment's elements into references. Element expressions are constant
 // expressions restricted to ref.null/ref.func, so they're read directly rather
 // than run through the compiler.
-static
-M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, void** o_elements)
+स्थिर
+M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, शून्य** o_elements)
 {
     M3Result result = m3Err_none;
 
     bytes_t  pos = i_segment->elements;
     cbytes_t end = io_module->elementSectionEnd;
 
-    for (u32 e = 0; e < i_segment->numElements; ++e) {
+    लागि (u32 e = 0; e < i_segment->अङ्क_Elements; ++e) {
         u32   funcIndex;
-        void* ref = NULL;
+        शून्य* ref = रिक्त;
 
-        if (i_segment->isExpr) {
+        यदि (i_segment->is_अभिव्यक्ति) {
             m3opcode_t opcode;
 _           (Read_opcode(&opcode, &pos, end));
 
-            if (opcode == c_waOp_refFunc) {
+            यदि (opcode == c_waOp_refFunc) {
 _               (ReadLEB_u32(&funcIndex, &pos, end));
-                _throwif("function index out of range", funcIndex >= io_module->numFunctions);
+                _throwif("function index out of range", funcIndex >= io_module->अङ्क_Functions);
                 ref = Function_Implementation(&io_module->functions[funcIndex]);
-            } else if (opcode == c_waOp_refNull) {
+            } अन्यथा यदि (opcode == c_waOp_refNull) {
                 i8 waType;
                 u8 nullType;
 _               (ReadLEB_i7(&waType, &pos, end));
 _               (NormalizeType(&nullType, waType));
                 _throwif(m3Err_typeMismatch, nullType != i_segment->type);
-            } else if (opcode == c_waOp_getGlobal) {
+            } अन्यथा यदि (opcode == c_waOp_getGlobal) {
                 // wasm 2.0 lets an element expression read an imported
                 // immutable global, which is how one module seeds another's
                 // table with a reference it exported.
                 u32 globalIndex;
 _               (ReadLEB_u32(&globalIndex, &pos, end));
-                _throwif(m3Err_globaIndexOutOfBounds, globalIndex >= io_module->numGlobals);
+                _throwif(m3Err_globaIndexOutOfBounds, globalIndex >= io_module->अङ्क_Globals);
 
                 IM3Global global = &io_module->globals[globalIndex];
 
@@ -1315,27 +1315,27 @@ _               (ReadLEB_u32(&globalIndex, &pos, end));
                 _throwif(m3Err_typeMismatch, BaseTypeOf(global->type) != BaseTypeOf(i_segment->type));
 
                 // read the cell the import was linked to, not the placeholder
-                if (global->resolved) {
+                यदि (global->resolved) {
                     global = global->resolved;
                 }
 
-                ref = global->refValue;
-            } else {
+                ref = global->ref_मान;
+            } अन्यथा {
                 _throw("constant expression required");
             }
 
 _           (Read_opcode(&opcode, &pos, end));
             _throwif(m3Err_wasmMalformed, opcode != c_waOp_end);
-        } else {
+        } अन्यथा {
 _           (ReadLEB_u32(&funcIndex, &pos, end));
-            _throwif("function index out of range", funcIndex >= io_module->numFunctions);
+            _throwif("function index out of range", funcIndex >= io_module->अङ्क_Functions);
             ref = Function_Implementation(&io_module->functions[funcIndex]);
         }
 
         o_elements[e] = ref;
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 
@@ -1346,52 +1346,52 @@ M3Result InitTableAndElements (IM3Module io_module)
     cbytes_t end = io_module->elementSectionEnd;
     M3Table* table;
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Tables; ++i) {
         table = io_module->tables[i];
 
         // a slot pointing at another module's table is that module's to fill
-        if (table->owner != io_module) {
-            continue;
+        यदि (table->owner != io_module) {
+            जारी;
         }
 
-        if (table->size) {
+        यदि (table->size) {
             IM3Runtime runtime = io_module->runtime;
             _throwif(m3Err_tableLimitExceeded, runtime->tableElementsLimit and
                                                  table->size > runtime->tableElementsLimit - runtime->tableElementsUsed);
-            table->elements = m3_AllocArray(void*, table->size);
+            table->elements = m3_AllocArray(शून्य*, table->size);
             _throwifnull(table->elements);
             runtime->tableElementsUsed += table->size;
 
-            if (table->initExpr) {
-                void*   value = NULL;
-                bytes_t start = table->initExpr;
-_               (EvaluateExpression(io_module, &value, BaseTypeOf(table->type),
-                                     &start, table->initExpr + table->initExprSize));
+            यदि (table->init_अभिव्यक्ति) {
+                शून्य*   मान = रिक्त;
+                bytes_t start = table->init_अभिव्यक्ति;
+_               (EvaluateExpression(io_module, &मान, BaseTypeOf(table->type),
+                                     &start, table->init_अभिव्यक्ति + table->init_अभिव्यक्ति_Size));
 
-                for (u32 e = 0; e < table->size; ++e) {
-                    table->elements[e] = value;
+                लागि (u32 e = 0; e < table->size; ++e) {
+                    table->elements[e] = मान;
                 }
             }
         }
     }
 
-    for (u32 i = 0; i < io_module->numElementSegments; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Element_Segments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         // Declarative segments only make their functions referenceable, and
         // passive ones wait for table.init, so neither is written out here.
-        if (segment->mode == c_m3Elem_declarative) {
+        यदि (segment->mode == c_m3Elem_declarative) {
             segment->dropped = true;
-            continue;
+            जारी;
         }
 
-        if (segment->mode == c_m3Elem_passive) {
-            if (segment->numElements) {
-                segment->resolved = m3_AllocArray(void*, segment->numElements);
+        यदि (segment->mode == c_m3Elem_passive) {
+            यदि (segment->अङ्क_Elements) {
+                segment->resolved = m3_AllocArray(शून्य*, segment->अङ्क_Elements);
                 _throwifnull(segment->resolved);
 _               (ResolveElements(io_module, segment, segment->resolved));
             }
-            continue;
+            जारी;
         }
 
         table = io_module->tables[segment->tableIndex];
@@ -1399,82 +1399,82 @@ _               (ResolveElements(io_module, segment, segment->resolved));
         // The offset expression has the table's index type, and is unsigned:
         // an i32 offset of -1 is 4294967295, out of bounds rather than negative.
         u64     offset = 0;
-        bytes_t expr   = segment->initExpr;
+        bytes_t अभिव्यक्ति   = segment->init_अभिव्यक्ति;
 
-        if (table->isTable64) {
-_           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &expr, end));
-        } else {
+        यदि (table->isTable64) {
+_           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &अभिव्यक्ति, end));
+        } अन्यथा {
             u32 offset32;
-_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &expr, end));
+_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &अभिव्यक्ति, end));
             offset = offset32;
         }
 
         _throwif("out of bounds table access",
-                 offset > table->size or segment->numElements > table->size - offset);
+                 offset > table->size or segment->अङ्क_Elements > table->size - offset);
 
 _       (ResolveElements(io_module, segment, table->elements + offset));
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 M3Result m3_CompileModule (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
-        if (f->wasm and not f->compiled) {
+        यदि (f->wasm and not f->compiled) {
 _           (CompileFunction(f));
         }
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
-#if d_m3HasExceptionHandling
+#यदि d_m3HasExceptionHandling
 
-M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs)
+M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_अङ्क_Args)
 {
-    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", sizeof(M3Exception) + i_numArgs * sizeof(u64));
+    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", परिमाण(M3Exception) + i_अङ्क_Args * परिमाण(u64));
 
-    if (exception) {
+    यदि (exception) {
         exception->tag     = i_tag;
-        exception->numArgs = i_numArgs;
+        exception->अङ्क_Args = i_अङ्क_Args;
         exception->reified = false;
-        exception->prev    = NULL;
+        exception->prev    = रिक्त;
         exception->next    = io_runtime->exceptions;
 
-        if (exception->next) {
+        यदि (exception->next) {
             exception->next->prev = exception;
         }
 
         io_runtime->exceptions = exception;
     }
 
-    return exception;
+    फर्काऊ exception;
 }
 
 
 // Releases one exception ahead of the rest. The caller has to know nothing can
 // still name it: no exnref was ever taken of it, and its payload has already
 // been copied out.
-void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
+शून्य FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 {
-    if (i_exception->prev) {
+    यदि (i_exception->prev) {
         i_exception->prev->next = i_exception->next;
-    } else {
+    } अन्यथा {
         io_runtime->exceptions = i_exception->next;
     }
 
-    if (i_exception->next) {
+    यदि (i_exception->next) {
         i_exception->next->prev = i_exception->prev;
     }
 
-    if (io_runtime->pendingException == i_exception) {
-        io_runtime->pendingException = NULL;
+    यदि (io_runtime->pendingException == i_exception) {
+        io_runtime->pendingException = रिक्त;
     }
 
     m3_Free_Impl(i_exception);
@@ -1484,14 +1484,14 @@ void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 // Releases every exception the runtime still holds. Only safe once the Wasm
 // stack is empty, which is why the outermost RunCodeChecked() is the one that
 // calls it.
-void FreeExceptions (IM3Runtime io_runtime)
+शून्य FreeExceptions (IM3Runtime io_runtime)
 {
     M3Exception* exception = io_runtime->exceptions;
 
-    io_runtime->exceptions       = NULL;
-    io_runtime->pendingException = NULL;
+    io_runtime->exceptions       = रिक्त;
+    io_runtime->pendingException = रिक्त;
 
-    while (exception) {
+    जबसम्म (exception) {
         M3Exception* next = exception->next;
         m3_Free_Impl(exception);
         exception = next;
@@ -1504,21 +1504,21 @@ void FreeExceptions (IM3Runtime io_runtime)
 // the original is freed with the rest before the outermost call returns - and
 // one a host function's nested call ended with may still be named by an
 // exnref further down the stack.
-static
-void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
+स्थिर
+शून्य RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 {
-    if (io_runtime->uncaughtException) {
+    यदि (io_runtime->uncaughtException) {
         m3_Free(io_runtime->uncaughtException);
     }
 
     M3Exception* exception = io_runtime->pendingException;
 
-    if (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
-        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, sizeof(M3Exception) + exception->numArgs * sizeof(u64));
+    यदि (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
+        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, परिमाण(M3Exception) + exception->अङ्क_Args * परिमाण(u64));
 
-        if (copy) {
-            copy->next = NULL;
-            copy->prev = NULL;
+        यदि (copy) {
+            copy->next = रिक्त;
+            copy->prev = रिक्त;
         }
 
         io_runtime->uncaughtException = copy;
@@ -1528,26 +1528,26 @@ void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#यदि d_m3HasExceptionHandling || d_m3_Has_थाक_Switching
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, अचर वर्ण* अचर i_tagName)
 {
-    if (not i_module or not i_tagName) {
-        return NULL;
+    यदि (not i_module or not i_tagName) {
+        फर्काऊ रिक्त;
     }
 
-    return Module_FindExportedTag(i_module, i_tagName);
+    फर्काऊ Module_FindExportedTag(i_module, i_tagName);
 }
 
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, अचर वर्ण* अचर i_signature)
 {
-    IM3FuncType type    = NULL;
-    M3HostTag*  hostTag = NULL;
+    IM3FuncType type    = रिक्त;
+    M3HostTag*  hostTag = रिक्त;
 
 _try {
     _throwif("null tag", not o_tag);
-    *o_tag = NULL;
+    *o_tag = रिक्त;
     _throwif(m3Err_mallocFailed, not io_runtime);
 
 _   (SignatureToFuncType(&type, i_signature));
@@ -1563,32 +1563,32 @@ _   (Environment_AddFuncType(io_runtime->environment, &type));
 
     *o_tag = &hostTag->tag;
 } _catch:
-    return result;
+    फर्काऊ result;
 }
 
 
 M3Result m3_LinkTag (IM3Module         io_module,
-                     const char* const i_moduleName,
-                     const char* const i_tagName,
+                     अचर वर्ण* अचर i_moduleName,
+                     अचर वर्ण* अचर i_tagName,
                      IM3Tag            i_tag)
 {
-    if (not io_module or not i_moduleName or not i_tagName or not i_tag) {
-        return m3Err_tagLookupFailed;
+    यदि (not io_module or not i_moduleName or not i_tagName or not i_tag) {
+        फर्काऊ m3Err_tagLookupFailed;
     }
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    अचर bool wildcardModule = (म_भेद(i_moduleName, "*") == 0);
     IM3Tag     target         = i_tag->resolved ? i_tag->resolved : i_tag;
 
     M3Result result = m3Err_tagLookupFailed;
 
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Tags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
-            strcmp(tag->import.fieldUtf8, i_tagName) == 0 and
-            (wildcardModule or strcmp(tag->import.moduleUtf8, i_moduleName) == 0)) {
-            if (tag->type != target->type) {
-                return m3Err_incompatibleImportType;
+        यदि (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
+            म_भेद(tag->import.fieldUtf8, i_tagName) == 0 and
+            (wildcardModule or म_भेद(tag->import.moduleUtf8, i_moduleName) == 0)) {
+            यदि (tag->type != target->type) {
+                फर्काऊ m3Err_incompatibleImportType;
             }
 
             tag->resolved = target;
@@ -1596,64 +1596,64 @@ M3Result m3_LinkTag (IM3Module         io_module,
         }
     }
 
-    return result;
+    फर्काऊ result;
 }
 
 
-uint32_t m3_GetTagArgCount (IM3Tag i_tag)
+uint32_t m3_Get_Tag_Arg_गन्ती (IM3Tag i_tag)
 {
-    return i_tag ? i_tag->type->numArgs : 0;
+    फर्काऊ i_tag ? i_tag->type->अङ्क_Args : 0;
 }
 
 
-M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
+M3_मान_Type m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    if (i_tag and i_index < i_tag->type->numArgs) {
-        return (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
+    यदि (i_tag and i_index < i_tag->type->अङ्क_Args) {
+        फर्काऊ (M3_मान_Type)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
     }
 
-    return c_m3Type_none;
+    फर्काऊ c_m3Type_none;
 }
 
-#else
+#अन्यथा
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, अचर वर्ण* अचर i_tagName)
 {
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, अचर वर्ण* अचर i_signature)
 {
-    if (o_tag) {
-        *o_tag = NULL;
+    यदि (o_tag) {
+        *o_tag = रिक्त;
     }
-    return m3Err_tagLookupFailed;
+    फर्काऊ m3Err_tagLookupFailed;
 }
 
-M3Result m3_LinkTag (IM3Module io_module, const char* const i_moduleName, const char* const i_tagName, IM3Tag i_tag)
+M3Result m3_LinkTag (IM3Module io_module, अचर वर्ण* अचर i_moduleName, अचर वर्ण* अचर i_tagName, IM3Tag i_tag)
 {
-    return m3Err_tagLookupFailed;
+    फर्काऊ m3Err_tagLookupFailed;
 }
 
-uint32_t m3_GetTagArgCount (IM3Tag i_tag)
+uint32_t m3_Get_Tag_Arg_गन्ती (IM3Tag i_tag)
 {
-    return 0;
+    फर्काऊ 0;
 }
 
-M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
+M3_मान_Type m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    return c_m3Type_none;
+    फर्काऊ c_m3Type_none;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasExceptionHandling
+#यदि d_m3HasExceptionHandling
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, अचर शून्य* i_argptrs[])
 {
-    if (not io_runtime or not i_tag) {
-        return m3Err_tagLookupFailed;
+    यदि (not io_runtime or not i_tag) {
+        फर्काऊ m3Err_tagLookupFailed;
     }
 
     IM3Tag      tag  = i_tag->resolved ? i_tag->resolved : i_tag;
@@ -1661,150 +1661,150 @@ M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc
 
     // a tag with results is a stack switching control tag, which is suspended
     // with rather than thrown
-    if (type->numRets) {
-        return m3Err_typeMismatch;
+    यदि (type->अङ्क_Rets) {
+        फर्काऊ m3Err_typeMismatch;
     }
-    if (i_argc != type->numArgs) {
-        return m3Err_argumentCountMismatch;
+    यदि (i_argc != type->अङ्क_Args) {
+        फर्काऊ m3_Err_argument_गन्ती_Mismatch;
     }
     // with nothing on the stack there is nothing to unwind, and the exception
     // would sit on the runtime's list until some later call ended
-    if (io_runtime->callNesting == 0) {
-        return "m3_ThrowException called outside a host function";
+    यदि (io_runtime->callNesting == 0) {
+        फर्काऊ "m3_ThrowException called outside a host function";
     }
 
     M3Exception* exception = NewException(io_runtime, tag, i_argc);
-    if (not exception) {
-        return m3Err_mallocFailed;
+    यदि (not exception) {
+        फर्काऊ m3Err_mallocFailed;
     }
 
     // the layout op_Throw gives a payload: 32-bit values zero-extended, floats
     // as their bit pattern
-    for (u32 i = 0; i < i_argc; ++i) {
-        const void* value = i_argptrs[i];
+    लागि (u32 i = 0; i < i_argc; ++i) {
+        अचर शून्य* मान = i_argptrs[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
+        विकल्प (BaseTypeOf(d_FuncArgType(type, i))) {
+        पक्ष c_m3Type_i32:
+        पक्ष c_m3Type_f32: {
             u32 bits;
-            memcpy(&bits, value, sizeof(bits));
+            स_नकल(&bits, मान, परिमाण(bits));
             exception->args[i] = bits;
-            break;
+            रोक;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(&exception->args[i], value, sizeof(u64));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            exception->args[i] = (u64)(*(const uintptr_t*)value);
-            break;
-        default:
+        पक्ष c_m3Type_i64:
+        पक्ष c_m3Type_f64:
+            स_नकल(&exception->args[i], मान, परिमाण(u64));
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
+        पक्ष c_m3Type_contref:
+            exception->args[i] = (u64)(*(अचर uintptr_t*)मान);
+            रोक;
+        स्वभाव:
             FreeException(io_runtime, exception);
-            return "unknown argument type";
+            फर्काऊ "unknown argument type";
         }
     }
 
     io_runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    फर्काऊ m3Err_pendingException;
 }
 
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    if (i_runtime and i_runtime->uncaughtException) {
-        return i_runtime->uncaughtException->tag;
+    यदि (i_runtime and i_runtime->uncaughtException) {
+        फर्काऊ i_runtime->uncaughtException->tag;
     }
 
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, अचर शून्य* o_argptrs[])
 {
-    if (not i_runtime or not i_runtime->uncaughtException) {
-        return "no uncaught exception";
+    यदि (not i_runtime or not i_runtime->uncaughtException) {
+        फर्काऊ "no uncaught exception";
     }
 
-    const M3Exception* exception = i_runtime->uncaughtException;
+    अचर M3Exception* exception = i_runtime->uncaughtException;
     IM3FuncType        type      = exception->tag->type;
 
-    if (i_argc != exception->numArgs) {
-        return m3Err_argumentCountMismatch;
+    यदि (i_argc != exception->अङ्क_Args) {
+        फर्काऊ m3_Err_argument_गन्ती_Mismatch;
     }
 
-    for (u32 i = 0; i < i_argc; ++i) {
-        void* value = (void*)o_argptrs[i];
+    लागि (u32 i = 0; i < i_argc; ++i) {
+        शून्य* मान = (शून्य*)o_argptrs[i];
         u64   bits  = exception->args[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
-            u32 low = (u32)bits;
-            memcpy(value, &low, sizeof(low));
-            break;
+        विकल्प (BaseTypeOf(d_FuncArgType(type, i))) {
+        पक्ष c_m3Type_i32:
+        पक्ष c_m3Type_f32: {
+            u32 तल्लो = (u32)bits;
+            स_नकल(मान, &तल्लो, परिमाण(तल्लो));
+            रोक;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(value, &bits, sizeof(bits));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            *(uintptr_t*)value = (uintptr_t)bits;
-            break;
-        default:
-            return "unknown argument type";
+        पक्ष c_m3Type_i64:
+        पक्ष c_m3Type_f64:
+            स_नकल(मान, &bits, परिमाण(bits));
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
+        पक्ष c_m3Type_contref:
+            *(uintptr_t*)मान = (uintptr_t)bits;
+            रोक;
+        स्वभाव:
+            फर्काऊ "unknown argument type";
         }
     }
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
-#else
+#अन्यथा
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, अचर शून्य* i_argptrs[])
 {
-    return m3Err_tagLookupFailed;
+    फर्काऊ m3Err_tagLookupFailed;
 }
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, अचर शून्य* o_argptrs[])
 {
-    return "no uncaught exception";
+    फर्काऊ "no uncaught exception";
 }
 
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3GuardedMemory
+#यदि d_m3GuardedMemory
 
 // What RunCodeProtected hands to the platform layer to run, and what comes back
-typedef struct M3ProtectedRun {
+प्रकारनिर्देश संरचना M3ProtectedRun {
     pc_t            pc;
     IM3Runtime      runtime;
     M3MemoryHeader* mem;
     M3Result        result;
 } M3ProtectedRun;
 
-static
-void RunCodeBody (void* io_context)
+स्थिर
+शून्य RunCodeBody (शून्य* io_context)
 {
     M3ProtectedRun* run = (M3ProtectedRun*)io_context;
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
+#  यदि (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->थाक, run->mem,
                                     d_m3OpDefaultArgs, d_m3BaseCstr);
-#  else
-    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
+#  अन्यथा
+    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->थाक, run->mem,
                                     d_m3OpDefaultArgs);
 #  endif
 }
@@ -1814,13 +1814,13 @@ void RunCodeBody (void* io_context)
 // of that memory's reservation, and the fault comes back as the trap the spec asks
 // for. Nothing is left half-done by it - the Wasm stack and the memories are heap,
 // and the caller unwinds the rest.
-static
+स्थिर
 M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_mem)
 {
     // Memory operations in this build carry no bounds check, so code only runs where a
     // fault past the end of a memory can still be turned into a trap
-    if (M3_UNLIKELY(not m3_HostGuardsActive())) {
-        return ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
+    यदि (M3_UNLIKELY(not m3_HostGuardsActive())) {
+        फर्काऊ ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
                             "another part of the process holds the fault signal");
     }
 
@@ -1830,35 +1830,35 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
     run.mem     = i_mem;
     run.result  = m3Err_none;
 
-    void*  arena;
-    size_t arenaBytes;
+    शून्य*  arena;
+    माप_प्रकार arenaBytes;
     Guard_ArenaRange(&arena, &arenaBytes);
 
-    if (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
-        return m3Err_trapOutOfBoundsMemoryAccess;
+    यदि (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
+        फर्काऊ m3Err_trapOutOfBoundsMemoryAccess;
     }
 
-    return run.result;
+    फर्काऊ run.result;
 }
 
 #endif // d_m3GuardedMemory
 
 
-#if d_m3HasStackSwitching
+#यदि d_m3_Has_थाक_Switching
 
 // The function a suspended continuation stopped in: the callee of its innermost
 // call frame, or the function it was entered with if it made no call. Frames are
 // recorded innermost first, so that is the lowest-numbered call frame.
-static
+स्थिर
 IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 {
-    for (u32 i = 0; i < i_cont->numFrames; ++i) {
-        if (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
-            return i_cont->frames[i].call.function;
+    लागि (u32 i = 0; i < i_cont->अङ्क_Frames; ++i) {
+        यदि (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
+            फर्काऊ i_cont->frames[i].call.function;
         }
     }
 
-    return i_cont->entryFunction;
+    फर्काऊ i_cont->entryFunction;
 }
 
 
@@ -1869,31 +1869,31 @@ IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 // function can use. That base is the root's own sp, unless it stopped inside a
 // resume: then the suspension point belongs to the resumed continuation, and the
 // root's innermost frame is that resume.
-void Runtime_PlaceCallStack (IM3Runtime io_runtime)
+शून्य Runtime_Place_Call_थाक (IM3Runtime io_runtime)
 {
-    IM3Continuation root = io_runtime->rootContinuation;
+    IM3Continuation जरा = io_runtime->जरा_Continuation;
 
-    io_runtime->stack = io_runtime->originStack;
+    io_runtime->थाक = io_runtime->origin_थाक;
 
-    if (not root or root->state != cont_suspended) {
-        return;
+    यदि (not जरा or जरा->state != cont_suspended) {
+        फर्काऊ;
     }
 
-    m3stack_t   sp       = root->sp;
-    IM3Function function = Continuation_InnermostFunction(root);
+    m3stack_t   sp       = जरा->sp;
+    IM3Function function = Continuation_InnermostFunction(जरा);
 
-    if (root->numFrames and root->frames[0].kind == frame_resume) {
-        sp = root->frames[0].sp;
+    यदि (जरा->अङ्क_Frames and जरा->frames[0].kind == frame_resume) {
+        sp = जरा->frames[0].sp;
     }
 
-    m3slot_t* base = (m3slot_t*)io_runtime->originStack;
-    m3slot_t* top  = (m3slot_t*)sp + (function ? function->maxStackSlots : 0);
+    m3slot_t* base = (m3slot_t*)io_runtime->origin_थाक;
+    m3slot_t* शीर्ष  = (m3slot_t*)sp + (function ? function->max_थाक_Slots : 0);
 
-    if (top > base + io_runtime->numStackSlots) {
-        top = base + io_runtime->numStackSlots;
+    यदि (शीर्ष > base + io_runtime->अङ्क_थाक_Slots) {
+        शीर्ष = base + io_runtime->अङ्क_थाक_Slots;
     }
 
-    io_runtime->stack = top;
+    io_runtime->थाक = शीर्ष;
 }
 
 #endif // d_m3HasStackSwitching
@@ -1902,7 +1902,7 @@ void Runtime_PlaceCallStack (IM3Runtime io_runtime)
 // Run compiled code on the runtime's stack, bounding native recursion for the
 // duration of the call. The outermost invocation establishes the stack limit;
 // nested ones (an imported function calling back into Wasm) inherit it.
-static inline
+स्थिर अन्तःस्थ
 M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
 {
     pc_t i_pc = i_function->compiled;
@@ -1911,27 +1911,27 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // to, not against some runtime-wide one
     M3MemoryHeader* _mem = Module_MemoryHeader(i_function->module);
 
-#if d_m3HasSnapshots
-    if (M3_UNLIKELY(i_function->module->isUnusable)) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+#यदि d_m3HasSnapshots
+    यदि (M3_UNLIKELY(i_function->module->isUnusable)) {
+        फर्काऊ "a snapshot failed to restore into the module, so it cannot run";
     }
     i_function->module->hasRun = true;
 #endif
 
-    d_m3StackLimitEnter(i_runtime);
+    d_m3_थाक_Limit_Enter(i_runtime);
 
     // a host function calling back into Wasm does not change which call a trap
     // ends: that is still the one the host made first
-    if (i_runtime->callNesting++ == 0) {
+    यदि (i_runtime->callNesting++ == 0) {
         i_runtime->entered = i_function;
     }
-#if d_m3HasExceptionHandling
+#यदि d_m3HasExceptionHandling
     // handler stacks don't nest across a call boundary: a host function calling
     // back into Wasm cannot be caught by a try_table its own caller entered
     u32 savedTryDepth   = i_runtime->tryDepth;
     i_runtime->tryDepth = 0;
 #endif
-#if d_m3HasStackSwitching
+#यदि d_m3_Has_थाक_Switching
     // nor do continuations: the native frames on the far side of a host call
     // are not ours to record, so a suspend in here has no handler to reach and
     // no resume to unwind to
@@ -1941,87 +1941,87 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // not scratch space. A call the host makes before resuming it gets a
     // context of its own, the way any other re-entry does, rather than having
     // the frames of the suspension reset out from under it.
-    bool claimRoot = i_runtime->isSuspendable and not savedContinuation and
-                     not (i_runtime->rootContinuation and
-                          i_runtime->rootContinuation->state == cont_suspended);
+    bool claim_जरा = i_runtime->isSuspendable and not savedContinuation and
+                     not (i_runtime->जरा_Continuation and
+                          i_runtime->जरा_Continuation->state == cont_suspended);
 
-    if (claimRoot and not i_runtime->rootContinuation) {
-        i_runtime->rootContinuation = Continuation_New(i_runtime, i_function->funcType, i_function);
+    यदि (claim_जरा and not i_runtime->जरा_Continuation) {
+        i_runtime->जरा_Continuation = Continuation_New(i_runtime, i_function->funcType, i_function);
 
-        if (i_runtime->rootContinuation) {
+        यदि (i_runtime->जरा_Continuation) {
             // The root borrows the runtime's stack and is not charged as cont.new.
-            i_runtime->rootContinuation->numStackSlots = i_runtime->numStackSlots;
-        } else {
-            claimRoot = false;
+            i_runtime->जरा_Continuation->अङ्क_थाक_Slots = i_runtime->अङ्क_थाक_Slots;
+        } अन्यथा {
+            claim_जरा = false;
         }
     }
 
-    if (claimRoot) {
-        i_runtime->activeContinuation              = i_runtime->rootContinuation;
-        i_runtime->rootContinuation->entryFunction = i_function;
-        i_runtime->rootContinuation->state         = cont_running;
-        i_runtime->rootContinuation->numFrames     = 0;
-    } else {
-        i_runtime->activeContinuation = NULL;
+    यदि (claim_जरा) {
+        i_runtime->activeContinuation              = i_runtime->जरा_Continuation;
+        i_runtime->जरा_Continuation->entryFunction = i_function;
+        i_runtime->जरा_Continuation->state         = cont_running;
+        i_runtime->जरा_Continuation->अङ्क_Frames     = 0;
+    } अन्यथा {
+        i_runtime->activeContinuation = रिक्त;
     }
 #endif
-#if d_m3GuardedMemory
+#यदि d_m3GuardedMemory
     M3Result result = RunCodeProtected(i_runtime, i_pc, _mem);
-#elif (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs);
+#अथवायदि (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->थाक, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
+#अन्यथा
+    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->थाक, _mem, d_m3OpDefaultArgs);
 #endif
-#if d_m3HasStackSwitching
-    if (claimRoot) {
-        i_runtime->rootContinuation->state =
+#यदि d_m3_Has_थाक_Switching
+    यदि (claim_जरा) {
+        i_runtime->जरा_Continuation->state =
           (result == m3Err_continuationSuspended) ? cont_suspended : cont_returned;
 
-        Runtime_PlaceCallStack(i_runtime);
+        Runtime_Place_Call_थाक(i_runtime);
     }
     i_runtime->activeContinuation = savedContinuation;
 #endif
-#if d_m3HasExceptionHandling
+#यदि d_m3HasExceptionHandling
     i_runtime->tryDepth = savedTryDepth;
 
     // an exception that reached the bottom of the call stack found no handler
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+    यदि (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(i_runtime, result);
 
     // a paused invocation can still reach the exceptions it holds, so they wait
     // for it to finish
-    if (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
+    यदि (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
         FreeExceptions(i_runtime);
     }
 #endif
     i_runtime->callNesting--;
-    d_m3StackLimitLeave(i_runtime);
+    d_m3_थाक_Limit_Leave(i_runtime);
 
-    return result;
+    फर्काऊ result;
 }
 
 M3Result m3_RunStart (IM3Module io_module)
 {
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // Execution disabled for fuzzing builds
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 #endif
 
     M3Result result           = m3Err_none;
     i32      startFunctionTmp = -1;
 
-    if (io_module and io_module->startFunction >= 0) {
+    यदि (io_module and io_module->startFunction >= 0) {
         IM3Function function = &io_module->functions[io_module->startFunction];
 
-        if (not function->compiled) {
+        यदि (not function->compiled) {
 _           (CompileFunction(function));
         }
 
         IM3FuncType ftype = function->funcType;
-        if (ftype->numArgs != 0 || ftype->numRets != 0) {
-            _throw(m3Err_argumentCountMismatch);
+        यदि (ftype->अङ्क_Args != 0 || ftype->अङ्क_Rets != 0) {
+            _throw(m3_Err_argument_गन्ती_Mismatch);
         }
 
         IM3Module  module  = function->module;
@@ -2035,14 +2035,14 @@ _           (CompileFunction(function));
 
         // a start function that suspended is not to be started again: resuming
         // is what finishes it
-        if (result and result != m3Err_continuationSuspended) {
+        यदि (result and result != m3Err_continuationSuspended) {
             io_module->startFunction = startFunctionTmp;
             EXCEPTION_PRINT(result);
-            goto _catch;
+            गच्छ _catch;
         }
     }
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 // TODO: deal with main + side-modules loading efforcement
@@ -2050,8 +2050,8 @@ M3Result m3_LoadModule (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (M3_UNLIKELY(io_module->runtime)) {
-        return m3Err_moduleAlreadyLinked;
+    यदि (M3_UNLIKELY(io_module->runtime)) {
+        फर्काऊ m3Err_moduleAlreadyLinked;
     }
 
     io_module->runtime = io_runtime;
@@ -2076,7 +2076,7 @@ _   (InitDataSegments(io_module));
 
     io_module->next     = io_runtime->modules;
     io_runtime->modules = io_module;
-    return result; // ok
+    फर्काऊ result; // ok
 
 _catch:
     // The runtime owns the module either way. Instantiation may already have
@@ -2087,200 +2087,200 @@ _catch:
     // It goes on the tail of the list rather than the head: it is not a module
     // anyone should find by name, only one whose functions may still be
     // reachable through someone else's table.
-    io_module->next = NULL;
+    io_module->next = रिक्त;
 
     IM3Module* tail = &io_runtime->modules;
-    while (*tail) {
+    जबसम्म (*tail) {
         tail = &(*tail)->next;
     }
     *tail = io_module;
 
-    return result;
+    फर्काऊ result;
 }
 
 IM3Global m3_FindGlobal (IM3Module         io_module,
-                         const char* const i_globalName)
+                         अचर वर्ण* अचर i_globalName)
 {
     // Search exports
     IM3Global exported = Module_FindExportedGlobal(io_module, i_globalName);
-    if (exported) {
+    यदि (exported) {
         // a re-exported global is the one that was imported, so reads and
         // writes have to reach the cell that actually holds the value
-        return exported->resolved ? exported->resolved : exported;
+        फर्काऊ exported->resolved ? exported->resolved : exported;
     }
 
     // Search imports
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (g->import.moduleUtf8 and g->import.fieldUtf8) {
-            if (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
-                return g->resolved ? g->resolved : g;
+        यदि (g->import.moduleUtf8 and g->import.fieldUtf8) {
+            यदि (म_भेद(g->import.fieldUtf8, i_globalName) == 0) {
+                फर्काऊ g->resolved ? g->resolved : g;
             }
         }
     }
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 M3Result m3_GetGlobal (IM3Global      i_global,
-                       IM3TaggedValue o_value)
+                       IM3_Tagged_मान o_मान)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    यदि (not i_global) {
+        फर्काऊ m3Err_globalLookupFailed;
     }
 
-    switch (i_global->type) {
-    case c_m3Type_i32: o_value->value.i32 = i_global->i32Value; break;
-    case c_m3Type_i64: o_value->value.i64 = i_global->i64Value; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: o_value->value.f32 = i_global->f32Value; break;
-    case c_m3Type_f64: o_value->value.f64 = i_global->f64Value; break;
+    विकल्प (i_global->type) {
+    पक्ष c_m3Type_i32: o_मान->मान.i32 = i_global->i32_मान; रोक;
+    पक्ष c_m3Type_i64: o_मान->मान.i64 = i_global->i64_मान; रोक;
+#यदि d_m3HasFloat
+    पक्ष c_m3Type_f32: o_मान->मान.f32 = i_global->f32_मान; रोक;
+    पक्ष c_m3Type_f64: o_मान->मान.f64 = i_global->f64_मान; रोक;
 #endif
-    default: return m3Err_invalidTypeId;
+    स्वभाव: फर्काऊ m3Err_invalidTypeId;
     }
 
-    o_value->type = (M3ValueType)(i_global->type);
-    return m3Err_none;
+    o_मान->type = (M3_मान_Type)(i_global->type);
+    फर्काऊ m3Err_none;
 }
 
 M3Result m3_SetGlobal (IM3Global            i_global,
-                       const IM3TaggedValue i_value)
+                       अचर IM3_Tagged_मान i_मान)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    यदि (not i_global) {
+        फर्काऊ m3Err_globalLookupFailed;
     }
-    if (not i_global->isMutable) {
-        return m3Err_globalNotMutable;
+    यदि (not i_global->isMutable) {
+        फर्काऊ m3Err_globalNotMutable;
     }
-    if (i_global->type != i_value->type) {
-        return m3Err_globalTypeMismatch;
+    यदि (i_global->type != i_मान->type) {
+        फर्काऊ m3Err_globalTypeMismatch;
     }
 
-    switch (i_value->type) {
-    case c_m3Type_i32: i_global->i32Value = i_value->value.i32; break;
-    case c_m3Type_i64: i_global->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: i_global->f32Value = i_value->value.f32; break;
-    case c_m3Type_f64: i_global->f64Value = i_value->value.f64; break;
+    विकल्प (i_मान->type) {
+    पक्ष c_m3Type_i32: i_global->i32_मान = i_मान->मान.i32; रोक;
+    पक्ष c_m3Type_i64: i_global->i64_मान = i_मान->मान.i64; रोक;
+#यदि d_m3HasFloat
+    पक्ष c_m3Type_f32: i_global->f32_मान = i_मान->मान.f32; रोक;
+    पक्ष c_m3Type_f64: i_global->f64_मान = i_मान->मान.f64; रोक;
 #endif
-    default: return m3Err_invalidTypeId;
+    स्वभाव: फर्काऊ m3Err_invalidTypeId;
     }
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
-M3ValueType m3_GetGlobalType (IM3Global i_global)
+M3_मान_Type m3_GetGlobalType (IM3Global i_global)
 {
-    return (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
+    फर्काऊ (i_global) ? (M3_मान_Type)(i_global->type) : c_m3Type_none;
 }
 
 
-void* v_FindFunction (IM3Module i_module, void* i_info)
+शून्य* v_FindFunction (IM3Module i_module, शून्य* i_info)
 {
-    const char* const i_name = (const char*)i_info;
+    अचर वर्ण* अचर i_name = (अचर वर्ण*)i_info;
 
     // Prefer exported functions
     IM3Function exported = Module_FindExportedFunction(i_module, i_name);
-    if (exported) {
-        return exported;
+    यदि (exported) {
+        फर्काऊ exported;
     }
 
     // Search internal functions
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    लागि (u32 i = 0; i < i_module->अङ्क_Functions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         bool isImported = f->import.moduleUtf8 or f->import.fieldUtf8;
 
-        if (isImported) {
-            continue;
+        यदि (isImported) {
+            जारी;
         }
 
-        for (int j = 0; j < f->numNames; j++) {
-            if (f->names[j] and strcmp(f->names[j], i_name) == 0) {
-                return f;
+        लागि (पूर्णाङ्क j = 0; j < f->अङ्क_Names; j++) {
+            यदि (f->names[j] and म_भेद(f->names[j], i_name) == 0) {
+                फर्काऊ f;
             }
         }
     }
 
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 
 // Shared tail of the two lookups: a function is only usable once it has code.
-static
+स्थिर
 M3Result PrepareFoundFunction (IM3Function* o_function, IM3Function i_function)
 {
     M3Result result = m3Err_none;
 
-    if (not i_function->compiled) {
+    यदि (not i_function->compiled) {
 _       (CompileFunction(i_function))
     }
 
     _catch:
-    *o_function = result ? NULL : i_function;
+    *o_function = result ? रिक्त : i_function;
 
-    return result;
+    फर्काऊ result;
 }
 
 
 // Searches every module in the runtime, most recently loaded first. That is a
 // guess once more than one module is loaded and two of them export the same
 // name - m3_FindFunctionIn says which module is meant.
-M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, const char* const i_functionName)
+M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, अचर वर्ण* अचर i_functionName)
 {
                                                                 d_m3Assert (o_function and i_runtime and i_functionName);
-    IM3Function function = NULL;
+    IM3Function function = रिक्त;
 
-    if (not i_runtime->modules) {
-        *o_function = NULL;
-        return "no modules loaded";
+    यदि (not i_runtime->modules) {
+        *o_function = रिक्त;
+        फर्काऊ "no modules loaded";
     }
 
-    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (void*)i_functionName);
+    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (शून्य*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
+    यदि (not function) {
+        *o_function = रिक्त;
+        फर्काऊ ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    फर्काऊ PrepareFoundFunction(o_function, function);
 }
 
 
-IM3Module m3_FindModule (IM3Runtime i_runtime, const char* const i_moduleName)
+IM3Module m3_FindModule (IM3Runtime i_runtime, अचर वर्ण* अचर i_moduleName)
 {
-    if (not i_runtime or not i_moduleName) {
-        return NULL;
+    यदि (not i_runtime or not i_moduleName) {
+        फर्काऊ रिक्त;
     }
 
     // the list is newest-first, so a name registered twice names the newer one
-    for (IM3Module m = i_runtime->modules; m; m = m->next) {
-        if (m->name and strcmp(m->name, i_moduleName) == 0) {
-            return m;
+    लागि (IM3Module m = i_runtime->modules; m; m = m->next) {
+        यदि (m->name and म_भेद(m->name, i_moduleName) == 0) {
+            फर्काऊ m;
         }
     }
 
-    return NULL;
+    फर्काऊ रिक्त;
 }
 
 
 // Searches one module's exports, which is what naming a module means.
-M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, const char* const i_functionName)
+M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, अचर वर्ण* अचर i_functionName)
 {
                                                                 d_m3Assert (o_function and i_functionName);
-    if (not i_module) {
-        *o_function = NULL;
-        return m3Err_functionLookupFailed;      // ErrorModule would deref it
+    यदि (not i_module) {
+        *o_function = रिक्त;
+        फर्काऊ m3Err_functionLookupFailed;      // ErrorModule would deref it
     }
 
-    IM3Function function = (IM3Function)v_FindFunction(i_module, (void*)i_functionName);
+    IM3Function function = (IM3Function)v_FindFunction(i_module, (शून्य*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
+    यदि (not function) {
+        *o_function = रिक्त;
+        फर्काऊ ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    फर्काऊ PrepareFoundFunction(o_function, function);
 }
 
 
@@ -2290,81 +2290,81 @@ _try {
     M3Table*    table;
     IM3Function function;
 
-    _throwif("no table", i_module->numTables == 0);
+    _throwif("no table", i_module->अङ्क_Tables == 0);
 
     table = i_module->tables[0];
     _throwif("function index out of range", i_index >= table->size);
 
     function = (IM3Function)table->elements[i_index];
 
-    if (function) {
-        if (not function->compiled) {
+    यदि (function) {
+        यदि (not function->compiled) {
 _           (CompileFunction(function))
         }
     }
 
     *o_function = function;
 } _catch:
-    return result;
+    फर्काऊ result;
 }
 
 
-static
+स्थिर
 M3Result checkStartFunction (IM3Module i_module)
 {
     M3Result result = m3Err_none;                               d_m3Assert(i_module);
 
     // Check if start function needs to be called
-    if (i_module->startFunction >= 0) {
+    यदि (i_module->startFunction >= 0) {
         result = m3_RunStart(i_module);
     }
 
-    return result;
+    फर्काऊ result;
 }
 
-uint32_t m3_GetArgCount (IM3Function i_function)
+uint32_t m3_Get_Arg_गन्ती (IM3Function i_function)
 {
-    if (i_function) {
+    यदि (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numArgs;
+        यदि (ft) {
+            फर्काऊ ft->अङ्क_Args;
         }
     }
-    return 0;
+    फर्काऊ 0;
 }
 
-uint32_t m3_GetRetCount (IM3Function i_function)
+uint32_t m3_Get_Ret_गन्ती (IM3Function i_function)
 {
-    if (i_function) {
+    यदि (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numRets;
+        यदि (ft) {
+            फर्काऊ ft->अङ्क_Rets;
         }
     }
-    return 0;
+    फर्काऊ 0;
 }
 
 
-M3ValueType m3_GetArgType (IM3Function i_function, uint32_t index)
+M3_मान_Type m3_GetArgType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    यदि (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numArgs) {
-            return (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
+        यदि (ft and index < ft->अङ्क_Args) {
+            फर्काऊ (M3_मान_Type)BaseTypeOf(d_FuncArgType(ft, index));
         }
     }
-    return c_m3Type_none;
+    फर्काऊ c_m3Type_none;
 }
 
-M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
+M3_मान_Type m3_GetRetType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    यदि (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numRets) {
-            return (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
+        यदि (ft and index < ft->अङ्क_Rets) {
+            फर्काऊ (M3_मान_Type)BaseTypeOf(d_FuncRetType(ft, index));
         }
     }
-    return c_m3Type_none;
+    फर्काऊ c_m3Type_none;
 }
 
 
@@ -2375,341 +2375,341 @@ M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
 // here instead: results and arguments each take a u64 at this boundary, however
 // wide the slot is inside. Every caller goes through this, so none of them can
 // be the one that forgets.
-static
-M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
+स्थिर
+M3Result Get_थाक_Pointer_For_Args (IM3Function i_function, u8** o_थाक)
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
     // the stack a paused invocation holds is not available to this one
-    size_t used      = (size_t)((u8*)runtime->stack - (u8*)runtime->originStack);
-    size_t needed    = ((size_t)ftype->numRets + ftype->numArgs) * sizeof(u64);
-    size_t available = (size_t)runtime->numStackSlots * sizeof(m3slot_t) - used;
+    माप_प्रकार used      = (माप_प्रकार)((u8*)runtime->थाक - (u8*)runtime->origin_थाक);
+    माप_प्रकार needed    = ((माप_प्रकार)ftype->अङ्क_Rets + ftype->अङ्क_Args) * परिमाण(u64);
+    माप_प्रकार available = (माप_प्रकार)runtime->अङ्क_थाक_Slots * परिमाण(m3slot_t) - used;
 
-    if (needed > available) {
-        return m3Err_trapStackOverflow;
+    यदि (needed > available) {
+        फर्काऊ m3_Err_trap_थाक_Overflow;
     }
 
-    u64* stack = (u64*)runtime->stack;
+    u64* थाक = (u64*)runtime->थाक;
 
-    stack += ftype->numRets;
+    थाक += ftype->अङ्क_Rets;
 
-    *o_stack = (u8*)stack;
+    *o_थाक = (u8*)थाक;
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 
 M3Result m3_CallV (IM3Function i_function, ...)
 {
-    va_list ap;
-    va_start(ap, i_function);
+    बहु_सूची ap;
+    बहु_शुरू(ap, i_function);
     M3Result r = m3_CallVL(i_function, ap);
-    va_end(ap);
-    return r;
+    बहु_पूर्ण(ap);
+    फर्काऊ r;
 }
 
-static
-void ReportNativeStackUsage ()
+स्थिर
+शून्य Report_Native_थाक_Usage ()
 {
-#if d_m3LogNativeStack
-    int stackUsed = m3StackGetMax();
-    fprintf(stderr, "Native stack used: %d\n", stackUsed);
+#यदि d_m3_Log_Native_थाक
+    पूर्णाङ्क थाक_Used = m3_थाक_Get_Max();
+    ख_लिखो(मानक_त्रुटि, "Native stack used: %d\n", थाक_Used);
 #endif
 }
 
 
-M3Result m3_CallVL (IM3Function i_function, va_list i_args)
+M3Result m3_CallVL (IM3Function i_function, बहु_सूची i_args)
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = रिक्त;
 
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    यदि (!i_function->compiled) {
+        फर्काऊ m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#यदि d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_थाक_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_थाक_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
-            *(i32*)(s) = va_arg(i_args, i32);
+    लागि (u32 i = 0; i < ftype->अङ्क_Args; ++i) {
+        विकल्प (d_FuncArgType(ftype, i)) {
+        पक्ष c_m3Type_i32:
+            *(i32*)(s) = बहु_तर्क(i_args, i32);
             s += 8;
-            break;
-        case c_m3Type_i64:
-            *(i64*)(s) = va_arg(i_args, i64);
+            रोक;
+        पक्ष c_m3Type_i64:
+            *(i64*)(s) = बहु_तर्क(i_args, i64);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-            *(uintptr_t*)(s) = va_arg(i_args, uintptr_t);
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
+            *(uintptr_t*)(s) = बहु_तर्क(i_args, uintptr_t);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
-            *(f32*)(s) = (f32)va_arg(i_args, f64);
+            रोक;
+#यदि d_m3HasFloat
+        पक्ष c_m3Type_f32:
+            *(f32*)(s) = (f32)बहु_तर्क(i_args, f64);
             s += 8;
-            break; // f32 is passed as f64
-        case c_m3Type_f64:
-            *(f64*)(s) = va_arg(i_args, f64);
+            रोक; // f32 is passed as f64
+        पक्ष c_m3Type_f64:
+            *(f64*)(s) = बहु_तर्क(i_args, f64);
             s += 8;
-            break;
+            रोक;
 #endif
-        default: return "unknown argument type";
+        स्वभाव: फर्काऊ "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
-    ReportNativeStackUsage();
+    Report_Native_थाक_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? रिक्त : i_function;
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
-M3Result m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_Call (IM3Function i_function, uint32_t i_argc, अचर शून्य* i_argptrs[])
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = रिक्त;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    यदि (i_argc != ftype->अङ्क_Args) {
+        फर्काऊ m3_Err_argument_गन्ती_Mismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    यदि (!i_function->compiled) {
+        फर्काऊ m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#यदि d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_थाक_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_थाक_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    लागि (u32 i = 0; i < ftype->अङ्क_Args; ++i) {
+        विकल्प (d_FuncArgType(ftype, i)) {
+        पक्ष c_m3Type_i32:
             *(i32*)(s) = *(i32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_i64:
+            रोक;
+        पक्ष c_m3Type_i64:
             *(i64*)(s) = *(i64*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
             *(uintptr_t*)(s) = *(uintptr_t*)i_argptrs[i];
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            रोक;
+#यदि d_m3HasFloat
+        पक्ष c_m3Type_f32:
             *(f32*)(s) = *(f32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_f64:
+            रोक;
+        पक्ष c_m3Type_f64:
             *(f64*)(s) = *(f64*)i_argptrs[i];
             s += 8;
-            break;
+            रोक;
 #endif
-        default: return "unknown argument type";
+        स्वभाव: फर्काऊ "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
 
-    ReportNativeStackUsage();
+    Report_Native_थाक_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? रिक्त : i_function;
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 // Argument parsing for m3_CallArgv. Strict on purpose: the whole string has to
 // be consumed, so "12abc" is rejected rather than read as 12, and an empty or
 // unparsable argument is an error rather than the zero that strtoul with a
 // NULL end pointer used to hand back. See wasm3/wasm3#367.
-static
-M3Result ParseArgInteger (ccstr_t i_arg, u32 i_numBits, u64* o_value)
+स्थिर
+M3Result ParseArgInteger (ccstr_t i_arg, u32 i_अङ्क_Bits, u64* o_मान)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    यदि (not i_arg or not *i_arg) {
+        फर्काऊ "empty argument";
     }
 
     // strtoull would skip leading space, but trailing space is rejected below;
     // accepting one and not the other would just be confusing
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    यदि (है_खाली((अचिन्हित वर्ण)*i_arg)) {
+        फर्काऊ "argument is not a number";
     }
 
-    char* end = NULL;
-    u64   value;
+    वर्ण* end = रिक्त;
+    u64   मान;
 
-    errno = 0;
+    त्रुटि_सं = 0;
 
     // an argument may be spelled signed or unsigned: -1 and 4294967295 name the
     // same i32
-    if (*i_arg == '-') {
-        i64 signedValue = strtoll(i_arg, &end, 10);
+    यदि (*i_arg == '-') {
+        i64 signed_मान = strtoll(i_arg, &end, 10);
 
-        if (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
-            return "argument out of range";
+        यदि (i_अङ्क_Bits == 32 and (signed_मान < INT32_MIN or signed_मान > INT32_MAX)) {
+            फर्काऊ "argument out of range";
         }
 
-        value = (u64)signedValue;
-    } else {
-        value = strtoull(i_arg, &end, 10);
+        मान = (u64)signed_मान;
+    } अन्यथा {
+        मान = strtoull(i_arg, &end, 10);
 
-        if (i_numBits == 32 and value > UINT32_MAX) {
-            return "argument out of range";
+        यदि (i_अङ्क_Bits == 32 and मान > UINT32_MAX) {
+            फर्काऊ "argument out of range";
         }
     }
 
-    if (errno == ERANGE) {
-        return "argument out of range";
+    यदि (त्रुटि_सं == दुस्फल) {
+        फर्काऊ "argument out of range";
     }
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    यदि (end == i_arg or *end) {
+        फर्काऊ "argument is not a number";
     }
 
-    *o_value = value;
+    *o_मान = मान;
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 
-#if d_m3HasFloat
-static
-M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
+#यदि d_m3HasFloat
+स्थिर
+M3Result ParseArgFloat (ccstr_t i_arg, f64* o_मान)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    यदि (not i_arg or not *i_arg) {
+        फर्काऊ "empty argument";
     }
 
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    यदि (है_खाली((अचिन्हित वर्ण)*i_arg)) {
+        फर्काऊ "argument is not a number";
     }
 
-    char* end = NULL;
+    वर्ण* end = रिक्त;
 
-    errno = 0;
+    त्रुटि_सं = 0;
 
-    f64 value = strtod(i_arg, &end);
+    f64 मान = म_से_भग्न(i_arg, &end);
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    यदि (end == i_arg or *end) {
+        फर्काऊ "argument is not a number";
     }
 
     // strtod reports underflow through ERANGE as well, and a denormal result is
     // perfectly usable, so only an overflow to infinity is out of range
-    if (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
-        return "argument out of range";
+    यदि (त्रुटि_सं == दुस्फल and (मान > द्विग_उच्च or मान < -द्विग_उच्च)) {
+        फर्काऊ "argument out of range";
     }
 
-    *o_value = value;
+    *o_मान = मान;
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 #endif
 
 
 // A reference argument is either the null reference or a host handle written as
 // an integer.
-static
-M3Result ParseArgReference (ccstr_t i_arg, u64* o_value)
+स्थिर
+M3Result ParseArgReference (ccstr_t i_arg, u64* o_मान)
 {
-    if (i_arg and strcmp(i_arg, "null") == 0) {
-        *o_value = 0;
-        return m3Err_none;
+    यदि (i_arg and म_भेद(i_arg, "null") == 0) {
+        *o_मान = 0;
+        फर्काऊ m3Err_none;
     }
 
-    return ParseArgInteger(i_arg, 64, o_value);
+    फर्काऊ ParseArgInteger(i_arg, 64, o_मान);
 }
 
 
-M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_argv[])
+M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, अचर वर्ण* i_argv[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = रिक्त;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    यदि (i_argc != ftype->अङ्क_Args) {
+        फर्काऊ m3_Err_argument_गन्ती_Mismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    यदि (!i_function->compiled) {
+        फर्काऊ m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#यदि d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_थाक_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_थाक_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        u64 value = 0;
-#if d_m3HasFloat
+    लागि (u32 i = 0; i < ftype->अङ्क_Args; ++i) {
+        u64 मान = 0;
+#यदि d_m3HasFloat
         f64 fvalue = 0;
 #endif
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
-_           (ParseArgInteger(i_argv[i], 32, &value)) * (i32*)(s) = (i32)value;
+        विकल्प (d_FuncArgType(ftype, i)) {
+        पक्ष c_m3Type_i32:
+_           (ParseArgInteger(i_argv[i], 32, &मान)) * (i32*)(s) = (i32)मान;
             s += 8;
-            break;
-        case c_m3Type_i64:
-_           (ParseArgInteger(i_argv[i], 64, &value)) * (i64*)(s) = (i64)value;
+            रोक;
+        पक्ष c_m3Type_i64:
+_           (ParseArgInteger(i_argv[i], 64, &मान)) * (i64*)(s) = (i64)मान;
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-_           (ParseArgReference(i_argv[i], &value)) * (uintptr_t*)(s) = (uintptr_t)value;
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
+_           (ParseArgReference(i_argv[i], &मान)) * (uintptr_t*)(s) = (uintptr_t)मान;
             s += 8;
-            break;
-#if d_m3HasFloat
+            रोक;
+#यदि d_m3HasFloat
             // strtof would be less portable
-        case c_m3Type_f32:
+        पक्ष c_m3Type_f32:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f32*)(s) = (f32)fvalue;
             s += 8;
-            break;
-        case c_m3Type_f64:
+            रोक;
+        पक्ष c_m3Type_f64:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
             s += 8;
-            break;
+            रोक;
 #endif
-        default: _throw("unknown argument type");
+        स्वभाव: _throw("unknown argument type");
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
 
-    ReportNativeStackUsage();
+    Report_Native_थाक_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? रिक्त : i_function;
 
-    _catch: return result;
+    _catch: फर्काऊ result;
 }
 
 
@@ -2720,336 +2720,336 @@ _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
 //}
 
 
-M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_retptrs[])
+M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, अचर शून्य* o_retptrs[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
 
-    if (i_retc != ftype->numRets) {
-        return m3Err_argumentCountMismatch;
+    यदि (i_retc != ftype->अङ्क_Rets) {
+        फर्काऊ m3_Err_argument_गन्ती_Mismatch;
     }
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    यदि (i_function != runtime->lastCalled) {
+        फर्काऊ "function not called";
     }
 
-    u8* s = (u8*)runtime->stack;
+    u8* s = (u8*)runtime->थाक;
 
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    लागि (u32 i = 0; i < ftype->अङ्क_Rets; ++i) {
+        विकल्प (d_FuncRetType(ftype, i)) {
+        पक्ष c_m3Type_i32:
             *(i32*)o_retptrs[i] = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            रोक;
+        पक्ष c_m3Type_i64:
             *(i64*)o_retptrs[i] = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
             *(uintptr_t*)o_retptrs[i] = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            रोक;
+#यदि d_m3HasFloat
+        पक्ष c_m3Type_f32:
             *(f32*)o_retptrs[i] = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            रोक;
+        पक्ष c_m3Type_f64:
             *(f64*)o_retptrs[i] = *(f64*)(s);
             s += 8;
-            break;
+            रोक;
 #endif
-        default: return "unknown return type";
+        स्वभाव: फर्काऊ "unknown return type";
         }
     }
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 M3Result m3_GetResultsV (IM3Function i_function, ...)
 {
-    va_list ap;
-    va_start(ap, i_function);
+    बहु_सूची ap;
+    बहु_शुरू(ap, i_function);
     M3Result r = m3_GetResultsVL(i_function, ap);
-    va_end(ap);
-    return r;
+    बहु_पूर्ण(ap);
+    फर्काऊ r;
 }
 
-M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
+M3Result m3_GetResultsVL (IM3Function i_function, बहु_सूची o_rets)
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    यदि (i_function != runtime->lastCalled) {
+        फर्काऊ "function not called";
     }
 
-    u8* s = (u8*)runtime->stack;
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
-            *va_arg(o_rets, i32*) = *(i32*)(s);
+    u8* s = (u8*)runtime->थाक;
+    लागि (u32 i = 0; i < ftype->अङ्क_Rets; ++i) {
+        विकल्प (d_FuncRetType(ftype, i)) {
+        पक्ष c_m3Type_i32:
+            *बहु_तर्क(o_rets, i32*) = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
-            *va_arg(o_rets, i64*) = *(i64*)(s);
+            रोक;
+        पक्ष c_m3Type_i64:
+            *बहु_तर्क(o_rets, i64*) = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-            *va_arg(o_rets, uintptr_t*) = *(uintptr_t*)(s);
+            रोक;
+        पक्ष c_m3Type_funcref:
+        पक्ष c_m3Type_externref:
+        पक्ष c_m3Type_exnref:
+            *बहु_तर्क(o_rets, uintptr_t*) = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
-            *va_arg(o_rets, f32*) = *(f32*)(s);
+            रोक;
+#यदि d_m3HasFloat
+        पक्ष c_m3Type_f32:
+            *बहु_तर्क(o_rets, f32*) = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
-            *va_arg(o_rets, f64*) = *(f64*)(s);
+            रोक;
+        पक्ष c_m3Type_f64:
+            *बहु_तर्क(o_rets, f64*) = *(f64*)(s);
             s += 8;
-            break;
+            रोक;
 #endif
-        default: return "unknown argument type";
+        स्वभाव: फर्काऊ "unknown argument type";
         }
     }
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
-void ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
+शून्य ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    यदि (i_codePage) {
         IM3CodePage* list;
 
-        bool pageFull = (NumFreeLines(i_codePage) < d_m3CodePageFreeLinesThreshold);
-        if (pageFull) {
+        bool pageFull = (अङ्क_Free_पङ्क्तिहरू(i_codePage) < d_m3_Code_Page_Free_पङ्क्तिहरू_Threshold);
+        यदि (pageFull) {
             list = &i_runtime->pagesFull;
-        } else {
+        } अन्यथा {
             list = &i_runtime->pagesOpen;
         }
 
-        PushCodePage(list, i_codePage);                         m3log (emit, "release page: %d to queue: '%s'", i_codePage->info.sequence, pageFull ? "full" : "open")
+        थप_Code_Page(list, i_codePage);                         m3log (emit, "release page: %d to queue: '%s'", i_codePage->info.sequence, pageFull ? "full" : "open")
     }
 }
 
 
-IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_minLineCount)
+IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_min_पङ्क्ति_गन्ती)
 {
-    IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_minLineCount);
+    IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_min_पङ्क्ति_गन्ती);
 
-    if (not page) {
-        page = Environment_AcquireCodePage(i_runtime->environment, i_minLineCount);
+    यदि (not page) {
+        page = Environment_AcquireCodePage(i_runtime->environment, i_min_पङ्क्ति_गन्ती);
 
-        if (not page) {
-            page = NewCodePage(i_runtime, i_minLineCount);
+        यदि (not page) {
+            page = NewCodePage(i_runtime, i_min_पङ्क्ति_गन्ती);
         }
 
-        if (page) {
-            i_runtime->numCodePages++;
+        यदि (page) {
+            i_runtime->अङ्क_Code_Pages++;
         }
     }
 
-    if (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
-        i_runtime->numActiveCodePages++;
+    यदि (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
+        i_runtime->अङ्क_Active_Code_Pages++;
     }
 
-    return page;
+    फर्काऊ page;
 }
 
 
 IM3CodePage AcquireCodePage (IM3Runtime i_runtime)
 {
-    return AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
+    फर्काऊ AcquireCodePageWithCapacity(i_runtime, d_m3_Code_Page_Free_पङ्क्तिहरू_Threshold);
 }
 
 
-void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
+शून्य ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    यदि (i_codePage) {
         ReleaseCodePageNoTrack(i_runtime, i_codePage);
-        i_runtime->numActiveCodePages--;
+        i_runtime->अङ्क_Active_Code_Pages--;
 
-#if defined(DEBUG)
-        u32 numOpen = CountCodePages(i_runtime->pagesOpen);
-        u32 numFull = CountCodePages(i_runtime->pagesFull);
+#यदि defined(DEBUG)
+        u32 अङ्क_Open = गन्ती_Code_Pages(i_runtime->pagesOpen);
+        u32 अङ्क_Full = गन्ती_Code_Pages(i_runtime->pagesFull);
 
-        m3log(runtime, "runtime: %p; open-pages: %d; full-pages: %d; active: %d; total: %d", i_runtime, numOpen, numFull, i_runtime->numActiveCodePages, i_runtime->numCodePages);
+        m3log(runtime, "runtime: %p; open-pages: %d; full-pages: %d; active: %d; total: %d", i_runtime, अङ्क_Open, अङ्क_Full, i_runtime->अङ्क_Active_Code_Pages, i_runtime->अङ्क_Code_Pages);
 
-        d_m3Assert(numOpen + numFull + i_runtime->numActiveCodePages == i_runtime->numCodePages);
+        d_m3Assert(अङ्क_Open + अङ्क_Full + i_runtime->अङ्क_Active_Code_Pages == i_runtime->अङ्क_Code_Pages);
 
-#  if d_m3LogCodePages
-        dump_code_page(i_codePage, /* startPC: */ NULL);
+#  यदि d_m3LogCodePages
+        dump_code_page(i_codePage, /* startPC: */ रिक्त);
 #  endif
 #endif
     }
 }
 
 
-#if d_m3VerboseErrorMessages
+#यदि d_m3VerboseErrorMessages
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...)
+                  अचर वर्ण* अचर i_file, u32 i_पङ्क्ति_अङ्क, अचर वर्ण* अचर i_errorMessage, ...)
 {
-    if (i_runtime) {
-        i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .line = i_lineNum };
+    यदि (i_runtime) {
+        i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .पङ्क्ति_2 = i_पङ्क्ति_अङ्क };
         i_runtime->error.message = i_runtime->error_message;
 
-        va_list args;
-        va_start(args, i_errorMessage);
-        vsnprintf(i_runtime->error_message, sizeof(i_runtime->error_message), i_errorMessage, args);
-        va_end(args);
+        बहु_सूची args;
+        बहु_शुरू(args, i_errorMessage);
+        vsnprintf(i_runtime->error_message, परिमाण(i_runtime->error_message), i_errorMessage, args);
+        बहु_पूर्ण(args);
     }
 
-    return i_result;
+    फर्काऊ i_result;
 }
 #endif
 
 
-void m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
+शून्य m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
 {
-    if (i_runtime) {
+    यदि (i_runtime) {
         *o_info = i_runtime->error;
         m3_ResetErrorInfo(i_runtime);
     }
 }
 
 
-void m3_ResetErrorInfo (IM3Runtime i_runtime)
+शून्य m3_ResetErrorInfo (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    यदि (i_runtime) {
         M3_INIT(i_runtime->error);
         i_runtime->error.message = "";
     }
 }
 
-uint8_t* m3_GetMemory (IM3Module i_module, size_t* o_memorySizeInBytes, uint32_t i_memoryIndex)
+uint8_t* m3_GetMemory (IM3Module i_module, माप_प्रकार* o_memorySizeInBytes, uint32_t i_memoryIndex)
 {
-    uint8_t* memory = NULL;
-    size_t   size   = 0;
+    uint8_t* memory = रिक्त;
+    माप_प्रकार   size   = 0;
 
-    if (i_module and i_memoryIndex < i_module->numMemories) {
+    यदि (i_module and i_memoryIndex < i_module->अङ्क_Memories) {
         IM3Memory mem = i_module->memories[i_memoryIndex];
 
-        if (mem->mallocated) {
+        यदि (mem->mallocated) {
             size = mem->mallocated->length;
 
-            if (size) {
+            यदि (size) {
                 memory = m3MemData(mem->mallocated);
             }
         }
     }
 
-    if (o_memorySizeInBytes) {
+    यदि (o_memorySizeInBytes) {
         *o_memorySizeInBytes = size;
     }
 
-    return memory;
+    फर्काऊ memory;
 }
 
 
-size_t m3_GetMemorySize (IM3Module i_module, uint32_t i_memoryIndex)
+माप_प्रकार m3_GetMemorySize (IM3Module i_module, uint32_t i_memoryIndex)
 {
-    if (not i_module or i_memoryIndex >= i_module->numMemories) {
-        return 0;
+    यदि (not i_module or i_memoryIndex >= i_module->अङ्क_Memories) {
+        फर्काऊ 0;
     }
 
     IM3Memory mem = i_module->memories[i_memoryIndex];
 
-    return mem->mallocated ? mem->mallocated->length : 0;
+    फर्काऊ mem->mallocated ? mem->mallocated->length : 0;
 }
 
 
-size_t m3_GetMemorySizeAt (const void* i_memory)
+माप_प्रकार m3_GetMemorySizeAt (अचर शून्य* i_memory)
 {
-    if (not i_memory) {
-        return 0;
+    यदि (not i_memory) {
+        फर्काऊ 0;
     }
 
     // the header sits immediately before the data it describes
-    const M3MemoryHeader* header = ((const M3MemoryHeader*)i_memory) - 1;
+    अचर M3MemoryHeader* header = ((अचर M3MemoryHeader*)i_memory) - 1;
 
-    return header->length;
+    फर्काऊ header->length;
 }
 
 
 M3Result m3_FindExportedMemory (IM3Module i_module, cstr_t i_name, u32* o_memoryIndex)
 {
-    if (not i_module or not i_name or not o_memoryIndex) {
-        return m3Err_unknownMemory;
+    यदि (not i_module or not i_name or not o_memoryIndex) {
+        फर्काऊ m3Err_unknownMemory;
     }
 
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    अचर M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    if (not e) {
-        return m3Err_unknownMemory;
+    यदि (not e) {
+        फर्काऊ m3Err_unknownMemory;
     }
 
     *o_memoryIndex = e->index;
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 
 bool Module_HasLinkedHostImport (IM3Module i_module, cstr_t i_importModule)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    लागि (u32 i = 0; i < i_module->अङ्क_Functions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         // hostMemory is set when a host function is bound to the import, so it
         // is also the mark of one - see CompileRawFunction
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        यदि (not f->hostMemory or f->wasm or f->resolved) {
+            जारी;
         }
 
-        if (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
-            return true;
+        यदि (f->import.moduleUtf8 and म_भेद(f->import.moduleUtf8, i_importModule) == 0) {
+            फर्काऊ true;
         }
     }
 
-    return false;
+    फर्काऊ false;
 }
 
 
 M3Result m3_BindImportMemory (IM3Module io_module, cstr_t i_importModule, u32 i_memoryIndex)
 {
-    if (not io_module or not i_importModule) {
-        return m3Err_moduleNotLinked;
+    यदि (not io_module or not i_importModule) {
+        फर्काऊ m3Err_moduleNotLinked;
     }
 
-    if (i_memoryIndex >= io_module->numMemories) {
-        return m3Err_unknownMemory;
+    यदि (i_memoryIndex >= io_module->अङ्क_Memories) {
+        फर्काऊ m3Err_unknownMemory;
     }
 
     // the memory itself, not the index: linking may have pointed this slot at
     // another module's memory, and growing one reallocates behind it
     IM3Memory memory = io_module->memories[i_memoryIndex];
 
-    const bool wildcardModule = (strcmp(i_importModule, "*") == 0);
+    अचर bool wildcardModule = (म_भेद(i_importModule, "*") == 0);
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    लागि (u32 i = 0; i < io_module->अङ्क_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
 
         // only an import that a host function was bound to has a memory to
         // pin: one with a body of its own reads memory through the interpreter,
         // and one resolved to another module's export runs that module's code
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        यदि (not f->hostMemory or f->wasm or f->resolved) {
+            जारी;
         }
 
-        if (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
+        यदि (wildcardModule or (f->import.moduleUtf8 and म_भेद(f->import.moduleUtf8, i_importModule) == 0)) {
             f->hostMemory = memory;
         }
     }
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 
 M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 {
-#if d_m3RecordBacktraces
-    return &i_runtime->backtrace;
-#else
-    return NULL;
+#यदि d_m3RecordBacktraces
+    फर्काऊ &i_runtime->backtrace;
+#अन्यथा
+    फर्काऊ रिक्त;
 #endif
 }
 
@@ -3058,69 +3058,69 @@ M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 //  snapshots & suspendable execution
 //-------------------------------------------------------------------------------------------------------------------------------
 
-void m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
+शून्य m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
 {
-    if (io_runtime) {
+    यदि (io_runtime) {
         io_runtime->isSuspendable = i_suspendable;
     }
 }
 
-void m3_RequestSuspend (IM3Runtime io_runtime)
+शून्य m3_RequestSuspend (IM3Runtime io_runtime)
 {
-    if (io_runtime) {
+    यदि (io_runtime) {
         io_runtime->suspendRequested = true;
     }
 }
 
 bool m3_IsSuspended (IM3Runtime i_runtime)
 {
-    if (!i_runtime) {
-        return false;
+    यदि (!i_runtime) {
+        फर्काऊ false;
     }
-#if d_m3HasStackSwitching
-    if (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
-        return true;
+#यदि d_m3_Has_थाक_Switching
+    यदि (i_runtime->जरा_Continuation && i_runtime->जरा_Continuation->state == cont_suspended) {
+        फर्काऊ true;
     }
 #endif
-    return false;
+    फर्काऊ false;
 }
 
 M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 {
-    if (!io_runtime) {
-        return m3Err_mallocFailed;
+    यदि (!io_runtime) {
+        फर्काऊ m3Err_mallocFailed;
     }
-    if (!io_runtime->isSuspendable) {
-        return m3Err_none;
+    यदि (!io_runtime->isSuspendable) {
+        फर्काऊ m3Err_none;
     }
-#if d_m3HasSnapshots
+#यदि d_m3HasSnapshots
     // a restore that failed leaves nothing to resume, and says so every time
     // rather than resuming nothing successfully
-    if (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
-        io_runtime->rootContinuation->entryFunction->module->isUnusable) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+    यदि (io_runtime->जरा_Continuation and io_runtime->जरा_Continuation->entryFunction and
+        io_runtime->जरा_Continuation->entryFunction->module->isUnusable) {
+        फर्काऊ "a snapshot failed to restore into the module, so it cannot run";
     }
 #endif
-#if d_m3HasStackSwitching
-    if (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
-        return m3Err_none;
+#यदि d_m3_Has_थाक_Switching
+    यदि (!io_runtime->जरा_Continuation || io_runtime->जरा_Continuation->state != cont_suspended) {
+        फर्काऊ m3Err_none;
     }
     // what finishes returns into the bottom of the stack, where it was entered
-    io_runtime->stack = io_runtime->originStack;
+    io_runtime->थाक = io_runtime->origin_थाक;
 
     // this is the outermost call again, as far as a host function calling back
     // into Wasm from inside it can tell
-    io_runtime->entered = io_runtime->rootContinuation->entryFunction;
+    io_runtime->entered = io_runtime->जरा_Continuation->entryFunction;
     io_runtime->callNesting++;
 
-    d_m3StackLimitEnter(io_runtime);
+    d_m3_थाक_Limit_Enter(io_runtime);
     io_runtime->resumePastCheck = true;
-    M3Result result             = (M3Result)ResumeContinuation(io_runtime, io_runtime->rootContinuation);
+    M3Result result             = (M3Result)ResumeContinuation(io_runtime, io_runtime->जरा_Continuation);
     io_runtime->resumePastCheck = false;
-    d_m3StackLimitLeave(io_runtime);
+    d_m3_थाक_Limit_Leave(io_runtime);
 
-#  if d_m3HasExceptionHandling
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+#  यदि d_m3HasExceptionHandling
+    यदि (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(io_runtime, result);
@@ -3128,19 +3128,19 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 
     io_runtime->callNesting--;
 
-#  if d_m3HasExceptionHandling
-    if (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
+#  यदि d_m3HasExceptionHandling
+    यदि (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
         FreeExceptions(io_runtime);
     }
 #  endif
 
     // the results are where the paused call left room for them, so a finished
     // resume can be asked for them the way the call itself could have been
-    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->rootContinuation->entryFunction : NULL;
+    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->जरा_Continuation->entryFunction : रिक्त;
 
-    Runtime_PlaceCallStack(io_runtime);
-    return result;
-#else
-    return m3Err_none;
+    Runtime_Place_Call_थाक(io_runtime);
+    फर्काऊ result;
+#अन्यथा
+    फर्काऊ m3Err_none;
 #endif
 }

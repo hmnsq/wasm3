@@ -5,12 +5,12 @@
 //  Copyright © 2020 Colin J. Ihrig, Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_wasi.h"
+#अन्तर्भाव "m3_api_wasi.h"
 
-#include "m3_env.h"
-#include "m3_exception.h"
+#अन्तर्भाव "m3_env.h"
+#अन्तर्भाव "m3_exception.h"
 
-#if defined(d_m3HasUVWASI)
+#यदि defined(d_m3HasUVWASI)
 
 #  include <stdio.h>
 #  include <string.h>
@@ -19,125 +19,125 @@
 #    include <crt_externs.h>
 #    define environ (*_NSGetEnviron())
 #  elif !defined(_MSC_VER)
-extern char** environ;
+बाह्य वर्ण** environ;
 #  endif
 
-static m3_wasi_context_t* wasi_context = NULL;
+स्थिर m3_wasi_context_t* wasi_context = रिक्त;
 
-typedef struct wasi_iovec_t {
+प्रकारनिर्देश संरचना wasi_iovec_t {
     uvwasi_size_t buf;
     uvwasi_size_t buf_len;
 } wasi_iovec_t;
 
-#  if d_m3EnableWasiTracing
+#  यदि d_m3EnableWasiTracing
 
-const char* wasi_errno2str (uvwasi_errno_t err)
+अचर वर्ण* wasi_errno2str (uvwasi_errno_t err)
 {
     // clang-format off
-    switch (err) {
-    case  0: return "ESUCCESS";
-    case  1: return "E2BIG";
-    case  2: return "EACCES";
-    case  3: return "EADDRINUSE";
-    case  4: return "EADDRNOTAVAIL";
-    case  5: return "EAFNOSUPPORT";
-    case  6: return "EAGAIN";
-    case  7: return "EALREADY";
-    case  8: return "EBADF";
-    case  9: return "EBADMSG";
-    case 10: return "EBUSY";
-    case 11: return "ECANCELED";
-    case 12: return "ECHILD";
-    case 13: return "ECONNABORTED";
-    case 14: return "ECONNREFUSED";
-    case 15: return "ECONNRESET";
-    case 16: return "EDEADLK";
-    case 17: return "EDESTADDRREQ";
-    case 18: return "EDOM";
-    case 19: return "EDQUOT";
-    case 20: return "EEXIST";
-    case 21: return "EFAULT";
-    case 22: return "EFBIG";
-    case 23: return "EHOSTUNREACH";
-    case 24: return "EIDRM";
-    case 25: return "EILSEQ";
-    case 26: return "EINPROGRESS";
-    case 27: return "EINTR";
-    case 28: return "EINVAL";
-    case 29: return "EIO";
-    case 30: return "EISCONN";
-    case 31: return "EISDIR";
-    case 32: return "ELOOP";
-    case 33: return "EMFILE";
-    case 34: return "EMLINK";
-    case 35: return "EMSGSIZE";
-    case 36: return "EMULTIHOP";
-    case 37: return "ENAMETOOLONG";
-    case 38: return "ENETDOWN";
-    case 39: return "ENETRESET";
-    case 40: return "ENETUNREACH";
-    case 41: return "ENFILE";
-    case 42: return "ENOBUFS";
-    case 43: return "ENODEV";
-    case 44: return "ENOENT";
-    case 45: return "ENOEXEC";
-    case 46: return "ENOLCK";
-    case 47: return "ENOLINK";
-    case 48: return "ENOMEM";
-    case 49: return "ENOMSG";
-    case 50: return "ENOPROTOOPT";
-    case 51: return "ENOSPC";
-    case 52: return "ENOSYS";
-    case 53: return "ENOTCONN";
-    case 54: return "ENOTDIR";
-    case 55: return "ENOTEMPTY";
-    case 56: return "ENOTRECOVERABLE";
-    case 57: return "ENOTSOCK";
-    case 58: return "ENOTSUP";
-    case 59: return "ENOTTY";
-    case 60: return "ENXIO";
-    case 61: return "EOVERFLOW";
-    case 62: return "EOWNERDEAD";
-    case 63: return "EPERM";
-    case 64: return "EPIPE";
-    case 65: return "EPROTO";
-    case 66: return "EPROTONOSUPPORT";
-    case 67: return "EPROTOTYPE";
-    case 68: return "ERANGE";
-    case 69: return "EROFS";
-    case 70: return "ESPIPE";
-    case 71: return "ESRCH";
-    case 72: return "ESTALE";
-    case 73: return "ETIMEDOUT";
-    case 74: return "ETXTBSY";
-    case 75: return "EXDEV";
-    case 76: return "ENOTCAPABLE";
-    default: return "<unknown>";
+    विकल्प (err) {
+    पक्ष  0: फर्काऊ "ESUCCESS";
+    पक्ष  1: फर्काऊ "E2BIG";
+    पक्ष  2: फर्काऊ "EACCES";
+    पक्ष  3: फर्काऊ "EADDRINUSE";
+    पक्ष  4: फर्काऊ "EADDRNOTAVAIL";
+    पक्ष  5: फर्काऊ "EAFNOSUPPORT";
+    पक्ष  6: फर्काऊ "EAGAIN";
+    पक्ष  7: फर्काऊ "EALREADY";
+    पक्ष  8: फर्काऊ "EBADF";
+    पक्ष  9: फर्काऊ "EBADMSG";
+    पक्ष 10: फर्काऊ "EBUSY";
+    पक्ष 11: फर्काऊ "ECANCELED";
+    पक्ष 12: फर्काऊ "ECHILD";
+    पक्ष 13: फर्काऊ "ECONNABORTED";
+    पक्ष 14: फर्काऊ "ECONNREFUSED";
+    पक्ष 15: फर्काऊ "ECONNRESET";
+    पक्ष 16: फर्काऊ "EDEADLK";
+    पक्ष 17: फर्काऊ "EDESTADDRREQ";
+    पक्ष 18: फर्काऊ "EDOM";
+    पक्ष 19: फर्काऊ "EDQUOT";
+    पक्ष 20: फर्काऊ "EEXIST";
+    पक्ष 21: फर्काऊ "EFAULT";
+    पक्ष 22: फर्काऊ "EFBIG";
+    पक्ष 23: फर्काऊ "EHOSTUNREACH";
+    पक्ष 24: फर्काऊ "EIDRM";
+    पक्ष 25: फर्काऊ "EILSEQ";
+    पक्ष 26: फर्काऊ "EINPROGRESS";
+    पक्ष 27: फर्काऊ "EINTR";
+    पक्ष 28: फर्काऊ "EINVAL";
+    पक्ष 29: फर्काऊ "EIO";
+    पक्ष 30: फर्काऊ "EISCONN";
+    पक्ष 31: फर्काऊ "EISDIR";
+    पक्ष 32: फर्काऊ "ELOOP";
+    पक्ष 33: फर्काऊ "EMFILE";
+    पक्ष 34: फर्काऊ "EMLINK";
+    पक्ष 35: फर्काऊ "EMSGSIZE";
+    पक्ष 36: फर्काऊ "EMULTIHOP";
+    पक्ष 37: फर्काऊ "ENAMETOOLONG";
+    पक्ष 38: फर्काऊ "ENETDOWN";
+    पक्ष 39: फर्काऊ "ENETRESET";
+    पक्ष 40: फर्काऊ "ENETUNREACH";
+    पक्ष 41: फर्काऊ "ENFILE";
+    पक्ष 42: फर्काऊ "ENOBUFS";
+    पक्ष 43: फर्काऊ "ENODEV";
+    पक्ष 44: फर्काऊ "ENOENT";
+    पक्ष 45: फर्काऊ "ENOEXEC";
+    पक्ष 46: फर्काऊ "ENOLCK";
+    पक्ष 47: फर्काऊ "ENOLINK";
+    पक्ष 48: फर्काऊ "ENOMEM";
+    पक्ष 49: फर्काऊ "ENOMSG";
+    पक्ष 50: फर्काऊ "ENOPROTOOPT";
+    पक्ष 51: फर्काऊ "ENOSPC";
+    पक्ष 52: फर्काऊ "ENOSYS";
+    पक्ष 53: फर्काऊ "ENOTCONN";
+    पक्ष 54: फर्काऊ "ENOTDIR";
+    पक्ष 55: फर्काऊ "ENOTEMPTY";
+    पक्ष 56: फर्काऊ "ENOTRECOVERABLE";
+    पक्ष 57: फर्काऊ "ENOTSOCK";
+    पक्ष 58: फर्काऊ "ENOTSUP";
+    पक्ष 59: फर्काऊ "ENOTTY";
+    पक्ष 60: फर्काऊ "ENXIO";
+    पक्ष 61: फर्काऊ "EOVERFLOW";
+    पक्ष 62: फर्काऊ "EOWNERDEAD";
+    पक्ष 63: फर्काऊ "EPERM";
+    पक्ष 64: फर्काऊ "EPIPE";
+    पक्ष 65: फर्काऊ "EPROTO";
+    पक्ष 66: फर्काऊ "EPROTONOSUPPORT";
+    पक्ष 67: फर्काऊ "EPROTOTYPE";
+    पक्ष 68: फर्काऊ "ERANGE";
+    पक्ष 69: फर्काऊ "EROFS";
+    पक्ष 70: फर्काऊ "ESPIPE";
+    पक्ष 71: फर्काऊ "ESRCH";
+    पक्ष 72: फर्काऊ "ESTALE";
+    पक्ष 73: फर्काऊ "ETIMEDOUT";
+    पक्ष 74: फर्काऊ "ETXTBSY";
+    पक्ष 75: फर्काऊ "EXDEV";
+    पक्ष 76: फर्काऊ "ENOTCAPABLE";
+    स्वभाव: फर्काऊ "<unknown>";
     }
     // clang-format on
 }
 
-const char* wasi_whence2str (uvwasi_whence_t whence)
+अचर वर्ण* wasi_whence2str (uvwasi_whence_t whence)
 {
-    switch (whence) {
-    case UVWASI_WHENCE_SET: return "SET";
-    case UVWASI_WHENCE_CUR: return "CUR";
-    case UVWASI_WHENCE_END: return "END";
-    default: return "<unknown>";
+    विकल्प (whence) {
+    पक्ष UVWASI_WHENCE_SET: फर्काऊ "SET";
+    पक्ष UVWASI_WHENCE_CUR: फर्काऊ "CUR";
+    पक्ष UVWASI_WHENCE_END: फर्काऊ "END";
+    स्वभाव: फर्काऊ "<unknown>";
     }
 }
 
-#    define WASI_TRACE(fmt, ...)    { fprintf(stderr, "%s " fmt, __FUNCTION__+16, ##__VA_ARGS__); fprintf(stderr, " => %s\n", wasi_errno2str(ret)); }
-#  else
+#    define WASI_TRACE(fmt, ...)    { ख_लिखो(मानक_त्रुटि, "%s " fmt, __FUNCTION__+16, ##__VA_ARGS__); ख_लिखो(मानक_त्रुटि, " => %s\n", wasi_errno2str(ret)); }
+#  अन्यथा
 #    define WASI_TRACE(fmt, ...)
 #  endif
 
-static inline
+स्थिर अन्तःस्थ
 uvwasi_t* _get_uvwasi_p (IM3ImportContext _ctx)
 {
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
-    assert(context != NULL);
-    return &context->uvwasi;
+    प्रतिज्ञा(context != रिक्त);
+    फर्काऊ &context->uvwasi;
 }
 
 /*
@@ -148,23 +148,23 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, argv)
-    m3ApiGetArgMem(char*, argv_buf)
+    m3ApiGetArgMem(वर्ण*, argv_buf)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    यदि (context == रिक्त) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
-    m3ApiCheckMem(argv, context->argc * sizeof(uint32_t));
+    m3ApiCheckMem(argv, context->argc * परिमाण(uint32_t));
 
-    for (u32 i = 0; i < context->argc; ++i) {
+    लागि (u32 i = 0; i < context->argc; ++i) {
         m3ApiWriteMem32(&argv[i], m3ApiPtrToOffset(argv_buf));
 
-        size_t len = strlen(context->argv[i]);
+        माप_प्रकार len = म_माप(context->argv[i]);
 
         m3ApiCheckMem(argv_buf, len + 1);       // include the terminating `\0`
-        memcpy(argv_buf, context->argv[i], len);
+        स_नकल(argv_buf, context->argv[i], len);
         argv_buf += len;
         *argv_buf++ = 0;
     }
@@ -178,18 +178,18 @@ m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
     m3ApiGetArgMem(uvwasi_size_t*, argc)
     m3ApiGetArgMem(uvwasi_size_t*, argv_buf_size)
 
-    m3ApiCheckMem(argc, sizeof(uvwasi_size_t));
-    m3ApiCheckMem(argv_buf_size, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(argc, परिमाण(uvwasi_size_t));
+    m3ApiCheckMem(argv_buf_size, परिमाण(uvwasi_size_t));
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    यदि (context == रिक्त) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
     uvwasi_size_t buf_len = 0;
-    for (u32 i = 0; i < context->argc; ++i) {
-        buf_len += (uvwasi_size_t)strlen(context->argv[i]) + 1;
+    लागि (u32 i = 0; i < context->argc; ++i) {
+        buf_len += (uvwasi_size_t)म_माप(context->argv[i]) + 1;
     }
 
     m3ApiWriteMem32(argc, context->argc);
@@ -202,58 +202,58 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, env)
-    m3ApiGetArgMem(char*, env_buf)
+    m3ApiGetArgMem(वर्ण*, env_buf)
 
-    char**         environment;
+    वर्ण**         environment;
     uvwasi_errno_t ret;
-    uvwasi_size_t  env_count, env_buf_size;
+    uvwasi_size_t  env_गन्ती, env_buf_size;
 
-    ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_count, &env_buf_size);
-    if (ret != UVWASI_ESUCCESS) {
+    ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_गन्ती, &env_buf_size);
+    यदि (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
-    m3ApiCheckMem(env, env_count * sizeof(uint32_t));
+    m3ApiCheckMem(env, env_गन्ती * परिमाण(uint32_t));
     m3ApiCheckMem(env_buf, env_buf_size);
 
-    environment = calloc(env_count, sizeof(char*));
-    if (environment == NULL) {
+    environment = सुस्मृति(env_गन्ती, परिमाण(वर्ण*));
+    यदि (environment == रिक्त) {
         m3ApiReturn(UVWASI_ENOMEM);
     }
 
     ret = uvwasi_environ_get(_get_uvwasi_p(_ctx), environment, env_buf);
-    if (ret != UVWASI_ESUCCESS) {
-        free(environment);
+    यदि (ret != UVWASI_ESUCCESS) {
+        मुक्त(environment);
         m3ApiReturn(ret);
     }
 
     uint32_t environ_buf_offset = m3ApiPtrToOffset(env_buf);
 
-    for (u32 i = 0; i < env_count; ++i) {
+    लागि (u32 i = 0; i < env_गन्ती; ++i) {
         uint32_t offset = environ_buf_offset +
                           (uint32_t)(environment[i] - environment[0]);
         m3ApiWriteMem32(&env[i], offset);
     }
 
-    free(environment);
+    मुक्त(environment);
     m3ApiReturn(UVWASI_ESUCCESS);
 }
 
 m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(uvwasi_size_t*, env_count)
+    m3ApiGetArgMem(uvwasi_size_t*, env_गन्ती)
     m3ApiGetArgMem(uvwasi_size_t*, env_buf_size)
 
-    m3ApiCheckMem(env_count, sizeof(uvwasi_size_t));
-    m3ApiCheckMem(env_buf_size, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(env_गन्ती, परिमाण(uvwasi_size_t));
+    m3ApiCheckMem(env_buf_size, परिमाण(uvwasi_size_t));
 
-    uvwasi_size_t count;
+    uvwasi_size_t गन्ती;
     uvwasi_size_t buf_size;
 
-    uvwasi_errno_t ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &count, &buf_size);
+    uvwasi_errno_t ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &गन्ती, &buf_size);
 
-    m3ApiWriteMem32(env_count, count);
+    m3ApiWriteMem32(env_गन्ती, गन्ती);
     m3ApiWriteMem32(env_buf_size, buf_size);
 
     m3ApiReturn(ret);
@@ -263,7 +263,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_dir_name)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(char*, path)
+    m3ApiGetArgMem(वर्ण*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -289,7 +289,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
 
     WASI_TRACE("fd:%d | type:%d, name_len:%d", fd, prestat.pr_type, prestat.u.dir.pr_name_len);
 
-    if (ret != UVWASI_ESUCCESS) {
+    यदि (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -311,11 +311,11 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
 
     WASI_TRACE("fd:%d", fd);
 
-    if (ret != UVWASI_ESUCCESS) {
+    यदि (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
-    memset(buf, 0, 24);
+    स_रखो(buf, 0, 24);
     m3ApiWriteMem8(buf + 0, stat.fs_filetype);
     m3ApiWriteMem16(buf + 2, stat.fs_flags);
     m3ApiWriteMem64(buf + 8, stat.fs_rights_base);
@@ -392,11 +392,11 @@ m3ApiRawFunction(m3_wasi_p1_fd_filestat_get)
 
     WASI_TRACE("fd:%d | fs.size:%" PRIu64, fd, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    यदि (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
-    memset(buf, 0, 64);
+    स_रखो(buf, 0, 64);
     m3ApiWriteMem64(buf + 0, stat.st_dev);
     m3ApiWriteMem64(buf + 8, stat.st_ino);
     m3ApiWriteMem8(buf + 16, stat.st_filetype);
@@ -417,13 +417,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_seek)
     m3ApiGetArg(uint32_t, wasi_whence)
     m3ApiGetArgMem(uvwasi_filesize_t*, result)
 
-    m3ApiCheckMem(result, sizeof(uvwasi_filesize_t));
+    m3ApiCheckMem(result, परिमाण(uvwasi_filesize_t));
 
     uvwasi_whence_t whence = -1;
-    switch (wasi_whence) {
-    case 0: whence = UVWASI_WHENCE_SET; break;
-    case 1: whence = UVWASI_WHENCE_CUR; break;
-    case 2: whence = UVWASI_WHENCE_END; break;
+    विकल्प (wasi_whence) {
+    पक्ष 0: whence = UVWASI_WHENCE_SET; रोक;
+    पक्ष 1: whence = UVWASI_WHENCE_CUR; रोक;
+    पक्ष 2: whence = UVWASI_WHENCE_END; रोक;
     }
 
     uvwasi_filesize_t pos;
@@ -468,7 +468,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_tell)
     m3ApiGetArg(uvwasi_fd_t, fd)
     m3ApiGetArgMem(uvwasi_filesize_t*, result)
 
-    m3ApiCheckMem(result, sizeof(uvwasi_filesize_t));
+    m3ApiCheckMem(result, परिमाण(uvwasi_filesize_t));
 
     uvwasi_filesize_t pos;
     uvwasi_errno_t    ret = uvwasi_fd_tell(_get_uvwasi_p(_ctx), fd, &pos);
@@ -484,7 +484,7 @@ m3ApiRawFunction(m3_wasi_p1_path_create_directory)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(अचर वर्ण*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -500,15 +500,15 @@ m3ApiRawFunction(m3_wasi_p1_path_readlink)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(अचर वर्ण*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
-    m3ApiGetArgMem(char*, buf)
+    m3ApiGetArgMem(वर्ण*, buf)
     m3ApiGetArg(uvwasi_size_t, buf_len)
     m3ApiGetArgMem(uvwasi_size_t*, bufused)
 
     m3ApiCheckMem(path, path_len);
     m3ApiCheckMem(buf, buf_len);
-    m3ApiCheckMem(bufused, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(bufused, परिमाण(uvwasi_size_t));
 
     uvwasi_size_t uvbufused;
 
@@ -525,7 +525,7 @@ m3ApiRawFunction(m3_wasi_p1_path_remove_directory)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(अचर वर्ण*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -541,10 +541,10 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, old_fd)
-    m3ApiGetArgMem(const char*, old_path)
+    m3ApiGetArgMem(अचर वर्ण*, old_path)
     m3ApiGetArg(uvwasi_size_t, old_path_len)
     m3ApiGetArg(uvwasi_fd_t, new_fd)
-    m3ApiGetArgMem(const char*, new_path)
+    m3ApiGetArgMem(अचर वर्ण*, new_path)
     m3ApiGetArg(uvwasi_size_t, new_path_len)
 
     m3ApiCheckMem(old_path, old_path_len);
@@ -561,10 +561,10 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 m3ApiRawFunction(m3_wasi_p1_path_symlink)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(const char*, old_path)
+    m3ApiGetArgMem(अचर वर्ण*, old_path)
     m3ApiGetArg(uvwasi_size_t, old_path_len)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, new_path)
+    m3ApiGetArgMem(अचर वर्ण*, new_path)
     m3ApiGetArg(uvwasi_size_t, new_path_len)
 
     m3ApiCheckMem(old_path, old_path_len);
@@ -582,7 +582,7 @@ m3ApiRawFunction(m3_wasi_p1_path_unlink_file)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(अचर वर्ण*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -599,7 +599,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, dirfd)
     m3ApiGetArg(uvwasi_lookupflags_t, dirflags)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(अचर वर्ण*, path)
     m3ApiGetArg(uvwasi_size_t, path_len)
     m3ApiGetArg(uvwasi_oflags_t, oflags)
     m3ApiGetArg(uvwasi_rights_t, fs_rights_base)
@@ -608,7 +608,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiGetArgMem(uvwasi_fd_t*, fd)
 
     m3ApiCheckMem(path, path_len);
-    m3ApiCheckMem(fd, sizeof(uvwasi_fd_t));
+    m3ApiCheckMem(fd, परिमाण(uvwasi_fd_t));
 
     uvwasi_fd_t uvfd;
 
@@ -635,7 +635,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
     m3ApiGetArg(uvwasi_lookupflags_t, flags)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(अचर वर्ण*, path)
     m3ApiGetArg(uint32_t, path_len)
     m3ApiGetArgMem(uint8_t*, buf)
 
@@ -648,11 +648,11 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
 
     WASI_TRACE("fd:%d, flags:0x%x, path:%s | fs.size:%" PRIu64, fd, flags, path, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    यदि (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
-    memset(buf, 0, 64);
+    स_रखो(buf, 0, 64);
     m3ApiWriteMem64(buf + 0, stat.st_dev);
     m3ApiWriteMem64(buf + 8, stat.st_ino);
     m3ApiWriteMem8(buf + 16, stat.st_filetype);
@@ -674,35 +674,35 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     m3ApiGetArg(uvwasi_filesize_t, offset)
     m3ApiGetArgMem(uvwasi_size_t*, nread)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * परिमाण(wasi_iovec_t));
+    m3ApiCheckMem(nread, परिमाण(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  यदि M3_HAS_VLA
+    यदि (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  अन्यथा
+    यदि (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
 #  endif
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    लागि (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
         //fprintf(stderr, "> fd_pread fd:%d iov%d.len:%d\n", fd, i, iovs[i].buf_len);
     }
 
-    uvwasi_size_t num_read;
+    uvwasi_size_t अङ्क_read;
 
-    uvwasi_errno_t ret = uvwasi_fd_pread(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &num_read);
+    uvwasi_errno_t ret = uvwasi_fd_pread(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &अङ्क_read);
 
-    WASI_TRACE("fd:%d | nread:%d", fd, num_read);
+    WASI_TRACE("fd:%d | nread:%d", fd, अङ्क_read);
 
-    m3ApiWriteMem32(nread, num_read);
+    m3ApiWriteMem32(nread, अङ्क_read);
     m3ApiReturn(ret);
 }
 
@@ -714,35 +714,35 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     m3ApiGetArg(uvwasi_size_t, iovs_len)
     m3ApiGetArgMem(uvwasi_size_t*, nread)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * परिमाण(wasi_iovec_t));
+    m3ApiCheckMem(nread, परिमाण(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  यदि M3_HAS_VLA
+    यदि (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  अन्यथा
+    यदि (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
 #  endif
-    uvwasi_size_t  num_read;
+    uvwasi_size_t  अङ्क_read;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    लागि (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
         //fprintf(stderr, "> fd_read fd:%d iov%d.len:%d\n", fd, i, iovs[i].buf_len);
     }
 
-    ret = uvwasi_fd_read(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &num_read);
+    ret = uvwasi_fd_read(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &अङ्क_read);
 
-    WASI_TRACE("fd:%d | nread:%d", fd, num_read);
+    WASI_TRACE("fd:%d | nread:%d", fd, अङ्क_read);
 
-    m3ApiWriteMem32(nread, num_read);
+    m3ApiWriteMem32(nread, अङ्क_read);
     m3ApiReturn(ret);
 }
 
@@ -754,34 +754,34 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     m3ApiGetArg(uvwasi_size_t, iovs_len)
     m3ApiGetArgMem(uvwasi_size_t*, nwritten)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * परिमाण(wasi_iovec_t));
+    m3ApiCheckMem(nwritten, परिमाण(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  यदि M3_HAS_VLA
+    यदि (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  अन्यथा
+    यदि (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
 #  endif
-    uvwasi_size_t  num_written;
+    uvwasi_size_t  अङ्क_written;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    लागि (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
     }
 
-    ret = uvwasi_fd_write(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &num_written);
+    ret = uvwasi_fd_write(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, &अङ्क_written);
 
-    WASI_TRACE("fd:%d | nwritten:%d", fd, num_written);
+    WASI_TRACE("fd:%d | nwritten:%d", fd, अङ्क_written);
 
-    m3ApiWriteMem32(nwritten, num_written);
+    m3ApiWriteMem32(nwritten, अङ्क_written);
     m3ApiReturn(ret);
 }
 
@@ -794,34 +794,34 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     m3ApiGetArg(uvwasi_filesize_t, offset)
     m3ApiGetArgMem(uvwasi_size_t*, nwritten)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
-    m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * परिमाण(wasi_iovec_t));
+    m3ApiCheckMem(nwritten, परिमाण(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  यदि M3_HAS_VLA
+    यदि (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  अन्यथा
+    यदि (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
 #  endif
-    uvwasi_size_t  num_written;
+    uvwasi_size_t  अङ्क_written;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    लागि (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
     }
 
-    ret = uvwasi_fd_pwrite(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &num_written);
+    ret = uvwasi_fd_pwrite(_get_uvwasi_p(_ctx), fd, iovs, iovs_len, offset, &अङ्क_written);
 
-    WASI_TRACE("fd:%d | nwritten:%d", fd, num_written);
+    WASI_TRACE("fd:%d | nwritten:%d", fd, अङ्क_written);
 
-    m3ApiWriteMem32(nwritten, num_written);
+    m3ApiWriteMem32(nwritten, अङ्क_written);
     m3ApiReturn(ret);
 }
 
@@ -829,13 +829,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_readdir)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_fd_t, fd)
-    m3ApiGetArgMem(void*, buf)
+    m3ApiGetArgMem(शून्य*, buf)
     m3ApiGetArg(uvwasi_size_t, buf_len)
     m3ApiGetArg(uvwasi_dircookie_t, cookie)
     m3ApiGetArgMem(uvwasi_size_t*, bufused)
 
     m3ApiCheckMem(buf, buf_len);
-    m3ApiCheckMem(bufused, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(bufused, परिमाण(uvwasi_size_t));
 
     uvwasi_size_t  uvbufused;
     uvwasi_errno_t ret = uvwasi_fd_readdir(_get_uvwasi_p(_ctx), fd, buf, buf_len, cookie, &uvbufused);
@@ -921,7 +921,7 @@ m3ApiRawFunction(m3_wasi_p1_clock_res_get)
     m3ApiGetArg(uvwasi_clockid_t, wasi_clk_id)
     m3ApiGetArgMem(uvwasi_timestamp_t*, resolution)
 
-    m3ApiCheckMem(resolution, sizeof(uvwasi_timestamp_t));
+    m3ApiCheckMem(resolution, परिमाण(uvwasi_timestamp_t));
 
     uvwasi_timestamp_t t;
     uvwasi_errno_t     ret = uvwasi_clock_res_get(_get_uvwasi_p(_ctx), wasi_clk_id, &t);
@@ -938,16 +938,16 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(uvwasi_clockid_t, wasi_clk_id)
     m3ApiGetArg(uvwasi_timestamp_t, precision)
-    m3ApiGetArgMem(uvwasi_timestamp_t*, time)
+    m3ApiGetArgMem(uvwasi_timestamp_t*, समय)
 
-    m3ApiCheckMem(time, sizeof(uvwasi_timestamp_t));
+    m3ApiCheckMem(समय, परिमाण(uvwasi_timestamp_t));
 
     uvwasi_timestamp_t t;
     uvwasi_errno_t     ret = uvwasi_clock_time_get(_get_uvwasi_p(_ctx), wasi_clk_id, precision, &t);
 
     WASI_TRACE("clk_id:%d | res:%" PRIu64, wasi_clk_id, t);
 
-    m3ApiWriteMem64(time, t);
+    m3ApiWriteMem64(समय, t);
 
     m3ApiReturn(ret);
 }
@@ -967,24 +967,24 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
 // Reads the guest's subscription list into host structs. The caller has already
 // bounds-checked i_in for i_count records. 48 bytes a record: userdata 0, type 8,
 // fd 16, and a clock's fields from 16.
-static
-void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
-                         uvwasi_size_t i_count)
+स्थिर
+शून्य read_subscriptions (uvwasi_subscription_t* o_subs, अचर uint8_t* i_in,
+                         uvwasi_size_t i_गन्ती)
 {
-    for (uvwasi_size_t i = 0; i < i_count; ++i) {
-        const uint8_t* s = i_in + (size_t)i * d_m3WasiSubscriptionSize;
+    लागि (uvwasi_size_t i = 0; i < i_गन्ती; ++i) {
+        अचर uint8_t* s = i_in + (माप_प्रकार)i * d_m3WasiSubscriptionSize;
 
-        memset(&o_subs[i], 0, sizeof(o_subs[i]));
+        स_रखो(&o_subs[i], 0, परिमाण(o_subs[i]));
 
         o_subs[i].userdata = m3ApiReadMem64(s + 0);
         o_subs[i].type     = m3ApiReadMem8(s + 8);
 
-        if (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
-            o_subs[i].u.clock.clock_id  = m3ApiReadMem32(s + 16);
-            o_subs[i].u.clock.timeout   = m3ApiReadMem64(s + 24);
-            o_subs[i].u.clock.precision = m3ApiReadMem64(s + 32);
-            o_subs[i].u.clock.flags     = m3ApiReadMem16(s + 40);
-        } else {
+        यदि (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
+            o_subs[i].u.घड़ी.clock_id  = m3ApiReadMem32(s + 16);
+            o_subs[i].u.घड़ी.timeout   = m3ApiReadMem64(s + 24);
+            o_subs[i].u.घड़ी.precision = m3ApiReadMem64(s + 32);
+            o_subs[i].u.घड़ी.flags     = m3ApiReadMem16(s + 40);
+        } अन्यथा {
             o_subs[i].u.fd_readwrite.fd = m3ApiReadMem32(s + 16);
         }
     }
@@ -995,10 +995,10 @@ void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
 // rather than left as whatever the guest had there - an event for a clock says
 // nothing about nbytes, and the guest should not read its own stale bytes back as
 // one.
-static
-void write_event (uint8_t* o_rec, const uvwasi_event_t* i_event)
+स्थिर
+शून्य write_event (uint8_t* o_rec, अचर uvwasi_event_t* i_event)
 {
-    memset(o_rec, 0, d_m3WasiEventSize);
+    स_रखो(o_rec, 0, d_m3WasiEventSize);
 
     m3ApiWriteMem64(o_rec + 0, i_event->userdata);
     m3ApiWriteMem16(o_rec + 8, i_event->error);
@@ -1010,70 +1010,70 @@ void write_event (uint8_t* o_rec, const uvwasi_event_t* i_event)
 // Waits on the subscriptions, once whichever reader above has decoded them, and
 // writes the events back. Knows nothing about revisions: the event record is the
 // same in both. i_subs is NULL when there are none, which uvwasi answers for itself.
-static
-uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscription_t* i_subs,
-                                        uint8_t* o_out, uvwasi_size_t i_count,
+स्थिर
+uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, अचर uvwasi_subscription_t* i_subs,
+                                        uint8_t* o_out, uvwasi_size_t i_गन्ती,
                                         uvwasi_size_t* o_written)
 {
     *o_written = 0;
 
-    uvwasi_event_t* events = i_count ? m3_AllocArray(uvwasi_event_t, i_count) : NULL;
+    uvwasi_event_t* events = i_गन्ती ? m3_AllocArray(uvwasi_event_t, i_गन्ती) : रिक्त;
 
-    if (i_count and not events) {
-        return UVWASI_ENOMEM;
+    यदि (i_गन्ती and not events) {
+        फर्काऊ UVWASI_ENOMEM;
     }
 
     uvwasi_size_t  written = 0;
-    uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_count, &written);
+    uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_गन्ती, &written);
 
-    if (ret == UVWASI_ESUCCESS) {
+    यदि (ret == UVWASI_ESUCCESS) {
         // One event per subscription is the most that was checked for, and the most
         // there can be; clamping keeps a surprise from reaching past that
-        written = M3_MIN(written, i_count);
+        written = M3_MIN(written, i_गन्ती);
 
-        for (uvwasi_size_t i = 0; i < written; ++i) {
-            write_event(o_out + (size_t)i * d_m3WasiEventSize, &events[i]);
+        लागि (uvwasi_size_t i = 0; i < written; ++i) {
+            write_event(o_out + (माप_प्रकार)i * d_m3WasiEventSize, &events[i]);
         }
         *o_written = written;
     }
 
     m3_Free(events);
 
-    return ret;
+    फर्काऊ ret;
 }
 
 m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(const uint8_t*, in)
+    m3ApiGetArgMem(अचर uint8_t*, in)
     m3ApiGetArgMem(uint8_t*, out)
     m3ApiGetArg(uvwasi_size_t, nsubscriptions)
     m3ApiGetArgMem(uvwasi_size_t*, nevents)
 
     m3ApiCheckMem(in, (uint64_t)nsubscriptions * d_m3WasiSubscriptionSize);
     m3ApiCheckMem(out, (uint64_t)nsubscriptions * d_m3WasiEventSize);
-    m3ApiCheckMem(nevents, sizeof(uvwasi_size_t));
+    m3ApiCheckMem(nevents, परिमाण(uvwasi_size_t));
 
-    uvwasi_subscription_t* subs = NULL;
+    uvwasi_subscription_t* subs = रिक्त;
 
-    if (nsubscriptions) {
+    यदि (nsubscriptions) {
         subs = m3_AllocArray(uvwasi_subscription_t, nsubscriptions);
-        if (not subs) {
+        यदि (not subs) {
             m3ApiReturn(UVWASI_ENOMEM);
         }
         read_subscriptions(subs, in, nsubscriptions);
     }
 
-    uvwasi_size_t count = 0;
+    uvwasi_size_t गन्ती = 0;
 
     uvwasi_errno_t ret =
-      poll_wasi_subscriptions(_get_uvwasi_p(_ctx), subs, out, nsubscriptions, &count);
+      poll_wasi_subscriptions(_get_uvwasi_p(_ctx), subs, out, nsubscriptions, &गन्ती);
 
     m3_Free(subs);
 
-    WASI_TRACE("nsubscriptions:%d | nevents:%d", nsubscriptions, count);
+    WASI_TRACE("nsubscriptions:%d | nevents:%d", nsubscriptions, गन्ती);
 
-    m3ApiWriteMem32(nevents, count);
+    m3ApiWriteMem32(nevents, गन्ती);
 
     m3ApiReturn(ret);
 }
@@ -1084,7 +1084,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_exit)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context) {
+    यदि (context) {
         context->exit_code = code;
     }
 
@@ -1114,53 +1114,53 @@ m3ApiRawFunction(m3_wasi_p1_sched_yield)
 }
 
 
-static
+स्थिर
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    यदि (i_result == m3Err_functionLookupFailed) {
+        फर्काऊ m3Err_none;
+    } अन्यथा {
+        फर्काऊ i_result;
     }
 }
 
 m3_wasi_context_t* m3_GetWasiContext ()
 {
-    return wasi_context;
+    फर्काऊ wasi_context;
 }
 
-static const char* DEFAULT_ENVIRONMENT[] = {
+स्थिर अचर वर्ण* DEFAULT_ENVIRONMENT[] = {
     d_m3WasiDefaultEnvironment,
-    NULL,
+    रिक्त,
 };
 
-static uvwasi_preopen_t DEFAULT_PREOPENS[] = {
+स्थिर uvwasi_preopen_t DEFAULT_PREOPENS[] = {
     { .mapped_path = "/",  .real_path = "." },
     { .mapped_path = "./", .real_path = "." },
 };
 
-static inline
-void _m3_set_up_default_uvwasi_opts (uvwasi_options_t* opts_p)
+स्थिर अन्तःस्थ
+शून्य _m3_set_up_default_uvwasi_opts (uvwasi_options_t* opts_p)
 {
 
     uvwasi_options_init(opts_p);
     opts_p->argc     = 0;      // runtime->argc is not initialized at this point, so we implement args_get directly
     opts_p->envp     = DEFAULT_ENVIRONMENT;
-    opts_p->preopenc = sizeof(DEFAULT_PREOPENS) / sizeof(uvwasi_preopen_t);
+    opts_p->preopenc = परिमाण(DEFAULT_PREOPENS) / परिमाण(uvwasi_preopen_t);
     opts_p->preopens = DEFAULT_PREOPENS;
 }
 
-static
+स्थिर
 M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 {
     M3Result result = m3Err_none;
 
-    static const char* namespaces[] = { "wasi_snapshot_preview1" };
+    स्थिर अचर वर्ण* namespaces[] = { "wasi_snapshot_preview1" };
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
-        const char* wasi = namespaces[i];
+    लागि (माप_प्रकार i = 0; i < M3_गन्ती_OF(namespaces); i++) {
+        अचर वर्ण* wasi = namespaces[i];
 
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_args_sizes_get, wasi_context)));
@@ -1220,10 +1220,10 @@ _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "sched_yield",
     // rather than per call. A module that linked none of the above imports has
     // no WASI to satisfy, so it is not asked for the export - link_all offers
     // WASI to every module, and most have neither the imports nor a memory.
-    if (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
+    यदि (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
         u32 memoryIndex;
 
-        if (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
+        यदि (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
             _throw("WASI requires the module to export its memory as \"memory\"");
         }
 
@@ -1231,21 +1231,21 @@ _       (m3_BindImportMemory(module, "wasi_snapshot_preview1", memoryIndex));
     }
 
 _catch:
-    return result;
+    फर्काऊ result;
 }
 
 M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_options)
 {
     *ctx_p = m3_AllocStruct(m3_wasi_context_t);
-    assert(*ctx_p);
+    प्रतिज्ञा(*ctx_p);
 
     uvwasi_errno_t ret = uvwasi_init(&(*ctx_p)->uvwasi, &init_options);
 
-    if (ret != UVWASI_ESUCCESS) {
-        return "uvwasi_init failed";
+    यदि (ret != UVWASI_ESUCCESS) {
+        फर्काऊ "uvwasi_init failed";
     }
 
-    return m3Err_none;
+    फर्काऊ m3Err_none;
 }
 
 M3Result m3_NewCustomWASI (M3WASI* wasi_p)
@@ -1253,15 +1253,15 @@ M3Result m3_NewCustomWASI (M3WASI* wasi_p)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_NewCustomWASIWithOptions(wasi_p, opts);
+    फर्काऊ m3_NewCustomWASIWithOptions(wasi_p, opts);
 }
 
 M3Result m3_LinkCustomWASI (IM3Module module, M3WASI wasi)
 {
-    return _linkWASI(module, wasi);
+    फर्काऊ _linkWASI(module, wasi);
 }
 
-void m3_FreeWASI (m3_wasi_context_t* wasi)
+शून्य m3_FreeWASI (m3_wasi_context_t* wasi)
 {
     uvwasi_destroy(&wasi->uvwasi);
     m3_Free(wasi);
@@ -1272,19 +1272,19 @@ M3Result m3_LinkWASI (IM3Module module)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_LinkWASIWithOptions(module, opts);
+    फर्काऊ m3_LinkWASIWithOptions(module, opts);
 }
 
 M3Result m3_LinkWASIWithOptions (IM3Module module, uvwasi_options_t init_options)
 {
-    if (NULL == wasi_context) {
+    यदि (रिक्त == wasi_context) {
         M3Result res = m3_NewCustomWASIWithOptions(&wasi_context, init_options);
-        if (res) {
-            return res;
+        यदि (res) {
+            फर्काऊ res;
         }
     }
 
-    return _linkWASI(module, wasi_context);
+    फर्काऊ _linkWASI(module, wasi_context);
 }
 
 #endif // d_m3HasUVWASI
