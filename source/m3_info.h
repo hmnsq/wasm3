@@ -5,34 +5,34 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_info_h
-#define m3_info_h
+#اگر_تعریف_نشده m3_info_h
+#تعریف_کن m3_info_h
 
-#include "m3_compile.h"
+#ضمن "m3_compile.h"
 
 d_m3BeginExternC
 
-void ProfileHit (cstr_t i_operationName);
+فراغ Profile_اصابت (cstr_t i_operationName);
 
-#ifdef DEBUG
+#اگر_تعریف_شده DEBUG
 
-void        dump_type_stack (IM3Compilation o);
-void        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
-const char* get_indention_string (IM3Compilation o);
-void        log_emit (IM3Compilation o, IM3Operation i_operation);
+فراغ        dump_type_پشته (IM3Compilation o);
+فراغ        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
+ثابت حرف* get_indention_string (IM3Compilation o);
+فراغ        log_emit (IM3Compilation o, IM3Operation i_operation);
 
 cstr_t      SPrintFuncTypeSignature (IM3FuncType i_funcType);
 
-#else // DEBUG
+#وإلا // DEBUG
 
-#  define   dump_type_stack(...)      {}
+#  define   dump_type_پشته(...)      {}
 #  define   log_opcode(...)           {}
 #  define   get_indention_string(...) ""
-#  define   emit_stack_dump(...)      {}
+#  define   emit_پشته_dump(...)      {}
 #  define   log_emit(...)             {}
 
-#endif // DEBUG
+#پایان_اگر // DEBUG
 
-d_m3EndExternC
+d_m3_انتها_Extern_C
 
-#endif // m3_info_h
+#پایان_اگر // m3_info_h

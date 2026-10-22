@@ -5,18 +5,18 @@
 //  Copyright © 2019 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_libc.h"
+#ضمن "m3_api_libc.h"
 
-#include "m3_env.h"
-#include "m3_deterministic.h"
-#include "m3_exception.h"
+#ضمن "m3_env.h"
+#ضمن "m3_deterministic.h"
+#ضمن "m3_exception.h"
 
-#include <time.h>
-#include <errno.h>
-#include <stdio.h>
+#ضمن <time.h>
+#ضمن <errno.h>
+#ضمن <stdio.h>
 
-typedef uint32_t wasm_ptr_t;
-typedef uint32_t wasm_size_t;
+تعريفنوع uint32_t wasm_ptr_t;
+تعريفنوع uint32_t wasm_اندازه_t;
 
 m3ApiRawFunction(m3_libc_abort)
 {
@@ -25,8 +25,8 @@ m3ApiRawFunction(m3_libc_abort)
 
 m3ApiRawFunction(m3_libc_exit)
 {
-    m3ApiGetArg(int32_t, code)
-    (void)code;
+    m3ApiGetArg(int32_t, کد)
+    (فراغ)کد;
 
     m3ApiTrap(m3Err_trapExit);
 }
@@ -36,72 +36,72 @@ m3ApiRawFunction(m3_libc_memset)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(void*, i_ptr)
-    m3ApiGetArg(int32_t, i_value)
-    m3ApiGetArg(wasm_size_t, i_size)
+    m3ApiGetArgMem(فراغ*, i_ptr)
+    m3ApiGetArg(int32_t, i_مقدار)
+    m3ApiGetArg(wasm_اندازه_t, i_اندازه)
 
-    m3ApiCheckMem(i_ptr, i_size);
+    m3ApiCheckMem(i_ptr, i_اندازه);
 
-    u32 result = m3ApiPtrToOffset(memset(i_ptr, i_value, i_size));
-    m3ApiReturn(result);
+    u32 نتیجه = m3_Api_Ptr_مقصد_جابه_جایی(memset(i_ptr, i_مقدار, i_اندازه));
+    m3ApiReturn(نتیجه);
 }
 
 m3ApiRawFunction(m3_libc_memmove)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(void*, o_dst)
-    m3ApiGetArgMem(void*, i_src)
-    m3ApiGetArg(wasm_size_t, i_size)
+    m3ApiGetArgMem(فراغ*, o_dst)
+    m3ApiGetArgMem(فراغ*, i_src)
+    m3ApiGetArg(wasm_اندازه_t, i_اندازه)
 
-    m3ApiCheckMem(o_dst, i_size);
-    m3ApiCheckMem(i_src, i_size);
+    m3ApiCheckMem(o_dst, i_اندازه);
+    m3ApiCheckMem(i_src, i_اندازه);
 
-    u32 result = m3ApiPtrToOffset(memmove(o_dst, i_src, i_size));
-    m3ApiReturn(result);
+    u32 نتیجه = m3_Api_Ptr_مقصد_جابه_جایی(memmove(o_dst, i_src, i_اندازه));
+    m3ApiReturn(نتیجه);
 }
 
 m3ApiRawFunction(m3_libc_print)
 {
     m3ApiReturnType(uint32_t)
 
-    m3ApiGetArgMem(void*, i_ptr)
-    m3ApiGetArg(wasm_size_t, i_size)
+    m3ApiGetArgMem(فراغ*, i_ptr)
+    m3ApiGetArg(wasm_اندازه_t, i_اندازه)
 
-    m3ApiCheckMem(i_ptr, i_size);
+    m3ApiCheckMem(i_ptr, i_اندازه);
 
-    fwrite(i_ptr, i_size, 1, stdout);
+    fwrite(i_ptr, i_اندازه, 1, stdout);
     fflush(stdout);
 
-    m3ApiReturn(i_size);
+    m3ApiReturn(i_اندازه);
 }
 
-static
-void internal_itoa (int n, char s[], int radix)
+ساكن
+فراغ داخلی_itoa (صحيح n, حرف s[], صحيح radix)
 {
-    static char const HEXDIGITS[0x10] = {
+    ساكن حرف ثابت HEXDIGITS[0x10] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
-    int  i, j, sign;
-    char c;
+    صحيح  i, j, sign;
+    حرف c;
 
-    if ((sign = n) < 0) {
+    إذا ((sign = n) < 0) {
         n = -n;
     }
     i = 0;
-    do {
+    افعل {
         s[i++] = HEXDIGITS[n % radix];
-    } while ((n /= radix) > 0);
+    } طالما ((n /= radix) > 0);
 
-    if (sign < 0) {
+    إذا (sign < 0) {
         s[i++] = '-';
     }
     s[i] = '\0';
 
-    // reverse
-    for (i = 0, j = (int)strlen(s) - 1; i < j; i++, j--) {
+    //معکوس
+    لكل (i = 0, j = (صحيح)طول_رشته(s) - 1; i < j; i++, j--) {
         c    = s[i];
         s[i] = s[j];
         s[j] = c;
@@ -112,10 +112,10 @@ m3ApiRawFunction(m3_libc_printf)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(const char*, i_fmt)
-    m3ApiGetArgMem(wasm_ptr_t*, i_args)
+    m3ApiGetArgMem(ثابت حرف*, i_fmt)
+    m3ApiGetArgMem(wasm_ptr_t*, i_آرگومانها)
 
-    if (m3ApiIsNullPtr(i_fmt)) {
+    إذا (m3ApiIsNullPtr(i_fmt)) {
         m3ApiReturn(0);
     }
 
@@ -124,83 +124,83 @@ m3ApiRawFunction(m3_libc_printf)
     m3ApiCheckMem(i_fmt, fmt_len + 1); // include `\0`
 
     FILE*   file   = stdout;
-    int32_t length = 0;
+    int32_t درازی = 0;
 
-    char ch;
-    while ((ch = *i_fmt++)) {
-        if ('%' != ch) {
+    حرف ch;
+    طالما ((ch = *i_fmt++)) {
+        إذا ('%' != ch) {
             putc(ch, file);
-            length++;
-            continue;
+            درازی++;
+            استمر;
         }
         // A trailing '%' has no conversion character: the next byte is the
         // terminating NUL. Stop here rather than consuming it, which would
         // step the cursor past the end of the guest string.
-        if (not *i_fmt) {
-            break;
+        إذا (not *i_fmt) {
+            اكسر;
         }
         ch = *i_fmt++;
-        switch (ch) {
-        case 'c': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            char char_temp = *i_args++;
-            fputc(char_temp, file);
-            length++;
-            break;
+        بدل (ch) {
+        حالة 'c': {
+            m3ApiCheckMem(i_آرگومانها, حجم(wasm_ptr_t));
+            حرف char_موقت = *i_آرگومانها++;
+            fputc(char_موقت, file);
+            درازی++;
+            اكسر;
         }
-        case 'd':
-        case 'x': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            int  int_temp   = *i_args++;
-            char buffer[32] = { 0 };
-            internal_itoa(int_temp, buffer, (ch == 'x') ? 16 : 10);
-            fputs(buffer, file);
-            length += (int32_t)strnlen(buffer, sizeof(buffer));
-            break;
+        حالة 'd':
+        حالة 'x': {
+            m3ApiCheckMem(i_آرگومانها, حجم(wasm_ptr_t));
+            صحيح  int_موقت   = *i_آرگومانها++;
+            حرف میانگیر[32] = { 0 };
+            داخلی_itoa(int_موقت, میانگیر, (ch == 'x') ? 16 : 10);
+            fputs(میانگیر, file);
+            درازی += (int32_t)strnlen(میانگیر, حجم(میانگیر));
+            اكسر;
         }
-        case 's': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            const char* string_temp;
+        حالة 's': {
+            m3ApiCheckMem(i_آرگومانها, حجم(wasm_ptr_t));
+            ثابت حرف* string_موقت;
             size_t      string_len;
 
-            string_temp = (const char*)m3ApiOffsetToPtr(*i_args++);
-            if (m3ApiIsNullPtr(string_temp)) {
-                string_temp = "(null)";
+            string_موقت = (ثابت حرف*)m3_Api_جابه_جایی_مقصد_Ptr(*i_آرگومانها++);
+            إذا (m3ApiIsNullPtr(string_موقت)) {
+                string_موقت = "(null)";
                 string_len  = 6;
-            } else {
-                string_len = strnlen(string_temp, 1024);
-                m3ApiCheckMem(string_temp, string_len + 1);
+            } وإلا {
+                string_len = strnlen(string_موقت, 1024);
+                m3ApiCheckMem(string_موقت, string_len + 1);
             }
 
-            fwrite(string_temp, 1, string_len, file);
-            length += (int32_t)string_len;
-            break;
-        default:
+            fwrite(string_موقت, 1, string_len, file);
+            درازی += (int32_t)string_len;
+            اكسر;
+        افتراضي:
             fputc(ch, file);
-            length++;
-            break;
+            درازی++;
+            اكسر;
         }
         }
     }
 
-    m3ApiReturn(length);
+    m3ApiReturn(درازی);
 }
 
-static
+ساكن
 uint64_t clock_ms (IM3Runtime i_runtime)
 {
-#if d_m3DeterministicProfile
-    return i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
-#else
-    (void)i_runtime;
+#إذا d_m3DeterministicProfile
+    أرجع i_runtime ? Deterministic_زمان(i_runtime) / 1000000 : 0;
+#وإلا
+    (فراغ)i_runtime;
 
 #  ifdef CLOCKS_PER_SEC
-    const clock_t clock_divider = CLOCKS_PER_SEC / 1000;
-    return (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
-#  else
-    return (uint64_t)clock();
+    ثابت clock_t clock_divider = CLOCKS_PER_SEC / 1000;
+    أرجع (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
+#  وإلا
+    أرجع (uint64_t)clock();
 #  endif
-#endif
+#پایان_اگر
 }
 
 m3ApiRawFunction(m3_libc_clock_ms)
@@ -217,36 +217,36 @@ m3ApiRawFunction(m3_libc_clock_ms_i64)
     m3ApiReturn(clock_ms(runtime));
 }
 
-static
-M3Result SuppressLookupFailure (M3Result i_result)
+ساكن
+M3_نتیجه SuppressLookupFailure (M3_نتیجه i_نتیجه)
 {
-    if (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    إذا (i_نتیجه == m3Err_functionLookupFailed or i_نتیجه == m3Err_globalLookupFailed) {
+        أرجع m3Err_none;
+    } وإلا {
+        أرجع i_نتیجه;
     }
 }
 
 // wasm-coremark's minimal build imports `u64 env.clock_ms()`, while older ones
 // - source/extra/coremark_minimal.wasm.h among them - import the i32 form.
 // Bind whichever of the two the module actually declares.
-static
-M3Result LinkClockMs (IM3Module module, ccstr_t i_moduleName)
+ساكن
+M3_نتیجه LinkClockMs (IM3Module module, ccstr_t i_moduleName)
 {
-    M3Result result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "I()", &m3_libc_clock_ms_i64);
+    M3_نتیجه نتیجه = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "I()", &m3_libc_clock_ms_i64);
 
-    if (result == m3Err_functionSignatureMismatch) {
-        result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "i()", &m3_libc_clock_ms);
+    إذا (نتیجه == m3Err_functionSignatureMismatch) {
+        نتیجه = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "i()", &m3_libc_clock_ms);
     }
 
-    return SuppressLookupFailure(result);
+    أرجع SuppressLookupFailure(نتیجه);
 }
 
-M3Result m3_LinkLibC (IM3Module module)
+M3_نتیجه m3_LinkLibC (IM3Module module)
 {
-    M3Result result = m3Err_none;
+    M3_نتیجه نتیجه = m3Err_none;
 
-    const char* env = "env";
+    ثابت حرف* env = "env";
     // clang-format off
 
 _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_debug",            "i(*i)",   &m3_libc_print)));
@@ -261,5 +261,5 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "printf",            
     // clang-format on
 
 _catch:
-    return result;
+    أرجع نتیجه;
 }

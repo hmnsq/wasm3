@@ -5,70 +5,70 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_code_h
-#define m3_code_h
+#اگر_تعریف_نشده m3_کد_h
+#تعریف_کن m3_کد_h
 
-#include "m3_core.h"
+#ضمن "m3_core.h"
 
 d_m3BeginExternC
 
-typedef struct M3CodePage {
-    M3CodePageHeader info;
-    code_t           code[1];
-} M3CodePage;
+تعريفنوع بنية M3_کد_صفحه {
+    M3_کد_صفحه_سرآیند info;
+    کد_t           کد[1];
+} M3_کد_صفحه;
 
-typedef M3CodePage* IM3CodePage;
+تعريفنوع M3_کد_صفحه* IM3_کد_صفحه;
 
 
-IM3CodePage         NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines);
+IM3_کد_صفحه         New_کد_صفحه (IM3Runtime i_runtime, u32 i_min_رقم_سطرها);
 
-void                FreeCodePages (IM3CodePage* io_list);
+فراغ                Free_کد_صفحات (IM3_کد_صفحه* io_list);
 
-u32                 NumFreeLines (IM3CodePage i_page);
-pc_t                GetPageStartPC (IM3CodePage i_page);
-pc_t                GetPagePC (IM3CodePage i_page);
-void                EmitWord_impl (IM3CodePage i_page, void* i_word);
-void                EmitWord32 (IM3CodePage i_page, u32 i_word);
-void                EmitWord64 (IM3CodePage i_page, u64 i_word);
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
-#endif // d_m3RecordBacktraces
+u32                 رقم_Free_سطرها (IM3_کد_صفحه i_صفحه);
+pc_t                Get_صفحه_شروع_PC (IM3_کد_صفحه i_صفحه);
+pc_t                Get_صفحه_PC (IM3_کد_صفحه i_صفحه);
+فراغ                Emit_کلمه_impl (IM3_کد_صفحه i_صفحه, فراغ* i_کلمه);
+فراغ                EmitWord32 (IM3_کد_صفحه i_صفحه, u32 i_کلمه);
+فراغ                EmitWord64 (IM3_کد_صفحه i_صفحه, u64 i_کلمه);
+#إذا d_m3_رکورد_Backtraces
+فراغ Emit_Mapping_مدخل (IM3_کد_صفحه i_صفحه, u32 i_module_جابه_جایی);
+#پایان_اگر // d_m3RecordBacktraces
 
-void        PushCodePage (IM3CodePage* io_list, IM3CodePage i_codePage);
-IM3CodePage PopCodePage (IM3CodePage* io_list);
+فراغ        افزودن_کد_صفحه (IM3_کد_صفحه* io_list, IM3_کد_صفحه i_کد_صفحه);
+IM3_کد_صفحه برداشت_کد_صفحه (IM3_کد_صفحه* io_list);
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list); // i_list = NULL is valid
-u32         CountCodePages (IM3CodePage i_list); // i_list = NULL is valid
+IM3_کد_صفحه Get_انتها_کد_صفحه (IM3_کد_صفحه i_list); // i_list = NULL is valid
+u32         شمار_کد_صفحات (IM3_کد_صفحه i_list); // i_list = NULL is valid
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc);
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset);
-#endif // d_m3RecordBacktraces
+#إذا d_m3_رکورد_Backtraces
+bool شامل_است_PC (IM3_کد_صفحه i_صفحه, pc_t i_pc);
+bool Map_PCTo_جابه_جایی (IM3_کد_صفحه i_صفحه, pc_t i_pc, u32* o_module_جابه_جایی);
+#پایان_اگر // d_m3RecordBacktraces
 
-#ifdef DEBUG
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
-#endif
+#اگر_تعریف_شده DEBUG
+فراغ dump_کد_صفحه (IM3_کد_صفحه i_کد_صفحه, pc_t i_شروع_PC);
+#پایان_اگر
 
-#define EmitWord(page, val) EmitWord_impl(page, (void*)(val))
+#تعریف_کن Emit_کلمه(صفحه, val) Emit_کلمه_impl(صفحه, (فراغ*)(val))
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3RecordBacktraces
+#إذا d_m3_رکورد_Backtraces
 
-typedef struct M3CodeMapEntry {
-    u32 pcOffset;
-    u32 moduleOffset;
-} M3CodeMapEntry;
+تعريفنوع بنية M3_کد_Map_مدخل {
+    u32 pc_جابه_جایی;
+    u32 module_جابه_جایی;
+} M3_کد_Map_مدخل;
 
-typedef struct M3CodeMappingPage {
-    pc_t           basePC;
-    u32            size;
-    u32            capacity;
-    M3CodeMapEntry entries[];
-} M3CodeMappingPage;
+تعريفنوع بنية M3_کد_Mapping_صفحه {
+    pc_t           پایه_PC;
+    u32            اندازه;
+    u32            ظرفیت;
+    M3_کد_Map_مدخل entries[];
+} M3_کد_Mapping_صفحه;
 
-#endif // d_m3RecordBacktraces
+#پایان_اگر // d_m3RecordBacktraces
 
-d_m3EndExternC
+d_m3_انتها_Extern_C
 
-#endif // m3_code_h
+#پایان_اگر // m3_code_h

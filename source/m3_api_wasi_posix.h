@@ -10,166 +10,166 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_api_wasi_posix_h
-#define m3_api_wasi_posix_h
+#اگر_تعریف_نشده m3_api_wasi_posix_h
+#تعریف_کن m3_api_wasi_posix_h
 
-#include "m3_core.h"
+#ضمن "m3_core.h"
 
-#if defined(_WIN32)
+#إذا defined(_WIN32)
 #  error "This file is not for Windows"
-#endif
+#پایان_اگر
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <poll.h>
-#include <string.h>
-#include <time.h>
+#ضمن <sys/types.h>
+#ضمن <sys/stat.h>
+#ضمن <errno.h>
+#ضمن <fcntl.h>
+#ضمن <limits.h>
+#ضمن <poll.h>
+#ضمن <string.h>
+#ضمن <time.h>
 
 // FIONREAD, which poll_oneoff uses to tell the guest how much is waiting on a
 // descriptor. Nothing here needs it - a descriptor whose count cannot be taken is
 // reported as having something rather than nothing - so a system without the header
 // simply does without.
-#if !defined(__wasi__)
+#إذا !defined(__wasi__)
 #  include <sys/ioctl.h>
-#endif
+#پایان_اگر
 
-#if defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__CYGWIN__)
+#إذا defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__CYGWIN__)
 #  include <unistd.h>
 #  include <sys/uio.h>
-#  if defined(__APPLE__)
+#  إذا defined(__APPLE__)
 #    include <TargetConditionals.h>
-#    if TARGET_OS_OSX // TARGET_OS_MAC includes iOS
+#    إذا هدف_OS_OSX // TARGET_OS_MAC includes iOS
 #      include <sys/random.h>
-#    else // iOS / Simulator
+#    وإلا // iOS / Simulator
 #      include <Security/Security.h>
 #    endif
-#  else
+#  وإلا
 #    include <sys/random.h>
 #  endif
 #  define d_m3WasiHasIovec
-#endif
+#پایان_اگر
 
-#include "m3_api_wasi_host.h"
+#ضمن "m3_api_wasi_host.h"
 
 
 /*
  * Plumbing
  */
 
-static
-__wasi_errno_t errno_to_wasi (int errnum)
+ساكن
+__wasi_errno_t errno_مقصد_wasi (صحيح errnum)
 {
     // clang-format off
-    switch (errnum) {
-    case EPERM:    return __WASI_ERRNO_PERM;
-    case ENOENT:   return __WASI_ERRNO_NOENT;
-    case ESRCH:    return __WASI_ERRNO_SRCH;
-    case EINTR:    return __WASI_ERRNO_INTR;
-    case EIO:      return __WASI_ERRNO_IO;
-    case ENXIO:    return __WASI_ERRNO_NXIO;
-    case E2BIG:    return __WASI_ERRNO_2BIG;
-    case ENOEXEC:  return __WASI_ERRNO_NOEXEC;
-    case EBADF:    return __WASI_ERRNO_BADF;
-    case ECHILD:   return __WASI_ERRNO_CHILD;
-    case EAGAIN:   return __WASI_ERRNO_AGAIN;
-    case ENOMEM:   return __WASI_ERRNO_NOMEM;
-    case EACCES:   return __WASI_ERRNO_ACCES;
-    case EFAULT:   return __WASI_ERRNO_FAULT;
-    case EBUSY:    return __WASI_ERRNO_BUSY;
-    case EEXIST:   return __WASI_ERRNO_EXIST;
-    case EXDEV:    return __WASI_ERRNO_XDEV;
-    case ENODEV:   return __WASI_ERRNO_NODEV;
-    case ENOTDIR:  return __WASI_ERRNO_NOTDIR;
-    case EISDIR:   return __WASI_ERRNO_ISDIR;
-    case EINVAL:   return __WASI_ERRNO_INVAL;
-    case ENFILE:   return __WASI_ERRNO_NFILE;
-    case EMFILE:   return __WASI_ERRNO_MFILE;
-    case ENOTTY:   return __WASI_ERRNO_NOTTY;
-    case ETXTBSY:  return __WASI_ERRNO_TXTBSY;
-    case EFBIG:    return __WASI_ERRNO_FBIG;
-    case ENOSPC:   return __WASI_ERRNO_NOSPC;
-    case ESPIPE:   return __WASI_ERRNO_SPIPE;
-    case EROFS:    return __WASI_ERRNO_ROFS;
-    case EMLINK:   return __WASI_ERRNO_MLINK;
-    case EPIPE:    return __WASI_ERRNO_PIPE;
-    case EDOM:     return __WASI_ERRNO_DOM;
-    case ERANGE:   return __WASI_ERRNO_RANGE;
+    بدل (errnum) {
+    حالة EPERM:    أرجع __WASI_ERRNO_PERM;
+    حالة ENOENT:   أرجع __WASI_ERRNO_NOENT;
+    حالة ESRCH:    أرجع __WASI_ERRNO_SRCH;
+    حالة EINTR:    أرجع __WASI_ERRNO_INTR;
+    حالة EIO:      أرجع __WASI_ERRNO_IO;
+    حالة ENXIO:    أرجع __WASI_ERRNO_NXIO;
+    حالة E2BIG:    أرجع __WASI_ERRNO_2BIG;
+    حالة ENOEXEC:  أرجع __WASI_ERRNO_NOEXEC;
+    حالة EBADF:    أرجع __WASI_ERRNO_BADF;
+    حالة ECHILD:   أرجع __WASI_ERRNO_CHILD;
+    حالة EAGAIN:   أرجع __WASI_ERRNO_AGAIN;
+    حالة ENOMEM:   أرجع __WASI_ERRNO_NOMEM;
+    حالة EACCES:   أرجع __WASI_ERRNO_ACCES;
+    حالة EFAULT:   أرجع __WASI_ERRNO_FAULT;
+    حالة EBUSY:    أرجع __WASI_ERRNO_BUSY;
+    حالة EEXIST:   أرجع __WASI_ERRNO_EXIST;
+    حالة EXDEV:    أرجع __WASI_ERRNO_XDEV;
+    حالة ENODEV:   أرجع __WASI_ERRNO_NODEV;
+    حالة ENOTDIR:  أرجع __WASI_ERRNO_NOTDIR;
+    حالة EISDIR:   أرجع __WASI_ERRNO_ISDIR;
+    حالة EINVAL:   أرجع __WASI_ERRNO_INVAL;
+    حالة ENFILE:   أرجع __WASI_ERRNO_NFILE;
+    حالة EMFILE:   أرجع __WASI_ERRNO_MFILE;
+    حالة ENOTTY:   أرجع __WASI_ERRNO_NOTTY;
+    حالة ETXTBSY:  أرجع __WASI_ERRNO_TXTBSY;
+    حالة EFBIG:    أرجع __WASI_ERRNO_FBIG;
+    حالة ENOSPC:   أرجع __WASI_ERRNO_NOSPC;
+    حالة ESPIPE:   أرجع __WASI_ERRNO_SPIPE;
+    حالة EROFS:    أرجع __WASI_ERRNO_ROFS;
+    حالة EMLINK:   أرجع __WASI_ERRNO_MLINK;
+    حالة EPIPE:    أرجع __WASI_ERRNO_PIPE;
+    حالة EDOM:     أرجع __WASI_ERRNO_DOM;
+    حالة ERANGE:   أرجع __WASI_ERRNO_RANGE;
     }
     // clang-format on
-    return __WASI_ERRNO_INVAL;
+    أرجع __WASI_ERRNO_INVAL;
 }
 
-static
-__wasi_filetype_t filetype_from_stat_mode (int mode)
+ساكن
+__wasi_filetype_t filetype_from_stat_نما (صحيح نما)
 {
-    return (S_ISBLK(mode) ? __WASI_FILETYPE_BLOCK_DEVICE : 0) |
-           (S_ISCHR(mode) ? __WASI_FILETYPE_CHARACTER_DEVICE : 0) |
-           (S_ISDIR(mode) ? __WASI_FILETYPE_DIRECTORY : 0) |
-           (S_ISREG(mode) ? __WASI_FILETYPE_REGULAR_FILE : 0) |
+    أرجع (S_ISBLK(نما) ? __WASI_FILETYPE_BLOCK_DEVICE : 0) |
+           (S_ISCHR(نما) ? __WASI_FILETYPE_CHARACTER_DEVICE : 0) |
+           (S_ISDIR(نما) ? __WASI_FILETYPE_DIRECTORY : 0) |
+           (S_ISREG(نما) ? __WASI_FILETYPE_REGULAR_FILE : 0) |
            //(S_ISSOCK(mode)  ? __WASI_FILETYPE_SOCKET_STREAM    : 0) |
-           (S_ISLNK(mode) ? __WASI_FILETYPE_SYMBOLIC_LINK : 0);
+           (S_ISLNK(نما) ? __WASI_FILETYPE_SYMBOLIC_LINK : 0);
 }
 
-static
-void filestat_from_stat (const struct stat* i_stat, m3_wasi_filestat_t* o_stat)
+ساكن
+فراغ filestat_from_stat (ثابت بنية stat* i_stat, m3_wasi_filestat_t* o_stat)
 {
     o_stat->dev = (uint64_t)i_stat->st_dev;
     o_stat->ino = (uint64_t)i_stat->st_ino;
     o_stat->nlink = (uint64_t)i_stat->st_nlink;
-    o_stat->size = (uint64_t)i_stat->st_size;
+    o_stat->اندازه = (uint64_t)i_stat->st_size;
     o_stat->atim = (uint64_t)i_stat->st_atime * 1000000000ULL;
     o_stat->mtim = (uint64_t)i_stat->st_mtime * 1000000000ULL;
     o_stat->ctim = (uint64_t)i_stat->st_ctime * 1000000000ULL;
-    o_stat->filetype = filetype_from_stat_mode(i_stat->st_mode);
+    o_stat->filetype = filetype_from_stat_نما(i_stat->st_mode);
 }
 
 // The descriptor a preopened directory holds, or -1 where i_fd names no preopen
-static
-int preopen_fd (__wasi_fd_t i_fd)
+ساكن
+صحيح preopen_fd (__wasi_fd_t i_fd)
 {
-    if (i_fd >= d_m3WasiPreopenCount) {
-        return -1;
+    إذا (i_fd >= d_m3_Wasi_Preopen_شمار) {
+        أرجع -1;
     }
-    return m3_wasi_preopen[i_fd].fd;
+    أرجع m3_wasi_preopen[i_fd].fd;
 }
 
 // wasi-libc (>= wasi-sdk 12) makes clockid_t an opaque pointer rather than an int,
 // so the "no such clock" sentinel has to be the null one
-#if defined(__wasi__)
-#  define d_m3ClockIdInvalid  ((clockid_t) NULL)
-#else
+#إذا defined(__wasi__)
+#  define d_m3ClockIdInvalid  ((clockid_t) عدم)
+#وإلا
 #  define d_m3ClockIdInvalid  ((clockid_t) -1)
-#endif
+#پایان_اگر
 
-static
-clockid_t convert_clockid (__wasi_clockid_t in)
+ساكن
+clockid_t convert_clockid (__wasi_clockid_t درون)
 {
-    switch (in) {
-    case __WASI_CLOCKID_MONOTONIC: return CLOCK_MONOTONIC;
-    case __WASI_CLOCKID_REALTIME: return CLOCK_REALTIME;
-#if defined(CLOCK_PROCESS_CPUTIME_ID)
-    case __WASI_CLOCKID_PROCESS_CPUTIME_ID: return CLOCK_PROCESS_CPUTIME_ID;
-#endif
-#if defined(CLOCK_THREAD_CPUTIME_ID)
-    case __WASI_CLOCKID_THREAD_CPUTIME_ID: return CLOCK_THREAD_CPUTIME_ID;
-#endif
-    default: return d_m3ClockIdInvalid;
+    بدل (درون) {
+    حالة __WASI_CLOCKID_MONOTONIC: أرجع CLOCK_MONOTONIC;
+    حالة __WASI_CLOCKID_REALTIME: أرجع CLOCK_REALTIME;
+#إذا defined(CLOCK_PROCESS_CPUTIME_ID)
+    حالة __WASI_CLOCKID_PROCESS_CPUTIME_ID: أرجع CLOCK_PROCESS_CPUTIME_ID;
+#پایان_اگر
+#إذا defined(CLOCK_THREAD_CPUTIME_ID)
+    حالة __WASI_CLOCKID_THREAD_CPUTIME_ID: أرجع CLOCK_THREAD_CPUTIME_ID;
+#پایان_اگر
+    افتراضي: أرجع d_m3ClockIdInvalid;
     }
 }
 
-static
-__wasi_timestamp_t convert_timespec (const struct timespec* ts)
+ساكن
+__wasi_timestamp_t convert_timespec (ثابت بنية timespec* ts)
 {
-    if (ts->tv_sec < 0) {
-        return 0;
+    إذا (ts->tv_sec < 0) {
+        أرجع 0;
     }
-    if ((__wasi_timestamp_t)ts->tv_sec >= UINT64_MAX / 1000000000) {
-        return UINT64_MAX;
+    إذا ((__wasi_timestamp_t)ts->tv_sec >= UINT64_MAX / 1000000000) {
+        أرجع UINT64_MAX;
     }
-    return (__wasi_timestamp_t)ts->tv_sec * 1000000000 + ts->tv_nsec;
+    أرجع (__wasi_timestamp_t)ts->tv_sec * 1000000000 + ts->tv_nsec;
 }
 
 
@@ -177,12 +177,12 @@ __wasi_timestamp_t convert_timespec (const struct timespec* ts)
  * Setup
  */
 
-static
-void m3_wasi_host_init ()
+ساكن
+فراغ m3_wasi_host_init ()
 {
-    for (int i = 3; i < d_m3WasiPreopenCount; i++) {
-        if (m3_wasi_preopen[i].fd < 0) {
-            m3_wasi_preopen[i].fd = open(m3_wasi_preopen[i].real_path, O_RDONLY);
+    لكل (صحيح i = 3; i < d_m3_Wasi_Preopen_شمار; i++) {
+        إذا (m3_wasi_preopen[i].fd < 0) {
+            m3_wasi_preopen[i].fd = open(m3_wasi_preopen[i].real_مسیر, O_RDONLY);
         }
     }
 }
@@ -192,203 +192,203 @@ void m3_wasi_host_init ()
  * Descriptors
  */
 
-static
+ساكن
 __wasi_errno_t m3_wasi_host_fd_close (__wasi_fd_t i_fd)
 {
-    if (close(i_fd) != 0) {
-        return errno_to_wasi(errno);
+    إذا (close(i_fd) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
 // no fdatasync on Apple, where fsync is the stronger promise of the two, and neither
 // on a platform this does not name
-#if defined(__APPLE__)
+#إذا defined(__APPLE__)
 #  define d_m3WasiDatasync(FD)  fsync(FD)
-#elif defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__)
+#وإلاإذا defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__)
 #  define d_m3WasiDatasync(FD)  fdatasync(FD)
-#endif
+#پایان_اگر
 
-static
+ساكن
 __wasi_errno_t m3_wasi_host_fd_datasync (__wasi_fd_t i_fd)
 {
-#if defined(d_m3WasiDatasync)
-    if (d_m3WasiDatasync(i_fd) != 0) {
-        return errno_to_wasi(errno);
+#إذا defined(d_m3WasiDatasync)
+    إذا (d_m3WasiDatasync(i_fd) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
-#else
-    return __WASI_ERRNO_NOSYS;
-#endif
+    أرجع __WASI_ERRNO_SUCCESS;
+#وإلا
+    أرجع __WASI_ERRNO_NOSYS;
+#پایان_اگر
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_advise (__wasi_fd_t i_fd, __wasi_filesize_t i_offset,
-                                       __wasi_filesize_t i_length, __wasi_advice_t i_advice)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_advise (__wasi_fd_t i_fd, __wasi_filesize_t i_جابه_جایی,
+                                       __wasi_filesize_t i_درازی, __wasi_advice_t i_advice)
 {
     // Purely advisory: passing it on is a best effort, and dropping it is
     // still a conforming implementation. Only the fd has to be valid.
-#if defined(POSIX_FADV_NORMAL)
-    int adv;
-    switch (i_advice) {
-    case __WASI_ADVICE_NORMAL: adv = POSIX_FADV_NORMAL; break;
-    case __WASI_ADVICE_SEQUENTIAL: adv = POSIX_FADV_SEQUENTIAL; break;
-    case __WASI_ADVICE_RANDOM: adv = POSIX_FADV_RANDOM; break;
-    case __WASI_ADVICE_WILLNEED: adv = POSIX_FADV_WILLNEED; break;
-    case __WASI_ADVICE_DONTNEED: adv = POSIX_FADV_DONTNEED; break;
-    case __WASI_ADVICE_NOREUSE: adv = POSIX_FADV_NOREUSE; break;
-    default: return __WASI_ERRNO_INVAL;
+#إذا defined(POSIX_FADV_NORMAL)
+    صحيح adv;
+    بدل (i_advice) {
+    حالة __WASI_ADVICE_NORMAL: adv = POSIX_FADV_NORMAL; اكسر;
+    حالة __WASI_ADVICE_SEQUENTIAL: adv = POSIX_FADV_SEQUENTIAL; اكسر;
+    حالة __WASI_ADVICE_RANDOM: adv = POSIX_FADV_RANDOM; اكسر;
+    حالة __WASI_ADVICE_WILLNEED: adv = POSIX_FADV_WILLNEED; اكسر;
+    حالة __WASI_ADVICE_DONTNEED: adv = POSIX_FADV_DONTNEED; اكسر;
+    حالة __WASI_ADVICE_NOREUSE: adv = POSIX_FADV_NOREUSE; اكسر;
+    افتراضي: أرجع __WASI_ERRNO_INVAL;
     }
 
-    int ret = posix_fadvise(i_fd, i_offset, i_length, adv);
-    if (ret != 0) {
-        return errno_to_wasi(ret);
+    صحيح ret = posix_fadvise(i_fd, i_جابه_جایی, i_درازی, adv);
+    إذا (ret != 0) {
+        أرجع errno_مقصد_wasi(ret);
     }
-#else
-    if (i_advice > __WASI_ADVICE_NOREUSE) {
-        return __WASI_ERRNO_INVAL;
+#وإلا
+    إذا (i_advice > __WASI_ADVICE_NOREUSE) {
+        أرجع __WASI_ERRNO_INVAL;
     }
 
-    struct stat fd_stat;
-    if (fstat(i_fd, &fd_stat) != 0) {
-        return errno_to_wasi(errno);
+    بنية stat fd_stat;
+    إذا (fstat(i_fd, &fd_stat) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-#endif
+#پایان_اگر
 
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
+ساكن
 __wasi_errno_t m3_wasi_host_fd_fdstat (__wasi_fd_t i_fd, __wasi_filetype_t* o_filetype,
                                        __wasi_fdflags_t* o_flags)
 {
     *o_filetype = __WASI_FILETYPE_UNKNOWN;
     *o_flags = 0;
 
-    int fl = fcntl(i_fd, F_GETFL);
-    if (fl < 0) {
-        return errno_to_wasi(errno);
+    صحيح fl = fcntl(i_fd, F_GETFL);
+    إذا (fl < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    struct stat fd_stat;
-    if (fstat(i_fd, &fd_stat) != 0) {
-        return errno_to_wasi(errno);
+    بنية stat fd_stat;
+    إذا (fstat(i_fd, &fd_stat) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    *o_filetype = filetype_from_stat_mode(fd_stat.st_mode);
+    *o_filetype = filetype_from_stat_نما(fd_stat.st_mode);
     *o_flags = ((fl & O_APPEND) ? __WASI_FDFLAGS_APPEND : 0) |
                ((fl & O_DSYNC) ? __WASI_FDFLAGS_DSYNC : 0) |
                ((fl & O_NONBLOCK) ? __WASI_FDFLAGS_NONBLOCK : 0) |
                //((fl & O_RSYNC)     ? __WASI_FDFLAGS_RSYNC     : 0) |
                ((fl & O_SYNC) ? __WASI_FDFLAGS_SYNC : 0);
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
 // F_SETFL changes only a handful of the bits a file was opened with: the sync ones
 // are fixed at open time, so a request to turn one on is refused rather than
 // accepted and quietly dropped. Turning one off is refused the same way - the guest
 // asked for a state the descriptor cannot be put into either way.
-static
-__wasi_errno_t m3_wasi_host_fd_fdstat_set_flags (__wasi_fd_t i_fd, __wasi_fdflags_t i_flags)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_fdstat_مجموعه_flags (__wasi_fd_t i_fd, __wasi_fdflags_t i_flags)
 {
-    int fl = fcntl(i_fd, F_GETFL);
-    if (fl < 0) {
-        return errno_to_wasi(errno);
+    صحيح fl = fcntl(i_fd, F_GETFL);
+    إذا (fl < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    const __wasi_fdflags_t fixed = __WASI_FDFLAGS_DSYNC | __WASI_FDFLAGS_RSYNC | __WASI_FDFLAGS_SYNC;
+    ثابت __wasi_fdflags_t fixed = __WASI_FDFLAGS_DSYNC | __WASI_FDFLAGS_RSYNC | __WASI_FDFLAGS_SYNC;
 
     // RSYNC is left out of the readback for the same reason fd_fdstat does not
     // report it: it has no bit of its own everywhere this builds
     __wasi_fdflags_t       current = ((fl & O_DSYNC) ? __WASI_FDFLAGS_DSYNC : 0) |
                                      ((fl & O_SYNC) ? __WASI_FDFLAGS_SYNC : 0);
 
-    if ((i_flags & fixed) != (current & fixed)) {
-        return __WASI_ERRNO_NOTSUP;
+    إذا ((i_flags & fixed) != (current & fixed)) {
+        أرجع __WASI_ERRNO_NOTSUP;
     }
 
     fl &= ~(O_APPEND | O_NONBLOCK);
     fl |= (i_flags & __WASI_FDFLAGS_APPEND) ? O_APPEND : 0;
     fl |= (i_flags & __WASI_FDFLAGS_NONBLOCK) ? O_NONBLOCK : 0;
 
-    if (fcntl(i_fd, F_SETFL, fl) < 0) {
-        return errno_to_wasi(errno);
+    إذا (fcntl(i_fd, F_SETFL, fl) < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
+ساكن
 __wasi_errno_t m3_wasi_host_fd_filestat (__wasi_fd_t i_fd, m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, حجم(*o_stat));
 
-    struct stat fd_stat;
-    if (fstat(i_fd, &fd_stat) != 0) {
-        return errno_to_wasi(errno);
+    بنية stat fd_stat;
+    إذا (fstat(i_fd, &fd_stat) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
     filestat_from_stat(&fd_stat, o_stat);
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_set_size (__wasi_fd_t i_fd, __wasi_filesize_t i_size)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_مجموعه_اندازه (__wasi_fd_t i_fd, __wasi_filesize_t i_اندازه)
 {
-    if (ftruncate(i_fd, (off_t)i_size) != 0) {
-        return errno_to_wasi(errno);
+    إذا (ftruncate(i_fd, (off_t)i_اندازه) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_set_times (__wasi_fd_t i_fd, __wasi_timestamp_t i_atim,
+ساكن
+__wasi_errno_t m3_wasi_host_fd_مجموعه_times (__wasi_fd_t i_fd, __wasi_timestamp_t i_atim,
                                           __wasi_timestamp_t i_mtim, __wasi_fstflags_t i_flags)
 {
     // a time is either given, asked for as now, or left alone
-    struct timespec times[2];
+    بنية timespec times[2];
 
-    if (i_flags & __WASI_FSTFLAGS_ATIM_NOW) {
+    إذا (i_flags & __WASI_FSTFLAGS_ATIM_NOW) {
         times[0].tv_sec = 0;
         times[0].tv_nsec = UTIME_NOW;
-    } else if (i_flags & __WASI_FSTFLAGS_ATIM) {
+    } وإلا إذا (i_flags & __WASI_FSTFLAGS_ATIM) {
         times[0].tv_sec = i_atim / 1000000000ULL;
         times[0].tv_nsec = i_atim % 1000000000ULL;
-    } else {
+    } وإلا {
         times[0].tv_sec = 0;
         times[0].tv_nsec = UTIME_OMIT;
     }
 
-    if (i_flags & __WASI_FSTFLAGS_MTIM_NOW) {
+    إذا (i_flags & __WASI_FSTFLAGS_MTIM_NOW) {
         times[1].tv_sec = 0;
         times[1].tv_nsec = UTIME_NOW;
-    } else if (i_flags & __WASI_FSTFLAGS_MTIM) {
+    } وإلا إذا (i_flags & __WASI_FSTFLAGS_MTIM) {
         times[1].tv_sec = i_mtim / 1000000000ULL;
         times[1].tv_nsec = i_mtim % 1000000000ULL;
-    } else {
+    } وإلا {
         times[1].tv_sec = 0;
         times[1].tv_nsec = UTIME_OMIT;
     }
 
-    if (futimens(i_fd, times) != 0) {
-        return errno_to_wasi(errno);
+    إذا (futimens(i_fd, times) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, int i_whence,
+ساكن
+__wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_جابه_جایی, صحيح i_whence,
                                      __wasi_filesize_t* o_pos)
 {
     *o_pos = 0;
 
-    off_t ret = lseek(i_fd, (off_t)i_offset, i_whence);
-    if (ret < 0) {
-        return errno_to_wasi(errno);
+    off_t ret = lseek(i_fd, (off_t)i_جابه_جایی, i_whence);
+    إذا (ret < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
     *o_pos = (__wasi_filesize_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -396,129 +396,129 @@ __wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, int i_w
  * Transfers
  */
 
-#if defined(d_m3WasiHasIovec)
+#إذا defined(d_m3WasiHasIovec)
 
 // m3_wasi_iovec_t is laid out as struct iovec is, but they are still two types, so
 // the list is copied across rather than cast.
-static
-__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                  __wasi_size_t i_iovsLen, bool i_write, __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                                  __wasi_size_t i_iovsLen, bool i_write, __wasi_size_t* o_انجامشده)
 {
-    *o_done = 0;
+    *o_انجامشده = 0;
 
-    struct iovec iovs[d_m3WasiMaxIovs];
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+    بنية iovec iovs[d_m3WasiMaxIovs];
+    لكل (__wasi_size_t i = 0; i < i_iovsLen; i++) {
         iovs[i].iov_base = i_iovs[i].buf;
         iovs[i].iov_len = i_iovs[i].len;
     }
 
-    ssize_t ret = i_write ? writev(i_fd, iovs, (int)i_iovsLen) : readv(i_fd, iovs, (int)i_iovsLen);
-    if (ret < 0) {
-        return errno_to_wasi(errno);
+    ssize_t ret = i_write ? writev(i_fd, iovs, (صحيح)i_iovsLen) : readv(i_fd, iovs, (صحيح)i_iovsLen);
+    إذا (ret < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    *o_done = (__wasi_size_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    *o_انجامشده = (__wasi_size_t)ret;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-#else
+#وإلا
 
 // No readv/writev here, so the list is walked one buffer at a time and a short
 // transfer ends it, which is what readv would have done
-static
-__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                  __wasi_size_t i_iovsLen, bool i_write, __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                                  __wasi_size_t i_iovsLen, bool i_write, __wasi_size_t* o_انجامشده)
 {
-    *o_done = 0;
+    *o_انجامشده = 0;
 
-    size_t done = 0;
+    size_t انجامشده = 0;
 
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
-        void*  addr = i_iovs[i].buf;
+    لكل (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+        فراغ*  addr = i_iovs[i].buf;
         size_t len = i_iovs[i].len;
-        if (len == 0) {
-            continue;
+        إذا (len == 0) {
+            استمر;
         }
 
-        ssize_t ret = i_write ? write(i_fd, addr, len) : read(i_fd, addr, len);
-        if (ret < 0) {
-            return errno_to_wasi(errno);
+        ssize_t ret = i_write ? اكتب(i_fd, addr, len) : اقرأ(i_fd, addr, len);
+        إذا (ret < 0) {
+            أرجع errno_مقصد_wasi(errno);
         }
 
-        done += (size_t)ret;
-        if ((size_t)ret < len) {
-            break;
+        انجامشده += (size_t)ret;
+        إذا ((size_t)ret < len) {
+            اكسر;
         }
     }
 
-    *o_done = (__wasi_size_t)done;
-    return __WASI_ERRNO_SUCCESS;
+    *o_انجامشده = (__wasi_size_t)انجامشده;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-#endif // d_m3WasiHasIovec
+#پایان_اگر // d_m3WasiHasIovec
 
 // pread/pwrite over the list. The offset walks with the data, so a short transfer
 // stops it rather than leaving a hole.
-static
-__wasi_errno_t transfer_at (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                            __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset, bool i_write,
-                            __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t transfer_at (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                            __wasi_size_t i_iovsLen, __wasi_filesize_t i_جابه_جایی, bool i_write,
+                            __wasi_size_t* o_انجامشده)
 {
-    *o_done = 0;
+    *o_انجامشده = 0;
 
-    size_t done = 0;
+    size_t انجامشده = 0;
 
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
-        void*  addr = i_iovs[i].buf;
+    لكل (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+        فراغ*  addr = i_iovs[i].buf;
         size_t len = i_iovs[i].len;
-        if (len == 0) {
-            continue;
+        إذا (len == 0) {
+            استمر;
         }
 
-        ssize_t ret = i_write ? pwrite(i_fd, addr, len, (off_t)(i_offset + done))
-                              : pread(i_fd, addr, len, (off_t)(i_offset + done));
-        if (ret < 0) {
-            return errno_to_wasi(errno);
+        ssize_t ret = i_write ? pwrite(i_fd, addr, len, (off_t)(i_جابه_جایی + انجامشده))
+                              : pread(i_fd, addr, len, (off_t)(i_جابه_جایی + انجامشده));
+        إذا (ret < 0) {
+            أرجع errno_مقصد_wasi(errno);
         }
 
-        done += (size_t)ret;
-        if ((size_t)ret < len) {
-            break;
+        انجامشده += (size_t)ret;
+        إذا ((size_t)ret < len) {
+            اكسر;
         }
     }
 
-    *o_done = (__wasi_size_t)done;
-    return __WASI_ERRNO_SUCCESS;
+    *o_انجامشده = (__wasi_size_t)انجامشده;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_read (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                     __wasi_size_t i_iovsLen, __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_read (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                                     __wasi_size_t i_iovsLen, __wasi_size_t* o_انجامشده)
 {
-    return transfer_vectored(i_fd, i_iovs, i_iovsLen, false, o_done);
+    أرجع transfer_vectored(i_fd, i_iovs, i_iovsLen, false, o_انجامشده);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_write (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                      __wasi_size_t i_iovsLen, __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_write (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                                      __wasi_size_t i_iovsLen, __wasi_size_t* o_انجامشده)
 {
-    return transfer_vectored(i_fd, i_iovs, i_iovsLen, true, o_done);
+    أرجع transfer_vectored(i_fd, i_iovs, i_iovsLen, true, o_انجامشده);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_pread (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                      __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
-                                      __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_pread (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                                      __wasi_size_t i_iovsLen, __wasi_filesize_t i_جابه_جایی,
+                                      __wasi_size_t* o_انجامشده)
 {
-    return transfer_at(i_fd, i_iovs, i_iovsLen, i_offset, false, o_done);
+    أرجع transfer_at(i_fd, i_iovs, i_iovsLen, i_جابه_جایی, false, o_انجامشده);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                       __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
-                                       __wasi_size_t* o_done)
+ساكن
+__wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, ثابت m3_wasi_iovec_t* i_iovs,
+                                       __wasi_size_t i_iovsLen, __wasi_filesize_t i_جابه_جایی,
+                                       __wasi_size_t* o_انجامشده)
 {
-    return transfer_at(i_fd, i_iovs, i_iovsLen, i_offset, true, o_done);
+    أرجع transfer_at(i_fd, i_iovs, i_iovsLen, i_جابه_جایی, true, o_انجامشده);
 }
 
 
@@ -526,20 +526,20 @@ __wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, const m3_wasi_iovec_t* 
  * Paths
  */
 
-static
-__wasi_errno_t m3_wasi_host_path_open (__wasi_fd_t i_dirfd, ccstr_t i_path,
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_open (__wasi_fd_t i_dirfd, ccstr_t i_مسیر,
                                        __wasi_oflags_t i_oflags, __wasi_rights_t i_rights,
                                        __wasi_fdflags_t i_fdFlags, __wasi_fd_t* o_fd)
 {
     *o_fd = 0;
 
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
     // translate o_flags and fs_flags into flags and mode
-    int flags = ((i_oflags & __WASI_OFLAGS_CREAT) ? O_CREAT : 0) |
+    صحيح flags = ((i_oflags & __WASI_OFLAGS_CREAT) ? O_CREAT : 0) |
                 //((i_oflags & __WASI_OFLAGS_DIRECTORY)      ? O_DIRECTORY : 0) |
                 ((i_oflags & __WASI_OFLAGS_EXCL) ? O_EXCL : 0) |
                 ((i_oflags & __WASI_OFLAGS_TRUNC) ? O_TRUNC : 0) |
@@ -549,149 +549,149 @@ __wasi_errno_t m3_wasi_host_path_open (__wasi_fd_t i_dirfd, ccstr_t i_path,
                 //((i_fdFlags & __WASI_FDFLAGS_RSYNC)        ? O_RSYNC     : 0) |
                 ((i_fdFlags & __WASI_FDFLAGS_SYNC) ? O_SYNC : 0);
 
-    if ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
+    إذا ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= O_RDWR;
-    } else if ((i_rights & __WASI_RIGHTS_FD_WRITE)) {
+    } وإلا إذا ((i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= O_WRONLY;
-    } else if ((i_rights & __WASI_RIGHTS_FD_READ)) {
+    } وإلا إذا ((i_rights & __WASI_RIGHTS_FD_READ)) {
         flags |= O_RDONLY; // no-op because O_RDONLY is 0
     }
 
-    int host_fd = openat(dirfd, i_path, flags, 0644);
-    if (host_fd < 0) {
-        return errno_to_wasi(errno);
+    صحيح host_fd = openat(dirfd, i_مسیر, flags, 0644);
+    إذا (host_fd < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
     *o_fd = (__wasi_fd_t)host_fd;
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_filestat (__wasi_fd_t i_dirfd, ccstr_t i_path, bool i_follow,
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_filestat (__wasi_fd_t i_dirfd, ccstr_t i_مسیر, bool i_follow,
                                            m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, حجم(*o_stat));
 
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    struct stat path_stat;
-    if (fstatat(dirfd, i_path, &path_stat, i_follow ? 0 : AT_SYMLINK_NOFOLLOW) != 0) {
-        return errno_to_wasi(errno);
+    بنية stat مسیر_stat;
+    إذا (fstatat(dirfd, i_مسیر, &مسیر_stat, i_follow ? 0 : AT_SYMLINK_NOFOLLOW) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    filestat_from_stat(&path_stat, o_stat);
-    return __WASI_ERRNO_SUCCESS;
+    filestat_from_stat(&مسیر_stat, o_stat);
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_create_directory (__wasi_fd_t i_dirfd, ccstr_t i_path)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_create_directory (__wasi_fd_t i_dirfd, ccstr_t i_مسیر)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    if (mkdirat(dirfd, i_path, 0755) != 0) {
-        return errno_to_wasi(errno);
+    إذا (mkdirat(dirfd, i_مسیر, 0755) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_remove_directory (__wasi_fd_t i_dirfd, ccstr_t i_path)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_remove_directory (__wasi_fd_t i_dirfd, ccstr_t i_مسیر)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    if (unlinkat(dirfd, i_path, AT_REMOVEDIR) != 0) {
-        return errno_to_wasi(errno);
+    إذا (unlinkat(dirfd, i_مسیر, AT_REMOVEDIR) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_unlink_file (__wasi_fd_t i_dirfd, ccstr_t i_path)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_unlink_file (__wasi_fd_t i_dirfd, ccstr_t i_مسیر)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    if (unlinkat(dirfd, i_path, 0) != 0) {
-        return errno_to_wasi(errno);
+    إذا (unlinkat(dirfd, i_مسیر, 0) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_rename (__wasi_fd_t i_oldDirfd, ccstr_t i_oldPath,
-                                         __wasi_fd_t i_newDirfd, ccstr_t i_newPath)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_rename (__wasi_fd_t i_oldDirfd, ccstr_t i_old_مسیر,
+                                         __wasi_fd_t i_newDirfd, ccstr_t i_new_مسیر)
 {
-    int oldDirfd = preopen_fd(i_oldDirfd);
-    int newDirfd = preopen_fd(i_newDirfd);
-    if (oldDirfd < 0 || newDirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح oldDirfd = preopen_fd(i_oldDirfd);
+    صحيح newDirfd = preopen_fd(i_newDirfd);
+    إذا (oldDirfd < 0 || newDirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    if (renameat(oldDirfd, i_oldPath, newDirfd, i_newPath) != 0) {
-        return errno_to_wasi(errno);
+    إذا (renameat(oldDirfd, i_old_مسیر, newDirfd, i_new_مسیر) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_link (__wasi_fd_t i_oldDirfd, ccstr_t i_oldPath, bool i_follow,
-                                       __wasi_fd_t i_newDirfd, ccstr_t i_newPath)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_link (__wasi_fd_t i_oldDirfd, ccstr_t i_old_مسیر, bool i_follow,
+                                       __wasi_fd_t i_newDirfd, ccstr_t i_new_مسیر)
 {
-    int oldDirfd = preopen_fd(i_oldDirfd);
-    int newDirfd = preopen_fd(i_newDirfd);
-    if (oldDirfd < 0 || newDirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح oldDirfd = preopen_fd(i_oldDirfd);
+    صحيح newDirfd = preopen_fd(i_newDirfd);
+    إذا (oldDirfd < 0 || newDirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    if (linkat(oldDirfd, i_oldPath, newDirfd, i_newPath, i_follow ? AT_SYMLINK_FOLLOW : 0) != 0) {
-        return errno_to_wasi(errno);
+    إذا (linkat(oldDirfd, i_old_مسیر, newDirfd, i_new_مسیر, i_follow ? AT_SYMLINK_FOLLOW : 0) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_symlink (ccstr_t i_target, __wasi_fd_t i_dirfd, ccstr_t i_path)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_symlink (ccstr_t i_هدف, __wasi_fd_t i_dirfd, ccstr_t i_مسیر)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    if (symlinkat(i_target, dirfd, i_path) != 0) {
-        return errno_to_wasi(errno);
+    إذا (symlinkat(i_هدف, dirfd, i_مسیر) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, char* o_buf,
-                                           __wasi_size_t i_bufLen, __wasi_size_t* o_bufUsed)
+ساكن
+__wasi_errno_t m3_wasi_host_مسیر_readlink (__wasi_fd_t i_dirfd, ccstr_t i_مسیر, حرف* o_buf,
+                                           __wasi_size_t i_bufLen, __wasi_size_t* o_buf_استفاده_شده)
 {
-    *o_bufUsed = 0;
+    *o_buf_استفاده_شده = 0;
 
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    صحيح dirfd = preopen_fd(i_dirfd);
+    إذا (dirfd < 0) {
+        أرجع __WASI_ERRNO_BADF;
     }
 
-    ssize_t ret = readlinkat(dirfd, i_path, o_buf, i_bufLen);
-    if (ret < 0) {
-        return errno_to_wasi(errno);
+    ssize_t ret = readlinkat(dirfd, i_مسیر, o_buf, i_bufLen);
+    إذا (ret < 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    *o_bufUsed = (__wasi_size_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    *o_buf_استفاده_شده = (__wasi_size_t)ret;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -699,77 +699,77 @@ __wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, 
  * Clocks and entropy
  */
 
-static
+ساكن
 __wasi_errno_t m3_wasi_host_clock_res_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_res)
 {
     *o_res = 0;
 
     clockid_t clk = convert_clockid(i_clockId);
-    if (clk == d_m3ClockIdInvalid) {
-        return __WASI_ERRNO_INVAL;
+    إذا (clk == d_m3ClockIdInvalid) {
+        أرجع __WASI_ERRNO_INVAL;
     }
 
-    struct timespec tp;
-    if (clock_getres(clk, &tp) != 0) {
+    بنية timespec tp;
+    إذا (clock_getres(clk, &tp) != 0) {
         *o_res = 1000000;
-    } else {
+    } وإلا {
         *o_res = convert_timespec(&tp);
     }
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_clock_time_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_time)
+ساكن
+__wasi_errno_t m3_wasi_host_clock_زمان_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_زمان)
 {
-    *o_time = 0;
+    *o_زمان = 0;
 
     clockid_t clk = convert_clockid(i_clockId);
-    if (clk == d_m3ClockIdInvalid) {
-        return __WASI_ERRNO_INVAL;
+    إذا (clk == d_m3ClockIdInvalid) {
+        أرجع __WASI_ERRNO_INVAL;
     }
 
-    struct timespec tp;
-    if (clock_gettime(clk, &tp) != 0) {
-        return errno_to_wasi(errno);
+    بنية timespec tp;
+    إذا (clock_gettime(clk, &tp) != 0) {
+        أرجع errno_مقصد_wasi(errno);
     }
 
-    *o_time = convert_timespec(&tp);
-    return __WASI_ERRNO_SUCCESS;
+    *o_زمان = convert_timespec(&tp);
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_random_get (void* o_buf, __wasi_size_t i_len)
+ساكن
+__wasi_errno_t m3_wasi_host_random_get (فراغ* o_buf, __wasi_size_t i_len)
 {
     uint8_t* buf = (uint8_t*)o_buf;
 
-    while (i_len) {
+    طالما (i_len) {
         ssize_t retlen;
 
-#if defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__EMSCRIPTEN__)
+#إذا defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__EMSCRIPTEN__)
         size_t reqlen = M3_MIN(i_len, 256);
-#  if defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
-        retlen = SecRandomCopyBytes(kSecRandomDefault, reqlen, buf) < 0 ? -1 : (ssize_t)reqlen;
-#  else
+#  إذا defined(__APPLE__) && (هدف_OS_IPHONE || هدف_IPHONE_SIMULATOR)
+        retlen = Sec_Random_Copy_بایتها(kSecRandomDefault, reqlen, buf) < 0 ? -1 : (ssize_t)reqlen;
+#  وإلا
         retlen = getentropy(buf, reqlen) < 0 ? -1 : (ssize_t)reqlen;
 #  endif
-#elif defined(__FreeBSD__) || defined(__linux__)
+#وإلاإذا defined(__FreeBSD__) || defined(__linux__)
         retlen = getrandom(buf, i_len, 0);
-#else
-        return __WASI_ERRNO_NOSYS;
-#endif
+#وإلا
+        أرجع __WASI_ERRNO_NOSYS;
+#پایان_اگر
 
-        if (retlen < 0) {
-            if (errno == EINTR || errno == EAGAIN) {
-                continue;
+        إذا (retlen < 0) {
+            إذا (errno == EINTR || errno == EAGAIN) {
+                استمر;
             }
-            return errno_to_wasi(errno);
+            أرجع errno_مقصد_wasi(errno);
         }
 
         buf += retlen;
         i_len -= (__wasi_size_t)retlen;
     }
 
-    return __WASI_ERRNO_SUCCESS;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -783,48 +783,48 @@ __wasi_errno_t m3_wasi_host_random_get (void* o_buf, __wasi_size_t i_len)
 // against the clock it names and ignores i_elapsedNs, that clock having moved on by
 // itself. A clock this system has not got answers UINT64_MAX so that it never
 // becomes the soonest deadline - the caller reports EINVAL for it separately.
-static
-uint64_t poll_remaining_ns (const m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs)
+ساكن
+uint64_t poll_مانده_ns (ثابت m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs)
 {
-    if (not i_sub->isAbsolute) {
-        return (i_sub->timeout > i_elapsedNs) ? i_sub->timeout - i_elapsedNs : 0;
+    إذا (not i_sub->isAbsolute) {
+        أرجع (i_sub->timeout > i_elapsedNs) ? i_sub->timeout - i_elapsedNs : 0;
     }
 
     clockid_t clk = convert_clockid(i_sub->clockId);
-    if (clk == d_m3ClockIdInvalid) {
-        return UINT64_MAX;
+    إذا (clk == d_m3ClockIdInvalid) {
+        أرجع UINT64_MAX;
     }
 
-    struct timespec tp;
-    if (clock_gettime(clk, &tp) != 0) {
-        return 0;
+    بنية timespec tp;
+    إذا (clock_gettime(clk, &tp) != 0) {
+        أرجع 0;
     }
 
     __wasi_timestamp_t now = convert_timespec(&tp);
-    return (i_sub->timeout > now) ? i_sub->timeout - now : 0;
+    أرجع (i_sub->timeout > now) ? i_sub->timeout - now : 0;
 }
 
 // How much a descriptor ready for reading has waiting on it. The guest is told a
 // count so that it can size the read that follows, and a wrong one only costs it a
 // short read - so a descriptor that cannot answer says one byte rather than nothing,
 // which would read as end of file.
-static
-__wasi_filesize_t poll_readable_bytes (int i_fd)
+ساكن
+__wasi_filesize_t poll_readable_بایتها (صحيح i_fd)
 {
-#if defined(FIONREAD)
-    int available = 0;
-    if (ioctl(i_fd, FIONREAD, &available) == 0 and available > 0) {
-        return (__wasi_filesize_t)available;
+#إذا defined(FIONREAD)
+    صحيح موجود = 0;
+    إذا (ioctl(i_fd, FIONREAD, &موجود) == 0 and موجود > 0) {
+        أرجع (__wasi_filesize_t)موجود;
     }
-#endif
-    return 1;
+#پایان_اگر
+    أرجع 1;
 }
 
-static
-__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_count,
-                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_eventCount)
+ساكن
+__wasi_errno_t m3_wasi_host_poll_oneoff (ثابت m3_wasi_pollsub_t* i_subs, __wasi_size_t i_شمار,
+                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_event_شمار)
 {
-    *o_eventCount = 0;
+    *o_event_شمار = 0;
 
     // The soonest clock deadline is what bounds the wait; without one, poll() is
     // told to wait forever, which is what a subscription list of descriptors alone
@@ -834,36 +834,36 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     bool          hasDeadline = false;
     bool          hasClock = false;
 
-    __wasi_size_t numFds = 0;
+    __wasi_size_t رقم_Fds = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
-        if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
+    لكل (__wasi_size_t i = 0; i < i_شمار; i++) {
+        إذا (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
             hasClock = true;
 
-            uint64_t delay = poll_remaining_ns(&i_subs[i], 0);
-            if (delay != UINT64_MAX) {
+            uint64_t delay = poll_مانده_ns(&i_subs[i], 0);
+            إذا (delay != UINT64_MAX) {
                 soonest = M3_MIN(soonest, delay);
                 hasDeadline = true;
             }
-        } else {
-            numFds++;
+        } وإلا {
+            رقم_Fds++;
         }
     }
 
-    struct pollfd* pollfds = NULL;
+    بنية pollfd* pollfds = عدم;
 
-    if (numFds) {
-        pollfds = (struct pollfd*)m3_Malloc("WASI poll_oneoff", numFds * sizeof(struct pollfd));
-        if (pollfds == NULL) {
-            return __WASI_ERRNO_NOMEM;
+    إذا (رقم_Fds) {
+        pollfds = (بنية pollfd*)m3_Malloc("WASI poll_oneoff", رقم_Fds * حجم(بنية pollfd));
+        إذا (pollfds == عدم) {
+            أرجع __WASI_ERRNO_NOMEM;
         }
 
         __wasi_size_t n = 0;
-        for (__wasi_size_t i = 0; i < i_count; i++) {
-            if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
-                continue;
+        لكل (__wasi_size_t i = 0; i < i_شمار; i++) {
+            إذا (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
+                استمر;
             }
-            pollfds[n].fd = (int)i_subs[i].fd;
+            pollfds[n].fd = (صحيح)i_subs[i].fd;
             pollfds[n].events = (i_subs[i].type == __WASI_EVENTTYPE_FD_READ) ? POLLIN : POLLOUT;
             pollfds[n].revents = 0;
             n++;
@@ -873,40 +873,40 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     // poll() counts in milliseconds and cannot say "no wait at all" apart from a
     // wait that rounds down to nothing, which is the same thing here. Rounding up
     // is what keeps a sub-millisecond deadline from becoming a spin.
-    int timeoutMs = -1;
-    if (hasDeadline) {
+    صحيح timeoutMs = -1;
+    إذا (hasDeadline) {
         uint64_t ms = (soonest + 999999) / 1000000;
-        timeoutMs = (ms > (uint64_t)INT_MAX) ? INT_MAX : (int)ms;
+        timeoutMs = (ms > (uint64_t)بیشترین_صحیح) ? بیشترین_صحیح : (صحيح)ms;
     }
 
-    int ready;
-    if (numFds) {
-        do {
-            ready = poll(pollfds, (nfds_t)numFds, timeoutMs);
-        } while (ready < 0 and errno == EINTR);
-    } else if (hasDeadline) {
+    صحيح ready;
+    إذا (رقم_Fds) {
+        افعل {
+            ready = poll(pollfds, (nfds_t)رقم_Fds, timeoutMs);
+        } طالما (ready < 0 and errno == EINTR);
+    } وإلا إذا (hasDeadline) {
         // nothing to watch, so the deadline is the whole of the wait
-        struct timespec req;
+        بنية timespec req;
         req.tv_sec = (time_t)(soonest / 1000000000);
-        req.tv_nsec = (long)(soonest % 1000000000);
+        req.tv_nsec = (دراز)(soonest % 1000000000);
 
-        while (nanosleep(&req, &req) != 0 and errno == EINTR) {
+        طالما (nanosleep(&req, &req) != 0 and errno == EINTR) {
             // interrupted: req holds what is left of it
         }
         ready = 0;
-    } else if (hasClock) {
+    } وإلا إذا (hasClock) {
         // every clock named is one this system has not got, so there is nothing to
         // wait for and every one of them is about to be reported as a bad argument
         ready = 0;
-    } else {
+    } وإلا {
         // no clocks and no descriptors: nothing that could ever become ready
-        return __WASI_ERRNO_INVAL;
+        أرجع __WASI_ERRNO_INVAL;
     }
 
-    if (ready < 0) {
-        __wasi_errno_t err = errno_to_wasi(errno);
+    إذا (ready < 0) {
+        __wasi_errno_t err = errno_مقصد_wasi(errno);
         m3_Free(pollfds);
-        return err;
+        أرجع err;
     }
 
     // How much of the wait actually happened. poll() answers 0 only when it waited
@@ -916,64 +916,64 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     // read again - an absolute deadline is held against its own clock regardless.
     uint64_t      elapsedNs = (ready == 0 and hasDeadline) ? soonest : 0;
 
-    __wasi_size_t out = 0;
+    __wasi_size_t بیرون = 0;
     __wasi_size_t n = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
-        const m3_wasi_pollsub_t* sub = &i_subs[i];
+    لكل (__wasi_size_t i = 0; i < i_شمار; i++) {
+        ثابت m3_wasi_pollsub_t* sub = &i_subs[i];
 
-        if (sub->type == __WASI_EVENTTYPE_CLOCK) {
+        إذا (sub->type == __WASI_EVENTTYPE_CLOCK) {
             // Every deadline is asked again rather than just the soonest: waiting
             // that one out may have passed a later one too, and an absolute
             // deadline already in the past fires without any wait at all.
-            if (convert_clockid(sub->clockId) == d_m3ClockIdInvalid) {
-                o_events[out].userdata = sub->userdata;
-                o_events[out].error = __WASI_ERRNO_INVAL;
-                o_events[out].type = __WASI_EVENTTYPE_CLOCK;
-                o_events[out].nbytes = 0;
-                o_events[out].flags = 0;
-                out++;
-            } else if (poll_remaining_ns(sub, elapsedNs) == 0) {
-                o_events[out].userdata = sub->userdata;
-                o_events[out].error = __WASI_ERRNO_SUCCESS;
-                o_events[out].type = __WASI_EVENTTYPE_CLOCK;
-                o_events[out].nbytes = 0;
-                o_events[out].flags = 0;
-                out++;
+            إذا (convert_clockid(sub->clockId) == d_m3ClockIdInvalid) {
+                o_events[بیرون].userdata = sub->userdata;
+                o_events[بیرون].error = __WASI_ERRNO_INVAL;
+                o_events[بیرون].type = __WASI_EVENTTYPE_CLOCK;
+                o_events[بیرون].nbytes = 0;
+                o_events[بیرون].flags = 0;
+                بیرون++;
+            } وإلا إذا (poll_مانده_ns(sub, elapsedNs) == 0) {
+                o_events[بیرون].userdata = sub->userdata;
+                o_events[بیرون].error = __WASI_ERRNO_SUCCESS;
+                o_events[بیرون].type = __WASI_EVENTTYPE_CLOCK;
+                o_events[بیرون].nbytes = 0;
+                o_events[بیرون].flags = 0;
+                بیرون++;
             }
-            continue;
+            استمر;
         }
 
-        short revents = pollfds[n].revents;
+        کوتاه revents = pollfds[n].revents;
         n++;
 
-        if (revents == 0) {
-            continue;
+        إذا (revents == 0) {
+            استمر;
         }
 
-        o_events[out].userdata = sub->userdata;
-        o_events[out].type = sub->type;
-        o_events[out].nbytes = 0;
-        o_events[out].flags = (revents & POLLHUP) ? __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP : 0;
+        o_events[بیرون].userdata = sub->userdata;
+        o_events[بیرون].type = sub->type;
+        o_events[بیرون].nbytes = 0;
+        o_events[بیرون].flags = (revents & POLLHUP) ? __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP : 0;
 
-        if (revents & POLLNVAL) {
-            o_events[out].error = __WASI_ERRNO_BADF;
-        } else if (revents & POLLERR) {
-            o_events[out].error = __WASI_ERRNO_IO;
-        } else {
-            o_events[out].error = __WASI_ERRNO_SUCCESS;
-            if (sub->type == __WASI_EVENTTYPE_FD_READ and (revents & POLLIN)) {
-                o_events[out].nbytes = poll_readable_bytes(pollfds[n - 1].fd);
+        إذا (revents & POLLNVAL) {
+            o_events[بیرون].error = __WASI_ERRNO_BADF;
+        } وإلا إذا (revents & POLLERR) {
+            o_events[بیرون].error = __WASI_ERRNO_IO;
+        } وإلا {
+            o_events[بیرون].error = __WASI_ERRNO_SUCCESS;
+            إذا (sub->type == __WASI_EVENTTYPE_FD_READ and (revents & POLLIN)) {
+                o_events[بیرون].nbytes = poll_readable_بایتها(pollfds[n - 1].fd);
             }
         }
 
-        out++;
+        بیرون++;
     }
 
     m3_Free(pollfds);
 
-    *o_eventCount = out;
-    return __WASI_ERRNO_SUCCESS;
+    *o_event_شمار = بیرون;
+    أرجع __WASI_ERRNO_SUCCESS;
 }
 
-#endif // m3_api_wasi_posix_h
+#پایان_اگر // m3_api_wasi_posix_h

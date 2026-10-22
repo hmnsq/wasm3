@@ -5,8 +5,8 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 
 
-#ifndef m3_exec_h
-#define m3_exec_h
+#اگر_تعریف_نشده m3_exec_h
+#تعریف_کن m3_exec_h
 
 // All these functions could move over to the .c at some point. normally, I'd say screw it,
 // but it might prove useful to be able to compile m3_exec alone w/ optimizations while the remaining
@@ -22,51 +22,51 @@
 //  and the second operand (the top of the stack) is in a register
 //------------------------------------------------------------------------------------------------------
 
-#ifndef M3_COMPILE_OPCODES
+#اگر_تعریف_نشده M3_COMPILE_OPCODES
 #  error "Opcodes should only be included in one compilation unit"
-#endif
+#پایان_اگر
 
-#include "m3_math_utils.h"
-#include "m3_compile.h"
-#include "m3_env.h"
-#include "m3_info.h"
-#include "m3_exec_defs.h"
-#include "m3_atomic.h"
-#include "m3_host.h"
+#ضمن "m3_math_utils.h"
+#ضمن "m3_compile.h"
+#ضمن "m3_env.h"
+#ضمن "m3_info.h"
+#ضمن "m3_exec_defs.h"
+#ضمن "m3_atomic.h"
+#ضمن "m3_host.h"
 
-#include <limits.h>
+#ضمن <limits.h>
 
 d_m3BeginExternC
 
-#define rewrite_op(OP)             * ((void **) (_pc-1)) = (void*)(OP)
+#تعریف_کن rewrite_op(OP)             * ((فراغ **) (_pc-1)) = (فراغ*)(OP)
 
-#define immediate(TYPE)            * ((TYPE *) _pc++)
-#define skip_immediate(TYPE)       (_pc++)
+#تعریف_کن فوری(TYPE)            * ((TYPE *) _pc++)
+#تعریف_کن skip_فوری(TYPE)       (_pc++)
 
-#define slot(TYPE)                 * (TYPE *) (_sp + immediate (i32))
-#define slot_ptr(TYPE)             (TYPE *) (_sp + immediate (i32))
+#تعریف_کن جایگاه(TYPE)                 * (TYPE *) (_sp + فوری (i32))
+#تعریف_کن جایگاه_ptr(TYPE)             (TYPE *) (_sp + فوری (i32))
 
 // Reads one address, index or length operand from a slot, at the width the
 // memory or table it belongs to is addressed by. Either way exactly one slot
 // immediate is consumed; only how much of the slot is read differs.
-#define d_m3WideOperand(IS64)      ((IS64) ? slot (u64) : (u64) slot (u32))
+#تعریف_کن d_m3_Wide_عملوند(IS64)      ((IS64) ? جایگاه (u64) : (u64) جایگاه (u32))
 
 // Whether a range fits a memory, written so that it holds for operands of any
 // magnitude: the subtraction cannot wrap once the start is known to be within
 // the memory, where start + length could.
-#define d_m3MemRangeOk(START, LENGTH, MEM)  \
-   ((START) <= (MEM)->length and (LENGTH) <= (MEM)->length - (START))
+#تعریف_کن d_m3MemRangeOk(شروع_2, درازی_2, MEM)  \
+   ((شروع_2) <= (MEM)->درازی and (درازی_2) <= (MEM)->درازی - (شروع_2))
 
 
-#if d_m3EnableOpProfiling
+#إذا d_m3EnableOpProfiling
 d_m3RetSig profileOp (d_m3OpSig, cstr_t i_operationName);
-#  define nextOp()                 M3_MUSTTAIL return profileOp (d_m3OpAllArgs, __FUNCTION__)
-#elif d_m3EnableOpTracing
+#  define بعدی_Op()                 M3_MUSTTAIL أرجع profileOp (d_m3_Op_All_آرگومانها, __FUNCTION__)
+#وإلاإذا d_m3EnableOpTracing
 d_m3RetSig debugOp (d_m3OpSig, cstr_t i_operationName);
-#  define nextOp()                 M3_MUSTTAIL return debugOp (d_m3OpAllArgs, __FUNCTION__)
-#else
-#  define nextOp()                 nextOpDirect()
-#endif
+#  define بعدی_Op()                 M3_MUSTTAIL أرجع debugOp (d_m3_Op_All_آرگومانها, __FUNCTION__)
+#وإلا
+#  define بعدی_Op()                 بعدی_Op_مستقیم()
+#پایان_اگر
 
 // Next-operation preloading. The dispatch load and the indirect jump that consumes it
 // sit next to each other, so the jump cannot resolve until the load returns. An
@@ -76,37 +76,37 @@ d_m3RetSig debugOp (d_m3OpSig, cstr_t i_operationName);
 //
 // Preloading is dropped in profiling and tracing builds, where dispatch goes through a
 // hook instead and the loaded pointer would be the wrong thing to call.
-#if d_m3PreloadNextOp && !(d_m3EnableOpProfiling || d_m3EnableOpTracing)
-#  define d_m3PreloadNext()        const IM3Operation _nextOp = (IM3Operation) (* _pc)
-#  define nextOpPreloaded()        M3_MUSTTAIL return _nextOp (_pc + 1, d_m3OpArgs)
-#else
-#  define d_m3PreloadNext()
-#  define nextOpPreloaded()        nextOp()
-#endif
+#إذا d_m3_Preload_بعدی_Op && !(d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#  define d_m3_Preload_بعدی()        ثابت IM3Operation بعدی_Op_2 = (IM3Operation) (* _pc)
+#  define بعدی_Op_Preloaded()        M3_MUSTTAIL أرجع بعدی_Op_2 (_pc + 1, d_m3_Op_آرگومانها)
+#وإلا
+#  define d_m3_Preload_بعدی()
+#  define بعدی_Op_Preloaded()        بعدی_Op()
+#پایان_اگر
 
-#if d_m3EnableOpProfiling
+#إذا d_m3EnableOpProfiling
 d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName);
 // An operation that leaves by a branch never reaches nextOp, so without this it is
 // absent from the profile entirely and its outgoing edges are attributed to whatever
 // ran before it. Has to stay one statement: jumpOp appears in brace-less else arms.
-#  define jumpOp(PC)               M3_MUSTTAIL return profileJumpOp ((pc_t)(PC), d_m3OpArgs, __FUNCTION__)
-#else
-#  define jumpOp(PC)               jumpOpDirect(PC)
-#endif
+#  define jumpOp(PC)               M3_MUSTTAIL أرجع profileJumpOp ((pc_t)(PC), d_m3_Op_آرگومانها, __FUNCTION__)
+#وإلا
+#  define jumpOp(PC)               jump_Op_مستقیم(PC)
+#پایان_اگر
 
-#if d_m3RecordBacktraces
-#  define pushBacktraceFrame()            (PushBacktraceFrame (_mem->runtime, _pc - 1))
-#  define fillBacktraceFrame(FUNCTION)    (FillBacktraceFunctionInfo (_mem->runtime, function))
+#إذا d_m3_رکورد_Backtraces
+#  define افزودن_Backtrace_قاب_2()            (افزودن_Backtrace_قاب (_mem->runtime, _pc - 1))
+#  define fill_Backtrace_قاب(FUNCTION)    (FillBacktraceFunctionInfo (_mem->runtime, function))
 
-#  define newTrap(err)                    return (pushBacktraceFrame (), err)
-#  define forwardTrap(err)                return err
-#else
-#  define pushBacktraceFrame()            do {} while (0)
-#  define fillBacktraceFrame(FUNCTION)    do {} while (0)
+#  define newTrap(err)                    أرجع (افزودن_Backtrace_قاب_2 (), err)
+#  define forwardTrap(err)                أرجع err
+#وإلا
+#  define افزودن_Backtrace_قاب_2()            افعل {} طالما (0)
+#  define fill_Backtrace_قاب(FUNCTION)    افعل {} طالما (0)
 
-#  define newTrap(err)                    return err
-#  define forwardTrap(err)                return err
-#endif
+#  define newTrap(err)                    أرجع err
+#  define forwardTrap(err)                أرجع err
+#پایان_اگر
 
 // Trap before an operation that claims a native frame of its own would drive
 // the native C stack past runtime->stackLimit. Reads the current stack pointer
@@ -116,34 +116,34 @@ d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName);
 // op_TryTable, whose frames outlive the body they run. Guarding the frame
 // claim rather than the call is what keeps op_ReturnCall bounded: the tail
 // call itself adds nothing, but the frames it leaves standing behind it do.
-#if d_m3MaxNativeStack > 0
-#  define d_m3CheckNativeStack()                                               \
-       do {                                                                    \
-           void * _m3Limit = m3MemRuntime (_mem)->stackLimit;                  \
-           if (M3_UNLIKELY (_m3Limit && m3_NativeStackPtr () < _m3Limit))      \
-               newTrap (m3Err_trapStackOverflow);                              \
-       } while (0)
-#else
-#  define d_m3CheckNativeStack()           do {} while (0)
-#endif
+#إذا d_m3_Max_Native_پشته > 0
+#  define d_m3_Check_Native_پشته()                                               \
+       افعل {                                                                    \
+           فراغ * m3_حد = m3MemRuntime (_mem)->پشته_حد;                  \
+           إذا (M3_UNLIKELY (m3_حد && m3_Native_پشته_Ptr () < m3_حد))      \
+               newTrap (m3_Err_trap_پشته_سرریز);                              \
+       } طالما (0)
+#وإلا
+#  define d_m3_Check_Native_پشته()           افعل {} طالما (0)
+#پایان_اگر
 
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_پشته_Switching
 
 // Calling into compiled code with an explicit register pair, which the replay
 // needs and the d_m3OpDefaultArgs spelling cannot express.
-#  if d_m3HasFloat
-#    define d_m3ExpRegArgs(R0, FP0)        (R0), (FP0)
-#  else
-#    define d_m3ExpRegArgs(R0, FP0)        (R0)
+#  إذا d_m3HasFloat
+#    define d_m3_Exp_Reg_آرگومانها(R0, FP0)        (R0), (FP0)
+#  وإلا
+#    define d_m3_Exp_Reg_آرگومانها(R0, FP0)        (R0)
 #  endif
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#  إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
 #    define d_m3CallWithRegs(PC, SP, MEM, R0, FP0)                             \
-         Call ((PC), (SP), (MEM), d_m3ExpRegArgs (R0, FP0), d_m3BaseCstr)
-#  else
+         Call ((PC), (SP), (MEM), d_m3_Exp_Reg_آرگومانها (R0, FP0), d_m3_پایه_Cstr)
+#  وإلا
 #    define d_m3CallWithRegs(PC, SP, MEM, R0, FP0)                             \
-         Call ((PC), (SP), (MEM), d_m3ExpRegArgs (R0, FP0))
+         Call ((PC), (SP), (MEM), d_m3_Exp_Reg_آرگومانها (R0, FP0))
 #  endif
 
 // A suspend is on its way up the native stack and this call was holding a
@@ -158,202 +158,202 @@ d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName);
 //
 // Called ahead of pushBacktraceFrame: a suspend is not a trap and has no
 // business writing a backtrace.
-static M3_NOINLINE
-m3ret_t RecordCallFrame (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3Memory i_memory,
+ساكن M3_NOINLINE
+m3ret_t رکورد_Call_قاب (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3_حافظه i_حافظه,
                          IM3Function i_function, m3reg_t i_r0
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
                          ,
                          f64 i_fp0
 #  endif
 )
 {
-    M3Frame frame;
+    M3_قاب قاب;
 
-    frame.kind = frame_call;
-    frame.pc = i_pc;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
-    frame.call.function = i_function;
-    frame.call.r0 = i_r0;
-#  if d_m3HasFloat
-    frame.call.fp0 = i_fp0;
+    قاب.نوع = قاب_call;
+    قاب.pc = i_pc;
+    قاب.sp = i_sp;
+    قاب.حافظه = i_حافظه;
+    قاب.call.function = i_function;
+    قاب.call.r0 = i_r0;
+#  إذا d_m3HasFloat
+    قاب.call.fp0 = i_fp0;
 #  endif
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    أرجع Continuation_رکورد_قاب(i_runtime, &قاب);
 }
 
-#  define d_m3RecordCallFrame(MEMORY, FUNCTION)                                \
-       if (M3_UNLIKELY (r == m3Err_continuationSuspended)) {                   \
-           return RecordCallFrame (m3MemRuntime (_mem), _pc, _sp, (MEMORY),    \
-                                   (FUNCTION), d_m3ExpRegArgs (_r0, _fp0));    \
+#  define d_m3_رکورد_Call_قاب(حافظه_2, FUNCTION)                                \
+       إذا (M3_UNLIKELY (r == m3Err_continuationSuspended)) {                   \
+           أرجع رکورد_Call_قاب (m3MemRuntime (_mem), _pc, _sp, (حافظه_2),    \
+                                   (FUNCTION), d_m3_Exp_Reg_آرگومانها (_r0, _fp0));    \
        }
 
 
 // op_Loop and op_TryTable hold native frames across their bodies and nest as
 // deeply as the Wasm does, so they keep their frames out of this too.
-static M3_NOINLINE
-m3ret_t RecordLoopFrame (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3Memory i_memory)
+ساكن M3_NOINLINE
+m3ret_t رکورد_Loop_قاب (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3_حافظه i_حافظه)
 {
-    M3Frame frame;
+    M3_قاب قاب;
 
-    frame.kind = frame_loop;
-    frame.pc = i_pc;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
+    قاب.نوع = قاب_loop;
+    قاب.pc = i_pc;
+    قاب.sp = i_sp;
+    قاب.حافظه = i_حافظه;
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    أرجع Continuation_رکورد_قاب(i_runtime, &قاب);
 }
 
 
-#  if d_m3HasExceptionHandling
-static M3_NOINLINE
-m3ret_t RecordTryFrame (IM3Runtime i_runtime, pc_t i_clauses, m3stack_t i_sp, IM3Memory i_memory,
-                        u32 i_numClauses, bool i_handlersLive)
+#  إذا d_m3HasExceptionHandling
+ساكن M3_NOINLINE
+m3ret_t رکورد_Try_قاب (IM3Runtime i_runtime, pc_t i_clauses, m3stack_t i_sp, IM3_حافظه i_حافظه,
+                        u32 i_رقم_Clauses, bool i_handlers_زنده)
 {
-    M3Frame frame;
+    M3_قاب قاب;
 
-    frame.kind = frame_try;
-    frame.pc = i_clauses;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
-    frame.try_.numClauses = i_numClauses;
-    frame.try_.handlersLive = i_handlersLive;
+    قاب.نوع = قاب_try;
+    قاب.pc = i_clauses;
+    قاب.sp = i_sp;
+    قاب.حافظه = i_حافظه;
+    قاب.try_.رقم_Clauses = i_رقم_Clauses;
+    قاب.try_.handlers_زنده = i_handlers_زنده;
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    أرجع Continuation_رکورد_قاب(i_runtime, &قاب);
 }
 #  endif
 
 
-#  if d_m3EntryKeepsFrame
-static M3_NOINLINE
-m3ret_t RecordEntryFrame (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3Memory i_memory,
+#  إذا d_m3_مدخل_Keeps_قاب
+ساكن M3_NOINLINE
+m3ret_t رکورد_مدخل_قاب (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3_حافظه i_حافظه,
                           IM3Function i_function)
 {
-    M3Frame frame;
+    M3_قاب قاب;
 
-    frame.kind = frame_entry;
-    frame.pc = i_pc;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
-    frame.entry.function = i_function;
+    قاب.نوع = قاب_مدخل;
+    قاب.pc = i_pc;
+    قاب.sp = i_sp;
+    قاب.حافظه = i_حافظه;
+    قاب.مدخل.function = i_function;
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    أرجع Continuation_رکورد_قاب(i_runtime, &قاب);
 }
 #  endif
-#else
-#  define d_m3RecordCallFrame(MEMORY, FUNCTION)
-#endif
+#وإلا
+#  define d_m3_رکورد_Call_قاب(حافظه_2, FUNCTION)
+#پایان_اگر
 
 
-#if d_m3EnableStrace == 1
+#إذا d_m3EnableStrace == 1
 // Flat trace
 #  define d_m3TracePrepare
 #  define d_m3TracePrint(fmt, ...)            fprintf(stderr, fmt "\n", ##__VA_ARGS__)
-#elif d_m3EnableStrace >= 2
+#وإلاإذا d_m3EnableStrace >= 2
 // Structured trace
-#  define d_m3TracePrepare                    const IM3Runtime trace_rt = m3MemRuntime(_mem); (void) trace_rt;
-#  define d_m3TracePrint(fmt, ...)            fprintf(stderr, "%*s" fmt "\n", (trace_rt->callDepth)*2, "", ##__VA_ARGS__)
-#else
+#  define d_m3TracePrepare                    ثابت IM3Runtime trace_rt = m3MemRuntime(_mem); (فراغ) trace_rt;
+#  define d_m3TracePrint(fmt, ...)            fprintf(stderr, "%*s" fmt "\n", (trace_rt->call_عمق)*2, "", ##__VA_ARGS__)
+#وإلا
 #  define d_m3TracePrepare
 #  define d_m3TracePrint(fmt, ...)
-#endif
+#پایان_اگر
 
-#if d_m3EnableStrace >= 3
-#  define d_m3TraceLoad(TYPE,offset,val)      d_m3TracePrint("load." #TYPE "  0x%x = %" PRI##TYPE, offset, val)
+#إذا d_m3EnableStrace >= 3
+#  define d_m3_Trace_بارگیری(TYPE,offset,val)      d_m3TracePrint("load." #TYPE "  0x%x = %" PRI##TYPE, offset, val)
 #  define d_m3TraceStore(TYPE,offset,val)     d_m3TracePrint("store." #TYPE " 0x%x , %" PRI##TYPE, offset, val)
-#else
-#  define d_m3TraceLoad(TYPE,offset,val)
+#وإلا
+#  define d_m3_Trace_بارگیری(TYPE,offset,val)
 #  define d_m3TraceStore(TYPE,offset,val)
-#endif
+#پایان_اگر
 
-#ifdef DEBUG
-  #define d_outOfBounds newTrap (ErrorRuntime (m3Err_trapOutOfBoundsMemoryAccess,   \
+#اگر_تعریف_شده DEBUG
+  #تعریف_کن d_بیرون_از_Bounds newTrap (ErrorRuntime (m3_Err_trap_بیرون_از_Bounds_حافظه_Access,   \
                         _mem->runtime, "memory size: %zu; access offset: %zu",      \
-                        _mem->length, operand))
+                        _mem->درازی, عملوند))
 
-#  define d_outOfBoundsMemOp(OFFSET, SIZE) newTrap (ErrorRuntime (m3Err_trapOutOfBoundsMemoryAccess,   \
+#  define d_بیرون_از_Bounds_Mem_Op(جابه_جایی, اندازه_2) newTrap (ErrorRuntime (m3_Err_trap_بیرون_از_Bounds_حافظه_Access,   \
                      _mem->runtime, "memory size: %zu; access offset: %zu; size: %u",     \
-                     _mem->length, OFFSET, SIZE))
-#else
-  #define d_outOfBounds newTrap (m3Err_trapOutOfBoundsMemoryAccess)
+                     _mem->درازی, جابه_جایی, اندازه_2))
+#وإلا
+  #تعریف_کن d_بیرون_از_Bounds newTrap (m3_Err_trap_بیرون_از_Bounds_حافظه_Access)
 
-#  define d_outOfBoundsMemOp(OFFSET, SIZE) newTrap (m3Err_trapOutOfBoundsMemoryAccess)
+#  define d_بیرون_از_Bounds_Mem_Op(جابه_جایی, اندازه_2) newTrap (m3_Err_trap_بیرون_از_Bounds_حافظه_Access)
 
-#endif
+#پایان_اگر
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
 d_m3RetSig Call (d_m3OpSig, cstr_t i_operationName)
-#else
+#وإلا
 d_m3RetSig Call (d_m3OpSig)
-#endif
+#پایان_اگر
 {
     m3ret_t possible_trap = m3_Yield();
-    if (M3_UNLIKELY(possible_trap)) {
-        return possible_trap;
+    إذا (M3_UNLIKELY(possible_trap)) {
+        أرجع possible_trap;
     }
 
-    nextOpDirect();
+    بعدی_Op_مستقیم();
 }
 
-#define d_m3CommutativeOpMacro(RES, REG, TYPE, NAME, OP, ...) \
+#تعریف_کن d_m3CommutativeOpMacro(RES, REG, TYPE, NAME, OP, ...) \
 d_m3Op(TYPE##_##NAME##_rs)                              \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    d_m3PreloadNext ();                                 \
-    OP((RES), operand, ((TYPE) REG), ##__VA_ARGS__);    \
-    nextOpPreloaded ();                                 \
+    TYPE عملوند = جایگاه (TYPE);                         \
+    d_m3_Preload_بعدی ();                                 \
+    OP((RES), عملوند, ((TYPE) REG), ##__VA_ARGS__);    \
+    بعدی_Op_Preloaded ();                                 \
 }                                                       \
 d_m3Op(TYPE##_##NAME##_ss)                              \
 {                                                       \
-    TYPE operand2 = slot (TYPE);                        \
-    TYPE operand1 = slot (TYPE);                        \
-    d_m3PreloadNext ();                                 \
+    TYPE operand2 = جایگاه (TYPE);                        \
+    TYPE operand1 = جایگاه (TYPE);                        \
+    d_m3_Preload_بعدی ();                                 \
     OP((RES), operand1, operand2, ##__VA_ARGS__);       \
-    nextOpPreloaded ();                                 \
+    بعدی_Op_Preloaded ();                                 \
 }
 
-#define d_m3OpMacro(RES, REG, TYPE, NAME, OP, ...)      \
+#تعریف_کن d_m3OpMacro(RES, REG, TYPE, NAME, OP, ...)      \
 d_m3Op(TYPE##_##NAME##_sr)                              \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    d_m3PreloadNext ();                                 \
-    OP((RES), ((TYPE) REG), operand, ##__VA_ARGS__);    \
-    nextOpPreloaded ();                                 \
+    TYPE عملوند = جایگاه (TYPE);                         \
+    d_m3_Preload_بعدی ();                                 \
+    OP((RES), ((TYPE) REG), عملوند, ##__VA_ARGS__);    \
+    بعدی_Op_Preloaded ();                                 \
 }                                                       \
 d_m3CommutativeOpMacro(RES, REG, TYPE,NAME, OP, ##__VA_ARGS__)
 
 // Accept macros
-#define d_m3CommutativeOpMacro_i(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
-#define d_m3OpMacro_i(TYPE, NAME, MACRO, ...)               d_m3OpMacro             ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
-#define d_m3CommutativeOpMacro_f(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
-#define d_m3OpMacro_f(TYPE, NAME, MACRO, ...)               d_m3OpMacro             (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#تعریف_کن d_m3CommutativeOpMacro_i(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#تعریف_کن d_m3OpMacro_i(TYPE, NAME, MACRO, ...)               d_m3OpMacro             ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#تعریف_کن d_m3CommutativeOpMacro_f(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#تعریف_کن d_m3OpMacro_f(TYPE, NAME, MACRO, ...)               d_m3OpMacro             (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
 
-#define M3_FUNC(RES, A, B, OP)  (RES) = OP((A), (B))        // Accept functions: res = OP(a,b)
-#define M3_OPER(RES, A, B, OP)  (RES) = ((A) OP (B))        // Accept operators: res = a OP b
+#تعریف_کن M3_FUNC(RES, A, B, OP)  (RES) = OP((A), (B))        // Accept functions: res = OP(a,b)
+#تعریف_کن M3_OPER(RES, A, B, OP)  (RES) = ((A) OP (B))        // Accept operators: res = a OP b
 
 // The same two, for a float operation whose NaN result the spec leaves to the host:
 // CANON is the canonicalizer for the operation's width (only in effect when d_m3CanonicalNaN is set).
-#define M3_FUNC_A(RES, A, B, OP, CANON)  (RES) = CANON(OP((A), (B)))
-#define M3_OPER_A(RES, A, B, OP, CANON)  (RES) = CANON((A) OP (B))
+#تعریف_کن M3_FUNC_A(RES, A, B, OP, CANON)  (RES) = CANON(OP((A), (B)))
+#تعریف_کن M3_OPER_A(RES, A, B, OP, CANON)  (RES) = CANON((A) OP (B))
 
-#define d_m3CommutativeOpFunc_i(TYPE, NAME, OP)     d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_FUNC, OP)
-#define d_m3OpFunc_i(TYPE, NAME, OP)                d_m3OpMacro_i               (TYPE, NAME, M3_FUNC, OP)
-#define d_m3CommutativeOpFunc_f(TYPE, NAME, OP)     d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_FUNC, OP)
-#define d_m3OpFunc_f(TYPE, NAME, OP)                d_m3OpMacro_f               (TYPE, NAME, M3_FUNC, OP)
+#تعریف_کن d_m3CommutativeOpFunc_i(TYPE, NAME, OP)     d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_FUNC, OP)
+#تعریف_کن d_m3OpFunc_i(TYPE, NAME, OP)                d_m3OpMacro_i               (TYPE, NAME, M3_FUNC, OP)
+#تعریف_کن d_m3CommutativeOpFunc_f(TYPE, NAME, OP)     d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_FUNC, OP)
+#تعریف_کن d_m3OpFunc_f(TYPE, NAME, OP)                d_m3OpMacro_f               (TYPE, NAME, M3_FUNC, OP)
 
-#define d_m3CommutativeOp_i(TYPE, NAME, OP)         d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_OPER, OP)
-#define d_m3Op_i(TYPE, NAME, OP)                    d_m3OpMacro_i               (TYPE, NAME, M3_OPER, OP)
-#define d_m3CommutativeOp_f(TYPE, NAME, OP)         d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER, OP)
-#define d_m3Op_f(TYPE, NAME, OP)                    d_m3OpMacro_f               (TYPE, NAME, M3_OPER, OP)
+#تعریف_کن d_m3CommutativeOp_i(TYPE, NAME, OP)         d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_OPER, OP)
+#تعریف_کن d_m3Op_i(TYPE, NAME, OP)                    d_m3OpMacro_i               (TYPE, NAME, M3_OPER, OP)
+#تعریف_کن d_m3CommutativeOp_f(TYPE, NAME, OP)         d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER, OP)
+#تعریف_کن d_m3Op_f(TYPE, NAME, OP)                    d_m3OpMacro_f               (TYPE, NAME, M3_OPER, OP)
 
 // ...and the arithmetic ones, which name the canonicalizer for their own width
-#define d_m3CommutativeArithOp_f(TYPE, NAME, OP)    d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
-#define d_m3ArithOp_f(TYPE, NAME, OP)               d_m3OpMacro_f               (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
-#define d_m3ArithOpFunc_f(TYPE, NAME, OP)           d_m3OpMacro_f               (TYPE, NAME, M3_FUNC_A, OP, canon_nan_##TYPE)
+#تعریف_کن d_m3CommutativeArithOp_f(TYPE, NAME, OP)    d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
+#تعریف_کن d_m3ArithOp_f(TYPE, NAME, OP)               d_m3OpMacro_f               (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
+#تعریف_کن d_m3ArithOpFunc_f(TYPE, NAME, OP)           d_m3OpMacro_f               (TYPE, NAME, M3_FUNC_A, OP, canon_nan_##TYPE)
 
 // compare needs to be distinct for fp 'cause the result must be _r0
-#define d_m3CompareOp_f(TYPE, NAME, OP)             d_m3OpMacro                 (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
-#define d_m3CommutativeCmpOp_f(TYPE, NAME, OP)      d_m3CommutativeOpMacro      (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
+#تعریف_کن d_m3CompareOp_f(TYPE, NAME, OP)             d_m3OpMacro                 (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
+#تعریف_کن d_m3CommutativeCmpOp_f(TYPE, NAME, OP)      d_m3CommutativeOpMacro      (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
 
 
 //-----------------------
@@ -374,35 +374,35 @@ d_m3Op_i(u32, GreaterThan,                 > )     d_m3Op_i(u64, GreaterThan,   
 d_m3Op_i(u32, LessThanOrEqual,             <=)     d_m3Op_i(u64, LessThanOrEqual,             <=)
 d_m3Op_i(u32, GreaterThanOrEqual,          >=)     d_m3Op_i(u64, GreaterThanOrEqual,          >=)
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3CommutativeCmpOp_f(f32, Equal,         ==)     d_m3CommutativeCmpOp_f(f64, Equal,         ==)
 d_m3CommutativeCmpOp_f(f32, NotEqual,      !=)     d_m3CommutativeCmpOp_f(f64, NotEqual,      !=)
 d_m3CompareOp_f(f32, LessThan,             < )     d_m3CompareOp_f(f64, LessThan,             < )
 d_m3CompareOp_f(f32, GreaterThan,          > )     d_m3CompareOp_f(f64, GreaterThan,          > )
 d_m3CompareOp_f(f32, LessThanOrEqual,      <=)     d_m3CompareOp_f(f64, LessThanOrEqual,      <=)
 d_m3CompareOp_f(f32, GreaterThanOrEqual,   >=)     d_m3CompareOp_f(f64, GreaterThanOrEqual,   >=)
-#endif
+#پایان_اگر
 
-#define OP_ADD_32(A,B) (i32)((u32)(A) + (u32)(B))
-#define OP_ADD_64(A,B) (i64)((u64)(A) + (u64)(B))
-#define OP_SUB_32(A,B) (i32)((u32)(A) - (u32)(B))
-#define OP_SUB_64(A,B) (i64)((u64)(A) - (u64)(B))
-#define OP_MUL_32(A,B) (i32)((u32)(A) * (u32)(B))
-#define OP_MUL_64(A,B) (i64)((u64)(A) * (u64)(B))
+#تعریف_کن OP_جمع_کن_32(A,B) (i32)((u32)(A) + (u32)(B))
+#تعریف_کن OP_جمع_کن_64(A,B) (i64)((u64)(A) + (u64)(B))
+#تعریف_کن OP_SUB_32(A,B) (i32)((u32)(A) - (u32)(B))
+#تعریف_کن OP_SUB_64(A,B) (i64)((u64)(A) - (u64)(B))
+#تعریف_کن OP_MUL_32(A,B) (i32)((u32)(A) * (u32)(B))
+#تعریف_کن OP_MUL_64(A,B) (i64)((u64)(A) * (u64)(B))
 
-d_m3CommutativeOpFunc_i (i32, Add,      OP_ADD_32)  d_m3CommutativeOpFunc_i (i64, Add,      OP_ADD_64)
+d_m3CommutativeOpFunc_i (i32, جمع_کن,      OP_جمع_کن_32)  d_m3CommutativeOpFunc_i (i64, جمع_کن,      OP_جمع_کن_64)
 d_m3CommutativeOpFunc_i (i32, Multiply, OP_MUL_32)  d_m3CommutativeOpFunc_i (i64, Multiply, OP_MUL_64)
 
-d_m3OpFunc_i (i32, Subtract,            OP_SUB_32)  d_m3OpFunc_i (i64, Subtract,            OP_SUB_64)
+d_m3OpFunc_i (i32, تفریق,            OP_SUB_32)  d_m3OpFunc_i (i64, تفریق,            OP_SUB_64)
 
-#define OP_SHL_32(X,N) ((X) << ((u32)(N) % 32))
-#define OP_SHL_64(X,N) ((X) << ((u64)(N) % 64))
-#define OP_SHR_32(X,N) ((X) >> ((u32)(N) % 32))
-#define OP_SHR_64(X,N) ((X) >> ((u64)(N) % 64))
+#تعریف_کن OP_SHL_32(X,N) ((X) << ((u32)(N) % 32))
+#تعریف_کن OP_SHL_64(X,N) ((X) << ((u64)(N) % 64))
+#تعریف_کن OP_SHR_32(X,N) ((X) >> ((u32)(N) % 32))
+#تعریف_کن OP_SHR_64(X,N) ((X) >> ((u64)(N) % 64))
 
-d_m3OpFunc_i (u32, ShiftLeft,       OP_SHL_32)      d_m3OpFunc_i (u64, ShiftLeft,       OP_SHL_64)
-d_m3OpFunc_i (i32, ShiftRight,      OP_SHR_32)      d_m3OpFunc_i (i64, ShiftRight,      OP_SHR_64)
-d_m3OpFunc_i (u32, ShiftRight,      OP_SHR_32)      d_m3OpFunc_i (u64, ShiftRight,      OP_SHR_64)
+d_m3OpFunc_i (u32, لغزش_چپ,       OP_SHL_32)      d_m3OpFunc_i (u64, لغزش_چپ,       OP_SHL_64)
+d_m3OpFunc_i (i32, لغزش_راست,      OP_SHR_32)      d_m3OpFunc_i (i64, لغزش_راست,      OP_SHR_64)
+d_m3OpFunc_i (u32, لغزش_راست,      OP_SHR_32)      d_m3OpFunc_i (u64, لغزش_راست,      OP_SHR_64)
 
 d_m3CommutativeOp_i(u32, And,              &)
 d_m3CommutativeOp_i(u32, Or,               |)
@@ -412,7 +412,7 @@ d_m3CommutativeOp_i(u64, And,              &)
 d_m3CommutativeOp_i(u64, Or,               |)
 d_m3CommutativeOp_i(u64, Xor,              ^)
 
-#if d_m3FoldSetLocal
+#إذا d_m3_Fold_مجموعه_Local
 
 // destination-folded ("_f") variants: same operand shapes as _rs/_sr/_ss, but the result is
 // written to a trailing destination slot instead of _r0 - a producer fused with its local.set.
@@ -427,87 +427,87 @@ d_m3CommutativeOp_i(u64, Xor,              ^)
 #  define d_m3FoldCommutativeOpMacro(REG, TYPE, NAME, OP, ...) \
 d_m3Op(TYPE##_##NAME##_rs_f)                            \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    TYPE * dest = slot_ptr (TYPE);                      \
-    d_m3PreloadNext ();                                 \
-    TYPE result;                                        \
-    OP((result), operand, ((TYPE) REG), ##__VA_ARGS__); \
-    * dest = result;  REG = result;                     \
-    nextOpPreloaded ();                                 \
+    TYPE عملوند = جایگاه (TYPE);                         \
+    TYPE * dest = جایگاه_ptr (TYPE);                      \
+    d_m3_Preload_بعدی ();                                 \
+    TYPE نتیجه;                                        \
+    OP((نتیجه), عملوند, ((TYPE) REG), ##__VA_ARGS__); \
+    * dest = نتیجه;  REG = نتیجه;                     \
+    بعدی_Op_Preloaded ();                                 \
 }                                                       \
 d_m3Op(TYPE##_##NAME##_ss_f)                            \
 {                                                       \
-    TYPE operand2 = slot (TYPE);                        \
-    TYPE operand1 = slot (TYPE);                        \
-    TYPE * dest = slot_ptr (TYPE);                      \
-    d_m3PreloadNext ();                                 \
-    TYPE result;                                        \
-    OP((result), operand1, operand2, ##__VA_ARGS__);    \
-    * dest = result;  REG = result;                     \
-    nextOpPreloaded ();                                 \
+    TYPE operand2 = جایگاه (TYPE);                        \
+    TYPE operand1 = جایگاه (TYPE);                        \
+    TYPE * dest = جایگاه_ptr (TYPE);                      \
+    d_m3_Preload_بعدی ();                                 \
+    TYPE نتیجه;                                        \
+    OP((نتیجه), operand1, operand2, ##__VA_ARGS__);    \
+    * dest = نتیجه;  REG = نتیجه;                     \
+    بعدی_Op_Preloaded ();                                 \
 }
 
 #  define d_m3FoldOpMacro(REG, TYPE, NAME, OP, ...)     \
 d_m3Op(TYPE##_##NAME##_sr_f)                            \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    TYPE * dest = slot_ptr (TYPE);                      \
-    d_m3PreloadNext ();                                 \
-    TYPE result;                                        \
-    OP((result), ((TYPE) REG), operand, ##__VA_ARGS__); \
-    * dest = result;  REG = result;                     \
-    nextOpPreloaded ();                                 \
+    TYPE عملوند = جایگاه (TYPE);                         \
+    TYPE * dest = جایگاه_ptr (TYPE);                      \
+    d_m3_Preload_بعدی ();                                 \
+    TYPE نتیجه;                                        \
+    OP((نتیجه), ((TYPE) REG), عملوند, ##__VA_ARGS__); \
+    * dest = نتیجه;  REG = نتیجه;                     \
+    بعدی_Op_Preloaded ();                                 \
 }                                                       \
 d_m3FoldCommutativeOpMacro(REG, TYPE, NAME, OP, ##__VA_ARGS__)
 
 // A commutative operator has no _sr form in its variant table, so the fold set skips
 // the _sr_f handler it could never be patched to.
-#define d_m3FoldOp_i(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
-#define d_m3FoldOp_f(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
-#define d_m3FoldCommutativeOp_i(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
-#define d_m3FoldCommutativeOp_f(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
+#تعریف_کن d_m3FoldOp_i(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
+#تعریف_کن d_m3FoldOp_f(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
+#تعریف_کن d_m3FoldCommutativeOp_i(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
+#تعریف_کن d_m3FoldCommutativeOp_f(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
 
-d_m3FoldCommutativeOp_i(i32, Add,          M3_FUNC, OP_ADD_32)
-d_m3FoldOp_i           (i32, Subtract,     M3_FUNC, OP_SUB_32)
+d_m3FoldCommutativeOp_i(i32, جمع_کن,          M3_FUNC, OP_جمع_کن_32)
+d_m3FoldOp_i           (i32, تفریق,     M3_FUNC, OP_SUB_32)
 d_m3FoldCommutativeOp_i(i32, Multiply,     M3_FUNC, OP_MUL_32)
 d_m3FoldCommutativeOp_i(u32, And,          M3_OPER, &)
 d_m3FoldCommutativeOp_i(u32, Or,           M3_OPER, |)
 d_m3FoldCommutativeOp_i(u32, Xor,          M3_OPER, ^)
-d_m3FoldOp_i           (u32, ShiftLeft,    M3_FUNC, OP_SHL_32)
-d_m3FoldOp_i           (i32, ShiftRight,   M3_FUNC, OP_SHR_32)
-d_m3FoldOp_i           (u32, ShiftRight,   M3_FUNC, OP_SHR_32)
+d_m3FoldOp_i           (u32, لغزش_چپ,    M3_FUNC, OP_SHL_32)
+d_m3FoldOp_i           (i32, لغزش_راست,   M3_FUNC, OP_SHR_32)
+d_m3FoldOp_i           (u32, لغزش_راست,   M3_FUNC, OP_SHR_32)
 
-d_m3FoldCommutativeOp_i(i64, Add,          M3_FUNC, OP_ADD_64)
-d_m3FoldOp_i           (i64, Subtract,     M3_FUNC, OP_SUB_64)
+d_m3FoldCommutativeOp_i(i64, جمع_کن,          M3_FUNC, OP_جمع_کن_64)
+d_m3FoldOp_i           (i64, تفریق,     M3_FUNC, OP_SUB_64)
 d_m3FoldCommutativeOp_i(i64, Multiply,     M3_FUNC, OP_MUL_64)
 d_m3FoldCommutativeOp_i(u64, And,          M3_OPER, &)
 d_m3FoldCommutativeOp_i(u64, Or,           M3_OPER, |)
 d_m3FoldCommutativeOp_i(u64, Xor,          M3_OPER, ^)
-d_m3FoldOp_i           (u64, ShiftLeft,    M3_FUNC, OP_SHL_64)
-d_m3FoldOp_i           (i64, ShiftRight,   M3_FUNC, OP_SHR_64)
-d_m3FoldOp_i           (u64, ShiftRight,   M3_FUNC, OP_SHR_64)
+d_m3FoldOp_i           (u64, لغزش_چپ,    M3_FUNC, OP_SHL_64)
+d_m3FoldOp_i           (i64, لغزش_راست,   M3_FUNC, OP_SHR_64)
+d_m3FoldOp_i           (u64, لغزش_راست,   M3_FUNC, OP_SHR_64)
 
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
 // Without these a float result round-trips through _fp0 and a separate SetSlot, which
 // on float-heavy code is about one dispatch in five.
-d_m3FoldCommutativeOp_f(f32, Add,          M3_OPER_A, +, canon_nan_f32)
-d_m3FoldOp_f           (f32, Subtract,     M3_OPER_A, -, canon_nan_f32)
+d_m3FoldCommutativeOp_f(f32, جمع_کن,          M3_OPER_A, +, canon_nan_f32)
+d_m3FoldOp_f           (f32, تفریق,     M3_OPER_A, -, canon_nan_f32)
 d_m3FoldCommutativeOp_f(f32, Multiply,     M3_OPER_A, *, canon_nan_f32)
 d_m3FoldOp_f           (f32, Divide,       M3_OPER_A, /, canon_nan_f32)
-d_m3FoldCommutativeOp_f(f64, Add,          M3_OPER_A, +, canon_nan_f64)
-d_m3FoldOp_f           (f64, Subtract,     M3_OPER_A, -, canon_nan_f64)
+d_m3FoldCommutativeOp_f(f64, جمع_کن,          M3_OPER_A, +, canon_nan_f64)
+d_m3FoldOp_f           (f64, تفریق,     M3_OPER_A, -, canon_nan_f64)
 d_m3FoldCommutativeOp_f(f64, Multiply,     M3_OPER_A, *, canon_nan_f64)
 d_m3FoldOp_f           (f64, Divide,       M3_OPER_A, /, canon_nan_f64)
-#endif
+#پایان_اگر
 
-#endif // d_m3FoldSetLocal
+#پایان_اگر // d_m3FoldSetLocal
 
-#if d_m3HasFloat
-d_m3CommutativeArithOp_f(f32, Add,         +)      d_m3CommutativeArithOp_f(f64, Add,         +)
+#إذا d_m3HasFloat
+d_m3CommutativeArithOp_f(f32, جمع_کن,         +)      d_m3CommutativeArithOp_f(f64, جمع_کن,         +)
 d_m3CommutativeArithOp_f(f32, Multiply,    *)      d_m3CommutativeArithOp_f(f64, Multiply,    *)
-d_m3ArithOp_f(f32, Subtract,               -)      d_m3ArithOp_f(f64, Subtract,               -)
+d_m3ArithOp_f(f32, تفریق,               -)      d_m3ArithOp_f(f64, تفریق,               -)
 d_m3ArithOp_f(f32, Divide,                 /)      d_m3ArithOp_f(f64, Divide,                 /)
-#endif
+#پایان_اگر
 
 d_m3OpFunc_i(u32, Rotl, rotl32)
 d_m3OpFunc_i(u32, Rotr, rotr32)
@@ -524,7 +524,7 @@ d_m3OpMacro_i(i32, Remainder, OP_REM_S, INT32_MIN);
 d_m3OpMacro_i(u64, Remainder, OP_REM_U);
 d_m3OpMacro_i(i64, Remainder, OP_REM_S, INT64_MIN);
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3ArithOpFunc_f(f32, Min, min_f32);
 d_m3ArithOpFunc_f(f32, Max, max_f32);
 d_m3ArithOpFunc_f(f64, Min, min_f64);
@@ -533,71 +533,71 @@ d_m3ArithOpFunc_f(f64, Max, max_f64);
 // copysign is defined bitwise and keeps its operand's payload - see canon_nan_f32
 d_m3OpFunc_f(f32, CopySign, copysignf);
 d_m3OpFunc_f(f64, CopySign, copysign);
-#endif
+#پایان_اگر
 
 // Unary operations
 // Note: This macro follows the principle of d_m3OpMacro
 
-#define d_m3UnaryMacro(RES, REG, TYPE, NAME, OP, ...)   \
+#تعریف_کن d_m3UnaryMacro(RES, REG, TYPE, NAME, OP, ...)   \
 d_m3Op(TYPE##_##NAME##_r)                           \
 {                                                   \
     OP((RES), (TYPE) REG, ##__VA_ARGS__);           \
-    nextOp ();                                      \
+    بعدی_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_s)                           \
 {                                                   \
-    TYPE operand = slot (TYPE);                     \
-    OP((RES), operand, ##__VA_ARGS__);              \
-    nextOp ();                                      \
+    TYPE عملوند = جایگاه (TYPE);                     \
+    OP((RES), عملوند, ##__VA_ARGS__);              \
+    بعدی_Op ();                                      \
 }
 
-#define M3_UNARY(RES, X, OP) (RES) = OP(X)
-#define M3_UNARY_A(RES, X, OP, CANON) (RES) = CANON(OP(X))
+#تعریف_کن M3_UNARY(RES, X, OP) (RES) = OP(X)
+#تعریف_کن M3_UNARY_A(RES, X, OP, CANON) (RES) = CANON(OP(X))
 
-#define d_m3UnaryOp_i(TYPE, NAME, OPERATION)        d_m3UnaryMacro( _r0,  _r0, TYPE, NAME, M3_UNARY, OPERATION)
-#define d_m3UnaryOp_f(TYPE, NAME, OPERATION)        d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY, OPERATION)
-#define d_m3UnaryArithOp_f(TYPE, NAME, OPERATION)   d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY_A, OPERATION, canon_nan_##TYPE)
+#تعریف_کن d_m3UnaryOp_i(TYPE, NAME, OPERATION)        d_m3UnaryMacro( _r0,  _r0, TYPE, NAME, M3_UNARY, OPERATION)
+#تعریف_کن d_m3UnaryOp_f(TYPE, NAME, OPERATION)        d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY, OPERATION)
+#تعریف_کن d_m3UnaryArithOp_f(TYPE, NAME, OPERATION)   d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY_A, OPERATION, canon_nan_##TYPE)
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 // abs and neg are defined bitwise and keep their operand's payload - see canon_nan_f32
 d_m3UnaryOp_f(f32, Abs,             fabsf);    d_m3UnaryOp_f(f64, Abs,             fabs);
 d_m3UnaryArithOp_f(f32, Ceil,       ceilf);    d_m3UnaryArithOp_f(f64, Ceil,       ceil);
 d_m3UnaryArithOp_f(f32, Floor,      floorf);   d_m3UnaryArithOp_f(f64, Floor,      floor);
 d_m3UnaryArithOp_f(f32, Trunc,      truncf);   d_m3UnaryArithOp_f(f64, Trunc,      trunc);
-d_m3UnaryArithOp_f(f32, Sqrt,       sqrtf);    d_m3UnaryArithOp_f(f64, Sqrt,       sqrt);
-d_m3UnaryArithOp_f(f32, Nearest,    rintf);    d_m3UnaryArithOp_f(f64, Nearest,    rint);
-#  if defined(M3_COMPILER_TCC)
+d_m3UnaryArithOp_f(f32, Sqrt,       sqrtf);    d_m3UnaryArithOp_f(f64, Sqrt,       جذر);
+d_m3UnaryArithOp_f(f32, نزدیکترین,    rintf);    d_m3UnaryArithOp_f(f64, نزدیکترین,    rint);
+#  إذا defined(M3_COMPILER_TCC)
 d_m3UnaryOp_f(f32, Negate,     m3_negf);       d_m3UnaryOp_f(f64, Negate,     m3_neg);
-#  else
+#  وإلا
 d_m3UnaryOp_f(f32, Negate,     -);             d_m3UnaryOp_f(f64, Negate,     -);
 #  endif
-#endif
+#پایان_اگر
 
-#define OP_EQZ(x) ((x) == 0)
+#تعریف_کن OP_EQZ(x) ((x) == 0)
 
-d_m3UnaryOp_i(i32, EqualToZero, OP_EQZ)
-d_m3UnaryOp_i(i64, EqualToZero, OP_EQZ)
+d_m3UnaryOp_i(i32, Equal_مقصد_Zero, OP_EQZ)
+d_m3UnaryOp_i(i64, Equal_مقصد_Zero, OP_EQZ)
 
 // clz(0), ctz(0) results are undefined for rest platforms, fix it
-#if (defined(__i386__) || defined(__x86_64__)) && !(defined(__AVX2__) || (defined(__ABM__) && defined(__BMI__)))
-#define OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
-#define OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
+#إذا (defined(__i386__) || defined(__x86_64__)) && !(defined(__AVX2__) || (defined(__ABM__) && defined(__BMI__)))
+#تعریف_کن OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
+#تعریف_کن OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
 // for 64-bit instructions branchless approach more preferable
-#define OP_CLZ_64(x) (__builtin_clzll((x) | (1ULL <<  0)) + OP_EQZ(x))
-#define OP_CTZ_64(x) (__builtin_ctzll((x) | (1ULL << 63)) + OP_EQZ(x))
-#elif defined(__ppc__) || defined(__ppc64__)
+#تعریف_کن OP_CLZ_64(x) (__builtin_clzll((x) | (1ULL <<  0)) + OP_EQZ(x))
+#تعریف_کن OP_CTZ_64(x) (__builtin_ctzll((x) | (1ULL << 63)) + OP_EQZ(x))
+#وإلاإذا defined(__ppc__) || defined(__ppc64__)
 // PowerPC is defined for __builtin_clz(0) and __builtin_ctz(0).
 // See (https://github.com/aquynh/capstone/blob/master/MathExtras.h#L99)
-#define OP_CLZ_32(x) __builtin_clz(x)
-#define OP_CTZ_32(x) __builtin_ctz(x)
-#define OP_CLZ_64(x) __builtin_clzll(x)
-#define OP_CTZ_64(x) __builtin_ctzll(x)
-#else
-#define OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
-#define OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
-#define OP_CLZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_clzll(x))
-#define OP_CTZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_ctzll(x))
-#endif
+#تعریف_کن OP_CLZ_32(x) __builtin_clz(x)
+#تعریف_کن OP_CTZ_32(x) __builtin_ctz(x)
+#تعریف_کن OP_CLZ_64(x) __builtin_clzll(x)
+#تعریف_کن OP_CTZ_64(x) __builtin_ctzll(x)
+#وإلا
+#تعریف_کن OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
+#تعریف_کن OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
+#تعریف_کن OP_CLZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_clzll(x))
+#تعریف_کن OP_CTZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_ctzll(x))
+#پایان_اگر
 
 d_m3UnaryOp_i(u32, Clz, OP_CLZ_32)
 d_m3UnaryOp_i(u64, Clz, OP_CLZ_64)
@@ -608,27 +608,27 @@ d_m3UnaryOp_i(u64, Ctz, OP_CTZ_64)
 d_m3UnaryOp_i(u32, Popcnt, __builtin_popcount)
 d_m3UnaryOp_i(u64, Popcnt, __builtin_popcountll)
 
-#define OP_WRAP_I64(X) ((X) & 0x00000000ffffffff)
+#تعریف_کن OP_WRAP_I64(X) ((X) & 0x00000000ffffffff)
 
 d_m3Op(i32_Wrap_i64_r)
 {
     _r0 = OP_WRAP_I64((i64)_r0);
-    nextOp();
+    بعدی_Op();
 }
 
 d_m3Op(i32_Wrap_i64_s)
 {
-    i64 operand = slot(i64);
-    _r0 = OP_WRAP_I64(operand);
-    nextOp();
+    i64 عملوند = جایگاه(i64);
+    _r0 = OP_WRAP_I64(عملوند);
+    بعدی_Op();
 }
 
 // Integer sign extension operations
-#define OP_EXTEND8_S_I32(X)  ((int32_t)(int8_t)(X))
-#define OP_EXTEND16_S_I32(X) ((int32_t)(int16_t)(X))
-#define OP_EXTEND8_S_I64(X)  ((int64_t)(int8_t)(X))
-#define OP_EXTEND16_S_I64(X) ((int64_t)(int16_t)(X))
-#define OP_EXTEND32_S_I64(X) ((int64_t)(int32_t)(X))
+#تعریف_کن OP_EXTEND8_S_I32(X)  ((int32_t)(int8_t)(X))
+#تعریف_کن OP_EXTEND16_S_I32(X) ((int32_t)(int16_t)(X))
+#تعریف_کن OP_EXTEND8_S_I64(X)  ((int64_t)(int8_t)(X))
+#تعریف_کن OP_EXTEND16_S_I64(X) ((int64_t)(int16_t)(X))
+#تعریف_کن OP_EXTEND32_S_I64(X) ((int64_t)(int32_t)(X))
 
 d_m3UnaryOp_i(i32, Extend8_s,  OP_EXTEND8_S_I32)
 d_m3UnaryOp_i(i32, Extend16_s, OP_EXTEND16_S_I32)
@@ -636,7 +636,7 @@ d_m3UnaryOp_i(i64, Extend8_s,  OP_EXTEND8_S_I64)
 d_m3UnaryOp_i(i64, Extend16_s, OP_EXTEND16_S_I64)
 d_m3UnaryOp_i(i64, Extend32_s, OP_EXTEND32_S_I64)
 
-#if d_m3HasWideArithmetic
+#إذا d_m3HasWideArithmetic
 
 // Wide arithmetic. Every operand is in a slot, the top of the stack first, and
 // the last immediate is the slot the low half of the result goes to; the high
@@ -644,93 +644,93 @@ d_m3UnaryOp_i(i64, Extend32_s, OP_EXTEND32_S_I64)
 // only written once all of them are.
 d_m3Op(i64_Add128)
 {
-    u64  rhsHigh = slot (u64);
-    u64  rhsLow  = slot (u64);
-    u64  lhsHigh = slot (u64);
-    u64  lhsLow  = slot (u64);
-    u64* low     = slot_ptr (u64);
-    d_m3PreloadNext();
+    u64  rhs_بالا = جایگاه (u64);
+    u64  rhs_کم  = جایگاه (u64);
+    u64  lhs_بالا = جایگاه (u64);
+    u64  lhs_کم  = جایگاه (u64);
+    u64* کم     = جایگاه_ptr (u64);
+    d_m3_Preload_بعدی();
 
-    u64 sum = lhsLow + rhsLow;
+    u64 جمع = lhs_کم + rhs_کم;
 
-    *low = sum;
-    _r0  = (i64) (lhsHigh + rhsHigh + (sum < lhsLow));
+    *کم = جمع;
+    _r0  = (i64) (lhs_بالا + rhs_بالا + (جمع < lhs_کم));
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 d_m3Op(i64_Sub128)
 {
-    u64  rhsHigh = slot (u64);
-    u64  rhsLow  = slot (u64);
-    u64  lhsHigh = slot (u64);
-    u64  lhsLow  = slot (u64);
-    u64* low     = slot_ptr (u64);
-    d_m3PreloadNext();
+    u64  rhs_بالا = جایگاه (u64);
+    u64  rhs_کم  = جایگاه (u64);
+    u64  lhs_بالا = جایگاه (u64);
+    u64  lhs_کم  = جایگاه (u64);
+    u64* کم     = جایگاه_ptr (u64);
+    d_m3_Preload_بعدی();
 
-    *low = lhsLow - rhsLow;
-    _r0  = (i64) (lhsHigh - rhsHigh - (lhsLow < rhsLow));
+    *کم = lhs_کم - rhs_کم;
+    _r0  = (i64) (lhs_بالا - rhs_بالا - (lhs_کم < rhs_کم));
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 d_m3Op(i64_MultiplyWide)
 {
-    i64  b   = slot (i64);
-    i64  a   = slot (i64);
-    u64* low = slot_ptr (u64);
-    d_m3PreloadNext();
+    i64  b   = جایگاه (i64);
+    i64  a   = جایگاه (i64);
+    u64* کم = جایگاه_ptr (u64);
+    d_m3_Preload_بعدی();
 
-    u64 high;
-    *low = mul_wide_i64 (a, b, &high);
-    _r0  = (i64) high;
+    u64 بالا;
+    *کم = mul_wide_i64 (a, b, &بالا);
+    _r0  = (i64) بالا;
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 d_m3Op(u64_MultiplyWide)
 {
-    u64  b   = slot (u64);
-    u64  a   = slot (u64);
-    u64* low = slot_ptr (u64);
-    d_m3PreloadNext();
+    u64  b   = جایگاه (u64);
+    u64  a   = جایگاه (u64);
+    u64* کم = جایگاه_ptr (u64);
+    d_m3_Preload_بعدی();
 
-    u64 high;
-    *low = mul_wide_u64 (a, b, &high);
-    _r0  = (i64) high;
+    u64 بالا;
+    *کم = mul_wide_u64 (a, b, &بالا);
+    _r0  = (i64) بالا;
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
-#endif // d_m3HasWideArithmetic
+#پایان_اگر // d_m3HasWideArithmetic
 
-#define d_m3TruncMacro(DEST, SRC, TYPE, NAME, FROM, OP, ...)   \
+#تعریف_کن d_m3TruncMacro(DEST, SRC, TYPE, NAME, FROM, OP, ...)   \
 d_m3Op(TYPE##_##NAME##_##FROM##_r_r)                \
 {                                                   \
     OP((DEST), (FROM) SRC, ##__VA_ARGS__);          \
-    nextOp ();                                      \
+    بعدی_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_##FROM##_r_s)                \
 {                                                   \
-    FROM * stack = slot_ptr (FROM);                 \
-    OP((DEST), (* stack), ##__VA_ARGS__);           \
-    nextOp ();                                      \
+    FROM * پشته = جایگاه_ptr (FROM);                 \
+    OP((DEST), (* پشته), ##__VA_ARGS__);           \
+    بعدی_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_##FROM##_s_r)                \
 {                                                   \
-    TYPE * dest = slot_ptr (TYPE);                  \
+    TYPE * dest = جایگاه_ptr (TYPE);                  \
     OP((* dest), (FROM) SRC, ##__VA_ARGS__);        \
-    nextOp ();                                      \
+    بعدی_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_##FROM##_s_s)                \
 {                                                   \
-    FROM * stack = slot_ptr (FROM);                 \
-    TYPE * dest = slot_ptr (TYPE);                  \
-    OP((* dest), (* stack), ##__VA_ARGS__);         \
-    nextOp ();                                      \
+    FROM * پشته = جایگاه_ptr (FROM);                 \
+    TYPE * dest = جایگاه_ptr (TYPE);                  \
+    OP((* dest), (* پشته), ##__VA_ARGS__);         \
+    بعدی_Op ();                                      \
 }
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3TruncMacro(_r0, _fp0, i32, Trunc, f32, OP_I32_TRUNC_F32)
 d_m3TruncMacro(_r0, _fp0, u32, Trunc, f32, OP_U32_TRUNC_F32)
 d_m3TruncMacro(_r0, _fp0, i32, Trunc, f64, OP_I32_TRUNC_F64)
@@ -750,20 +750,20 @@ d_m3TruncMacro(_r0, _fp0, i64, TruncSat, f32, OP_I64_TRUNC_SAT_F32)
 d_m3TruncMacro(_r0, _fp0, u64, TruncSat, f32, OP_U64_TRUNC_SAT_F32)
 d_m3TruncMacro(_r0, _fp0, i64, TruncSat, f64, OP_I64_TRUNC_SAT_F64)
 d_m3TruncMacro(_r0, _fp0, u64, TruncSat, f64, OP_U64_TRUNC_SAT_F64)
-#endif
+#پایان_اگر
 
-#define d_m3TypeModifyOp(REG_TO, REG_FROM, TO, NAME, FROM)  \
-d_m3Op(TO##_##NAME##_##FROM##_r)                            \
+#تعریف_کن d_m3TypeModifyOp(REG_مقصد, REG_FROM, مقصد_2, NAME, FROM)  \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_r)                            \
 {                                                           \
-    REG_TO = (TO) ((FROM) REG_FROM);                        \
-    nextOp ();                                              \
+    REG_مقصد = (مقصد_2) ((FROM) REG_FROM);                        \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s)                            \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_s)                            \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    REG_TO = (TO) (from);                                   \
-    nextOp ();                                              \
+    FROM from = جایگاه (FROM);                                \
+    REG_مقصد = (مقصد_2) (from);                                   \
+    بعدی_Op ();                                              \
 }
 
 // Int to int
@@ -772,54 +772,54 @@ d_m3TypeModifyOp(_r0, _r0, i64, Extend, u32);
 
 // Float to float. Narrowing or widening a NaN produces an arithmetic one, so these
 // two go through the canonicalizer where the int conversions have nothing to do.
-#define d_m3FloatModifyOp(TO, NAME, FROM)                   \
-d_m3Op(TO##_##NAME##_##FROM##_r)                            \
+#تعریف_کن d_m3FloatModifyOp(مقصد_2, NAME, FROM)                   \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_r)                            \
 {                                                           \
-    _fp0 = canon_nan_##TO ((TO) ((FROM) _fp0));             \
-    nextOp ();                                              \
+    _fp0 = canon_nan_##TO ((مقصد_2) ((FROM) _fp0));             \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s)                            \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_s)                            \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    _fp0 = canon_nan_##TO ((TO) (from));                    \
-    nextOp ();                                              \
+    FROM from = جایگاه (FROM);                                \
+    _fp0 = canon_nan_##TO ((مقصد_2) (from));                    \
+    بعدی_Op ();                                              \
 }
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3FloatModifyOp(f32, Demote, f64);
 d_m3FloatModifyOp(f64, Promote, f32);
-#endif
+#پایان_اگر
 
-#define d_m3TypeConvertOp(REG_TO, REG_FROM, TO, NAME, FROM) \
-d_m3Op(TO##_##NAME##_##FROM##_r_r)                          \
+#تعریف_کن d_m3TypeConvertOp(REG_مقصد, REG_FROM, مقصد_2, NAME, FROM) \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_r_r)                          \
 {                                                           \
-    REG_TO = (TO) ((FROM) REG_FROM);                        \
-    nextOp ();                                              \
+    REG_مقصد = (مقصد_2) ((FROM) REG_FROM);                        \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s_r)                          \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_s_r)                          \
 {                                                           \
-    slot (TO) = (TO) ((FROM) REG_FROM);                     \
-    nextOp ();                                              \
+    جایگاه (مقصد_2) = (مقصد_2) ((FROM) REG_FROM);                     \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_r_s)                          \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_r_s)                          \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    REG_TO = (TO) (from);                                   \
-    nextOp ();                                              \
+    FROM from = جایگاه (FROM);                                \
+    REG_مقصد = (مقصد_2) (from);                                   \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s_s)                          \
+d_m3Op(مقصد_2##_##NAME##_##FROM##_s_s)                          \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    slot (TO) = (TO) (from);                                \
-    nextOp ();                                              \
+    FROM from = جایگاه (FROM);                                \
+    جایگاه (مقصد_2) = (مقصد_2) (from);                                \
+    بعدی_Op ();                                              \
 }
 
 // Int to float
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3TypeConvertOp(_fp0, _r0, f64, Convert, i32);
 d_m3TypeConvertOp(_fp0, _r0, f64, Convert, u32);
 d_m3TypeConvertOp(_fp0, _r0, f64, Convert, i64);
@@ -829,143 +829,143 @@ d_m3TypeConvertOp(_fp0, _r0, f32, Convert, i32);
 d_m3TypeConvertOp(_fp0, _r0, f32, Convert, u32);
 d_m3TypeConvertOp(_fp0, _r0, f32, Convert, i64);
 d_m3TypeConvertOp(_fp0, _r0, f32, Convert, u64);
-#endif
+#پایان_اگر
 
-#define d_m3ReinterpretOp(REG, TO, SRC, FROM)               \
-d_m3Op(TO##_Reinterpret_##FROM##_r_r)                       \
+#تعریف_کن d_m3ReinterpretOp(REG, مقصد_2, SRC, FROM)               \
+d_m3Op(مقصد_2##_Reinterpret_##FROM##_r_r)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
+    اتحاد { FROM c; مقصد_2 t; } u;                              \
     u.c = (FROM) SRC;                                       \
     REG = u.t;                                              \
-    nextOp ();                                              \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_Reinterpret_##FROM##_r_s)                       \
+d_m3Op(مقصد_2##_Reinterpret_##FROM##_r_s)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
-    u.c = slot (FROM);                                      \
+    اتحاد { FROM c; مقصد_2 t; } u;                              \
+    u.c = جایگاه (FROM);                                      \
     REG = u.t;                                              \
-    nextOp ();                                              \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_Reinterpret_##FROM##_s_r)                       \
+d_m3Op(مقصد_2##_Reinterpret_##FROM##_s_r)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
+    اتحاد { FROM c; مقصد_2 t; } u;                              \
     u.c = (FROM) SRC;                                       \
-    slot (TO) = u.t;                                        \
-    nextOp ();                                              \
+    جایگاه (مقصد_2) = u.t;                                        \
+    بعدی_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_Reinterpret_##FROM##_s_s)                       \
+d_m3Op(مقصد_2##_Reinterpret_##FROM##_s_s)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
-    u.c = slot (FROM);                                      \
-    slot (TO) = u.t;                                        \
-    nextOp ();                                              \
+    اتحاد { FROM c; مقصد_2 t; } u;                              \
+    u.c = جایگاه (FROM);                                      \
+    جایگاه (مقصد_2) = u.t;                                        \
+    بعدی_Op ();                                              \
 }
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3ReinterpretOp(_r0, i32, _fp0, f32)
 d_m3ReinterpretOp(_r0, i64, _fp0, f64)
 d_m3ReinterpretOp(_fp0, f32, _r0, i32)
 d_m3ReinterpretOp(_fp0, f64, _r0, i64)
-#endif
+#پایان_اگر
 
 // clang-format on
 
 d_m3Op(GetGlobal_s32)
 {
-    u32* global = immediate(u32*);
-    slot(u32) = *global;                        //  printf ("get global: %p %" PRIi64 "\n", global, *global);
+    u32* global = فوری(u32*);
+    جایگاه(u32) = *global;                        //  printf ("get global: %p %" PRIi64 "\n", global, *global);
 
-    nextOp();
+    بعدی_Op();
 }
 
 
 d_m3Op(GetGlobal_s64)
 {
-    u64* global = immediate(u64*);
-    slot(u64) = *global;                        // printf ("get global: %p %" PRIi64 "\n", global, *global);
+    u64* global = فوری(u64*);
+    جایگاه(u64) = *global;                        // printf ("get global: %p %" PRIi64 "\n", global, *global);
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(SetGlobal_i32)
+d_m3Op(مجموعه_Global_i32)
 {
-    u32* global = immediate(u32*);
+    u32* global = فوری(u32*);
     *global = (u32)_r0;                         //  printf ("set global: %p %" PRIi64 "\n", global, _r0);
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(SetGlobal_i64)
+d_m3Op(مجموعه_Global_i64)
 {
-    u64* global = immediate(u64*);
+    u64* global = فوری(u64*);
     *global = (u64)_r0;                         //  printf ("set global: %p %" PRIi64 "\n", global, _r0);
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_پشته_Switching
 
 d_m3Op(Branch);
-d_m3Op(Entry);
-#  if !d_m3EntryKeepsFrame
-d_m3Op(Entry_Suspendable);
+d_m3Op(مدخل_2);
+#  إذا !d_m3_مدخل_Keeps_قاب
+d_m3Op(مدخل_Suspendable);
 #  endif
 
 // The function a body of compiled code belongs to. op_Call is handed the code
 // rather than the function, but every body opens with op_Entry and the function
 // it enters - past a bridge, where the page ran out before the first op.
-static M3_NOINLINE
-IM3Function FunctionOfCompiledCode (pc_t i_pc)
+ساكن M3_NOINLINE
+IM3Function Function_از_Compiled_کد (pc_t i_pc)
 {
-    if (not i_pc) {
-        return NULL;
+    إذا (not i_pc) {
+        أرجع عدم;
     }
 
-    while ((IM3Operation)i_pc[0] == op_Branch) {
+    طالما ((IM3Operation)i_pc[0] == op_Branch) {
         i_pc = (pc_t)i_pc[1];
     }
 
-    IM3Operation entry = (IM3Operation)i_pc[0];
+    IM3Operation مدخل = (IM3Operation)i_pc[0];
 
-#  if !d_m3EntryKeepsFrame
-    if (entry == op_Entry_Suspendable) {
-        return (IM3Function)i_pc[1];
+#  إذا !d_m3_مدخل_Keeps_قاب
+    إذا (مدخل == op_مدخل_Suspendable) {
+        أرجع (IM3Function)i_pc[1];
     }
 #  endif
-    return (entry == op_Entry) ? (IM3Function)i_pc[1] : NULL;
+    أرجع (مدخل == op_مدخل) ? (IM3Function)i_pc[1] : عدم;
 }
 
-#endif
+#پایان_اگر
 
 d_m3Op(Call)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_پشته();
 
-    pc_t      callPC = immediate(pc_t);
-    i32       stackOffset = immediate(i32);
-    IM3Memory memory = m3MemInfo(_mem);
+    pc_t      callPC = فوری(pc_t);
+    i32       پشته_جابه_جایی = فوری(i32);
+    IM3_حافظه حافظه = m3MemInfo(_mem);
 
-    m3stack_t sp = _sp + stackOffset;
+    m3stack_t sp = _sp + پشته_جابه_جایی;
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    m3ret_t r = Call(callPC, sp, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-    m3ret_t r = Call(callPC, sp, _mem, d_m3OpDefaultArgs);
-#endif
+#إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    m3ret_t r = Call(callPC, sp, _mem, d_m3_Op_Default_آرگومانها, d_m3_پایه_Cstr);
+#وإلا
+    m3ret_t r = Call(callPC, sp, _mem, d_m3_Op_Default_آرگومانها);
+#پایان_اگر
 
-    _mem = memory->mallocated;
+    _mem = حافظه->mallocated;
 
-    if (M3_LIKELY(not r)) {
-        nextOp();
-    } else {
-        d_m3RecordCallFrame(memory, FunctionOfCompiledCode(callPC));
-        pushBacktraceFrame();
+    إذا (M3_LIKELY(not r)) {
+        بعدی_Op();
+    } وإلا {
+        d_m3_رکورد_Call_قاب(حافظه, Function_از_Compiled_کد(callPC));
+        افزودن_Backtrace_قاب_2();
         forwardTrap(r);
     }
 }
@@ -977,48 +977,48 @@ d_m3Op(Call)
 // reference the validator only knows as $t, and null has to trap.
 d_m3Op(CallRef)
 {
-    IM3Function function = slot(IM3Function);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    IM3Memory   memory = m3MemInfo(_mem);
+    IM3Function function = جایگاه(IM3Function);
+    IM3FuncType type = فوری(IM3FuncType);
+    i32         پشته_جابه_جایی = فوری(i32);
+    IM3_حافظه   حافظه = m3MemInfo(_mem);
 
-    m3stack_t   sp = _sp + stackOffset;
+    m3stack_t   sp = _sp + پشته_جابه_جایی;
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(function)) {
-        if (M3_LIKELY(type == function->funcType)) {
-            if (M3_UNLIKELY(not function->compiled)) {
+    إذا (M3_LIKELY(function)) {
+        إذا (M3_LIKELY(type == function->funcType)) {
+            إذا (M3_UNLIKELY(not function->compiled)) {
                 r = CompileFunction(function);
             }
 
-            if (M3_LIKELY(not r)) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-                r = Call(function->compiled, sp, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-                r = Call(function->compiled, sp, _mem, d_m3OpDefaultArgs);
-#endif
+            إذا (M3_LIKELY(not r)) {
+#إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+                r = Call(function->compiled, sp, _mem, d_m3_Op_Default_آرگومانها, d_m3_پایه_Cstr);
+#وإلا
+                r = Call(function->compiled, sp, _mem, d_m3_Op_Default_آرگومانها);
+#پایان_اگر
 
-                _mem = memory->mallocated;
+                _mem = حافظه->mallocated;
 
-                if (M3_LIKELY(not r)) {
-                    nextOpDirect();
-                } else {
-                    d_m3RecordCallFrame(memory, function);
-                    pushBacktraceFrame();
+                إذا (M3_LIKELY(not r)) {
+                    بعدی_Op_مستقیم();
+                } وإلا {
+                    d_m3_رکورد_Call_قاب(حافظه, function);
+                    افزودن_Backtrace_قاب_2();
                     forwardTrap(r);
                 }
             }
-        } else {
-            r = m3Err_trapIndirectCallTypeMismatch;
+        } وإلا {
+            r = m3_Err_trap_غیرمستقیم_Call_Type_Mismatch;
         }
-    } else {
+    } وإلا {
         r = m3Err_trapNullFunctionRef;
     }
 
-    if (M3_UNLIKELY(r)) {
+    إذا (M3_UNLIKELY(r)) {
         newTrap(r);
-    } else {
+    } وإلا {
         forwardTrap(r);
     }
 }
@@ -1028,73 +1028,73 @@ d_m3Op(CallRef)
 // there is no destination slot, only the trap.
 d_m3Op(RefAsNonNull)
 {
-    IM3Function reference = slot(IM3Function);
+    IM3Function reference = جایگاه(IM3Function);
 
-    if (M3_UNLIKELY(not reference)) {
+    إذا (M3_UNLIKELY(not reference)) {
         newTrap(m3Err_trapNullReference);
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(CallIndirect)
+d_m3Op(Call_غیرمستقیم)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_پشته();
 
-    M3Table*    table = immediate(M3Table*);
-    u64         tableIndex = d_m3WideOperand(table->isTable64);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    IM3Memory   memory = m3MemInfo(_mem);
+    M3_جدول*    جدول_2 = فوری(M3_جدول*);
+    u64         جدول_شاخص = d_m3_Wide_عملوند(جدول_2->isTable64);
+    IM3FuncType type = فوری(IM3FuncType);
+    i32         پشته_جابه_جایی = فوری(i32);
+    IM3_حافظه   حافظه = m3MemInfo(_mem);
 
-    m3stack_t   sp = _sp + stackOffset;
+    m3stack_t   sp = _sp + پشته_جابه_جایی;
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(tableIndex < table->size)) {
-        IM3Function function = (IM3Function)table->elements[tableIndex];
+    إذا (M3_LIKELY(جدول_شاخص < جدول_2->اندازه)) {
+        IM3Function function = (IM3Function)جدول_2->elements[جدول_شاخص];
 
-        if (M3_LIKELY(function)) {
-            if (M3_LIKELY(type == function->funcType)) {
-                if (M3_UNLIKELY(not function->compiled)) {
+        إذا (M3_LIKELY(function)) {
+            إذا (M3_LIKELY(type == function->funcType)) {
+                إذا (M3_UNLIKELY(not function->compiled)) {
                     r = CompileFunction(function);
                 }
 
-                if (M3_LIKELY(not r)) {
+                إذا (M3_LIKELY(not r)) {
                     // a table may hold functions from another module, and those
                     // run against their own module's memory
-                    M3MemoryHeader* calleeMem = Module_MemoryHeader(function->module);
+                    M3_حافظه_سرآیند* calleeMem = Module_حافظه_سرآیند(function->module);
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-                    r = Call(function->compiled, sp, calleeMem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-                    r = Call(function->compiled, sp, calleeMem, d_m3OpDefaultArgs);
-#endif
+#إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+                    r = Call(function->compiled, sp, calleeMem, d_m3_Op_Default_آرگومانها, d_m3_پایه_Cstr);
+#وإلا
+                    r = Call(function->compiled, sp, calleeMem, d_m3_Op_Default_آرگومانها);
+#پایان_اگر
 
-                    _mem = memory->mallocated;
+                    _mem = حافظه->mallocated;
 
-                    if (M3_LIKELY(not r)) {
-                        nextOpDirect();
-                    } else {
-                        d_m3RecordCallFrame(memory, function);
-                        pushBacktraceFrame();
+                    إذا (M3_LIKELY(not r)) {
+                        بعدی_Op_مستقیم();
+                    } وإلا {
+                        d_m3_رکورد_Call_قاب(حافظه, function);
+                        افزودن_Backtrace_قاب_2();
                         forwardTrap(r);
                     }
                 }
-            } else {
-                r = m3Err_trapIndirectCallTypeMismatch;
+            } وإلا {
+                r = m3_Err_trap_غیرمستقیم_Call_Type_Mismatch;
             }
-        } else {
-            r = m3Err_trapTableElementIsNull;
+        } وإلا {
+            r = m3_Err_trap_جدول_Element_Is_Null;
         }
-    } else {
-        r = m3Err_trapTableIndexOutOfRange;
+    } وإلا {
+        r = m3_Err_trap_جدول_شاخص_بیرون_از_Range;
     }
 
-    if (M3_UNLIKELY(r)) {
+    إذا (M3_UNLIKELY(r)) {
         newTrap(r);
-    } else {
+    } وإلا {
         forwardTrap(r);
     }
 }
@@ -1109,57 +1109,57 @@ d_m3Op(CallIndirect)
 // stack grows.  Tail recursion therefore runs in constant space, unless the return_call
 // sits inside a loop or a try region: those hold a native frame that the tail call walks
 // away from instead of unwinding, and d_m3CheckNativeStack bounds the pile they make.
-#define d_m3TailCallArgs(RETURNSLOTS, STACKOFFSET, NUMARGSLOTS)                     \
-   memmove ((void *) (_sp + (RETURNSLOTS)), (const void *) (_sp + (STACKOFFSET)),   \
-            (size_t) (NUMARGSLOTS) * sizeof (m3slot_t))
+#تعریف_کن d_m3_دم_Call_آرگومانها(RETURNSLOTS, STACKOFFSET, NUMARGSLOTS)                     \
+   memmove ((فراغ *) (_sp + (RETURNSLOTS)), (ثابت فراغ *) (_sp + (STACKOFFSET)),   \
+            (size_t) (NUMARGSLOTS) * حجم (m3slot_t))
 
 d_m3Op(ReturnCall)
 {
-    pc_t    callPC = immediate(pc_t);
-    i32     stackOffset = immediate(i32);
-    i32     returnSlots = immediate(i32);
-    u32     numArgSlots = immediate(u32);
+    pc_t    callPC = فوری(pc_t);
+    i32     پشته_جابه_جایی = فوری(i32);
+    i32     returnSlots = فوری(i32);
+    u32     رقم_Arg_Slots = فوری(u32);
 
     m3ret_t possible_trap = m3_Yield();
-    if (M3_UNLIKELY(possible_trap)) {
+    إذا (M3_UNLIKELY(possible_trap)) {
         newTrap(possible_trap);
     }
 
-    d_m3TailCallArgs(returnSlots, stackOffset, numArgSlots);
+    d_m3_دم_Call_آرگومانها(returnSlots, پشته_جابه_جایی, رقم_Arg_Slots);
 
-    jumpOpDirect(callPC);
+    jump_Op_مستقیم(callPC);
 }
 
 
 d_m3Op(ReturnCallRef)
 {
-    IM3Function function = slot(IM3Function);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    i32         returnSlots = immediate(i32);
-    u32         numArgSlots = immediate(u32);
+    IM3Function function = جایگاه(IM3Function);
+    IM3FuncType type = فوری(IM3FuncType);
+    i32         پشته_جابه_جایی = فوری(i32);
+    i32         returnSlots = فوری(i32);
+    u32         رقم_Arg_Slots = فوری(u32);
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(function)) {
-        if (M3_LIKELY(type == function->funcType)) {
-            if (M3_UNLIKELY(not function->compiled)) {
+    إذا (M3_LIKELY(function)) {
+        إذا (M3_LIKELY(type == function->funcType)) {
+            إذا (M3_UNLIKELY(not function->compiled)) {
                 r = CompileFunction(function);
             }
 
-            if (M3_LIKELY(not r)) {
+            إذا (M3_LIKELY(not r)) {
                 r = m3_Yield();
 
-                if (M3_LIKELY(not r)) {
-                    d_m3TailCallArgs(returnSlots, stackOffset, numArgSlots);
+                إذا (M3_LIKELY(not r)) {
+                    d_m3_دم_Call_آرگومانها(returnSlots, پشته_جابه_جایی, رقم_Arg_Slots);
 
-                    jumpOpDirect(function->compiled);
+                    jump_Op_مستقیم(function->compiled);
                 }
             }
-        } else {
-            r = m3Err_trapIndirectCallTypeMismatch;
+        } وإلا {
+            r = m3_Err_trap_غیرمستقیم_Call_Type_Mismatch;
         }
-    } else {
+    } وإلا {
         r = m3Err_trapNullFunctionRef;
     }
 
@@ -1167,43 +1167,43 @@ d_m3Op(ReturnCallRef)
 }
 
 
-d_m3Op(ReturnCallIndirect)
+d_m3Op(Return_Call_غیرمستقیم)
 {
-    M3Table*    table = immediate(M3Table*);
-    u64         tableIndex = d_m3WideOperand(table->isTable64);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    i32         returnSlots = immediate(i32);
-    u32         numArgSlots = immediate(u32);
+    M3_جدول*    جدول_2 = فوری(M3_جدول*);
+    u64         جدول_شاخص = d_m3_Wide_عملوند(جدول_2->isTable64);
+    IM3FuncType type = فوری(IM3FuncType);
+    i32         پشته_جابه_جایی = فوری(i32);
+    i32         returnSlots = فوری(i32);
+    u32         رقم_Arg_Slots = فوری(u32);
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(tableIndex < table->size)) {
-        IM3Function function = (IM3Function)table->elements[tableIndex];
+    إذا (M3_LIKELY(جدول_شاخص < جدول_2->اندازه)) {
+        IM3Function function = (IM3Function)جدول_2->elements[جدول_شاخص];
 
-        if (M3_LIKELY(function)) {
-            if (M3_LIKELY(type == function->funcType)) {
-                if (M3_UNLIKELY(not function->compiled)) {
+        إذا (M3_LIKELY(function)) {
+            إذا (M3_LIKELY(type == function->funcType)) {
+                إذا (M3_UNLIKELY(not function->compiled)) {
                     r = CompileFunction(function);
                 }
 
-                if (M3_LIKELY(not r)) {
+                إذا (M3_LIKELY(not r)) {
                     r = m3_Yield();
 
-                    if (M3_LIKELY(not r)) {
-                        d_m3TailCallArgs(returnSlots, stackOffset, numArgSlots);
+                    إذا (M3_LIKELY(not r)) {
+                        d_m3_دم_Call_آرگومانها(returnSlots, پشته_جابه_جایی, رقم_Arg_Slots);
 
-                        jumpOpDirect(function->compiled);
+                        jump_Op_مستقیم(function->compiled);
                     }
                 }
-            } else {
-                r = m3Err_trapIndirectCallTypeMismatch;
+            } وإلا {
+                r = m3_Err_trap_غیرمستقیم_Call_Type_Mismatch;
             }
-        } else {
-            r = m3Err_trapTableElementIsNull;
+        } وإلا {
+            r = m3_Err_trap_جدول_Element_Is_Null;
         }
-    } else {
-        r = m3Err_trapTableIndexOutOfRange;
+    } وإلا {
+        r = m3_Err_trap_جدول_شاخص_بیرون_از_Range;
     }
 
     newTrap(r);
@@ -1217,117 +1217,117 @@ d_m3Op(CallRawFunction)
     M3ImportContext ctx;
 
     M3RawCall       call = (M3RawCall)(*_pc++);
-    ctx.function = immediate(IM3Function);
-    ctx.userdata = immediate(void*);
-    u64* const sp = ((u64*)_sp);
-    IM3Memory  memory = m3MemInfo(_mem);
+    ctx.function = فوری(IM3Function);
+    ctx.userdata = فوری(فراغ*);
+    u64* ثابت sp = ((u64*)_sp);
+    IM3_حافظه  حافظه = m3MemInfo(_mem);
 
     IM3Runtime runtime = m3MemRuntime(_mem);
 
-#if d_m3EnableStrace
+#إذا d_m3EnableStrace
     IM3FuncType ftype = ctx.function->funcType;
 
-    char        outbuff[1024];
-    char*       outp = outbuff;
-    char*       oute = outbuff + 1024;
+    حرف        outbuff[1024];
+    حرف*       outp = outbuff;
+    حرف*       oute = outbuff + 1024;
 
-    outp += snprintf(outp, oute - outp, "%s!%s(", ctx.function->import.moduleUtf8, ctx.function->import.fieldUtf8);
+    outp += snprintf(outp, oute - outp, "%s!%s(", ctx.function->import.moduleUtf8, ctx.function->import.فیلد_Utf8);
 
-    const int nArgs = ftype->numArgs;
-    const int nRets = ftype->numRets;
-    u64*      args = sp + nRets;
-    for (int i = 0; i < nArgs; i++) {
-        const int type = ftype->types[nRets + i];
-        switch (type) {
-        case c_m3Type_i32: outp += snprintf(outp, oute - outp, "%" PRIi32, *(i32*)(args + i)); break;
-        case c_m3Type_i64: outp += snprintf(outp, oute - outp, "%" PRIi64, *(i64*)(args + i)); break;
-        case c_m3Type_f32: outp += snprintf(outp, oute - outp, "%" PRIf32, *(f32*)(args + i)); break;
-        case c_m3Type_f64: outp += snprintf(outp, oute - outp, "%" PRIf64, *(f64*)(args + i)); break;
-        default: outp += snprintf(outp, oute - outp, "<type %d>", type); break;
+    ثابت صحيح n_آرگومانها = ftype->رقم_آرگومانها;
+    ثابت صحيح nRets = ftype->رقم_Rets;
+    u64*      آرگومانها = sp + nRets;
+    لكل (صحيح i = 0; i < n_آرگومانها; i++) {
+        ثابت صحيح type = ftype->types[nRets + i];
+        بدل (type) {
+        حالة c_m3Type_i32: outp += snprintf(outp, oute - outp, "%" PRIi32, *(i32*)(آرگومانها + i)); اكسر;
+        حالة c_m3Type_i64: outp += snprintf(outp, oute - outp, "%" PRIi64, *(i64*)(آرگومانها + i)); اكسر;
+        حالة c_m3Type_f32: outp += snprintf(outp, oute - outp, "%" PRIf32, *(f32*)(آرگومانها + i)); اكسر;
+        حالة c_m3Type_f64: outp += snprintf(outp, oute - outp, "%" PRIf64, *(f64*)(آرگومانها + i)); اكسر;
+        افتراضي: outp += snprintf(outp, oute - outp, "<type %d>", type); اكسر;
         }
-        if (i < nArgs - 1) {
+        إذا (i < n_آرگومانها - 1) {
             outp += snprintf(outp, oute - outp, ", ");
         }
     }
     // closed here rather than after the last argument: an import taking none has
     // no last argument to close it
     outp += snprintf(outp, oute - outp, ")");
-#  if d_m3EnableStrace >= 2
+#  إذا d_m3EnableStrace >= 2
     outp += snprintf(outp, oute - outp, " { <native> }");
 #  endif
-#endif
+#پایان_اگر
 
     // m3_Call uses runtime->stack to set-up initial exported function stack.
     // Reconfigure the stack to enable recursive invocations of m3_Call.
     // I.e. exported/table function can be called from an impoted function.
-    void* stack_backup = runtime->stack;
-    runtime->stack = sp;
+    فراغ* پشته_backup = runtime->پشته;
+    runtime->پشته = sp;
     // the memory this import was bound to, which is memory 0 unless the host
     // module named another one. _mem itself stays on the caller's memory:
     // the trap path below and the backtrace recorder still read it.
-    m3ret_t possible_trap = call(runtime, &ctx, sp, m3MemData(ctx.function->hostMemory->mallocated));
-    runtime->stack = stack_backup;
+    m3ret_t possible_trap = call(runtime, &ctx, sp, m3_Mem_داده(ctx.function->host_حافظه->mallocated));
+    runtime->پشته = پشته_backup;
 
-#if d_m3EnableStrace
-    if (M3_UNLIKELY(possible_trap)) {
-        d_m3TracePrint("%s -> %s", outbuff, (char*)possible_trap);
-    } else if (ftype and ftype->numRets) {
+#إذا d_m3EnableStrace
+    إذا (M3_UNLIKELY(possible_trap)) {
+        d_m3TracePrint("%s -> %s", outbuff, (حرف*)possible_trap);
+    } وإلا إذا (ftype and ftype->رقم_Rets) {
         d_m3TracePrint("%s = %s", outbuff, SPrintFunctionRetList(ftype, (m3stack_t)sp));
-    } else {
+    } وإلا {
         d_m3TracePrint("%s", outbuff);
     }
-#endif
+#پایان_اگر
 
-    if (M3_UNLIKELY(possible_trap)) {
-        _mem = memory->mallocated;
+    إذا (M3_UNLIKELY(possible_trap)) {
+        _mem = حافظه->mallocated;
         // an exception the host threw (m3_ThrowException) is not a trap yet, and
         // may well be caught: it records no frame, as a Wasm throw doesn't
-        if (possible_trap != m3Err_pendingException) {
-            pushBacktraceFrame();
+        إذا (possible_trap != m3Err_pendingException) {
+            افزودن_Backtrace_قاب_2();
         }
     }
     forwardTrap(possible_trap);
 }
 
 
-d_m3Op(MemSize)
+d_m3Op(Mem_اندازه)
 {
-    IM3Memory memory = m3MemInfo(_mem);
+    IM3_حافظه حافظه = m3MemInfo(_mem);
 
-    _r0 = memory->numPages;
+    _r0 = حافظه->رقم_صفحات;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
 d_m3Op(MemGrow)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    IM3Memory  memory = m3MemInfo(_mem);
+    IM3_حافظه  حافظه = m3MemInfo(_mem);
 
-    i32        numPagesToGrow = (i32)_r0;
-    if (numPagesToGrow >= 0) {
-        _r0 = (m3reg_t)memory->numPages;
+    i32        رقم_صفحات_مقصد_Grow = (i32)_r0;
+    إذا (رقم_صفحات_مقصد_Grow >= 0) {
+        _r0 = (m3reg_t)حافظه->رقم_صفحات;
 
-        if (M3_LIKELY(numPagesToGrow)) {
-            u64      requiredPages = memory->numPages + (u32)numPagesToGrow;
+        إذا (M3_LIKELY(رقم_صفحات_مقصد_Grow)) {
+            u64      required_صفحات = حافظه->رقم_صفحات + (u32)رقم_صفحات_مقصد_Grow;
 
-            M3Result r = ResizeMemory(runtime, memory, requiredPages);
-            if (r) {
+            M3_نتیجه r = Resize_حافظه(runtime, حافظه, required_صفحات);
+            إذا (r) {
                 _r0 = -1;
             }
 
-            _mem = memory->mallocated;
+            _mem = حافظه->mallocated;
         }
-    } else {
+    } وإلا {
         _r0 = -1;
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-#if d_m3HasMemory64
+#إذا d_m3HasMemory64
 
 // memory.grow on a 64-bit memory. The delta is a full u64 rather than a value
 // the sign of which can stand in for "too big", and failure answers 2^64-1
@@ -1336,79 +1336,79 @@ d_m3Op(MemGrow)
 d_m3Op(MemGrow64)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    IM3Memory  memory = m3MemInfo(_mem);
+    IM3_حافظه  حافظه = m3MemInfo(_mem);
 
-    u64        numPagesToGrow = (u64)_r0;
-    u64        numPages = memory->numPages;
+    u64        رقم_صفحات_مقصد_Grow = (u64)_r0;
+    u64        رقم_صفحات = حافظه->رقم_صفحات;
 
-    if (M3_LIKELY(numPagesToGrow)) {
+    إذا (M3_LIKELY(رقم_صفحات_مقصد_Grow)) {
         // maxPages is never below the current size, so the difference cannot
         // wrap; asking for more than it is a request nothing could satisfy
-        if (numPagesToGrow <= memory->maxPages - numPages and
-            not ResizeMemory(runtime, memory, numPages + numPagesToGrow)) {
-            _r0 = (m3reg_t)numPages;
-        } else {
+        إذا (رقم_صفحات_مقصد_Grow <= حافظه->max_صفحات - رقم_صفحات and
+            not Resize_حافظه(runtime, حافظه, رقم_صفحات + رقم_صفحات_مقصد_Grow)) {
+            _r0 = (m3reg_t)رقم_صفحات;
+        } وإلا {
             _r0 = -1;
         }
 
-        _mem = memory->mallocated;
-    } else {
-        _r0 = (m3reg_t)numPages;
+        _mem = حافظه->mallocated;
+    } وإلا {
+        _r0 = (m3reg_t)رقم_صفحات;
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
-#endif // d_m3HasMemory64
+#پایان_اگر // d_m3HasMemory64
 
 
 d_m3Op(MemCopy)
 {
-    u64 size = (u32)_r0;
-    u64 source = slot(u32);
-    u64 destination = slot(u32);
+    u64 اندازه = (u32)_r0;
+    u64 منبع = جایگاه(u32);
+    u64 destination = جایگاه(u32);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(d_m3MemRangeOk(source, size, _mem))) {
-            u8* dst = m3MemData(_mem) + destination;
-            u8* src = m3MemData(_mem) + source;
-            memmove(dst, src, (size_t)size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, _mem))) {
+        إذا (M3_LIKELY(d_m3MemRangeOk(منبع, اندازه, _mem))) {
+            u8* dst = m3_Mem_داده(_mem) + destination;
+            u8* src = m3_Mem_داده(_mem) + منبع;
+            memmove(dst, src, (size_t)اندازه);
 
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+            بعدی_Op();
+        } وإلا {
+            d_بیرون_از_Bounds_Mem_Op(منبع, اندازه);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
 
-#if d_m3HasMemory64
+#إذا d_m3HasMemory64
 
 // memory.copy within a single 64-bit memory: every operand is a full u64.
 d_m3Op(MemCopy64)
 {
-    u64 size = (u64)_r0;
-    u64 source = slot(u64);
-    u64 destination = slot(u64);
+    u64 اندازه = (u64)_r0;
+    u64 منبع = جایگاه(u64);
+    u64 destination = جایگاه(u64);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(d_m3MemRangeOk(source, size, _mem))) {
-            u8* dst = m3MemData(_mem) + destination;
-            u8* src = m3MemData(_mem) + source;
-            memmove(dst, src, (size_t)size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, _mem))) {
+        إذا (M3_LIKELY(d_m3MemRangeOk(منبع, اندازه, _mem))) {
+            u8* dst = m3_Mem_داده(_mem) + destination;
+            u8* src = m3_Mem_داده(_mem) + منبع;
+            memmove(dst, src, (size_t)اندازه);
 
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+            بعدی_Op();
+        } وإلا {
+            d_بیرون_از_Bounds_Mem_Op(منبع, اندازه);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
-#endif // d_m3HasMemory64
+#پایان_اگر // d_m3HasMemory64
 
 
 // Points the _mem register at another memory: one of the module's own, or
@@ -1416,17 +1416,17 @@ d_m3Op(MemCopy64)
 // around a single access or a single cross-module call, so _mem is back where
 // it belongs before anything that reads it for another purpose - a backtrace,
 // the stack-limit check - can run.
-d_m3Op(SetMemory)
+d_m3Op(مجموعه_حافظه)
 {
-    IM3Memory memory = immediate(IM3Memory);
+    IM3_حافظه حافظه = فوری(IM3_حافظه);
 
-    _mem = memory->mallocated;
+    _mem = حافظه->mallocated;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-#if d_m3HasMultiMemory
+#إذا d_m3_Has_Multi_حافظه
 
 // memory.copy between two different memories. The pair-of-SetMemory trick only
 // reaches one memory at a time, so this one names both outright.
@@ -1437,209 +1437,209 @@ d_m3Op(SetMemory)
 // two, which is 64-bit only when both are.
 d_m3Op(MemCopy_x)
 {
-    IM3Memory       destMemory = immediate(IM3Memory);
-    IM3Memory       sourceMemory = immediate(IM3Memory);
-    u32             widths = immediate(u32);
+    IM3_حافظه       dest_حافظه = فوری(IM3_حافظه);
+    IM3_حافظه       منبع_حافظه = فوری(IM3_حافظه);
+    u32             widths = فوری(u32);
 
-    M3MemoryHeader* destMem = destMemory->mallocated;
-    M3MemoryHeader* sourceMem = sourceMemory->mallocated;
+    M3_حافظه_سرآیند* destMem = dest_حافظه->mallocated;
+    M3_حافظه_سرآیند* منبع_Mem = منبع_حافظه->mallocated;
 
-    u64             size = (widths == 0x3) ? (u64)_r0 : (u64)(u32)_r0;
-    u64             source = d_m3WideOperand(widths & 0x2);
-    u64             destination = d_m3WideOperand(widths & 0x1);
+    u64             اندازه = (widths == 0x3) ? (u64)_r0 : (u64)(u32)_r0;
+    u64             منبع = d_m3_Wide_عملوند(widths & 0x2);
+    u64             destination = d_m3_Wide_عملوند(widths & 0x1);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, destMem))) {
-        if (M3_LIKELY(d_m3MemRangeOk(source, size, sourceMem))) {
-            memmove(m3MemData(destMem) + destination, m3MemData(sourceMem) + source, (size_t)size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, destMem))) {
+        إذا (M3_LIKELY(d_m3MemRangeOk(منبع, اندازه, منبع_Mem))) {
+            memmove(m3_Mem_داده(destMem) + destination, m3_Mem_داده(منبع_Mem) + منبع, (size_t)اندازه);
 
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+            بعدی_Op();
+        } وإلا {
+            d_بیرون_از_Bounds_Mem_Op(منبع, اندازه);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
-#endif // d_m3HasMultiMemory
+#پایان_اگر // d_m3HasMultiMemory
 
 
 d_m3Op(MemFill)
 {
-    u32 size = (u32)_r0;
-    u32 byte = slot(u32);
-    u64 destination = slot(u32);
+    u32 اندازه = (u32)_r0;
+    u32 byte = جایگاه(u32);
+    u64 destination = جایگاه(u32);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        u8* mem8 = m3MemData(_mem) + destination;
-        memset(mem8, (u8)byte, size);
-        nextOp();
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, _mem))) {
+        u8* mem8 = m3_Mem_داده(_mem) + destination;
+        memset(mem8, (u8)byte, اندازه);
+        بعدی_Op();
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
 
-#if d_m3HasMemory64
+#إذا d_m3HasMemory64
 
 // memory.fill on a 64-bit memory. The byte to write stays an i32 - it is a
 // value, not an address - so only the destination and the length widen.
 d_m3Op(MemFill64)
 {
-    u64 size = (u64)_r0;
-    u32 byte = slot(u32);
-    u64 destination = slot(u64);
+    u64 اندازه = (u64)_r0;
+    u32 byte = جایگاه(u32);
+    u64 destination = جایگاه(u64);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        u8* mem8 = m3MemData(_mem) + destination;
-        memset(mem8, (u8)byte, (size_t)size);
-        nextOp();
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, _mem))) {
+        u8* mem8 = m3_Mem_داده(_mem) + destination;
+        memset(mem8, (u8)byte, (size_t)اندازه);
+        بعدی_Op();
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
-#endif // d_m3HasMemory64
+#پایان_اگر // d_m3HasMemory64
 
 
 d_m3Op(MemInit)
 {
-    M3DataSegment* segment = immediate(M3DataSegment*);
+    M3_داده_Segment* segment = فوری(M3_داده_Segment*);
 
-    u64            size = (u32)_r0;
-    u64            source = slot(u32);
-    u64            destination = slot(u32);
+    u64            اندازه = (u32)_r0;
+    u64            منبع = جایگاه(u32);
+    u64            destination = جایگاه(u32);
 
-    u64            available = segment->dropped ? 0 : segment->size;
+    u64            موجود = segment->dropped ? 0 : segment->اندازه;
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(source <= available and size <= available - source)) {
-            memcpy(m3MemData(_mem) + destination, segment->data + source, (size_t)size);
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, _mem))) {
+        إذا (M3_LIKELY(منبع <= موجود and اندازه <= موجود - منبع)) {
+            کپی_حافظه(m3_Mem_داده(_mem) + destination, segment->داده + منبع, (size_t)اندازه);
+            بعدی_Op();
+        } وإلا {
+            d_بیرون_از_Bounds_Mem_Op(منبع, اندازه);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
 
-#if d_m3HasMemory64
+#إذا d_m3HasMemory64
 
 // memory.init into a 64-bit memory. The segment is indexed as an i32 whatever
 // the memory is, so only the destination widens.
 d_m3Op(MemInit64)
 {
-    M3DataSegment* segment = immediate(M3DataSegment*);
+    M3_داده_Segment* segment = فوری(M3_داده_Segment*);
 
-    u64            size = (u32)_r0;
-    u64            source = slot(u32);
-    u64            destination = slot(u64);
+    u64            اندازه = (u32)_r0;
+    u64            منبع = جایگاه(u32);
+    u64            destination = جایگاه(u64);
 
-    u64            available = segment->dropped ? 0 : segment->size;
+    u64            موجود = segment->dropped ? 0 : segment->اندازه;
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(source <= available and size <= available - source)) {
-            memcpy(m3MemData(_mem) + destination, segment->data + source, (size_t)size);
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+    إذا (M3_LIKELY(d_m3MemRangeOk(destination, اندازه, _mem))) {
+        إذا (M3_LIKELY(منبع <= موجود and اندازه <= موجود - منبع)) {
+            کپی_حافظه(m3_Mem_داده(_mem) + destination, segment->داده + منبع, (size_t)اندازه);
+            بعدی_Op();
+        } وإلا {
+            d_بیرون_از_Bounds_Mem_Op(منبع, اندازه);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } وإلا {
+        d_بیرون_از_Bounds_Mem_Op(destination, اندازه);
     }
 }
 
-#endif // d_m3HasMemory64
+#پایان_اگر // d_m3HasMemory64
 
 
-d_m3Op(DataDrop)
+d_m3Op(داده_Drop)
 {
-    M3DataSegment* segment = immediate(M3DataSegment*);
+    M3_داده_Segment* segment = فوری(M3_داده_Segment*);
     segment->dropped = true;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-#if d_m3HasRefTypes
+#إذا d_m3HasRefTypes
 
-d_m3Op(TableGet)
+d_m3Op(جدول_Get)
 {
-    M3Table* table = immediate(M3Table*);
-    u64      index = d_m3WideOperand(table->isTable64);
+    M3_جدول* جدول_2 = فوری(M3_جدول*);
+    u64      index = d_m3_Wide_عملوند(جدول_2->isTable64);
 
-    if (M3_LIKELY(index < table->size)) {
-        _r0 = (u64)(uintptr_t)table->elements[index];
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+    إذا (M3_LIKELY(index < جدول_2->اندازه)) {
+        _r0 = (u64)(uintptr_t)جدول_2->elements[index];
+        بعدی_Op();
+    } وإلا {
+        newTrap(m3_Err_trap_جدول_بیرون_از_Bounds);
     }
 }
 
 
-d_m3Op(TableSet)
+d_m3Op(جدول_مجموعه)
 {
-    M3Table* table = immediate(M3Table*);
-    void*    value = slot(void*);
-    u64      index = d_m3WideOperand(table->isTable64);
+    M3_جدول* جدول_2 = فوری(M3_جدول*);
+    فراغ*    مقدار = جایگاه(فراغ*);
+    u64      index = d_m3_Wide_عملوند(جدول_2->isTable64);
 
-    if (M3_LIKELY(index < table->size)) {
-        table->elements[index] = value;
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+    إذا (M3_LIKELY(index < جدول_2->اندازه)) {
+        جدول_2->elements[index] = مقدار;
+        بعدی_Op();
+    } وإلا {
+        newTrap(m3_Err_trap_جدول_بیرون_از_Bounds);
     }
 }
 
 
-d_m3Op(TableSize)
+d_m3Op(جدول_اندازه)
 {
-    M3Table* table = immediate(M3Table*);
+    M3_جدول* جدول_2 = فوری(M3_جدول*);
 
-    _r0 = table->size;
+    _r0 = جدول_2->اندازه;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(TableGrow)
+d_m3Op(جدول_Grow)
 {
-    M3Table* table = immediate(M3Table*);
-    u64      delta = d_m3WideOperand(table->isTable64);
-    void*    value = slot(void*);
+    M3_جدول* جدول_2 = فوری(M3_جدول*);
+    u64      delta = d_m3_Wide_عملوند(جدول_2->isTable64);
+    فراغ*    مقدار = جایگاه(فراغ*);
 
-    u32      oldSize = table->size;
-    u32      maxSize = table->maxSize ? table->maxSize : d_m3MaxSaneTableSize;
+    u32      old_اندازه = جدول_2->اندازه;
+    u32      max_اندازه = جدول_2->max_اندازه ? جدول_2->max_اندازه : d_m3_Max_Sane_جدول_اندازه;
 
     // a table64 delta is a whole u64, so the sum is formed only once it is
     // known to fit
-    u64      newSize = (delta <= maxSize - oldSize) ? (u64)oldSize + delta
-                                                    : (u64)maxSize + 1;
+    u64      new_اندازه = (delta <= max_اندازه - old_اندازه) ? (u64)old_اندازه + delta
+                                                    : (u64)max_اندازه + 1;
 
-    if (newSize == oldSize)         // a zero delta never reallocates, and the table may have no storage yet
+    إذا (new_اندازه == old_اندازه)         // a zero delta never reallocates, and the table may have no storage yet
     {
-        _r0 = oldSize;
-        nextOp();
+        _r0 = old_اندازه;
+        بعدی_Op();
     }
 
     IM3Runtime runtime = m3MemRuntime(_mem);
-    if (newSize <= maxSize and (not runtime->tableElementsLimit or
-                                delta <= runtime->tableElementsLimit - runtime->tableElementsUsed)) {
-        void** elements = m3_ReallocArray(void*, table->elements, (size_t)newSize, oldSize);
+    إذا (new_اندازه <= max_اندازه and (not runtime->جدول_Elements_حد or
+                                delta <= runtime->جدول_Elements_حد - runtime->جدول_Elements_استفاده_شده)) {
+        فراغ** elements = m3_ReallocArray(فراغ*, جدول_2->elements, (size_t)new_اندازه, old_اندازه);
 
-        if (elements) {
-            runtime->tableElementsUsed += newSize - oldSize;
-            table->elements = elements;
-            table->size = (u32)newSize;
+        إذا (elements) {
+            runtime->جدول_Elements_استفاده_شده += new_اندازه - old_اندازه;
+            جدول_2->elements = elements;
+            جدول_2->اندازه = (u32)new_اندازه;
 
-            for (u32 i = oldSize; i < table->size; ++i) {
-                table->elements[i] = value;
+            لكل (u32 i = old_اندازه; i < جدول_2->اندازه; ++i) {
+                جدول_2->elements[i] = مقدار;
             }
 
-            _r0 = oldSize;
-            nextOp();
+            _r0 = old_اندازه;
+            بعدی_Op();
         }
     }
 
@@ -1647,84 +1647,84 @@ d_m3Op(TableGrow)
     // slot it is pushed to is what decides how much of the register is seen
     _r0 = -1;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(TableInit)
+d_m3Op(جدول_Init)
 {
-    M3Table*          table = immediate(M3Table*);
-    M3ElementSegment* segment = immediate(M3ElementSegment*);
-    u32               count = slot(u32);
-    u32               source = slot(u32);
+    M3_جدول*          جدول_2 = فوری(M3_جدول*);
+    M3ElementSegment* segment = فوری(M3ElementSegment*);
+    u32               شمار = جایگاه(u32);
+    u32               منبع = جایگاه(u32);
     // an element segment is indexed as an i32 whatever the table is; only the
     // destination follows the table's index type
-    u64               destination = d_m3WideOperand(table->isTable64);
+    u64               destination = d_m3_Wide_عملوند(جدول_2->isTable64);
 
-    u64               available = segment->dropped ? 0 : segment->numElements;
+    u64               موجود = segment->dropped ? 0 : segment->رقم_Elements;
 
-    if (M3_LIKELY(destination <= table->size and count <= table->size - destination and
-                  (u64) source + count <= available)) {
-        for (u32 i = 0; i < count; ++i) {
-            table->elements[destination + i] = segment->resolved[source + i];
+    إذا (M3_LIKELY(destination <= جدول_2->اندازه and شمار <= جدول_2->اندازه - destination and
+                  (u64) منبع + شمار <= موجود)) {
+        لكل (u32 i = 0; i < شمار; ++i) {
+            جدول_2->elements[destination + i] = segment->resolved[منبع + i];
         }
 
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+        بعدی_Op();
+    } وإلا {
+        newTrap(m3_Err_trap_جدول_بیرون_از_Bounds);
     }
 }
 
 
 d_m3Op(ElemDrop)
 {
-    M3ElementSegment* segment = immediate(M3ElementSegment*);
+    M3ElementSegment* segment = فوری(M3ElementSegment*);
     segment->dropped = true;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(TableCopy)
+d_m3Op(جدول_Copy)
 {
-    M3Table* dst = immediate(M3Table*);
-    M3Table* src = immediate(M3Table*);
+    M3_جدول* dst = فوری(M3_جدول*);
+    M3_جدول* src = فوری(M3_جدول*);
     // the length follows the narrower of the two tables, so it is 64-bit only
     // when both are
-    u64      count = d_m3WideOperand(dst->isTable64 and src->isTable64);
-    u64      source = d_m3WideOperand(src->isTable64);
-    u64      destination = d_m3WideOperand(dst->isTable64);
+    u64      شمار = d_m3_Wide_عملوند(dst->isTable64 and src->isTable64);
+    u64      منبع = d_m3_Wide_عملوند(src->isTable64);
+    u64      destination = d_m3_Wide_عملوند(dst->isTable64);
 
-    if (M3_LIKELY(destination <= dst->size and count <= dst->size - destination and
-                  source <= src->size and count <= src->size - source)) {
-        memmove(dst->elements + destination, src->elements + source, (size_t)count * sizeof(void*));
+    إذا (M3_LIKELY(destination <= dst->اندازه and شمار <= dst->اندازه - destination and
+                  منبع <= src->اندازه and شمار <= src->اندازه - منبع)) {
+        memmove(dst->elements + destination, src->elements + منبع, (size_t)شمار * حجم(فراغ*));
 
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+        بعدی_Op();
+    } وإلا {
+        newTrap(m3_Err_trap_جدول_بیرون_از_Bounds);
     }
 }
 
 
-d_m3Op(TableFill)
+d_m3Op(جدول_Fill)
 {
-    M3Table* table = immediate(M3Table*);
-    u64      count = d_m3WideOperand(table->isTable64);
-    void*    value = slot(void*);
-    u64      index = d_m3WideOperand(table->isTable64);
+    M3_جدول* جدول_2 = فوری(M3_جدول*);
+    u64      شمار = d_m3_Wide_عملوند(جدول_2->isTable64);
+    فراغ*    مقدار = جایگاه(فراغ*);
+    u64      index = d_m3_Wide_عملوند(جدول_2->isTable64);
 
-    if (M3_LIKELY(index <= table->size and count <= table->size - index)) {
-        for (u64 i = 0; i < count; ++i) {
-            table->elements[index + i] = value;
+    إذا (M3_LIKELY(index <= جدول_2->اندازه and شمار <= جدول_2->اندازه - index)) {
+        لكل (u64 i = 0; i < شمار; ++i) {
+            جدول_2->elements[index + i] = مقدار;
         }
 
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+        بعدی_Op();
+    } وإلا {
+        newTrap(m3_Err_trap_جدول_بیرون_از_Bounds);
     }
 }
 
-#endif // d_m3HasRefTypes
+#پایان_اگر // d_m3HasRefTypes
 
 
 // it's a debate: should the compilation be trigger be the caller or callee page.
@@ -1736,22 +1736,22 @@ d_m3Op(Compile)
 {
     rewrite_op(op_Call);
 
-    IM3Function function = immediate(IM3Function);
+    IM3Function function = فوری(IM3Function);
 
-    m3ret_t     result = m3Err_none;
+    m3ret_t     نتیجه = m3Err_none;
 
-    if (M3_UNLIKELY(not function->compiled)) { // check to see if function was compiled since this operation was emitted.
-        result = CompileFunction(function);
+    إذا (M3_UNLIKELY(not function->compiled)) { // check to see if function was compiled since this operation was emitted.
+        نتیجه = CompileFunction(function);
     }
 
-    if (not result) {
+    إذا (not نتیجه) {
         // patch up compiled pc and call rewritten op_Call
-        *((void**)--_pc) = (void*)(function->compiled);
+        *((فراغ**)--_pc) = (فراغ*)(function->compiled);
         --_pc;
-        nextOpDirect();
+        بعدی_Op_مستقیم();
     }
 
-    newTrap(result);
+    newTrap(نتیجه);
 }
 
 
@@ -1760,26 +1760,26 @@ d_m3Op(CompileReturnCall)
 {
     rewrite_op(op_ReturnCall);
 
-    IM3Function function = immediate(IM3Function);
+    IM3Function function = فوری(IM3Function);
 
-    m3ret_t     result = m3Err_none;
+    m3ret_t     نتیجه = m3Err_none;
 
-    if (M3_UNLIKELY(not function->compiled)) {
-        result = CompileFunction(function);
+    إذا (M3_UNLIKELY(not function->compiled)) {
+        نتیجه = CompileFunction(function);
     }
 
-    if (not result) {
+    إذا (not نتیجه) {
         // patch up compiled pc and call rewritten op_ReturnCall
-        *((void**)--_pc) = (void*)(function->compiled);
+        *((فراغ**)--_pc) = (فراغ*)(function->compiled);
         --_pc;
-        nextOpDirect();
+        بعدی_Op_مستقیم();
     }
 
-    newTrap(result);
+    newTrap(نتیجه);
 }
 
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_پشته_Switching
 // Suspending for a reason that is not a control tag - the host asked, or the
 // gas ran out. There is no handler to look for and no payload to carry, and
 // clearing the routing a previous suspend left behind is what keeps this from
@@ -1791,10 +1791,10 @@ d_m3Op(CompileReturnCall)
 // handler takes the suspend as its own, so naming the suspending continuation
 // would stop a suspend from inside a resumed one at that resume, with no stub
 // to run. Naming none sends it through every resume up to the host.
-static
-void SuspendWithoutTag (IM3Runtime io_runtime, IM3Continuation io_cont, M3SafePointKind i_kind,
+ساكن
+فراغ Suspend_Without_برچسب (IM3Runtime io_runtime, IM3Continuation io_cont, M3_امن_نقطه_نوع i_نوع,
                         pc_t i_pc, m3stack_t i_sp, m3reg_t i_r0
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
                         ,
                         f64 i_fp0
 #  endif
@@ -1802,26 +1802,26 @@ void SuspendWithoutTag (IM3Runtime io_runtime, IM3Continuation io_cont, M3SafePo
 {
     io_runtime->suspendRequested = false;
 
-    io_runtime->suspendTag = NULL;
-    io_runtime->suspendHandlerCont = NULL;
-    io_runtime->suspendStubPC = NULL;
-    io_runtime->switchTarget = NULL;
-    io_runtime->numSuspendPayload = 0;
+    io_runtime->suspend_برچسب = عدم;
+    io_runtime->suspendHandlerCont = عدم;
+    io_runtime->suspendStubPC = عدم;
+    io_runtime->switch_هدف = عدم;
+    io_runtime->رقم_Suspend_Payload = 0;
 
     io_cont->pc = i_pc;
-    io_cont->suspendPoint = (u8)i_kind;
+    io_cont->suspend_نقطه = (u8)i_نوع;
     io_cont->sp = i_sp;
     io_cont->r0 = i_r0;
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
     io_cont->fp0 = i_fp0;
 #  endif
 
-    io_cont->numSuspendResults = 0;
+    io_cont->رقم_Suspend_Results = 0;
 }
-#endif // d_m3HasStackSwitching
+#پایان_اگر // d_m3HasStackSwitching
 
 
-#if d_m3HasGasMetering
+#إذا d_m3HasGasMetering
 
 // Pays for the straight-line segment of the function body that follows, before
 // any of it runs. The compiler adds up the segment's instruction costs while it
@@ -1833,126 +1833,126 @@ void SuspendWithoutTag (IM3Runtime io_runtime, IM3Continuation io_cont, M3SafePo
 d_m3Op(UseGas)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    u32        cost = immediate(u32);
+    u32        هزینه = فوری(u32);
 
-    runtime->gasRemaining -= (i64)cost;
+    runtime->gas_مانده -= (i64)هزینه;
 
-    if (M3_UNLIKELY(runtime->gasRemaining < 0)) {
-#  if d_m3HasStackSwitching
+    إذا (M3_UNLIKELY(runtime->gas_مانده < 0)) {
+#  إذا d_m3_Has_پشته_Switching
         // A runtime that can pause does, at the next pause point: running out
         // is a request to stop, like the host's, and the segment runs on to
         // it. The counter goes below zero by what it takes to get there.
-        if (runtime->isSuspendable and runtime->activeContinuation) {
+        إذا (runtime->isSuspendable and runtime->فعال_Continuation) {
             runtime->suspendRequested = true;
-            nextOp();
+            بعدی_Op();
         }
 #  endif
-        newTrap(m3Err_trapOutOfGas);
+        newTrap(m3_Err_trap_بیرون_از_Gas);
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
-#endif // d_m3HasGasMetering
+#پایان_اگر // d_m3HasGasMetering
 
 
 // Whether a function's frame fits the stack it is about to be entered on
-static inline
-bool EntryFits (IM3Function i_function, m3stack_t _sp, M3MemoryHeader* _mem)
+ساكن مضمن
+bool مدخل_میگنجد (IM3Function i_function, m3stack_t _sp, M3_حافظه_سرآیند* _mem)
 {
-#if d_m3SkipStackCheck
-    (void)i_function;
-    (void)_sp;
-    (void)_mem;
-    return true;
-#elif d_m3HasStackSwitching
-    IM3Continuation _act = (_mem ? m3MemRuntime(_mem)->activeContinuation : NULL);
-    void*           maxStack = (_act && _act->valStack)
-                                 ? (void*)(_act->valStack + _act->numStackSlots)
-                                 : (_mem ? _mem->maxStack : (void*)~(uintptr_t)0);
-    return M3_LIKELY((void*)(_sp + i_function->maxStackSlots) < maxStack);
-#else
-    return M3_LIKELY((void*)(_sp + i_function->maxStackSlots) < _mem->maxStack);
-#endif
+#إذا d_m3_Skip_پشته_Check
+    (فراغ)i_function;
+    (فراغ)_sp;
+    (فراغ)_mem;
+    أرجع true;
+#وإلاإذا d_m3_Has_پشته_Switching
+    IM3Continuation _act = (_mem ? m3MemRuntime(_mem)->فعال_Continuation : عدم);
+    فراغ*           max_پشته = (_act && _act->val_پشته)
+                                 ? (فراغ*)(_act->val_پشته + _act->رقم_پشته_Slots)
+                                 : (_mem ? _mem->max_پشته : (فراغ*)~(uintptr_t)0);
+    أرجع M3_LIKELY((فراغ*)(_sp + i_function->max_پشته_Slots) < max_پشته);
+#وإلا
+    أرجع M3_LIKELY((فراغ*)(_sp + i_function->max_پشته_Slots) < _mem->max_پشته);
+#پایان_اگر
 }
 
 // Sets up a function's frame: its locals zeroed, and its constants copied in
-static inline
-void EnterFrame (IM3Function i_function, m3stack_t _sp)
+ساكن مضمن
+فراغ Enter_قاب (IM3Function i_function, m3stack_t _sp)
 {
-#if defined(DEBUG)
-    i_function->hits++;
-#endif
-    u8* stack = (u8*)((m3slot_t*)_sp + i_function->numRetAndArgSlots);
+#إذا defined(DEBUG)
+    i_function->اصابتها++;
+#پایان_اگر
+    u8* پشته = (u8*)((m3slot_t*)_sp + i_function->رقم_Ret_And_Arg_Slots);
 
-    memset(stack, 0x0, i_function->numLocalBytes);
-    stack += i_function->numLocalBytes;
+    memset(پشته, 0x0, i_function->رقم_Local_بایتها);
+    پشته += i_function->رقم_Local_بایتها;
 
-    if (i_function->constants) {
-        memcpy(stack, i_function->constants, i_function->numConstantBytes);
+    إذا (i_function->constants) {
+        کپی_حافظه(پشته, i_function->constants, i_function->رقم_Constant_بایتها);
     }
 }
 
 
-d_m3Op(Entry)
+d_m3Op(مدخل_2)
 {
     d_m3ClearRegisters
 
     d_m3TracePrepare
 
-    IM3Function function = immediate(IM3Function);
-#if d_m3EntryKeepsFrame
-    IM3Memory memory = m3MemInfo(_mem);
-#endif
+    IM3Function function = فوری(IM3Function);
+#إذا d_m3_مدخل_Keeps_قاب
+    IM3_حافظه حافظه = m3MemInfo(_mem);
+#پایان_اگر
 
-    if (EntryFits(function, _sp, _mem)) {
-        EnterFrame(function, _sp);
+    إذا (مدخل_میگنجد(function, _sp, _mem)) {
+        Enter_قاب(function, _sp);
 
-#if !d_m3EntryKeepsFrame
+#إذا !d_m3_مدخل_Keeps_قاب
         // there's nothing left to do once the body returns, so hand this native frame
         // over to it. That's what lets op_ReturnCall tail-call in constant native stack.
-        nextOpDirect();
-#else
+        بعدی_Op_مستقیم();
+#وإلا
 
-#  if d_m3EnableStrace >= 2
-        d_m3TracePrint("%s %s {", m3_GetFunctionName(function), SPrintFunctionArgList(function, _sp + function->numRetSlots));
-        trace_rt->callDepth++;
+#  إذا d_m3EnableStrace >= 2
+        d_m3TracePrint("%s %s {", m3_GetFunctionName(function), SPrintFunctionArgList(function, _sp + function->رقم_Ret_Slots));
+        trace_rt->call_عمق++;
 #  endif
 
-        m3ret_t r = nextOpImpl();
+        m3ret_t r = بعدی_Op_Impl();
 
-#  if d_m3EnableStrace >= 2
-        trace_rt->callDepth--;
+#  إذا d_m3EnableStrace >= 2
+        trace_rt->call_عمق--;
 
-        if (r) {
-            d_m3TracePrint("} !trap = %s", (char*)r);
-        } else if (GetFunctionNumReturns(function)) {
+        إذا (r) {
+            d_m3TracePrint("} !trap = %s", (حرف*)r);
+        } وإلا إذا (Get_Function_رقم_Returns(function)) {
             d_m3TracePrint("} = %s", SPrintFunctionRetList(function->funcType, _sp));
-        } else {
+        } وإلا {
             d_m3TracePrint("}");
         }
 #  endif
 
-        if (M3_UNLIKELY(r)) {
-            _mem = memory->mallocated;
-#  if d_m3HasStackSwitching
-            if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-                return RecordEntryFrame(m3MemRuntime(_mem), _pc, _sp, memory, function);
+        إذا (M3_UNLIKELY(r)) {
+            _mem = حافظه->mallocated;
+#  إذا d_m3_Has_پشته_Switching
+            إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+                أرجع رکورد_مدخل_قاب(m3MemRuntime(_mem), _pc, _sp, حافظه, function);
             }
 #  endif
-            fillBacktraceFrame();
+            fill_Backtrace_قاب();
         }
         forwardTrap(r);
-#endif // d_m3EntryKeepsFrame
-    } else {
-        newTrap(m3Err_trapStackOverflow);
+#پایان_اگر // d_m3EntryKeepsFrame
+    } وإلا {
+        newTrap(m3_Err_trap_پشته_سرریز);
     }
 }
 
 
 d_m3Op(Loop)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_پشته();
 
     d_m3TracePrepare
 
@@ -1962,38 +1962,38 @@ d_m3Op(Loop)
 
     m3ret_t   r;
 
-    IM3Memory memory = m3MemInfo(_mem);
+    IM3_حافظه حافظه = m3MemInfo(_mem);
 
-    do {
-#if d_m3EnableStrace >= 3
+    افعل {
+#إذا d_m3EnableStrace >= 3
         d_m3TracePrint("iter {");
-        trace_rt->callDepth++;
-#endif
-        r = nextOpImpl();
+        trace_rt->call_عمق++;
+#پایان_اگر
+        r = بعدی_Op_Impl();
 
-#if d_m3EnableStrace >= 3
-        trace_rt->callDepth--;
+#إذا d_m3EnableStrace >= 3
+        trace_rt->call_عمق--;
         d_m3TracePrint("}");
-#endif
+#پایان_اگر
         // linear memory pointer needs refreshed here because the block it's looping over
         // can potentially invoke the grow operation.
-        _mem = memory->mallocated;
-    } while (r == _pc);
+        _mem = حافظه->mallocated;
+    } طالما (r == _pc);
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_پشته_Switching
     // The loop's identity is its own pc, which is also where its body starts,
     // so replaying it needs nothing else. Without this the continue sentinel
     // has no frame left to land in after a resume and gets mistaken for a trap.
-    if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-        return RecordLoopFrame(m3MemRuntime(_mem), _pc, _sp, memory);
+    إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+        أرجع رکورد_Loop_قاب(m3MemRuntime(_mem), _pc, _sp, حافظه);
     }
-#endif
+#پایان_اگر
 
     forwardTrap(r);
 }
 
 
-#if d_m3HasExceptionHandling
+#إذا d_m3HasExceptionHandling
 
 // try_table. Like op_Loop this claims a native frame, and for the same reason:
 // a throw unwinds by returning m3Err_pendingException up the native stack, so
@@ -2010,48 +2010,48 @@ d_m3Op(Loop)
 // The handler stack is just a depth counter: an unwind stops at whichever frame
 // finds the count still standing at the value its own push produced, which is
 // the innermost try region that hasn't been popped.
-d_m3Op(TryTable)
+d_m3Op(Try_جدول)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_پشته();
 
-    IM3Memory  memory = m3MemInfo(_mem);
+    IM3_حافظه  حافظه = m3MemInfo(_mem);
     IM3Runtime runtime = m3MemRuntime(_mem);
 
-    u32        numClauses = immediate(u32);
+    u32        رقم_Clauses = فوری(u32);
 
     pc_t       clauses = _pc;
-    pc_t       body = _pc + 2 * numClauses;
+    pc_t       body = _pc + 2 * رقم_Clauses;
 
-    u32        depth = ++runtime->tryDepth;
+    u32        عمق = ++runtime->try_عمق;
 
     m3ret_t    r = jumpOpImpl(body);
 
     // the body can have grown linear memory out from under us
-    _mem = memory->mallocated;
+    _mem = حافظه->mallocated;
 
     // control is leaving this frame for good, so this try is done either way
-    bool isInnermost = (runtime->tryDepth == depth);
-    runtime->tryDepth = depth - 1;
+    bool isInnermost = (runtime->try_عمق == عمق);
+    runtime->try_عمق = عمق - 1;
 
-#  if d_m3HasStackSwitching
-    if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-        return RecordTryFrame(runtime, clauses, _sp, memory, numClauses, isInnermost);
+#  إذا d_m3_Has_پشته_Switching
+    إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+        أرجع رکورد_Try_قاب(runtime, clauses, _sp, حافظه, رقم_Clauses, isInnermost);
     }
 #  endif
 
-    if (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
-        const M3Exception* exception = runtime->pendingException;
+    إذا (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
+        ثابت M3Exception* exception = runtime->pendingException;
 
-        for (u32 i = 0; i < numClauses; ++i) {
-            IM3Tag tag = (IM3Tag)clauses[2 * i];
+        لكل (u32 i = 0; i < رقم_Clauses; ++i) {
+            IM3_برچسب برچسب = (IM3_برچسب)clauses[2 * i];
 
-            if (tag == NULL or tag == exception->tag) {
+            إذا (برچسب == عدم or برچسب == exception->برچسب) {
                 pc_t handler = (pc_t)clauses[2 * i + 1];
 
                 // an unwind leaves nothing meaningful in the registers
                 d_m3ClearRegisters
 
-                jumpOpDirect(handler);
+                jump_Op_مستقیم(handler);
             }
         }
 
@@ -2075,30 +2075,30 @@ d_m3Op(CatchPayload)
     IM3Runtime   runtime = m3MemRuntime(_mem);
     M3Exception* exception = runtime->pendingException;
 
-    u32          numArgs = immediate(u32);
+    u32          رقم_آرگومانها = فوری(u32);
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 offset = immediate(i32);
-        u32 is64 = immediate(u32);
-        u64 value = exception->args[i];
+    لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+        i32 offset = فوری(i32);
+        u32 is64 = فوری(u32);
+        u64 مقدار = exception->آرگومانها[i];
 
-        if (is64) {
-            *(u64*)(_sp + offset) = value;
-        } else {
-            *(u32*)(_sp + offset) = (u32)value;
+        إذا (is64) {
+            *(u64*)(_sp + offset) = مقدار;
+        } وإلا {
+            *(u32*)(_sp + offset) = (u32)مقدار;
         }
     }
 
-    i32 refOffset = immediate(i32);
+    i32 ref_جابه_جایی = فوری(i32);
 
-    if (refOffset >= 0) {
-        *(M3Exception**)(_sp + refOffset) = exception;
+    إذا (ref_جابه_جایی >= 0) {
+        *(M3Exception**)(_sp + ref_جابه_جایی) = exception;
         exception->reified = true;
-    } else if (not exception->reified) {
+    } وإلا إذا (not exception->reified) {
         FreeException(runtime, exception);
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
 
@@ -2106,184 +2106,184 @@ d_m3Op(Throw)
 {
     IM3Runtime   runtime = m3MemRuntime(_mem);
 
-    IM3Tag       tag = immediate(IM3Tag);
-    u32          numArgs = immediate(u32);
+    IM3_برچسب       برچسب = فوری(IM3_برچسب);
+    u32          رقم_آرگومانها = فوری(u32);
 
-    M3Exception* exception = NewException(runtime, tag, numArgs);
+    M3Exception* exception = NewException(runtime, برچسب, رقم_آرگومانها);
 
-    if (M3_UNLIKELY(not exception)) {
+    إذا (M3_UNLIKELY(not exception)) {
         newTrap(m3Err_mallocFailed);
     }
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 offset = immediate(i32);
-        u32 is64 = immediate(u32);
+    لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+        i32 offset = فوری(i32);
+        u32 is64 = فوری(u32);
 
-        exception->args[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
+        exception->آرگومانها[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
     }
 
     runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    أرجع m3Err_pendingException;
 }
 
 
 d_m3Op(ThrowRef)
 {
-    M3Exception* exception = slot(M3Exception*);
+    M3Exception* exception = جایگاه(M3Exception*);
 
-    if (M3_UNLIKELY(not exception)) {
+    إذا (M3_UNLIKELY(not exception)) {
         newTrap(m3Err_trapNullReference);
     }
 
     m3MemRuntime(_mem)->pendingException = exception;
 
-    return m3Err_pendingException;
+    أرجع m3Err_pendingException;
 }
 
 
 // Emitted where control leaves a try region without leaving op_TryTable's native
 // frame: falling out of the block's end, or branching past it. The count is how
 // many try regions the exit crosses.
-d_m3Op(PopHandlers)
+d_m3Op(برداشت_Handlers)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
 
-    u32        count = immediate(u32);
+    u32        شمار = فوری(u32);
 
-    runtime->tryDepth -= count;
+    runtime->try_عمق -= شمار;
 
-    nextOp();
+    بعدی_Op();
 }
 
-#endif // d_m3HasExceptionHandling
+#پایان_اگر // d_m3HasExceptionHandling
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_پشته_Switching
 
 d_m3Op(ContNew)
 {
     IM3Runtime  runtime = m3MemRuntime(_mem);
-    IM3FuncType funcType = immediate(IM3FuncType);
-    i32         dstSlot = immediate(i32);
-    i32         funcSlot = immediate(i32);
+    IM3FuncType funcType = فوری(IM3FuncType);
+    i32         dst_جایگاه = فوری(i32);
+    i32         func_جایگاه = فوری(i32);
 
-    IM3Function func = *(IM3Function*)(_sp + funcSlot);
-    if (M3_UNLIKELY(not func)) {
+    IM3Function func = *(IM3Function*)(_sp + func_جایگاه);
+    إذا (M3_UNLIKELY(not func)) {
         newTrap(m3Err_trapNullFunctionRef);
     }
 
     // refused before a record exists, so a trap here leaves nothing behind
-    if (M3_UNLIKELY(not Continuation_CanAcquireStack(runtime))) {
-        newTrap(m3Err_continuationLimitExceeded);
+    إذا (M3_UNLIKELY(not Continuation_Can_Acquire_پشته(runtime))) {
+        newTrap(m3_Err_continuation_حد_Exceeded);
     }
     IM3Continuation cont = Continuation_New(runtime, funcType, func);
-    if (M3_UNLIKELY(not cont)) {
+    إذا (M3_UNLIKELY(not cont)) {
         newTrap(m3Err_mallocFailed);
     }
 
-    M3Result allocation = Continuation_AcquireStack(runtime, cont);
-    if (M3_UNLIKELY(allocation)) {
+    M3_نتیجه تخصیص = Continuation_Acquire_پشته(runtime, cont);
+    إذا (M3_UNLIKELY(تخصیص)) {
         cont->state = cont_consumed;
-        newTrap(allocation);
+        newTrap(تخصیص);
     }
-    *(IM3Continuation*)(_sp + dstSlot) = cont;
-    nextOp();
+    *(IM3Continuation*)(_sp + dst_جایگاه) = cont;
+    بعدی_Op();
 }
 
 
-static
+ساكن
 IM3Continuation InnermostSuspended (IM3Continuation i_cont);
 
 d_m3Op(ContBind)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3FuncType     ct1 = immediate(IM3FuncType);
-    IM3FuncType     ct2 = immediate(IM3FuncType);
-    i32             dstSlot = immediate(i32);
-    i32             contSlot = immediate(i32);
-    u32             numBound = immediate(u32);
+    IM3FuncType     ct1 = فوری(IM3FuncType);
+    IM3FuncType     ct2 = فوری(IM3FuncType);
+    i32             dst_جایگاه = فوری(i32);
+    i32             cont_جایگاه = فوری(i32);
+    u32             رقم_Bound = فوری(u32);
 
-    IM3Continuation srcCont = *(IM3Continuation*)(_sp + contSlot);
-    if (M3_UNLIKELY(not srcCont)) {
+    IM3Continuation srcCont = *(IM3Continuation*)(_sp + cont_جایگاه);
+    إذا (M3_UNLIKELY(not srcCont)) {
         newTrap(m3Err_trapNullContinuationRef);
     }
-    if (M3_UNLIKELY(srcCont->state == cont_consumed || srcCont->state == cont_running)) {
+    إذا (M3_UNLIKELY(srcCont->state == cont_consumed || srcCont->state == cont_running)) {
         newTrap(m3Err_trapContinuationConsumed);
     }
 
-    IM3Continuation dstCont = Continuation_New(runtime, ct2, srcCont->entryFunction);
-    if (M3_UNLIKELY(not dstCont)) {
+    IM3Continuation dstCont = Continuation_New(runtime, ct2, srcCont->مدخل_Function);
+    إذا (M3_UNLIKELY(not dstCont)) {
         newTrap(m3Err_mallocFailed);
     }
 
     // the bound continuation takes over the original's execution state whole,
     // recorded native frames included: binding a suspended continuation must
     // not cost it the frames it has to be resumed through
-    dstCont->entryFunction = srcCont->entryFunction;
-    dstCont->valStack = srcCont->valStack;
-    dstCont->numStackSlots = srcCont->numStackSlots;
-    dstCont->frames = srcCont->frames;
-    dstCont->framesCap = srcCont->framesCap;
-    dstCont->numFrames = srcCont->numFrames;
+    dstCont->مدخل_Function = srcCont->مدخل_Function;
+    dstCont->val_پشته = srcCont->val_پشته;
+    dstCont->رقم_پشته_Slots = srcCont->رقم_پشته_Slots;
+    dstCont->قابها = srcCont->قابها;
+    dstCont->قابها_Cap = srcCont->قابها_Cap;
+    dstCont->رقم_قابها = srcCont->رقم_قابها;
     dstCont->sp = srcCont->sp;
     dstCont->pc = srcCont->pc;
-    dstCont->suspendPoint = srcCont->suspendPoint;
+    dstCont->suspend_نقطه = srcCont->suspend_نقطه;
     dstCont->r0 = srcCont->r0;
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
     dstCont->fp0 = srcCont->fp0;
 #  endif
-    dstCont->boundArgsCount = srcCont->boundArgsCount;
+    dstCont->bound_آرگومانها_شمار = srcCont->bound_آرگومانها_شمار;
     dstCont->state = srcCont->state;
-#  if d_m3HasExceptionHandling
+#  إذا d_m3HasExceptionHandling
     dstCont->resumeThrow = srcCont->resumeThrow;
-    srcCont->resumeThrow = NULL;
+    srcCont->resumeThrow = عدم;
 #  endif
 
-    dstCont->numSuspendResults = srcCont->numSuspendResults;
-    for (u32 j = 0; j < srcCont->numSuspendResults; ++j) {
-        dstCont->suspendResultOffsets[j] = srcCont->suspendResultOffsets[j];
-        dstCont->suspendResultIs64[j] = srcCont->suspendResultIs64[j];
+    dstCont->رقم_Suspend_Results = srcCont->رقم_Suspend_Results;
+    لكل (u32 j = 0; j < srcCont->رقم_Suspend_Results; ++j) {
+        dstCont->suspend_نتیجه_Offsets[j] = srcCont->suspend_نتیجه_Offsets[j];
+        dstCont->suspend_نتیجه_Is64[j] = srcCont->suspend_نتیجه_Is64[j];
     }
 
-    if (dstCont->state == cont_allocated) {
-        u16 numRets = ct1->contFuncType ? GetFuncTypeNumResults(ct1->contFuncType) : 0;
-        for (u32 i = 0; i < numBound; ++i) {
-            i32 argSlot = immediate(i32);
-            u32 is64 = immediate(u32);
-            u32 targetIdx = (numRets + dstCont->boundArgsCount) * c_ioSlotCount;
-            if (is64) {
-                *(u64*)(dstCont->valStack + targetIdx) = *(u64*)(_sp + argSlot);
-            } else {
-                *(u32*)(dstCont->valStack + targetIdx) = *(u32*)(_sp + argSlot);
+    إذا (dstCont->state == cont_allocated) {
+        u16 رقم_Rets = ct1->contFuncType ? Get_Func_Type_رقم_Results(ct1->contFuncType) : 0;
+        لكل (u32 i = 0; i < رقم_Bound; ++i) {
+            i32 arg_جایگاه = فوری(i32);
+            u32 is64 = فوری(u32);
+            u32 هدف_Idx = (رقم_Rets + dstCont->bound_آرگومانها_شمار) * c_io_جایگاه_شمار;
+            إذا (is64) {
+                *(u64*)(dstCont->val_پشته + هدف_Idx) = *(u64*)(_sp + arg_جایگاه);
+            } وإلا {
+                *(u32*)(dstCont->val_پشته + هدف_Idx) = *(u32*)(_sp + arg_جایگاه);
             }
-            dstCont->boundArgsCount++;
+            dstCont->bound_آرگومانها_شمار++;
         }
-    } else {
+    } وإلا {
         IM3Continuation inner = InnermostSuspended(dstCont);
-        for (u32 i = 0; i < numBound; ++i) {
-            i32 argSlot = immediate(i32);
-            u32 is64 = immediate(u32);
-            u32 dstIdx = dstCont->boundArgsCount;
-            if (dstIdx < inner->numSuspendResults) {
-                i32 dstOffset = inner->suspendResultOffsets[dstIdx];
-                if (is64) {
-                    *(u64*)(inner->sp + dstOffset) = *(u64*)(_sp + argSlot);
-                } else {
-                    *(u32*)(inner->sp + dstOffset) = *(u32*)(_sp + argSlot);
+        لكل (u32 i = 0; i < رقم_Bound; ++i) {
+            i32 arg_جایگاه = فوری(i32);
+            u32 is64 = فوری(u32);
+            u32 dstIdx = dstCont->bound_آرگومانها_شمار;
+            إذا (dstIdx < inner->رقم_Suspend_Results) {
+                i32 dst_جابه_جایی = inner->suspend_نتیجه_Offsets[dstIdx];
+                إذا (is64) {
+                    *(u64*)(inner->sp + dst_جابه_جایی) = *(u64*)(_sp + arg_جایگاه);
+                } وإلا {
+                    *(u32*)(inner->sp + dst_جابه_جایی) = *(u32*)(_sp + arg_جایگاه);
                 }
             }
-            dstCont->boundArgsCount++;
+            dstCont->bound_آرگومانها_شمار++;
         }
     }
 
-    srcCont->valStack = NULL;
-    srcCont->frames = NULL;
-    srcCont->framesCap = 0;
-    srcCont->numFrames = 0;
+    srcCont->val_پشته = عدم;
+    srcCont->قابها = عدم;
+    srcCont->قابها_Cap = 0;
+    srcCont->رقم_قابها = 0;
     srcCont->state = cont_consumed;
 
-    *(IM3Continuation*)(_sp + dstSlot) = dstCont;
-    nextOp();
+    *(IM3Continuation*)(_sp + dst_جایگاه) = dstCont;
+    بعدی_Op();
 }
 
 
@@ -2292,29 +2292,29 @@ d_m3Op(ContBind)
 // 0 for (on $e $l), 1 for (on $e switch). The spec is explicit that the search
 // walks past a handler of the wrong sort even when the tag matches, so the
 // kind is part of the match rather than something checked afterwards.
-static
-IM3Continuation FindHandler (IM3Continuation i_cont, IM3Tag i_tag, u8 i_kind, pc_t* o_stubPC)
+ساكن
+IM3Continuation پیدا_کن_Handler (IM3Continuation i_cont, IM3_برچسب i_برچسب, u8 i_نوع, pc_t* o_stubPC)
 {
-    IM3Tag queryTag = (i_tag and i_tag->resolved) ? i_tag->resolved : i_tag;
+    IM3_برچسب query_برچسب = (i_برچسب and i_برچسب->resolved) ? i_برچسب->resolved : i_برچسب;
 
-    for (IM3Continuation cont = i_cont; cont; cont = cont->parent) {
-        for (u32 h = 0; h < cont->numHandlers; ++h) {
-            pc_t   entry = cont->handlersPC + (h * 3);
-            IM3Tag handlerTag = (IM3Tag)(*(entry + 1));
-            if (handlerTag and handlerTag->resolved) {
-                handlerTag = handlerTag->resolved;
+    لكل (IM3Continuation cont = i_cont; cont; cont = cont->والد) {
+        لكل (u32 h = 0; h < cont->رقم_Handlers; ++h) {
+            pc_t   مدخل = cont->handlersPC + (h * 3);
+            IM3_برچسب handler_برچسب = (IM3_برچسب)(*(مدخل + 1));
+            إذا (handler_برچسب and handler_برچسب->resolved) {
+                handler_برچسب = handler_برچسب->resolved;
             }
 
-            if ((u32)(uintptr_t)(*entry) == i_kind and handlerTag == queryTag) {
-                if (o_stubPC) {
-                    *o_stubPC = (pc_t)(*(entry + 2));
+            إذا ((u32)(uintptr_t)(*مدخل) == i_نوع and handler_برچسب == query_برچسب) {
+                إذا (o_stubPC) {
+                    *o_stubPC = (pc_t)(*(مدخل + 2));
                 }
-                return cont;
+                أرجع cont;
             }
         }
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
@@ -2322,14 +2322,14 @@ IM3Continuation FindHandler (IM3Continuation i_cont, IM3Tag i_tag, u8 i_kind, pc
 // Until something writes them they are part of the suspended frame holding
 // nothing, and a snapshot taken meanwhile reads each one as the type it will
 // have: a reference there has to be null rather than whatever the slot held.
-static
-void ClearSuspendResults (IM3Continuation io_cont, m3stack_t i_sp)
+ساكن
+فراغ ClearSuspendResults (IM3Continuation io_cont, m3stack_t i_sp)
 {
-    for (u32 i = 0; i < io_cont->numSuspendResults; ++i) {
-        if (io_cont->suspendResultIs64[i]) {
-            *(u64*)(i_sp + io_cont->suspendResultOffsets[i]) = 0;
-        } else {
-            *(m3slot_t*)(i_sp + io_cont->suspendResultOffsets[i]) = 0;
+    لكل (u32 i = 0; i < io_cont->رقم_Suspend_Results; ++i) {
+        إذا (io_cont->suspend_نتیجه_Is64[i]) {
+            *(u64*)(i_sp + io_cont->suspend_نتیجه_Offsets[i]) = 0;
+        } وإلا {
+            *(m3slot_t*)(i_sp + io_cont->suspend_نتیجه_Offsets[i]) = 0;
         }
     }
 }
@@ -2338,83 +2338,83 @@ void ClearSuspendResults (IM3Continuation io_cont, m3stack_t i_sp)
 d_m3Op(Suspend)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3Continuation cont = runtime->activeContinuation;
-    if (M3_UNLIKELY(not cont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    IM3Continuation cont = runtime->فعال_Continuation;
+    إذا (M3_UNLIKELY(not cont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_برچسب);
     }
 
-    IM3Tag tag = immediate(IM3Tag);
-    u32    numParams = immediate(u32);
+    IM3_برچسب برچسب = فوری(IM3_برچسب);
+    u32    رقم_Params = فوری(u32);
 
-    runtime->numSuspendPayload = numParams;
-    for (u32 i = 0; i < numParams; ++i) {
-        i32 paramSlot = immediate(i32);
-        u32 is64 = immediate(u32);
-        if (is64) {
-            runtime->suspendPayload[i] = *(u64*)(_sp + paramSlot);
-        } else {
-            runtime->suspendPayload[i] = (u64) * (u32*)(_sp + paramSlot);
+    runtime->رقم_Suspend_Payload = رقم_Params;
+    لكل (u32 i = 0; i < رقم_Params; ++i) {
+        i32 param_جایگاه = فوری(i32);
+        u32 is64 = فوری(u32);
+        إذا (is64) {
+            runtime->suspendPayload[i] = *(u64*)(_sp + param_جایگاه);
+        } وإلا {
+            runtime->suspendPayload[i] = (u64) * (u32*)(_sp + param_جایگاه);
         }
         runtime->suspendPayloadIs64[i] = is64;
     }
 
-    u32 numResults = immediate(u32);
-    cont->numSuspendResults = numResults;
-    for (u32 i = 0; i < numResults; ++i) {
-        cont->suspendResultOffsets[i] = immediate(i32);
-        cont->suspendResultIs64[i] = immediate(u32);
+    u32 رقم_Results = فوری(u32);
+    cont->رقم_Suspend_Results = رقم_Results;
+    لكل (u32 i = 0; i < رقم_Results; ++i) {
+        cont->suspend_نتیجه_Offsets[i] = فوری(i32);
+        cont->suspend_نتیجه_Is64[i] = فوری(u32);
     }
 
     ClearSuspendResults(cont, _sp);
 
-    pc_t            matchedStubPC = NULL;
-    IM3Continuation searchCont = FindHandler(cont, tag, 0, &matchedStubPC);
+    pc_t            matchedStubPC = عدم;
+    IM3Continuation جستجو_Cont = پیدا_کن_Handler(cont, برچسب, 0, &matchedStubPC);
 
-    if (M3_UNLIKELY(not searchCont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    إذا (M3_UNLIKELY(not جستجو_Cont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_برچسب);
     }
 
     runtime->suspendStubPC = matchedStubPC;
-    runtime->suspendHandlerCont = searchCont;
-    runtime->switchTarget = NULL;
-    runtime->suspendTag = tag;
+    runtime->suspendHandlerCont = جستجو_Cont;
+    runtime->switch_هدف = عدم;
+    runtime->suspend_برچسب = برچسب;
 
     cont->pc = _pc;
-    cont->suspendPoint = safepoint_suspend;
+    cont->suspend_نقطه = safepoint_suspend;
     cont->sp = _sp;
     cont->r0 = _r0;
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
     cont->fp0 = _fp0;
 #  endif
-    cont->boundArgsCount = 0;
+    cont->bound_آرگومانها_شمار = 0;
 
-    return m3Err_continuationSuspended;
+    أرجع m3Err_continuationSuspended;
 }
 
 
 // ReplayFrames and RunUnderHandlers call each other: a captured resume is a
 // frame like any other, and what it stands back up is a continuation with
 // frames of its own.
-static
-m3ret_t RunUnderHandlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
-                          pc_t i_handlersPC, u32 i_numHandlers, M3MemoryHeader** io_mem);
-static
-void TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp,
-                              pc_t i_resultsPC, u32 i_numResults);
-static
-m3ret_t ResumePastCheck (IM3Continuation i_cont, M3MemoryHeader* _mem);
+ساكن
+m3ret_t پیاپی_Under_Handlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
+                          pc_t i_handlersPC, u32 i_رقم_Handlers, M3_حافظه_سرآیند** io_mem);
+ساكن
+فراغ TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp,
+                              pc_t i_resultsPC, u32 i_رقم_Results);
+ساكن
+m3ret_t ResumePastCheck (IM3Continuation i_cont, M3_حافظه_سرآیند* _mem);
 
 // Whether the suspension point a replay has come down to is resumed past its
 // check. Only the first one reached answers to m3_ResumeRuntime's request: that
 // is the one the runtime paused at, and whatever it is, the request is spent.
-static inline
+ساكن مضمن
 bool ResumesPastCheck (IM3Runtime io_runtime, IM3Continuation i_cont)
 {
     bool pass = io_runtime->resumePastCheck;
 
     io_runtime->resumePastCheck = false;
 
-    return pass and (i_cont->suspendPoint == safepoint_op or i_cont->suspendPoint == safepoint_entry);
+    أرجع pass and (i_cont->suspend_نقطه == safepoint_op or i_cont->suspend_نقطه == safepoint_مدخل);
 }
 
 
@@ -2432,211 +2432,211 @@ bool ResumesPastCheck (IM3Runtime io_runtime, IM3Continuation i_cont)
 // inside the chain being rebuilt here. That second suspend refills frames[]
 // from index 0 while this walk is still in it, which is why every level takes
 // its own copy of the frame on the way down, before anything can run.
-static
-m3ret_t ReplayFrames (IM3Continuation i_cont, i32 i_depth, M3MemoryHeader* _mem)
+ساكن
+m3ret_t Replay_قابها (IM3Continuation i_cont, i32 i_عمق, M3_حافظه_سرآیند* _mem)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
     m3ret_t    r = m3Err_none;
 
-#  if d_m3MaxNativeStack > 0
+#  إذا d_m3_Max_Native_پشته > 0
     {
-        void* limit = runtime->stackLimit;
+        فراغ* حد = runtime->پشته_حد;
 
-        if (M3_UNLIKELY(limit and m3_NativeStackPtr() < limit)) {
-            return m3Err_trapStackOverflow;
+        إذا (M3_UNLIKELY(حد and m3_Native_پشته_Ptr() < حد)) {
+            أرجع m3_Err_trap_پشته_سرریز;
         }
     }
 #  endif
 
-    if (i_depth < 0) {
+    إذا (i_عمق < 0) {
         bool pastCheck = ResumesPastCheck(runtime, i_cont);
 
-#  if d_m3HasExceptionHandling
+#  إذا d_m3HasExceptionHandling
         // resume_throw stops here: rather than carrying on from the suspension
         // point, the exception is raised at it and travels back out through the
         // try regions this walk has just rebuilt above
-        if (M3_UNLIKELY(i_cont->resumeThrow)) {
+        إذا (M3_UNLIKELY(i_cont->resumeThrow)) {
             runtime->pendingException = i_cont->resumeThrow;
-            i_cont->resumeThrow = NULL;
+            i_cont->resumeThrow = عدم;
 
-            return m3Err_pendingException;
+            أرجع m3Err_pendingException;
         }
 #  endif
-        if (pastCheck) {
-            return ResumePastCheck(i_cont, _mem);
+        إذا (pastCheck) {
+            أرجع ResumePastCheck(i_cont, _mem);
         }
 
-        return d_m3CallWithRegs(i_cont->pc, i_cont->sp, _mem, i_cont->r0, i_cont->fp0);
+        أرجع d_m3CallWithRegs(i_cont->pc, i_cont->sp, _mem, i_cont->r0, i_cont->fp0);
     }
 
-    M3Frame frame = i_cont->frames[i_depth];
+    M3_قاب قاب = i_cont->قابها[i_عمق];
 
     // frame_try brackets the recursion with its own bookkeeping, and
     // frame_resume descends into another continuation entirely, so neither
     // shares this one
-    bool    ownDescent = ((M3FrameKind)frame.kind == frame_resume);
+    bool    ownDescent = ((M3_قاب_نوع)قاب.نوع == قاب_resume);
 
-#  if d_m3HasExceptionHandling
-    ownDescent = ownDescent or ((M3FrameKind)frame.kind == frame_try);
+#  إذا d_m3HasExceptionHandling
+    ownDescent = ownDescent or ((M3_قاب_نوع)قاب.نوع == قاب_try);
 #  endif
 
-    if (not ownDescent) {
-        r = ReplayFrames(i_cont, i_depth - 1, _mem);
-        _mem = frame.memory->mallocated;
+    إذا (not ownDescent) {
+        r = Replay_قابها(i_cont, i_عمق - 1, _mem);
+        _mem = قاب.حافظه->mallocated;
     }
 
-    switch ((M3FrameKind)frame.kind) {
-    case frame_call:
-        if (M3_LIKELY(not r)) {
+    بدل ((M3_قاب_نوع)قاب.نوع) {
+    حالة قاب_call:
+        إذا (M3_LIKELY(not r)) {
             // the callee returned: carry on in the caller, with the registers
             // op_Call's own frame had been holding across the call
-            return d_m3CallWithRegs(frame.pc, frame.sp, _mem, frame.call.r0, frame.call.fp0);
+            أرجع d_m3CallWithRegs(قاب.pc, قاب.sp, _mem, قاب.call.r0, قاب.call.fp0);
         }
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            return Continuation_RecordFrame(runtime, &frame);
+        إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            أرجع Continuation_رکورد_قاب(runtime, &قاب);
         }
-#  if d_m3RecordBacktraces
-        PushBacktraceFrame(runtime, frame.pc - 1);
+#  إذا d_m3_رکورد_Backtraces
+        افزودن_Backtrace_قاب(runtime, قاب.pc - 1);
 #  endif
-        return r;
+        أرجع r;
 
-    case frame_loop: {
-        m3stack_t _sp = frame.sp;
+    حالة قاب_loop: {
+        m3stack_t _sp = قاب.sp;
         m3reg_t   _r0 = 0;
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
         f64 _fp0 = 0.;
 #  endif
         // op_Loop's protocol: the body hands its own pc back to ask for
         // another lap. Dispatched the way op_Loop dispatches it, so a yield
         // hook sees the same back edges it always did.
-        while (r == (m3ret_t)frame.pc) {
-            r = jumpOpImpl(frame.pc);
-            _mem = frame.memory->mallocated;
+        طالما (r == (m3ret_t)قاب.pc) {
+            r = jumpOpImpl(قاب.pc);
+            _mem = قاب.حافظه->mallocated;
         }
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            return Continuation_RecordFrame(runtime, &frame);
+        إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            أرجع Continuation_رکورد_قاب(runtime, &قاب);
         }
-        return r;
+        أرجع r;
     }
 
-#  if d_m3HasExceptionHandling
-    case frame_try: {
-        m3stack_t _sp = frame.sp;
+#  إذا d_m3HasExceptionHandling
+    حالة قاب_try: {
+        m3stack_t _sp = قاب.sp;
         m3reg_t   _r0 = 0;
-#    if d_m3HasFloat
+#    إذا d_m3HasFloat
         f64 _fp0 = 0.;
 #    endif
-        (void)_sp;
-        (void)_r0;
-#    if d_m3HasFloat
-        (void)_fp0;
+        (فراغ)_sp;
+        (فراغ)_r0;
+#    إذا d_m3HasFloat
+        (فراغ)_fp0;
 #    endif
 
         // this try region is standing again, so it counts towards the depth
         // once more - unless op_PopHandlers had already retired it before the
         // suspend, in which case it is only here to be walked past
-        u32 depth = ++runtime->tryDepth;
+        u32 عمق = ++runtime->try_عمق;
 
-        if (not frame.try_.handlersLive) {
-            runtime->tryDepth = depth - 1;
+        إذا (not قاب.try_.handlers_زنده) {
+            runtime->try_عمق = عمق - 1;
         }
 
-        r = ReplayFrames(i_cont, i_depth - 1, _mem);
-        _mem = frame.memory->mallocated;
+        r = Replay_قابها(i_cont, i_عمق - 1, _mem);
+        _mem = قاب.حافظه->mallocated;
 
-        bool isInnermost = (runtime->tryDepth == depth);
-        runtime->tryDepth = depth - 1;
+        bool isInnermost = (runtime->try_عمق == عمق);
+        runtime->try_عمق = عمق - 1;
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            frame.try_.handlersLive = isInnermost;
-            return Continuation_RecordFrame(runtime, &frame);
+        إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            قاب.try_.handlers_زنده = isInnermost;
+            أرجع Continuation_رکورد_قاب(runtime, &قاب);
         }
 
-        if (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
-            const M3Exception* exception = runtime->pendingException;
+        إذا (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
+            ثابت M3Exception* exception = runtime->pendingException;
 
-            for (u32 i = 0; i < frame.try_.numClauses; ++i) {
-                IM3Tag tag = (IM3Tag)frame.pc[2 * i];
+            لكل (u32 i = 0; i < قاب.try_.رقم_Clauses; ++i) {
+                IM3_برچسب برچسب = (IM3_برچسب)قاب.pc[2 * i];
 
-                if (tag == NULL or tag == exception->tag) {
-                    pc_t handler = (pc_t)frame.pc[2 * i + 1];
+                إذا (برچسب == عدم or برچسب == exception->برچسب) {
+                    pc_t handler = (pc_t)قاب.pc[2 * i + 1];
 
                     d_m3ClearRegisters
 
                     // op_TryTable hands its frame to the handler, but this is
                     // not an operation and cannot: the replay stands in for
                     // that frame, so it keeps it and passes the answer on.
-                    return jumpOpImpl(handler);
+                    أرجع jumpOpImpl(handler);
                 }
             }
         }
-        return r;
+        أرجع r;
     }
 #  endif
 
-    case frame_resume: {
+    حالة قاب_resume: {
         // A resume that the suspend passed straight through. Standing it up
         // again means running the continuation it had under it, under the same
         // handlers - and that continuation carries the suspension point, so it
         // is where the rest of the replay happens.
-        IM3Continuation inner = frame.resume.cont;
+        IM3Continuation inner = قاب.resume.cont;
 
-        r = RunUnderHandlers(runtime, &inner, frame.resume.handlersPC,
-                             frame.resume.numHandlers, &_mem);
+        r = پیاپی_Under_Handlers(runtime, &inner, قاب.resume.handlersPC,
+                             قاب.resume.رقم_Handlers, &_mem);
 
-        if (r == m3Err_none) {
+        إذا (r == m3Err_none) {
             inner->state = cont_consumed;
 
-            TakeContinuationResults(inner, frame.sp, frame.resume.resultsPC,
-                                    frame.resume.numResults);
-            Continuation_RecycleStack(runtime, inner);
+            TakeContinuationResults(inner, قاب.sp, قاب.resume.resultsPC,
+                                    قاب.resume.رقم_Results);
+            Continuation_Recycle_پشته(runtime, inner);
 
-            return d_m3CallWithRegs(frame.pc, frame.sp, _mem, 0, 0.);
+            أرجع d_m3CallWithRegs(قاب.pc, قاب.sp, _mem, 0, 0.);
         }
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            if (runtime->suspendHandlerCont != inner) {
-                frame.resume.cont = inner;
-                return Continuation_RecordFrame(runtime, &frame);
+        إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            إذا (runtime->suspendHandlerCont != inner) {
+                قاب.resume.cont = inner;
+                أرجع Continuation_رکورد_قاب(runtime, &قاب);
             }
 
             IM3Continuation suspended = Continuation_ForkSuspended(runtime, inner);
-            if (M3_UNLIKELY(not suspended)) {
-                return m3Err_mallocFailed;
+            إذا (M3_UNLIKELY(not suspended)) {
+                أرجع m3Err_mallocFailed;
             }
             runtime->suspendedContinuation = suspended;
-            if (runtime->suspendStubPC) {
-                return d_m3CallWithRegs(runtime->suspendStubPC, frame.sp, _mem, 0, 0.);
-            } else {
-                return m3Err_trapUnhandledControlTag;
+            إذا (runtime->suspendStubPC) {
+                أرجع d_m3CallWithRegs(runtime->suspendStubPC, قاب.sp, _mem, 0, 0.);
+            } وإلا {
+                أرجع m3_Err_trap_Unhandled_Control_برچسب;
             }
-        } else {
+        } وإلا {
             inner->state = cont_consumed;
-            Continuation_RecycleStack(runtime, inner);
+            Continuation_Recycle_پشته(runtime, inner);
         }
 
-        return r;
+        أرجع r;
     }
 
-#  if d_m3EntryKeepsFrame
-    case frame_entry:
-        if (M3_UNLIKELY(r)) {
-            if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-                return Continuation_RecordFrame(runtime, &frame);
+#  إذا d_m3_مدخل_Keeps_قاب
+    حالة قاب_مدخل:
+        إذا (M3_UNLIKELY(r)) {
+            إذا (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+                أرجع Continuation_رکورد_قاب(runtime, &قاب);
             }
-#    if d_m3RecordBacktraces
-            FillBacktraceFunctionInfo(runtime, frame.entry.function);
-#    else
-            (void)frame.entry.function;
+#    إذا d_m3_رکورد_Backtraces
+            FillBacktraceFunctionInfo(runtime, قاب.مدخل.function);
+#    وإلا
+            (فراغ)قاب.مدخل.function;
 #    endif
         }
-        return r;
+        أرجع r;
 #  endif
     }
 
-    return r;
+    أرجع r;
 }
 
 
@@ -2644,52 +2644,52 @@ m3ret_t ReplayFrames (IM3Continuation i_cont, i32 i_depth, M3MemoryHeader* _mem)
 // started yet takes them as the arguments of its entry frame, laid out above
 // its return slots; one that is suspended takes them in the slots its own
 // suspend or switch left waiting.
-static
-void* ContinuationArgDest (IM3Continuation i_cont, u32 i_index)
+ساكن
+فراغ* ContinuationArgDest (IM3Continuation i_cont, u32 i_شاخص)
 {
-    if (i_cont->state == cont_allocated) {
-        IM3FuncType inner = i_cont->type ? i_cont->type->contFuncType : NULL;
-        u16         numRets = inner ? GetFuncTypeNumResults(inner) : 0;
+    إذا (i_cont->state == cont_allocated) {
+        IM3FuncType inner = i_cont->type ? i_cont->type->contFuncType : عدم;
+        u16         رقم_Rets = inner ? Get_Func_Type_رقم_Results(inner) : 0;
 
-        return i_cont->valStack + (numRets + i_index) * c_ioSlotCount;
+        أرجع i_cont->val_پشته + (رقم_Rets + i_شاخص) * c_io_جایگاه_شمار;
     }
 
-    if (i_index < i_cont->numSuspendResults) {
-        return i_cont->sp + i_cont->suspendResultOffsets[i_index];
+    إذا (i_شاخص < i_cont->رقم_Suspend_Results) {
+        أرجع i_cont->sp + i_cont->suspend_نتیجه_Offsets[i_شاخص];
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
 // Hands a switch's payload to the peer, and after it the continuation that
 // switched away - the reference that lets the peer come back this way.
-static
-void HandOverToPeer (IM3Runtime i_runtime, IM3Continuation io_peer, IM3Continuation i_from)
+ساكن
+فراغ Hand_Over_مقصد_Peer (IM3Runtime i_runtime, IM3Continuation io_peer, IM3Continuation i_from)
 {
-    u32 numArgs = i_runtime->numSuspendPayload;
-    u32 base = (io_peer->state == cont_allocated) ? io_peer->boundArgsCount : 0;
+    u32 رقم_آرگومانها = i_runtime->رقم_Suspend_Payload;
+    u32 پایه = (io_peer->state == cont_allocated) ? io_peer->bound_آرگومانها_شمار : 0;
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        void* dest = ContinuationArgDest(io_peer, base + i);
+    لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+        فراغ* dest = ContinuationArgDest(io_peer, پایه + i);
 
-        if (dest) {
-            if (i_runtime->suspendPayloadIs64[i]) {
+        إذا (dest) {
+            إذا (i_runtime->suspendPayloadIs64[i]) {
                 *(u64*)dest = i_runtime->suspendPayload[i];
-            } else {
+            } وإلا {
                 *(u32*)dest = (u32)i_runtime->suspendPayload[i];
             }
         }
     }
 
-    void* refDest = ContinuationArgDest(io_peer, base + numArgs);
+    فراغ* refDest = ContinuationArgDest(io_peer, پایه + رقم_آرگومانها);
 
-    if (refDest) {
+    إذا (refDest) {
         *(IM3Continuation*)refDest = i_from;
     }
 
-    if (io_peer->state == cont_allocated) {
-        io_peer->boundArgsCount += numArgs + 1;
+    إذا (io_peer->state == cont_allocated) {
+        io_peer->bound_آرگومانها_شمار += رقم_آرگومانها + 1;
     }
 }
 
@@ -2702,14 +2702,14 @@ void HandOverToPeer (IM3Runtime i_runtime, IM3Continuation io_peer, IM3Continuat
 // at the bottom of it, and so the one whose waiting slots any values handed to
 // the capture belong in. A resume the suspend travelled through leaves its
 // record at the foot of the frame list, which is the link to follow.
-static
+ساكن
 IM3Continuation InnermostSuspended (IM3Continuation i_cont)
 {
-    while (i_cont->numFrames and (M3FrameKind) i_cont->frames[0].kind == frame_resume) {
-        i_cont = i_cont->frames[0].resume.cont;
+    طالما (i_cont->رقم_قابها and (M3_قاب_نوع) i_cont->قابها[0].نوع == قاب_resume) {
+        i_cont = i_cont->قابها[0].resume.cont;
     }
 
-    return i_cont;
+    أرجع i_cont;
 }
 
 
@@ -2717,115 +2717,115 @@ IM3Continuation InnermostSuspended (IM3Continuation i_cont)
 // is not a switch, and reports which continuation was running when it did: a
 // switch under this table takes the place of the one that switched away, and
 // whatever is running is what the handler table belongs to.
-static
-m3ret_t RunUnderHandlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
-                          pc_t i_handlersPC, u32 i_numHandlers, M3MemoryHeader** io_mem)
+ساكن
+m3ret_t پیاپی_Under_Handlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
+                          pc_t i_handlersPC, u32 i_رقم_Handlers, M3_حافظه_سرآیند** io_mem)
 {
     IM3Continuation cont = *io_cont;
-    IM3Continuation parent = i_runtime->activeContinuation;
-    IM3Memory       memory = m3MemInfo(*io_mem);
+    IM3Continuation والد = i_runtime->فعال_Continuation;
+    IM3_حافظه       حافظه = m3MemInfo(*io_mem);
     m3ret_t         r;
 
-    for (;;) {
-#  if d_m3HasExceptionHandling
+    لكل (;;) {
+#  إذا d_m3HasExceptionHandling
         // aborting a continuation that never started: there is no suspension
         // point to raise at, so the exception simply comes straight back out
-        if (M3_UNLIKELY(cont->resumeThrow and cont->numFrames == 0)) {
+        إذا (M3_UNLIKELY(cont->resumeThrow and cont->رقم_قابها == 0)) {
             i_runtime->pendingException = cont->resumeThrow;
-            cont->resumeThrow = NULL;
+            cont->resumeThrow = عدم;
             cont->state = cont_consumed;
             r = m3Err_pendingException;
-            break;
+            اكسر;
         }
 #  endif
         bool isStarting = (cont->state == cont_allocated);
 
-        if (isStarting) {
-            if (M3_UNLIKELY(not cont->entryFunction->compiled)) {
-                r = CompileFunction(cont->entryFunction);
+        إذا (isStarting) {
+            إذا (M3_UNLIKELY(not cont->مدخل_Function->compiled)) {
+                r = CompileFunction(cont->مدخل_Function);
 
-                if (M3_UNLIKELY(r)) {
-                    break;
+                إذا (M3_UNLIKELY(r)) {
+                    اكسر;
                 }
             }
-            cont->pc = cont->entryFunction->compiled;
-            cont->sp = cont->valStack;
-            cont->numFrames = 0;
+            cont->pc = cont->مدخل_Function->compiled;
+            cont->sp = cont->val_پشته;
+            cont->رقم_قابها = 0;
         }
 
         cont->handlersPC = i_handlersPC;
-        cont->numHandlers = i_numHandlers;
-        cont->parent = parent;
+        cont->رقم_Handlers = i_رقم_Handlers;
+        cont->والد = والد;
         cont->state = cont_running;
-        cont->boundArgsCount = 0;
+        cont->bound_آرگومانها_شمار = 0;
 
-        i_runtime->activeContinuation = cont;
+        i_runtime->فعال_Continuation = cont;
 
-        if (cont->numFrames) {
+        إذا (cont->رقم_قابها) {
             // a suspended continuation: put back the native frames it unwound
             // through before landing on the suspension point. The count is
             // cleared first because a second suspend records into the same
             // array, starting over at index 0.
-            i32 outermost = (i32)cont->numFrames - 1;
-            cont->numFrames = 0;
+            i32 outermost = (i32)cont->رقم_قابها - 1;
+            cont->رقم_قابها = 0;
 
-            r = ReplayFrames(cont, outermost, *io_mem);
-        } else if (not isStarting and ResumesPastCheck(i_runtime, cont)) {
+            r = Replay_قابها(cont, outermost, *io_mem);
+        } وإلا إذا (not isStarting and ResumesPastCheck(i_runtime, cont)) {
             r = ResumePastCheck(cont, *io_mem);
-        } else {
+        } وإلا {
             r = d_m3CallWithRegs(cont->pc, cont->sp, *io_mem, 0, 0.);
         }
 
-        *io_mem = memory->mallocated;
-        i_runtime->activeContinuation = parent;
+        *io_mem = حافظه->mallocated;
+        i_runtime->فعال_Continuation = والد;
 
-        if (r != m3Err_continuationSuspended) {
-            break;
+        إذا (r != m3Err_continuationSuspended) {
+            اكسر;
         }
 
         cont->state = cont_suspended;
 
         // not a switch, so it is a suspend and this is as far as we take it
-        if (not i_runtime->switchTarget or i_runtime->suspendHandlerCont != cont) {
-            break;
+        إذا (not i_runtime->switch_هدف or i_runtime->suspendHandlerCont != cont) {
+            اكسر;
         }
 
-        IM3Continuation peer = i_runtime->switchTarget;
-        i_runtime->switchTarget = NULL;
+        IM3Continuation peer = i_runtime->switch_هدف;
+        i_runtime->switch_هدف = عدم;
 
         IM3Continuation suspended = Continuation_ForkSuspended(i_runtime, cont);
-        if (M3_UNLIKELY(not suspended)) {
+        إذا (M3_UNLIKELY(not suspended)) {
             r = m3Err_mallocFailed;
-            break;
+            اكسر;
         }
         IM3FuncType peerType = peer->type->contFuncType;
-        suspended->type = Module_ContTypeOfRef(peer->entryFunction->module,
-                                               GetFuncTypeParamType(peerType, (u16)(GetFuncTypeNumParams(peerType) - 1)));
-        HandOverToPeer(i_runtime, peer, suspended);
+        suspended->type = Module_Cont_Type_از_Ref(peer->مدخل_Function->module,
+                                               GetFuncTypeParamType(peerType, (u16)(Get_Func_Type_رقم_Params(peerType) - 1)));
+        Hand_Over_مقصد_Peer(i_runtime, peer, suspended);
 
         cont = peer;
     }
 
     *io_cont = cont;
 
-    return r;
+    أرجع r;
 }
 
 
 // Copies what a finished continuation left in its return slots into the slots
 // the resume site set aside for them.
-static
-void TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp, pc_t i_resultsPC, u32 i_numResults)
+ساكن
+فراغ TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp, pc_t i_resultsPC, u32 i_رقم_Results)
 {
-    for (u32 i = 0; i < i_numResults; ++i) {
-        i32 resSlot = *(i32*)(i_resultsPC + 2 * i);
+    لكل (u32 i = 0; i < i_رقم_Results; ++i) {
+        i32 res_جایگاه = *(i32*)(i_resultsPC + 2 * i);
         u32 is64 = *(u32*)(i_resultsPC + 2 * i + 1);
-        u32 srcIdx = i * c_ioSlotCount;
+        u32 srcIdx = i * c_io_جایگاه_شمار;
 
-        if (is64) {
-            *(u64*)(i_sp + resSlot) = *(u64*)(i_cont->valStack + srcIdx);
-        } else {
-            *(u32*)(i_sp + resSlot) = *(u32*)(i_cont->valStack + srcIdx);
+        إذا (is64) {
+            *(u64*)(i_sp + res_جایگاه) = *(u64*)(i_cont->val_پشته + srcIdx);
+        } وإلا {
+            *(u32*)(i_sp + res_جایگاه) = *(u32*)(i_cont->val_پشته + srcIdx);
         }
     }
 }
@@ -2838,150 +2838,150 @@ void TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp, pc_t i_res
 d_m3Op(Resume)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3FuncType     contFuncType = immediate(IM3FuncType);
-    i32             contSlot = immediate(i32);
-    u32             mode = immediate(u32);
+    IM3FuncType     contFuncType = فوری(IM3FuncType);
+    i32             cont_جایگاه = فوری(i32);
+    u32             نما = فوری(u32);
 
-    IM3Continuation cont = *(IM3Continuation*)(_sp + contSlot);
-    if (M3_UNLIKELY(not cont)) {
+    IM3Continuation cont = *(IM3Continuation*)(_sp + cont_جایگاه);
+    إذا (M3_UNLIKELY(not cont)) {
         newTrap(m3Err_trapNullContinuationRef);
     }
-    if (M3_UNLIKELY(cont->state == cont_consumed or cont->state == cont_running)) {
+    إذا (M3_UNLIKELY(cont->state == cont_consumed or cont->state == cont_running)) {
         newTrap(m3Err_trapContinuationConsumed);
     }
 
     IM3FuncType innerType = contFuncType->contFuncType ? contFuncType->contFuncType : contFuncType;
-    u16         numRets = GetFuncTypeNumResults(innerType);
+    u16         رقم_Rets = Get_Func_Type_رقم_Results(innerType);
 
-    if (mode == d_m3ResumeThrowRef) {
-        i32 exnSlot = immediate(i32);
+    إذا (نما == d_m3ResumeThrowRef) {
+        i32 exn_جایگاه = فوری(i32);
 
-#  if d_m3HasExceptionHandling
-        M3Exception* exception = *(M3Exception**)(_sp + exnSlot);
+#  إذا d_m3HasExceptionHandling
+        M3Exception* exception = *(M3Exception**)(_sp + exn_جایگاه);
 
-        if (M3_UNLIKELY(not exception)) {
+        إذا (M3_UNLIKELY(not exception)) {
             newTrap(m3Err_trapNullReference);
         }
 
         InnermostSuspended(cont)->resumeThrow = exception;
-#  else
-        (void)exnSlot;
+#  وإلا
+        (فراغ)exn_جایگاه;
         newTrap(m3Err_trapUnsupportedInstruction);
 #  endif
-    } else if (mode == d_m3ResumeThrow) {
-        IM3Tag exnTag = immediate(IM3Tag);
-        u32    numArgs = immediate(u32);
+    } وإلا إذا (نما == d_m3ResumeThrow) {
+        IM3_برچسب exn_برچسب = فوری(IM3_برچسب);
+        u32    رقم_آرگومانها = فوری(u32);
 
-#  if d_m3HasExceptionHandling
-        M3Exception* exception = NewException(runtime, exnTag, numArgs);
+#  إذا d_m3HasExceptionHandling
+        M3Exception* exception = NewException(runtime, exn_برچسب, رقم_آرگومانها);
 
-        if (M3_UNLIKELY(not exception)) {
+        إذا (M3_UNLIKELY(not exception)) {
             newTrap(m3Err_mallocFailed);
         }
 
-        for (u32 i = 0; i < numArgs; ++i) {
-            i32 offset = immediate(i32);
-            u32 is64 = immediate(u32);
+        لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+            i32 offset = فوری(i32);
+            u32 is64 = فوری(u32);
 
-            exception->args[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
+            exception->آرگومانها[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
         }
 
         InnermostSuspended(cont)->resumeThrow = exception;
-#  else
-        (void)exnTag;
-        (void)numArgs;
+#  وإلا
+        (فراغ)exn_برچسب;
+        (فراغ)رقم_آرگومانها;
         newTrap(m3Err_trapUnsupportedInstruction);
 #  endif
-    } else {
-        u32 numArgs = immediate(u32);
+    } وإلا {
+        u32 رقم_آرگومانها = فوری(u32);
 
-        if (cont->state == cont_allocated) {
-            for (u32 i = 0; i < numArgs; ++i) {
-                i32 argSlot = immediate(i32);
-                u32 is64 = immediate(u32);
-                u32 targetIdx = (numRets + cont->boundArgsCount + i) * c_ioSlotCount;
-                if (is64) {
-                    *(u64*)(cont->valStack + targetIdx) = *(u64*)(_sp + argSlot);
-                } else {
-                    *(u32*)(cont->valStack + targetIdx) = *(u32*)(_sp + argSlot);
+        إذا (cont->state == cont_allocated) {
+            لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+                i32 arg_جایگاه = فوری(i32);
+                u32 is64 = فوری(u32);
+                u32 هدف_Idx = (رقم_Rets + cont->bound_آرگومانها_شمار + i) * c_io_جایگاه_شمار;
+                إذا (is64) {
+                    *(u64*)(cont->val_پشته + هدف_Idx) = *(u64*)(_sp + arg_جایگاه);
+                } وإلا {
+                    *(u32*)(cont->val_پشته + هدف_Idx) = *(u32*)(_sp + arg_جایگاه);
                 }
             }
-            cont->boundArgsCount = 0;
-        } else {
+            cont->bound_آرگومانها_شمار = 0;
+        } وإلا {
             // the waiting slots belong to whichever continuation holds the
             // suspension point, which is not this one if a resume was captured
             // along with it
             IM3Continuation inner = InnermostSuspended(cont);
 
-            for (u32 i = 0; i < numArgs; ++i) {
-                i32 argSlot = immediate(i32);
-                u32 is64 = immediate(u32);
-                u32 dstIdx = cont->boundArgsCount + i;
-                if (dstIdx < inner->numSuspendResults) {
-                    i32 dstOffset = inner->suspendResultOffsets[dstIdx];
-                    if (is64) {
-                        *(u64*)(inner->sp + dstOffset) = *(u64*)(_sp + argSlot);
-                    } else {
-                        *(u32*)(inner->sp + dstOffset) = *(u32*)(_sp + argSlot);
+            لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+                i32 arg_جایگاه = فوری(i32);
+                u32 is64 = فوری(u32);
+                u32 dstIdx = cont->bound_آرگومانها_شمار + i;
+                إذا (dstIdx < inner->رقم_Suspend_Results) {
+                    i32 dst_جابه_جایی = inner->suspend_نتیجه_Offsets[dstIdx];
+                    إذا (is64) {
+                        *(u64*)(inner->sp + dst_جابه_جایی) = *(u64*)(_sp + arg_جایگاه);
+                    } وإلا {
+                        *(u32*)(inner->sp + dst_جابه_جایی) = *(u32*)(_sp + arg_جایگاه);
                     }
                 }
             }
         }
     }
 
-    u32  numHandlers = immediate(u32);
+    u32  رقم_Handlers = فوری(u32);
     pc_t handlersPC = _pc;
-    _pc += numHandlers * 3;
+    _pc += رقم_Handlers * 3;
 
-    u32       numResults = immediate(u32);
+    u32       رقم_Results = فوری(u32);
     pc_t      resultsPC = _pc;
 
-    IM3Memory memory = m3MemInfo(_mem);
+    IM3_حافظه حافظه = m3MemInfo(_mem);
 
-    m3ret_t   r = RunUnderHandlers(runtime, &cont, handlersPC, numHandlers, &_mem);
+    m3ret_t   r = پیاپی_Under_Handlers(runtime, &cont, handlersPC, رقم_Handlers, &_mem);
 
-    if (r == m3Err_none) {
+    إذا (r == m3Err_none) {
         cont->state = cont_consumed;
 
-        TakeContinuationResults(cont, _sp, resultsPC, numResults);
-        Continuation_RecycleStack(runtime, cont);
+        TakeContinuationResults(cont, _sp, resultsPC, رقم_Results);
+        Continuation_Recycle_پشته(runtime, cont);
 
-        _pc += numResults * 2;
-        nextOp();
-    } else if (r == m3Err_continuationSuspended) {
-        if (M3_UNLIKELY(runtime->suspendHandlerCont != cont)) {
-            if (M3_UNLIKELY(not runtime->activeContinuation)) {
-                newTrap(m3Err_trapUnhandledControlTag);
+        _pc += رقم_Results * 2;
+        بعدی_Op();
+    } وإلا إذا (r == m3Err_continuationSuspended) {
+        إذا (M3_UNLIKELY(runtime->suspendHandlerCont != cont)) {
+            إذا (M3_UNLIKELY(not runtime->فعال_Continuation)) {
+                newTrap(m3_Err_trap_Unhandled_Control_برچسب);
             }
-            M3Frame frame;
-            frame.kind = frame_resume;
-            frame.pc = resultsPC + numResults * 2;
-            frame.sp = _sp;
-            frame.memory = memory;
-            frame.resume.cont = cont;
-            frame.resume.handlersPC = handlersPC;
-            frame.resume.numHandlers = numHandlers;
-            frame.resume.resultsPC = resultsPC;
-            frame.resume.numResults = numResults;
+            M3_قاب قاب;
+            قاب.نوع = قاب_resume;
+            قاب.pc = resultsPC + رقم_Results * 2;
+            قاب.sp = _sp;
+            قاب.حافظه = حافظه;
+            قاب.resume.cont = cont;
+            قاب.resume.handlersPC = handlersPC;
+            قاب.resume.رقم_Handlers = رقم_Handlers;
+            قاب.resume.resultsPC = resultsPC;
+            قاب.resume.رقم_Results = رقم_Results;
 
-            return Continuation_RecordFrame(runtime, &frame);
+            أرجع Continuation_رکورد_قاب(runtime, &قاب);
         }
 
         IM3Continuation suspended = Continuation_ForkSuspended(runtime, cont);
-        if (M3_UNLIKELY(not suspended)) {
+        إذا (M3_UNLIKELY(not suspended)) {
             newTrap(m3Err_mallocFailed);
         }
         runtime->suspendedContinuation = suspended;
 
-        if (runtime->suspendStubPC) {
-            jumpOpDirect(runtime->suspendStubPC);
-        } else {
-            newTrap(m3Err_trapUnhandledControlTag);
+        إذا (runtime->suspendStubPC) {
+            jump_Op_مستقیم(runtime->suspendStubPC);
+        } وإلا {
+            newTrap(m3_Err_trap_Unhandled_Control_برچسب);
         }
-    } else {
+    } وإلا {
         cont->state = cont_consumed;
-        Continuation_RecycleStack(runtime, cont);
-        pushBacktraceFrame();
+        Continuation_Recycle_پشته(runtime, cont);
+        افزودن_Backtrace_قاب_2();
         forwardTrap(r);
     }
 }
@@ -2995,26 +2995,26 @@ d_m3Op(ResumePayload)
     // was captured, which is not the same continuation once the suspend has
     // travelled out through a resume that had nothing to say about its tag.
     IM3Continuation cont = runtime->suspendedContinuation;
-    cont->type = immediate(IM3FuncType);
+    cont->type = فوری(IM3FuncType);
 
-    u32 numArgs = immediate(u32);
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 offset = immediate(i32);
-        u32 is64 = immediate(u32);
-        u64 val = (i < runtime->numSuspendPayload) ? runtime->suspendPayload[i] : 0;
-        if (is64) {
+    u32 رقم_آرگومانها = فوری(u32);
+    لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+        i32 offset = فوری(i32);
+        u32 is64 = فوری(u32);
+        u64 val = (i < runtime->رقم_Suspend_Payload) ? runtime->suspendPayload[i] : 0;
+        إذا (is64) {
             *(u64*)(_sp + offset) = val;
-        } else {
+        } وإلا {
             *(u32*)(_sp + offset) = (u32)val;
         }
     }
 
-    i32 contOffset = immediate(i32);
-    if (contOffset >= 0) {
-        *(IM3Continuation*)(_sp + contOffset) = cont;
+    i32 cont_جابه_جایی = فوری(i32);
+    إذا (cont_جابه_جایی >= 0) {
+        *(IM3Continuation*)(_sp + cont_جابه_جایی) = cont;
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
 
@@ -3027,76 +3027,76 @@ d_m3Op(ResumePayload)
 d_m3Op(Switch)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3Continuation cont = runtime->activeContinuation;
+    IM3Continuation cont = runtime->فعال_Continuation;
 
-    if (M3_UNLIKELY(not cont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    إذا (M3_UNLIKELY(not cont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_برچسب);
     }
 
-    skip_immediate(IM3FuncType);
+    skip_فوری(IM3FuncType);
 
-    IM3Tag          tag = immediate(IM3Tag);
-    i32             targetSlot = immediate(i32);
+    IM3_برچسب          برچسب = فوری(IM3_برچسب);
+    i32             هدف_جایگاه = فوری(i32);
 
-    IM3Continuation target = *(IM3Continuation*)(_sp + targetSlot);
+    IM3Continuation هدف = *(IM3Continuation*)(_sp + هدف_جایگاه);
 
-    if (M3_UNLIKELY(not target)) {
+    إذا (M3_UNLIKELY(not هدف)) {
         newTrap(m3Err_trapNullContinuationRef);
     }
-    if (M3_UNLIKELY(target->state == cont_consumed or target->state == cont_running)) {
+    إذا (M3_UNLIKELY(هدف->state == cont_consumed or هدف->state == cont_running)) {
         newTrap(m3Err_trapContinuationConsumed);
     }
 
-    IM3Continuation handlerCont = FindHandler(cont, tag, 1, NULL);
+    IM3Continuation handlerCont = پیدا_کن_Handler(cont, برچسب, 1, عدم);
 
-    if (M3_UNLIKELY(not handlerCont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    إذا (M3_UNLIKELY(not handlerCont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_برچسب);
     }
 
     // the peer's arguments, and after them the room for the continuation
     // reference the resume will write once this one is safely suspended
-    u32 numArgs = immediate(u32);
+    u32 رقم_آرگومانها = فوری(u32);
 
-    runtime->numSuspendPayload = numArgs;
+    runtime->رقم_Suspend_Payload = رقم_آرگومانها;
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 argSlot = immediate(i32);
-        u32 is64 = immediate(u32);
+    لكل (u32 i = 0; i < رقم_آرگومانها; ++i) {
+        i32 arg_جایگاه = فوری(i32);
+        u32 is64 = فوری(u32);
 
-        runtime->suspendPayload[i] = is64 ? *(u64*)(_sp + argSlot) : (u64) * (u32*)(_sp + argSlot);
+        runtime->suspendPayload[i] = is64 ? *(u64*)(_sp + arg_جایگاه) : (u64) * (u32*)(_sp + arg_جایگاه);
         runtime->suspendPayloadIs64[i] = is64;
     }
 
     // where the values come back to, when something switches into this one
-    u32 numResults = immediate(u32);
+    u32 رقم_Results = فوری(u32);
 
-    cont->numSuspendResults = numResults;
+    cont->رقم_Suspend_Results = رقم_Results;
 
-    for (u32 i = 0; i < numResults; ++i) {
-        cont->suspendResultOffsets[i] = immediate(i32);
-        cont->suspendResultIs64[i] = immediate(u32);
+    لكل (u32 i = 0; i < رقم_Results; ++i) {
+        cont->suspend_نتیجه_Offsets[i] = فوری(i32);
+        cont->suspend_نتیجه_Is64[i] = فوری(u32);
     }
 
     ClearSuspendResults(cont, _sp);
 
-    runtime->suspendStubPC = NULL;
+    runtime->suspendStubPC = عدم;
     runtime->suspendHandlerCont = handlerCont;
-    runtime->switchTarget = target;
-    runtime->suspendTag = tag;
+    runtime->switch_هدف = هدف;
+    runtime->suspend_برچسب = برچسب;
 
     cont->pc = _pc;
-    cont->suspendPoint = safepoint_suspend;
+    cont->suspend_نقطه = safepoint_suspend;
     cont->sp = _sp;
     cont->r0 = _r0;
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
     cont->fp0 = _fp0;
 #  endif
 
-    return m3Err_continuationSuspended;
+    أرجع m3Err_continuationSuspended;
 }
 
 
-#endif // d_m3HasStackSwitching
+#پایان_اگر // d_m3HasStackSwitching
 
 
 d_m3Op(Branch)
@@ -3109,11 +3109,11 @@ d_m3Op(If_r)
 {
     i32  condition = (i32)_r0;
 
-    pc_t elsePC = immediate(pc_t);
+    pc_t elsePC = فوری(pc_t);
 
-    if (condition) {
-        nextOp();
-    } else {
+    إذا (condition) {
+        بعدی_Op();
+    } وإلا {
         jumpOp(elsePC);
     }
 }
@@ -3121,199 +3121,199 @@ d_m3Op(If_r)
 
 d_m3Op(If_s)
 {
-    i32  condition = slot(i32);
+    i32  condition = جایگاه(i32);
 
-    pc_t elsePC = immediate(pc_t);
+    pc_t elsePC = فوری(pc_t);
 
-    if (condition) {
-        nextOp();
-    } else {
+    إذا (condition) {
+        بعدی_Op();
+    } وإلا {
         jumpOp(elsePC);
     }
 }
 
 
-d_m3Op(BranchTable)
+d_m3Op(Branch_جدول)
 {
-    u32   branchIndex = slot(u32);           // branch index is always in a slot
-    u32   numTargets = immediate(u32);
+    u32   branch_شاخص = جایگاه(u32);           // branch index is always in a slot
+    u32   رقم_Targets = فوری(u32);
 
     pc_t* branches = (pc_t*)_pc;
 
-    if (branchIndex > numTargets) {
-        branchIndex = numTargets; // the default index
+    إذا (branch_شاخص > رقم_Targets) {
+        branch_شاخص = رقم_Targets; // the default index
     }
 
-    jumpOp(branches[branchIndex]);
+    jumpOp(branches[branch_شاخص]);
 }
 
 
-#define d_m3SetRegisterSetSlot(TYPE, REG) \
-d_m3Op  (SetRegister_##TYPE)            \
+#تعریف_کن d_m3_مجموعه_ثبات_مجموعه_جایگاه(TYPE, REG) \
+d_m3Op  (مجموعه_ثبات_2##TYPE)            \
 {                                       \
-    TYPE * src = slot_ptr (TYPE);       \
-    d_m3PreloadNext ();                 \
+    TYPE * src = جایگاه_ptr (TYPE);       \
+    d_m3_Preload_بعدی ();                 \
     REG = * src;                        \
-    nextOpPreloaded ();                 \
+    بعدی_Op_Preloaded ();                 \
 }                                       \
                                         \
-d_m3Op (SetSlot_##TYPE)                 \
+d_m3Op (مجموعه_جایگاه_2##TYPE)                 \
 {                                       \
-    TYPE * dst = slot_ptr (TYPE);       \
-    d_m3PreloadNext ();                 \
+    TYPE * dst = جایگاه_ptr (TYPE);       \
+    d_m3_Preload_بعدی ();                 \
     * dst = (TYPE) REG;                 \
-    nextOpPreloaded ();                 \
+    بعدی_Op_Preloaded ();                 \
 }                                       \
                                         \
-d_m3Op (PreserveSetSlot_##TYPE)         \
+d_m3Op (Preserve_مجموعه_جایگاه_2##TYPE)         \
 {                                       \
-    TYPE * stack     = slot_ptr (TYPE); \
-    TYPE * preserve  = slot_ptr (TYPE); \
-    d_m3PreloadNext ();                 \
+    TYPE * پشته     = جایگاه_ptr (TYPE); \
+    TYPE * preserve  = جایگاه_ptr (TYPE); \
+    d_m3_Preload_بعدی ();                 \
                                         \
-    * preserve = * stack;               \
-    * stack = (TYPE) REG;               \
+    * preserve = * پشته;               \
+    * پشته = (TYPE) REG;               \
                                         \
-    nextOpPreloaded ();                 \
+    بعدی_Op_Preloaded ();                 \
 }
 
-d_m3SetRegisterSetSlot(i32, _r0)
-d_m3SetRegisterSetSlot(i64, _r0)
-#if d_m3HasFloat
-d_m3SetRegisterSetSlot(f32, _fp0)
-d_m3SetRegisterSetSlot(f64, _fp0)
-#endif
+d_m3_مجموعه_ثبات_مجموعه_جایگاه(i32, _r0)
+d_m3_مجموعه_ثبات_مجموعه_جایگاه(i64, _r0)
+#إذا d_m3HasFloat
+d_m3_مجموعه_ثبات_مجموعه_جایگاه(f32, _fp0)
+d_m3_مجموعه_ثبات_مجموعه_جایگاه(f64, _fp0)
+#پایان_اگر
 
-d_m3Op(CopySlot_32)
+d_m3Op(Copy_جایگاه_32)
 {
-    u32* dst = slot_ptr(u32);
-    u32* src = slot_ptr(u32);
-    d_m3PreloadNext();
+    u32* dst = جایگاه_ptr(u32);
+    u32* src = جایگاه_ptr(u32);
+    d_m3_Preload_بعدی();
 
     *dst = *src;
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 
-d_m3Op(PreserveCopySlot_32)
+d_m3Op(Preserve_Copy_جایگاه_32)
 {
-    u32* dest = slot_ptr(u32);
-    u32* src = slot_ptr(u32);
-    u32* preserve = slot_ptr(u32);
-    d_m3PreloadNext();
+    u32* dest = جایگاه_ptr(u32);
+    u32* src = جایگاه_ptr(u32);
+    u32* preserve = جایگاه_ptr(u32);
+    d_m3_Preload_بعدی();
 
     *preserve = *dest;
     *dest = *src;
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 
-d_m3Op(CopySlot_64)
+d_m3Op(Copy_جایگاه_64)
 {
-    u64* dst = slot_ptr(u64);
-    u64* src = slot_ptr(u64);
-    d_m3PreloadNext();
+    u64* dst = جایگاه_ptr(u64);
+    u64* src = جایگاه_ptr(u64);
+    d_m3_Preload_بعدی();
 
     *dst = *src;                  // printf ("copy: %p <- %" PRIi64 " <- %p\n", dst, * dst, src);
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 
-d_m3Op(PreserveCopySlot_64)
+d_m3Op(Preserve_Copy_جایگاه_64)
 {
-    u64* dest = slot_ptr(u64);
-    u64* src = slot_ptr(u64);
-    u64* preserve = slot_ptr(u64);
-    d_m3PreloadNext();
+    u64* dest = جایگاه_ptr(u64);
+    u64* src = جایگاه_ptr(u64);
+    u64* preserve = جایگاه_ptr(u64);
+    d_m3_Preload_بعدی();
 
     *preserve = *dest;
     *dest = *src;
 
-    nextOpPreloaded();
+    بعدی_Op_Preloaded();
 }
 
 
-#if d_m3EnableOpTracing
+#إذا d_m3EnableOpTracing
 //--------------------------------------------------------------------------------------------------------
-d_m3Op(DumpStack)
+d_m3Op(Dump_پشته)
 {
-    u32         opcodeIndex = immediate(u32);
-    u32         stackHeight = immediate(u32);
-    IM3Function function = immediate(IM3Function);
+    u32         opcode_شاخص = فوری(u32);
+    u32         پشته_ارتفاع = فوری(u32);
+    IM3Function function = فوری(IM3Function);
 
     cstr_t      funcName = (function) ? m3_GetFunctionName(function) : "";
 
-    printf(" %4d ", opcodeIndex);
-    printf(" %-25s     r0: 0x%016" PRIx64 "  i:%" PRIi64 "  u:%" PRIu64 "\n", funcName, _r0, _r0, _r0);
-#  if d_m3HasFloat
-    printf("                                    fp0: %" PRIf64 "\n", _fp0);
+    چاپ_کن(" %4d ", opcode_شاخص);
+    چاپ_کن(" %-25s     r0: 0x%016" PRIx64 "  i:%" PRIi64 "  u:%" PRIu64 "\n", funcName, _r0, _r0, _r0);
+#  إذا d_m3HasFloat
+    چاپ_کن("                                    fp0: %" PRIf64 "\n", _fp0);
 #  endif
     m3stack_t sp = _sp;
 
-    for (u32 i = 0; i < stackHeight; ++i) {
-        cstr_t kind = "";
+    لكل (u32 i = 0; i < پشته_ارتفاع; ++i) {
+        cstr_t نوع = "";
 
-        printf("%p  %5s  %2d: 0x%" PRIx64 "  i:%" PRIi64 "\n", sp, kind, i, (u64) * (sp), (i64) * (sp));
+        چاپ_کن("%p  %5s  %2d: 0x%" PRIx64 "  i:%" PRIi64 "\n", sp, نوع, i, (u64) * (sp), (i64) * (sp));
 
         ++sp;
     }
-    printf("---------------------------------------------------------------------------------------------------------\n");
+    چاپ_کن("---------------------------------------------------------------------------------------------------------\n");
 
-    nextOpDirect();
+    بعدی_Op_مستقیم();
 }
-#endif
+#پایان_اگر
 
 
-#define d_m3Select_i(TYPE, REG)                 \
+#تعریف_کن d_m3Select_i(TYPE, REG)                 \
 d_m3Op  (Select_##TYPE##_rss)                   \
 {                                               \
     i32 condition = (i32) _r0;                  \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand2 = جایگاه (TYPE);                \
+    TYPE operand1 = جایگاه (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_srs)                   \
 {                                               \
-    i32 condition = slot (i32);                 \
+    i32 condition = جایگاه (i32);                 \
                                                 \
     TYPE operand2 = (TYPE) REG;                 \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand1 = جایگاه (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_ssr)                   \
 {                                               \
-    i32 condition = slot (i32);                 \
+    i32 condition = جایگاه (i32);                 \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
+    TYPE operand2 = جایگاه (TYPE);                \
     TYPE operand1 = (TYPE) REG;                 \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_sss)                   \
 {                                               \
-    i32 condition = slot (i32);                 \
+    i32 condition = جایگاه (i32);                 \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand2 = جایگاه (TYPE);                \
+    TYPE operand1 = جایگاه (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }
 
 
@@ -3321,17 +3321,17 @@ d_m3Select_i(i32, _r0)
 d_m3Select_i(i64, _r0)
 
 
-#define d_m3Select_f(TYPE, REG, LABEL, SELECTOR)  \
+#تعریف_کن d_m3Select_f(TYPE, REG, LABEL, SELECTOR)  \
 d_m3Op  (Select_##TYPE##_##LABEL##ss)           \
 {                                               \
     i32 condition = (i32) SELECTOR;             \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand2 = جایگاه (TYPE);                \
+    TYPE operand1 = جایگاه (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_##LABEL##rs)           \
@@ -3339,66 +3339,66 @@ d_m3Op  (Select_##TYPE##_##LABEL##rs)           \
     i32 condition = (i32) SELECTOR;             \
                                                 \
     TYPE operand2 = (TYPE) REG;                 \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand1 = جایگاه (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_##LABEL##sr)           \
 {                                               \
     i32 condition = (i32) SELECTOR;             \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
+    TYPE operand2 = جایگاه (TYPE);                \
     TYPE operand1 = (TYPE) REG;                 \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    بعدی_Op ();                                  \
 }
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3Select_f(f32, _fp0, r, _r0)
-d_m3Select_f(f32, _fp0, s, slot(i32))
+d_m3Select_f(f32, _fp0, s, جایگاه(i32))
 
 d_m3Select_f(f64, _fp0, r, _r0)
-d_m3Select_f(f64, _fp0, s, slot(i32))
-#endif
+d_m3Select_f(f64, _fp0, s, جایگاه(i32))
+#پایان_اگر
 
 d_m3Op(Return)
 {
-    m3StackCheck();
-    return m3Err_none;
+    m3_پشته_Check();
+    أرجع m3Err_none;
 }
 
 
 d_m3Op(BranchIf_r)
 {
     i32  condition = (i32)_r0;
-    pc_t branch = immediate(pc_t);
+    pc_t branch = فوری(pc_t);
 
-    if (condition) {
+    إذا (condition) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } وإلا {
+        بعدی_Op();
     }
 }
 
 
 d_m3Op(BranchIf_s)
 {
-    i32  condition = slot(i32);
-    pc_t branch = immediate(pc_t);
+    i32  condition = جایگاه(i32);
+    pc_t branch = فوری(pc_t);
 
-    if (condition) {
+    إذا (condition) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } وإلا {
+        بعدی_Op();
     }
 }
 
-#if d_m3FuseBranch
+#إذا d_m3FuseBranch
 
 // fused compare+branch and compare+if: a compare retro-patched by the compiler when a br_if or if
 // immediately consumes its result. operand shapes and immediate order match the plain compare
@@ -3406,53 +3406,53 @@ d_m3Op(BranchIf_s)
 #  define d_m3FusedCmpBranch(TYPE, NAME, OPER)                \
   d_m3Op(TYPE##_BranchIf_##NAME##_rs)                         \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t branch  = immediate (pc_t);                        \
-      if (operand OPER ((TYPE) _r0))                          \
+      TYPE عملوند = جایگاه (TYPE);                             \
+      pc_t branch  = فوری (pc_t);                        \
+      إذا (عملوند OPER ((TYPE) _r0))                          \
           jumpOp (branch);                                    \
-      else nextOp ();                                         \
+      وإلا بعدی_Op ();                                         \
   }                                                           \
   d_m3Op(TYPE##_BranchIf_##NAME##_sr)                         \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t branch  = immediate (pc_t);                        \
-      if (((TYPE) _r0) OPER operand)                          \
+      TYPE عملوند = جایگاه (TYPE);                             \
+      pc_t branch  = فوری (pc_t);                        \
+      إذا (((TYPE) _r0) OPER عملوند)                          \
           jumpOp (branch);                                    \
-      else nextOp ();                                         \
+      وإلا بعدی_Op ();                                         \
   }                                                           \
   d_m3Op(TYPE##_BranchIf_##NAME##_ss)                         \
   {                                                           \
-      TYPE operand2 = slot (TYPE);                            \
-      TYPE operand1 = slot (TYPE);                            \
-      pc_t branch   = immediate (pc_t);                       \
-      if (operand1 OPER operand2)                             \
+      TYPE operand2 = جایگاه (TYPE);                            \
+      TYPE operand1 = جایگاه (TYPE);                            \
+      pc_t branch   = فوری (pc_t);                       \
+      إذا (operand1 OPER operand2)                             \
           jumpOp (branch);                                    \
-      else nextOp ();                                         \
+      وإلا بعدی_Op ();                                         \
   }                                                           \
   d_m3Op(TYPE##_If_##NAME##_rs)                               \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t elsePC  = immediate (pc_t);                        \
-      if (operand OPER ((TYPE) _r0))                          \
-          nextOp ();                                          \
-      else jumpOp (elsePC);                                   \
+      TYPE عملوند = جایگاه (TYPE);                             \
+      pc_t elsePC  = فوری (pc_t);                        \
+      إذا (عملوند OPER ((TYPE) _r0))                          \
+          بعدی_Op ();                                          \
+      وإلا jumpOp (elsePC);                                   \
   }                                                           \
   d_m3Op(TYPE##_If_##NAME##_sr)                               \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t elsePC  = immediate (pc_t);                        \
-      if (((TYPE) _r0) OPER operand)                          \
-          nextOp ();                                          \
-      else jumpOp (elsePC);                                   \
+      TYPE عملوند = جایگاه (TYPE);                             \
+      pc_t elsePC  = فوری (pc_t);                        \
+      إذا (((TYPE) _r0) OPER عملوند)                          \
+          بعدی_Op ();                                          \
+      وإلا jumpOp (elsePC);                                   \
   }                                                           \
   d_m3Op(TYPE##_If_##NAME##_ss)                               \
   {                                                           \
-      TYPE operand2 = slot (TYPE);                            \
-      TYPE operand1 = slot (TYPE);                            \
-      pc_t elsePC   = immediate (pc_t);                       \
-      if (operand1 OPER operand2)                             \
-          nextOp ();                                          \
-      else jumpOp (elsePC);                                   \
+      TYPE operand2 = جایگاه (TYPE);                            \
+      TYPE operand1 = جایگاه (TYPE);                            \
+      pc_t elsePC   = فوری (pc_t);                       \
+      إذا (operand1 OPER operand2)                             \
+          بعدی_Op ();                                          \
+      وإلا jumpOp (elsePC);                                   \
   }
 
 d_m3FusedCmpBranch(i32, Equal, ==)
@@ -3469,59 +3469,59 @@ d_m3FusedCmpBranch(u32, GreaterThanOrEqual, >=)
 // i32.eqz is unary: form _r has the operand in _r0 (no operand immediate), _s reads a slot
 d_m3Op(i32_BranchIfEqz_r)
 {
-    pc_t branch = immediate(pc_t);
-    if (((i32)_r0) == 0) {
+    pc_t branch = فوری(pc_t);
+    إذا (((i32)_r0) == 0) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } وإلا {
+        بعدی_Op();
     }
 }
 
 d_m3Op(i32_BranchIfEqz_s)
 {
-    i32  operand = slot(i32);
-    pc_t branch = immediate(pc_t);
-    if (operand == 0) {
+    i32  عملوند = جایگاه(i32);
+    pc_t branch = فوری(pc_t);
+    إذا (عملوند == 0) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } وإلا {
+        بعدی_Op();
     }
 }
 
 d_m3Op(i32_IfEqz_r)
 {
-    pc_t elsePC = immediate(pc_t);
-    if (((i32)_r0) == 0) {
-        nextOp();
-    } else {
+    pc_t elsePC = فوری(pc_t);
+    إذا (((i32)_r0) == 0) {
+        بعدی_Op();
+    } وإلا {
         jumpOp(elsePC);
     }
 }
 
 d_m3Op(i32_IfEqz_s)
 {
-    i32  operand = slot(i32);
-    pc_t elsePC = immediate(pc_t);
-    if (operand == 0) {
-        nextOp();
-    } else {
+    i32  عملوند = جایگاه(i32);
+    pc_t elsePC = فوری(pc_t);
+    إذا (عملوند == 0) {
+        بعدی_Op();
+    } وإلا {
         jumpOp(elsePC);
     }
 }
 
-#endif // d_m3FuseBranch
+#پایان_اگر // d_m3FuseBranch
 
 
 d_m3Op(BranchIfPrologue_r)
 {
     i32  condition = (i32)_r0;
-    pc_t branch = immediate(pc_t);
+    pc_t branch = فوری(pc_t);
 
-    if (condition) {
+    إذا (condition) {
         // this is the "prologue" that ends with
         // a plain branch to the actual target
-        nextOp();
-    } else {
+        بعدی_Op();
+    } وإلا {
         jumpOp(branch); // jump over the prologue
     }
 }
@@ -3529,12 +3529,12 @@ d_m3Op(BranchIfPrologue_r)
 
 d_m3Op(BranchIfPrologue_s)
 {
-    i32  condition = slot(i32);
-    pc_t branch = immediate(pc_t);
+    i32  condition = جایگاه(i32);
+    pc_t branch = فوری(pc_t);
 
-    if (condition) {
-        nextOp();
-    } else {
+    إذا (condition) {
+        بعدی_Op();
+    } وإلا {
         jumpOp(branch);
     }
 }
@@ -3542,27 +3542,27 @@ d_m3Op(BranchIfPrologue_s)
 
 d_m3Op(ContinueLoop)
 {
-    m3StackCheck();
+    m3_پشته_Check();
 
-    void* loopId = immediate(void*);
-    return loopId;
+    فراغ* loopId = فوری(فراغ*);
+    أرجع loopId;
 }
 
 
 d_m3Op(ContinueLoopIf)
 {
     i32   condition = (i32)_r0;
-    void* loopId = immediate(void*);
+    فراغ* loopId = فوری(فراغ*);
 
-    if (condition) {
-        return loopId;
-    } else {
-        nextOp();
+    إذا (condition) {
+        أرجع loopId;
+    } وإلا {
+        بعدی_Op();
     }
 }
 
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_پشته_Switching
 
 // This is where execution can "escape" the M3 code and callback to the client / fiber switch
 // OR it can go in the Loop operation. I think it's best to do here. adding code to the loop operation
@@ -3570,47 +3570,47 @@ d_m3Op(ContinueLoopIf)
 
 d_m3Op(ContinueLoop_Suspendable)
 {
-    m3StackCheck();
+    m3_پشته_Check();
 
     IM3Runtime runtime = m3MemRuntime(_mem);
-    if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-        SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_op, _pc - 1, _sp,
-                          d_m3ExpRegArgs(_r0, _fp0));
+    إذا (M3_UNLIKELY(runtime->suspendRequested and runtime->فعال_Continuation)) {
+        Suspend_Without_برچسب(runtime, runtime->فعال_Continuation, safepoint_op, _pc - 1, _sp,
+                          d_m3_Exp_Reg_آرگومانها(_r0, _fp0));
 
-        return m3Err_continuationSuspended;
+        أرجع m3Err_continuationSuspended;
     }
 
-    void* loopId = immediate(void*);
-    return loopId;
+    فراغ* loopId = فوری(فراغ*);
+    أرجع loopId;
 }
 
 
-#  if !d_m3EntryKeepsFrame
+#  إذا !d_m3_مدخل_Keeps_قاب
 // op_Entry, in code compiled while the runtime is suspendable: once the frame is
 // set up, it checks for a pause request. Recursion passes one of these on every
 // lap, as a loop passes its back edge, so a pause the host requests reaches code
 // that has no loop. A pause here stops at the body's first operation, so going
 // on from it is going on past the check.
-d_m3Op(Entry_Suspendable)
+d_m3Op(مدخل_Suspendable)
 {
     d_m3ClearRegisters
 
-    IM3Function function = immediate(IM3Function);
+    IM3Function function = فوری(IM3Function);
 
-    if (EntryFits(function, _sp, _mem)) {
-        EnterFrame(function, _sp);
+    إذا (مدخل_میگنجد(function, _sp, _mem)) {
+        Enter_قاب(function, _sp);
 
         IM3Runtime runtime = m3MemRuntime(_mem);
-        if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-            SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_entry, _pc, _sp,
-                              d_m3ExpRegArgs(_r0, _fp0));
+        إذا (M3_UNLIKELY(runtime->suspendRequested and runtime->فعال_Continuation)) {
+            Suspend_Without_برچسب(runtime, runtime->فعال_Continuation, safepoint_مدخل, _pc, _sp,
+                              d_m3_Exp_Reg_آرگومانها(_r0, _fp0));
 
-            return m3Err_continuationSuspended;
+            أرجع m3Err_continuationSuspended;
         }
 
-        nextOpDirect();
-    } else {
-        newTrap(m3Err_trapStackOverflow);
+        بعدی_Op_مستقیم();
+    } وإلا {
+        newTrap(m3_Err_trap_پشته_سرریز);
     }
 }
 #  endif
@@ -3619,36 +3619,36 @@ d_m3Op(Entry_Suspendable)
 // The check op_Entry_Suspendable makes, as an operation of its own for the
 // builds whose op_Entry keeps a frame and so cannot make it: the start of a
 // function's body, in code compiled while the runtime is suspendable
-d_m3Op(EntryCheck)
+d_m3Op(مدخل_Check)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-        SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_entry, _pc - 1, _sp,
-                          d_m3ExpRegArgs(_r0, _fp0));
+    إذا (M3_UNLIKELY(runtime->suspendRequested and runtime->فعال_Continuation)) {
+        Suspend_Without_برچسب(runtime, runtime->فعال_Continuation, safepoint_مدخل, _pc - 1, _sp,
+                          d_m3_Exp_Reg_آرگومانها(_r0, _fp0));
 
-        return m3Err_continuationSuspended;
+        أرجع m3Err_continuationSuspended;
     }
 
-    nextOp();
+    بعدی_Op();
 }
 
 
 d_m3Op(ContinueLoopIf_Suspendable)
 {
     i32   condition = (i32)_r0;
-    void* loopId = immediate(void*);
+    فراغ* loopId = فوری(فراغ*);
 
-    if (condition) {
+    إذا (condition) {
         IM3Runtime runtime = m3MemRuntime(_mem);
-        if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-            SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_op, _pc - 2, _sp,
-                              d_m3ExpRegArgs(_r0, _fp0));
+        إذا (M3_UNLIKELY(runtime->suspendRequested and runtime->فعال_Continuation)) {
+            Suspend_Without_برچسب(runtime, runtime->فعال_Continuation, safepoint_op, _pc - 2, _sp,
+                              d_m3_Exp_Reg_آرگومانها(_r0, _fp0));
 
-            return m3Err_continuationSuspended;
+            أرجع m3Err_continuationSuspended;
         }
-        return loopId;
-    } else {
-        nextOp();
+        أرجع loopId;
+    } وإلا {
+        بعدی_Op();
     }
 }
 
@@ -3657,53 +3657,53 @@ d_m3Op(ContinueLoopIf_Suspendable)
 // (see M3Runtime.resumePastCheck), by running the operation the check stands
 // in front of: the plain back edge on the same immediates, or whatever follows
 // the entry check.
-static
-m3ret_t ResumePastCheck (IM3Continuation i_cont, M3MemoryHeader* _mem)
+ساكن
+m3ret_t ResumePastCheck (IM3Continuation i_cont, M3_حافظه_سرآیند* _mem)
 {
     pc_t         check = i_cont->pc;
     IM3Operation op = (IM3Operation)(*check);
     pc_t         _pc = check + 1;
     m3stack_t    _sp = i_cont->sp;
     m3reg_t      _r0 = i_cont->r0;
-#  if d_m3HasFloat
+#  إذا d_m3HasFloat
     f64 _fp0 = i_cont->fp0;
 #  endif
 
-    if (op == op_ContinueLoop_Suspendable) {
+    إذا (op == op_ContinueLoop_Suspendable) {
         op = op_ContinueLoop;
-    } else if (op == op_ContinueLoopIf_Suspendable) {
+    } وإلا إذا (op == op_ContinueLoopIf_Suspendable) {
         op = op_ContinueLoopIf;
-    } else if (op == op_EntryCheck) {
-        return nextOpImpl();
-    } else {
-        return d_m3CallWithRegs(check, _sp, _mem, _r0, _fp0);
+    } وإلا إذا (op == op_مدخل_Check) {
+        أرجع بعدی_Op_Impl();
+    } وإلا {
+        أرجع d_m3CallWithRegs(check, _sp, _mem, _r0, _fp0);
     }
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    return op(_pc, d_m3OpArgs, d_m3BaseCstr);
-#  else
-    return op(_pc, d_m3OpArgs);
+#  إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    أرجع op(_pc, d_m3_Op_آرگومانها, d_m3_پایه_Cstr);
+#  وإلا
+    أرجع op(_pc, d_m3_Op_آرگومانها);
 #  endif
 }
-#endif // d_m3HasStackSwitching
+#پایان_اگر // d_m3HasStackSwitching
 
 
 d_m3Op(Const32)
 {
-    u32 value = *(u32*)_pc++;
-    slot(u32) = value;
-    nextOp();
+    u32 مقدار = *(u32*)_pc++;
+    جایگاه(u32) = مقدار;
+    بعدی_Op();
 }
 
 
 d_m3Op(Const64)
 {
     // where a pointer is 32 bits the two lines are only 4-byte aligned
-    u64 value;
-    memcpy(&value, _pc, sizeof(value));
+    u64 مقدار;
+    کپی_حافظه(&مقدار, _pc, حجم(مقدار));
     _pc += (M3_SIZEOF_PTR == 4) ? 2 : 1;
-    slot(u64) = value;
-    nextOp();
+    جایگاه(u64) = مقدار;
+    بعدی_Op();
 }
 
 d_m3Op(Unsupported)
@@ -3713,56 +3713,56 @@ d_m3Op(Unsupported)
 
 d_m3Op(Unreachable)
 {
-    m3StackCheck();
+    m3_پشته_Check();
     newTrap(m3Err_trapUnreachable);
 }
 
 
-d_m3Op(End)
+d_m3Op(انتها_2)
 {
-    m3StackCheck();
-    return m3Err_none;
+    m3_پشته_Check();
+    أرجع m3Err_none;
 }
 
 
-d_m3Op(SetGlobal_s32)
+d_m3Op(مجموعه_Global_s32)
 {
-    u32* global = immediate(u32*);
-    *global = slot(u32);
+    u32* global = فوری(u32*);
+    *global = جایگاه(u32);
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(SetGlobal_s64)
+d_m3Op(مجموعه_Global_s64)
 {
-    u64* global = immediate(u64*);
-    *global = slot(u64);
+    u64* global = فوری(u64*);
+    *global = جایگاه(u64);
 
-    nextOp();
+    بعدی_Op();
 }
 
-#if d_m3HasFloat
-d_m3Op(SetGlobal_f32)
+#إذا d_m3HasFloat
+d_m3Op(مجموعه_Global_f32)
 {
-    f32* global = immediate(f32*);
+    f32* global = فوری(f32*);
     *global = (f32)_fp0;
 
-    nextOp();
+    بعدی_Op();
 }
 
 
-d_m3Op(SetGlobal_f64)
+d_m3Op(مجموعه_Global_f64)
 {
-    f64* global = immediate(f64*);
+    f64* global = فوری(f64*);
     *global = _fp0;
 
-    nextOp();
+    بعدی_Op();
 }
-#endif
+#پایان_اگر
 
 
-#if d_m3HasMemory64
+#إذا d_m3HasMemory64
 
 // Checks a 64-bit address and folds the memarg offset into it, leaving the
 // effective address in a slot the access that follows reads as an ordinary
@@ -3777,283 +3777,283 @@ d_m3Op(SetGlobal_f64)
 // lets past 32 bits, so the truncation below is exact.
 d_m3Op(CheckAddr64)
 {
-    u64  operand = slot(u64);
-    u32* address = slot_ptr(u32);
+    u64  عملوند = جایگاه(u64);
+    u32* آدرس = جایگاه_ptr(u32);
 
     u64  offset;
-    memcpy(&offset, _pc, sizeof(offset));
+    کپی_حافظه(&offset, _pc, حجم(offset));
     _pc += (M3_SIZEOF_PTR == 4) ? 2 : 1;
 
-    if (M3_LIKELY(operand < d_m3AddressLimit)) {
-        u64 effective = operand + offset;
+    إذا (M3_LIKELY(عملوند < d_m3_آدرس_حد)) {
+        u64 effective = عملوند + offset;
 
         // the access itself checks its own size against what is left
-        if (M3_LIKELY(effective < _mem->length)) {
-            *address = (u32)effective;
-            nextOp();
+        إذا (M3_LIKELY(effective < _mem->درازی)) {
+            *آدرس = (u32)effective;
+            بعدی_Op();
         }
     }
 
-    d_outOfBounds;
+    d_بیرون_از_Bounds;
 }
 
-#endif // d_m3HasMemory64
+#پایان_اگر // d_m3HasMemory64
 
 
 // Under d_m3GuardedMemory there is nothing to check: every address one of these
 // operations can name lands inside the memory's reservation, and the part of it the
 // memory does not have is not committed, so the access faults and RunCodeChecked
 // turns that into the trap the spec asks for.
-#if d_m3SkipMemoryBoundsCheck || d_m3GuardedMemory
+#إذا d_m3_Skip_حافظه_Bounds_Check || d_m3_Guarded_حافظه
 #  define m3MemCheck(x) true
-#else
+#وإلا
 #  define m3MemCheck(x) M3_LIKELY(x)
-#endif
+#پایان_اگر
 
 // memcpy here is to support non-aligned access on some platforms.
 
-#define d_m3Load(REG,DEST_TYPE,SRC_TYPE)                \
+#تعریف_کن d_m3_بارگیری(REG,DEST_TYPE,SRC_TYPE)                \
 d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_r)                 \
 {                                                       \
     d_m3TracePrepare                                    \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    u64 operand = (u32) _r0;                            \
-    operand += offset;                                  \
+    u32 offset = فوری (u32);                       \
+    d_m3_Preload_بعدی ();                                 \
+    u64 عملوند = (u32) _r0;                            \
+    عملوند += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (SRC_TYPE) <= _mem->length     \
+    إذا (m3MemCheck(                                     \
+        عملوند + حجم (SRC_TYPE) <= _mem->درازی     \
     )) {                                                \
         {                                               \
-            u8* src8 = m3MemData(_mem) + operand;       \
-            SRC_TYPE value;                             \
-            memcpy(&value, src8, sizeof(value));        \
-            M3_BSWAP_##SRC_TYPE(value);                 \
-            REG = (DEST_TYPE)value;                     \
-            d_m3TraceLoad(DEST_TYPE, operand, REG);     \
+            u8* src8 = m3_Mem_داده(_mem) + عملوند;       \
+            SRC_TYPE مقدار;                             \
+            کپی_حافظه(&مقدار, src8, حجم(مقدار));        \
+            M3_BSWAP_##SRC_TYPE(مقدار);                 \
+            REG = (DEST_TYPE)مقدار;                     \
+            d_m3_Trace_بارگیری(DEST_TYPE, عملوند, REG);     \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        بعدی_Op_Preloaded ();                             \
+    } وإلا d_بیرون_از_Bounds;                               \
 }                                                       \
 d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_s)                 \
 {                                                       \
     d_m3TracePrepare                                    \
-    u64 operand = slot (u32);                           \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    u64 عملوند = جایگاه (u32);                           \
+    u32 offset = فوری (u32);                       \
+    d_m3_Preload_بعدی ();                                 \
+    عملوند += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (SRC_TYPE) <= _mem->length     \
+    إذا (m3MemCheck(                                     \
+        عملوند + حجم (SRC_TYPE) <= _mem->درازی     \
     )) {                                                \
         {                                               \
-            u8* src8 = m3MemData(_mem) + operand;       \
-            SRC_TYPE value;                             \
-            memcpy(&value, src8, sizeof(value));        \
-            M3_BSWAP_##SRC_TYPE(value);                 \
-            REG = (DEST_TYPE)value;                     \
-            d_m3TraceLoad(DEST_TYPE, operand, REG);     \
+            u8* src8 = m3_Mem_داده(_mem) + عملوند;       \
+            SRC_TYPE مقدار;                             \
+            کپی_حافظه(&مقدار, src8, حجم(مقدار));        \
+            M3_BSWAP_##SRC_TYPE(مقدار);                 \
+            REG = (DEST_TYPE)مقدار;                     \
+            d_m3_Trace_بارگیری(DEST_TYPE, عملوند, REG);     \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        بعدی_Op_Preloaded ();                             \
+    } وإلا d_بیرون_از_Bounds;                               \
 }
 
 //  printf ("get: %d -> %d\n", operand + offset, (i64) REG);
 
 
-#define d_m3Load_i(DEST_TYPE, SRC_TYPE) d_m3Load(_r0, DEST_TYPE, SRC_TYPE)
-#define d_m3Load_f(DEST_TYPE, SRC_TYPE) d_m3Load(_fp0, DEST_TYPE, SRC_TYPE)
+#تعریف_کن d_m3_بارگیری_i(DEST_TYPE, SRC_TYPE) d_m3_بارگیری(_r0, DEST_TYPE, SRC_TYPE)
+#تعریف_کن d_m3_بارگیری_f(DEST_TYPE, SRC_TYPE) d_m3_بارگیری(_fp0, DEST_TYPE, SRC_TYPE)
 
-#if d_m3HasFloat
-d_m3Load_f(f32, f32);
-d_m3Load_f(f64, f64);
-#endif
+#إذا d_m3HasFloat
+d_m3_بارگیری_f(f32, f32);
+d_m3_بارگیری_f(f64, f64);
+#پایان_اگر
 
-d_m3Load_i(i32, i8);
-d_m3Load_i(i32, u8);
-d_m3Load_i(i32, i16);
-d_m3Load_i(i32, u16);
-d_m3Load_i(i32, i32);
+d_m3_بارگیری_i(i32, i8);
+d_m3_بارگیری_i(i32, u8);
+d_m3_بارگیری_i(i32, i16);
+d_m3_بارگیری_i(i32, u16);
+d_m3_بارگیری_i(i32, i32);
 
-d_m3Load_i(i64, i8);
-d_m3Load_i(i64, u8);
-d_m3Load_i(i64, i16);
-d_m3Load_i(i64, u16);
-d_m3Load_i(i64, i32);
-d_m3Load_i(i64, u32);
-d_m3Load_i(i64, i64);
+d_m3_بارگیری_i(i64, i8);
+d_m3_بارگیری_i(i64, u8);
+d_m3_بارگیری_i(i64, i16);
+d_m3_بارگیری_i(i64, u16);
+d_m3_بارگیری_i(i64, i32);
+d_m3_بارگیری_i(i64, u32);
+d_m3_بارگیری_i(i64, i64);
 
-#if d_m3FoldSetLocal
+#إذا d_m3_Fold_مجموعه_Local
 
 // destination-folded loads: the value goes to a trailing destination slot instead of _r0.
 // operand immediates keep d_m3Load's order; the destination slot is the last immediate
-#  define d_m3LoadFold(REG, DEST_TYPE, SRC_TYPE)          \
+#  define d_m3_بارگیری_Fold(REG, DEST_TYPE, SRC_TYPE)          \
   d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_r_f)               \
   {                                                       \
       d_m3TracePrepare                                    \
-      u32 offset = immediate (u32);                       \
-      DEST_TYPE * dest = slot_ptr (DEST_TYPE);            \
-      d_m3PreloadNext ();                                 \
-      u64 operand = (u32) _r0;                            \
-      operand += offset;                                  \
+      u32 offset = فوری (u32);                       \
+      DEST_TYPE * dest = جایگاه_ptr (DEST_TYPE);            \
+      d_m3_Preload_بعدی ();                                 \
+      u64 عملوند = (u32) _r0;                            \
+      عملوند += offset;                                  \
                                                           \
-      if (m3MemCheck(                                     \
-          operand + sizeof (SRC_TYPE) <= _mem->length     \
+      إذا (m3MemCheck(                                     \
+          عملوند + حجم (SRC_TYPE) <= _mem->درازی     \
       )) {                                                \
-          u8* src8 = m3MemData(_mem) + operand;           \
-          SRC_TYPE value;                                 \
-          memcpy(&value, src8, sizeof(value));            \
-          M3_BSWAP_##SRC_TYPE(value);                     \
-          DEST_TYPE result = (DEST_TYPE)value;            \
-          * dest = result;  REG = result;                 \
-          d_m3TraceLoad(DEST_TYPE, operand, result);      \
-          nextOpPreloaded ();                             \
-      } else d_outOfBounds;                               \
+          u8* src8 = m3_Mem_داده(_mem) + عملوند;           \
+          SRC_TYPE مقدار;                                 \
+          کپی_حافظه(&مقدار, src8, حجم(مقدار));            \
+          M3_BSWAP_##SRC_TYPE(مقدار);                     \
+          DEST_TYPE نتیجه = (DEST_TYPE)مقدار;            \
+          * dest = نتیجه;  REG = نتیجه;                 \
+          d_m3_Trace_بارگیری(DEST_TYPE, عملوند, نتیجه);      \
+          بعدی_Op_Preloaded ();                             \
+      } وإلا d_بیرون_از_Bounds;                               \
   }                                                       \
   d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_s_f)               \
   {                                                       \
       d_m3TracePrepare                                    \
-      u64 operand = slot (u32);                           \
-      u32 offset = immediate (u32);                       \
-      DEST_TYPE * dest = slot_ptr (DEST_TYPE);            \
-      d_m3PreloadNext ();                                 \
-      operand += offset;                                  \
+      u64 عملوند = جایگاه (u32);                           \
+      u32 offset = فوری (u32);                       \
+      DEST_TYPE * dest = جایگاه_ptr (DEST_TYPE);            \
+      d_m3_Preload_بعدی ();                                 \
+      عملوند += offset;                                  \
                                                           \
-      if (m3MemCheck(                                     \
-          operand + sizeof (SRC_TYPE) <= _mem->length     \
+      إذا (m3MemCheck(                                     \
+          عملوند + حجم (SRC_TYPE) <= _mem->درازی     \
       )) {                                                \
-          u8* src8 = m3MemData(_mem) + operand;           \
-          SRC_TYPE value;                                 \
-          memcpy(&value, src8, sizeof(value));            \
-          M3_BSWAP_##SRC_TYPE(value);                     \
-          DEST_TYPE result = (DEST_TYPE)value;            \
-          * dest = result;  REG = result;                 \
-          d_m3TraceLoad(DEST_TYPE, operand, result);      \
-          nextOpPreloaded ();                             \
-      } else d_outOfBounds;                               \
+          u8* src8 = m3_Mem_داده(_mem) + عملوند;           \
+          SRC_TYPE مقدار;                                 \
+          کپی_حافظه(&مقدار, src8, حجم(مقدار));            \
+          M3_BSWAP_##SRC_TYPE(مقدار);                     \
+          DEST_TYPE نتیجه = (DEST_TYPE)مقدار;            \
+          * dest = نتیجه;  REG = نتیجه;                 \
+          d_m3_Trace_بارگیری(DEST_TYPE, عملوند, نتیجه);      \
+          بعدی_Op_Preloaded ();                             \
+      } وإلا d_بیرون_از_Bounds;                               \
   }
 
-d_m3LoadFold(_r0, i32, i8)
-d_m3LoadFold(_r0, i32, u8)
-d_m3LoadFold(_r0, i32, i16)
-d_m3LoadFold(_r0, i32, u16)
-d_m3LoadFold(_r0, i32, i32)
+d_m3_بارگیری_Fold(_r0, i32, i8)
+d_m3_بارگیری_Fold(_r0, i32, u8)
+d_m3_بارگیری_Fold(_r0, i32, i16)
+d_m3_بارگیری_Fold(_r0, i32, u16)
+d_m3_بارگیری_Fold(_r0, i32, i32)
 
 // The fold forms take the address from _r0 and write the result straight to the
 // destination slot, so they never touch _fp0 and the float widths need no register form.
-d_m3LoadFold(_r0, i64, i8)
-d_m3LoadFold(_r0, i64, u8)
-d_m3LoadFold(_r0, i64, i16)
-d_m3LoadFold(_r0, i64, u16)
-d_m3LoadFold(_r0, i64, i32)
-d_m3LoadFold(_r0, i64, u32)
-d_m3LoadFold(_r0, i64, i64)
-#  if d_m3HasFloat
-d_m3LoadFold(_fp0, f32, f32)
-d_m3LoadFold(_fp0, f64, f64)
+d_m3_بارگیری_Fold(_r0, i64, i8)
+d_m3_بارگیری_Fold(_r0, i64, u8)
+d_m3_بارگیری_Fold(_r0, i64, i16)
+d_m3_بارگیری_Fold(_r0, i64, u16)
+d_m3_بارگیری_Fold(_r0, i64, i32)
+d_m3_بارگیری_Fold(_r0, i64, u32)
+d_m3_بارگیری_Fold(_r0, i64, i64)
+#  إذا d_m3HasFloat
+d_m3_بارگیری_Fold(_fp0, f32, f32)
+d_m3_بارگیری_Fold(_fp0, f64, f64)
 #  endif
 
-#endif // d_m3FoldSetLocal
+#پایان_اگر // d_m3FoldSetLocal
 
-#define d_m3Store(REG, SRC_TYPE, DEST_TYPE)             \
+#تعریف_کن d_m3Store(REG, SRC_TYPE, DEST_TYPE)             \
 d_m3Op  (SRC_TYPE##_Store_##DEST_TYPE##_rs)             \
 {                                                       \
     d_m3TracePrepare                                    \
-    u64 operand = slot (u32);                           \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    u64 عملوند = جایگاه (u32);                           \
+    u32 offset = فوری (u32);                       \
+    d_m3_Preload_بعدی ();                                 \
+    عملوند += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (DEST_TYPE) <= _mem->length    \
+    إذا (m3MemCheck(                                     \
+        عملوند + حجم (DEST_TYPE) <= _mem->درازی    \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(SRC_TYPE, operand, REG);     \
-            u8* mem8 = m3MemData(_mem) + operand;       \
+            d_m3TraceStore(SRC_TYPE, عملوند, REG);     \
+            u8* mem8 = m3_Mem_داده(_mem) + عملوند;       \
             DEST_TYPE val = (DEST_TYPE) REG;            \
             M3_BSWAP_##DEST_TYPE(val);                  \
-            memcpy(mem8, &val, sizeof(val));            \
+            کپی_حافظه(mem8, &val, حجم(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        بعدی_Op_Preloaded ();                             \
+    } وإلا d_بیرون_از_Bounds;                               \
 }                                                       \
 d_m3Op  (SRC_TYPE##_Store_##DEST_TYPE##_sr)             \
 {                                                       \
     d_m3TracePrepare                                    \
-    const SRC_TYPE value = slot (SRC_TYPE);             \
-    u64 operand = (u32) _r0;                            \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    ثابت SRC_TYPE مقدار = جایگاه (SRC_TYPE);             \
+    u64 عملوند = (u32) _r0;                            \
+    u32 offset = فوری (u32);                       \
+    d_m3_Preload_بعدی ();                                 \
+    عملوند += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (DEST_TYPE) <= _mem->length    \
+    إذا (m3MemCheck(                                     \
+        عملوند + حجم (DEST_TYPE) <= _mem->درازی    \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(SRC_TYPE, operand, value);   \
-            u8* mem8 = m3MemData(_mem) + operand;       \
-            DEST_TYPE val = (DEST_TYPE) value;          \
+            d_m3TraceStore(SRC_TYPE, عملوند, مقدار);   \
+            u8* mem8 = m3_Mem_داده(_mem) + عملوند;       \
+            DEST_TYPE val = (DEST_TYPE) مقدار;          \
             M3_BSWAP_##DEST_TYPE(val);                  \
-            memcpy(mem8, &val, sizeof(val));            \
+            کپی_حافظه(mem8, &val, حجم(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        بعدی_Op_Preloaded ();                             \
+    } وإلا d_بیرون_از_Bounds;                               \
 }                                                       \
 d_m3Op  (SRC_TYPE##_Store_##DEST_TYPE##_ss)             \
 {                                                       \
     d_m3TracePrepare                                    \
-    const SRC_TYPE value = slot (SRC_TYPE);             \
-    u64 operand = slot (u32);                           \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    ثابت SRC_TYPE مقدار = جایگاه (SRC_TYPE);             \
+    u64 عملوند = جایگاه (u32);                           \
+    u32 offset = فوری (u32);                       \
+    d_m3_Preload_بعدی ();                                 \
+    عملوند += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (DEST_TYPE) <= _mem->length    \
+    إذا (m3MemCheck(                                     \
+        عملوند + حجم (DEST_TYPE) <= _mem->درازی    \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(SRC_TYPE, operand, value);   \
-            u8* mem8 = m3MemData(_mem) + operand;       \
-            DEST_TYPE val = (DEST_TYPE) value;          \
+            d_m3TraceStore(SRC_TYPE, عملوند, مقدار);   \
+            u8* mem8 = m3_Mem_داده(_mem) + عملوند;       \
+            DEST_TYPE val = (DEST_TYPE) مقدار;          \
             M3_BSWAP_##DEST_TYPE(val);                  \
-            memcpy(mem8, &val, sizeof(val));            \
+            کپی_حافظه(mem8, &val, حجم(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        بعدی_Op_Preloaded ();                             \
+    } وإلا d_بیرون_از_Bounds;                               \
 }
 
 // both operands can be in regs when storing a float
-#define d_m3StoreFp(REG, TYPE)                          \
+#تعریف_کن d_m3StoreFp(REG, TYPE)                          \
 d_m3Op  (TYPE##_Store_##TYPE##_rr)                      \
 {                                                       \
     d_m3TracePrepare                                    \
-    u64 operand = (u32) _r0;                            \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    u64 عملوند = (u32) _r0;                            \
+    u32 offset = فوری (u32);                       \
+    d_m3_Preload_بعدی ();                                 \
+    عملوند += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (TYPE) <= _mem->length         \
+    إذا (m3MemCheck(                                     \
+        عملوند + حجم (TYPE) <= _mem->درازی         \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(TYPE, operand, REG);         \
-            u8* mem8 = m3MemData(_mem) + operand;       \
+            d_m3TraceStore(TYPE, عملوند, REG);         \
+            u8* mem8 = m3_Mem_داده(_mem) + عملوند;       \
             TYPE val = (TYPE) REG;                      \
             M3_BSWAP_##TYPE(val);                       \
-            memcpy(mem8, &val, sizeof(val));            \
+            کپی_حافظه(mem8, &val, حجم(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        بعدی_Op_Preloaded ();                             \
+    } وإلا d_بیرون_از_Bounds;                               \
 }
 
 
-#define d_m3Store_i(SRC_TYPE, DEST_TYPE) d_m3Store(_r0, SRC_TYPE, DEST_TYPE)
-#define d_m3Store_f(SRC_TYPE, DEST_TYPE) d_m3Store(_fp0, SRC_TYPE, DEST_TYPE) d_m3StoreFp (_fp0, SRC_TYPE);
+#تعریف_کن d_m3Store_i(SRC_TYPE, DEST_TYPE) d_m3Store(_r0, SRC_TYPE, DEST_TYPE)
+#تعریف_کن d_m3Store_f(SRC_TYPE, DEST_TYPE) d_m3Store(_fp0, SRC_TYPE, DEST_TYPE) d_m3StoreFp (_fp0, SRC_TYPE);
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 d_m3Store_f(f32, f32)
 d_m3Store_f(f64, f64)
-#endif
+#پایان_اگر
 
 d_m3Store_i(i32, u8)
 d_m3Store_i(i32, i16)
@@ -4064,47 +4064,47 @@ d_m3Store_i(i64, i16)
 d_m3Store_i(i64, i32)
 d_m3Store_i(i64, i64)
 
-#include "m3_exec_atomic.h"
+#ضمن "m3_exec_atomic.h"
 
-#undef m3MemCheck
+#لغو_تعریف m3MemCheck
 
 
 //---------------------------------------------------------------------------------------------------------------------
 // debug/profiling
 //---------------------------------------------------------------------------------------------------------------------
-#if d_m3EnableOpTracing
+#إذا d_m3EnableOpTracing
 d_m3RetSig debugOp (d_m3OpSig, cstr_t i_opcode)
 {
-    char name[100];
-    strcpy(name, strstr(i_opcode, "op_") + 3);
-    char* bracket = strstr(name, "(");
-    if (bracket) {
+    حرف name[100];
+    strcpy(name, جستجوی_رشته(i_opcode, "op_") + 3);
+    حرف* bracket = جستجوی_رشته(name, "(");
+    إذا (bracket) {
         *bracket = 0;
     }
 
     puts(name);
-    nextOpDirect();
+    بعدی_Op_مستقیم();
 }
-#endif
+#پایان_اگر
 
-#if d_m3EnableOpProfiling
+#إذا d_m3EnableOpProfiling
 d_m3RetSig profileOp (d_m3OpSig, cstr_t i_operationName)
 {
-    ProfileHit(i_operationName);
+    Profile_اصابت(i_operationName);
 
-    nextOpDirect();
+    بعدی_Op_مستقیم();
 }
 
 // Same, for an operation leaving by a branch: jumpOp hands the target pc in as _pc,
 // so dispatching from here lands exactly where jumpOpDirect would have.
 d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName)
 {
-    ProfileHit(i_operationName);
+    Profile_اصابت(i_operationName);
 
-    nextOpDirect();
+    بعدی_Op_مستقیم();
 }
-#endif
+#پایان_اگر
 
-d_m3EndExternC
+d_m3_انتها_Extern_C
 
-#endif // m3_exec_h
+#پایان_اگر // m3_exec_h

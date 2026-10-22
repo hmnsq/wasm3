@@ -5,72 +5,72 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_exec_defs_h
-#define m3_exec_defs_h
+#اگر_تعریف_نشده m3_exec_defs_h
+#تعریف_کن m3_exec_defs_h
 
-#include "m3_core.h"
+#ضمن "m3_core.h"
 
 d_m3BeginExternC
 
-#define m3MemData(mem)              (u8*)(((M3MemoryHeader*)(mem))+1)
-#define m3MemRuntime(mem)           (((M3MemoryHeader*)(mem))->runtime)
-#define m3MemInfo(mem)              (((M3MemoryHeader*)(mem))->memory)
+#تعریف_کن m3_Mem_داده(mem)              (u8*)(((M3_حافظه_سرآیند*)(mem))+1)
+#تعریف_کن m3MemRuntime(mem)           (((M3_حافظه_سرآیند*)(mem))->runtime)
+#تعریف_کن m3MemInfo(mem)              (((M3_حافظه_سرآیند*)(mem))->حافظه)
 
-#define d_m3BaseOpSig               pc_t _pc, m3stack_t _sp, M3MemoryHeader * _mem, m3reg_t _r0
-#define d_m3BaseOpArgs              _sp, _mem, _r0
-#define d_m3BaseOpAllArgs           _pc, _sp, _mem, _r0
-#define d_m3BaseOpDefaultArgs       0
-#define d_m3BaseClearRegisters      _r0 = 0;
-#define d_m3BaseCstr                ""
+#تعریف_کن d_m3_پایه_Op_Sig               pc_t _pc, m3stack_t _sp, M3_حافظه_سرآیند * _mem, m3reg_t _r0
+#تعریف_کن d_m3_پایه_Op_آرگومانها              _sp, _mem, _r0
+#تعریف_کن d_m3_پایه_Op_All_آرگومانها           _pc, _sp, _mem, _r0
+#تعریف_کن d_m3_پایه_Op_Default_آرگومانها       0
+#تعریف_کن d_m3_پایه_Clear_Registers      _r0 = 0;
+#تعریف_کن d_m3_پایه_Cstr                ""
 
-#define d_m3ExpOpSig(...)           d_m3BaseOpSig, __VA_ARGS__
-#define d_m3ExpOpArgs(...)          d_m3BaseOpArgs, __VA_ARGS__
-#define d_m3ExpOpAllArgs(...)       d_m3BaseOpAllArgs, __VA_ARGS__
-#define d_m3ExpOpDefaultArgs(...)   d_m3BaseOpDefaultArgs, __VA_ARGS__
-#define d_m3ExpClearRegisters(...)  d_m3BaseClearRegisters; __VA_ARGS__
+#تعریف_کن d_m3ExpOpSig(...)           d_m3_پایه_Op_Sig, __VA_ARGS__
+#تعریف_کن d_m3_Exp_Op_آرگومانها(...)          d_m3_پایه_Op_آرگومانها, __VA_ARGS__
+#تعریف_کن d_m3_Exp_Op_All_آرگومانها(...)       d_m3_پایه_Op_All_آرگومانها, __VA_ARGS__
+#تعریف_کن d_m3_Exp_Op_Default_آرگومانها(...)   d_m3_پایه_Op_Default_آرگومانها, __VA_ARGS__
+#تعریف_کن d_m3ExpClearRegisters(...)  d_m3_پایه_Clear_Registers; __VA_ARGS__
 
-#if d_m3HasFloat
+#إذا d_m3HasFloat
 #  define d_m3OpSig                 d_m3ExpOpSig            (f64 _fp0)
-#  define d_m3OpArgs                d_m3ExpOpArgs           (_fp0)
-#  define d_m3OpAllArgs             d_m3ExpOpAllArgs        (_fp0)
-#  define d_m3OpDefaultArgs         d_m3ExpOpDefaultArgs    (0.)
+#  define d_m3_Op_آرگومانها                d_m3_Exp_Op_آرگومانها           (_fp0)
+#  define d_m3_Op_All_آرگومانها             d_m3_Exp_Op_All_آرگومانها        (_fp0)
+#  define d_m3_Op_Default_آرگومانها         d_m3_Exp_Op_Default_آرگومانها    (0.)
 #  define d_m3ClearRegisters        d_m3ExpClearRegisters   (_fp0 = 0.;)
-#else
-#  define d_m3OpSig                 d_m3BaseOpSig
-#  define d_m3OpArgs                d_m3BaseOpArgs
-#  define d_m3OpAllArgs             d_m3BaseOpAllArgs
-#  define d_m3OpDefaultArgs         d_m3BaseOpDefaultArgs
-#  define d_m3ClearRegisters        d_m3BaseClearRegisters
-#endif
+#وإلا
+#  define d_m3OpSig                 d_m3_پایه_Op_Sig
+#  define d_m3_Op_آرگومانها                d_m3_پایه_Op_آرگومانها
+#  define d_m3_Op_All_آرگومانها             d_m3_پایه_Op_All_آرگومانها
+#  define d_m3_Op_Default_آرگومانها         d_m3_پایه_Op_Default_آرگومانها
+#  define d_m3ClearRegisters        d_m3_پایه_Clear_Registers
+#پایان_اگر
 
 
-#define d_m3RetSig                  static inline m3ret_t vectorcall
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-typedef m3ret_t(vectorcall* IM3Operation)(d_m3OpSig, cstr_t i_operationName);
+#تعریف_کن d_m3RetSig                  ساكن مضمن m3ret_t vectorcall
+#إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+تعريفنوع m3ret_t(vectorcall* IM3Operation)(d_m3OpSig, cstr_t i_operationName);
 #  define d_m3Op(NAME)              M3_NO_UBSAN d_m3RetSig op_##NAME (d_m3OpSig, cstr_t i_operationName)
 
-#  define nextOpImpl()              ((IM3Operation)(* _pc))(_pc + 1, d_m3OpArgs, __FUNCTION__)
-#  define jumpOpImpl(PC)            ((IM3Operation)(*  PC))( PC + 1, d_m3OpArgs, __FUNCTION__)
-#else
-typedef m3ret_t(vectorcall* IM3Operation)(d_m3OpSig);
+#  define بعدی_Op_Impl()              ((IM3Operation)(* _pc))(_pc + 1, d_m3_Op_آرگومانها, __FUNCTION__)
+#  define jumpOpImpl(PC)            ((IM3Operation)(*  PC))( PC + 1, d_m3_Op_آرگومانها, __FUNCTION__)
+#وإلا
+تعريفنوع m3ret_t(vectorcall* IM3Operation)(d_m3OpSig);
 #  define d_m3Op(NAME)              M3_NO_UBSAN d_m3RetSig op_##NAME (d_m3OpSig)
 
-#  define nextOpImpl()              ((IM3Operation)(* _pc))(_pc + 1, d_m3OpArgs)
-#  define jumpOpImpl(PC)            ((IM3Operation)(*  PC))( PC + 1, d_m3OpArgs)
-#endif
+#  define بعدی_Op_Impl()              ((IM3Operation)(* _pc))(_pc + 1, d_m3_Op_آرگومانها)
+#  define jumpOpImpl(PC)            ((IM3Operation)(*  PC))( PC + 1, d_m3_Op_آرگومانها)
+#پایان_اگر
 
-#define nextOpDirect()              M3_MUSTTAIL return nextOpImpl()
-#define jumpOpDirect(PC)            M3_MUSTTAIL return jumpOpImpl((pc_t)(PC))
+#تعریف_کن بعدی_Op_مستقیم()              M3_MUSTTAIL أرجع بعدی_Op_Impl()
+#تعریف_کن jump_Op_مستقیم(PC)            M3_MUSTTAIL أرجع jumpOpImpl((pc_t)(PC))
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-d_m3RetSig RunCode (d_m3OpSig, cstr_t i_operationName)
-#else
-d_m3RetSig RunCode (d_m3OpSig)
-#endif
+#إذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+d_m3RetSig پیاپی_کد (d_m3OpSig, cstr_t i_operationName)
+#وإلا
+d_m3RetSig پیاپی_کد (d_m3OpSig)
+#پایان_اگر
 {
-    nextOpDirect();
+    بعدی_Op_مستقیم();
 }
 
-d_m3EndExternC
+d_m3_انتها_Extern_C
 
-#endif // m3_exec_defs_h
+#پایان_اگر // m3_exec_defs_h
