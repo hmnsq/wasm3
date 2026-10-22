@@ -5,24 +5,24 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_exception.h"
+#அந்தர்பாவ "m3_env.h"
+#அந்தர்பாவ "m3_exception.h"
 
 
-void Module_FreeFunctions (IM3Module i_module)
+வெறுமை Module_FreeFunctions (IM3Module i_module)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Functions; ++i) {
         IM3Function func = &i_module->functions[i];
         Function_Release(func);
     }
 }
 
 
-void m3_FreeModule (IM3Module i_module)
+வெறுமை m3_FreeModule (IM3Module i_module)
 {
-    if (i_module) {
+    எனில் (i_module) {
         m3log(module, "freeing module: %s (funcs: %d; segments: %d)",
-              i_module->name, i_module->numFunctions, i_module->numDataSegments);
+              i_module->name, i_module->இலக்கம்_Functions, i_module->இலக்கம்_Data_Segments);
 
         Module_FreeFunctions(i_module);
 
@@ -31,16 +31,16 @@ void m3_FreeModule (IM3Module i_module)
         m3_Free(i_module->funcTypes);
         m3_Free(i_module->dataSegments);
 
-        for (u32 i = 0; i < i_module->numTables; ++i) {
+        க்கு (u32 i = 0; i < i_module->இலக்கம்_Tables; ++i) {
             IM3Table table = i_module->tables[i];
 
             // a slot may point at a table another module owns; that module
             // frees it
-            if (not table or table->owner != i_module) {
-                continue;
+            எனில் (not table or table->owner != i_module) {
+                தொடர்;
             }
 
-            if (table->elements and i_module->runtime) {
+            எனில் (table->elements and i_module->runtime) {
                 i_module->runtime->tableElementsUsed -= table->size;
             }
             m3_Free(table->elements);
@@ -49,31 +49,31 @@ void m3_FreeModule (IM3Module i_module)
         }
         m3_Free(i_module->tables);
 
-        for (u32 i = 0; i < i_module->numElementSegments; ++i) {
+        க்கு (u32 i = 0; i < i_module->இலக்கம்_Element_Segments; ++i) {
             m3_Free(i_module->elementSegments[i].resolved);
         }
         m3_Free(i_module->elementSegments);
         m3_Free(i_module->declaredFuncs);
 
-        for (u32 i = 0; i < i_module->numGlobals; ++i) {
+        க்கு (u32 i = 0; i < i_module->இலக்கம்_Globals; ++i) {
             FreeImportInfo(&(i_module->globals[i].import));
         }
         m3_Free(i_module->globals);
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-        for (u32 i = 0; i < i_module->numTags; ++i) {
+#எனில் d_m3HasExceptionHandling || d_m3_Has_அடுக்கு_Switching
+        க்கு (u32 i = 0; i < i_module->இலக்கம்_Tags; ++i) {
             FreeImportInfo(&(i_module->tags[i].import));
         }
         m3_Free(i_module->tags);
 #endif
 
-        for (u32 i = 0; i < i_module->numMemories; ++i) {
+        க்கு (u32 i = 0; i < i_module->இலக்கம்_Memories; ++i) {
             IM3Memory memory = i_module->memories[i];
 
             // a slot may point at a memory another module owns; that module
             // frees it
-            if (not memory or memory->owner != i_module) {
-                continue;
+            எனில் (not memory or memory->owner != i_module) {
+                தொடர்;
             }
 
             FreeMemoryBlock(memory);
@@ -83,14 +83,14 @@ void m3_FreeModule (IM3Module i_module)
         m3_Free(i_module->memories);
         FreeMemoryBlock(&i_module->emptyMemory);
 
-        for (u32 i = 0; i < i_module->numExports; ++i) {
+        க்கு (u32 i = 0; i < i_module->இலக்கம்_Exports; ++i) {
             m3_Free(i_module->exports[i].name);
         }
         m3_Free(i_module->exports);
 
-#if d_m3HasSnapshots
+#எனில் d_m3HasSnapshots
         M3EmbeddedSnapshot* snap = i_module->snapshots;
-        while (snap) {
+        போது (snap) {
             M3EmbeddedSnapshot* next = snap->next;
             m3_Free(snap->name);
             m3_Free(snap);
@@ -107,42 +107,42 @@ void m3_FreeModule (IM3Module i_module)
 // mutability: the import's mutability governs what the wasm code may do with it,
 // not whether the host may provide it in the first place.
 M3Result m3_LinkGlobal (IM3Module            io_module,
-                        const char* const    i_moduleName,
-                        const char* const    i_globalName,
-                        const IM3TaggedValue i_value)
+                        மாறிலி எழுத்து* மாறிலி    i_moduleName,
+                        மாறிலி எழுத்து* மாறிலி    i_globalName,
+                        மாறிலி IM3_Tagged_மதிப்பு i_மதிப்பு)
 {
     M3Result result = m3Err_globalLookupFailed;
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
-            continue;
+        எனில் (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+            தொடர்;
         }
 
-        if (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
+        எனில் (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
             strcmp(g->import.fieldUtf8, i_globalName) != 0) {
-            continue;
+            தொடர்;
         }
 
-        if (g->type != i_value->type) {
-            return m3Err_globalTypeMismatch;
+        எனில் (g->type != i_மதிப்பு->type) {
+            திரும்பு m3Err_globalTypeMismatch;
         }
 
-        switch (i_value->type) {
-        case c_m3Type_i32: g->i32Value = i_value->value.i32; break;
-        case c_m3Type_i64: g->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-        case c_m3Type_f32: g->f32Value = i_value->value.f32; break;
-        case c_m3Type_f64: g->f64Value = i_value->value.f64; break;
+        தேர்வு (i_மதிப்பு->type) {
+        நிலை c_m3Type_i32: g->i32_மதிப்பு = i_மதிப்பு->மதிப்பு.i32; நிறுத்து;
+        நிலை c_m3Type_i64: g->i64_மதிப்பு = i_மதிப்பு->மதிப்பு.i64; நிறுத்து;
+#எனில் d_m3HasFloat
+        நிலை c_m3Type_f32: g->f32_மதிப்பு = i_மதிப்பு->மதிப்பு.f32; நிறுத்து;
+        நிலை c_m3Type_f64: g->f64_மதிப்பு = i_மதிப்பு->மதிப்பு.f64; நிறுத்து;
 #endif
-        default: return m3Err_invalidTypeId;
+        இயல்பு: திரும்பு m3Err_invalidTypeId;
         }
 
         result = m3Err_none;
     }
 
-    return result;
+    திரும்பு result;
 }
 
 
@@ -153,39 +153,39 @@ M3Result Module_DeclareFunction (IM3Module io_module, u32 i_index)
 {
     M3Result result = m3Err_none;
 
-    if (i_index >= io_module->numFunctions) {
-        return "function index out of range";
+    எனில் (i_index >= io_module->இலக்கம்_Functions) {
+        திரும்பு "function index out of range";
     }
 
-    if (not io_module->declaredFuncs) {
-        io_module->declaredFuncs = m3_AllocArray(u8, (io_module->numFunctions + 7) / 8);
+    எனில் (not io_module->declaredFuncs) {
+        io_module->declaredFuncs = m3_AllocArray(u8, (io_module->இலக்கம்_Functions + 7) / 8);
         _throwifnull(io_module->declaredFuncs);
     }
 
     io_module->declaredFuncs[i_index / 8] |= (u8)(1u << (i_index % 8));
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
 bool Module_IsFunctionDeclared (IM3Module i_module, u32 i_index)
 {
-    if (not i_module->declaredFuncs or i_index >= i_module->numFunctions) {
-        return false;
+    எனில் (not i_module->declaredFuncs or i_index >= i_module->இலக்கம்_Functions) {
+        திரும்பு false;
     }
 
-    return (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
+    திரும்பு (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
 }
 
 
 // Appends an entry to the module's memory index space. The M3Memory is
 // allocated separately from the index so that another module importing it can
 // hold the same pointer.
-M3Result Module_AddMemory (IM3Module io_module, IM3Memory* o_memory, const M3MemoryInfo* i_info, bool i_isImported)
+M3Result Module_AddMemory (IM3Module io_module, IM3Memory* o_memory, மாறிலி M3MemoryInfo* i_info, bool i_isImported)
 {
-    IM3Memory memory = NULL;
+    IM3Memory memory = வெற்று;
 _try {
-    u32 index = io_module->numMemories;
+    u32 index = io_module->இலக்கம்_Memories;
 
     memory = m3_AllocStruct(M3Memory);
     _throwifnull(memory);
@@ -203,28 +203,28 @@ _try {
     memory->isShared   = i_info->isShared;
 
     io_module->memories[index] = memory;
-    io_module->numMemories     = index + 1;
+    io_module->இலக்கம்_Memories     = index + 1;
 
-    if (o_memory) {
+    எனில் (o_memory) {
         *o_memory = memory;
     }
 
-    return result;
+    திரும்பு result;
 
 } _catch:
     m3_Free(memory);
-    return result;
+    திரும்பு result;
 }
 
 
 // Appends an entry to the module's table index space. Allocated separately from
 // the index, like a memory, so another module importing it can hold the same
 // pointer.
-M3Result Module_AddTable (IM3Module io_module, IM3Table* o_table, const M3TableInfo* i_info, bool i_isImported)
+M3Result Module_AddTable (IM3Module io_module, IM3Table* o_table, மாறிலி M3TableInfo* i_info, bool i_isImported)
 {
-    IM3Table table = NULL;
+    IM3Table table = வெற்று;
 _try {
-    u32 index = io_module->numTables;
+    u32 index = io_module->இலக்கம்_Tables;
 
     table = m3_AllocStruct(M3Table);
     _throwifnull(table);
@@ -242,48 +242,48 @@ _try {
     table->isTable64 = i_info->isTable64;
 
     io_module->tables[index] = table;
-    io_module->numTables     = index + 1;
+    io_module->இலக்கம்_Tables     = index + 1;
 
-    if (o_table) {
+    எனில் (o_table) {
         *o_table = table;
     }
 
-    return result;
+    திரும்பு result;
 
 } _catch:
     m3_Free(table);
-    return result;
+    திரும்பு result;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#எனில் d_m3HasExceptionHandling || d_m3_Has_அடுக்கு_Switching
 
 M3Result Module_AddTag (IM3Module io_module, IM3Tag* o_tag, IM3FuncType i_type, bool i_isImported)
 {
 _try {
-    u32 index = io_module->numTags++;
+    u32 index = io_module->இலக்கம்_Tags++;
 
-    io_module->tags = m3_ReallocArray(M3Tag, io_module->tags, io_module->numTags, index);
+    io_module->tags = m3_ReallocArray(M3Tag, io_module->tags, io_module->இலக்கம்_Tags, index);
     _throwifnull(io_module->tags);
     M3Tag* tag = &io_module->tags[index];
 
     tag->type     = i_type;
     tag->imported = i_isImported;
-    tag->resolved = NULL;
-    memset(&tag->import, 0, sizeof(tag->import));
+    tag->resolved = வெற்று;
+    memset(&tag->import, 0, அளவு(tag->import));
 
-    if (o_tag) {
+    எனில் (o_tag) {
         *o_tag = tag;
     }
 
 } _catch:
-    return result;
+    திரும்பு result;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasStackSwitching
+#எனில் d_m3_Has_அடுக்கு_Switching
 
 // The continuation type a spelled-out reference names. Reference types carry
 // the canonical index, and the module's own type space is where a name for it
@@ -292,25 +292,25 @@ _try {
 // switches to.
 IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType)
 {
-    if (not IsSpelledRefType(i_refType)) {
-        return NULL;
+    எனில் (not IsSpelledRefType(i_refType)) {
+        திரும்பு வெற்று;
     }
 
     u32 heap = HeapTypeOf(i_refType);
 
-    if (heap == d_m3Type_heapAbstract) {
-        return NULL;
+    எனில் (heap == d_m3Type_heapAbstract) {
+        திரும்பு வெற்று;
     }
 
-    for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Func_Types; ++i) {
         IM3FuncType ftype = i_module->funcTypes[i];
 
-        if (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
-            return ftype;
+        எனில் (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
+            திரும்பு ftype;
         }
     }
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 #endif // d_m3HasStackSwitching
@@ -319,9 +319,9 @@ IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType)
 M3Result Module_AddGlobal (IM3Module io_module, IM3Global* o_global, m3type_t i_type, bool i_mutable, bool i_isImported)
 {
 _try {
-    u32 index = io_module->numGlobals++;
+    u32 index = io_module->இலக்கம்_Globals++;
 
-    io_module->globals = m3_ReallocArray(M3Global, io_module->globals, io_module->numGlobals, index);
+    io_module->globals = m3_ReallocArray(M3Global, io_module->globals, io_module->இலக்கம்_Globals, index);
     _throwifnull(io_module->globals);
     M3Global* global = &io_module->globals[index];
 
@@ -329,34 +329,34 @@ _try {
     global->imported  = i_isImported;
     global->isMutable = i_mutable;
 
-    if (o_global) {
+    எனில் (o_global) {
         *o_global = global;
     }
 
 } _catch:
-    return result;
+    திரும்பு result;
 }
 
 M3Result Module_PreallocFunctions (IM3Module io_module, u32 i_totalFunctions)
 {
 _try {
-    if (i_totalFunctions > io_module->allFunctions) {
+    எனில் (i_totalFunctions > io_module->allFunctions) {
         io_module->functions    = m3_ReallocArray(M3Function, io_module->functions, i_totalFunctions, io_module->allFunctions);
         io_module->allFunctions = i_totalFunctions;
         _throwifnull(io_module->functions);
     }
 } _catch:
-    return result;
+    திரும்பு result;
 }
 
 M3Result Module_AddFunction (IM3Module io_module, u32 i_typeIndex, IM3ImportInfo i_importInfo)
 {
 _try {
 
-    u32 index = io_module->numFunctions++;
-_   (Module_PreallocFunctions(io_module, io_module->numFunctions));
+    u32 index = io_module->இலக்கம்_Functions++;
+_   (Module_PreallocFunctions(io_module, io_module->இலக்கம்_Functions));
 
-    _throwif("type sig index out of bounds", i_typeIndex >= io_module->numFuncTypes);
+    _throwif("type sig index out of bounds", i_typeIndex >= io_module->இலக்கம்_Func_Types);
 
     IM3FuncType ft = io_module->funcTypes[i_typeIndex];
 
@@ -368,29 +368,29 @@ _   (Module_PreallocFunctions(io_module, io_module->numFunctions));
     func->index = index;
 #endif
 
-    if (i_importInfo and func->numNames == 0) {
+    எனில் (i_importInfo and func->இலக்கம்_Names == 0) {
         func->import   = *i_importInfo;
         func->names[0] = i_importInfo->fieldUtf8;
-        func->numNames = 1;
+        func->இலக்கம்_Names = 1;
     }
 
     m3log(module, "   added function: %3d; sig: %d", index, i_typeIndex);
 
 } _catch:
-    return result;
+    திரும்பு result;
 }
 
 #ifdef DEBUG
-void Module_GenerateNames (IM3Module i_module)
+வெறுமை Module_GenerateNames (IM3Module i_module)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Functions; ++i) {
         IM3Function func = &i_module->functions[i];
 
-        if (func->numNames == 0) {
-            char* buff = m3_AllocArray(char, 16);
+        எனில் (func->இலக்கம்_Names == 0) {
+            எழுத்து* buff = m3_AllocArray(எழுத்து, 16);
             snprintf(buff, 16, "$func%d", i);
             func->names[0] = buff;
-            func->numNames = 1;
+            func->இலக்கம்_Names = 1;
         }
     }
 }
@@ -398,34 +398,34 @@ void Module_GenerateNames (IM3Module i_module)
 
 IM3Function Module_GetFunction (IM3Module i_module, u32 i_functionIndex)
 {
-    IM3Function func = NULL;
+    IM3Function func = வெற்று;
 
-    if (i_functionIndex < i_module->numFunctions) {
+    எனில் (i_functionIndex < i_module->இலக்கம்_Functions) {
         func = &i_module->functions[i_functionIndex];
         //func->module = i_module;
     }
 
-    return func;
+    திரும்பு func;
 }
 
 
-const char* m3_GetModuleName (IM3Module i_module)
+மாறிலி எழுத்து* m3_GetModuleName (IM3Module i_module)
 {
-    if (!i_module || !i_module->name) {
-        return ".unnamed";
+    எனில் (!i_module || !i_module->name) {
+        திரும்பு ".unnamed";
     }
 
-    return i_module->name;
+    திரும்பு i_module->name;
 }
 
-void m3_SetModuleName (IM3Module i_module, const char* name)
+வெறுமை m3_SetModuleName (IM3Module i_module, மாறிலி எழுத்து* name)
 {
-    if (i_module) {
+    எனில் (i_module) {
         i_module->name = name;
     }
 }
 
 IM3Runtime m3_GetModuleRuntime (IM3Module i_module)
 {
-    return i_module ? i_module->runtime : NULL;
+    திரும்பு i_module ? i_module->runtime : வெற்று;
 }

@@ -5,18 +5,18 @@
 //  Copyright © 2019 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_libc.h"
+#அந்தர்பாவ "m3_api_libc.h"
 
-#include "m3_env.h"
-#include "m3_deterministic.h"
-#include "m3_exception.h"
+#அந்தர்பாவ "m3_env.h"
+#அந்தர்பாவ "m3_deterministic.h"
+#அந்தர்பாவ "m3_exception.h"
 
-#include <time.h>
-#include <errno.h>
-#include <stdio.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <stdio.h>
 
-typedef uint32_t wasm_ptr_t;
-typedef uint32_t wasm_size_t;
+வகைவரை uint32_t wasm_ptr_t;
+வகைவரை uint32_t wasm_size_t;
 
 m3ApiRawFunction(m3_libc_abort)
 {
@@ -26,7 +26,7 @@ m3ApiRawFunction(m3_libc_abort)
 m3ApiRawFunction(m3_libc_exit)
 {
     m3ApiGetArg(int32_t, code)
-    (void)code;
+    (வெறுமை)code;
 
     m3ApiTrap(m3Err_trapExit);
 }
@@ -36,13 +36,13 @@ m3ApiRawFunction(m3_libc_memset)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(void*, i_ptr)
-    m3ApiGetArg(int32_t, i_value)
+    m3ApiGetArgMem(வெறுமை*, i_ptr)
+    m3ApiGetArg(int32_t, i_மதிப்பு)
     m3ApiGetArg(wasm_size_t, i_size)
 
     m3ApiCheckMem(i_ptr, i_size);
 
-    u32 result = m3ApiPtrToOffset(memset(i_ptr, i_value, i_size));
+    u32 result = m3ApiPtrToOffset(memset(i_ptr, i_மதிப்பு, i_size));
     m3ApiReturn(result);
 }
 
@@ -50,8 +50,8 @@ m3ApiRawFunction(m3_libc_memmove)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(void*, o_dst)
-    m3ApiGetArgMem(void*, i_src)
+    m3ApiGetArgMem(வெறுமை*, o_dst)
+    m3ApiGetArgMem(வெறுமை*, i_src)
     m3ApiGetArg(wasm_size_t, i_size)
 
     m3ApiCheckMem(o_dst, i_size);
@@ -65,7 +65,7 @@ m3ApiRawFunction(m3_libc_print)
 {
     m3ApiReturnType(uint32_t)
 
-    m3ApiGetArgMem(void*, i_ptr)
+    m3ApiGetArgMem(வெறுமை*, i_ptr)
     m3ApiGetArg(wasm_size_t, i_size)
 
     m3ApiCheckMem(i_ptr, i_size);
@@ -76,32 +76,32 @@ m3ApiRawFunction(m3_libc_print)
     m3ApiReturn(i_size);
 }
 
-static
-void internal_itoa (int n, char s[], int radix)
+நிலையான
+வெறுமை internal_itoa (முழு n, எழுத்து s[], முழு radix)
 {
-    static char const HEXDIGITS[0x10] = {
+    நிலையான எழுத்து மாறிலி HEXDIGITS[0x10] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
-    int  i, j, sign;
-    char c;
+    முழு  i, j, sign;
+    எழுத்து c;
 
-    if ((sign = n) < 0) {
+    எனில் ((sign = n) < 0) {
         n = -n;
     }
     i = 0;
-    do {
+    செய் {
         s[i++] = HEXDIGITS[n % radix];
-    } while ((n /= radix) > 0);
+    } போது ((n /= radix) > 0);
 
-    if (sign < 0) {
+    எனில் (sign < 0) {
         s[i++] = '-';
     }
     s[i] = '\0';
 
     // reverse
-    for (i = 0, j = (int)strlen(s) - 1; i < j; i++, j--) {
+    க்கு (i = 0, j = (முழு)strlen(s) - 1; i < j; i++, j--) {
         c    = s[i];
         s[i] = s[j];
         s[j] = c;
@@ -112,10 +112,10 @@ m3ApiRawFunction(m3_libc_printf)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(const char*, i_fmt)
+    m3ApiGetArgMem(மாறிலி எழுத்து*, i_fmt)
     m3ApiGetArgMem(wasm_ptr_t*, i_args)
 
-    if (m3ApiIsNullPtr(i_fmt)) {
+    எனில் (m3ApiIsNullPtr(i_fmt)) {
         m3ApiReturn(0);
     }
 
@@ -126,59 +126,59 @@ m3ApiRawFunction(m3_libc_printf)
     FILE*   file   = stdout;
     int32_t length = 0;
 
-    char ch;
-    while ((ch = *i_fmt++)) {
-        if ('%' != ch) {
+    எழுத்து ch;
+    போது ((ch = *i_fmt++)) {
+        எனில் ('%' != ch) {
             putc(ch, file);
             length++;
-            continue;
+            தொடர்;
         }
         // A trailing '%' has no conversion character: the next byte is the
         // terminating NUL. Stop here rather than consuming it, which would
         // step the cursor past the end of the guest string.
-        if (not *i_fmt) {
-            break;
+        எனில் (not *i_fmt) {
+            நிறுத்து;
         }
         ch = *i_fmt++;
-        switch (ch) {
-        case 'c': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            char char_temp = *i_args++;
+        தேர்வு (ch) {
+        நிலை 'c': {
+            m3ApiCheckMem(i_args, அளவு(wasm_ptr_t));
+            எழுத்து char_temp = *i_args++;
             fputc(char_temp, file);
             length++;
-            break;
+            நிறுத்து;
         }
-        case 'd':
-        case 'x': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            int  int_temp   = *i_args++;
-            char buffer[32] = { 0 };
+        நிலை 'd':
+        நிலை 'x': {
+            m3ApiCheckMem(i_args, அளவு(wasm_ptr_t));
+            முழு  int_temp   = *i_args++;
+            எழுத்து buffer[32] = { 0 };
             internal_itoa(int_temp, buffer, (ch == 'x') ? 16 : 10);
             fputs(buffer, file);
-            length += (int32_t)strnlen(buffer, sizeof(buffer));
-            break;
+            length += (int32_t)strnlen(buffer, அளவு(buffer));
+            நிறுத்து;
         }
-        case 's': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            const char* string_temp;
+        நிலை 's': {
+            m3ApiCheckMem(i_args, அளவு(wasm_ptr_t));
+            மாறிலி எழுத்து* string_temp;
             size_t      string_len;
 
-            string_temp = (const char*)m3ApiOffsetToPtr(*i_args++);
-            if (m3ApiIsNullPtr(string_temp)) {
+            string_temp = (மாறிலி எழுத்து*)m3ApiOffsetToPtr(*i_args++);
+            எனில் (m3ApiIsNullPtr(string_temp)) {
                 string_temp = "(null)";
                 string_len  = 6;
-            } else {
+            } இல்லையெனில் {
                 string_len = strnlen(string_temp, 1024);
                 m3ApiCheckMem(string_temp, string_len + 1);
             }
 
             fwrite(string_temp, 1, string_len, file);
             length += (int32_t)string_len;
-            break;
-        default:
+            நிறுத்து;
+        இயல்பு:
             fputc(ch, file);
             length++;
-            break;
+            நிறுத்து;
         }
         }
     }
@@ -186,19 +186,19 @@ m3ApiRawFunction(m3_libc_printf)
     m3ApiReturn(length);
 }
 
-static
+நிலையான
 uint64_t clock_ms (IM3Runtime i_runtime)
 {
-#if d_m3DeterministicProfile
-    return i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
-#else
-    (void)i_runtime;
+#எனில் d_m3DeterministicProfile
+    திரும்பு i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
+#இல்லையெனில்
+    (வெறுமை)i_runtime;
 
 #  ifdef CLOCKS_PER_SEC
-    const clock_t clock_divider = CLOCKS_PER_SEC / 1000;
-    return (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
-#  else
-    return (uint64_t)clock();
+    மாறிலி clock_t clock_divider = CLOCKS_PER_SEC / 1000;
+    திரும்பு (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
+#  இல்லையெனில்
+    திரும்பு (uint64_t)clock();
 #  endif
 #endif
 }
@@ -217,36 +217,36 @@ m3ApiRawFunction(m3_libc_clock_ms_i64)
     m3ApiReturn(clock_ms(runtime));
 }
 
-static
+நிலையான
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    எனில் (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
+        திரும்பு m3Err_none;
+    } இல்லையெனில் {
+        திரும்பு i_result;
     }
 }
 
 // wasm-coremark's minimal build imports `u64 env.clock_ms()`, while older ones
 // - source/extra/coremark_minimal.wasm.h among them - import the i32 form.
 // Bind whichever of the two the module actually declares.
-static
+நிலையான
 M3Result LinkClockMs (IM3Module module, ccstr_t i_moduleName)
 {
     M3Result result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "I()", &m3_libc_clock_ms_i64);
 
-    if (result == m3Err_functionSignatureMismatch) {
+    எனில் (result == m3Err_functionSignatureMismatch) {
         result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "i()", &m3_libc_clock_ms);
     }
 
-    return SuppressLookupFailure(result);
+    திரும்பு SuppressLookupFailure(result);
 }
 
 M3Result m3_LinkLibC (IM3Module module)
 {
     M3Result result = m3Err_none;
 
-    const char* env = "env";
+    மாறிலி எழுத்து* env = "env";
     // clang-format off
 
 _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_debug",            "i(*i)",   &m3_libc_print)));
@@ -261,5 +261,5 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "printf",            
     // clang-format on
 
 _catch:
-    return result;
+    திரும்பு result;
 }

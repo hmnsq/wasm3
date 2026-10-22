@@ -5,45 +5,45 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_info.h"
-#include "m3_compile.h"
+#அந்தர்பாவ "m3_env.h"
+#அந்தர்பாவ "m3_info.h"
+#அந்தர்பாவ "m3_compile.h"
 
-#if defined(DEBUG) || (d_m3EnableStrace >= 1)
+#எனில் defined(DEBUG) || (d_m3EnableStrace >= 1)
 
-size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type)
+size_t SPrintArg (எழுத்து* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type)
 {
-    int len = 0;
+    முழு len = 0;
 
     *o_string = 0;
 
-    if (i_type == c_m3Type_i32) {
+    எனில் (i_type == c_m3Type_i32) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIi32, *(i32*)i_sp);
-    } else if (i_type == c_m3Type_i64) {
+    } இல்லையெனில் எனில் (i_type == c_m3Type_i64) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIi64, *(i64*)i_sp);
     }
-#  if d_m3HasFloat
-    else if (i_type == c_m3Type_f32) {
+#  எனில் d_m3HasFloat
+    இல்லையெனில் எனில் (i_type == c_m3Type_f32) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIf32, *(f32*)i_sp);
-    } else if (i_type == c_m3Type_f64) {
+    } இல்லையெனில் எனில் (i_type == c_m3Type_f64) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIf64, *(f64*)i_sp);
     }
 #  endif
 
     len = M3_MAX(0, len);
 
-    return len;
+    திரும்பு len;
 }
 
 
 cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 {
-    int ret;
+    முழு ret;
 
-    static char string[256];
+    நிலையான எழுத்து string[256];
 
-    char*   s = string;
-    ccstr_t e = string + sizeof(string) - 1;
+    எழுத்து*   s = string;
+    ccstr_t e = string + அளவு(string) - 1;
 
     ret = snprintf(s, e - s, "(");
     s += M3_MAX(0, ret);
@@ -51,10 +51,10 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
     u64* argSp = (u64*)i_sp;
 
     IM3FuncType funcType = i_function->funcType;
-    if (funcType) {
-        u32 numArgs = funcType->numArgs;
+    எனில் (funcType) {
+        u32 இலக்கம்_Args = funcType->இலக்கம்_Args;
 
-        for (u32 i = 0; i < numArgs; ++i) {
+        க்கு (u32 i = 0; i < இலக்கம்_Args; ++i) {
             m3type_t type = d_FuncArgType(funcType, i);
 
             ret = snprintf(s, e - s, "%s: ", c_waTypes[BaseTypeOf(type)]);
@@ -62,19 +62,19 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 
             s += SPrintArg(s, e - s, argSp + i, type);
 
-            if (i != numArgs - 1) {
+            எனில் (i != இலக்கம்_Args - 1) {
                 ret = snprintf(s, e - s, ", ");
                 s += M3_MAX(0, ret);
             }
         }
-    } else {
+    } இல்லையெனில் {
         printf("null signature");
     }
 
     ret = snprintf(s, e - s, ")");
     s += M3_MAX(0, ret);
 
-    return string;
+    திரும்பு string;
 }
 
 // The results of a call, comma separated, for the strace return line. Empty when
@@ -83,29 +83,29 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 // layout m3_GetResults reads.
 cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 {
-    int ret;
+    முழு ret;
 
-    static char string[256];
+    நிலையான எழுத்து string[256];
 
-    char*   s = string;
-    ccstr_t e = string + sizeof(string) - 1;
+    எழுத்து*   s = string;
+    ccstr_t e = string + அளவு(string) - 1;
 
     *s = 0;
 
     u64* retSp = (u64*)i_sp;
 
-    u32 numRets = i_funcType ? i_funcType->numRets : 0;
+    u32 இலக்கம்_Rets = i_funcType ? i_funcType->இலக்கம்_Rets : 0;
 
-    for (u32 i = 0; i < numRets; ++i) {
+    க்கு (u32 i = 0; i < இலக்கம்_Rets; ++i) {
         s += SPrintArg(s, e - s, retSp + i, d_FuncRetType(i_funcType, i));
 
-        if (i != numRets - 1) {
+        எனில் (i != இலக்கம்_Rets - 1) {
             ret = snprintf(s, e - s, ", ");
             s += M3_MAX(0, ret);
         }
     }
 
-    return string;
+    திரும்பு string;
 }
 
 #endif
@@ -113,43 +113,43 @@ cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 #ifdef DEBUG
 
 // a central function you can be breakpoint:
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message)
+வெறுமை ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message)
 {
     printf("\nexception: '%s' @ %s\n", i_exception, i_message);
-    return;
+    திரும்பு;
 }
 
 
-typedef struct OpInfo {
+வகைவரை கட்டமைப்பு OpInfo {
     IM3OpInfo  info;
     m3opcode_t opcode;
 } OpInfo;
 
-void m3_PrintM3Info ()
+வெறுமை m3_PrintM3Info ()
 {
     printf("\n-- m3 configuration --------------------------------------------\n");
     //  printf (" sizeof M3CodePage    : %zu bytes  (%d slots) \n", sizeof (M3CodePage), c_m3CodePageNumSlots);
     printf(" sizeof M3MemPage     : %u bytes              \n", d_m3DefaultMemPageSize);
-    printf(" sizeof M3Compilation : %zu bytes             \n", sizeof(M3Compilation));
-    printf(" sizeof M3Function    : %zu bytes             \n", sizeof(M3Function));
+    printf(" sizeof M3Compilation : %zu bytes             \n", அளவு(M3Compilation));
+    printf(" sizeof M3Function    : %zu bytes             \n", அளவு(M3Function));
     printf("----------------------------------------------------------------\n\n");
 }
 
 
-void* v_PrintEnvModuleInfo (IM3Module i_module, void* i_info)
+வெறுமை* v_PrintEnvModuleInfo (IM3Module i_module, வெறுமை* i_info)
 {
     u32* io_index = (u32*)i_info;
-    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->numFunctions);
+    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->இலக்கம்_Functions);
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
-void m3_PrintRuntimeInfo (IM3Runtime i_runtime)
+வெறுமை m3_PrintRuntimeInfo (IM3Runtime i_runtime)
 {
     printf("\n-- m3 runtime -------------------------------------------------\n");
 
-    printf(" stack-size: %zu   \n\n", i_runtime->numStackSlots * sizeof(m3slot_t));
+    printf(" stack-size: %zu   \n\n", i_runtime->இலக்கம்_அடுக்கு_Slots * அளவு(m3slot_t));
 
     u32 moduleIndex = 0;
     ForEachModule(i_runtime, v_PrintEnvModuleInfo, &moduleIndex);
@@ -162,10 +162,10 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 {
     u8 base = BaseTypeOf(i_m3Type);
 
-    if (base <= c_m3Type_unknown) {
-        return c_waTypes[base];
-    } else {
-        return "?";
+    எனில் (base <= c_m3Type_unknown) {
+        திரும்பு c_waTypes[base];
+    } இல்லையெனில் {
+        திரும்பு "?";
     }
 }
 
@@ -173,19 +173,19 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 // Appends to a string that is built up over several calls, and returns the length
 // reached. snprintf reports the length it wanted to write rather than the length
 // it wrote, so an append that truncates has to leave the cursor inside the buffer.
-static
-size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, ccstr_t i_format, ...)
+நிலையான
+size_t SPrintAppend (எழுத்து* o_string, size_t i_stringBufferSize, size_t i_len, ccstr_t i_format, ...)
 {
-    if (i_len + 1 >= i_stringBufferSize) {
-        return i_len;
+    எனில் (i_len + 1 >= i_stringBufferSize) {
+        திரும்பு i_len;
     }
 
     va_list args;
     va_start(args, i_format);
-    int ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
+    முழு ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
     va_end(args);
 
-    return M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
+    திரும்பு M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
 }
 
 
@@ -194,60 +194,60 @@ size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, cc
 
 cstr_t SPrintFuncTypeSignature (IM3FuncType i_funcType)
 {
-    static char string[256];
+    நிலையான எழுத்து string[256];
 
-    size_t len = SPrintAppend(string, sizeof(string), 0, "(");
+    size_t len = SPrintAppend(string, அளவு(string), 0, "(");
 
-    for (u32 i = 0; i < i_funcType->numArgs; ++i) {
-        len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
+    க்கு (u32 i = 0; i < i_funcType->இலக்கம்_Args; ++i) {
+        len = SPrintAppend(string, அளவு(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncArgType(i_funcType, i)));
     }
 
-    len = SPrintAppend(string, sizeof(string), len, ") -> ");
+    len = SPrintAppend(string, அளவு(string), len, ") -> ");
 
-    for (u32 i = 0; i < i_funcType->numRets; ++i) {
-        len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
+    க்கு (u32 i = 0; i < i_funcType->இலக்கம்_Rets; ++i) {
+        len = SPrintAppend(string, அளவு(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncRetType(i_funcType, i)));
     }
 
-    return string;
+    திரும்பு string;
 }
 
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type)
+cstr_t SPrint_மதிப்பு (வெறுமை* i_மதிப்பு, m3type_t i_type)
 {
-    static char string[100];
-    SPrintArg(string, 100, (m3stack_t)i_value, i_type);
-    return string;
+    நிலையான எழுத்து string[100];
+    SPrintArg(string, 100, (m3stack_t)i_மதிப்பு, i_type);
+    திரும்பு string;
 }
 
 // Finds i_operation in one operation table. i_opcodeBase tags the result, so an
 // extended entry comes back as the 0xFCxx opcode the rest of the code speaks.
-static
-bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_numOps, m3opcode_t i_opcodeBase, IM3Operation i_operation)
+நிலையான
+bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_இலக்கம்_Ops, m3opcode_t i_opcodeBase, IM3Operation i_operation)
 {
-    for (u32 i = 0; i < i_numOps; ++i) {
+    க்கு (u32 i = 0; i < i_இலக்கம்_Ops; ++i) {
         IM3OpInfo oi = &i_table[i];
 
-        for (u32 o = 0; o < 4; ++o) {
-            if (oi->operations[o] == i_operation) {
+        க்கு (u32 o = 0; o < 4; ++o) {
+            எனில் (oi->operations[o] == i_operation) {
                 io_info->info   = oi;
                 io_info->opcode = i_opcodeBase | i;
-                return true;
+                திரும்பு true;
             }
         }
     }
 
-    return false;
+    திரும்பு false;
 }
 
-static
+நிலையான
 OpInfo find_operation_info (IM3Operation i_operation)
 {
-    OpInfo opInfo = { NULL, 0 };
+    OpInfo opInfo = { வெற்று, 0 };
 
-    if (!i_operation) {
-        return opInfo;
+    எனில் (!i_operation) {
+        திரும்பு opInfo;
     }
 
     // Scans the tables directly rather than through GetOpInfo (), which rejects
@@ -255,30 +255,30 @@ OpInfo find_operation_info (IM3Operation i_operation)
     // Reserved slots are zeroed, so they never match a real operation here.
     // c_operationsHigh is not scanned: every entry in it is compiler-driven with
     // an empty operation list, so nothing there could match.
-    if (not ScanOperationTable(&opInfo, c_operations, c_numOperations, 0, i_operation)) {
-        if (not ScanOperationTable(&opInfo, c_operationsFC, c_numOperationsFC, c_waOp_extended << 8, i_operation)) {
-#  if d_m3HasAtomics
+    எனில் (not ScanOperationTable(&opInfo, c_operations, c_இலக்கம்_Operations, 0, i_operation)) {
+        எனில் (not ScanOperationTable(&opInfo, c_operationsFC, c_இலக்கம்_Operations_FC, c_waOp_extended << 8, i_operation)) {
+#  எனில் d_m3HasAtomics
             // one entry serves a whole kind, so the opcode it comes back with is only the entry's index
-            ScanOperationTable(&opInfo, c_operationsFE, c_numOperationsFE, c_waOp_atomic << 8, i_operation);
+            ScanOperationTable(&opInfo, c_operationsFE, c_இலக்கம்_Operations_FE, c_waOp_atomic << 8, i_operation);
 #  endif
         }
     }
 
-    return opInfo;
+    திரும்பு opInfo;
 }
 
 
 #  undef fetch
 #  define fetch(TYPE) (* (TYPE *) ((*o_pc)++))
 
-#  define d_m3Decoder(FUNC) void Decode_##FUNC (char * o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t * o_pc)
+#  define d_m3Decoder(FUNC) வெறுமை Decode_##FUNC (எழுத்து * o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t * o_pc)
 
 d_m3Decoder(Call)
 {
-    void* function    = fetch(void*);
-    i32   stackOffset = fetch(i32);
+    வெறுமை* function    = fetch(வெறுமை*);
+    i32   அடுக்கு_Offset = fetch(i32);
 
-    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, stackOffset);
+    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, அடுக்கு_Offset);
 }
 
 
@@ -293,7 +293,7 @@ d_m3Decoder(Entry)
 
 d_m3Decoder(f64_Store)
 {
-    if (i_operation == i_opInfo->operations[0]) {
+    எனில் (i_operation == i_opInfo->operations[0]) {
         u32 operand = fetch(u32);
         u32 offset  = fetch(u32);
 
@@ -304,7 +304,7 @@ d_m3Decoder(f64_Store)
 
 d_m3Decoder(Branch)
 {
-    void* target = fetch(void*);
+    வெறுமை* target = fetch(வெறுமை*);
     snprintf(o_string, i_stringBufferSize, "%p", target);
 }
 
@@ -318,7 +318,7 @@ d_m3Decoder(BranchTable)
 
     i32 targets = fetch(i32);
 
-    for (i32 i = 0; i < targets; ++i) {
+    க்கு (i32 i = 0; i < targets; ++i) {
         pc_t addr = fetch(pc_t);
         len       = SPrintAppend(o_string, i_stringBufferSize, len, "%" PRIi32 "=%p, ", i, addr);
     }
@@ -330,19 +330,19 @@ d_m3Decoder(BranchTable)
 
 d_m3Decoder(Const)
 {
-    u64 value  = fetch(u64);
+    u64 மதிப்பு  = fetch(u64);
     i32 offset = fetch(i32);
-    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, value);
+    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, மதிப்பு);
 }
 
 
 #  undef fetch
 
-void DecodeOperation (char* o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t* o_pc)
+வெறுமை DecodeOperation (எழுத்து* o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t* o_pc)
 {
-#  define d_m3Decode(OPCODE, FUNC) case OPCODE: Decode_##FUNC (o_string, i_stringBufferSize, i_opcode, i_operation, i_opInfo, o_pc); break;
+#  define d_m3Decode(OPCODE, FUNC) நிலை OPCODE: Decode_##FUNC (o_string, i_stringBufferSize, i_opcode, i_operation, i_opInfo, o_pc); நிறுத்து;
 
-    switch (i_opcode) {
+    தேர்வு (i_opcode) {
         //d_m3Decode (0xc0,                  Const)
         d_m3Decode(0xc5, Entry)
         d_m3Decode(c_waOp_call, Call)
@@ -354,7 +354,7 @@ void DecodeOperation (char* o_string, size_t i_stringBufferSize, m3opcode_t i_op
 
 // TODO: this isn't fully implemented. it blindly assumes each word is a Operation pointer
 // and, if an operation happens to missing from the c_operations table it won't be recognized here
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
+வெறுமை dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
 {
     m3log(code, "code page seq: %d", i_codePage->info.sequence);
 
@@ -363,31 +363,31 @@ void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
 
     m3log(code, "---------------------------------------------------------------------------------------");
 
-    while (pc < end) {
-        const pc_t operationPC = pc;
-        (void)operationPC;  // avoid unused variable warning if DEBUG is not defined
+    போது (pc < end) {
+        மாறிலி pc_t operationPC = pc;
+        (வெறுமை)operationPC;  // avoid unused variable warning if DEBUG is not defined
         IM3Operation op = (IM3Operation)(*pc++);
 
         OpInfo i = find_operation_info(op);
 
-        if (i.info) {
-            char infoString[8 * 1024] = { 0 };
+        எனில் (i.info) {
+            எழுத்து infoString[8 * 1024] = { 0 };
 
-            DecodeOperation(infoString, sizeof(infoString), i.opcode, op, i.info, &pc);
+            DecodeOperation(infoString, அளவு(infoString), i.opcode, op, i.info, &pc);
 
             m3log(code, "%p | %20s  %s", operationPC, i.info->name, infoString);
-        } else {
+        } இல்லையெனில் {
             m3log(code, "%p | %p", operationPC, op);
         }
     }
 
     m3log(code, "---------------------------------------------------------------------------------------");
 
-    m3log(code, "free-lines: %d", i_codePage->info.numLines - i_codePage->info.lineIndex);
+    m3log(code, "free-lines: %d", i_codePage->info.இலக்கம்_வரிகள் - i_codePage->info.வரி_Index);
 }
 
 
-void dump_type_stack (IM3Compilation o)
+வெறுமை dump_type_அடுக்கு (IM3Compilation o)
 {
     /* Reminders about how the stack works! :)
      -- args & locals remain on the type stack for duration of the function. Denoted with a constant 'A' and 'L' in this dump.
@@ -408,61 +408,61 @@ void dump_type_stack (IM3Compilation o)
     i32 regAllocated[2] = { (i32)IsRegisterAllocated(o, 0), (i32)IsRegisterAllocated(o, 1) };
 
     // display whether r0 or fp0 is allocated. these should then also be reflected somewhere in the stack too.
-    d_m3Log(stack, "\n");
-    d_m3Log(stack, "        ");
+    d_m3Log(அடுக்கு, "\n");
+    d_m3Log(அடுக்கு, "        ");
     printf("%s %s    ", regAllocated[0] ? "(r0)" : "    ", regAllocated[1] ? "(fp0)" : "     ");
     printf("\n");
 
-    for (u32 p = 1; p <= 2; ++p) {
-        d_m3Log(stack, "        ");
+    க்கு (u32 p = 1; p <= 2; ++p) {
+        d_m3Log(அடுக்கு, "        ");
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            if (i > 0 and i == o->stackFirstDynamicIndex) {
+        க்கு (u16 i = 0; i < o->அடுக்கு_Index; ++i) {
+            எனில் (i > 0 and i == o->அடுக்கு_First_Dynamic_Index) {
                 printf("#");
             }
 
-            if (i == o->block.blockStackIndex) {
+            எனில் (i == o->block.block_அடுக்கு_Index) {
                 printf(">");
             }
 
-            const char* type = c_waCompactTypes[BaseTypeOf(o->typeStack[i])];
+            மாறிலி எழுத்து* type = c_waCompactTypes[BaseTypeOf(o->type_அடுக்கு[i])];
 
-            const char* location = "";
+            மாறிலி எழுத்து* location = "";
 
-            i32 slot = o->wasmStack[i];
+            i32 slot = o->wasm_அடுக்கு[i];
 
-            if (IsRegisterSlotAlias(slot)) {
+            எனில் (IsRegisterSlotAlias(slot)) {
                 bool isFp = IsFpRegisterSlotAlias(slot);
                 location  = isFp ? "/f" : "/r";
 
                 regAllocated[isFp]--;
                 slot = -1;
-            } else {
-                if (slot < o->slotFirstDynamicIndex) {
-                    if (slot >= o->slotFirstConstIndex) {
+            } இல்லையெனில் {
+                எனில் (slot < o->slotFirstDynamicIndex) {
+                    எனில் (slot >= o->slotFirstConstIndex) {
                         location = "c";
-                    } else if (slot >= o->function->numRetAndArgSlots) {
+                    } இல்லையெனில் எனில் (slot >= o->function->இலக்கம்_Ret_And_Arg_Slots) {
                         location = "L";
-                    } else {
+                    } இல்லையெனில் {
                         location = "a";
                     }
                 }
             }
 
-            char item[100];
+            எழுத்து item[100];
 
-            if (slot >= 0) {
-                snprintf(item, sizeof(item), "%s%s%d", type, location, slot);
-            } else {
-                snprintf(item, sizeof(item), "%s%s", type, location);
+            எனில் (slot >= 0) {
+                snprintf(item, அளவு(item), "%s%s%d", type, location, slot);
+            } இல்லையெனில் {
+                snprintf(item, அளவு(item), "%s%s", type, location);
             }
 
-            if (p == 1) {
+            எனில் (p == 1) {
                 size_t s = strlen(item);
 
-                snprintf(item, sizeof(item), "%d", i);
+                snprintf(item, அளவு(item), "%d", i);
 
-                while (strlen(item) < s) {
+                போது (strlen(item) < s) {
                     strcat(item, " ");
                 }
             }
@@ -477,80 +477,80 @@ void dump_type_stack (IM3Compilation o)
 
     u16 maxSlot = GetMaxUsedSlotPlusOne(o);
 
-    if (maxSlot > o->slotFirstDynamicIndex) {
-        d_m3Log(stack, "                      -");
+    எனில் (maxSlot > o->slotFirstDynamicIndex) {
+        d_m3Log(அடுக்கு, "                      -");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        க்கு (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("----");
         }
 
         printf("\n");
 
-        d_m3Log(stack, "                 slot |");
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        d_m3Log(அடுக்கு, "                 slot |");
+        க்கு (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", i);
         }
 
         printf("\n");
-        d_m3Log(stack, "                alloc |");
+        d_m3Log(அடுக்கு, "                alloc |");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        க்கு (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", o->m3Slots[i]);
         }
 
         printf("\n");
     }
-    d_m3Log(stack, "\n");
+    d_m3Log(அடுக்கு, "\n");
 }
 
 
-static
-const char* GetOpcodeIndentionString (i32 blockDepth)
+நிலையான
+மாறிலி எழுத்து* GetOpcodeIndentionString (i32 blockDepth)
 {
     blockDepth += 1;
 
-    if (blockDepth < 0) {
+    எனில் (blockDepth < 0) {
         blockDepth = 0;
     }
 
-    static const char* s_spaces = ".......................................................................................";
+    நிலையான மாறிலி எழுத்து* s_spaces = ".......................................................................................";
 
-    const char* indent = s_spaces + strlen(s_spaces);
+    மாறிலி எழுத்து* indent = s_spaces + strlen(s_spaces);
     indent -= (blockDepth * 2);
-    if (indent < s_spaces) {
+    எனில் (indent < s_spaces) {
         indent = s_spaces;
     }
 
-    return indent;
+    திரும்பு indent;
 }
 
 
-const char* get_indention_string (IM3Compilation o)
+மாறிலி எழுத்து* get_indention_string (IM3Compilation o)
 {
-    return GetOpcodeIndentionString(o->block.depth + 4);
+    திரும்பு GetOpcodeIndentionString(o->block.depth + 4);
 }
 
 
-void log_opcode (IM3Compilation o, m3opcode_t i_opcode)
+வெறுமை log_opcode (IM3Compilation o, m3opcode_t i_opcode)
 {
     i32 depth = o->block.depth;
-    if (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
+    எனில் (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
         depth--;
     }
-    (void)depth;
+    (வெறுமை)depth;
 
-    m3log(compile, "%4d | 0x%02x  %s %s", o->numOpcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
+    m3log(compile, "%4d | 0x%02x  %s %s", o->இலக்கம்_Opcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
 }
 
 
-void log_emit (IM3Compilation o, IM3Operation i_operation)
+வெறுமை log_emit (IM3Compilation o, IM3Operation i_operation)
 {
     OpInfo i = find_operation_info(i_operation);
 
     d_m3Log(emit, "");
-    if (i.info) {
+    எனில் (i.info) {
         printf("%p: %s\n", GetPagePC(o->page), i.info->name);
-    } else {
+    } இல்லையெனில் {
         printf("not found: %p\n", i_operation);
     }
 }
@@ -558,59 +558,59 @@ void log_emit (IM3Compilation o, IM3Operation i_operation)
 #endif // DEBUG
 
 
-#if d_m3EnableOpProfiling
+#எனில் d_m3EnableOpProfiling
 
-typedef struct M3ProfilerSlot {
+வகைவரை கட்டமைப்பு M3ProfilerSlot {
     cstr_t opName;
-    u64    hitCount;
+    u64    hit_மொத்தம்;
 } M3ProfilerSlot;
 
-static M3ProfilerSlot s_opProfilerCounts[d_m3ProfilerSlotMask + 1] = {};
+நிலையான M3ProfilerSlot s_opProfilerCounts[d_m3ProfilerSlotMask + 1] = {};
 
-void ProfileHit (cstr_t i_operationName)
+வெறுமை ProfileHit (cstr_t i_operationName)
 {
     u64 ptr = (u64)i_operationName;
 
     M3ProfilerSlot* slot = &s_opProfilerCounts[ptr & d_m3ProfilerSlotMask];
 
-    if (slot->opName) {
-        if (slot->opName != i_operationName) {
+    எனில் (slot->opName) {
+        எனில் (slot->opName != i_operationName) {
             m3_Abort("profiler slot collision; increase d_m3ProfilerSlotMask");
         }
     }
 
     slot->opName = i_operationName;
-    slot->hitCount++;
+    slot->hit_மொத்தம்++;
 }
 
 
-void m3_PrintProfilerInfo ()
+வெறுமை m3_PrintProfilerInfo ()
 {
     M3ProfilerSlot  dummy;
     M3ProfilerSlot* maxSlot = &dummy;
 
-    do {
-        maxSlot->hitCount = 0;
+    செய் {
+        maxSlot->hit_மொத்தம் = 0;
 
-        for (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
+        க்கு (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
             M3ProfilerSlot* slot = &s_opProfilerCounts[i];
 
-            if (slot->opName) {
-                if (slot->hitCount > maxSlot->hitCount) {
+            எனில் (slot->opName) {
+                எனில் (slot->hit_மொத்தம் > maxSlot->hit_மொத்தம்) {
                     maxSlot = slot;
                 }
             }
         }
 
-        if (maxSlot->opName) {
-            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hitCount, maxSlot->opName);
-            maxSlot->opName = NULL;
+        எனில் (maxSlot->opName) {
+            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hit_மொத்தம், maxSlot->opName);
+            maxSlot->opName = வெற்று;
         }
-    } while (maxSlot->hitCount);
+    } போது (maxSlot->hit_மொத்தம்);
 }
 
-#else
+#இல்லையெனில்
 
-void m3_PrintProfilerInfo () {}
+வெறுமை m3_PrintProfilerInfo () {}
 
 #endif

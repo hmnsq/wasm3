@@ -5,40 +5,40 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <stdarg.h>
-#include <limits.h>
-#include <errno.h>
-#include <float.h>
-#include <ctype.h>
+#அந்தர்பாவ <stdarg.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <float.h>
+#அந்தர்பாவ <ctype.h>
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_deterministic.h"
-#include "m3_compile.h"
-#include "m3_host.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#அந்தர்பாவ "m3_env.h"
+#அந்தர்பாவ "m3_bind.h"
+#அந்தர்பாவ "m3_deterministic.h"
+#அந்தர்பாவ "m3_compile.h"
+#அந்தர்பாவ "m3_host.h"
+#அந்தர்பாவ "m3_exception.h"
+#அந்தர்பாவ "m3_info.h"
 
 
 IM3Environment m3_NewEnvironment ()
 {
     IM3Environment env = m3_AllocStruct(M3Environment);
 
-    if (env) {
+    எனில் (env) {
         _try
         {
             // create FuncTypes for all simple block return ValueTypes.
             // v128 is skipped: it parses as a slot but has no operations.
-            for (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
-                if (t == c_m3Type_v128) {
-                    continue;
+            க்கு (u8 t = c_m3Type_none; t < c_m3_Type_மொத்தம்; t++) {
+                எனில் (t == c_m3Type_v128) {
+                    தொடர்;
                 }
 
                 IM3FuncType ftype;
 _               (AllocFuncType(&ftype, 1));
 
-                ftype->numArgs  = 0;
-                ftype->numRets  = (t == c_m3Type_none) ? 0 : 1;
+                ftype->இலக்கம்_Args  = 0;
+                ftype->இலக்கம்_Rets  = (t == c_m3Type_none) ? 0 : 1;
                 ftype->types[0] = t;
 
                 Environment_AddFuncType(env, &ftype);
@@ -48,43 +48,43 @@ _               (AllocFuncType(&ftype, 1));
         }
 
         _catch:
-        if (result) {
+        எனில் (result) {
             m3_FreeEnvironment(env);
-            env = NULL;
+            env = வெற்று;
         }
     }
 
-    return env;
+    திரும்பு env;
 }
 
 
-void Environment_Release (IM3Environment i_environment)
+வெறுமை Environment_Release (IM3Environment i_environment)
 {
     IM3FuncType ftype = i_environment->funcTypes;
 
-    while (ftype) {
+    போது (ftype) {
         IM3FuncType next = ftype->next;
         m3_Free(ftype);
         ftype = next;
     }
 
-    m3log(runtime, "freeing %d pages from environment", CountCodePages(i_environment->pagesReleased));
+    m3log(runtime, "freeing %d pages from environment", மொத்தம்_Code_Pages(i_environment->pagesReleased));
     FreeCodePages(&i_environment->pagesReleased);
 }
 
 
-void m3_FreeEnvironment (IM3Environment i_environment)
+வெறுமை m3_FreeEnvironment (IM3Environment i_environment)
 {
-    if (i_environment) {
+    எனில் (i_environment) {
         Environment_Release(i_environment);
         m3_Free(i_environment);
     }
 }
 
 
-void m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
+வெறுமை m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
 {
-    if (i_environment) {
+    எனில் (i_environment) {
         i_environment->customSectionHandler = i_handler;
     }
 }
@@ -96,32 +96,32 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
     IM3FuncType addType = *io_funcType;
     IM3FuncType newType = i_environment->funcTypes;
 
-    while (newType) {
-        if (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
+    போது (newType) {
+        எனில் (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
             m3_Free(addType);
-            break;
+            நிறுத்து;
         }
 
         newType = newType->next;
     }
 
-    if (newType == NULL) {
+    எனில் (newType == வெற்று) {
         // a type index has to fit in the heap type field of an m3type_t
-        if (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
+        எனில் (i_environment->இலக்கம்_Func_Types >= d_m3_Max_Sane_Types_மொத்தம்) {
             m3_Free(addType);
-            *io_funcType = NULL;
-            return "too many distinct function types";
+            *io_funcType = வெற்று;
+            திரும்பு "too many distinct function types";
         }
 
         newType                  = addType;
-        newType->canonicalIndex  = i_environment->numFuncTypes++;
+        newType->canonicalIndex  = i_environment->இலக்கம்_Func_Types++;
         newType->next            = i_environment->funcTypes;
         i_environment->funcTypes = newType;
     }
 
     *io_funcType = newType;
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 
@@ -133,20 +133,20 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 // the same way are still two groups, and a type inside one is never the type
 // outside it that matches field for field. Reserving the indices up front is
 // also what lets the members refer to each other while they are being read.
-M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_count, u16* o_firstIndex)
+M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_மொத்தம், u16* o_firstIndex)
 {
-    if ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
-        return "too many distinct function types";
+    எனில் ((u64)i_environment->இலக்கம்_Func_Types + i_மொத்தம் > d_m3_Max_Sane_Types_மொத்தம்) {
+        திரும்பு "too many distinct function types";
     }
 
-    *o_firstIndex = i_environment->numFuncTypes;
-    i_environment->numFuncTypes += (u16)i_count;
+    *o_firstIndex = i_environment->இலக்கம்_Func_Types;
+    i_environment->இலக்கம்_Func_Types += (u16)i_மொத்தம்;
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 
-void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
+வெறுமை Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
 {
     i_funcType->inRecGroup     = true;
     i_funcType->canonicalIndex = i_canonicalIndex;
@@ -155,56 +155,56 @@ void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_func
 }
 
 
-IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimumLineCount)
+IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimum_வரி_மொத்தம்)
 {
-    IM3CodePage prev = NULL;
+    IM3CodePage prev = வெற்று;
     IM3CodePage page = *io_list;
 
-    while (page) {
-        if (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
+    போது (page) {
+        எனில் (இலக்கம்_Free_வரிகள்(page) >= i_minimum_வரி_மொத்தம்) {             d_m3Assert (page->info.usage_மொத்தம் == 0);
             IM3CodePage next = page->info.next;
-            if (prev) {
+            எனில் (prev) {
                 prev->info.next = next; // mid-list
-            } else {
+            } இல்லையெனில் {
                 *io_list = next;       // front of list
             }
 
-            break;
+            நிறுத்து;
         }
 
         prev = page;
         page = page->info.next;
     }
 
-    return page;
+    திரும்பு page;
 }
 
 
-IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimumLineCount)
+IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimum_வரி_மொத்தம்)
 {
-    return RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
+    திரும்பு RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimum_வரி_மொத்தம்);
 }
 
 
-void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
+வெறுமை Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
 {
     IM3CodePage end = i_codePageList;
 
-    while (end) {
-        end->info.lineIndex = 0; // reset page
-#if d_m3RecordBacktraces
+    போது (end) {
+        end->info.வரி_Index = 0; // reset page
+#எனில் d_m3RecordBacktraces
         end->info.mapping->size = 0;
 #endif // d_m3RecordBacktraces
 
         IM3CodePage next = end->info.next;
-        if (not next) {
-            break;
+        எனில் (not next) {
+            நிறுத்து;
         }
 
         end = next;
     }
 
-    if (end) {
+    எனில் (end) {
         // push list to front
         end->info.next               = i_environment->pagesReleased;
         i_environment->pagesReleased = i_codePageList;
@@ -212,11 +212,11 @@ void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_c
 }
 
 
-IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, void* i_userdata)
+IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_அடுக்கு_Size_In_Bytes, வெறுமை* i_userdata)
 {
     IM3Runtime runtime = m3_AllocStruct(M3Runtime);
 
-    if (runtime) {
+    எனில் (runtime) {
         m3_ResetErrorInfo(runtime);
 
         runtime->environment = i_environment;
@@ -224,138 +224,138 @@ IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, 
 
         Deterministic_InitRuntime(runtime);
 
-        runtime->originStack = m3_Malloc("Wasm Stack", i_stackSizeInBytes + 4 * sizeof(m3slot_t)); // TODO: more precise stack checks
+        runtime->origin_அடுக்கு = m3_Malloc("Wasm Stack", i_அடுக்கு_Size_In_Bytes + 4 * அளவு(m3slot_t)); // TODO: more precise stack checks
 
-        if (runtime->originStack) {
-            runtime->stack         = runtime->originStack;
-            runtime->numStackSlots = i_stackSizeInBytes / sizeof(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->originStack, runtime->numStackSlots);
-        } else {
+        எனில் (runtime->origin_அடுக்கு) {
+            runtime->அடுக்கு         = runtime->origin_அடுக்கு;
+            runtime->இலக்கம்_அடுக்கு_Slots = i_அடுக்கு_Size_In_Bytes / அளவு(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->origin_அடுக்கு, runtime->இலக்கம்_அடுக்கு_Slots);
+        } இல்லையெனில் {
             m3_Free(runtime);
         }
     }
 
-    return runtime;
+    திரும்பு runtime;
 }
 
-void m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
+வெறுமை m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
 {
-#if d_m3EnableValidation
-    if (i_runtime) {
+#எனில் d_m3EnableValidation
+    எனில் (i_runtime) {
         i_runtime->skipValidation = not i_enable;
     }
-#else
-    (void)i_runtime;
-    (void)i_enable;              // nothing to skip: the validator was compiled out
+#இல்லையெனில்
+    (வெறுமை)i_runtime;
+    (வெறுமை)i_enable;              // nothing to skip: the validator was compiled out
 #endif
 }
 
-M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_value)
+M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_மதிப்பு)
 {
-    if (not i_runtime) {
-        return m3Err_mallocFailed;
+    எனில் (not i_runtime) {
+        திரும்பு m3Err_mallocFailed;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes:
-        if (i_value and i_value < i_runtime->memoryBytesUsed) {
-            return m3Err_resourceLimitBelowUsage;
+    தேர்வு (i_limit) {
+    நிலை c_m3Limit_MemoryBytes:
+        எனில் (i_மதிப்பு and i_மதிப்பு < i_runtime->memoryBytesUsed) {
+            திரும்பு m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->memoryBytesLimit = i_value;
-        return m3Err_none;
-    case c_m3Limit_TableElements:
-        if (i_value and i_value < i_runtime->tableElementsUsed) {
-            return m3Err_resourceLimitBelowUsage;
+        i_runtime->memoryBytesLimit = i_மதிப்பு;
+        திரும்பு m3Err_none;
+    நிலை c_m3Limit_TableElements:
+        எனில் (i_மதிப்பு and i_மதிப்பு < i_runtime->tableElementsUsed) {
+            திரும்பு m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->tableElementsLimit = i_value;
-        return m3Err_none;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations:
-        if (i_value and i_value < i_runtime->continuationsAllocated) {
-            return m3Err_resourceLimitBelowUsage;
+        i_runtime->tableElementsLimit = i_மதிப்பு;
+        திரும்பு m3Err_none;
+#எனில் d_m3_Has_அடுக்கு_Switching
+    நிலை c_m3Limit_Continuations:
+        எனில் (i_மதிப்பு and i_மதிப்பு < i_runtime->continuationsAllocated) {
+            திரும்பு m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->continuationsLimit = (u32)M3_MIN(i_value, (u64)UINT32_MAX);
-        while (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
-            m3_Free(i_runtime->valStackPool[--i_runtime->valStackPoolCount]);
+        i_runtime->continuationsLimit = (u32)M3_MIN(i_மதிப்பு, (u64)UINT32_MAX);
+        போது (i_மதிப்பு and i_runtime->val_அடுக்கு_Pool_மொத்தம் > i_மதிப்பு - i_runtime->continuationsAllocated) {
+            m3_Free(i_runtime->val_அடுக்கு_Pool[--i_runtime->val_அடுக்கு_Pool_மொத்தம்]);
         }
-        return m3Err_none;
-#else
-    case c_m3Limit_Continuations: return m3Err_resourceLimitNotSupported;
+        திரும்பு m3Err_none;
+#இல்லையெனில்
+    நிலை c_m3Limit_Continuations: திரும்பு m3Err_resourceLimitNotSupported;
 #endif
-    case c_m3Limit_GasUnits:
-#if d_m3HasGasMetering
-        i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_value, (u64)INT64_MAX);
-        return m3Err_none;
-#else
-        return m3Err_resourceLimitNotSupported;
+    நிலை c_m3Limit_GasUnits:
+#எனில் d_m3HasGasMetering
+        i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_மதிப்பு, (u64)INT64_MAX);
+        திரும்பு m3Err_none;
+#இல்லையெனில்
+        திரும்பு m3Err_resourceLimitNotSupported;
 #endif
-    default: return m3Err_unknownResourceLimit;
+    இயல்பு: திரும்பு m3Err_unknownResourceLimit;
     }
 }
 
 uint64_t m3_GetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    எனில் (not i_runtime) {
+        திரும்பு 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesLimit;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsLimit;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsLimit;
+    தேர்வு (i_limit) {
+    நிலை c_m3Limit_MemoryBytes: திரும்பு i_runtime->memoryBytesLimit;
+    நிலை c_m3Limit_TableElements: திரும்பு i_runtime->tableElementsLimit;
+#எனில் d_m3_Has_அடுக்கு_Switching
+    நிலை c_m3Limit_Continuations: திரும்பு i_runtime->continuationsLimit;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit;
+#எனில் d_m3HasGasMetering
+    நிலை c_m3Limit_GasUnits: திரும்பு (u64)i_runtime->gasLimit;
 #endif
-    default: return 0;
+    இயல்பு: திரும்பு 0;
     }
 }
 
 uint64_t m3_GetResourceUsage (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    எனில் (not i_runtime) {
+        திரும்பு 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesUsed;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsUsed;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsAllocated;
+    தேர்வு (i_limit) {
+    நிலை c_m3Limit_MemoryBytes: திரும்பு i_runtime->memoryBytesUsed;
+    நிலை c_m3Limit_TableElements: திரும்பு i_runtime->tableElementsUsed;
+#எனில் d_m3_Has_அடுக்கு_Switching
+    நிலை c_m3Limit_Continuations: திரும்பு i_runtime->continuationsAllocated;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
+#எனில் d_m3HasGasMetering
+    நிலை c_m3Limit_GasUnits: திரும்பு (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
 #endif
-    default: return 0;
+    இயல்பு: திரும்பு 0;
     }
 }
 
-void* m3_GetUserData (IM3Runtime i_runtime)
+வெறுமை* m3_GetUserData (IM3Runtime i_runtime)
 {
-    return i_runtime ? i_runtime->userdata : NULL;
+    திரும்பு i_runtime ? i_runtime->userdata : வெற்று;
 }
 
 
-void* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, void* i_info)
+வெறுமை* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, வெறுமை* i_info)
 {
-    void* r = NULL;
+    வெறுமை* r = வெற்று;
 
     IM3Module module = i_runtime->modules;
 
-    while (module) {
+    போது (module) {
         IM3Module next = module->next;
-        if ((r = i_visitor(module, i_info))) {
-            break;
+        எனில் ((r = i_visitor(module, i_info))) {
+            நிறுத்து;
         }
 
         module = next;
     }
 
-    return r;
+    திரும்பு r;
 }
 
 
-void* _FreeModule (IM3Module i_module, void* i_info)
+வெறுமை* _FreeModule (IM3Module i_module, வெறுமை* i_info)
 {
     m3_FreeModule(i_module);
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
@@ -367,63 +367,63 @@ void* _FreeModule (IM3Module i_module, void* i_info)
 // the modules borrowing from it. So clear the borrowed slots first, in a pass
 // that frees nothing; the walk then skips them on the NULL check it already
 // does, instead of reading a memory some earlier module has freed.
-void* _ReleaseBorrowedSlots (IM3Module i_module, void* i_info)
+வெறுமை* _ReleaseBorrowedSlots (IM3Module i_module, வெறுமை* i_info)
 {
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Memories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
-        if (memory and memory->owner != i_module) {
-            i_module->memories[i] = NULL;
+        எனில் (memory and memory->owner != i_module) {
+            i_module->memories[i] = வெற்று;
         }
     }
 
-    for (u32 i = 0; i < i_module->numTables; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Tables; ++i) {
         IM3Table table = i_module->tables[i];
 
-        if (table and table->owner != i_module) {
-            i_module->tables[i] = NULL;
+        எனில் (table and table->owner != i_module) {
+            i_module->tables[i] = வெற்று;
         }
     }
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
-void Runtime_Release (IM3Runtime i_runtime)
+வெறுமை Runtime_Release (IM3Runtime i_runtime)
 {
-    ForEachModule(i_runtime, _ReleaseBorrowedSlots, NULL);
-    ForEachModule(i_runtime, _FreeModule, NULL);                    d_m3Assert (i_runtime->numActiveCodePages == 0);
+    ForEachModule(i_runtime, _ReleaseBorrowedSlots, வெற்று);
+    ForEachModule(i_runtime, _FreeModule, வெற்று);                    d_m3Assert (i_runtime->இலக்கம்_Active_Code_Pages == 0);
 
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesOpen);
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesFull);
 
-    m3_Free(i_runtime->originStack);
+    m3_Free(i_runtime->origin_அடுக்கு);
 
-#if d_m3EnableValidation
+#எனில் d_m3EnableValidation
     m3_Free(i_runtime->validator);
 #endif
 
-#if d_m3HasExceptionHandling
+#எனில் d_m3HasExceptionHandling
     // a runtime let go of while suspended still holds its exceptions
     FreeExceptions(i_runtime);
     m3_Free(i_runtime->uncaughtException);
 #endif
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    while (i_runtime->hostTags) {
+#எனில் d_m3HasExceptionHandling || d_m3_Has_அடுக்கு_Switching
+    போது (i_runtime->hostTags) {
         M3HostTag* next = i_runtime->hostTags->next;
         m3_Free(i_runtime->hostTags);
         i_runtime->hostTags = next;
     }
 #endif
-#if d_m3HasStackSwitching
+#எனில் d_m3_Has_அடுக்கு_Switching
     Continuation_ReleaseAll(i_runtime);
 #endif
 }
 
 
-void m3_FreeRuntime (IM3Runtime i_runtime)
+வெறுமை m3_FreeRuntime (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    எனில் (i_runtime) {
         m3_PrintProfilerInfo();
 
         Runtime_Release(i_runtime);
@@ -432,162 +432,162 @@ void m3_FreeRuntime (IM3Runtime i_runtime)
 }
 
 
-#if d_m3HasStackSwitching
+#எனில் d_m3_Has_அடுக்கு_Switching
 
 IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3Function i_function)
 {
     IM3Continuation cont = m3_AllocStruct(M3Continuation);
-    if (!cont) {
-        return NULL;
+    எனில் (!cont) {
+        திரும்பு வெற்று;
     }
 
     cont->type          = i_type;
     cont->entryFunction = i_function;
     cont->state         = cont_allocated;
 
-    cont->numStackSlots = d_m3ContinuationStackSlots;
+    cont->இலக்கம்_அடுக்கு_Slots = d_m3_Continuation_அடுக்கு_Slots;
     // frames are recorded only when this continuation actually suspends, and
     // only as deep as it got, so the array starts out unallocated
-    cont->frames    = NULL;
+    cont->frames    = வெற்று;
     cont->framesCap = 0;
-    cont->numFrames = 0;
+    cont->இலக்கம்_Frames = 0;
 
-    cont->sp = cont->valStack;
-    cont->pc = i_function ? i_function->compiled : NULL;
+    cont->sp = cont->val_அடுக்கு;
+    cont->pc = i_function ? i_function->compiled : வெற்று;
     cont->r0 = 0;
-#  if d_m3HasFloat
+#  எனில் d_m3HasFloat
     cont->fp0 = 0;
 #  endif
-    cont->boundArgsCount    = 0;
-    cont->numSuspendResults = 0;
-    cont->numHandlers       = 0;
-    cont->handlersPC        = NULL;
-    cont->parent            = NULL;
+    cont->bound_Args_மொத்தம்    = 0;
+    cont->இலக்கம்_Suspend_Results = 0;
+    cont->இலக்கம்_Handlers       = 0;
+    cont->handlersPC        = வெற்று;
+    cont->parent            = வெற்று;
 
     cont->next               = i_runtime->continuations;
     i_runtime->continuations = cont;
 
-    return cont;
+    திரும்பு cont;
 }
 
 IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
     IM3Continuation newCont = Continuation_New(i_runtime, i_cont->type, i_cont->entryFunction);
-    if (M3_UNLIKELY(not newCont)) {
-        return NULL;
+    எனில் (M3_UNLIKELY(not newCont)) {
+        திரும்பு வெற்று;
     }
 
-    newCont->valStack      = i_cont->valStack;
-    newCont->numStackSlots = i_cont->numStackSlots;
+    newCont->val_அடுக்கு      = i_cont->val_அடுக்கு;
+    newCont->இலக்கம்_அடுக்கு_Slots = i_cont->இலக்கம்_அடுக்கு_Slots;
     newCont->sp            = i_cont->sp;
     newCont->pc            = i_cont->pc;
     newCont->suspendPoint  = i_cont->suspendPoint;
     newCont->r0            = i_cont->r0;
-#  if d_m3HasFloat
+#  எனில் d_m3HasFloat
     newCont->fp0 = i_cont->fp0;
 #  endif
     newCont->frames    = i_cont->frames;
     newCont->framesCap = i_cont->framesCap;
-    newCont->numFrames = i_cont->numFrames;
+    newCont->இலக்கம்_Frames = i_cont->இலக்கம்_Frames;
 
-    newCont->boundArgsCount = 0;
-#  if d_m3HasExceptionHandling
+    newCont->bound_Args_மொத்தம் = 0;
+#  எனில் d_m3HasExceptionHandling
     newCont->resumeThrow = i_cont->resumeThrow;
-    i_cont->resumeThrow  = NULL;
+    i_cont->resumeThrow  = வெற்று;
 #  endif
-    newCont->numSuspendResults = i_cont->numSuspendResults;
-    for (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
+    newCont->இலக்கம்_Suspend_Results = i_cont->இலக்கம்_Suspend_Results;
+    க்கு (u32 i = 0; i < i_cont->இலக்கம்_Suspend_Results; ++i) {
         newCont->suspendResultOffsets[i] = i_cont->suspendResultOffsets[i];
         newCont->suspendResultIs64[i]    = i_cont->suspendResultIs64[i];
     }
 
-    newCont->numHandlers = i_cont->numHandlers;
+    newCont->இலக்கம்_Handlers = i_cont->இலக்கம்_Handlers;
     newCont->handlersPC  = i_cont->handlersPC;
     newCont->parent      = i_cont->parent;
     newCont->state       = cont_suspended;
 
-    i_cont->valStack  = NULL;
-    i_cont->frames    = NULL;
+    i_cont->val_அடுக்கு  = வெற்று;
+    i_cont->frames    = வெற்று;
     i_cont->framesCap = 0;
-    i_cont->numFrames = 0;
+    i_cont->இலக்கம்_Frames = 0;
     i_cont->state     = cont_consumed;
 
-    return newCont;
+    திரும்பு newCont;
 }
 
 // Only cont.new and snapshot restoration acquire stacks. Binding and suspension
 // transfer them between records without changing the active count.
-M3Result Continuation_AcquireStack (IM3Runtime runtime, IM3Continuation cont)
+M3Result Continuation_Acquire_அடுக்கு (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not Continuation_CanAcquireStack(runtime)) {
-        return m3Err_continuationLimitExceeded;
+    எனில் (not Continuation_Can_Acquire_அடுக்கு(runtime)) {
+        திரும்பு m3Err_continuationLimitExceeded;
     }
-    if (runtime->valStackPoolCount) {
-        cont->valStack = runtime->valStackPool[--runtime->valStackPoolCount];
-        memset(cont->valStack, 0, (cont->numStackSlots + 4) * sizeof(m3slot_t));
-    } else {
-        cont->valStack = m3_AllocArray(m3slot_t, cont->numStackSlots + 4);
+    எனில் (runtime->val_அடுக்கு_Pool_மொத்தம்) {
+        cont->val_அடுக்கு = runtime->val_அடுக்கு_Pool[--runtime->val_அடுக்கு_Pool_மொத்தம்];
+        memset(cont->val_அடுக்கு, 0, (cont->இலக்கம்_அடுக்கு_Slots + 4) * அளவு(m3slot_t));
+    } இல்லையெனில் {
+        cont->val_அடுக்கு = m3_AllocArray(m3slot_t, cont->இலக்கம்_அடுக்கு_Slots + 4);
     }
-    if (not cont->valStack) {
-        return m3Err_mallocFailed;
+    எனில் (not cont->val_அடுக்கு) {
+        திரும்பு m3Err_mallocFailed;
     }
-    cont->sp = cont->valStack;
+    cont->sp = cont->val_அடுக்கு;
     runtime->continuationsAllocated++;
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
-void Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont)
+வெறுமை Continuation_Recycle_அடுக்கு (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not cont->valStack or cont == runtime->rootContinuation) {
-        return;
+    எனில் (not cont->val_அடுக்கு or cont == runtime->வேர்_Continuation) {
+        திரும்பு;
     }
-    if (not runtime->valStackPool) {
-        runtime->valStackPool = m3_AllocArray(m3slot_t*, 16);
-        if (runtime->valStackPool) {
-            runtime->valStackPoolCap = 16;
+    எனில் (not runtime->val_அடுக்கு_Pool) {
+        runtime->val_அடுக்கு_Pool = m3_AllocArray(m3slot_t*, 16);
+        எனில் (runtime->val_அடுக்கு_Pool) {
+            runtime->val_அடுக்கு_Pool_Cap = 16;
         }
     }
-    if (runtime->valStackPoolCount < runtime->valStackPoolCap and
-        (not runtime->continuationsLimit or runtime->valStackPoolCount <
+    எனில் (runtime->val_அடுக்கு_Pool_மொத்தம் < runtime->val_அடுக்கு_Pool_Cap and
+        (not runtime->continuationsLimit or runtime->val_அடுக்கு_Pool_மொத்தம் <
                                               runtime->continuationsLimit - runtime->continuationsAllocated + 1)) {
-        runtime->valStackPool[runtime->valStackPoolCount++] = cont->valStack;
-        cont->valStack                                      = NULL;
-    } else {
-        m3_Free(cont->valStack);
+        runtime->val_அடுக்கு_Pool[runtime->val_அடுக்கு_Pool_மொத்தம்++] = cont->val_அடுக்கு;
+        cont->val_அடுக்கு                                      = வெற்று;
+    } இல்லையெனில் {
+        m3_Free(cont->val_அடுக்கு);
     }
-    cont->sp = NULL;
+    cont->sp = வெற்று;
     runtime->continuationsAllocated--;
 }
 
-void Continuation_ReleaseAll (IM3Runtime io_runtime)
+வெறுமை Continuation_ReleaseAll (IM3Runtime io_runtime)
 {
     // Records live until teardown: a consumed reference can still be in a table
     // or on a Wasm stack. Its value stack has already been recycled.
     IM3Continuation cont = io_runtime->continuations;
 
-    while (cont) {
+    போது (cont) {
         IM3Continuation next = cont->next;
 
-        m3_Free(cont->valStack);
+        m3_Free(cont->val_அடுக்கு);
         m3_Free(cont->frames);
         m3_Free(cont);
 
         cont = next;
     }
 
-    for (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
-        m3_Free(io_runtime->valStackPool[i]);
+    க்கு (u32 i = 0; i < io_runtime->val_அடுக்கு_Pool_மொத்தம்; ++i) {
+        m3_Free(io_runtime->val_அடுக்கு_Pool[i]);
     }
-    m3_Free(io_runtime->valStackPool);
-    io_runtime->valStackPoolCount = io_runtime->valStackPoolCap = 0;
+    m3_Free(io_runtime->val_அடுக்கு_Pool);
+    io_runtime->val_அடுக்கு_Pool_மொத்தம் = io_runtime->val_அடுக்கு_Pool_Cap = 0;
     io_runtime->continuationsAllocated                          = 0;
-    io_runtime->continuations                                   = NULL;
-    io_runtime->activeContinuation                              = NULL;
-    io_runtime->rootContinuation                                = NULL;
+    io_runtime->continuations                                   = வெற்று;
+    io_runtime->activeContinuation                              = வெற்று;
+    io_runtime->வேர்_Continuation                                = வெற்று;
 }
 
 
-m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
+m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, மாறிலி M3Frame* i_frame)
 {
     IM3Continuation cont = i_runtime->activeContinuation;
 
@@ -595,53 +595,53 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
     // and that whole stretch has an active continuation
     d_m3Assert(cont);
 
-    if (cont->numFrames == cont->framesCap) {
+    எனில் (cont->இலக்கம்_Frames == cont->framesCap) {
         u32 newCap = cont->framesCap ? cont->framesCap * 2 : 8;
 
-        if (newCap > d_m3ContinuationMaxFrames) {
+        எனில் (newCap > d_m3ContinuationMaxFrames) {
             newCap = d_m3ContinuationMaxFrames;
         }
 
-        if (newCap == cont->framesCap) {
-            return m3Err_trapStackOverflow;
+        எனில் (newCap == cont->framesCap) {
+            திரும்பு m3_Err_trap_அடுக்கு_Overflow;
         }
 
         M3Frame* frames = m3_ReallocArray(M3Frame, cont->frames, newCap, cont->framesCap);
 
-        if (not frames) {
-            return m3Err_mallocFailed;
+        எனில் (not frames) {
+            திரும்பு m3Err_mallocFailed;
         }
 
         cont->frames    = frames;
         cont->framesCap = newCap;
     }
 
-    cont->frames[cont->numFrames++] = *i_frame;
+    cont->frames[cont->இலக்கம்_Frames++] = *i_frame;
 
-    return m3Err_continuationSuspended;
+    திரும்பு m3Err_continuationSuspended;
 }
 
 #endif // d_m3HasStackSwitching
 
-M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
+M3Result EvaluateExpression (IM3Module i_module, வெறுமை* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
 
     // OPTZ: use a simplified interpreter for expressions
 
     // create a temporary runtime context
-#if defined(d_m3PreferStaticAlloc)
-    static M3Runtime runtime;
-#else
+#எனில் defined(d_m3PreferStaticAlloc)
+    நிலையான M3Runtime runtime;
+#இல்லையெனில்
     M3Runtime runtime;
 #endif
     M3_INIT(runtime);
 
     runtime.environment   = i_module->runtime->environment;
-    runtime.numStackSlots = i_module->runtime->numStackSlots;
-    runtime.stack         = i_module->runtime->stack;
+    runtime.இலக்கம்_அடுக்கு_Slots = i_module->runtime->இலக்கம்_அடுக்கு_Slots;
+    runtime.அடுக்கு         = i_module->runtime->அடுக்கு;
 
-    m3stack_t stack = (m3stack_t)runtime.stack;
+    m3stack_t அடுக்கு = (m3stack_t)runtime.அடுக்கு;
 
     IM3Runtime savedRuntime = i_module->runtime;
     i_module->runtime       = &runtime;
@@ -658,23 +658,23 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
     // empty and the next expression reuses it rather than burning fresh lines.
     o->page = AcquireCodePage(&runtime);
 
-    if (o->page) {
-        IM3FuncType ftype = NULL;
+    எனில் (o->page) {
+        IM3FuncType ftype = வெற்று;
 
-#if d_m3HasTypedRefs
+#எனில் d_m3HasTypedRefs
         // A reference type has to be checked as the type it is: the shared
         // return types are one per storage class, so borrowing one of those
         // would let any reference at all satisfy a particular one.
-        if (IsSpelledRefType(i_type)) {
+        எனில் (IsSpelledRefType(i_type)) {
             result = AllocFuncType(&ftype, 1);
 
-            if (not result) {
-                ftype->numRets  = 1;
+            எனில் (not result) {
+                ftype->இலக்கம்_Rets  = 1;
                 ftype->types[0] = i_type;
 
                 result = Environment_AddFuncType(runtime.environment, &ftype);
             }
-        } else
+        } இல்லையெனில்
 #endif
         {
             ftype = runtime.environment->retFuncTypes[BaseTypeOf(i_type)];
@@ -682,42 +682,42 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 
         pc_t m3code = GetPagePC(o->page);
 
-        if (not result) {
+        எனில் (not result) {
             result = CompileExpression(o, ftype);
         }
 
-        if (not result && o->maxStackSlots >= runtime.numStackSlots) {
-            result = m3Err_trapStackOverflow;
+        எனில் (not result && o->max_அடுக்கு_Slots >= runtime.இலக்கம்_அடுக்கு_Slots) {
+            result = m3_Err_trap_அடுக்கு_Overflow;
         }
 
-        if (not result) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs);
+        எனில் (not result) {
+#எனில் (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+            m3ret_t r = RunCode(m3code, அடுக்கு, வெற்று, d_m3OpDefaultArgs, d_m3BaseCstr);
+#இல்லையெனில்
+            m3ret_t r = RunCode(m3code, அடுக்கு, வெற்று, d_m3OpDefaultArgs);
 #endif
 
-            if (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
-                if (SizeOfType(BaseTypeOf(i_type)) == sizeof(u32)) {
-                    *(u32*)o_expressed = *((u32*)stack);
-                } else {
-                    *(u64*)o_expressed = *((u64*)stack);
+            எனில் (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrint_மதிப்பு (அடுக்கு, i_type));
+                எனில் (SizeOfType(BaseTypeOf(i_type)) == அளவு(u32)) {
+                    *(u32*)o_expressed = *((u32*)அடுக்கு);
+                } இல்லையெனில் {
+                    *(u64*)o_expressed = *((u64*)அடுக்கு);
                 }
             }
         }
 
         ReleaseCodePage(&runtime, o->page);
-    } else {
+    } இல்லையெனில் {
         result = m3Err_mallocFailedCodePage;
     }
 
-    runtime.originStack = NULL;        // prevent free(stack) in ReleaseRuntime
+    runtime.origin_அடுக்கு = வெற்று;        // prevent free(stack) in ReleaseRuntime
     Runtime_Release(&runtime);
     i_module->runtime = savedRuntime;
 
     *io_bytes = o->wasm;
 
-    return result;
+    திரும்பு result;
 }
 
 
@@ -735,92 +735,92 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 // Whether an exporting memory or table satisfies what an import asks for. The
 // exporter's *current* size is its minimum - one that has been grown satisfies
 // a larger import than its declaration would - and it may be no less bounded.
-static
+நிலையான
 bool LimitsSatisfy (u64 i_exportedSize, bool i_exportedHasMax, u64 i_exportedMax,
                     u64 i_importMin, bool i_importHasMax, u64 i_importMax)
 {
-    if (i_exportedSize < i_importMin) {
-        return false;
+    எனில் (i_exportedSize < i_importMin) {
+        திரும்பு false;
     }
 
-    if (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
-        return false;
+    எனில் (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
+        திரும்பு false;
     }
 
-    return true;
+    திரும்பு true;
 }
 
 
 // The export of this kind under this name, or NULL. The index it carries is
 // resolved by the caller, against the module's index space as it stands then -
 // after linking, a re-exported import's slot holds the entity it was linked to.
-static
-const M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
+நிலையான
+மாறிலி M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        const M3Export* e = &i_module->exports[i];
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Exports; ++i) {
+        மாறிலி M3Export* e = &i_module->exports[i];
 
-        if (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
-            return e;
+        எனில் (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
+            திரும்பு e;
         }
     }
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
-static
+நிலையான
 IM3Function Module_FindExportedFunction (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
+    மாறிலி M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
 
     // A module that re-exports an import names the placeholder here. Resolve to
     // the function that actually runs, or a host-side call would run it against
     // the importing module's memory.
-    return e ? Function_Implementation(&i_module->functions[e->index]) : NULL;
+    திரும்பு e ? Function_Implementation(&i_module->functions[e->index]) : வெற்று;
 }
 
 
-static
+நிலையான
 IM3Memory Module_FindExportedMemory (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    மாறிலி M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    return e ? i_module->memories[e->index] : NULL;
+    திரும்பு e ? i_module->memories[e->index] : வெற்று;
 }
 
 
-static
+நிலையான
 IM3Table Module_FindExportedTable (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
+    மாறிலி M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
 
-    return e ? i_module->tables[e->index] : NULL;
+    திரும்பு e ? i_module->tables[e->index] : வெற்று;
 }
 
 
-static
+நிலையான
 IM3Global Module_FindExportedGlobal (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
+    மாறிலி M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
 
-    return e ? &i_module->globals[e->index] : NULL;
+    திரும்பு e ? &i_module->globals[e->index] : வெற்று;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-static
+#எனில் d_m3HasExceptionHandling || d_m3_Has_அடுக்கு_Switching
+நிலையான
 IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
+    மாறிலி M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
 
-    if (not e) {
-        return NULL;
+    எனில் (not e) {
+        திரும்பு வெற்று;
     }
 
     IM3Tag tag = &i_module->tags[e->index];
 
-    return tag->resolved ? tag->resolved : tag;
+    திரும்பு tag->resolved ? tag->resolved : tag;
 }
 #endif
 
@@ -829,16 +829,16 @@ IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 // unique within a module, so a name one of the lookups above missed but this
 // one finds is exported as something else - a kind the import cannot be
 // satisfied by, rather than a name the module never exported.
-static
+நிலையான
 bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        if (strcmp(i_module->exports[i].name, i_name) == 0) {
-            return true;
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Exports; ++i) {
+        எனில் (strcmp(i_module->exports[i].name, i_name) == 0) {
+            திரும்பு true;
         }
     }
 
-    return false;
+    திரும்பு false;
 }
 
 
@@ -846,25 +846,25 @@ bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 // it. Runs before anything is allocated or initialized: a memory import has to
 // be resolved before InitMemory would give it pages of its own, and a global
 // import before InitGlobals runs an initializer that reads it.
-static
+நிலையான
 M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
 
-        if (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
-            continue;
+        எனில் (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
+            தொடர்;
         }
 
         IM3Module from = m3_FindModule(io_runtime, f->import.moduleUtf8);
-        if (not from) {
-            continue;
+        எனில் (not from) {
+            தொடர்;
         }
 
         IM3Function exported = Module_FindExportedFunction(from, f->import.fieldUtf8);
-        if (not exported) {
+        எனில் (not exported) {
             // the import names a module that is loaded, so its exports settle the
             // question: a name it exports as something else is a type mismatch, and
             // one it does not export at all is an unknown import
@@ -879,20 +879,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         f->resolved = Function_Implementation(exported);
     }
 
-    for (u32 i = 0; i < io_module->numMemories; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Memories; ++i) {
         IM3Memory memory = io_module->memories[i];
 
-        if (not memory->imported or memory->owner != io_module) {
-            continue;
+        எனில் (not memory->imported or memory->owner != io_module) {
+            தொடர்;
         }
 
         IM3Module from = m3_FindModule(io_runtime, memory->import.moduleUtf8);
-        if (not from) {
-            continue;
+        எனில் (not from) {
+            தொடர்;
         }
 
         IM3Memory exported = Module_FindExportedMemory(from, memory->import.fieldUtf8);
-        if (not exported) {
+        எனில் (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, memory->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -907,7 +907,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         _throwif(m3Err_incompatibleImportType, exported->isShared != memory->isShared);
 
         _throwif(m3Err_incompatibleImportType,
-                 not LimitsSatisfy(exported->numPages, exported->hasMax, exported->maxPages,
+                 not LimitsSatisfy(exported->இலக்கம்_Pages, exported->hasMax, exported->maxPages,
                                    memory->initPages, memory->hasMax, memory->maxPages));
 
         // hand the slot over to the exporter's memory, and drop the placeholder
@@ -918,20 +918,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->memories[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Tables; ++i) {
         IM3Table table = io_module->tables[i];
 
-        if (not table->imported or table->owner != io_module) {
-            continue;
+        எனில் (not table->imported or table->owner != io_module) {
+            தொடர்;
         }
 
         IM3Module from = m3_FindModule(io_runtime, table->import.moduleUtf8);
-        if (not from) {
-            continue;
+        எனில் (not from) {
+            தொடர்;
         }
 
         IM3Table exported = Module_FindExportedTable(from, table->import.fieldUtf8);
-        if (not exported) {
+        எனில் (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, table->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -953,20 +953,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->tables[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
-            continue;
+        எனில் (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+            தொடர்;
         }
 
         IM3Module from = m3_FindModule(io_runtime, g->import.moduleUtf8);
-        if (not from) {
-            continue;
+        எனில் (not from) {
+            தொடர்;
         }
 
         IM3Global exported = Module_FindExportedGlobal(from, g->import.fieldUtf8);
-        if (not exported) {
+        எனில் (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, g->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -977,21 +977,21 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         g->resolved = exported->resolved ? exported->resolved : exported;
     }
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+#எனில் d_m3HasExceptionHandling || d_m3_Has_அடுக்கு_Switching
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Tags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
-            continue;
+        எனில் (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
+            தொடர்;
         }
 
         IM3Module from = m3_FindModule(io_runtime, tag->import.moduleUtf8);
-        if (not from) {
-            continue;
+        எனில் (not from) {
+            தொடர்;
         }
 
         IM3Tag exported = Module_FindExportedTag(from, tag->import.fieldUtf8);
-        if (not exported) {
+        எனில் (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, tag->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -1002,7 +1002,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
     }
 #endif
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
@@ -1016,10 +1016,10 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 
     // Fixed from here on: the index space stops changing after parse, and
     // linking has already repointed any slot it was going to.
-    i_module->memory0 = i_module->numMemories ? i_module->memories[0]
+    i_module->memory0 = i_module->இலக்கம்_Memories ? i_module->memories[0]
                                               : &i_module->emptyMemory;
 
-    if (i_module->numMemories == 0) {
+    எனில் (i_module->இலக்கம்_Memories == 0) {
         // nothing addressable, but _mem still has to point somewhere
         i_module->emptyMemory.owner    = i_module;
         i_module->emptyMemory.pageSize = d_m3DefaultMemPageSize;
@@ -1027,13 +1027,13 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
     }
 
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Memories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
         // a slot that already points at another module's memory is that
         // module's to allocate
-        if (memory->owner != i_module or memory->mallocated) {
-            continue;
+        எனில் (memory->owner != i_module or memory->mallocated) {
+            தொடர்;
         }
 
         u32 pageSize = Memory_PageSize(memory);
@@ -1049,7 +1049,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
         // 2^64/pagesize overflows a u64 only when a page is a single byte, and
         // a power-of-two page size divides the address space exactly, so the
         // 64-bit division below is 2^64/pagesize written so that it fits.
-        if (not memory->hasMax) {
+        எனில் (not memory->hasMax) {
             memory->maxPages = memory->isMemory64
                                  ? (pageSize > 1 ? (UINT64_MAX / pageSize) + 1 : UINT64_MAX)
                                  : (0x100000000ull / pageSize);
@@ -1058,52 +1058,52 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
 _       (ResizeMemory(io_runtime, memory, memory->initPages));
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
-M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
+M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_இலக்கம்_Pages)
 {
     M3Result result = m3Err_none;
 
-    u64 numPagesToAlloc = i_numPages;
+    u64 இலக்கம்_Pages_To_Alloc = i_இலக்கம்_Pages;
 
-    if (numPagesToAlloc <= memory->maxPages) {
+    எனில் (இலக்கம்_Pages_To_Alloc <= memory->maxPages) {
         // A 64-bit memory may ask for up to 2^48 pages, which overflows a u64
         // of bytes. Nothing that large can be backed, so refuse it up front
         // rather than multiplying into a wrapped size.
         _throwif("linear memory limitation exceeded",
-                 numPagesToAlloc > d_m3AddressLimit / memory->pageSize);
+                 இலக்கம்_Pages_To_Alloc > d_m3AddressLimit / memory->pageSize);
 
-        u64 numPageBytes = numPagesToAlloc * memory->pageSize;
+        u64 இலக்கம்_Page_Bytes = இலக்கம்_Pages_To_Alloc * memory->pageSize;
 
-#if d_m3MaxLinearMemoryPages > 0
+#எனில் d_m3MaxLinearMemoryPages > 0
         // the limit is a memory size, counted in default-sized pages; comparing
         // it against a raw page count would make it 65536 times stricter for a
         // module whose pages are one byte
         _throwif("linear memory limitation exceeded",
-                 numPageBytes > (u64)d_m3MaxLinearMemoryPages * d_m3DefaultMemPageSize);
+                 இலக்கம்_Page_Bytes > (u64)d_m3MaxLinearMemoryPages * d_m3DefaultMemPageSize);
 #endif
 
         // Limit the amount of memory that gets actually allocated
-        if (io_runtime->memoryLimit) {
-            numPageBytes = M3_MIN(numPageBytes, (u64)io_runtime->memoryLimit);
+        எனில் (io_runtime->memoryLimit) {
+            இலக்கம்_Page_Bytes = M3_MIN(இலக்கம்_Page_Bytes, (u64)io_runtime->memoryLimit);
         }
 
         u64 oldLength = memory->mallocated ? memory->mallocated->length : 0;
         u64 otherUsed = io_runtime->memoryBytesUsed - oldLength;
         _throwif(m3Err_memoryLimitExceeded, io_runtime->memoryBytesLimit and
-                                              (numPageBytes > io_runtime->memoryBytesLimit or
-                                               otherUsed > io_runtime->memoryBytesLimit - numPageBytes));
+                                              (இலக்கம்_Page_Bytes > io_runtime->memoryBytesLimit or
+                                               otherUsed > io_runtime->memoryBytesLimit - இலக்கம்_Page_Bytes));
 
-        _throwif("linear memory limitation exceeded", numPageBytes > (u64)SIZE_MAX - sizeof(M3MemoryHeader));
+        _throwif("linear memory limitation exceeded", இலக்கம்_Page_Bytes > (u64)SIZE_MAX - அளவு(M3MemoryHeader));
 
-#if d_m3GuardedMemory
+#எனில் d_m3GuardedMemory
 
         // A slot holds every address a Wasm access can name, and nothing beyond
         // that: a memory larger than the data part of one would put addresses past
         // the guard, where a fault is nobody's to recognize
-        _throwif("linear memory limitation exceeded", numPageBytes > d_m3GuardedDataBytes);
+        _throwif("linear memory limitation exceeded", இலக்கம்_Page_Bytes > d_m3GuardedDataBytes);
 
         // What makes an access past the end fault is the page after the memory not
         // being committed, so the end has to fall on one of the system's page
@@ -1116,20 +1116,20 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         _throwif("guarded memory needs a page size the system's divides into",
                  (memory->pageSize % m3_HostPageSize()) != 0);
 
-        if (memory->guardSlot == NULL) {
+        எனில் (memory->guardSlot == வெற்று) {
             memory->guardSlot = Guard_TakeSlot();
             _throwifnull(memory->guardSlot);
         }
 
         // Growing only ever commits more of the same slot, so the memory never
         // moves - which the interpreter does not rely on, but nothing minds
-        _throwif(m3Err_mallocFailed, not Guard_CommitSlot(memory->guardSlot, (size_t)numPageBytes));
+        _throwif(m3Err_mallocFailed, not Guard_CommitSlot(memory->guardSlot, (size_t)இலக்கம்_Page_Bytes));
 
         memory->mallocated = Guard_SlotHeader(memory->guardSlot);
 
-#else
+#இல்லையெனில்
 
-        size_t numBytes = (size_t)numPageBytes + sizeof(M3MemoryHeader);
+        size_t இலக்கம்_Bytes = (size_t)இலக்கம்_Page_Bytes + அளவு(M3MemoryHeader);
 
         // What is really there, which is not numPages * pageSize: the limit above
         // caps the bytes without capping the page count, so a memory can be short
@@ -1137,48 +1137,48 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         // MCU has. Measuring the old block by the page count would overstate it,
         // and then realloc never sees the size it already has and copies the
         // whole limit again on every grow past it.
-        size_t numPreviousBytes = memory->mallocated ? memory->mallocated->length + sizeof(M3MemoryHeader) : 0;
+        size_t இலக்கம்_Previous_Bytes = memory->mallocated ? memory->mallocated->length + அளவு(M3MemoryHeader) : 0;
 
-        void* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, numBytes, numPreviousBytes);
+        வெறுமை* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, இலக்கம்_Bytes, இலக்கம்_Previous_Bytes);
         _throwifnull(newMem);
 
         memory->mallocated = (M3MemoryHeader*)newMem;
 
 #endif
 
-#if d_m3LogRuntime
+#எனில் d_m3LogRuntime
         M3MemoryHeader* oldMallocated = memory->mallocated;
 #endif
 
-        io_runtime->memoryBytesUsed = otherUsed + numPageBytes;
-        memory->numPages            = numPagesToAlloc;
+        io_runtime->memoryBytesUsed = otherUsed + இலக்கம்_Page_Bytes;
+        memory->இலக்கம்_Pages            = இலக்கம்_Pages_To_Alloc;
 
-        memory->mallocated->length  = (size_t)numPageBytes;
+        memory->mallocated->length  = (size_t)இலக்கம்_Page_Bytes;
         memory->mallocated->runtime = io_runtime;
         memory->mallocated->memory  = memory;
 
-        memory->mallocated->maxStack = (m3slot_t*)io_runtime->originStack + io_runtime->numStackSlots;
+        memory->mallocated->max_அடுக்கு = (m3slot_t*)io_runtime->origin_அடுக்கு + io_runtime->இலக்கம்_அடுக்கு_Slots;
 
-        m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->numPages);
-    } else {
+        m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->இலக்கம்_Pages);
+    } இல்லையெனில் {
         result = m3Err_wasmMemoryOverflow;
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
-void FreeMemoryBlock (IM3Memory io_memory)
+வெறுமை FreeMemoryBlock (IM3Memory io_memory)
 {
-    if (io_memory->mallocated and io_memory->mallocated->runtime) {
+    எனில் (io_memory->mallocated and io_memory->mallocated->runtime) {
         io_memory->mallocated->runtime->memoryBytesUsed -= io_memory->mallocated->length;
     }
-#if d_m3GuardedMemory
+#எனில் d_m3GuardedMemory
     Guard_GiveSlot(io_memory->guardSlot);
-    io_memory->guardSlot = NULL;
+    io_memory->guardSlot = வெற்று;
 
-    io_memory->mallocated = NULL;
-#else
+    io_memory->mallocated = வெற்று;
+#இல்லையெனில்
     m3_Free(io_memory->mallocated);
 #endif
 }
@@ -1188,7 +1188,7 @@ M3Result InitGlobals (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (io_module->numGlobals) {
+    எனில் (io_module->இலக்கம்_Globals) {
         // placing the globals in their structs isn't good for cache locality, but i don't really know what the global
         // access patterns typically look like yet.
 
@@ -1196,27 +1196,27 @@ M3Result InitGlobals (IM3Module io_module)
 
         //          if (io_module->globalMemory)
         {
-            for (u32 i = 0; i < io_module->numGlobals; ++i) {
+            க்கு (u32 i = 0; i < io_module->இலக்கம்_Globals; ++i) {
                 M3Global* g = &io_module->globals[i];                           m3log (runtime, "initializing global: %d", i);
 
-                if (g->initExpr) {
-                    bytes_t start = g->initExpr;
+                எனில் (g->init_கோவை) {
+                    bytes_t start = g->init_கோவை;
 
-                    result = EvaluateExpression(io_module, &g->i64Value, g->type, &start, g->initExpr + g->initExprSize);
+                    result = EvaluateExpression(io_module, &g->i64_மதிப்பு, g->type, &start, g->init_கோவை + g->init_கோவை_Size);
 
-                    if (not result) {
+                    எனில் (not result) {
                         // io_module->globalMemory [i] = initValue;
-                    } else {
-                        break;
+                    } இல்லையெனில் {
+                        நிறுத்து;
                     }
-                } else {                                                        m3log (runtime, "importing global");
+                } இல்லையெனில் {                                                        m3log (runtime, "importing global");
                 }
             }
         }
         //          else result = ErrorModule (m3Err_mallocFailed, io_module, "could allocate globals for module: '%s", io_module->name);
     }
 
-    return result;
+    திரும்பு result;
 }
 
 
@@ -1224,17 +1224,17 @@ M3Result InitDataSegments (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numDataSegments; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Data_Segments; ++i) {
         M3DataSegment* segment = &io_module->dataSegments[i];
 
         // A passive segment stays available for memory.init until data.drop.
         // An active one is copied here and then counts as dropped.
-        if (segment->isPassive) {
-            continue;
+        எனில் (segment->isPassive) {
+            தொடர்;
         }
 
         _throwif("data segment memory index out of range",
-                 segment->memoryRegion >= io_module->numMemories);
+                 segment->memoryRegion >= io_module->இலக்கம்_Memories);
 
         IM3Memory io_memory = io_module->memories[segment->memoryRegion];
 
@@ -1244,69 +1244,69 @@ M3Result InitDataSegments (IM3Module io_module)
         // unsigned: an i32 offset of -1 is 4294967295, way out of bounds
         // rather than negative.
         u64     segmentOffset = 0;
-        bytes_t start         = segment->initExpr;
+        bytes_t start         = segment->init_கோவை;
 
-        if (io_memory->isMemory64) {
-_           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->initExpr + segment->initExprSize));
-        } else {
+        எனில் (io_memory->isMemory64) {
+_           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->init_கோவை + segment->init_கோவை_Size));
+        } இல்லையெனில் {
             u32 offset32;
-_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->initExpr + segment->initExprSize));
+_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->init_கோவை + segment->init_கோவை_Size));
             segmentOffset = offset32;
         }
 
         m3log(runtime, "loading data segment: %d; size: %d; offset: %llu", i, segment->size, (unsigned long long)segmentOffset);
 
-        if (segmentOffset <= io_memory->mallocated->length &&
+        எனில் (segmentOffset <= io_memory->mallocated->length &&
             (u64)segment->size <= io_memory->mallocated->length - segmentOffset) {
             u8* dest = m3MemData(io_memory->mallocated) + segmentOffset;
             memcpy(dest, segment->data, segment->size);
-        } else {
+        } இல்லையெனில் {
             _throw("data segment out of bounds");
         }
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
 // Turns a segment's elements into references. Element expressions are constant
 // expressions restricted to ref.null/ref.func, so they're read directly rather
 // than run through the compiler.
-static
-M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, void** o_elements)
+நிலையான
+M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, வெறுமை** o_elements)
 {
     M3Result result = m3Err_none;
 
     bytes_t  pos = i_segment->elements;
     cbytes_t end = io_module->elementSectionEnd;
 
-    for (u32 e = 0; e < i_segment->numElements; ++e) {
+    க்கு (u32 e = 0; e < i_segment->இலக்கம்_Elements; ++e) {
         u32   funcIndex;
-        void* ref = NULL;
+        வெறுமை* ref = வெற்று;
 
-        if (i_segment->isExpr) {
+        எனில் (i_segment->is_கோவை) {
             m3opcode_t opcode;
 _           (Read_opcode(&opcode, &pos, end));
 
-            if (opcode == c_waOp_refFunc) {
+            எனில் (opcode == c_waOp_refFunc) {
 _               (ReadLEB_u32(&funcIndex, &pos, end));
-                _throwif("function index out of range", funcIndex >= io_module->numFunctions);
+                _throwif("function index out of range", funcIndex >= io_module->இலக்கம்_Functions);
                 ref = Function_Implementation(&io_module->functions[funcIndex]);
-            } else if (opcode == c_waOp_refNull) {
+            } இல்லையெனில் எனில் (opcode == c_waOp_refNull) {
                 i8 waType;
                 u8 nullType;
 _               (ReadLEB_i7(&waType, &pos, end));
 _               (NormalizeType(&nullType, waType));
                 _throwif(m3Err_typeMismatch, nullType != i_segment->type);
-            } else if (opcode == c_waOp_getGlobal) {
+            } இல்லையெனில் எனில் (opcode == c_waOp_getGlobal) {
                 // wasm 2.0 lets an element expression read an imported
                 // immutable global, which is how one module seeds another's
                 // table with a reference it exported.
                 u32 globalIndex;
 _               (ReadLEB_u32(&globalIndex, &pos, end));
-                _throwif(m3Err_globaIndexOutOfBounds, globalIndex >= io_module->numGlobals);
+                _throwif(m3Err_globaIndexOutOfBounds, globalIndex >= io_module->இலக்கம்_Globals);
 
                 IM3Global global = &io_module->globals[globalIndex];
 
@@ -1315,27 +1315,27 @@ _               (ReadLEB_u32(&globalIndex, &pos, end));
                 _throwif(m3Err_typeMismatch, BaseTypeOf(global->type) != BaseTypeOf(i_segment->type));
 
                 // read the cell the import was linked to, not the placeholder
-                if (global->resolved) {
+                எனில் (global->resolved) {
                     global = global->resolved;
                 }
 
-                ref = global->refValue;
-            } else {
+                ref = global->ref_மதிப்பு;
+            } இல்லையெனில் {
                 _throw("constant expression required");
             }
 
 _           (Read_opcode(&opcode, &pos, end));
             _throwif(m3Err_wasmMalformed, opcode != c_waOp_end);
-        } else {
+        } இல்லையெனில் {
 _           (ReadLEB_u32(&funcIndex, &pos, end));
-            _throwif("function index out of range", funcIndex >= io_module->numFunctions);
+            _throwif("function index out of range", funcIndex >= io_module->இலக்கம்_Functions);
             ref = Function_Implementation(&io_module->functions[funcIndex]);
         }
 
         o_elements[e] = ref;
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
@@ -1346,52 +1346,52 @@ M3Result InitTableAndElements (IM3Module io_module)
     cbytes_t end = io_module->elementSectionEnd;
     M3Table* table;
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Tables; ++i) {
         table = io_module->tables[i];
 
         // a slot pointing at another module's table is that module's to fill
-        if (table->owner != io_module) {
-            continue;
+        எனில் (table->owner != io_module) {
+            தொடர்;
         }
 
-        if (table->size) {
+        எனில் (table->size) {
             IM3Runtime runtime = io_module->runtime;
             _throwif(m3Err_tableLimitExceeded, runtime->tableElementsLimit and
                                                  table->size > runtime->tableElementsLimit - runtime->tableElementsUsed);
-            table->elements = m3_AllocArray(void*, table->size);
+            table->elements = m3_AllocArray(வெறுமை*, table->size);
             _throwifnull(table->elements);
             runtime->tableElementsUsed += table->size;
 
-            if (table->initExpr) {
-                void*   value = NULL;
-                bytes_t start = table->initExpr;
-_               (EvaluateExpression(io_module, &value, BaseTypeOf(table->type),
-                                     &start, table->initExpr + table->initExprSize));
+            எனில் (table->init_கோவை) {
+                வெறுமை*   மதிப்பு = வெற்று;
+                bytes_t start = table->init_கோவை;
+_               (EvaluateExpression(io_module, &மதிப்பு, BaseTypeOf(table->type),
+                                     &start, table->init_கோவை + table->init_கோவை_Size));
 
-                for (u32 e = 0; e < table->size; ++e) {
-                    table->elements[e] = value;
+                க்கு (u32 e = 0; e < table->size; ++e) {
+                    table->elements[e] = மதிப்பு;
                 }
             }
         }
     }
 
-    for (u32 i = 0; i < io_module->numElementSegments; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Element_Segments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         // Declarative segments only make their functions referenceable, and
         // passive ones wait for table.init, so neither is written out here.
-        if (segment->mode == c_m3Elem_declarative) {
+        எனில் (segment->mode == c_m3Elem_declarative) {
             segment->dropped = true;
-            continue;
+            தொடர்;
         }
 
-        if (segment->mode == c_m3Elem_passive) {
-            if (segment->numElements) {
-                segment->resolved = m3_AllocArray(void*, segment->numElements);
+        எனில் (segment->mode == c_m3Elem_passive) {
+            எனில் (segment->இலக்கம்_Elements) {
+                segment->resolved = m3_AllocArray(வெறுமை*, segment->இலக்கம்_Elements);
                 _throwifnull(segment->resolved);
 _               (ResolveElements(io_module, segment, segment->resolved));
             }
-            continue;
+            தொடர்;
         }
 
         table = io_module->tables[segment->tableIndex];
@@ -1399,82 +1399,82 @@ _               (ResolveElements(io_module, segment, segment->resolved));
         // The offset expression has the table's index type, and is unsigned:
         // an i32 offset of -1 is 4294967295, out of bounds rather than negative.
         u64     offset = 0;
-        bytes_t expr   = segment->initExpr;
+        bytes_t கோவை   = segment->init_கோவை;
 
-        if (table->isTable64) {
-_           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &expr, end));
-        } else {
+        எனில் (table->isTable64) {
+_           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &கோவை, end));
+        } இல்லையெனில் {
             u32 offset32;
-_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &expr, end));
+_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &கோவை, end));
             offset = offset32;
         }
 
         _throwif("out of bounds table access",
-                 offset > table->size or segment->numElements > table->size - offset);
+                 offset > table->size or segment->இலக்கம்_Elements > table->size - offset);
 
 _       (ResolveElements(io_module, segment, table->elements + offset));
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 M3Result m3_CompileModule (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
-        if (f->wasm and not f->compiled) {
+        எனில் (f->wasm and not f->compiled) {
 _           (CompileFunction(f));
         }
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
-#if d_m3HasExceptionHandling
+#எனில் d_m3HasExceptionHandling
 
-M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs)
+M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_இலக்கம்_Args)
 {
-    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", sizeof(M3Exception) + i_numArgs * sizeof(u64));
+    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", அளவு(M3Exception) + i_இலக்கம்_Args * அளவு(u64));
 
-    if (exception) {
+    எனில் (exception) {
         exception->tag     = i_tag;
-        exception->numArgs = i_numArgs;
+        exception->இலக்கம்_Args = i_இலக்கம்_Args;
         exception->reified = false;
-        exception->prev    = NULL;
+        exception->prev    = வெற்று;
         exception->next    = io_runtime->exceptions;
 
-        if (exception->next) {
+        எனில் (exception->next) {
             exception->next->prev = exception;
         }
 
         io_runtime->exceptions = exception;
     }
 
-    return exception;
+    திரும்பு exception;
 }
 
 
 // Releases one exception ahead of the rest. The caller has to know nothing can
 // still name it: no exnref was ever taken of it, and its payload has already
 // been copied out.
-void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
+வெறுமை FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 {
-    if (i_exception->prev) {
+    எனில் (i_exception->prev) {
         i_exception->prev->next = i_exception->next;
-    } else {
+    } இல்லையெனில் {
         io_runtime->exceptions = i_exception->next;
     }
 
-    if (i_exception->next) {
+    எனில் (i_exception->next) {
         i_exception->next->prev = i_exception->prev;
     }
 
-    if (io_runtime->pendingException == i_exception) {
-        io_runtime->pendingException = NULL;
+    எனில் (io_runtime->pendingException == i_exception) {
+        io_runtime->pendingException = வெற்று;
     }
 
     m3_Free_Impl(i_exception);
@@ -1484,14 +1484,14 @@ void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 // Releases every exception the runtime still holds. Only safe once the Wasm
 // stack is empty, which is why the outermost RunCodeChecked() is the one that
 // calls it.
-void FreeExceptions (IM3Runtime io_runtime)
+வெறுமை FreeExceptions (IM3Runtime io_runtime)
 {
     M3Exception* exception = io_runtime->exceptions;
 
-    io_runtime->exceptions       = NULL;
-    io_runtime->pendingException = NULL;
+    io_runtime->exceptions       = வெற்று;
+    io_runtime->pendingException = வெற்று;
 
-    while (exception) {
+    போது (exception) {
         M3Exception* next = exception->next;
         m3_Free_Impl(exception);
         exception = next;
@@ -1504,21 +1504,21 @@ void FreeExceptions (IM3Runtime io_runtime)
 // the original is freed with the rest before the outermost call returns - and
 // one a host function's nested call ended with may still be named by an
 // exnref further down the stack.
-static
-void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
+நிலையான
+வெறுமை RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 {
-    if (io_runtime->uncaughtException) {
+    எனில் (io_runtime->uncaughtException) {
         m3_Free(io_runtime->uncaughtException);
     }
 
     M3Exception* exception = io_runtime->pendingException;
 
-    if (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
-        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, sizeof(M3Exception) + exception->numArgs * sizeof(u64));
+    எனில் (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
+        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, அளவு(M3Exception) + exception->இலக்கம்_Args * அளவு(u64));
 
-        if (copy) {
-            copy->next = NULL;
-            copy->prev = NULL;
+        எனில் (copy) {
+            copy->next = வெற்று;
+            copy->prev = வெற்று;
         }
 
         io_runtime->uncaughtException = copy;
@@ -1528,26 +1528,26 @@ void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#எனில் d_m3HasExceptionHandling || d_m3_Has_அடுக்கு_Switching
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, மாறிலி எழுத்து* மாறிலி i_tagName)
 {
-    if (not i_module or not i_tagName) {
-        return NULL;
+    எனில் (not i_module or not i_tagName) {
+        திரும்பு வெற்று;
     }
 
-    return Module_FindExportedTag(i_module, i_tagName);
+    திரும்பு Module_FindExportedTag(i_module, i_tagName);
 }
 
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, மாறிலி எழுத்து* மாறிலி i_signature)
 {
-    IM3FuncType type    = NULL;
-    M3HostTag*  hostTag = NULL;
+    IM3FuncType type    = வெற்று;
+    M3HostTag*  hostTag = வெற்று;
 
 _try {
     _throwif("null tag", not o_tag);
-    *o_tag = NULL;
+    *o_tag = வெற்று;
     _throwif(m3Err_mallocFailed, not io_runtime);
 
 _   (SignatureToFuncType(&type, i_signature));
@@ -1563,32 +1563,32 @@ _   (Environment_AddFuncType(io_runtime->environment, &type));
 
     *o_tag = &hostTag->tag;
 } _catch:
-    return result;
+    திரும்பு result;
 }
 
 
 M3Result m3_LinkTag (IM3Module         io_module,
-                     const char* const i_moduleName,
-                     const char* const i_tagName,
+                     மாறிலி எழுத்து* மாறிலி i_moduleName,
+                     மாறிலி எழுத்து* மாறிலி i_tagName,
                      IM3Tag            i_tag)
 {
-    if (not io_module or not i_moduleName or not i_tagName or not i_tag) {
-        return m3Err_tagLookupFailed;
+    எனில் (not io_module or not i_moduleName or not i_tagName or not i_tag) {
+        திரும்பு m3Err_tagLookupFailed;
     }
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    மாறிலி bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
     IM3Tag     target         = i_tag->resolved ? i_tag->resolved : i_tag;
 
     M3Result result = m3Err_tagLookupFailed;
 
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Tags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
+        எனில் (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
             strcmp(tag->import.fieldUtf8, i_tagName) == 0 and
             (wildcardModule or strcmp(tag->import.moduleUtf8, i_moduleName) == 0)) {
-            if (tag->type != target->type) {
-                return m3Err_incompatibleImportType;
+            எனில் (tag->type != target->type) {
+                திரும்பு m3Err_incompatibleImportType;
             }
 
             tag->resolved = target;
@@ -1596,64 +1596,64 @@ M3Result m3_LinkTag (IM3Module         io_module,
         }
     }
 
-    return result;
+    திரும்பு result;
 }
 
 
-uint32_t m3_GetTagArgCount (IM3Tag i_tag)
+uint32_t m3_Get_Tag_Arg_மொத்தம் (IM3Tag i_tag)
 {
-    return i_tag ? i_tag->type->numArgs : 0;
+    திரும்பு i_tag ? i_tag->type->இலக்கம்_Args : 0;
 }
 
 
-M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
+M3_மதிப்பு_Type m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    if (i_tag and i_index < i_tag->type->numArgs) {
-        return (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
+    எனில் (i_tag and i_index < i_tag->type->இலக்கம்_Args) {
+        திரும்பு (M3_மதிப்பு_Type)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
     }
 
-    return c_m3Type_none;
+    திரும்பு c_m3Type_none;
 }
 
-#else
+#இல்லையெனில்
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, மாறிலி எழுத்து* மாறிலி i_tagName)
 {
-    return NULL;
+    திரும்பு வெற்று;
 }
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, மாறிலி எழுத்து* மாறிலி i_signature)
 {
-    if (o_tag) {
-        *o_tag = NULL;
+    எனில் (o_tag) {
+        *o_tag = வெற்று;
     }
-    return m3Err_tagLookupFailed;
+    திரும்பு m3Err_tagLookupFailed;
 }
 
-M3Result m3_LinkTag (IM3Module io_module, const char* const i_moduleName, const char* const i_tagName, IM3Tag i_tag)
+M3Result m3_LinkTag (IM3Module io_module, மாறிலி எழுத்து* மாறிலி i_moduleName, மாறிலி எழுத்து* மாறிலி i_tagName, IM3Tag i_tag)
 {
-    return m3Err_tagLookupFailed;
+    திரும்பு m3Err_tagLookupFailed;
 }
 
-uint32_t m3_GetTagArgCount (IM3Tag i_tag)
+uint32_t m3_Get_Tag_Arg_மொத்தம் (IM3Tag i_tag)
 {
-    return 0;
+    திரும்பு 0;
 }
 
-M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
+M3_மதிப்பு_Type m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    return c_m3Type_none;
+    திரும்பு c_m3Type_none;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasExceptionHandling
+#எனில் d_m3HasExceptionHandling
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, மாறிலி வெறுமை* i_argptrs[])
 {
-    if (not io_runtime or not i_tag) {
-        return m3Err_tagLookupFailed;
+    எனில் (not io_runtime or not i_tag) {
+        திரும்பு m3Err_tagLookupFailed;
     }
 
     IM3Tag      tag  = i_tag->resolved ? i_tag->resolved : i_tag;
@@ -1661,150 +1661,150 @@ M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc
 
     // a tag with results is a stack switching control tag, which is suspended
     // with rather than thrown
-    if (type->numRets) {
-        return m3Err_typeMismatch;
+    எனில் (type->இலக்கம்_Rets) {
+        திரும்பு m3Err_typeMismatch;
     }
-    if (i_argc != type->numArgs) {
-        return m3Err_argumentCountMismatch;
+    எனில் (i_argc != type->இலக்கம்_Args) {
+        திரும்பு m3_Err_argument_மொத்தம்_Mismatch;
     }
     // with nothing on the stack there is nothing to unwind, and the exception
     // would sit on the runtime's list until some later call ended
-    if (io_runtime->callNesting == 0) {
-        return "m3_ThrowException called outside a host function";
+    எனில் (io_runtime->callNesting == 0) {
+        திரும்பு "m3_ThrowException called outside a host function";
     }
 
     M3Exception* exception = NewException(io_runtime, tag, i_argc);
-    if (not exception) {
-        return m3Err_mallocFailed;
+    எனில் (not exception) {
+        திரும்பு m3Err_mallocFailed;
     }
 
     // the layout op_Throw gives a payload: 32-bit values zero-extended, floats
     // as their bit pattern
-    for (u32 i = 0; i < i_argc; ++i) {
-        const void* value = i_argptrs[i];
+    க்கு (u32 i = 0; i < i_argc; ++i) {
+        மாறிலி வெறுமை* மதிப்பு = i_argptrs[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
+        தேர்வு (BaseTypeOf(d_FuncArgType(type, i))) {
+        நிலை c_m3Type_i32:
+        நிலை c_m3Type_f32: {
             u32 bits;
-            memcpy(&bits, value, sizeof(bits));
+            memcpy(&bits, மதிப்பு, அளவு(bits));
             exception->args[i] = bits;
-            break;
+            நிறுத்து;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(&exception->args[i], value, sizeof(u64));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            exception->args[i] = (u64)(*(const uintptr_t*)value);
-            break;
-        default:
+        நிலை c_m3Type_i64:
+        நிலை c_m3Type_f64:
+            memcpy(&exception->args[i], மதிப்பு, அளவு(u64));
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
+        நிலை c_m3Type_contref:
+            exception->args[i] = (u64)(*(மாறிலி uintptr_t*)மதிப்பு);
+            நிறுத்து;
+        இயல்பு:
             FreeException(io_runtime, exception);
-            return "unknown argument type";
+            திரும்பு "unknown argument type";
         }
     }
 
     io_runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    திரும்பு m3Err_pendingException;
 }
 
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    if (i_runtime and i_runtime->uncaughtException) {
-        return i_runtime->uncaughtException->tag;
+    எனில் (i_runtime and i_runtime->uncaughtException) {
+        திரும்பு i_runtime->uncaughtException->tag;
     }
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, மாறிலி வெறுமை* o_argptrs[])
 {
-    if (not i_runtime or not i_runtime->uncaughtException) {
-        return "no uncaught exception";
+    எனில் (not i_runtime or not i_runtime->uncaughtException) {
+        திரும்பு "no uncaught exception";
     }
 
-    const M3Exception* exception = i_runtime->uncaughtException;
+    மாறிலி M3Exception* exception = i_runtime->uncaughtException;
     IM3FuncType        type      = exception->tag->type;
 
-    if (i_argc != exception->numArgs) {
-        return m3Err_argumentCountMismatch;
+    எனில் (i_argc != exception->இலக்கம்_Args) {
+        திரும்பு m3_Err_argument_மொத்தம்_Mismatch;
     }
 
-    for (u32 i = 0; i < i_argc; ++i) {
-        void* value = (void*)o_argptrs[i];
+    க்கு (u32 i = 0; i < i_argc; ++i) {
+        வெறுமை* மதிப்பு = (வெறுமை*)o_argptrs[i];
         u64   bits  = exception->args[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
-            u32 low = (u32)bits;
-            memcpy(value, &low, sizeof(low));
-            break;
+        தேர்வு (BaseTypeOf(d_FuncArgType(type, i))) {
+        நிலை c_m3Type_i32:
+        நிலை c_m3Type_f32: {
+            u32 கீழ் = (u32)bits;
+            memcpy(மதிப்பு, &கீழ், அளவு(கீழ்));
+            நிறுத்து;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(value, &bits, sizeof(bits));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            *(uintptr_t*)value = (uintptr_t)bits;
-            break;
-        default:
-            return "unknown argument type";
+        நிலை c_m3Type_i64:
+        நிலை c_m3Type_f64:
+            memcpy(மதிப்பு, &bits, அளவு(bits));
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
+        நிலை c_m3Type_contref:
+            *(uintptr_t*)மதிப்பு = (uintptr_t)bits;
+            நிறுத்து;
+        இயல்பு:
+            திரும்பு "unknown argument type";
         }
     }
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
-#else
+#இல்லையெனில்
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, மாறிலி வெறுமை* i_argptrs[])
 {
-    return m3Err_tagLookupFailed;
+    திரும்பு m3Err_tagLookupFailed;
 }
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    return NULL;
+    திரும்பு வெற்று;
 }
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, மாறிலி வெறுமை* o_argptrs[])
 {
-    return "no uncaught exception";
+    திரும்பு "no uncaught exception";
 }
 
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3GuardedMemory
+#எனில் d_m3GuardedMemory
 
 // What RunCodeProtected hands to the platform layer to run, and what comes back
-typedef struct M3ProtectedRun {
+வகைவரை கட்டமைப்பு M3ProtectedRun {
     pc_t            pc;
     IM3Runtime      runtime;
     M3MemoryHeader* mem;
     M3Result        result;
 } M3ProtectedRun;
 
-static
-void RunCodeBody (void* io_context)
+நிலையான
+வெறுமை RunCodeBody (வெறுமை* io_context)
 {
     M3ProtectedRun* run = (M3ProtectedRun*)io_context;
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
+#  எனில் (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->அடுக்கு, run->mem,
                                     d_m3OpDefaultArgs, d_m3BaseCstr);
-#  else
-    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
+#  இல்லையெனில்
+    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->அடுக்கு, run->mem,
                                     d_m3OpDefaultArgs);
 #  endif
 }
@@ -1814,13 +1814,13 @@ void RunCodeBody (void* io_context)
 // of that memory's reservation, and the fault comes back as the trap the spec asks
 // for. Nothing is left half-done by it - the Wasm stack and the memories are heap,
 // and the caller unwinds the rest.
-static
+நிலையான
 M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_mem)
 {
     // Memory operations in this build carry no bounds check, so code only runs where a
     // fault past the end of a memory can still be turned into a trap
-    if (M3_UNLIKELY(not m3_HostGuardsActive())) {
-        return ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
+    எனில் (M3_UNLIKELY(not m3_HostGuardsActive())) {
+        திரும்பு ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
                             "another part of the process holds the fault signal");
     }
 
@@ -1830,35 +1830,35 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
     run.mem     = i_mem;
     run.result  = m3Err_none;
 
-    void*  arena;
+    வெறுமை*  arena;
     size_t arenaBytes;
     Guard_ArenaRange(&arena, &arenaBytes);
 
-    if (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
-        return m3Err_trapOutOfBoundsMemoryAccess;
+    எனில் (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
+        திரும்பு m3Err_trapOutOfBoundsMemoryAccess;
     }
 
-    return run.result;
+    திரும்பு run.result;
 }
 
 #endif // d_m3GuardedMemory
 
 
-#if d_m3HasStackSwitching
+#எனில் d_m3_Has_அடுக்கு_Switching
 
 // The function a suspended continuation stopped in: the callee of its innermost
 // call frame, or the function it was entered with if it made no call. Frames are
 // recorded innermost first, so that is the lowest-numbered call frame.
-static
+நிலையான
 IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 {
-    for (u32 i = 0; i < i_cont->numFrames; ++i) {
-        if (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
-            return i_cont->frames[i].call.function;
+    க்கு (u32 i = 0; i < i_cont->இலக்கம்_Frames; ++i) {
+        எனில் (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
+            திரும்பு i_cont->frames[i].call.function;
         }
     }
 
-    return i_cont->entryFunction;
+    திரும்பு i_cont->entryFunction;
 }
 
 
@@ -1869,31 +1869,31 @@ IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 // function can use. That base is the root's own sp, unless it stopped inside a
 // resume: then the suspension point belongs to the resumed continuation, and the
 // root's innermost frame is that resume.
-void Runtime_PlaceCallStack (IM3Runtime io_runtime)
+வெறுமை Runtime_Place_Call_அடுக்கு (IM3Runtime io_runtime)
 {
-    IM3Continuation root = io_runtime->rootContinuation;
+    IM3Continuation வேர் = io_runtime->வேர்_Continuation;
 
-    io_runtime->stack = io_runtime->originStack;
+    io_runtime->அடுக்கு = io_runtime->origin_அடுக்கு;
 
-    if (not root or root->state != cont_suspended) {
-        return;
+    எனில் (not வேர் or வேர்->state != cont_suspended) {
+        திரும்பு;
     }
 
-    m3stack_t   sp       = root->sp;
-    IM3Function function = Continuation_InnermostFunction(root);
+    m3stack_t   sp       = வேர்->sp;
+    IM3Function function = Continuation_InnermostFunction(வேர்);
 
-    if (root->numFrames and root->frames[0].kind == frame_resume) {
-        sp = root->frames[0].sp;
+    எனில் (வேர்->இலக்கம்_Frames and வேர்->frames[0].kind == frame_resume) {
+        sp = வேர்->frames[0].sp;
     }
 
-    m3slot_t* base = (m3slot_t*)io_runtime->originStack;
-    m3slot_t* top  = (m3slot_t*)sp + (function ? function->maxStackSlots : 0);
+    m3slot_t* base = (m3slot_t*)io_runtime->origin_அடுக்கு;
+    m3slot_t* உச்சி  = (m3slot_t*)sp + (function ? function->max_அடுக்கு_Slots : 0);
 
-    if (top > base + io_runtime->numStackSlots) {
-        top = base + io_runtime->numStackSlots;
+    எனில் (உச்சி > base + io_runtime->இலக்கம்_அடுக்கு_Slots) {
+        உச்சி = base + io_runtime->இலக்கம்_அடுக்கு_Slots;
     }
 
-    io_runtime->stack = top;
+    io_runtime->அடுக்கு = உச்சி;
 }
 
 #endif // d_m3HasStackSwitching
@@ -1902,7 +1902,7 @@ void Runtime_PlaceCallStack (IM3Runtime io_runtime)
 // Run compiled code on the runtime's stack, bounding native recursion for the
 // duration of the call. The outermost invocation establishes the stack limit;
 // nested ones (an imported function calling back into Wasm) inherit it.
-static inline
+நிலையான உள்வரி
 M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
 {
     pc_t i_pc = i_function->compiled;
@@ -1911,27 +1911,27 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // to, not against some runtime-wide one
     M3MemoryHeader* _mem = Module_MemoryHeader(i_function->module);
 
-#if d_m3HasSnapshots
-    if (M3_UNLIKELY(i_function->module->isUnusable)) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+#எனில் d_m3HasSnapshots
+    எனில் (M3_UNLIKELY(i_function->module->isUnusable)) {
+        திரும்பு "a snapshot failed to restore into the module, so it cannot run";
     }
     i_function->module->hasRun = true;
 #endif
 
-    d_m3StackLimitEnter(i_runtime);
+    d_m3_அடுக்கு_Limit_Enter(i_runtime);
 
     // a host function calling back into Wasm does not change which call a trap
     // ends: that is still the one the host made first
-    if (i_runtime->callNesting++ == 0) {
+    எனில் (i_runtime->callNesting++ == 0) {
         i_runtime->entered = i_function;
     }
-#if d_m3HasExceptionHandling
+#எனில் d_m3HasExceptionHandling
     // handler stacks don't nest across a call boundary: a host function calling
     // back into Wasm cannot be caught by a try_table its own caller entered
     u32 savedTryDepth   = i_runtime->tryDepth;
     i_runtime->tryDepth = 0;
 #endif
-#if d_m3HasStackSwitching
+#எனில் d_m3_Has_அடுக்கு_Switching
     // nor do continuations: the native frames on the far side of a host call
     // are not ours to record, so a suspend in here has no handler to reach and
     // no resume to unwind to
@@ -1941,87 +1941,87 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // not scratch space. A call the host makes before resuming it gets a
     // context of its own, the way any other re-entry does, rather than having
     // the frames of the suspension reset out from under it.
-    bool claimRoot = i_runtime->isSuspendable and not savedContinuation and
-                     not (i_runtime->rootContinuation and
-                          i_runtime->rootContinuation->state == cont_suspended);
+    bool claim_வேர் = i_runtime->isSuspendable and not savedContinuation and
+                     not (i_runtime->வேர்_Continuation and
+                          i_runtime->வேர்_Continuation->state == cont_suspended);
 
-    if (claimRoot and not i_runtime->rootContinuation) {
-        i_runtime->rootContinuation = Continuation_New(i_runtime, i_function->funcType, i_function);
+    எனில் (claim_வேர் and not i_runtime->வேர்_Continuation) {
+        i_runtime->வேர்_Continuation = Continuation_New(i_runtime, i_function->funcType, i_function);
 
-        if (i_runtime->rootContinuation) {
+        எனில் (i_runtime->வேர்_Continuation) {
             // The root borrows the runtime's stack and is not charged as cont.new.
-            i_runtime->rootContinuation->numStackSlots = i_runtime->numStackSlots;
-        } else {
-            claimRoot = false;
+            i_runtime->வேர்_Continuation->இலக்கம்_அடுக்கு_Slots = i_runtime->இலக்கம்_அடுக்கு_Slots;
+        } இல்லையெனில் {
+            claim_வேர் = false;
         }
     }
 
-    if (claimRoot) {
-        i_runtime->activeContinuation              = i_runtime->rootContinuation;
-        i_runtime->rootContinuation->entryFunction = i_function;
-        i_runtime->rootContinuation->state         = cont_running;
-        i_runtime->rootContinuation->numFrames     = 0;
-    } else {
-        i_runtime->activeContinuation = NULL;
+    எனில் (claim_வேர்) {
+        i_runtime->activeContinuation              = i_runtime->வேர்_Continuation;
+        i_runtime->வேர்_Continuation->entryFunction = i_function;
+        i_runtime->வேர்_Continuation->state         = cont_running;
+        i_runtime->வேர்_Continuation->இலக்கம்_Frames     = 0;
+    } இல்லையெனில் {
+        i_runtime->activeContinuation = வெற்று;
     }
 #endif
-#if d_m3GuardedMemory
+#எனில் d_m3GuardedMemory
     M3Result result = RunCodeProtected(i_runtime, i_pc, _mem);
-#elif (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs);
+#அல்லதெனில் (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->அடுக்கு, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
+#இல்லையெனில்
+    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->அடுக்கு, _mem, d_m3OpDefaultArgs);
 #endif
-#if d_m3HasStackSwitching
-    if (claimRoot) {
-        i_runtime->rootContinuation->state =
+#எனில் d_m3_Has_அடுக்கு_Switching
+    எனில் (claim_வேர்) {
+        i_runtime->வேர்_Continuation->state =
           (result == m3Err_continuationSuspended) ? cont_suspended : cont_returned;
 
-        Runtime_PlaceCallStack(i_runtime);
+        Runtime_Place_Call_அடுக்கு(i_runtime);
     }
     i_runtime->activeContinuation = savedContinuation;
 #endif
-#if d_m3HasExceptionHandling
+#எனில் d_m3HasExceptionHandling
     i_runtime->tryDepth = savedTryDepth;
 
     // an exception that reached the bottom of the call stack found no handler
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+    எனில் (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(i_runtime, result);
 
     // a paused invocation can still reach the exceptions it holds, so they wait
     // for it to finish
-    if (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
+    எனில் (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
         FreeExceptions(i_runtime);
     }
 #endif
     i_runtime->callNesting--;
-    d_m3StackLimitLeave(i_runtime);
+    d_m3_அடுக்கு_Limit_Leave(i_runtime);
 
-    return result;
+    திரும்பு result;
 }
 
 M3Result m3_RunStart (IM3Module io_module)
 {
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // Execution disabled for fuzzing builds
-    return m3Err_none;
+    திரும்பு m3Err_none;
 #endif
 
     M3Result result           = m3Err_none;
     i32      startFunctionTmp = -1;
 
-    if (io_module and io_module->startFunction >= 0) {
+    எனில் (io_module and io_module->startFunction >= 0) {
         IM3Function function = &io_module->functions[io_module->startFunction];
 
-        if (not function->compiled) {
+        எனில் (not function->compiled) {
 _           (CompileFunction(function));
         }
 
         IM3FuncType ftype = function->funcType;
-        if (ftype->numArgs != 0 || ftype->numRets != 0) {
-            _throw(m3Err_argumentCountMismatch);
+        எனில் (ftype->இலக்கம்_Args != 0 || ftype->இலக்கம்_Rets != 0) {
+            _throw(m3_Err_argument_மொத்தம்_Mismatch);
         }
 
         IM3Module  module  = function->module;
@@ -2035,14 +2035,14 @@ _           (CompileFunction(function));
 
         // a start function that suspended is not to be started again: resuming
         // is what finishes it
-        if (result and result != m3Err_continuationSuspended) {
+        எனில் (result and result != m3Err_continuationSuspended) {
             io_module->startFunction = startFunctionTmp;
             EXCEPTION_PRINT(result);
-            goto _catch;
+            செல் _catch;
         }
     }
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 // TODO: deal with main + side-modules loading efforcement
@@ -2050,8 +2050,8 @@ M3Result m3_LoadModule (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (M3_UNLIKELY(io_module->runtime)) {
-        return m3Err_moduleAlreadyLinked;
+    எனில் (M3_UNLIKELY(io_module->runtime)) {
+        திரும்பு m3Err_moduleAlreadyLinked;
     }
 
     io_module->runtime = io_runtime;
@@ -2076,7 +2076,7 @@ _   (InitDataSegments(io_module));
 
     io_module->next     = io_runtime->modules;
     io_runtime->modules = io_module;
-    return result; // ok
+    திரும்பு result; // ok
 
 _catch:
     // The runtime owns the module either way. Instantiation may already have
@@ -2087,200 +2087,200 @@ _catch:
     // It goes on the tail of the list rather than the head: it is not a module
     // anyone should find by name, only one whose functions may still be
     // reachable through someone else's table.
-    io_module->next = NULL;
+    io_module->next = வெற்று;
 
     IM3Module* tail = &io_runtime->modules;
-    while (*tail) {
+    போது (*tail) {
         tail = &(*tail)->next;
     }
     *tail = io_module;
 
-    return result;
+    திரும்பு result;
 }
 
 IM3Global m3_FindGlobal (IM3Module         io_module,
-                         const char* const i_globalName)
+                         மாறிலி எழுத்து* மாறிலி i_globalName)
 {
     // Search exports
     IM3Global exported = Module_FindExportedGlobal(io_module, i_globalName);
-    if (exported) {
+    எனில் (exported) {
         // a re-exported global is the one that was imported, so reads and
         // writes have to reach the cell that actually holds the value
-        return exported->resolved ? exported->resolved : exported;
+        திரும்பு exported->resolved ? exported->resolved : exported;
     }
 
     // Search imports
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (g->import.moduleUtf8 and g->import.fieldUtf8) {
-            if (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
-                return g->resolved ? g->resolved : g;
+        எனில் (g->import.moduleUtf8 and g->import.fieldUtf8) {
+            எனில் (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
+                திரும்பு g->resolved ? g->resolved : g;
             }
         }
     }
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 M3Result m3_GetGlobal (IM3Global      i_global,
-                       IM3TaggedValue o_value)
+                       IM3_Tagged_மதிப்பு o_மதிப்பு)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    எனில் (not i_global) {
+        திரும்பு m3Err_globalLookupFailed;
     }
 
-    switch (i_global->type) {
-    case c_m3Type_i32: o_value->value.i32 = i_global->i32Value; break;
-    case c_m3Type_i64: o_value->value.i64 = i_global->i64Value; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: o_value->value.f32 = i_global->f32Value; break;
-    case c_m3Type_f64: o_value->value.f64 = i_global->f64Value; break;
+    தேர்வு (i_global->type) {
+    நிலை c_m3Type_i32: o_மதிப்பு->மதிப்பு.i32 = i_global->i32_மதிப்பு; நிறுத்து;
+    நிலை c_m3Type_i64: o_மதிப்பு->மதிப்பு.i64 = i_global->i64_மதிப்பு; நிறுத்து;
+#எனில் d_m3HasFloat
+    நிலை c_m3Type_f32: o_மதிப்பு->மதிப்பு.f32 = i_global->f32_மதிப்பு; நிறுத்து;
+    நிலை c_m3Type_f64: o_மதிப்பு->மதிப்பு.f64 = i_global->f64_மதிப்பு; நிறுத்து;
 #endif
-    default: return m3Err_invalidTypeId;
+    இயல்பு: திரும்பு m3Err_invalidTypeId;
     }
 
-    o_value->type = (M3ValueType)(i_global->type);
-    return m3Err_none;
+    o_மதிப்பு->type = (M3_மதிப்பு_Type)(i_global->type);
+    திரும்பு m3Err_none;
 }
 
 M3Result m3_SetGlobal (IM3Global            i_global,
-                       const IM3TaggedValue i_value)
+                       மாறிலி IM3_Tagged_மதிப்பு i_மதிப்பு)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    எனில் (not i_global) {
+        திரும்பு m3Err_globalLookupFailed;
     }
-    if (not i_global->isMutable) {
-        return m3Err_globalNotMutable;
+    எனில் (not i_global->isMutable) {
+        திரும்பு m3Err_globalNotMutable;
     }
-    if (i_global->type != i_value->type) {
-        return m3Err_globalTypeMismatch;
+    எனில் (i_global->type != i_மதிப்பு->type) {
+        திரும்பு m3Err_globalTypeMismatch;
     }
 
-    switch (i_value->type) {
-    case c_m3Type_i32: i_global->i32Value = i_value->value.i32; break;
-    case c_m3Type_i64: i_global->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: i_global->f32Value = i_value->value.f32; break;
-    case c_m3Type_f64: i_global->f64Value = i_value->value.f64; break;
+    தேர்வு (i_மதிப்பு->type) {
+    நிலை c_m3Type_i32: i_global->i32_மதிப்பு = i_மதிப்பு->மதிப்பு.i32; நிறுத்து;
+    நிலை c_m3Type_i64: i_global->i64_மதிப்பு = i_மதிப்பு->மதிப்பு.i64; நிறுத்து;
+#எனில் d_m3HasFloat
+    நிலை c_m3Type_f32: i_global->f32_மதிப்பு = i_மதிப்பு->மதிப்பு.f32; நிறுத்து;
+    நிலை c_m3Type_f64: i_global->f64_மதிப்பு = i_மதிப்பு->மதிப்பு.f64; நிறுத்து;
 #endif
-    default: return m3Err_invalidTypeId;
+    இயல்பு: திரும்பு m3Err_invalidTypeId;
     }
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
-M3ValueType m3_GetGlobalType (IM3Global i_global)
+M3_மதிப்பு_Type m3_GetGlobalType (IM3Global i_global)
 {
-    return (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
+    திரும்பு (i_global) ? (M3_மதிப்பு_Type)(i_global->type) : c_m3Type_none;
 }
 
 
-void* v_FindFunction (IM3Module i_module, void* i_info)
+வெறுமை* v_FindFunction (IM3Module i_module, வெறுமை* i_info)
 {
-    const char* const i_name = (const char*)i_info;
+    மாறிலி எழுத்து* மாறிலி i_name = (மாறிலி எழுத்து*)i_info;
 
     // Prefer exported functions
     IM3Function exported = Module_FindExportedFunction(i_module, i_name);
-    if (exported) {
-        return exported;
+    எனில் (exported) {
+        திரும்பு exported;
     }
 
     // Search internal functions
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Functions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         bool isImported = f->import.moduleUtf8 or f->import.fieldUtf8;
 
-        if (isImported) {
-            continue;
+        எனில் (isImported) {
+            தொடர்;
         }
 
-        for (int j = 0; j < f->numNames; j++) {
-            if (f->names[j] and strcmp(f->names[j], i_name) == 0) {
-                return f;
+        க்கு (முழு j = 0; j < f->இலக்கம்_Names; j++) {
+            எனில் (f->names[j] and strcmp(f->names[j], i_name) == 0) {
+                திரும்பு f;
             }
         }
     }
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
 // Shared tail of the two lookups: a function is only usable once it has code.
-static
+நிலையான
 M3Result PrepareFoundFunction (IM3Function* o_function, IM3Function i_function)
 {
     M3Result result = m3Err_none;
 
-    if (not i_function->compiled) {
+    எனில் (not i_function->compiled) {
 _       (CompileFunction(i_function))
     }
 
     _catch:
-    *o_function = result ? NULL : i_function;
+    *o_function = result ? வெற்று : i_function;
 
-    return result;
+    திரும்பு result;
 }
 
 
 // Searches every module in the runtime, most recently loaded first. That is a
 // guess once more than one module is loaded and two of them export the same
 // name - m3_FindFunctionIn says which module is meant.
-M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, const char* const i_functionName)
+M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, மாறிலி எழுத்து* மாறிலி i_functionName)
 {
                                                                 d_m3Assert (o_function and i_runtime and i_functionName);
-    IM3Function function = NULL;
+    IM3Function function = வெற்று;
 
-    if (not i_runtime->modules) {
-        *o_function = NULL;
-        return "no modules loaded";
+    எனில் (not i_runtime->modules) {
+        *o_function = வெற்று;
+        திரும்பு "no modules loaded";
     }
 
-    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (void*)i_functionName);
+    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (வெறுமை*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
+    எனில் (not function) {
+        *o_function = வெற்று;
+        திரும்பு ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    திரும்பு PrepareFoundFunction(o_function, function);
 }
 
 
-IM3Module m3_FindModule (IM3Runtime i_runtime, const char* const i_moduleName)
+IM3Module m3_FindModule (IM3Runtime i_runtime, மாறிலி எழுத்து* மாறிலி i_moduleName)
 {
-    if (not i_runtime or not i_moduleName) {
-        return NULL;
+    எனில் (not i_runtime or not i_moduleName) {
+        திரும்பு வெற்று;
     }
 
     // the list is newest-first, so a name registered twice names the newer one
-    for (IM3Module m = i_runtime->modules; m; m = m->next) {
-        if (m->name and strcmp(m->name, i_moduleName) == 0) {
-            return m;
+    க்கு (IM3Module m = i_runtime->modules; m; m = m->next) {
+        எனில் (m->name and strcmp(m->name, i_moduleName) == 0) {
+            திரும்பு m;
         }
     }
 
-    return NULL;
+    திரும்பு வெற்று;
 }
 
 
 // Searches one module's exports, which is what naming a module means.
-M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, const char* const i_functionName)
+M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, மாறிலி எழுத்து* மாறிலி i_functionName)
 {
                                                                 d_m3Assert (o_function and i_functionName);
-    if (not i_module) {
-        *o_function = NULL;
-        return m3Err_functionLookupFailed;      // ErrorModule would deref it
+    எனில் (not i_module) {
+        *o_function = வெற்று;
+        திரும்பு m3Err_functionLookupFailed;      // ErrorModule would deref it
     }
 
-    IM3Function function = (IM3Function)v_FindFunction(i_module, (void*)i_functionName);
+    IM3Function function = (IM3Function)v_FindFunction(i_module, (வெறுமை*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
+    எனில் (not function) {
+        *o_function = வெற்று;
+        திரும்பு ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    திரும்பு PrepareFoundFunction(o_function, function);
 }
 
 
@@ -2290,81 +2290,81 @@ _try {
     M3Table*    table;
     IM3Function function;
 
-    _throwif("no table", i_module->numTables == 0);
+    _throwif("no table", i_module->இலக்கம்_Tables == 0);
 
     table = i_module->tables[0];
     _throwif("function index out of range", i_index >= table->size);
 
     function = (IM3Function)table->elements[i_index];
 
-    if (function) {
-        if (not function->compiled) {
+    எனில் (function) {
+        எனில் (not function->compiled) {
 _           (CompileFunction(function))
         }
     }
 
     *o_function = function;
 } _catch:
-    return result;
+    திரும்பு result;
 }
 
 
-static
+நிலையான
 M3Result checkStartFunction (IM3Module i_module)
 {
     M3Result result = m3Err_none;                               d_m3Assert(i_module);
 
     // Check if start function needs to be called
-    if (i_module->startFunction >= 0) {
+    எனில் (i_module->startFunction >= 0) {
         result = m3_RunStart(i_module);
     }
 
-    return result;
+    திரும்பு result;
 }
 
-uint32_t m3_GetArgCount (IM3Function i_function)
+uint32_t m3_Get_Arg_மொத்தம் (IM3Function i_function)
 {
-    if (i_function) {
+    எனில் (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numArgs;
+        எனில் (ft) {
+            திரும்பு ft->இலக்கம்_Args;
         }
     }
-    return 0;
+    திரும்பு 0;
 }
 
-uint32_t m3_GetRetCount (IM3Function i_function)
+uint32_t m3_Get_Ret_மொத்தம் (IM3Function i_function)
 {
-    if (i_function) {
+    எனில் (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numRets;
+        எனில் (ft) {
+            திரும்பு ft->இலக்கம்_Rets;
         }
     }
-    return 0;
+    திரும்பு 0;
 }
 
 
-M3ValueType m3_GetArgType (IM3Function i_function, uint32_t index)
+M3_மதிப்பு_Type m3_GetArgType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    எனில் (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numArgs) {
-            return (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
+        எனில் (ft and index < ft->இலக்கம்_Args) {
+            திரும்பு (M3_மதிப்பு_Type)BaseTypeOf(d_FuncArgType(ft, index));
         }
     }
-    return c_m3Type_none;
+    திரும்பு c_m3Type_none;
 }
 
-M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
+M3_மதிப்பு_Type m3_GetRetType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    எனில் (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numRets) {
-            return (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
+        எனில் (ft and index < ft->இலக்கம்_Rets) {
+            திரும்பு (M3_மதிப்பு_Type)BaseTypeOf(d_FuncRetType(ft, index));
         }
     }
-    return c_m3Type_none;
+    திரும்பு c_m3Type_none;
 }
 
 
@@ -2375,28 +2375,28 @@ M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
 // here instead: results and arguments each take a u64 at this boundary, however
 // wide the slot is inside. Every caller goes through this, so none of them can
 // be the one that forgets.
-static
-M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
+நிலையான
+M3Result Get_அடுக்கு_Pointer_For_Args (IM3Function i_function, u8** o_அடுக்கு)
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
     // the stack a paused invocation holds is not available to this one
-    size_t used      = (size_t)((u8*)runtime->stack - (u8*)runtime->originStack);
-    size_t needed    = ((size_t)ftype->numRets + ftype->numArgs) * sizeof(u64);
-    size_t available = (size_t)runtime->numStackSlots * sizeof(m3slot_t) - used;
+    size_t used      = (size_t)((u8*)runtime->அடுக்கு - (u8*)runtime->origin_அடுக்கு);
+    size_t needed    = ((size_t)ftype->இலக்கம்_Rets + ftype->இலக்கம்_Args) * அளவு(u64);
+    size_t available = (size_t)runtime->இலக்கம்_அடுக்கு_Slots * அளவு(m3slot_t) - used;
 
-    if (needed > available) {
-        return m3Err_trapStackOverflow;
+    எனில் (needed > available) {
+        திரும்பு m3_Err_trap_அடுக்கு_Overflow;
     }
 
-    u64* stack = (u64*)runtime->stack;
+    u64* அடுக்கு = (u64*)runtime->அடுக்கு;
 
-    stack += ftype->numRets;
+    அடுக்கு += ftype->இலக்கம்_Rets;
 
-    *o_stack = (u8*)stack;
+    *o_அடுக்கு = (u8*)அடுக்கு;
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 
@@ -2406,15 +2406,15 @@ M3Result m3_CallV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_CallVL(i_function, ap);
     va_end(ap);
-    return r;
+    திரும்பு r;
 }
 
-static
-void ReportNativeStackUsage ()
+நிலையான
+வெறுமை Report_Native_அடுக்கு_Usage ()
 {
-#if d_m3LogNativeStack
-    int stackUsed = m3StackGetMax();
-    fprintf(stderr, "Native stack used: %d\n", stackUsed);
+#எனில் d_m3_Log_Native_அடுக்கு
+    முழு அடுக்கு_Used = m3_அடுக்கு_Get_Max();
+    fprintf(stderr, "Native stack used: %d\n", அடுக்கு_Used);
 #endif
 }
 
@@ -2424,292 +2424,292 @@ M3Result m3_CallVL (IM3Function i_function, va_list i_args)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = வெற்று;
 
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    எனில் (!i_function->compiled) {
+        திரும்பு m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#எனில் d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_அடுக்கு_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_அடுக்கு_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    க்கு (u32 i = 0; i < ftype->இலக்கம்_Args; ++i) {
+        தேர்வு (d_FuncArgType(ftype, i)) {
+        நிலை c_m3Type_i32:
             *(i32*)(s) = va_arg(i_args, i32);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            நிறுத்து;
+        நிலை c_m3Type_i64:
             *(i64*)(s) = va_arg(i_args, i64);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
             *(uintptr_t*)(s) = va_arg(i_args, uintptr_t);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            நிறுத்து;
+#எனில் d_m3HasFloat
+        நிலை c_m3Type_f32:
             *(f32*)(s) = (f32)va_arg(i_args, f64);
             s += 8;
-            break; // f32 is passed as f64
-        case c_m3Type_f64:
+            நிறுத்து; // f32 is passed as f64
+        நிலை c_m3Type_f64:
             *(f64*)(s) = va_arg(i_args, f64);
             s += 8;
-            break;
+            நிறுத்து;
 #endif
-        default: return "unknown argument type";
+        இயல்பு: திரும்பு "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
-    ReportNativeStackUsage();
+    Report_Native_அடுக்கு_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? வெற்று : i_function;
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
-M3Result m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_Call (IM3Function i_function, uint32_t i_argc, மாறிலி வெறுமை* i_argptrs[])
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = வெற்று;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    எனில் (i_argc != ftype->இலக்கம்_Args) {
+        திரும்பு m3_Err_argument_மொத்தம்_Mismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    எனில் (!i_function->compiled) {
+        திரும்பு m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#எனில் d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_அடுக்கு_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_அடுக்கு_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    க்கு (u32 i = 0; i < ftype->இலக்கம்_Args; ++i) {
+        தேர்வு (d_FuncArgType(ftype, i)) {
+        நிலை c_m3Type_i32:
             *(i32*)(s) = *(i32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_i64:
+            நிறுத்து;
+        நிலை c_m3Type_i64:
             *(i64*)(s) = *(i64*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
             *(uintptr_t*)(s) = *(uintptr_t*)i_argptrs[i];
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            நிறுத்து;
+#எனில் d_m3HasFloat
+        நிலை c_m3Type_f32:
             *(f32*)(s) = *(f32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_f64:
+            நிறுத்து;
+        நிலை c_m3Type_f64:
             *(f64*)(s) = *(f64*)i_argptrs[i];
             s += 8;
-            break;
+            நிறுத்து;
 #endif
-        default: return "unknown argument type";
+        இயல்பு: திரும்பு "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
 
-    ReportNativeStackUsage();
+    Report_Native_அடுக்கு_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? வெற்று : i_function;
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 // Argument parsing for m3_CallArgv. Strict on purpose: the whole string has to
 // be consumed, so "12abc" is rejected rather than read as 12, and an empty or
 // unparsable argument is an error rather than the zero that strtoul with a
 // NULL end pointer used to hand back. See wasm3/wasm3#367.
-static
-M3Result ParseArgInteger (ccstr_t i_arg, u32 i_numBits, u64* o_value)
+நிலையான
+M3Result ParseArgInteger (ccstr_t i_arg, u32 i_இலக்கம்_Bits, u64* o_மதிப்பு)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    எனில் (not i_arg or not *i_arg) {
+        திரும்பு "empty argument";
     }
 
     // strtoull would skip leading space, but trailing space is rejected below;
     // accepting one and not the other would just be confusing
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    எனில் (isspace((unsigned எழுத்து)*i_arg)) {
+        திரும்பு "argument is not a number";
     }
 
-    char* end = NULL;
-    u64   value;
+    எழுத்து* end = வெற்று;
+    u64   மதிப்பு;
 
     errno = 0;
 
     // an argument may be spelled signed or unsigned: -1 and 4294967295 name the
     // same i32
-    if (*i_arg == '-') {
-        i64 signedValue = strtoll(i_arg, &end, 10);
+    எனில் (*i_arg == '-') {
+        i64 signed_மதிப்பு = strtoll(i_arg, &end, 10);
 
-        if (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
-            return "argument out of range";
+        எனில் (i_இலக்கம்_Bits == 32 and (signed_மதிப்பு < INT32_MIN or signed_மதிப்பு > INT32_MAX)) {
+            திரும்பு "argument out of range";
         }
 
-        value = (u64)signedValue;
-    } else {
-        value = strtoull(i_arg, &end, 10);
+        மதிப்பு = (u64)signed_மதிப்பு;
+    } இல்லையெனில் {
+        மதிப்பு = strtoull(i_arg, &end, 10);
 
-        if (i_numBits == 32 and value > UINT32_MAX) {
-            return "argument out of range";
+        எனில் (i_இலக்கம்_Bits == 32 and மதிப்பு > UINT32_MAX) {
+            திரும்பு "argument out of range";
         }
     }
 
-    if (errno == ERANGE) {
-        return "argument out of range";
+    எனில் (errno == ERANGE) {
+        திரும்பு "argument out of range";
     }
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    எனில் (end == i_arg or *end) {
+        திரும்பு "argument is not a number";
     }
 
-    *o_value = value;
+    *o_மதிப்பு = மதிப்பு;
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 
-#if d_m3HasFloat
-static
-M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
+#எனில் d_m3HasFloat
+நிலையான
+M3Result ParseArgFloat (ccstr_t i_arg, f64* o_மதிப்பு)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    எனில் (not i_arg or not *i_arg) {
+        திரும்பு "empty argument";
     }
 
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    எனில் (isspace((unsigned எழுத்து)*i_arg)) {
+        திரும்பு "argument is not a number";
     }
 
-    char* end = NULL;
+    எழுத்து* end = வெற்று;
 
     errno = 0;
 
-    f64 value = strtod(i_arg, &end);
+    f64 மதிப்பு = strtod(i_arg, &end);
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    எனில் (end == i_arg or *end) {
+        திரும்பு "argument is not a number";
     }
 
     // strtod reports underflow through ERANGE as well, and a denormal result is
     // perfectly usable, so only an overflow to infinity is out of range
-    if (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
-        return "argument out of range";
+    எனில் (errno == ERANGE and (மதிப்பு > DBL_MAX or மதிப்பு < -DBL_MAX)) {
+        திரும்பு "argument out of range";
     }
 
-    *o_value = value;
+    *o_மதிப்பு = மதிப்பு;
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 #endif
 
 
 // A reference argument is either the null reference or a host handle written as
 // an integer.
-static
-M3Result ParseArgReference (ccstr_t i_arg, u64* o_value)
+நிலையான
+M3Result ParseArgReference (ccstr_t i_arg, u64* o_மதிப்பு)
 {
-    if (i_arg and strcmp(i_arg, "null") == 0) {
-        *o_value = 0;
-        return m3Err_none;
+    எனில் (i_arg and strcmp(i_arg, "null") == 0) {
+        *o_மதிப்பு = 0;
+        திரும்பு m3Err_none;
     }
 
-    return ParseArgInteger(i_arg, 64, o_value);
+    திரும்பு ParseArgInteger(i_arg, 64, o_மதிப்பு);
 }
 
 
-M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_argv[])
+M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, மாறிலி எழுத்து* i_argv[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = வெற்று;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    எனில் (i_argc != ftype->இலக்கம்_Args) {
+        திரும்பு m3_Err_argument_மொத்தம்_Mismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    எனில் (!i_function->compiled) {
+        திரும்பு m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#எனில் d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_அடுக்கு_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_அடுக்கு_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        u64 value = 0;
-#if d_m3HasFloat
+    க்கு (u32 i = 0; i < ftype->இலக்கம்_Args; ++i) {
+        u64 மதிப்பு = 0;
+#எனில் d_m3HasFloat
         f64 fvalue = 0;
 #endif
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
-_           (ParseArgInteger(i_argv[i], 32, &value)) * (i32*)(s) = (i32)value;
+        தேர்வு (d_FuncArgType(ftype, i)) {
+        நிலை c_m3Type_i32:
+_           (ParseArgInteger(i_argv[i], 32, &மதிப்பு)) * (i32*)(s) = (i32)மதிப்பு;
             s += 8;
-            break;
-        case c_m3Type_i64:
-_           (ParseArgInteger(i_argv[i], 64, &value)) * (i64*)(s) = (i64)value;
+            நிறுத்து;
+        நிலை c_m3Type_i64:
+_           (ParseArgInteger(i_argv[i], 64, &மதிப்பு)) * (i64*)(s) = (i64)மதிப்பு;
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-_           (ParseArgReference(i_argv[i], &value)) * (uintptr_t*)(s) = (uintptr_t)value;
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
+_           (ParseArgReference(i_argv[i], &மதிப்பு)) * (uintptr_t*)(s) = (uintptr_t)மதிப்பு;
             s += 8;
-            break;
-#if d_m3HasFloat
+            நிறுத்து;
+#எனில் d_m3HasFloat
             // strtof would be less portable
-        case c_m3Type_f32:
+        நிலை c_m3Type_f32:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f32*)(s) = (f32)fvalue;
             s += 8;
-            break;
-        case c_m3Type_f64:
+            நிறுத்து;
+        நிலை c_m3Type_f64:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
             s += 8;
-            break;
+            நிறுத்து;
 #endif
-        default: _throw("unknown argument type");
+        இயல்பு: _throw("unknown argument type");
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
 
-    ReportNativeStackUsage();
+    Report_Native_அடுக்கு_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? வெற்று : i_function;
 
-    _catch: return result;
+    _catch: திரும்பு result;
 }
 
 
@@ -2720,50 +2720,50 @@ _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
 //}
 
 
-M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_retptrs[])
+M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, மாறிலி வெறுமை* o_retptrs[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
 
-    if (i_retc != ftype->numRets) {
-        return m3Err_argumentCountMismatch;
+    எனில் (i_retc != ftype->இலக்கம்_Rets) {
+        திரும்பு m3_Err_argument_மொத்தம்_Mismatch;
     }
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    எனில் (i_function != runtime->lastCalled) {
+        திரும்பு "function not called";
     }
 
-    u8* s = (u8*)runtime->stack;
+    u8* s = (u8*)runtime->அடுக்கு;
 
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    க்கு (u32 i = 0; i < ftype->இலக்கம்_Rets; ++i) {
+        தேர்வு (d_FuncRetType(ftype, i)) {
+        நிலை c_m3Type_i32:
             *(i32*)o_retptrs[i] = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            நிறுத்து;
+        நிலை c_m3Type_i64:
             *(i64*)o_retptrs[i] = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
             *(uintptr_t*)o_retptrs[i] = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            நிறுத்து;
+#எனில் d_m3HasFloat
+        நிலை c_m3Type_f32:
             *(f32*)o_retptrs[i] = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            நிறுத்து;
+        நிலை c_m3Type_f64:
             *(f64*)o_retptrs[i] = *(f64*)(s);
             s += 8;
-            break;
+            நிறுத்து;
 #endif
-        default: return "unknown return type";
+        இயல்பு: திரும்பு "unknown return type";
         }
     }
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 M3Result m3_GetResultsV (IM3Function i_function, ...)
@@ -2772,7 +2772,7 @@ M3Result m3_GetResultsV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_GetResultsVL(i_function, ap);
     va_end(ap);
-    return r;
+    திரும்பு r;
 }
 
 M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
@@ -2780,143 +2780,143 @@ M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    எனில் (i_function != runtime->lastCalled) {
+        திரும்பு "function not called";
     }
 
-    u8* s = (u8*)runtime->stack;
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    u8* s = (u8*)runtime->அடுக்கு;
+    க்கு (u32 i = 0; i < ftype->இலக்கம்_Rets; ++i) {
+        தேர்வு (d_FuncRetType(ftype, i)) {
+        நிலை c_m3Type_i32:
             *va_arg(o_rets, i32*) = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            நிறுத்து;
+        நிலை c_m3Type_i64:
             *va_arg(o_rets, i64*) = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            நிறுத்து;
+        நிலை c_m3Type_funcref:
+        நிலை c_m3Type_externref:
+        நிலை c_m3Type_exnref:
             *va_arg(o_rets, uintptr_t*) = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            நிறுத்து;
+#எனில் d_m3HasFloat
+        நிலை c_m3Type_f32:
             *va_arg(o_rets, f32*) = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            நிறுத்து;
+        நிலை c_m3Type_f64:
             *va_arg(o_rets, f64*) = *(f64*)(s);
             s += 8;
-            break;
+            நிறுத்து;
 #endif
-        default: return "unknown argument type";
+        இயல்பு: திரும்பு "unknown argument type";
         }
     }
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
-void ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
+வெறுமை ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    எனில் (i_codePage) {
         IM3CodePage* list;
 
-        bool pageFull = (NumFreeLines(i_codePage) < d_m3CodePageFreeLinesThreshold);
-        if (pageFull) {
+        bool pageFull = (இலக்கம்_Free_வரிகள்(i_codePage) < d_m3_Code_Page_Free_வரிகள்_Threshold);
+        எனில் (pageFull) {
             list = &i_runtime->pagesFull;
-        } else {
+        } இல்லையெனில் {
             list = &i_runtime->pagesOpen;
         }
 
-        PushCodePage(list, i_codePage);                         m3log (emit, "release page: %d to queue: '%s'", i_codePage->info.sequence, pageFull ? "full" : "open")
+        தள்ளு_Code_Page(list, i_codePage);                         m3log (emit, "release page: %d to queue: '%s'", i_codePage->info.sequence, pageFull ? "full" : "open")
     }
 }
 
 
-IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_minLineCount)
+IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_min_வரி_மொத்தம்)
 {
-    IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_minLineCount);
+    IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_min_வரி_மொத்தம்);
 
-    if (not page) {
-        page = Environment_AcquireCodePage(i_runtime->environment, i_minLineCount);
+    எனில் (not page) {
+        page = Environment_AcquireCodePage(i_runtime->environment, i_min_வரி_மொத்தம்);
 
-        if (not page) {
-            page = NewCodePage(i_runtime, i_minLineCount);
+        எனில் (not page) {
+            page = NewCodePage(i_runtime, i_min_வரி_மொத்தம்);
         }
 
-        if (page) {
-            i_runtime->numCodePages++;
+        எனில் (page) {
+            i_runtime->இலக்கம்_Code_Pages++;
         }
     }
 
-    if (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
-        i_runtime->numActiveCodePages++;
+    எனில் (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
+        i_runtime->இலக்கம்_Active_Code_Pages++;
     }
 
-    return page;
+    திரும்பு page;
 }
 
 
 IM3CodePage AcquireCodePage (IM3Runtime i_runtime)
 {
-    return AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
+    திரும்பு AcquireCodePageWithCapacity(i_runtime, d_m3_Code_Page_Free_வரிகள்_Threshold);
 }
 
 
-void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
+வெறுமை ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    எனில் (i_codePage) {
         ReleaseCodePageNoTrack(i_runtime, i_codePage);
-        i_runtime->numActiveCodePages--;
+        i_runtime->இலக்கம்_Active_Code_Pages--;
 
-#if defined(DEBUG)
-        u32 numOpen = CountCodePages(i_runtime->pagesOpen);
-        u32 numFull = CountCodePages(i_runtime->pagesFull);
+#எனில் defined(DEBUG)
+        u32 இலக்கம்_Open = மொத்தம்_Code_Pages(i_runtime->pagesOpen);
+        u32 இலக்கம்_Full = மொத்தம்_Code_Pages(i_runtime->pagesFull);
 
-        m3log(runtime, "runtime: %p; open-pages: %d; full-pages: %d; active: %d; total: %d", i_runtime, numOpen, numFull, i_runtime->numActiveCodePages, i_runtime->numCodePages);
+        m3log(runtime, "runtime: %p; open-pages: %d; full-pages: %d; active: %d; total: %d", i_runtime, இலக்கம்_Open, இலக்கம்_Full, i_runtime->இலக்கம்_Active_Code_Pages, i_runtime->இலக்கம்_Code_Pages);
 
-        d_m3Assert(numOpen + numFull + i_runtime->numActiveCodePages == i_runtime->numCodePages);
+        d_m3Assert(இலக்கம்_Open + இலக்கம்_Full + i_runtime->இலக்கம்_Active_Code_Pages == i_runtime->இலக்கம்_Code_Pages);
 
-#  if d_m3LogCodePages
-        dump_code_page(i_codePage, /* startPC: */ NULL);
+#  எனில் d_m3LogCodePages
+        dump_code_page(i_codePage, /* startPC: */ வெற்று);
 #  endif
 #endif
     }
 }
 
 
-#if d_m3VerboseErrorMessages
+#எனில் d_m3VerboseErrorMessages
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...)
+                  மாறிலி எழுத்து* மாறிலி i_file, u32 i_வரி_இலக்கம், மாறிலி எழுத்து* மாறிலி i_errorMessage, ...)
 {
-    if (i_runtime) {
-        i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .line = i_lineNum };
+    எனில் (i_runtime) {
+        i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .வரி_2 = i_வரி_இலக்கம் };
         i_runtime->error.message = i_runtime->error_message;
 
         va_list args;
         va_start(args, i_errorMessage);
-        vsnprintf(i_runtime->error_message, sizeof(i_runtime->error_message), i_errorMessage, args);
+        vsnprintf(i_runtime->error_message, அளவு(i_runtime->error_message), i_errorMessage, args);
         va_end(args);
     }
 
-    return i_result;
+    திரும்பு i_result;
 }
 #endif
 
 
-void m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
+வெறுமை m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
 {
-    if (i_runtime) {
+    எனில் (i_runtime) {
         *o_info = i_runtime->error;
         m3_ResetErrorInfo(i_runtime);
     }
 }
 
 
-void m3_ResetErrorInfo (IM3Runtime i_runtime)
+வெறுமை m3_ResetErrorInfo (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    எனில் (i_runtime) {
         M3_INIT(i_runtime->error);
         i_runtime->error.message = "";
     }
@@ -2924,132 +2924,132 @@ void m3_ResetErrorInfo (IM3Runtime i_runtime)
 
 uint8_t* m3_GetMemory (IM3Module i_module, size_t* o_memorySizeInBytes, uint32_t i_memoryIndex)
 {
-    uint8_t* memory = NULL;
+    uint8_t* memory = வெற்று;
     size_t   size   = 0;
 
-    if (i_module and i_memoryIndex < i_module->numMemories) {
+    எனில் (i_module and i_memoryIndex < i_module->இலக்கம்_Memories) {
         IM3Memory mem = i_module->memories[i_memoryIndex];
 
-        if (mem->mallocated) {
+        எனில் (mem->mallocated) {
             size = mem->mallocated->length;
 
-            if (size) {
+            எனில் (size) {
                 memory = m3MemData(mem->mallocated);
             }
         }
     }
 
-    if (o_memorySizeInBytes) {
+    எனில் (o_memorySizeInBytes) {
         *o_memorySizeInBytes = size;
     }
 
-    return memory;
+    திரும்பு memory;
 }
 
 
 size_t m3_GetMemorySize (IM3Module i_module, uint32_t i_memoryIndex)
 {
-    if (not i_module or i_memoryIndex >= i_module->numMemories) {
-        return 0;
+    எனில் (not i_module or i_memoryIndex >= i_module->இலக்கம்_Memories) {
+        திரும்பு 0;
     }
 
     IM3Memory mem = i_module->memories[i_memoryIndex];
 
-    return mem->mallocated ? mem->mallocated->length : 0;
+    திரும்பு mem->mallocated ? mem->mallocated->length : 0;
 }
 
 
-size_t m3_GetMemorySizeAt (const void* i_memory)
+size_t m3_GetMemorySizeAt (மாறிலி வெறுமை* i_memory)
 {
-    if (not i_memory) {
-        return 0;
+    எனில் (not i_memory) {
+        திரும்பு 0;
     }
 
     // the header sits immediately before the data it describes
-    const M3MemoryHeader* header = ((const M3MemoryHeader*)i_memory) - 1;
+    மாறிலி M3MemoryHeader* header = ((மாறிலி M3MemoryHeader*)i_memory) - 1;
 
-    return header->length;
+    திரும்பு header->length;
 }
 
 
 M3Result m3_FindExportedMemory (IM3Module i_module, cstr_t i_name, u32* o_memoryIndex)
 {
-    if (not i_module or not i_name or not o_memoryIndex) {
-        return m3Err_unknownMemory;
+    எனில் (not i_module or not i_name or not o_memoryIndex) {
+        திரும்பு m3Err_unknownMemory;
     }
 
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    மாறிலி M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    if (not e) {
-        return m3Err_unknownMemory;
+    எனில் (not e) {
+        திரும்பு m3Err_unknownMemory;
     }
 
     *o_memoryIndex = e->index;
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 
 bool Module_HasLinkedHostImport (IM3Module i_module, cstr_t i_importModule)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < i_module->இலக்கம்_Functions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         // hostMemory is set when a host function is bound to the import, so it
         // is also the mark of one - see CompileRawFunction
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        எனில் (not f->hostMemory or f->wasm or f->resolved) {
+            தொடர்;
         }
 
-        if (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
-            return true;
+        எனில் (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
+            திரும்பு true;
         }
     }
 
-    return false;
+    திரும்பு false;
 }
 
 
 M3Result m3_BindImportMemory (IM3Module io_module, cstr_t i_importModule, u32 i_memoryIndex)
 {
-    if (not io_module or not i_importModule) {
-        return m3Err_moduleNotLinked;
+    எனில் (not io_module or not i_importModule) {
+        திரும்பு m3Err_moduleNotLinked;
     }
 
-    if (i_memoryIndex >= io_module->numMemories) {
-        return m3Err_unknownMemory;
+    எனில் (i_memoryIndex >= io_module->இலக்கம்_Memories) {
+        திரும்பு m3Err_unknownMemory;
     }
 
     // the memory itself, not the index: linking may have pointed this slot at
     // another module's memory, and growing one reallocates behind it
     IM3Memory memory = io_module->memories[i_memoryIndex];
 
-    const bool wildcardModule = (strcmp(i_importModule, "*") == 0);
+    மாறிலி bool wildcardModule = (strcmp(i_importModule, "*") == 0);
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    க்கு (u32 i = 0; i < io_module->இலக்கம்_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
 
         // only an import that a host function was bound to has a memory to
         // pin: one with a body of its own reads memory through the interpreter,
         // and one resolved to another module's export runs that module's code
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        எனில் (not f->hostMemory or f->wasm or f->resolved) {
+            தொடர்;
         }
 
-        if (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
+        எனில் (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
             f->hostMemory = memory;
         }
     }
 
-    return m3Err_none;
+    திரும்பு m3Err_none;
 }
 
 
 M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 {
-#if d_m3RecordBacktraces
-    return &i_runtime->backtrace;
-#else
-    return NULL;
+#எனில் d_m3RecordBacktraces
+    திரும்பு &i_runtime->backtrace;
+#இல்லையெனில்
+    திரும்பு வெற்று;
 #endif
 }
 
@@ -3058,69 +3058,69 @@ M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 //  snapshots & suspendable execution
 //-------------------------------------------------------------------------------------------------------------------------------
 
-void m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
+வெறுமை m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
 {
-    if (io_runtime) {
+    எனில் (io_runtime) {
         io_runtime->isSuspendable = i_suspendable;
     }
 }
 
-void m3_RequestSuspend (IM3Runtime io_runtime)
+வெறுமை m3_RequestSuspend (IM3Runtime io_runtime)
 {
-    if (io_runtime) {
+    எனில் (io_runtime) {
         io_runtime->suspendRequested = true;
     }
 }
 
 bool m3_IsSuspended (IM3Runtime i_runtime)
 {
-    if (!i_runtime) {
-        return false;
+    எனில் (!i_runtime) {
+        திரும்பு false;
     }
-#if d_m3HasStackSwitching
-    if (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
-        return true;
+#எனில் d_m3_Has_அடுக்கு_Switching
+    எனில் (i_runtime->வேர்_Continuation && i_runtime->வேர்_Continuation->state == cont_suspended) {
+        திரும்பு true;
     }
 #endif
-    return false;
+    திரும்பு false;
 }
 
 M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 {
-    if (!io_runtime) {
-        return m3Err_mallocFailed;
+    எனில் (!io_runtime) {
+        திரும்பு m3Err_mallocFailed;
     }
-    if (!io_runtime->isSuspendable) {
-        return m3Err_none;
+    எனில் (!io_runtime->isSuspendable) {
+        திரும்பு m3Err_none;
     }
-#if d_m3HasSnapshots
+#எனில் d_m3HasSnapshots
     // a restore that failed leaves nothing to resume, and says so every time
     // rather than resuming nothing successfully
-    if (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
-        io_runtime->rootContinuation->entryFunction->module->isUnusable) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+    எனில் (io_runtime->வேர்_Continuation and io_runtime->வேர்_Continuation->entryFunction and
+        io_runtime->வேர்_Continuation->entryFunction->module->isUnusable) {
+        திரும்பு "a snapshot failed to restore into the module, so it cannot run";
     }
 #endif
-#if d_m3HasStackSwitching
-    if (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
-        return m3Err_none;
+#எனில் d_m3_Has_அடுக்கு_Switching
+    எனில் (!io_runtime->வேர்_Continuation || io_runtime->வேர்_Continuation->state != cont_suspended) {
+        திரும்பு m3Err_none;
     }
     // what finishes returns into the bottom of the stack, where it was entered
-    io_runtime->stack = io_runtime->originStack;
+    io_runtime->அடுக்கு = io_runtime->origin_அடுக்கு;
 
     // this is the outermost call again, as far as a host function calling back
     // into Wasm from inside it can tell
-    io_runtime->entered = io_runtime->rootContinuation->entryFunction;
+    io_runtime->entered = io_runtime->வேர்_Continuation->entryFunction;
     io_runtime->callNesting++;
 
-    d_m3StackLimitEnter(io_runtime);
+    d_m3_அடுக்கு_Limit_Enter(io_runtime);
     io_runtime->resumePastCheck = true;
-    M3Result result             = (M3Result)ResumeContinuation(io_runtime, io_runtime->rootContinuation);
+    M3Result result             = (M3Result)ResumeContinuation(io_runtime, io_runtime->வேர்_Continuation);
     io_runtime->resumePastCheck = false;
-    d_m3StackLimitLeave(io_runtime);
+    d_m3_அடுக்கு_Limit_Leave(io_runtime);
 
-#  if d_m3HasExceptionHandling
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+#  எனில் d_m3HasExceptionHandling
+    எனில் (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(io_runtime, result);
@@ -3128,19 +3128,19 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 
     io_runtime->callNesting--;
 
-#  if d_m3HasExceptionHandling
-    if (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
+#  எனில் d_m3HasExceptionHandling
+    எனில் (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
         FreeExceptions(io_runtime);
     }
 #  endif
 
     // the results are where the paused call left room for them, so a finished
     // resume can be asked for them the way the call itself could have been
-    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->rootContinuation->entryFunction : NULL;
+    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->வேர்_Continuation->entryFunction : வெற்று;
 
-    Runtime_PlaceCallStack(io_runtime);
-    return result;
-#else
-    return m3Err_none;
+    Runtime_Place_Call_அடுக்கு(io_runtime);
+    திரும்பு result;
+#இல்லையெனில்
+    திரும்பு m3Err_none;
 #endif
 }

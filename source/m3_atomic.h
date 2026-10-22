@@ -19,13 +19,13 @@
 #ifndef m3_atomic_h
 #define m3_atomic_h
 
-#include "m3_core.h"
+#அந்தர்பாவ "m3_core.h"
 
-#if d_m3HasAtomics
+#எனில் d_m3HasAtomics
 
 d_m3BeginExternC
 
-enum {
+எண்ணிக்கை {
     c_atomicAdd,
     c_atomicSub,
     c_atomicAnd,
@@ -35,18 +35,18 @@ enum {
 };
 
 #  define d_m3AtomicTyped(T)                                            \
-    static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
+    நிலையான உள்வரி T m3_AtomicLoad_##T (மாறிலி u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T மதிப்பு;                                                        \
+        memcpy (& மதிப்பு, i_cell, அளவு (மதிப்பு));                       \
+        M3_BSWAP_##T (மதிப்பு);                                           \
+        திரும்பு மதிப்பு;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    நிலையான உள்வரி வெறுமை m3_AtomicStore_##T (u8* o_cell, T i_மதிப்பு)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_மதிப்பு);                                         \
+        memcpy (o_cell, & i_மதிப்பு, அளவு (i_மதிப்பு));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -54,57 +54,57 @@ d_m3AtomicTyped(u16);
 d_m3AtomicTyped(u32);
 d_m3AtomicTyped(u64);
 
-static inline
-u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
+நிலையான உள்வரி
+u64 m3_AtomicLoadW (மாறிலி u8* i_cell, u32 i_log2Width)
 {
-    switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    தேர்வு (i_log2Width) {
+    நிலை 0: திரும்பு m3_AtomicLoad_u8(i_cell);
+    நிலை 1: திரும்பு m3_AtomicLoad_u16(i_cell);
+    நிலை 2: திரும்பு m3_AtomicLoad_u32(i_cell);
+    இயல்பு: திரும்பு m3_AtomicLoad_u64(i_cell);
     }
 }
 
-static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+நிலையான உள்வரி
+வெறுமை m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_மதிப்பு)
 {
-    switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    தேர்வு (i_log2Width) {
+    நிலை 0: m3_AtomicStore_u8(o_cell, (u8)i_மதிப்பு); நிறுத்து;
+    நிலை 1: m3_AtomicStore_u16(o_cell, (u16)i_மதிப்பு); நிறுத்து;
+    நிலை 2: m3_AtomicStore_u32(o_cell, (u32)i_மதிப்பு); நிறுத்து;
+    இயல்பு: m3_AtomicStore_u64(o_cell, i_மதிப்பு); நிறுத்து;
     }
 }
 
-static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+நிலையான உள்வரி
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_மதிப்பு)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 updated;
 
-    switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    தேர்வு (i_kind) {
+    நிலை c_atomicAdd: updated = old + i_மதிப்பு; நிறுத்து;
+    நிலை c_atomicSub: updated = old - i_மதிப்பு; நிறுத்து;
+    நிலை c_atomicAnd: updated = old & i_மதிப்பு; நிறுத்து;
+    நிலை c_atomicOr: updated = old | i_மதிப்பு; நிறுத்து;
+    நிலை c_atomicXor: updated = old ^ i_மதிப்பு; நிறுத்து;
+    இயல்பு: updated = i_மதிப்பு; நிறுத்து;
     }
 
     m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    திரும்பு old;
 }
 
-static inline
+நிலையான உள்வரி
 u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_replacement)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
 
-    if (old == (i_expected & mask)) {
+    எனில் (old == (i_expected & mask)) {
         m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
     }
-    return old;
+    திரும்பு old;
 }
 
 d_m3EndExternC
