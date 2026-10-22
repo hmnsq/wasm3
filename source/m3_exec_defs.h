@@ -29,13 +29,13 @@ d_m3BeginExternC
 #define d_m3ExpOpDefaultArgs(...)   d_m3BaseOpDefaultArgs, __VA_ARGS__
 #define d_m3ExpClearRegisters(...)  d_m3BaseClearRegisters; __VA_ARGS__
 
-#if d_m3HasFloat
+#အကယ်၍ d_m3HasFloat
 #  define d_m3OpSig                 d_m3ExpOpSig            (f64 _fp0)
 #  define d_m3OpArgs                d_m3ExpOpArgs           (_fp0)
 #  define d_m3OpAllArgs             d_m3ExpOpAllArgs        (_fp0)
 #  define d_m3OpDefaultArgs         d_m3ExpOpDefaultArgs    (0.)
 #  define d_m3ClearRegisters        d_m3ExpClearRegisters   (_fp0 = 0.;)
-#else
+#မဟုတ်ပါက
 #  define d_m3OpSig                 d_m3BaseOpSig
 #  define d_m3OpArgs                d_m3BaseOpArgs
 #  define d_m3OpAllArgs             d_m3BaseOpAllArgs
@@ -44,14 +44,14 @@ d_m3BeginExternC
 #endif
 
 
-#define d_m3RetSig                  static inline m3ret_t vectorcall
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#define d_m3RetSig                  static anta_hstha m3ret_t vectorcall
+#အကယ်၍ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
 typedef m3ret_t(vectorcall* IM3Operation)(d_m3OpSig, cstr_t i_operationName);
 #  define d_m3Op(NAME)              M3_NO_UBSAN d_m3RetSig op_##NAME (d_m3OpSig, cstr_t i_operationName)
 
 #  define nextOpImpl()              ((IM3Operation)(* _pc))(_pc + 1, d_m3OpArgs, __FUNCTION__)
 #  define jumpOpImpl(PC)            ((IM3Operation)(*  PC))( PC + 1, d_m3OpArgs, __FUNCTION__)
-#else
+#မဟုတ်ပါက
 typedef m3ret_t(vectorcall* IM3Operation)(d_m3OpSig);
 #  define d_m3Op(NAME)              M3_NO_UBSAN d_m3RetSig op_##NAME (d_m3OpSig)
 
@@ -59,12 +59,12 @@ typedef m3ret_t(vectorcall* IM3Operation)(d_m3OpSig);
 #  define jumpOpImpl(PC)            ((IM3Operation)(*  PC))( PC + 1, d_m3OpArgs)
 #endif
 
-#define nextOpDirect()              M3_MUSTTAIL return nextOpImpl()
-#define jumpOpDirect(PC)            M3_MUSTTAIL return jumpOpImpl((pc_t)(PC))
+#define nextOpDirect()              M3_MUSTTAIL ပြန်ပေး nextOpImpl()
+#define jumpOpDirect(PC)            M3_MUSTTAIL ပြန်ပေး jumpOpImpl((pc_t)(PC))
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#အကယ်၍ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
 d_m3RetSig RunCode (d_m3OpSig, cstr_t i_operationName)
-#else
+#မဟုတ်ပါက
 d_m3RetSig RunCode (d_m3OpSig)
 #endif
 {
