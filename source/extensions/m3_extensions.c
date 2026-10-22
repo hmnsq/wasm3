@@ -5,100 +5,100 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#include "wasm3_ext.h"
+#ಅನ್ತರ್ಭಾವ "wasm3_ext.h"
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_exception.h"
+#ಅನ್ತರ್ಭಾವ "m3_env.h"
+#ಅನ್ತರ್ಭಾವ "m3_bind.h"
+#ಅನ್ತರ್ಭಾವ "m3_exception.h"
 
 
 IM3Module m3_NewModule (IM3Environment i_environment)
 {
     IM3Module module = m3_AllocStruct(M3Module);
 
-    if (module) {
+    ಆದರೆ (module) {
         module->name          = ".unnamed";
-        module->startFunction = -1;
+        module->ಆರಂಭ_Function = -1;
         module->environment   = i_environment;
 
-        module->wasmStart = NULL;
-        module->wasmEnd   = NULL;
+        module->wasm_ಆರಂಭ = ಖಾಲಿ;
+        module->wasm_ಕೊನೆ   = ಖಾಲಿ;
     }
 
-    return module;
+    ಹಿಂತಿರುಗಿ module;
 }
 
 
-M3Result m3_InjectFunction (IM3Module            i_module,
-                            int32_t*             io_functionIndex,
-                            const char* const    i_signature,
-                            const uint8_t* const i_wasmBytes,
+M3_ಫಲಿತಾಂಶ m3_InjectFunction (IM3Module            i_module,
+                            int32_t*             io_function_ಸೂಚ್ಯಂಕ,
+                            ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* ಸ್ಥಿರಾಂಕ    i_signature,
+                            ಸ್ಥಿರಾಂಕ uint8_t* ಸ್ಥಿರಾಂಕ i_wasm_ಬೈಟುಗಳು,
                             bool                 i_doCompilation)
 {
-    M3Result result = m3Err_none;                                       d_m3Assert (io_functionIndex);
+    M3_ಫಲಿತಾಂಶ ಫಲಿತಾಂಶ = m3Err_none;                                       d_m3Assert (io_function_ಸೂಚ್ಯಂಕ);
 
-    IM3Function function = NULL;
-    IM3FuncType ftype    = NULL;
+    IM3Function function = ಖಾಲಿ;
+    IM3FuncType ftype    = ಖಾಲಿ;
 
     // Declared before the first throw below, which jumps past this point to
     // _catch and so must not skip an initialization.
     i32     index;
-    bytes_t bytes = i_wasmBytes;
-    bytes_t end   = i_wasmBytes + 5;
-    size_t  numBytes;
-    u32     size;
+    ಬೈಟುಗಳು_t ಬೈಟುಗಳು = i_wasm_ಬೈಟುಗಳು;
+    ಬೈಟುಗಳು_t ಕೊನೆ   = i_wasm_ಬೈಟುಗಳು + 5;
+    size_t  ಅಂಕೆ_ಬೈಟುಗಳು;
+    u32     ಗಾತ್ರ_2;
 
-_   (SignatureToFuncType(&ftype, i_signature));
+_   (Signature_ಗಮ್ಯ_Func_Type(&ftype, i_signature));
 
-    index = *io_functionIndex;
+    index = *io_function_ಸೂಚ್ಯಂಕ;
 
-_   (ReadLEB_u32(&size, &bytes, end));
-    end = bytes + size;
+_   (ReadLEB_u32(&ಗಾತ್ರ_2, &ಬೈಟುಗಳು, ಕೊನೆ));
+    ಕೊನೆ = ಬೈಟುಗಳು + ಗಾತ್ರ_2;
 
-    if (index >= 0) {
+    ಆದರೆ (index >= 0) {
         // index is known non-negative here, so the counts compare as unsigned
-        _throwif("function index out of bounds", (u32)index >= i_module->numFunctions);
+        _throwif("function index out of bounds", (u32)index >= i_module->ಅಂಕೆ_Functions);
 
         function = &i_module->functions[index];
 
-        if (not AreFuncTypesEqual(ftype, function->funcType)) {
+        ಆದರೆ (not AreFuncTypesEqual(ftype, function->funcType)) {
             _throw("function type mismatch");
         }
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         // add slot to function type table in the module
-        u32 funcTypeIndex   = i_module->numFuncTypes++;
-        i_module->funcTypes = m3_ReallocArray(IM3FuncType, i_module->funcTypes, i_module->numFuncTypes, funcTypeIndex);
+        u32 func_Type_ಸೂಚ್ಯಂಕ   = i_module->ಅಂಕೆ_Func_Types++;
+        i_module->funcTypes = m3_ReallocArray(IM3FuncType, i_module->funcTypes, i_module->ಅಂಕೆ_Func_Types, func_Type_ಸೂಚ್ಯಂಕ);
         _throwifnull(i_module->funcTypes);
 
         // add functype object to the environment
-        Environment_AddFuncType(i_module->environment, &ftype);
-        i_module->funcTypes[funcTypeIndex] = ftype;
+        Environment_ಕೂಡಿಸು_Func_Type(i_module->environment, &ftype);
+        i_module->funcTypes[func_Type_ಸೂಚ್ಯಂಕ] = ftype;
 
-        ftype = NULL; // prevent freeing below
+        ftype = ಖಾಲಿ; // prevent freeing below
 
-        index = (i32)i_module->numFunctions;
-_       (Module_AddFunction(i_module, funcTypeIndex, NULL));
+        index = (i32)i_module->ಅಂಕೆ_Functions;
+_       (Module_ಕೂಡಿಸು_Function(i_module, func_Type_ಸೂಚ್ಯಂಕ, ಖಾಲಿ));
         function = Module_GetFunction(i_module, index);
 
-        *io_functionIndex = index;
+        *io_function_ಸೂಚ್ಯಂಕ = index;
     }
 
-    function->compiled = NULL;
+    function->compiled = ಖಾಲಿ;
 
-    if (function->ownsWasmCode) {
+    ಆದರೆ (function->owns_Wasm_ಸಂಕೇತ) {
         m3_Free(function->wasm);
     }
 
-    numBytes       = end - i_wasmBytes;
-    function->wasm = m3_CopyMem(i_wasmBytes, numBytes);
+    ಅಂಕೆ_ಬೈಟುಗಳು       = ಕೊನೆ - i_wasm_ಬೈಟುಗಳು;
+    function->wasm = m3_CopyMem(i_wasm_ಬೈಟುಗಳು, ಅಂಕೆ_ಬೈಟುಗಳು);
     _throwifnull(function->wasm);
 
-    function->wasmEnd      = function->wasm + numBytes;
-    function->ownsWasmCode = true;
+    function->wasm_ಕೊನೆ      = function->wasm + ಅಂಕೆ_ಬೈಟುಗಳು;
+    function->owns_Wasm_ಸಂಕೇತ = true;
 
     function->module = i_module;
 
-    if (i_doCompilation and not i_module->runtime) {
+    ಆದರೆ (i_doCompilation and not i_module->runtime) {
         _throw("module must be loaded into runtime to compile function");
     }
 
@@ -107,11 +107,11 @@ _   (CompileFunction(function));
     _catch:
     m3_Free(ftype);
 
-    return result;
+    ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module, uint32_t i_index)
+IM3Function m3_Get_Function_By_ಸೂಚ್ಯಂಕ (IM3Module i_module, uint32_t i_ಸೂಚ್ಯಂಕ)
 {
-    return Module_GetFunction(i_module, i_index);
+    ಹಿಂತಿರುಗಿ Module_GetFunction(i_module, i_ಸೂಚ್ಯಂಕ);
 }

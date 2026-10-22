@@ -5,8 +5,8 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 
 
-#ifndef m3_exec_h
-#define m3_exec_h
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ m3_exec_h
+#ವ್ಯಾಖ್ಯಾನಿಸು m3_exec_h
 
 // All these functions could move over to the .c at some point. normally, I'd say screw it,
 // but it might prove useful to be able to compile m3_exec alone w/ optimizations while the remaining
@@ -22,51 +22,51 @@
 //  and the second operand (the top of the stack) is in a register
 //------------------------------------------------------------------------------------------------------
 
-#ifndef M3_COMPILE_OPCODES
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ M3_COMPILE_OPCODES
 #  error "Opcodes should only be included in one compilation unit"
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#include "m3_math_utils.h"
-#include "m3_compile.h"
-#include "m3_env.h"
-#include "m3_info.h"
-#include "m3_exec_defs.h"
-#include "m3_atomic.h"
-#include "m3_host.h"
+#ಅನ್ತರ್ಭಾವ "m3_math_utils.h"
+#ಅನ್ತರ್ಭಾವ "m3_compile.h"
+#ಅನ್ತರ್ಭಾವ "m3_env.h"
+#ಅನ್ತರ್ಭಾವ "m3_info.h"
+#ಅನ್ತರ್ಭಾವ "m3_exec_defs.h"
+#ಅನ್ತರ್ಭಾವ "m3_atomic.h"
+#ಅನ್ತರ್ಭಾವ "m3_host.h"
 
-#include <limits.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
 
 d_m3BeginExternC
 
-#define rewrite_op(OP)             * ((void **) (_pc-1)) = (void*)(OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು rewrite_op(OP)             * ((ಶೂನ್ಯ **) (_pc-1)) = (ಶೂನ್ಯ*)(OP)
 
-#define immediate(TYPE)            * ((TYPE *) _pc++)
-#define skip_immediate(TYPE)       (_pc++)
+#ವ್ಯಾಖ್ಯಾನಿಸು ತಕ್ಷಣ(TYPE)            * ((TYPE *) _pc++)
+#ವ್ಯಾಖ್ಯಾನಿಸು skip_ತಕ್ಷಣ(TYPE)       (_pc++)
 
-#define slot(TYPE)                 * (TYPE *) (_sp + immediate (i32))
-#define slot_ptr(TYPE)             (TYPE *) (_sp + immediate (i32))
+#ವ್ಯಾಖ್ಯಾನಿಸು ಸ್ಥಾನ(TYPE)                 * (TYPE *) (_sp + ತಕ್ಷಣ (i32))
+#ವ್ಯಾಖ್ಯಾನಿಸು ಸ್ಥಾನ_ptr(TYPE)             (TYPE *) (_sp + ತಕ್ಷಣ (i32))
 
 // Reads one address, index or length operand from a slot, at the width the
 // memory or table it belongs to is addressed by. Either way exactly one slot
 // immediate is consumed; only how much of the slot is read differs.
-#define d_m3WideOperand(IS64)      ((IS64) ? slot (u64) : (u64) slot (u32))
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_Wide_ಕಾರ್ಯಾಂಶ(IS64)      ((IS64) ? ಸ್ಥಾನ (u64) : (u64) ಸ್ಥಾನ (u32))
 
 // Whether a range fits a memory, written so that it holds for operands of any
 // magnitude: the subtraction cannot wrap once the start is known to be within
 // the memory, where start + length could.
-#define d_m3MemRangeOk(START, LENGTH, MEM)  \
-   ((START) <= (MEM)->length and (LENGTH) <= (MEM)->length - (START))
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3MemRangeOk(ಆರಂಭ_2, ಉದ್ದಳತೆ_2, MEM)  \
+   ((ಆರಂಭ_2) <= (MEM)->ಉದ್ದಳತೆ and (ಉದ್ದಳತೆ_2) <= (MEM)->ಉದ್ದಳತೆ - (ಆರಂಭ_2))
 
 
-#if d_m3EnableOpProfiling
+#ಆದರೆ d_m3EnableOpProfiling
 d_m3RetSig profileOp (d_m3OpSig, cstr_t i_operationName);
-#  define nextOp()                 M3_MUSTTAIL return profileOp (d_m3OpAllArgs, __FUNCTION__)
-#elif d_m3EnableOpTracing
+#  define ಮುಂದಿನ_Op()                 M3_MUSTTAIL ಹಿಂತಿರುಗಿ profileOp (d_m3_Op_All_ವಾದಗಳು, __FUNCTION__)
+#ಅಥವಾಆದರೆ d_m3EnableOpTracing
 d_m3RetSig debugOp (d_m3OpSig, cstr_t i_operationName);
-#  define nextOp()                 M3_MUSTTAIL return debugOp (d_m3OpAllArgs, __FUNCTION__)
-#else
-#  define nextOp()                 nextOpDirect()
-#endif
+#  define ಮುಂದಿನ_Op()                 M3_MUSTTAIL ಹಿಂತಿರುಗಿ debugOp (d_m3_Op_All_ವಾದಗಳು, __FUNCTION__)
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define ಮುಂದಿನ_Op()                 ಮುಂದಿನ_Op_ನೇರ()
+#ಆದರೆ_ಅಂತ್ಯ
 
 // Next-operation preloading. The dispatch load and the indirect jump that consumes it
 // sit next to each other, so the jump cannot resolve until the load returns. An
@@ -76,37 +76,37 @@ d_m3RetSig debugOp (d_m3OpSig, cstr_t i_operationName);
 //
 // Preloading is dropped in profiling and tracing builds, where dispatch goes through a
 // hook instead and the loaded pointer would be the wrong thing to call.
-#if d_m3PreloadNextOp && !(d_m3EnableOpProfiling || d_m3EnableOpTracing)
-#  define d_m3PreloadNext()        const IM3Operation _nextOp = (IM3Operation) (* _pc)
-#  define nextOpPreloaded()        M3_MUSTTAIL return _nextOp (_pc + 1, d_m3OpArgs)
-#else
-#  define d_m3PreloadNext()
-#  define nextOpPreloaded()        nextOp()
-#endif
+#ಆದರೆ d_m3_Preload_ಮುಂದಿನ_Op && !(d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#  define d_m3_Preload_ಮುಂದಿನ()        ಸ್ಥಿರಾಂಕ IM3Operation ಮುಂದಿನ_Op_2 = (IM3Operation) (* _pc)
+#  define ಮುಂದಿನ_Op_Preloaded()        M3_MUSTTAIL ಹಿಂತಿರುಗಿ ಮುಂದಿನ_Op_2 (_pc + 1, d_m3_Op_ವಾದಗಳು)
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define d_m3_Preload_ಮುಂದಿನ()
+#  define ಮುಂದಿನ_Op_Preloaded()        ಮುಂದಿನ_Op()
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if d_m3EnableOpProfiling
+#ಆದರೆ d_m3EnableOpProfiling
 d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName);
 // An operation that leaves by a branch never reaches nextOp, so without this it is
 // absent from the profile entirely and its outgoing edges are attributed to whatever
 // ran before it. Has to stay one statement: jumpOp appears in brace-less else arms.
-#  define jumpOp(PC)               M3_MUSTTAIL return profileJumpOp ((pc_t)(PC), d_m3OpArgs, __FUNCTION__)
-#else
-#  define jumpOp(PC)               jumpOpDirect(PC)
-#endif
+#  define jumpOp(PC)               M3_MUSTTAIL ಹಿಂತಿರುಗಿ profileJumpOp ((pc_t)(PC), d_m3_Op_ವಾದಗಳು, __FUNCTION__)
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define jumpOp(PC)               jump_Op_ನೇರ(PC)
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if d_m3RecordBacktraces
-#  define pushBacktraceFrame()            (PushBacktraceFrame (_mem->runtime, _pc - 1))
-#  define fillBacktraceFrame(FUNCTION)    (FillBacktraceFunctionInfo (_mem->runtime, function))
+#ಆದರೆ d_m3_ದಾಖಲೆ_Backtraces
+#  define ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2()            (ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು (_mem->runtime, _pc - 1))
+#  define fill_Backtrace_ಚೌಕಟ್ಟು(FUNCTION)    (FillBacktraceFunctionInfo (_mem->runtime, function))
 
-#  define newTrap(err)                    return (pushBacktraceFrame (), err)
-#  define forwardTrap(err)                return err
-#else
-#  define pushBacktraceFrame()            do {} while (0)
-#  define fillBacktraceFrame(FUNCTION)    do {} while (0)
+#  define newTrap(err)                    ಹಿಂತಿರುಗಿ (ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2 (), err)
+#  define forwardTrap(err)                ಹಿಂತಿರುಗಿ err
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2()            ಮಾಡು {} ಆಗ (0)
+#  define fill_Backtrace_ಚೌಕಟ್ಟು(FUNCTION)    ಮಾಡು {} ಆಗ (0)
 
-#  define newTrap(err)                    return err
-#  define forwardTrap(err)                return err
-#endif
+#  define newTrap(err)                    ಹಿಂತಿರುಗಿ err
+#  define forwardTrap(err)                ಹಿಂತಿರುಗಿ err
+#ಆದರೆ_ಅಂತ್ಯ
 
 // Trap before an operation that claims a native frame of its own would drive
 // the native C stack past runtime->stackLimit. Reads the current stack pointer
@@ -116,34 +116,34 @@ d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName);
 // op_TryTable, whose frames outlive the body they run. Guarding the frame
 // claim rather than the call is what keeps op_ReturnCall bounded: the tail
 // call itself adds nothing, but the frames it leaves standing behind it do.
-#if d_m3MaxNativeStack > 0
-#  define d_m3CheckNativeStack()                                               \
-       do {                                                                    \
-           void * _m3Limit = m3MemRuntime (_mem)->stackLimit;                  \
-           if (M3_UNLIKELY (_m3Limit && m3_NativeStackPtr () < _m3Limit))      \
-               newTrap (m3Err_trapStackOverflow);                              \
-       } while (0)
-#else
-#  define d_m3CheckNativeStack()           do {} while (0)
-#endif
+#ಆದರೆ d_m3_Max_Native_ರಾಶಿ > 0
+#  define d_m3_Check_Native_ರಾಶಿ()                                               \
+       ಮಾಡು {                                                                    \
+           ಶೂನ್ಯ * m3_ಎಲ್ಲೆ = m3MemRuntime (_mem)->ರಾಶಿ_ಎಲ್ಲೆ;                  \
+           ಆದರೆ (M3_UNLIKELY (m3_ಎಲ್ಲೆ && m3_Native_ರಾಶಿ_Ptr () < m3_ಎಲ್ಲೆ))      \
+               newTrap (m3_Err_trap_ರಾಶಿ_ಅತಿಪ್ರವಾಹ);                              \
+       } ಆಗ (0)
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define d_m3_Check_Native_ರಾಶಿ()           ಮಾಡು {} ಆಗ (0)
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#if d_m3HasStackSwitching
+#ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
 
 // Calling into compiled code with an explicit register pair, which the replay
 // needs and the d_m3OpDefaultArgs spelling cannot express.
-#  if d_m3HasFloat
-#    define d_m3ExpRegArgs(R0, FP0)        (R0), (FP0)
-#  else
-#    define d_m3ExpRegArgs(R0, FP0)        (R0)
+#  ಆದರೆ d_m3HasFloat
+#    define d_m3_Exp_Reg_ವಾದಗಳು(R0, FP0)        (R0), (FP0)
+#  ಇಲ್ಲದಿದ್ದರೆ
+#    define d_m3_Exp_Reg_ವಾದಗಳು(R0, FP0)        (R0)
 #  endif
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#  ಆದರೆ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
 #    define d_m3CallWithRegs(PC, SP, MEM, R0, FP0)                             \
-         Call ((PC), (SP), (MEM), d_m3ExpRegArgs (R0, FP0), d_m3BaseCstr)
-#  else
+         Call ((PC), (SP), (MEM), d_m3_Exp_Reg_ವಾದಗಳು (R0, FP0), d_m3_ತಳ_Cstr)
+#  ಇಲ್ಲದಿದ್ದರೆ
 #    define d_m3CallWithRegs(PC, SP, MEM, R0, FP0)                             \
-         Call ((PC), (SP), (MEM), d_m3ExpRegArgs (R0, FP0))
+         Call ((PC), (SP), (MEM), d_m3_Exp_Reg_ವಾದಗಳು (R0, FP0))
 #  endif
 
 // A suspend is on its way up the native stack and this call was holding a
@@ -158,202 +158,202 @@ d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName);
 //
 // Called ahead of pushBacktraceFrame: a suspend is not a trap and has no
 // business writing a backtrace.
-static M3_NOINLINE
-m3ret_t RecordCallFrame (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3Memory i_memory,
+ಸ್ಥಿರ M3_NOINLINE
+m3ret_t ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3_ಸ್ಮರಣೆ i_ಸ್ಮರಣೆ,
                          IM3Function i_function, m3reg_t i_r0
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
                          ,
                          f64 i_fp0
 #  endif
 )
 {
-    M3Frame frame;
+    M3_ಚೌಕಟ್ಟು ಚೌಕಟ್ಟು;
 
-    frame.kind = frame_call;
-    frame.pc = i_pc;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
-    frame.call.function = i_function;
-    frame.call.r0 = i_r0;
-#  if d_m3HasFloat
-    frame.call.fp0 = i_fp0;
+    ಚೌಕಟ್ಟು.ಬಗೆ = ಚೌಕಟ್ಟು_call;
+    ಚೌಕಟ್ಟು.pc = i_pc;
+    ಚೌಕಟ್ಟು.sp = i_sp;
+    ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ = i_ಸ್ಮರಣೆ;
+    ಚೌಕಟ್ಟು.call.function = i_function;
+    ಚೌಕಟ್ಟು.call.r0 = i_r0;
+#  ಆದರೆ d_m3HasFloat
+    ಚೌಕಟ್ಟು.call.fp0 = i_fp0;
 #  endif
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(i_runtime, &ಚೌಕಟ್ಟು);
 }
 
-#  define d_m3RecordCallFrame(MEMORY, FUNCTION)                                \
-       if (M3_UNLIKELY (r == m3Err_continuationSuspended)) {                   \
-           return RecordCallFrame (m3MemRuntime (_mem), _pc, _sp, (MEMORY),    \
-                                   (FUNCTION), d_m3ExpRegArgs (_r0, _fp0));    \
+#  define d_m3_ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು(ಸ್ಮರಣೆ_2, FUNCTION)                                \
+       ಆದರೆ (M3_UNLIKELY (r == m3Err_continuationSuspended)) {                   \
+           ಹಿಂತಿರುಗಿ ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು (m3MemRuntime (_mem), _pc, _sp, (ಸ್ಮರಣೆ_2),    \
+                                   (FUNCTION), d_m3_Exp_Reg_ವಾದಗಳು (_r0, _fp0));    \
        }
 
 
 // op_Loop and op_TryTable hold native frames across their bodies and nest as
 // deeply as the Wasm does, so they keep their frames out of this too.
-static M3_NOINLINE
-m3ret_t RecordLoopFrame (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3Memory i_memory)
+ಸ್ಥಿರ M3_NOINLINE
+m3ret_t ದಾಖಲೆ_Loop_ಚೌಕಟ್ಟು (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3_ಸ್ಮರಣೆ i_ಸ್ಮರಣೆ)
 {
-    M3Frame frame;
+    M3_ಚೌಕಟ್ಟು ಚೌಕಟ್ಟು;
 
-    frame.kind = frame_loop;
-    frame.pc = i_pc;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
+    ಚೌಕಟ್ಟು.ಬಗೆ = ಚೌಕಟ್ಟು_loop;
+    ಚೌಕಟ್ಟು.pc = i_pc;
+    ಚೌಕಟ್ಟು.sp = i_sp;
+    ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ = i_ಸ್ಮರಣೆ;
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(i_runtime, &ಚೌಕಟ್ಟು);
 }
 
 
-#  if d_m3HasExceptionHandling
-static M3_NOINLINE
-m3ret_t RecordTryFrame (IM3Runtime i_runtime, pc_t i_clauses, m3stack_t i_sp, IM3Memory i_memory,
-                        u32 i_numClauses, bool i_handlersLive)
+#  ಆದರೆ d_m3HasExceptionHandling
+ಸ್ಥಿರ M3_NOINLINE
+m3ret_t ದಾಖಲೆ_Try_ಚೌಕಟ್ಟು (IM3Runtime i_runtime, pc_t i_clauses, m3stack_t i_sp, IM3_ಸ್ಮರಣೆ i_ಸ್ಮರಣೆ,
+                        u32 i_ಅಂಕೆ_Clauses, bool i_handlers_ಜೀವಂತ)
 {
-    M3Frame frame;
+    M3_ಚೌಕಟ್ಟು ಚೌಕಟ್ಟು;
 
-    frame.kind = frame_try;
-    frame.pc = i_clauses;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
-    frame.try_.numClauses = i_numClauses;
-    frame.try_.handlersLive = i_handlersLive;
+    ಚೌಕಟ್ಟು.ಬಗೆ = ಚೌಕಟ್ಟು_try;
+    ಚೌಕಟ್ಟು.pc = i_clauses;
+    ಚೌಕಟ್ಟು.sp = i_sp;
+    ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ = i_ಸ್ಮರಣೆ;
+    ಚೌಕಟ್ಟು.try_.ಅಂಕೆ_Clauses = i_ಅಂಕೆ_Clauses;
+    ಚೌಕಟ್ಟು.try_.handlers_ಜೀವಂತ = i_handlers_ಜೀವಂತ;
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(i_runtime, &ಚೌಕಟ್ಟು);
 }
 #  endif
 
 
-#  if d_m3EntryKeepsFrame
-static M3_NOINLINE
-m3ret_t RecordEntryFrame (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3Memory i_memory,
+#  ಆದರೆ d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
+ಸ್ಥಿರ M3_NOINLINE
+m3ret_t ದಾಖಲೆ_ನಮೂದು_ಚೌಕಟ್ಟು (IM3Runtime i_runtime, pc_t i_pc, m3stack_t i_sp, IM3_ಸ್ಮರಣೆ i_ಸ್ಮರಣೆ,
                           IM3Function i_function)
 {
-    M3Frame frame;
+    M3_ಚೌಕಟ್ಟು ಚೌಕಟ್ಟು;
 
-    frame.kind = frame_entry;
-    frame.pc = i_pc;
-    frame.sp = i_sp;
-    frame.memory = i_memory;
-    frame.entry.function = i_function;
+    ಚೌಕಟ್ಟು.ಬಗೆ = ಚೌಕಟ್ಟು_ನಮೂದು;
+    ಚೌಕಟ್ಟು.pc = i_pc;
+    ಚೌಕಟ್ಟು.sp = i_sp;
+    ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ = i_ಸ್ಮರಣೆ;
+    ಚೌಕಟ್ಟು.ನಮೂದು.function = i_function;
 
-    return Continuation_RecordFrame(i_runtime, &frame);
+    ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(i_runtime, &ಚೌಕಟ್ಟು);
 }
 #  endif
-#else
-#  define d_m3RecordCallFrame(MEMORY, FUNCTION)
-#endif
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define d_m3_ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು(ಸ್ಮರಣೆ_2, FUNCTION)
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#if d_m3EnableStrace == 1
+#ಆದರೆ d_m3EnableStrace == 1
 // Flat trace
 #  define d_m3TracePrepare
 #  define d_m3TracePrint(fmt, ...)            fprintf(stderr, fmt "\n", ##__VA_ARGS__)
-#elif d_m3EnableStrace >= 2
+#ಅಥವಾಆದರೆ d_m3EnableStrace >= 2
 // Structured trace
-#  define d_m3TracePrepare                    const IM3Runtime trace_rt = m3MemRuntime(_mem); (void) trace_rt;
-#  define d_m3TracePrint(fmt, ...)            fprintf(stderr, "%*s" fmt "\n", (trace_rt->callDepth)*2, "", ##__VA_ARGS__)
-#else
+#  define d_m3TracePrepare                    ಸ್ಥಿರಾಂಕ IM3Runtime trace_rt = m3MemRuntime(_mem); (ಶೂನ್ಯ) trace_rt;
+#  define d_m3TracePrint(fmt, ...)            fprintf(stderr, "%*s" fmt "\n", (trace_rt->call_ಆಳ)*2, "", ##__VA_ARGS__)
+#ಇಲ್ಲದಿದ್ದರೆ
 #  define d_m3TracePrepare
 #  define d_m3TracePrint(fmt, ...)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if d_m3EnableStrace >= 3
-#  define d_m3TraceLoad(TYPE,offset,val)      d_m3TracePrint("load." #TYPE "  0x%x = %" PRI##TYPE, offset, val)
+#ಆದರೆ d_m3EnableStrace >= 3
+#  define d_m3_Trace_ತುಂಬು(TYPE,offset,val)      d_m3TracePrint("load." #TYPE "  0x%x = %" PRI##TYPE, offset, val)
 #  define d_m3TraceStore(TYPE,offset,val)     d_m3TracePrint("store." #TYPE " 0x%x , %" PRI##TYPE, offset, val)
-#else
-#  define d_m3TraceLoad(TYPE,offset,val)
+#ಇಲ್ಲದಿದ್ದರೆ
+#  define d_m3_Trace_ತುಂಬು(TYPE,offset,val)
 #  define d_m3TraceStore(TYPE,offset,val)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef DEBUG
-  #define d_outOfBounds newTrap (ErrorRuntime (m3Err_trapOutOfBoundsMemoryAccess,   \
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ DEBUG
+  #ವ್ಯಾಖ್ಯಾನಿಸು d_ಹೊರಹೋಗು_ದ_Bounds newTrap (ErrorRuntime (m3_Err_trap_ಹೊರಹೋಗು_ದ_Bounds_ಸ್ಮರಣೆ_Access,   \
                         _mem->runtime, "memory size: %zu; access offset: %zu",      \
-                        _mem->length, operand))
+                        _mem->ಉದ್ದಳತೆ, ಕಾರ್ಯಾಂಶ))
 
-#  define d_outOfBoundsMemOp(OFFSET, SIZE) newTrap (ErrorRuntime (m3Err_trapOutOfBoundsMemoryAccess,   \
+#  define d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಸ್ಥಾನಾಂತರ, ಗಾತ್ರ_3) newTrap (ErrorRuntime (m3_Err_trap_ಹೊರಹೋಗು_ದ_Bounds_ಸ್ಮರಣೆ_Access,   \
                      _mem->runtime, "memory size: %zu; access offset: %zu; size: %u",     \
-                     _mem->length, OFFSET, SIZE))
-#else
-  #define d_outOfBounds newTrap (m3Err_trapOutOfBoundsMemoryAccess)
+                     _mem->ಉದ್ದಳತೆ, ಸ್ಥಾನಾಂತರ, ಗಾತ್ರ_3))
+#ಇಲ್ಲದಿದ್ದರೆ
+  #ವ್ಯಾಖ್ಯಾನಿಸು d_ಹೊರಹೋಗು_ದ_Bounds newTrap (m3_Err_trap_ಹೊರಹೋಗು_ದ_Bounds_ಸ್ಮರಣೆ_Access)
 
-#  define d_outOfBoundsMemOp(OFFSET, SIZE) newTrap (m3Err_trapOutOfBoundsMemoryAccess)
+#  define d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಸ್ಥಾನಾಂತರ, ಗಾತ್ರ_3) newTrap (m3_Err_trap_ಹೊರಹೋಗು_ದ_Bounds_ಸ್ಮರಣೆ_Access)
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#ಆದರೆ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
 d_m3RetSig Call (d_m3OpSig, cstr_t i_operationName)
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 d_m3RetSig Call (d_m3OpSig)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 {
     m3ret_t possible_trap = m3_Yield();
-    if (M3_UNLIKELY(possible_trap)) {
-        return possible_trap;
+    ಆದರೆ (M3_UNLIKELY(possible_trap)) {
+        ಹಿಂತಿರುಗಿ possible_trap;
     }
 
-    nextOpDirect();
+    ಮುಂದಿನ_Op_ನೇರ();
 }
 
-#define d_m3CommutativeOpMacro(RES, REG, TYPE, NAME, OP, ...) \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOpMacro(RES, REG, TYPE, NAME, OP, ...) \
 d_m3Op(TYPE##_##NAME##_rs)                              \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    d_m3PreloadNext ();                                 \
-    OP((RES), operand, ((TYPE) REG), ##__VA_ARGS__);    \
-    nextOpPreloaded ();                                 \
+    TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                         \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    OP((RES), ಕಾರ್ಯಾಂಶ, ((TYPE) REG), ##__VA_ARGS__);    \
+    ಮುಂದಿನ_Op_Preloaded ();                                 \
 }                                                       \
 d_m3Op(TYPE##_##NAME##_ss)                              \
 {                                                       \
-    TYPE operand2 = slot (TYPE);                        \
-    TYPE operand1 = slot (TYPE);                        \
-    d_m3PreloadNext ();                                 \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                        \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                        \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
     OP((RES), operand1, operand2, ##__VA_ARGS__);       \
-    nextOpPreloaded ();                                 \
+    ಮುಂದಿನ_Op_Preloaded ();                                 \
 }
 
-#define d_m3OpMacro(RES, REG, TYPE, NAME, OP, ...)      \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3OpMacro(RES, REG, TYPE, NAME, OP, ...)      \
 d_m3Op(TYPE##_##NAME##_sr)                              \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    d_m3PreloadNext ();                                 \
-    OP((RES), ((TYPE) REG), operand, ##__VA_ARGS__);    \
-    nextOpPreloaded ();                                 \
+    TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                         \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    OP((RES), ((TYPE) REG), ಕಾರ್ಯಾಂಶ, ##__VA_ARGS__);    \
+    ಮುಂದಿನ_Op_Preloaded ();                                 \
 }                                                       \
 d_m3CommutativeOpMacro(RES, REG, TYPE,NAME, OP, ##__VA_ARGS__)
 
 // Accept macros
-#define d_m3CommutativeOpMacro_i(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
-#define d_m3OpMacro_i(TYPE, NAME, MACRO, ...)               d_m3OpMacro             ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
-#define d_m3CommutativeOpMacro_f(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
-#define d_m3OpMacro_f(TYPE, NAME, MACRO, ...)               d_m3OpMacro             (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOpMacro_i(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3OpMacro_i(TYPE, NAME, MACRO, ...)               d_m3OpMacro             ( _r0,  _r0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOpMacro_f(TYPE, NAME, MACRO, ...)    d_m3CommutativeOpMacro  (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3OpMacro_f(TYPE, NAME, MACRO, ...)               d_m3OpMacro             (_fp0, _fp0, TYPE, NAME, MACRO, ##__VA_ARGS__)
 
-#define M3_FUNC(RES, A, B, OP)  (RES) = OP((A), (B))        // Accept functions: res = OP(a,b)
-#define M3_OPER(RES, A, B, OP)  (RES) = ((A) OP (B))        // Accept operators: res = a OP b
+#ವ್ಯಾಖ್ಯಾನಿಸು M3_FUNC(RES, A, B, OP)  (RES) = OP((A), (B))        // Accept functions: res = OP(a,b)
+#ವ್ಯಾಖ್ಯಾನಿಸು M3_OPER(RES, A, B, OP)  (RES) = ((A) OP (B))        // Accept operators: res = a OP b
 
 // The same two, for a float operation whose NaN result the spec leaves to the host:
 // CANON is the canonicalizer for the operation's width (only in effect when d_m3CanonicalNaN is set).
-#define M3_FUNC_A(RES, A, B, OP, CANON)  (RES) = CANON(OP((A), (B)))
-#define M3_OPER_A(RES, A, B, OP, CANON)  (RES) = CANON((A) OP (B))
+#ವ್ಯಾಖ್ಯಾನಿಸು M3_FUNC_A(RES, A, B, OP, CANON)  (RES) = CANON(OP((A), (B)))
+#ವ್ಯಾಖ್ಯಾನಿಸು M3_OPER_A(RES, A, B, OP, CANON)  (RES) = CANON((A) OP (B))
 
-#define d_m3CommutativeOpFunc_i(TYPE, NAME, OP)     d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_FUNC, OP)
-#define d_m3OpFunc_i(TYPE, NAME, OP)                d_m3OpMacro_i               (TYPE, NAME, M3_FUNC, OP)
-#define d_m3CommutativeOpFunc_f(TYPE, NAME, OP)     d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_FUNC, OP)
-#define d_m3OpFunc_f(TYPE, NAME, OP)                d_m3OpMacro_f               (TYPE, NAME, M3_FUNC, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOpFunc_i(TYPE, NAME, OP)     d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_FUNC, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3OpFunc_i(TYPE, NAME, OP)                d_m3OpMacro_i               (TYPE, NAME, M3_FUNC, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOpFunc_f(TYPE, NAME, OP)     d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_FUNC, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3OpFunc_f(TYPE, NAME, OP)                d_m3OpMacro_f               (TYPE, NAME, M3_FUNC, OP)
 
-#define d_m3CommutativeOp_i(TYPE, NAME, OP)         d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_OPER, OP)
-#define d_m3Op_i(TYPE, NAME, OP)                    d_m3OpMacro_i               (TYPE, NAME, M3_OPER, OP)
-#define d_m3CommutativeOp_f(TYPE, NAME, OP)         d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER, OP)
-#define d_m3Op_f(TYPE, NAME, OP)                    d_m3OpMacro_f               (TYPE, NAME, M3_OPER, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOp_i(TYPE, NAME, OP)         d_m3CommutativeOpMacro_i    (TYPE, NAME, M3_OPER, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Op_i(TYPE, NAME, OP)                    d_m3OpMacro_i               (TYPE, NAME, M3_OPER, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeOp_f(TYPE, NAME, OP)         d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Op_f(TYPE, NAME, OP)                    d_m3OpMacro_f               (TYPE, NAME, M3_OPER, OP)
 
 // ...and the arithmetic ones, which name the canonicalizer for their own width
-#define d_m3CommutativeArithOp_f(TYPE, NAME, OP)    d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
-#define d_m3ArithOp_f(TYPE, NAME, OP)               d_m3OpMacro_f               (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
-#define d_m3ArithOpFunc_f(TYPE, NAME, OP)           d_m3OpMacro_f               (TYPE, NAME, M3_FUNC_A, OP, canon_nan_##TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeArithOp_f(TYPE, NAME, OP)    d_m3CommutativeOpMacro_f    (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3ArithOp_f(TYPE, NAME, OP)               d_m3OpMacro_f               (TYPE, NAME, M3_OPER_A, OP, canon_nan_##TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3ArithOpFunc_f(TYPE, NAME, OP)           d_m3OpMacro_f               (TYPE, NAME, M3_FUNC_A, OP, canon_nan_##TYPE)
 
 // compare needs to be distinct for fp 'cause the result must be _r0
-#define d_m3CompareOp_f(TYPE, NAME, OP)             d_m3OpMacro                 (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
-#define d_m3CommutativeCmpOp_f(TYPE, NAME, OP)      d_m3CommutativeOpMacro      (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CompareOp_f(TYPE, NAME, OP)             d_m3OpMacro                 (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3CommutativeCmpOp_f(TYPE, NAME, OP)      d_m3CommutativeOpMacro      (_r0, _fp0, TYPE, NAME, M3_OPER, OP)
 
 
 //-----------------------
@@ -374,35 +374,35 @@ d_m3Op_i(u32, GreaterThan,                 > )     d_m3Op_i(u64, GreaterThan,   
 d_m3Op_i(u32, LessThanOrEqual,             <=)     d_m3Op_i(u64, LessThanOrEqual,             <=)
 d_m3Op_i(u32, GreaterThanOrEqual,          >=)     d_m3Op_i(u64, GreaterThanOrEqual,          >=)
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3CommutativeCmpOp_f(f32, Equal,         ==)     d_m3CommutativeCmpOp_f(f64, Equal,         ==)
 d_m3CommutativeCmpOp_f(f32, NotEqual,      !=)     d_m3CommutativeCmpOp_f(f64, NotEqual,      !=)
 d_m3CompareOp_f(f32, LessThan,             < )     d_m3CompareOp_f(f64, LessThan,             < )
 d_m3CompareOp_f(f32, GreaterThan,          > )     d_m3CompareOp_f(f64, GreaterThan,          > )
 d_m3CompareOp_f(f32, LessThanOrEqual,      <=)     d_m3CompareOp_f(f64, LessThanOrEqual,      <=)
 d_m3CompareOp_f(f32, GreaterThanOrEqual,   >=)     d_m3CompareOp_f(f64, GreaterThanOrEqual,   >=)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#define OP_ADD_32(A,B) (i32)((u32)(A) + (u32)(B))
-#define OP_ADD_64(A,B) (i64)((u64)(A) + (u64)(B))
-#define OP_SUB_32(A,B) (i32)((u32)(A) - (u32)(B))
-#define OP_SUB_64(A,B) (i64)((u64)(A) - (u64)(B))
-#define OP_MUL_32(A,B) (i32)((u32)(A) * (u32)(B))
-#define OP_MUL_64(A,B) (i64)((u64)(A) * (u64)(B))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_ಕೂಡಿಸು_32(A,B) (i32)((u32)(A) + (u32)(B))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_ಕೂಡಿಸು_64(A,B) (i64)((u64)(A) + (u64)(B))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_SUB_32(A,B) (i32)((u32)(A) - (u32)(B))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_SUB_64(A,B) (i64)((u64)(A) - (u64)(B))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_MUL_32(A,B) (i32)((u32)(A) * (u32)(B))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_MUL_64(A,B) (i64)((u64)(A) * (u64)(B))
 
-d_m3CommutativeOpFunc_i (i32, Add,      OP_ADD_32)  d_m3CommutativeOpFunc_i (i64, Add,      OP_ADD_64)
+d_m3CommutativeOpFunc_i (i32, ಕೂಡಿಸು,      OP_ಕೂಡಿಸು_32)  d_m3CommutativeOpFunc_i (i64, ಕೂಡಿಸು,      OP_ಕೂಡಿಸು_64)
 d_m3CommutativeOpFunc_i (i32, Multiply, OP_MUL_32)  d_m3CommutativeOpFunc_i (i64, Multiply, OP_MUL_64)
 
-d_m3OpFunc_i (i32, Subtract,            OP_SUB_32)  d_m3OpFunc_i (i64, Subtract,            OP_SUB_64)
+d_m3OpFunc_i (i32, ಕಳೆ,            OP_SUB_32)  d_m3OpFunc_i (i64, ಕಳೆ,            OP_SUB_64)
 
-#define OP_SHL_32(X,N) ((X) << ((u32)(N) % 32))
-#define OP_SHL_64(X,N) ((X) << ((u64)(N) % 64))
-#define OP_SHR_32(X,N) ((X) >> ((u32)(N) % 32))
-#define OP_SHR_64(X,N) ((X) >> ((u64)(N) % 64))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_SHL_32(X,N) ((X) << ((u32)(N) % 32))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_SHL_64(X,N) ((X) << ((u64)(N) % 64))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_SHR_32(X,N) ((X) >> ((u32)(N) % 32))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_SHR_64(X,N) ((X) >> ((u64)(N) % 64))
 
-d_m3OpFunc_i (u32, ShiftLeft,       OP_SHL_32)      d_m3OpFunc_i (u64, ShiftLeft,       OP_SHL_64)
-d_m3OpFunc_i (i32, ShiftRight,      OP_SHR_32)      d_m3OpFunc_i (i64, ShiftRight,      OP_SHR_64)
-d_m3OpFunc_i (u32, ShiftRight,      OP_SHR_32)      d_m3OpFunc_i (u64, ShiftRight,      OP_SHR_64)
+d_m3OpFunc_i (u32, ಸರಿಸು_ಎಡ,       OP_SHL_32)      d_m3OpFunc_i (u64, ಸರಿಸು_ಎಡ,       OP_SHL_64)
+d_m3OpFunc_i (i32, ಸರಿಸು_ಬಲ,      OP_SHR_32)      d_m3OpFunc_i (i64, ಸರಿಸು_ಬಲ,      OP_SHR_64)
+d_m3OpFunc_i (u32, ಸರಿಸು_ಬಲ,      OP_SHR_32)      d_m3OpFunc_i (u64, ಸರಿಸು_ಬಲ,      OP_SHR_64)
 
 d_m3CommutativeOp_i(u32, And,              &)
 d_m3CommutativeOp_i(u32, Or,               |)
@@ -412,7 +412,7 @@ d_m3CommutativeOp_i(u64, And,              &)
 d_m3CommutativeOp_i(u64, Or,               |)
 d_m3CommutativeOp_i(u64, Xor,              ^)
 
-#if d_m3FoldSetLocal
+#ಆದರೆ d_m3_Fold_ಗಣ_Local
 
 // destination-folded ("_f") variants: same operand shapes as _rs/_sr/_ss, but the result is
 // written to a trailing destination slot instead of _r0 - a producer fused with its local.set.
@@ -427,87 +427,87 @@ d_m3CommutativeOp_i(u64, Xor,              ^)
 #  define d_m3FoldCommutativeOpMacro(REG, TYPE, NAME, OP, ...) \
 d_m3Op(TYPE##_##NAME##_rs_f)                            \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    TYPE * dest = slot_ptr (TYPE);                      \
-    d_m3PreloadNext ();                                 \
-    TYPE result;                                        \
-    OP((result), operand, ((TYPE) REG), ##__VA_ARGS__); \
-    * dest = result;  REG = result;                     \
-    nextOpPreloaded ();                                 \
+    TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                         \
+    TYPE * dest = ಸ್ಥಾನ_ptr (TYPE);                      \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    TYPE ಫಲಿತಾಂಶ;                                        \
+    OP((ಫಲಿತಾಂಶ), ಕಾರ್ಯಾಂಶ, ((TYPE) REG), ##__VA_ARGS__); \
+    * dest = ಫಲಿತಾಂಶ;  REG = ಫಲಿತಾಂಶ;                     \
+    ಮುಂದಿನ_Op_Preloaded ();                                 \
 }                                                       \
 d_m3Op(TYPE##_##NAME##_ss_f)                            \
 {                                                       \
-    TYPE operand2 = slot (TYPE);                        \
-    TYPE operand1 = slot (TYPE);                        \
-    TYPE * dest = slot_ptr (TYPE);                      \
-    d_m3PreloadNext ();                                 \
-    TYPE result;                                        \
-    OP((result), operand1, operand2, ##__VA_ARGS__);    \
-    * dest = result;  REG = result;                     \
-    nextOpPreloaded ();                                 \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                        \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                        \
+    TYPE * dest = ಸ್ಥಾನ_ptr (TYPE);                      \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    TYPE ಫಲಿತಾಂಶ;                                        \
+    OP((ಫಲಿತಾಂಶ), operand1, operand2, ##__VA_ARGS__);    \
+    * dest = ಫಲಿತಾಂಶ;  REG = ಫಲಿತಾಂಶ;                     \
+    ಮುಂದಿನ_Op_Preloaded ();                                 \
 }
 
 #  define d_m3FoldOpMacro(REG, TYPE, NAME, OP, ...)     \
 d_m3Op(TYPE##_##NAME##_sr_f)                            \
 {                                                       \
-    TYPE operand = slot (TYPE);                         \
-    TYPE * dest = slot_ptr (TYPE);                      \
-    d_m3PreloadNext ();                                 \
-    TYPE result;                                        \
-    OP((result), ((TYPE) REG), operand, ##__VA_ARGS__); \
-    * dest = result;  REG = result;                     \
-    nextOpPreloaded ();                                 \
+    TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                         \
+    TYPE * dest = ಸ್ಥಾನ_ptr (TYPE);                      \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    TYPE ಫಲಿತಾಂಶ;                                        \
+    OP((ಫಲಿತಾಂಶ), ((TYPE) REG), ಕಾರ್ಯಾಂಶ, ##__VA_ARGS__); \
+    * dest = ಫಲಿತಾಂಶ;  REG = ಫಲಿತಾಂಶ;                     \
+    ಮುಂದಿನ_Op_Preloaded ();                                 \
 }                                                       \
 d_m3FoldCommutativeOpMacro(REG, TYPE, NAME, OP, ##__VA_ARGS__)
 
 // A commutative operator has no _sr form in its variant table, so the fold set skips
 // the _sr_f handler it could never be patched to.
-#define d_m3FoldOp_i(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
-#define d_m3FoldOp_f(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
-#define d_m3FoldCommutativeOp_i(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
-#define d_m3FoldCommutativeOp_f(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3FoldOp_i(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3FoldOp_f(TYPE, NAME, OP, ...)               d_m3FoldOpMacro             (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3FoldCommutativeOp_i(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  ( _r0, TYPE, NAME, OP, ##__VA_ARGS__)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3FoldCommutativeOp_f(TYPE, NAME, OP, ...)    d_m3FoldCommutativeOpMacro  (_fp0, TYPE, NAME, OP, ##__VA_ARGS__)
 
-d_m3FoldCommutativeOp_i(i32, Add,          M3_FUNC, OP_ADD_32)
-d_m3FoldOp_i           (i32, Subtract,     M3_FUNC, OP_SUB_32)
+d_m3FoldCommutativeOp_i(i32, ಕೂಡಿಸು,          M3_FUNC, OP_ಕೂಡಿಸು_32)
+d_m3FoldOp_i           (i32, ಕಳೆ,     M3_FUNC, OP_SUB_32)
 d_m3FoldCommutativeOp_i(i32, Multiply,     M3_FUNC, OP_MUL_32)
 d_m3FoldCommutativeOp_i(u32, And,          M3_OPER, &)
 d_m3FoldCommutativeOp_i(u32, Or,           M3_OPER, |)
 d_m3FoldCommutativeOp_i(u32, Xor,          M3_OPER, ^)
-d_m3FoldOp_i           (u32, ShiftLeft,    M3_FUNC, OP_SHL_32)
-d_m3FoldOp_i           (i32, ShiftRight,   M3_FUNC, OP_SHR_32)
-d_m3FoldOp_i           (u32, ShiftRight,   M3_FUNC, OP_SHR_32)
+d_m3FoldOp_i           (u32, ಸರಿಸು_ಎಡ,    M3_FUNC, OP_SHL_32)
+d_m3FoldOp_i           (i32, ಸರಿಸು_ಬಲ,   M3_FUNC, OP_SHR_32)
+d_m3FoldOp_i           (u32, ಸರಿಸು_ಬಲ,   M3_FUNC, OP_SHR_32)
 
-d_m3FoldCommutativeOp_i(i64, Add,          M3_FUNC, OP_ADD_64)
-d_m3FoldOp_i           (i64, Subtract,     M3_FUNC, OP_SUB_64)
+d_m3FoldCommutativeOp_i(i64, ಕೂಡಿಸು,          M3_FUNC, OP_ಕೂಡಿಸು_64)
+d_m3FoldOp_i           (i64, ಕಳೆ,     M3_FUNC, OP_SUB_64)
 d_m3FoldCommutativeOp_i(i64, Multiply,     M3_FUNC, OP_MUL_64)
 d_m3FoldCommutativeOp_i(u64, And,          M3_OPER, &)
 d_m3FoldCommutativeOp_i(u64, Or,           M3_OPER, |)
 d_m3FoldCommutativeOp_i(u64, Xor,          M3_OPER, ^)
-d_m3FoldOp_i           (u64, ShiftLeft,    M3_FUNC, OP_SHL_64)
-d_m3FoldOp_i           (i64, ShiftRight,   M3_FUNC, OP_SHR_64)
-d_m3FoldOp_i           (u64, ShiftRight,   M3_FUNC, OP_SHR_64)
+d_m3FoldOp_i           (u64, ಸರಿಸು_ಎಡ,    M3_FUNC, OP_SHL_64)
+d_m3FoldOp_i           (i64, ಸರಿಸು_ಬಲ,   M3_FUNC, OP_SHR_64)
+d_m3FoldOp_i           (u64, ಸರಿಸು_ಬಲ,   M3_FUNC, OP_SHR_64)
 
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
 // Without these a float result round-trips through _fp0 and a separate SetSlot, which
 // on float-heavy code is about one dispatch in five.
-d_m3FoldCommutativeOp_f(f32, Add,          M3_OPER_A, +, canon_nan_f32)
-d_m3FoldOp_f           (f32, Subtract,     M3_OPER_A, -, canon_nan_f32)
+d_m3FoldCommutativeOp_f(f32, ಕೂಡಿಸು,          M3_OPER_A, +, canon_nan_f32)
+d_m3FoldOp_f           (f32, ಕಳೆ,     M3_OPER_A, -, canon_nan_f32)
 d_m3FoldCommutativeOp_f(f32, Multiply,     M3_OPER_A, *, canon_nan_f32)
 d_m3FoldOp_f           (f32, Divide,       M3_OPER_A, /, canon_nan_f32)
-d_m3FoldCommutativeOp_f(f64, Add,          M3_OPER_A, +, canon_nan_f64)
-d_m3FoldOp_f           (f64, Subtract,     M3_OPER_A, -, canon_nan_f64)
+d_m3FoldCommutativeOp_f(f64, ಕೂಡಿಸು,          M3_OPER_A, +, canon_nan_f64)
+d_m3FoldOp_f           (f64, ಕಳೆ,     M3_OPER_A, -, canon_nan_f64)
 d_m3FoldCommutativeOp_f(f64, Multiply,     M3_OPER_A, *, canon_nan_f64)
 d_m3FoldOp_f           (f64, Divide,       M3_OPER_A, /, canon_nan_f64)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#endif // d_m3FoldSetLocal
+#ಆದರೆ_ಅಂತ್ಯ // d_m3FoldSetLocal
 
-#if d_m3HasFloat
-d_m3CommutativeArithOp_f(f32, Add,         +)      d_m3CommutativeArithOp_f(f64, Add,         +)
+#ಆದರೆ d_m3HasFloat
+d_m3CommutativeArithOp_f(f32, ಕೂಡಿಸು,         +)      d_m3CommutativeArithOp_f(f64, ಕೂಡಿಸು,         +)
 d_m3CommutativeArithOp_f(f32, Multiply,    *)      d_m3CommutativeArithOp_f(f64, Multiply,    *)
-d_m3ArithOp_f(f32, Subtract,               -)      d_m3ArithOp_f(f64, Subtract,               -)
+d_m3ArithOp_f(f32, ಕಳೆ,               -)      d_m3ArithOp_f(f64, ಕಳೆ,               -)
 d_m3ArithOp_f(f32, Divide,                 /)      d_m3ArithOp_f(f64, Divide,                 /)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 d_m3OpFunc_i(u32, Rotl, rotl32)
 d_m3OpFunc_i(u32, Rotr, rotr32)
@@ -524,7 +524,7 @@ d_m3OpMacro_i(i32, Remainder, OP_REM_S, INT32_MIN);
 d_m3OpMacro_i(u64, Remainder, OP_REM_U);
 d_m3OpMacro_i(i64, Remainder, OP_REM_S, INT64_MIN);
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3ArithOpFunc_f(f32, Min, min_f32);
 d_m3ArithOpFunc_f(f32, Max, max_f32);
 d_m3ArithOpFunc_f(f64, Min, min_f64);
@@ -533,71 +533,71 @@ d_m3ArithOpFunc_f(f64, Max, max_f64);
 // copysign is defined bitwise and keeps its operand's payload - see canon_nan_f32
 d_m3OpFunc_f(f32, CopySign, copysignf);
 d_m3OpFunc_f(f64, CopySign, copysign);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 // Unary operations
 // Note: This macro follows the principle of d_m3OpMacro
 
-#define d_m3UnaryMacro(RES, REG, TYPE, NAME, OP, ...)   \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3UnaryMacro(RES, REG, TYPE, NAME, OP, ...)   \
 d_m3Op(TYPE##_##NAME##_r)                           \
 {                                                   \
     OP((RES), (TYPE) REG, ##__VA_ARGS__);           \
-    nextOp ();                                      \
+    ಮುಂದಿನ_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_s)                           \
 {                                                   \
-    TYPE operand = slot (TYPE);                     \
-    OP((RES), operand, ##__VA_ARGS__);              \
-    nextOp ();                                      \
+    TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                     \
+    OP((RES), ಕಾರ್ಯಾಂಶ, ##__VA_ARGS__);              \
+    ಮುಂದಿನ_Op ();                                      \
 }
 
-#define M3_UNARY(RES, X, OP) (RES) = OP(X)
-#define M3_UNARY_A(RES, X, OP, CANON) (RES) = CANON(OP(X))
+#ವ್ಯಾಖ್ಯಾನಿಸು M3_UNARY(RES, X, OP) (RES) = OP(X)
+#ವ್ಯಾಖ್ಯಾನಿಸು M3_UNARY_A(RES, X, OP, CANON) (RES) = CANON(OP(X))
 
-#define d_m3UnaryOp_i(TYPE, NAME, OPERATION)        d_m3UnaryMacro( _r0,  _r0, TYPE, NAME, M3_UNARY, OPERATION)
-#define d_m3UnaryOp_f(TYPE, NAME, OPERATION)        d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY, OPERATION)
-#define d_m3UnaryArithOp_f(TYPE, NAME, OPERATION)   d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY_A, OPERATION, canon_nan_##TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3UnaryOp_i(TYPE, NAME, OPERATION)        d_m3UnaryMacro( _r0,  _r0, TYPE, NAME, M3_UNARY, OPERATION)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3UnaryOp_f(TYPE, NAME, OPERATION)        d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY, OPERATION)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3UnaryArithOp_f(TYPE, NAME, OPERATION)   d_m3UnaryMacro(_fp0, _fp0, TYPE, NAME, M3_UNARY_A, OPERATION, canon_nan_##TYPE)
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 // abs and neg are defined bitwise and keep their operand's payload - see canon_nan_f32
 d_m3UnaryOp_f(f32, Abs,             fabsf);    d_m3UnaryOp_f(f64, Abs,             fabs);
 d_m3UnaryArithOp_f(f32, Ceil,       ceilf);    d_m3UnaryArithOp_f(f64, Ceil,       ceil);
 d_m3UnaryArithOp_f(f32, Floor,      floorf);   d_m3UnaryArithOp_f(f64, Floor,      floor);
 d_m3UnaryArithOp_f(f32, Trunc,      truncf);   d_m3UnaryArithOp_f(f64, Trunc,      trunc);
-d_m3UnaryArithOp_f(f32, Sqrt,       sqrtf);    d_m3UnaryArithOp_f(f64, Sqrt,       sqrt);
-d_m3UnaryArithOp_f(f32, Nearest,    rintf);    d_m3UnaryArithOp_f(f64, Nearest,    rint);
-#  if defined(M3_COMPILER_TCC)
+d_m3UnaryArithOp_f(f32, Sqrt,       sqrtf);    d_m3UnaryArithOp_f(f64, Sqrt,       ವರ್ಗಮೂಲ);
+d_m3UnaryArithOp_f(f32, ಹತ್ತಿರದ,    rintf);    d_m3UnaryArithOp_f(f64, ಹತ್ತಿರದ,    rint);
+#  ಆದರೆ defined(M3_COMPILER_TCC)
 d_m3UnaryOp_f(f32, Negate,     m3_negf);       d_m3UnaryOp_f(f64, Negate,     m3_neg);
-#  else
+#  ಇಲ್ಲದಿದ್ದರೆ
 d_m3UnaryOp_f(f32, Negate,     -);             d_m3UnaryOp_f(f64, Negate,     -);
 #  endif
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#define OP_EQZ(x) ((x) == 0)
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_EQZ(x) ((x) == 0)
 
-d_m3UnaryOp_i(i32, EqualToZero, OP_EQZ)
-d_m3UnaryOp_i(i64, EqualToZero, OP_EQZ)
+d_m3UnaryOp_i(i32, Equal_ಗಮ್ಯ_Zero, OP_EQZ)
+d_m3UnaryOp_i(i64, Equal_ಗಮ್ಯ_Zero, OP_EQZ)
 
 // clz(0), ctz(0) results are undefined for rest platforms, fix it
-#if (defined(__i386__) || defined(__x86_64__)) && !(defined(__AVX2__) || (defined(__ABM__) && defined(__BMI__)))
-#define OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
-#define OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
+#ಆದರೆ (defined(__i386__) || defined(__x86_64__)) && !(defined(__AVX2__) || (defined(__ABM__) && defined(__BMI__)))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
 // for 64-bit instructions branchless approach more preferable
-#define OP_CLZ_64(x) (__builtin_clzll((x) | (1ULL <<  0)) + OP_EQZ(x))
-#define OP_CTZ_64(x) (__builtin_ctzll((x) | (1ULL << 63)) + OP_EQZ(x))
-#elif defined(__ppc__) || defined(__ppc64__)
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CLZ_64(x) (__builtin_clzll((x) | (1ULL <<  0)) + OP_EQZ(x))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CTZ_64(x) (__builtin_ctzll((x) | (1ULL << 63)) + OP_EQZ(x))
+#ಅಥವಾಆದರೆ defined(__ppc__) || defined(__ppc64__)
 // PowerPC is defined for __builtin_clz(0) and __builtin_ctz(0).
 // See (https://github.com/aquynh/capstone/blob/master/MathExtras.h#L99)
-#define OP_CLZ_32(x) __builtin_clz(x)
-#define OP_CTZ_32(x) __builtin_ctz(x)
-#define OP_CLZ_64(x) __builtin_clzll(x)
-#define OP_CTZ_64(x) __builtin_ctzll(x)
-#else
-#define OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
-#define OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
-#define OP_CLZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_clzll(x))
-#define OP_CTZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_ctzll(x))
-#endif
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CLZ_32(x) __builtin_clz(x)
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CTZ_32(x) __builtin_ctz(x)
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CLZ_64(x) __builtin_clzll(x)
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CTZ_64(x) __builtin_ctzll(x)
+#ಇಲ್ಲದಿದ್ದರೆ
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CLZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_clz(x))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CTZ_32(x) (M3_UNLIKELY((x) == 0) ? 32 : __builtin_ctz(x))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CLZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_clzll(x))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_CTZ_64(x) (M3_UNLIKELY((x) == 0) ? 64 : __builtin_ctzll(x))
+#ಆದರೆ_ಅಂತ್ಯ
 
 d_m3UnaryOp_i(u32, Clz, OP_CLZ_32)
 d_m3UnaryOp_i(u64, Clz, OP_CLZ_64)
@@ -608,27 +608,27 @@ d_m3UnaryOp_i(u64, Ctz, OP_CTZ_64)
 d_m3UnaryOp_i(u32, Popcnt, __builtin_popcount)
 d_m3UnaryOp_i(u64, Popcnt, __builtin_popcountll)
 
-#define OP_WRAP_I64(X) ((X) & 0x00000000ffffffff)
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_WRAP_I64(X) ((X) & 0x00000000ffffffff)
 
 d_m3Op(i32_Wrap_i64_r)
 {
     _r0 = OP_WRAP_I64((i64)_r0);
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 d_m3Op(i32_Wrap_i64_s)
 {
-    i64 operand = slot(i64);
-    _r0 = OP_WRAP_I64(operand);
-    nextOp();
+    i64 ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ(i64);
+    _r0 = OP_WRAP_I64(ಕಾರ್ಯಾಂಶ);
+    ಮುಂದಿನ_Op();
 }
 
 // Integer sign extension operations
-#define OP_EXTEND8_S_I32(X)  ((int32_t)(int8_t)(X))
-#define OP_EXTEND16_S_I32(X) ((int32_t)(int16_t)(X))
-#define OP_EXTEND8_S_I64(X)  ((int64_t)(int8_t)(X))
-#define OP_EXTEND16_S_I64(X) ((int64_t)(int16_t)(X))
-#define OP_EXTEND32_S_I64(X) ((int64_t)(int32_t)(X))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_EXTEND8_S_I32(X)  ((int32_t)(int8_t)(X))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_EXTEND16_S_I32(X) ((int32_t)(int16_t)(X))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_EXTEND8_S_I64(X)  ((int64_t)(int8_t)(X))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_EXTEND16_S_I64(X) ((int64_t)(int16_t)(X))
+#ವ್ಯಾಖ್ಯಾನಿಸು OP_EXTEND32_S_I64(X) ((int64_t)(int32_t)(X))
 
 d_m3UnaryOp_i(i32, Extend8_s,  OP_EXTEND8_S_I32)
 d_m3UnaryOp_i(i32, Extend16_s, OP_EXTEND16_S_I32)
@@ -636,7 +636,7 @@ d_m3UnaryOp_i(i64, Extend8_s,  OP_EXTEND8_S_I64)
 d_m3UnaryOp_i(i64, Extend16_s, OP_EXTEND16_S_I64)
 d_m3UnaryOp_i(i64, Extend32_s, OP_EXTEND32_S_I64)
 
-#if d_m3HasWideArithmetic
+#ಆದರೆ d_m3HasWideArithmetic
 
 // Wide arithmetic. Every operand is in a slot, the top of the stack first, and
 // the last immediate is the slot the low half of the result goes to; the high
@@ -644,93 +644,93 @@ d_m3UnaryOp_i(i64, Extend32_s, OP_EXTEND32_S_I64)
 // only written once all of them are.
 d_m3Op(i64_Add128)
 {
-    u64  rhsHigh = slot (u64);
-    u64  rhsLow  = slot (u64);
-    u64  lhsHigh = slot (u64);
-    u64  lhsLow  = slot (u64);
-    u64* low     = slot_ptr (u64);
-    d_m3PreloadNext();
+    u64  rhs_ಮೇಲಿನ = ಸ್ಥಾನ (u64);
+    u64  rhs_ಕೆಳಗಿನ  = ಸ್ಥಾನ (u64);
+    u64  lhs_ಮೇಲಿನ = ಸ್ಥಾನ (u64);
+    u64  lhs_ಕೆಳಗಿನ  = ಸ್ಥಾನ (u64);
+    u64* ಕೆಳಗಿನ     = ಸ್ಥಾನ_ptr (u64);
+    d_m3_Preload_ಮುಂದಿನ();
 
-    u64 sum = lhsLow + rhsLow;
+    u64 ಮೊತ್ತ = lhs_ಕೆಳಗಿನ + rhs_ಕೆಳಗಿನ;
 
-    *low = sum;
-    _r0  = (i64) (lhsHigh + rhsHigh + (sum < lhsLow));
+    *ಕೆಳಗಿನ = ಮೊತ್ತ;
+    _r0  = (i64) (lhs_ಮೇಲಿನ + rhs_ಮೇಲಿನ + (ಮೊತ್ತ < lhs_ಕೆಳಗಿನ));
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 d_m3Op(i64_Sub128)
 {
-    u64  rhsHigh = slot (u64);
-    u64  rhsLow  = slot (u64);
-    u64  lhsHigh = slot (u64);
-    u64  lhsLow  = slot (u64);
-    u64* low     = slot_ptr (u64);
-    d_m3PreloadNext();
+    u64  rhs_ಮೇಲಿನ = ಸ್ಥಾನ (u64);
+    u64  rhs_ಕೆಳಗಿನ  = ಸ್ಥಾನ (u64);
+    u64  lhs_ಮೇಲಿನ = ಸ್ಥಾನ (u64);
+    u64  lhs_ಕೆಳಗಿನ  = ಸ್ಥಾನ (u64);
+    u64* ಕೆಳಗಿನ     = ಸ್ಥಾನ_ptr (u64);
+    d_m3_Preload_ಮುಂದಿನ();
 
-    *low = lhsLow - rhsLow;
-    _r0  = (i64) (lhsHigh - rhsHigh - (lhsLow < rhsLow));
+    *ಕೆಳಗಿನ = lhs_ಕೆಳಗಿನ - rhs_ಕೆಳಗಿನ;
+    _r0  = (i64) (lhs_ಮೇಲಿನ - rhs_ಮೇಲಿನ - (lhs_ಕೆಳಗಿನ < rhs_ಕೆಳಗಿನ));
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 d_m3Op(i64_MultiplyWide)
 {
-    i64  b   = slot (i64);
-    i64  a   = slot (i64);
-    u64* low = slot_ptr (u64);
-    d_m3PreloadNext();
+    i64  b   = ಸ್ಥಾನ (i64);
+    i64  a   = ಸ್ಥಾನ (i64);
+    u64* ಕೆಳಗಿನ = ಸ್ಥಾನ_ptr (u64);
+    d_m3_Preload_ಮುಂದಿನ();
 
-    u64 high;
-    *low = mul_wide_i64 (a, b, &high);
-    _r0  = (i64) high;
+    u64 ಮೇಲಿನ;
+    *ಕೆಳಗಿನ = mul_wide_i64 (a, b, &ಮೇಲಿನ);
+    _r0  = (i64) ಮೇಲಿನ;
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 d_m3Op(u64_MultiplyWide)
 {
-    u64  b   = slot (u64);
-    u64  a   = slot (u64);
-    u64* low = slot_ptr (u64);
-    d_m3PreloadNext();
+    u64  b   = ಸ್ಥಾನ (u64);
+    u64  a   = ಸ್ಥಾನ (u64);
+    u64* ಕೆಳಗಿನ = ಸ್ಥಾನ_ptr (u64);
+    d_m3_Preload_ಮುಂದಿನ();
 
-    u64 high;
-    *low = mul_wide_u64 (a, b, &high);
-    _r0  = (i64) high;
+    u64 ಮೇಲಿನ;
+    *ಕೆಳಗಿನ = mul_wide_u64 (a, b, &ಮೇಲಿನ);
+    _r0  = (i64) ಮೇಲಿನ;
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
-#endif // d_m3HasWideArithmetic
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasWideArithmetic
 
-#define d_m3TruncMacro(DEST, SRC, TYPE, NAME, FROM, OP, ...)   \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3TruncMacro(DEST, SRC, TYPE, NAME, FROM, OP, ...)   \
 d_m3Op(TYPE##_##NAME##_##FROM##_r_r)                \
 {                                                   \
     OP((DEST), (FROM) SRC, ##__VA_ARGS__);          \
-    nextOp ();                                      \
+    ಮುಂದಿನ_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_##FROM##_r_s)                \
 {                                                   \
-    FROM * stack = slot_ptr (FROM);                 \
-    OP((DEST), (* stack), ##__VA_ARGS__);           \
-    nextOp ();                                      \
+    FROM * ರಾಶಿ = ಸ್ಥಾನ_ptr (FROM);                 \
+    OP((DEST), (* ರಾಶಿ), ##__VA_ARGS__);           \
+    ಮುಂದಿನ_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_##FROM##_s_r)                \
 {                                                   \
-    TYPE * dest = slot_ptr (TYPE);                  \
+    TYPE * dest = ಸ್ಥಾನ_ptr (TYPE);                  \
     OP((* dest), (FROM) SRC, ##__VA_ARGS__);        \
-    nextOp ();                                      \
+    ಮುಂದಿನ_Op ();                                      \
 }                                                   \
 d_m3Op(TYPE##_##NAME##_##FROM##_s_s)                \
 {                                                   \
-    FROM * stack = slot_ptr (FROM);                 \
-    TYPE * dest = slot_ptr (TYPE);                  \
-    OP((* dest), (* stack), ##__VA_ARGS__);         \
-    nextOp ();                                      \
+    FROM * ರಾಶಿ = ಸ್ಥಾನ_ptr (FROM);                 \
+    TYPE * dest = ಸ್ಥಾನ_ptr (TYPE);                  \
+    OP((* dest), (* ರಾಶಿ), ##__VA_ARGS__);         \
+    ಮುಂದಿನ_Op ();                                      \
 }
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3TruncMacro(_r0, _fp0, i32, Trunc, f32, OP_I32_TRUNC_F32)
 d_m3TruncMacro(_r0, _fp0, u32, Trunc, f32, OP_U32_TRUNC_F32)
 d_m3TruncMacro(_r0, _fp0, i32, Trunc, f64, OP_I32_TRUNC_F64)
@@ -750,20 +750,20 @@ d_m3TruncMacro(_r0, _fp0, i64, TruncSat, f32, OP_I64_TRUNC_SAT_F32)
 d_m3TruncMacro(_r0, _fp0, u64, TruncSat, f32, OP_U64_TRUNC_SAT_F32)
 d_m3TruncMacro(_r0, _fp0, i64, TruncSat, f64, OP_I64_TRUNC_SAT_F64)
 d_m3TruncMacro(_r0, _fp0, u64, TruncSat, f64, OP_U64_TRUNC_SAT_F64)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#define d_m3TypeModifyOp(REG_TO, REG_FROM, TO, NAME, FROM)  \
-d_m3Op(TO##_##NAME##_##FROM##_r)                            \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3TypeModifyOp(REG_ಗಮ್ಯ, REG_FROM, ಗಮ್ಯ_2, NAME, FROM)  \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_r)                            \
 {                                                           \
-    REG_TO = (TO) ((FROM) REG_FROM);                        \
-    nextOp ();                                              \
+    REG_ಗಮ್ಯ = (ಗಮ್ಯ_2) ((FROM) REG_FROM);                        \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s)                            \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_s)                            \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    REG_TO = (TO) (from);                                   \
-    nextOp ();                                              \
+    FROM from = ಸ್ಥಾನ (FROM);                                \
+    REG_ಗಮ್ಯ = (ಗಮ್ಯ_2) (from);                                   \
+    ಮುಂದಿನ_Op ();                                              \
 }
 
 // Int to int
@@ -772,54 +772,54 @@ d_m3TypeModifyOp(_r0, _r0, i64, Extend, u32);
 
 // Float to float. Narrowing or widening a NaN produces an arithmetic one, so these
 // two go through the canonicalizer where the int conversions have nothing to do.
-#define d_m3FloatModifyOp(TO, NAME, FROM)                   \
-d_m3Op(TO##_##NAME##_##FROM##_r)                            \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3FloatModifyOp(ಗಮ್ಯ_2, NAME, FROM)                   \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_r)                            \
 {                                                           \
-    _fp0 = canon_nan_##TO ((TO) ((FROM) _fp0));             \
-    nextOp ();                                              \
+    _fp0 = canon_nan_##TO ((ಗಮ್ಯ_2) ((FROM) _fp0));             \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s)                            \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_s)                            \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    _fp0 = canon_nan_##TO ((TO) (from));                    \
-    nextOp ();                                              \
+    FROM from = ಸ್ಥಾನ (FROM);                                \
+    _fp0 = canon_nan_##TO ((ಗಮ್ಯ_2) (from));                    \
+    ಮುಂದಿನ_Op ();                                              \
 }
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3FloatModifyOp(f32, Demote, f64);
 d_m3FloatModifyOp(f64, Promote, f32);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#define d_m3TypeConvertOp(REG_TO, REG_FROM, TO, NAME, FROM) \
-d_m3Op(TO##_##NAME##_##FROM##_r_r)                          \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3TypeConvertOp(REG_ಗಮ್ಯ, REG_FROM, ಗಮ್ಯ_2, NAME, FROM) \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_r_r)                          \
 {                                                           \
-    REG_TO = (TO) ((FROM) REG_FROM);                        \
-    nextOp ();                                              \
+    REG_ಗಮ್ಯ = (ಗಮ್ಯ_2) ((FROM) REG_FROM);                        \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s_r)                          \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_s_r)                          \
 {                                                           \
-    slot (TO) = (TO) ((FROM) REG_FROM);                     \
-    nextOp ();                                              \
+    ಸ್ಥಾನ (ಗಮ್ಯ_2) = (ಗಮ್ಯ_2) ((FROM) REG_FROM);                     \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_r_s)                          \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_r_s)                          \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    REG_TO = (TO) (from);                                   \
-    nextOp ();                                              \
+    FROM from = ಸ್ಥಾನ (FROM);                                \
+    REG_ಗಮ್ಯ = (ಗಮ್ಯ_2) (from);                                   \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_##NAME##_##FROM##_s_s)                          \
+d_m3Op(ಗಮ್ಯ_2##_##NAME##_##FROM##_s_s)                          \
 {                                                           \
-    FROM from = slot (FROM);                                \
-    slot (TO) = (TO) (from);                                \
-    nextOp ();                                              \
+    FROM from = ಸ್ಥಾನ (FROM);                                \
+    ಸ್ಥಾನ (ಗಮ್ಯ_2) = (ಗಮ್ಯ_2) (from);                                \
+    ಮುಂದಿನ_Op ();                                              \
 }
 
 // Int to float
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3TypeConvertOp(_fp0, _r0, f64, Convert, i32);
 d_m3TypeConvertOp(_fp0, _r0, f64, Convert, u32);
 d_m3TypeConvertOp(_fp0, _r0, f64, Convert, i64);
@@ -829,143 +829,143 @@ d_m3TypeConvertOp(_fp0, _r0, f32, Convert, i32);
 d_m3TypeConvertOp(_fp0, _r0, f32, Convert, u32);
 d_m3TypeConvertOp(_fp0, _r0, f32, Convert, i64);
 d_m3TypeConvertOp(_fp0, _r0, f32, Convert, u64);
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#define d_m3ReinterpretOp(REG, TO, SRC, FROM)               \
-d_m3Op(TO##_Reinterpret_##FROM##_r_r)                       \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3ReinterpretOp(REG, ಗಮ್ಯ_2, SRC, FROM)               \
+d_m3Op(ಗಮ್ಯ_2##_Reinterpret_##FROM##_r_r)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
+    ಒಕ್ಕೂಟ { FROM c; ಗಮ್ಯ_2 t; } u;                              \
     u.c = (FROM) SRC;                                       \
     REG = u.t;                                              \
-    nextOp ();                                              \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_Reinterpret_##FROM##_r_s)                       \
+d_m3Op(ಗಮ್ಯ_2##_Reinterpret_##FROM##_r_s)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
-    u.c = slot (FROM);                                      \
+    ಒಕ್ಕೂಟ { FROM c; ಗಮ್ಯ_2 t; } u;                              \
+    u.c = ಸ್ಥಾನ (FROM);                                      \
     REG = u.t;                                              \
-    nextOp ();                                              \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_Reinterpret_##FROM##_s_r)                       \
+d_m3Op(ಗಮ್ಯ_2##_Reinterpret_##FROM##_s_r)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
+    ಒಕ್ಕೂಟ { FROM c; ಗಮ್ಯ_2 t; } u;                              \
     u.c = (FROM) SRC;                                       \
-    slot (TO) = u.t;                                        \
-    nextOp ();                                              \
+    ಸ್ಥಾನ (ಗಮ್ಯ_2) = u.t;                                        \
+    ಮುಂದಿನ_Op ();                                              \
 }                                                           \
                                                             \
-d_m3Op(TO##_Reinterpret_##FROM##_s_s)                       \
+d_m3Op(ಗಮ್ಯ_2##_Reinterpret_##FROM##_s_s)                       \
 {                                                           \
-    union { FROM c; TO t; } u;                              \
-    u.c = slot (FROM);                                      \
-    slot (TO) = u.t;                                        \
-    nextOp ();                                              \
+    ಒಕ್ಕೂಟ { FROM c; ಗಮ್ಯ_2 t; } u;                              \
+    u.c = ಸ್ಥಾನ (FROM);                                      \
+    ಸ್ಥಾನ (ಗಮ್ಯ_2) = u.t;                                        \
+    ಮುಂದಿನ_Op ();                                              \
 }
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3ReinterpretOp(_r0, i32, _fp0, f32)
 d_m3ReinterpretOp(_r0, i64, _fp0, f64)
 d_m3ReinterpretOp(_fp0, f32, _r0, i32)
 d_m3ReinterpretOp(_fp0, f64, _r0, i64)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 // clang-format on
 
 d_m3Op(GetGlobal_s32)
 {
-    u32* global = immediate(u32*);
-    slot(u32) = *global;                        //  printf ("get global: %p %" PRIi64 "\n", global, *global);
+    u32* global = ತಕ್ಷಣ(u32*);
+    ಸ್ಥಾನ(u32) = *global;                        //  printf ("get global: %p %" PRIi64 "\n", global, *global);
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
 d_m3Op(GetGlobal_s64)
 {
-    u64* global = immediate(u64*);
-    slot(u64) = *global;                        // printf ("get global: %p %" PRIi64 "\n", global, *global);
+    u64* global = ತಕ್ಷಣ(u64*);
+    ಸ್ಥಾನ(u64) = *global;                        // printf ("get global: %p %" PRIi64 "\n", global, *global);
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(SetGlobal_i32)
+d_m3Op(ಗಣ_Global_i32)
 {
-    u32* global = immediate(u32*);
+    u32* global = ತಕ್ಷಣ(u32*);
     *global = (u32)_r0;                         //  printf ("set global: %p %" PRIi64 "\n", global, _r0);
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(SetGlobal_i64)
+d_m3Op(ಗಣ_Global_i64)
 {
-    u64* global = immediate(u64*);
+    u64* global = ತಕ್ಷಣ(u64*);
     *global = (u64)_r0;                         //  printf ("set global: %p %" PRIi64 "\n", global, _r0);
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-#if d_m3HasStackSwitching
+#ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
 
 d_m3Op(Branch);
-d_m3Op(Entry);
-#  if !d_m3EntryKeepsFrame
-d_m3Op(Entry_Suspendable);
+d_m3Op(ನಮೂದು_2);
+#  ಆದರೆ !d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
+d_m3Op(ನಮೂದು_Suspendable);
 #  endif
 
 // The function a body of compiled code belongs to. op_Call is handed the code
 // rather than the function, but every body opens with op_Entry and the function
 // it enters - past a bridge, where the page ran out before the first op.
-static M3_NOINLINE
-IM3Function FunctionOfCompiledCode (pc_t i_pc)
+ಸ್ಥಿರ M3_NOINLINE
+IM3Function Function_ದ_Compiled_ಸಂಕೇತ (pc_t i_pc)
 {
-    if (not i_pc) {
-        return NULL;
+    ಆದರೆ (not i_pc) {
+        ಹಿಂತಿರುಗಿ ಖಾಲಿ;
     }
 
-    while ((IM3Operation)i_pc[0] == op_Branch) {
+    ಆಗ ((IM3Operation)i_pc[0] == op_Branch) {
         i_pc = (pc_t)i_pc[1];
     }
 
-    IM3Operation entry = (IM3Operation)i_pc[0];
+    IM3Operation ನಮೂದು = (IM3Operation)i_pc[0];
 
-#  if !d_m3EntryKeepsFrame
-    if (entry == op_Entry_Suspendable) {
-        return (IM3Function)i_pc[1];
+#  ಆದರೆ !d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
+    ಆದರೆ (ನಮೂದು == op_ನಮೂದು_Suspendable) {
+        ಹಿಂತಿರುಗಿ (IM3Function)i_pc[1];
     }
 #  endif
-    return (entry == op_Entry) ? (IM3Function)i_pc[1] : NULL;
+    ಹಿಂತಿರುಗಿ (ನಮೂದು == op_ನಮೂದು) ? (IM3Function)i_pc[1] : ಖಾಲಿ;
 }
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 d_m3Op(Call)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_ರಾಶಿ();
 
-    pc_t      callPC = immediate(pc_t);
-    i32       stackOffset = immediate(i32);
-    IM3Memory memory = m3MemInfo(_mem);
+    pc_t      callPC = ತಕ್ಷಣ(pc_t);
+    i32       ರಾಶಿ_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    IM3_ಸ್ಮರಣೆ ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    m3stack_t sp = _sp + stackOffset;
+    m3stack_t sp = _sp + ರಾಶಿ_ಸ್ಥಾನಾಂತರ;
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    m3ret_t r = Call(callPC, sp, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-    m3ret_t r = Call(callPC, sp, _mem, d_m3OpDefaultArgs);
-#endif
+#ಆದರೆ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    m3ret_t r = Call(callPC, sp, _mem, d_m3_Op_Default_ವಾದಗಳು, d_m3_ತಳ_Cstr);
+#ಇಲ್ಲದಿದ್ದರೆ
+    m3ret_t r = Call(callPC, sp, _mem, d_m3_Op_Default_ವಾದಗಳು);
+#ಆದರೆ_ಅಂತ್ಯ
 
-    _mem = memory->mallocated;
+    _mem = ಸ್ಮರಣೆ->mallocated;
 
-    if (M3_LIKELY(not r)) {
-        nextOp();
-    } else {
-        d_m3RecordCallFrame(memory, FunctionOfCompiledCode(callPC));
-        pushBacktraceFrame();
+    ಆದರೆ (M3_LIKELY(not r)) {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_m3_ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು(ಸ್ಮರಣೆ, Function_ದ_Compiled_ಸಂಕೇತ(callPC));
+        ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2();
         forwardTrap(r);
     }
 }
@@ -977,48 +977,48 @@ d_m3Op(Call)
 // reference the validator only knows as $t, and null has to trap.
 d_m3Op(CallRef)
 {
-    IM3Function function = slot(IM3Function);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    IM3Memory   memory = m3MemInfo(_mem);
+    IM3Function function = ಸ್ಥಾನ(IM3Function);
+    IM3FuncType type = ತಕ್ಷಣ(IM3FuncType);
+    i32         ರಾಶಿ_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    IM3_ಸ್ಮರಣೆ   ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    m3stack_t   sp = _sp + stackOffset;
+    m3stack_t   sp = _sp + ರಾಶಿ_ಸ್ಥಾನಾಂತರ;
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(function)) {
-        if (M3_LIKELY(type == function->funcType)) {
-            if (M3_UNLIKELY(not function->compiled)) {
+    ಆದರೆ (M3_LIKELY(function)) {
+        ಆದರೆ (M3_LIKELY(type == function->funcType)) {
+            ಆದರೆ (M3_UNLIKELY(not function->compiled)) {
                 r = CompileFunction(function);
             }
 
-            if (M3_LIKELY(not r)) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-                r = Call(function->compiled, sp, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-                r = Call(function->compiled, sp, _mem, d_m3OpDefaultArgs);
-#endif
+            ಆದರೆ (M3_LIKELY(not r)) {
+#ಆದರೆ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+                r = Call(function->compiled, sp, _mem, d_m3_Op_Default_ವಾದಗಳು, d_m3_ತಳ_Cstr);
+#ಇಲ್ಲದಿದ್ದರೆ
+                r = Call(function->compiled, sp, _mem, d_m3_Op_Default_ವಾದಗಳು);
+#ಆದರೆ_ಅಂತ್ಯ
 
-                _mem = memory->mallocated;
+                _mem = ಸ್ಮರಣೆ->mallocated;
 
-                if (M3_LIKELY(not r)) {
-                    nextOpDirect();
-                } else {
-                    d_m3RecordCallFrame(memory, function);
-                    pushBacktraceFrame();
+                ಆದರೆ (M3_LIKELY(not r)) {
+                    ಮುಂದಿನ_Op_ನೇರ();
+                } ಇಲ್ಲದಿದ್ದರೆ {
+                    d_m3_ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು(ಸ್ಮರಣೆ, function);
+                    ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2();
                     forwardTrap(r);
                 }
             }
-        } else {
-            r = m3Err_trapIndirectCallTypeMismatch;
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            r = m3_Err_trap_ಪರೋಕ್ಷ_Call_Type_Mismatch;
         }
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         r = m3Err_trapNullFunctionRef;
     }
 
-    if (M3_UNLIKELY(r)) {
+    ಆದರೆ (M3_UNLIKELY(r)) {
         newTrap(r);
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         forwardTrap(r);
     }
 }
@@ -1028,73 +1028,73 @@ d_m3Op(CallRef)
 // there is no destination slot, only the trap.
 d_m3Op(RefAsNonNull)
 {
-    IM3Function reference = slot(IM3Function);
+    IM3Function reference = ಸ್ಥಾನ(IM3Function);
 
-    if (M3_UNLIKELY(not reference)) {
+    ಆದರೆ (M3_UNLIKELY(not reference)) {
         newTrap(m3Err_trapNullReference);
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(CallIndirect)
+d_m3Op(Call_ಪರೋಕ್ಷ)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_ರಾಶಿ();
 
-    M3Table*    table = immediate(M3Table*);
-    u64         tableIndex = d_m3WideOperand(table->isTable64);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    IM3Memory   memory = m3MemInfo(_mem);
+    M3_ಕೋಷ್ಟಕ*    ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    u64         ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
+    IM3FuncType type = ತಕ್ಷಣ(IM3FuncType);
+    i32         ರಾಶಿ_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    IM3_ಸ್ಮರಣೆ   ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    m3stack_t   sp = _sp + stackOffset;
+    m3stack_t   sp = _sp + ರಾಶಿ_ಸ್ಥಾನಾಂತರ;
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(tableIndex < table->size)) {
-        IM3Function function = (IM3Function)table->elements[tableIndex];
+    ಆದರೆ (M3_LIKELY(ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ < ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2)) {
+        IM3Function function = (IM3Function)ಕೋಷ್ಟಕ_2->elements[ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ];
 
-        if (M3_LIKELY(function)) {
-            if (M3_LIKELY(type == function->funcType)) {
-                if (M3_UNLIKELY(not function->compiled)) {
+        ಆದರೆ (M3_LIKELY(function)) {
+            ಆದರೆ (M3_LIKELY(type == function->funcType)) {
+                ಆದರೆ (M3_UNLIKELY(not function->compiled)) {
                     r = CompileFunction(function);
                 }
 
-                if (M3_LIKELY(not r)) {
+                ಆದರೆ (M3_LIKELY(not r)) {
                     // a table may hold functions from another module, and those
                     // run against their own module's memory
-                    M3MemoryHeader* calleeMem = Module_MemoryHeader(function->module);
+                    M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* calleeMem = Module_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ(function->module);
 
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-                    r = Call(function->compiled, sp, calleeMem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-                    r = Call(function->compiled, sp, calleeMem, d_m3OpDefaultArgs);
-#endif
+#ಆದರೆ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+                    r = Call(function->compiled, sp, calleeMem, d_m3_Op_Default_ವಾದಗಳು, d_m3_ತಳ_Cstr);
+#ಇಲ್ಲದಿದ್ದರೆ
+                    r = Call(function->compiled, sp, calleeMem, d_m3_Op_Default_ವಾದಗಳು);
+#ಆದರೆ_ಅಂತ್ಯ
 
-                    _mem = memory->mallocated;
+                    _mem = ಸ್ಮರಣೆ->mallocated;
 
-                    if (M3_LIKELY(not r)) {
-                        nextOpDirect();
-                    } else {
-                        d_m3RecordCallFrame(memory, function);
-                        pushBacktraceFrame();
+                    ಆದರೆ (M3_LIKELY(not r)) {
+                        ಮುಂದಿನ_Op_ನೇರ();
+                    } ಇಲ್ಲದಿದ್ದರೆ {
+                        d_m3_ದಾಖಲೆ_Call_ಚೌಕಟ್ಟು(ಸ್ಮರಣೆ, function);
+                        ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2();
                         forwardTrap(r);
                     }
                 }
-            } else {
-                r = m3Err_trapIndirectCallTypeMismatch;
+            } ಇಲ್ಲದಿದ್ದರೆ {
+                r = m3_Err_trap_ಪರೋಕ್ಷ_Call_Type_Mismatch;
             }
-        } else {
-            r = m3Err_trapTableElementIsNull;
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            r = m3_Err_trap_ಕೋಷ್ಟಕ_Element_Is_Null;
         }
-    } else {
-        r = m3Err_trapTableIndexOutOfRange;
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        r = m3_Err_trap_ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ_ಹೊರಹೋಗು_ದ_Range;
     }
 
-    if (M3_UNLIKELY(r)) {
+    ಆದರೆ (M3_UNLIKELY(r)) {
         newTrap(r);
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         forwardTrap(r);
     }
 }
@@ -1109,57 +1109,57 @@ d_m3Op(CallIndirect)
 // stack grows.  Tail recursion therefore runs in constant space, unless the return_call
 // sits inside a loop or a try region: those hold a native frame that the tail call walks
 // away from instead of unwinding, and d_m3CheckNativeStack bounds the pile they make.
-#define d_m3TailCallArgs(RETURNSLOTS, STACKOFFSET, NUMARGSLOTS)                     \
-   memmove ((void *) (_sp + (RETURNSLOTS)), (const void *) (_sp + (STACKOFFSET)),   \
-            (size_t) (NUMARGSLOTS) * sizeof (m3slot_t))
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_ಬಾಲ_Call_ವಾದಗಳು(RETURNSLOTS, STACKOFFSET, NUMARGSLOTS)                     \
+   memmove ((ಶೂನ್ಯ *) (_sp + (RETURNSLOTS)), (ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *) (_sp + (STACKOFFSET)),   \
+            (size_t) (NUMARGSLOTS) * ಗಾತ್ರ (m3slot_t))
 
 d_m3Op(ReturnCall)
 {
-    pc_t    callPC = immediate(pc_t);
-    i32     stackOffset = immediate(i32);
-    i32     returnSlots = immediate(i32);
-    u32     numArgSlots = immediate(u32);
+    pc_t    callPC = ತಕ್ಷಣ(pc_t);
+    i32     ರಾಶಿ_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    i32     returnSlots = ತಕ್ಷಣ(i32);
+    u32     ಅಂಕೆ_Arg_Slots = ತಕ್ಷಣ(u32);
 
     m3ret_t possible_trap = m3_Yield();
-    if (M3_UNLIKELY(possible_trap)) {
+    ಆದರೆ (M3_UNLIKELY(possible_trap)) {
         newTrap(possible_trap);
     }
 
-    d_m3TailCallArgs(returnSlots, stackOffset, numArgSlots);
+    d_m3_ಬಾಲ_Call_ವಾದಗಳು(returnSlots, ರಾಶಿ_ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_Arg_Slots);
 
-    jumpOpDirect(callPC);
+    jump_Op_ನೇರ(callPC);
 }
 
 
 d_m3Op(ReturnCallRef)
 {
-    IM3Function function = slot(IM3Function);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    i32         returnSlots = immediate(i32);
-    u32         numArgSlots = immediate(u32);
+    IM3Function function = ಸ್ಥಾನ(IM3Function);
+    IM3FuncType type = ತಕ್ಷಣ(IM3FuncType);
+    i32         ರಾಶಿ_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    i32         returnSlots = ತಕ್ಷಣ(i32);
+    u32         ಅಂಕೆ_Arg_Slots = ತಕ್ಷಣ(u32);
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(function)) {
-        if (M3_LIKELY(type == function->funcType)) {
-            if (M3_UNLIKELY(not function->compiled)) {
+    ಆದರೆ (M3_LIKELY(function)) {
+        ಆದರೆ (M3_LIKELY(type == function->funcType)) {
+            ಆದರೆ (M3_UNLIKELY(not function->compiled)) {
                 r = CompileFunction(function);
             }
 
-            if (M3_LIKELY(not r)) {
+            ಆದರೆ (M3_LIKELY(not r)) {
                 r = m3_Yield();
 
-                if (M3_LIKELY(not r)) {
-                    d_m3TailCallArgs(returnSlots, stackOffset, numArgSlots);
+                ಆದರೆ (M3_LIKELY(not r)) {
+                    d_m3_ಬಾಲ_Call_ವಾದಗಳು(returnSlots, ರಾಶಿ_ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_Arg_Slots);
 
-                    jumpOpDirect(function->compiled);
+                    jump_Op_ನೇರ(function->compiled);
                 }
             }
-        } else {
-            r = m3Err_trapIndirectCallTypeMismatch;
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            r = m3_Err_trap_ಪರೋಕ್ಷ_Call_Type_Mismatch;
         }
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         r = m3Err_trapNullFunctionRef;
     }
 
@@ -1167,43 +1167,43 @@ d_m3Op(ReturnCallRef)
 }
 
 
-d_m3Op(ReturnCallIndirect)
+d_m3Op(Return_Call_ಪರೋಕ್ಷ)
 {
-    M3Table*    table = immediate(M3Table*);
-    u64         tableIndex = d_m3WideOperand(table->isTable64);
-    IM3FuncType type = immediate(IM3FuncType);
-    i32         stackOffset = immediate(i32);
-    i32         returnSlots = immediate(i32);
-    u32         numArgSlots = immediate(u32);
+    M3_ಕೋಷ್ಟಕ*    ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    u64         ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
+    IM3FuncType type = ತಕ್ಷಣ(IM3FuncType);
+    i32         ರಾಶಿ_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    i32         returnSlots = ತಕ್ಷಣ(i32);
+    u32         ಅಂಕೆ_Arg_Slots = ತಕ್ಷಣ(u32);
 
     m3ret_t     r = m3Err_none;
 
-    if (M3_LIKELY(tableIndex < table->size)) {
-        IM3Function function = (IM3Function)table->elements[tableIndex];
+    ಆದರೆ (M3_LIKELY(ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ < ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2)) {
+        IM3Function function = (IM3Function)ಕೋಷ್ಟಕ_2->elements[ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ];
 
-        if (M3_LIKELY(function)) {
-            if (M3_LIKELY(type == function->funcType)) {
-                if (M3_UNLIKELY(not function->compiled)) {
+        ಆದರೆ (M3_LIKELY(function)) {
+            ಆದರೆ (M3_LIKELY(type == function->funcType)) {
+                ಆದರೆ (M3_UNLIKELY(not function->compiled)) {
                     r = CompileFunction(function);
                 }
 
-                if (M3_LIKELY(not r)) {
+                ಆದರೆ (M3_LIKELY(not r)) {
                     r = m3_Yield();
 
-                    if (M3_LIKELY(not r)) {
-                        d_m3TailCallArgs(returnSlots, stackOffset, numArgSlots);
+                    ಆದರೆ (M3_LIKELY(not r)) {
+                        d_m3_ಬಾಲ_Call_ವಾದಗಳು(returnSlots, ರಾಶಿ_ಸ್ಥಾನಾಂತರ, ಅಂಕೆ_Arg_Slots);
 
-                        jumpOpDirect(function->compiled);
+                        jump_Op_ನೇರ(function->compiled);
                     }
                 }
-            } else {
-                r = m3Err_trapIndirectCallTypeMismatch;
+            } ಇಲ್ಲದಿದ್ದರೆ {
+                r = m3_Err_trap_ಪರೋಕ್ಷ_Call_Type_Mismatch;
             }
-        } else {
-            r = m3Err_trapTableElementIsNull;
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            r = m3_Err_trap_ಕೋಷ್ಟಕ_Element_Is_Null;
         }
-    } else {
-        r = m3Err_trapTableIndexOutOfRange;
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        r = m3_Err_trap_ಕೋಷ್ಟಕ_ಸೂಚ್ಯಂಕ_ಹೊರಹೋಗು_ದ_Range;
     }
 
     newTrap(r);
@@ -1217,117 +1217,117 @@ d_m3Op(CallRawFunction)
     M3ImportContext ctx;
 
     M3RawCall       call = (M3RawCall)(*_pc++);
-    ctx.function = immediate(IM3Function);
-    ctx.userdata = immediate(void*);
-    u64* const sp = ((u64*)_sp);
-    IM3Memory  memory = m3MemInfo(_mem);
+    ctx.function = ತಕ್ಷಣ(IM3Function);
+    ctx.userdata = ತಕ್ಷಣ(ಶೂನ್ಯ*);
+    u64* ಸ್ಥಿರಾಂಕ sp = ((u64*)_sp);
+    IM3_ಸ್ಮರಣೆ  ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
     IM3Runtime runtime = m3MemRuntime(_mem);
 
-#if d_m3EnableStrace
+#ಆದರೆ d_m3EnableStrace
     IM3FuncType ftype = ctx.function->funcType;
 
-    char        outbuff[1024];
-    char*       outp = outbuff;
-    char*       oute = outbuff + 1024;
+    ಅಕ್ಷರ        outbuff[1024];
+    ಅಕ್ಷರ*       outp = outbuff;
+    ಅಕ್ಷರ*       oute = outbuff + 1024;
 
-    outp += snprintf(outp, oute - outp, "%s!%s(", ctx.function->import.moduleUtf8, ctx.function->import.fieldUtf8);
+    outp += snprintf(outp, oute - outp, "%s!%s(", ctx.function->import.moduleUtf8, ctx.function->import.ಕ್ಷೇತ್ರ_Utf8);
 
-    const int nArgs = ftype->numArgs;
-    const int nRets = ftype->numRets;
-    u64*      args = sp + nRets;
-    for (int i = 0; i < nArgs; i++) {
-        const int type = ftype->types[nRets + i];
-        switch (type) {
-        case c_m3Type_i32: outp += snprintf(outp, oute - outp, "%" PRIi32, *(i32*)(args + i)); break;
-        case c_m3Type_i64: outp += snprintf(outp, oute - outp, "%" PRIi64, *(i64*)(args + i)); break;
-        case c_m3Type_f32: outp += snprintf(outp, oute - outp, "%" PRIf32, *(f32*)(args + i)); break;
-        case c_m3Type_f64: outp += snprintf(outp, oute - outp, "%" PRIf64, *(f64*)(args + i)); break;
-        default: outp += snprintf(outp, oute - outp, "<type %d>", type); break;
+    ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ n_ವಾದಗಳು = ftype->ಅಂಕೆ_ವಾದಗಳು;
+    ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ nRets = ftype->ಅಂಕೆ_Rets;
+    u64*      ವಾದಗಳು = sp + nRets;
+    ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < n_ವಾದಗಳು; i++) {
+        ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ type = ftype->types[nRets + i];
+        ಆಯ್ಕೆ (type) {
+        ಸ್ಥಿತಿ c_m3Type_i32: outp += snprintf(outp, oute - outp, "%" PRIi32, *(i32*)(ವಾದಗಳು + i)); ನಿಲ್ಲಿಸು;
+        ಸ್ಥಿತಿ c_m3Type_i64: outp += snprintf(outp, oute - outp, "%" PRIi64, *(i64*)(ವಾದಗಳು + i)); ನಿಲ್ಲಿಸು;
+        ಸ್ಥಿತಿ c_m3Type_f32: outp += snprintf(outp, oute - outp, "%" PRIf32, *(f32*)(ವಾದಗಳು + i)); ನಿಲ್ಲಿಸು;
+        ಸ್ಥಿತಿ c_m3Type_f64: outp += snprintf(outp, oute - outp, "%" PRIf64, *(f64*)(ವಾದಗಳು + i)); ನಿಲ್ಲಿಸು;
+        ಪೂರ್ವನಿಯೋಜಿತ: outp += snprintf(outp, oute - outp, "<type %d>", type); ನಿಲ್ಲಿಸು;
         }
-        if (i < nArgs - 1) {
+        ಆದರೆ (i < n_ವಾದಗಳು - 1) {
             outp += snprintf(outp, oute - outp, ", ");
         }
     }
     // closed here rather than after the last argument: an import taking none has
     // no last argument to close it
     outp += snprintf(outp, oute - outp, ")");
-#  if d_m3EnableStrace >= 2
+#  ಆದರೆ d_m3EnableStrace >= 2
     outp += snprintf(outp, oute - outp, " { <native> }");
 #  endif
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
     // m3_Call uses runtime->stack to set-up initial exported function stack.
     // Reconfigure the stack to enable recursive invocations of m3_Call.
     // I.e. exported/table function can be called from an impoted function.
-    void* stack_backup = runtime->stack;
-    runtime->stack = sp;
+    ಶೂನ್ಯ* ರಾಶಿ_backup = runtime->ರಾಶಿ;
+    runtime->ರಾಶಿ = sp;
     // the memory this import was bound to, which is memory 0 unless the host
     // module named another one. _mem itself stays on the caller's memory:
     // the trap path below and the backtrace recorder still read it.
-    m3ret_t possible_trap = call(runtime, &ctx, sp, m3MemData(ctx.function->hostMemory->mallocated));
-    runtime->stack = stack_backup;
+    m3ret_t possible_trap = call(runtime, &ctx, sp, m3_Mem_ದತ್ತಾಂಶ(ctx.function->host_ಸ್ಮರಣೆ->mallocated));
+    runtime->ರಾಶಿ = ರಾಶಿ_backup;
 
-#if d_m3EnableStrace
-    if (M3_UNLIKELY(possible_trap)) {
-        d_m3TracePrint("%s -> %s", outbuff, (char*)possible_trap);
-    } else if (ftype and ftype->numRets) {
+#ಆದರೆ d_m3EnableStrace
+    ಆದರೆ (M3_UNLIKELY(possible_trap)) {
+        d_m3TracePrint("%s -> %s", outbuff, (ಅಕ್ಷರ*)possible_trap);
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ftype and ftype->ಅಂಕೆ_Rets) {
         d_m3TracePrint("%s = %s", outbuff, SPrintFunctionRetList(ftype, (m3stack_t)sp));
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         d_m3TracePrint("%s", outbuff);
     }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-    if (M3_UNLIKELY(possible_trap)) {
-        _mem = memory->mallocated;
+    ಆದರೆ (M3_UNLIKELY(possible_trap)) {
+        _mem = ಸ್ಮರಣೆ->mallocated;
         // an exception the host threw (m3_ThrowException) is not a trap yet, and
         // may well be caught: it records no frame, as a Wasm throw doesn't
-        if (possible_trap != m3Err_pendingException) {
-            pushBacktraceFrame();
+        ಆದರೆ (possible_trap != m3Err_pendingException) {
+            ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2();
         }
     }
     forwardTrap(possible_trap);
 }
 
 
-d_m3Op(MemSize)
+d_m3Op(Mem_ಗಾತ್ರ)
 {
-    IM3Memory memory = m3MemInfo(_mem);
+    IM3_ಸ್ಮರಣೆ ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    _r0 = memory->numPages;
+    _r0 = ಸ್ಮರಣೆ->ಅಂಕೆ_ಪುಟಗಳು;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
 d_m3Op(MemGrow)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    IM3Memory  memory = m3MemInfo(_mem);
+    IM3_ಸ್ಮರಣೆ  ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    i32        numPagesToGrow = (i32)_r0;
-    if (numPagesToGrow >= 0) {
-        _r0 = (m3reg_t)memory->numPages;
+    i32        ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow = (i32)_r0;
+    ಆದರೆ (ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow >= 0) {
+        _r0 = (m3reg_t)ಸ್ಮರಣೆ->ಅಂಕೆ_ಪುಟಗಳು;
 
-        if (M3_LIKELY(numPagesToGrow)) {
-            u64      requiredPages = memory->numPages + (u32)numPagesToGrow;
+        ಆದರೆ (M3_LIKELY(ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow)) {
+            u64      required_ಪುಟಗಳು = ಸ್ಮರಣೆ->ಅಂಕೆ_ಪುಟಗಳು + (u32)ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow;
 
-            M3Result r = ResizeMemory(runtime, memory, requiredPages);
-            if (r) {
+            M3_ಫಲಿತಾಂಶ r = Resize_ಸ್ಮರಣೆ(runtime, ಸ್ಮರಣೆ, required_ಪುಟಗಳು);
+            ಆದರೆ (r) {
                 _r0 = -1;
             }
 
-            _mem = memory->mallocated;
+            _mem = ಸ್ಮರಣೆ->mallocated;
         }
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         _r0 = -1;
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-#if d_m3HasMemory64
+#ಆದರೆ d_m3HasMemory64
 
 // memory.grow on a 64-bit memory. The delta is a full u64 rather than a value
 // the sign of which can stand in for "too big", and failure answers 2^64-1
@@ -1336,79 +1336,79 @@ d_m3Op(MemGrow)
 d_m3Op(MemGrow64)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    IM3Memory  memory = m3MemInfo(_mem);
+    IM3_ಸ್ಮರಣೆ  ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    u64        numPagesToGrow = (u64)_r0;
-    u64        numPages = memory->numPages;
+    u64        ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow = (u64)_r0;
+    u64        ಅಂಕೆ_ಪುಟಗಳು = ಸ್ಮರಣೆ->ಅಂಕೆ_ಪುಟಗಳು;
 
-    if (M3_LIKELY(numPagesToGrow)) {
+    ಆದರೆ (M3_LIKELY(ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow)) {
         // maxPages is never below the current size, so the difference cannot
         // wrap; asking for more than it is a request nothing could satisfy
-        if (numPagesToGrow <= memory->maxPages - numPages and
-            not ResizeMemory(runtime, memory, numPages + numPagesToGrow)) {
-            _r0 = (m3reg_t)numPages;
-        } else {
+        ಆದರೆ (ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow <= ಸ್ಮರಣೆ->max_ಪುಟಗಳು - ಅಂಕೆ_ಪುಟಗಳು and
+            not Resize_ಸ್ಮರಣೆ(runtime, ಸ್ಮರಣೆ, ಅಂಕೆ_ಪುಟಗಳು + ಅಂಕೆ_ಪುಟಗಳು_ಗಮ್ಯ_Grow)) {
+            _r0 = (m3reg_t)ಅಂಕೆ_ಪುಟಗಳು;
+        } ಇಲ್ಲದಿದ್ದರೆ {
             _r0 = -1;
         }
 
-        _mem = memory->mallocated;
-    } else {
-        _r0 = (m3reg_t)numPages;
+        _mem = ಸ್ಮರಣೆ->mallocated;
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        _r0 = (m3reg_t)ಅಂಕೆ_ಪುಟಗಳು;
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
-#endif // d_m3HasMemory64
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasMemory64
 
 
 d_m3Op(MemCopy)
 {
-    u64 size = (u32)_r0;
-    u64 source = slot(u32);
-    u64 destination = slot(u32);
+    u64 ಗಾತ್ರ_2 = (u32)_r0;
+    u64 ಮೂಲ = ಸ್ಥಾನ(u32);
+    u64 destination = ಸ್ಥಾನ(u32);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(d_m3MemRangeOk(source, size, _mem))) {
-            u8* dst = m3MemData(_mem) + destination;
-            u8* src = m3MemData(_mem) + source;
-            memmove(dst, src, (size_t)size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, _mem))) {
+        ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(ಮೂಲ, ಗಾತ್ರ_2, _mem))) {
+            u8* dst = m3_Mem_ದತ್ತಾಂಶ(_mem) + destination;
+            u8* src = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಮೂಲ;
+            memmove(dst, src, (size_t)ಗಾತ್ರ_2);
 
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+            ಮುಂದಿನ_Op();
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಮೂಲ, ಗಾತ್ರ_2);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
 
-#if d_m3HasMemory64
+#ಆದರೆ d_m3HasMemory64
 
 // memory.copy within a single 64-bit memory: every operand is a full u64.
 d_m3Op(MemCopy64)
 {
-    u64 size = (u64)_r0;
-    u64 source = slot(u64);
-    u64 destination = slot(u64);
+    u64 ಗಾತ್ರ_2 = (u64)_r0;
+    u64 ಮೂಲ = ಸ್ಥಾನ(u64);
+    u64 destination = ಸ್ಥಾನ(u64);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(d_m3MemRangeOk(source, size, _mem))) {
-            u8* dst = m3MemData(_mem) + destination;
-            u8* src = m3MemData(_mem) + source;
-            memmove(dst, src, (size_t)size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, _mem))) {
+        ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(ಮೂಲ, ಗಾತ್ರ_2, _mem))) {
+            u8* dst = m3_Mem_ದತ್ತಾಂಶ(_mem) + destination;
+            u8* src = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಮೂಲ;
+            memmove(dst, src, (size_t)ಗಾತ್ರ_2);
 
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+            ಮುಂದಿನ_Op();
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಮೂಲ, ಗಾತ್ರ_2);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
-#endif // d_m3HasMemory64
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasMemory64
 
 
 // Points the _mem register at another memory: one of the module's own, or
@@ -1416,17 +1416,17 @@ d_m3Op(MemCopy64)
 // around a single access or a single cross-module call, so _mem is back where
 // it belongs before anything that reads it for another purpose - a backtrace,
 // the stack-limit check - can run.
-d_m3Op(SetMemory)
+d_m3Op(ಗಣ_ಸ್ಮರಣೆ)
 {
-    IM3Memory memory = immediate(IM3Memory);
+    IM3_ಸ್ಮರಣೆ ಸ್ಮರಣೆ = ತಕ್ಷಣ(IM3_ಸ್ಮರಣೆ);
 
-    _mem = memory->mallocated;
+    _mem = ಸ್ಮರಣೆ->mallocated;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-#if d_m3HasMultiMemory
+#ಆದರೆ d_m3_Has_Multi_ಸ್ಮರಣೆ
 
 // memory.copy between two different memories. The pair-of-SetMemory trick only
 // reaches one memory at a time, so this one names both outright.
@@ -1437,209 +1437,209 @@ d_m3Op(SetMemory)
 // two, which is 64-bit only when both are.
 d_m3Op(MemCopy_x)
 {
-    IM3Memory       destMemory = immediate(IM3Memory);
-    IM3Memory       sourceMemory = immediate(IM3Memory);
-    u32             widths = immediate(u32);
+    IM3_ಸ್ಮರಣೆ       dest_ಸ್ಮರಣೆ = ತಕ್ಷಣ(IM3_ಸ್ಮರಣೆ);
+    IM3_ಸ್ಮರಣೆ       ಮೂಲ_ಸ್ಮರಣೆ = ತಕ್ಷಣ(IM3_ಸ್ಮರಣೆ);
+    u32             widths = ತಕ್ಷಣ(u32);
 
-    M3MemoryHeader* destMem = destMemory->mallocated;
-    M3MemoryHeader* sourceMem = sourceMemory->mallocated;
+    M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* destMem = dest_ಸ್ಮರಣೆ->mallocated;
+    M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* ಮೂಲ_Mem = ಮೂಲ_ಸ್ಮರಣೆ->mallocated;
 
-    u64             size = (widths == 0x3) ? (u64)_r0 : (u64)(u32)_r0;
-    u64             source = d_m3WideOperand(widths & 0x2);
-    u64             destination = d_m3WideOperand(widths & 0x1);
+    u64             ಗಾತ್ರ_2 = (widths == 0x3) ? (u64)_r0 : (u64)(u32)_r0;
+    u64             ಮೂಲ = d_m3_Wide_ಕಾರ್ಯಾಂಶ(widths & 0x2);
+    u64             destination = d_m3_Wide_ಕಾರ್ಯಾಂಶ(widths & 0x1);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, destMem))) {
-        if (M3_LIKELY(d_m3MemRangeOk(source, size, sourceMem))) {
-            memmove(m3MemData(destMem) + destination, m3MemData(sourceMem) + source, (size_t)size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, destMem))) {
+        ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(ಮೂಲ, ಗಾತ್ರ_2, ಮೂಲ_Mem))) {
+            memmove(m3_Mem_ದತ್ತಾಂಶ(destMem) + destination, m3_Mem_ದತ್ತಾಂಶ(ಮೂಲ_Mem) + ಮೂಲ, (size_t)ಗಾತ್ರ_2);
 
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+            ಮುಂದಿನ_Op();
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಮೂಲ, ಗಾತ್ರ_2);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
-#endif // d_m3HasMultiMemory
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasMultiMemory
 
 
 d_m3Op(MemFill)
 {
-    u32 size = (u32)_r0;
-    u32 byte = slot(u32);
-    u64 destination = slot(u32);
+    u32 ಗಾತ್ರ_2 = (u32)_r0;
+    u32 byte = ಸ್ಥಾನ(u32);
+    u64 destination = ಸ್ಥಾನ(u32);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        u8* mem8 = m3MemData(_mem) + destination;
-        memset(mem8, (u8)byte, size);
-        nextOp();
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, _mem))) {
+        u8* mem8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + destination;
+        memset(mem8, (u8)byte, ಗಾತ್ರ_2);
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
 
-#if d_m3HasMemory64
+#ಆದರೆ d_m3HasMemory64
 
 // memory.fill on a 64-bit memory. The byte to write stays an i32 - it is a
 // value, not an address - so only the destination and the length widen.
 d_m3Op(MemFill64)
 {
-    u64 size = (u64)_r0;
-    u32 byte = slot(u32);
-    u64 destination = slot(u64);
+    u64 ಗಾತ್ರ_2 = (u64)_r0;
+    u32 byte = ಸ್ಥಾನ(u32);
+    u64 destination = ಸ್ಥಾನ(u64);
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        u8* mem8 = m3MemData(_mem) + destination;
-        memset(mem8, (u8)byte, (size_t)size);
-        nextOp();
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, _mem))) {
+        u8* mem8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + destination;
+        memset(mem8, (u8)byte, (size_t)ಗಾತ್ರ_2);
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
-#endif // d_m3HasMemory64
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasMemory64
 
 
 d_m3Op(MemInit)
 {
-    M3DataSegment* segment = immediate(M3DataSegment*);
+    M3_ದತ್ತಾಂಶ_Segment* segment = ತಕ್ಷಣ(M3_ದತ್ತಾಂಶ_Segment*);
 
-    u64            size = (u32)_r0;
-    u64            source = slot(u32);
-    u64            destination = slot(u32);
+    u64            ಗಾತ್ರ_2 = (u32)_r0;
+    u64            ಮೂಲ = ಸ್ಥಾನ(u32);
+    u64            destination = ಸ್ಥಾನ(u32);
 
-    u64            available = segment->dropped ? 0 : segment->size;
+    u64            ಲಭ್ಯ = segment->dropped ? 0 : segment->ಗಾತ್ರ_2;
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(source <= available and size <= available - source)) {
-            memcpy(m3MemData(_mem) + destination, segment->data + source, (size_t)size);
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, _mem))) {
+        ಆದರೆ (M3_LIKELY(ಮೂಲ <= ಲಭ್ಯ and ಗಾತ್ರ_2 <= ಲಭ್ಯ - ಮೂಲ)) {
+            ಸ್ಮರಣೆ_ನಕಲು(m3_Mem_ದತ್ತಾಂಶ(_mem) + destination, segment->ದತ್ತಾಂಶ + ಮೂಲ, (size_t)ಗಾತ್ರ_2);
+            ಮುಂದಿನ_Op();
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಮೂಲ, ಗಾತ್ರ_2);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
 
-#if d_m3HasMemory64
+#ಆದರೆ d_m3HasMemory64
 
 // memory.init into a 64-bit memory. The segment is indexed as an i32 whatever
 // the memory is, so only the destination widens.
 d_m3Op(MemInit64)
 {
-    M3DataSegment* segment = immediate(M3DataSegment*);
+    M3_ದತ್ತಾಂಶ_Segment* segment = ತಕ್ಷಣ(M3_ದತ್ತಾಂಶ_Segment*);
 
-    u64            size = (u32)_r0;
-    u64            source = slot(u32);
-    u64            destination = slot(u64);
+    u64            ಗಾತ್ರ_2 = (u32)_r0;
+    u64            ಮೂಲ = ಸ್ಥಾನ(u32);
+    u64            destination = ಸ್ಥಾನ(u64);
 
-    u64            available = segment->dropped ? 0 : segment->size;
+    u64            ಲಭ್ಯ = segment->dropped ? 0 : segment->ಗಾತ್ರ_2;
 
-    if (M3_LIKELY(d_m3MemRangeOk(destination, size, _mem))) {
-        if (M3_LIKELY(source <= available and size <= available - source)) {
-            memcpy(m3MemData(_mem) + destination, segment->data + source, (size_t)size);
-            nextOp();
-        } else {
-            d_outOfBoundsMemOp(source, size);
+    ಆದರೆ (M3_LIKELY(d_m3MemRangeOk(destination, ಗಾತ್ರ_2, _mem))) {
+        ಆದರೆ (M3_LIKELY(ಮೂಲ <= ಲಭ್ಯ and ಗಾತ್ರ_2 <= ಲಭ್ಯ - ಮೂಲ)) {
+            ಸ್ಮರಣೆ_ನಕಲು(m3_Mem_ದತ್ತಾಂಶ(_mem) + destination, segment->ದತ್ತಾಂಶ + ಮೂಲ, (size_t)ಗಾತ್ರ_2);
+            ಮುಂದಿನ_Op();
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(ಮೂಲ, ಗಾತ್ರ_2);
         }
-    } else {
-        d_outOfBoundsMemOp(destination, size);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        d_ಹೊರಹೋಗು_ದ_Bounds_Mem_Op(destination, ಗಾತ್ರ_2);
     }
 }
 
-#endif // d_m3HasMemory64
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasMemory64
 
 
-d_m3Op(DataDrop)
+d_m3Op(ದತ್ತಾಂಶ_Drop)
 {
-    M3DataSegment* segment = immediate(M3DataSegment*);
+    M3_ದತ್ತಾಂಶ_Segment* segment = ತಕ್ಷಣ(M3_ದತ್ತಾಂಶ_Segment*);
     segment->dropped = true;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-#if d_m3HasRefTypes
+#ಆದರೆ d_m3HasRefTypes
 
-d_m3Op(TableGet)
+d_m3Op(ಕೋಷ್ಟಕ_Get)
 {
-    M3Table* table = immediate(M3Table*);
-    u64      index = d_m3WideOperand(table->isTable64);
+    M3_ಕೋಷ್ಟಕ* ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    u64      index = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
 
-    if (M3_LIKELY(index < table->size)) {
-        _r0 = (u64)(uintptr_t)table->elements[index];
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+    ಆದರೆ (M3_LIKELY(index < ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2)) {
+        _r0 = (u64)(uintptr_t)ಕೋಷ್ಟಕ_2->elements[index];
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ಕೋಷ್ಟಕ_ಹೊರಹೋಗು_ದ_Bounds);
     }
 }
 
 
-d_m3Op(TableSet)
+d_m3Op(ಕೋಷ್ಟಕ_ಗಣ)
 {
-    M3Table* table = immediate(M3Table*);
-    void*    value = slot(void*);
-    u64      index = d_m3WideOperand(table->isTable64);
+    M3_ಕೋಷ್ಟಕ* ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    ಶೂನ್ಯ*    ಮೌಲ್ಯ = ಸ್ಥಾನ(ಶೂನ್ಯ*);
+    u64      index = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
 
-    if (M3_LIKELY(index < table->size)) {
-        table->elements[index] = value;
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+    ಆದರೆ (M3_LIKELY(index < ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2)) {
+        ಕೋಷ್ಟಕ_2->elements[index] = ಮೌಲ್ಯ;
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ಕೋಷ್ಟಕ_ಹೊರಹೋಗು_ದ_Bounds);
     }
 }
 
 
-d_m3Op(TableSize)
+d_m3Op(ಕೋಷ್ಟಕ_ಗಾತ್ರ)
 {
-    M3Table* table = immediate(M3Table*);
+    M3_ಕೋಷ್ಟಕ* ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
 
-    _r0 = table->size;
+    _r0 = ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(TableGrow)
+d_m3Op(ಕೋಷ್ಟಕ_Grow)
 {
-    M3Table* table = immediate(M3Table*);
-    u64      delta = d_m3WideOperand(table->isTable64);
-    void*    value = slot(void*);
+    M3_ಕೋಷ್ಟಕ* ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    u64      delta = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
+    ಶೂನ್ಯ*    ಮೌಲ್ಯ = ಸ್ಥಾನ(ಶೂನ್ಯ*);
 
-    u32      oldSize = table->size;
-    u32      maxSize = table->maxSize ? table->maxSize : d_m3MaxSaneTableSize;
+    u32      old_ಗಾತ್ರ = ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2;
+    u32      max_ಗಾತ್ರ = ಕೋಷ್ಟಕ_2->max_ಗಾತ್ರ ? ಕೋಷ್ಟಕ_2->max_ಗಾತ್ರ : d_m3_Max_Sane_ಕೋಷ್ಟಕ_ಗಾತ್ರ;
 
     // a table64 delta is a whole u64, so the sum is formed only once it is
     // known to fit
-    u64      newSize = (delta <= maxSize - oldSize) ? (u64)oldSize + delta
-                                                    : (u64)maxSize + 1;
+    u64      new_ಗಾತ್ರ = (delta <= max_ಗಾತ್ರ - old_ಗಾತ್ರ) ? (u64)old_ಗಾತ್ರ + delta
+                                                    : (u64)max_ಗಾತ್ರ + 1;
 
-    if (newSize == oldSize)         // a zero delta never reallocates, and the table may have no storage yet
+    ಆದರೆ (new_ಗಾತ್ರ == old_ಗಾತ್ರ)         // a zero delta never reallocates, and the table may have no storage yet
     {
-        _r0 = oldSize;
-        nextOp();
+        _r0 = old_ಗಾತ್ರ;
+        ಮುಂದಿನ_Op();
     }
 
     IM3Runtime runtime = m3MemRuntime(_mem);
-    if (newSize <= maxSize and (not runtime->tableElementsLimit or
-                                delta <= runtime->tableElementsLimit - runtime->tableElementsUsed)) {
-        void** elements = m3_ReallocArray(void*, table->elements, (size_t)newSize, oldSize);
+    ಆದರೆ (new_ಗಾತ್ರ <= max_ಗಾತ್ರ and (not runtime->ಕೋಷ್ಟಕ_Elements_ಎಲ್ಲೆ or
+                                delta <= runtime->ಕೋಷ್ಟಕ_Elements_ಎಲ್ಲೆ - runtime->ಕೋಷ್ಟಕ_Elements_ಬಳಸಿದ)) {
+        ಶೂನ್ಯ** elements = m3_ReallocArray(ಶೂನ್ಯ*, ಕೋಷ್ಟಕ_2->elements, (size_t)new_ಗಾತ್ರ, old_ಗಾತ್ರ);
 
-        if (elements) {
-            runtime->tableElementsUsed += newSize - oldSize;
-            table->elements = elements;
-            table->size = (u32)newSize;
+        ಆದರೆ (elements) {
+            runtime->ಕೋಷ್ಟಕ_Elements_ಬಳಸಿದ += new_ಗಾತ್ರ - old_ಗಾತ್ರ;
+            ಕೋಷ್ಟಕ_2->elements = elements;
+            ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2 = (u32)new_ಗಾತ್ರ;
 
-            for (u32 i = oldSize; i < table->size; ++i) {
-                table->elements[i] = value;
+            ಗಾಗಿ (u32 i = old_ಗಾತ್ರ; i < ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2; ++i) {
+                ಕೋಷ್ಟಕ_2->elements[i] = ಮೌಲ್ಯ;
             }
 
-            _r0 = oldSize;
-            nextOp();
+            _r0 = old_ಗಾತ್ರ;
+            ಮುಂದಿನ_Op();
         }
     }
 
@@ -1647,84 +1647,84 @@ d_m3Op(TableGrow)
     // slot it is pushed to is what decides how much of the register is seen
     _r0 = -1;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(TableInit)
+d_m3Op(ಕೋಷ್ಟಕ_Init)
 {
-    M3Table*          table = immediate(M3Table*);
-    M3ElementSegment* segment = immediate(M3ElementSegment*);
-    u32               count = slot(u32);
-    u32               source = slot(u32);
+    M3_ಕೋಷ್ಟಕ*          ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    M3ElementSegment* segment = ತಕ್ಷಣ(M3ElementSegment*);
+    u32               ಎಣಿಕೆ_2 = ಸ್ಥಾನ(u32);
+    u32               ಮೂಲ = ಸ್ಥಾನ(u32);
     // an element segment is indexed as an i32 whatever the table is; only the
     // destination follows the table's index type
-    u64               destination = d_m3WideOperand(table->isTable64);
+    u64               destination = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
 
-    u64               available = segment->dropped ? 0 : segment->numElements;
+    u64               ಲಭ್ಯ = segment->dropped ? 0 : segment->ಅಂಕೆ_Elements;
 
-    if (M3_LIKELY(destination <= table->size and count <= table->size - destination and
-                  (u64) source + count <= available)) {
-        for (u32 i = 0; i < count; ++i) {
-            table->elements[destination + i] = segment->resolved[source + i];
+    ಆದರೆ (M3_LIKELY(destination <= ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2 and ಎಣಿಕೆ_2 <= ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2 - destination and
+                  (u64) ಮೂಲ + ಎಣಿಕೆ_2 <= ಲಭ್ಯ)) {
+        ಗಾಗಿ (u32 i = 0; i < ಎಣಿಕೆ_2; ++i) {
+            ಕೋಷ್ಟಕ_2->elements[destination + i] = segment->resolved[ಮೂಲ + i];
         }
 
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ಕೋಷ್ಟಕ_ಹೊರಹೋಗು_ದ_Bounds);
     }
 }
 
 
 d_m3Op(ElemDrop)
 {
-    M3ElementSegment* segment = immediate(M3ElementSegment*);
+    M3ElementSegment* segment = ತಕ್ಷಣ(M3ElementSegment*);
     segment->dropped = true;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(TableCopy)
+d_m3Op(ಕೋಷ್ಟಕ_Copy)
 {
-    M3Table* dst = immediate(M3Table*);
-    M3Table* src = immediate(M3Table*);
+    M3_ಕೋಷ್ಟಕ* dst = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    M3_ಕೋಷ್ಟಕ* src = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
     // the length follows the narrower of the two tables, so it is 64-bit only
     // when both are
-    u64      count = d_m3WideOperand(dst->isTable64 and src->isTable64);
-    u64      source = d_m3WideOperand(src->isTable64);
-    u64      destination = d_m3WideOperand(dst->isTable64);
+    u64      ಎಣಿಕೆ_2 = d_m3_Wide_ಕಾರ್ಯಾಂಶ(dst->isTable64 and src->isTable64);
+    u64      ಮೂಲ = d_m3_Wide_ಕಾರ್ಯಾಂಶ(src->isTable64);
+    u64      destination = d_m3_Wide_ಕಾರ್ಯಾಂಶ(dst->isTable64);
 
-    if (M3_LIKELY(destination <= dst->size and count <= dst->size - destination and
-                  source <= src->size and count <= src->size - source)) {
-        memmove(dst->elements + destination, src->elements + source, (size_t)count * sizeof(void*));
+    ಆದರೆ (M3_LIKELY(destination <= dst->ಗಾತ್ರ_2 and ಎಣಿಕೆ_2 <= dst->ಗಾತ್ರ_2 - destination and
+                  ಮೂಲ <= src->ಗಾತ್ರ_2 and ಎಣಿಕೆ_2 <= src->ಗಾತ್ರ_2 - ಮೂಲ)) {
+        memmove(dst->elements + destination, src->elements + ಮೂಲ, (size_t)ಎಣಿಕೆ_2 * ಗಾತ್ರ(ಶೂನ್ಯ*));
 
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ಕೋಷ್ಟಕ_ಹೊರಹೋಗು_ದ_Bounds);
     }
 }
 
 
-d_m3Op(TableFill)
+d_m3Op(ಕೋಷ್ಟಕ_Fill)
 {
-    M3Table* table = immediate(M3Table*);
-    u64      count = d_m3WideOperand(table->isTable64);
-    void*    value = slot(void*);
-    u64      index = d_m3WideOperand(table->isTable64);
+    M3_ಕೋಷ್ಟಕ* ಕೋಷ್ಟಕ_2 = ತಕ್ಷಣ(M3_ಕೋಷ್ಟಕ*);
+    u64      ಎಣಿಕೆ_2 = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
+    ಶೂನ್ಯ*    ಮೌಲ್ಯ = ಸ್ಥಾನ(ಶೂನ್ಯ*);
+    u64      index = d_m3_Wide_ಕಾರ್ಯಾಂಶ(ಕೋಷ್ಟಕ_2->isTable64);
 
-    if (M3_LIKELY(index <= table->size and count <= table->size - index)) {
-        for (u64 i = 0; i < count; ++i) {
-            table->elements[index + i] = value;
+    ಆದರೆ (M3_LIKELY(index <= ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2 and ಎಣಿಕೆ_2 <= ಕೋಷ್ಟಕ_2->ಗಾತ್ರ_2 - index)) {
+        ಗಾಗಿ (u64 i = 0; i < ಎಣಿಕೆ_2; ++i) {
+            ಕೋಷ್ಟಕ_2->elements[index + i] = ಮೌಲ್ಯ;
         }
 
-        nextOp();
-    } else {
-        newTrap(m3Err_trapTableOutOfBounds);
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ಕೋಷ್ಟಕ_ಹೊರಹೋಗು_ದ_Bounds);
     }
 }
 
-#endif // d_m3HasRefTypes
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasRefTypes
 
 
 // it's a debate: should the compilation be trigger be the caller or callee page.
@@ -1736,22 +1736,22 @@ d_m3Op(Compile)
 {
     rewrite_op(op_Call);
 
-    IM3Function function = immediate(IM3Function);
+    IM3Function function = ತಕ್ಷಣ(IM3Function);
 
-    m3ret_t     result = m3Err_none;
+    m3ret_t     ಫಲಿತಾಂಶ = m3Err_none;
 
-    if (M3_UNLIKELY(not function->compiled)) { // check to see if function was compiled since this operation was emitted.
-        result = CompileFunction(function);
+    ಆದರೆ (M3_UNLIKELY(not function->compiled)) { // check to see if function was compiled since this operation was emitted.
+        ಫಲಿತಾಂಶ = CompileFunction(function);
     }
 
-    if (not result) {
+    ಆದರೆ (not ಫಲಿತಾಂಶ) {
         // patch up compiled pc and call rewritten op_Call
-        *((void**)--_pc) = (void*)(function->compiled);
+        *((ಶೂನ್ಯ**)--_pc) = (ಶೂನ್ಯ*)(function->compiled);
         --_pc;
-        nextOpDirect();
+        ಮುಂದಿನ_Op_ನೇರ();
     }
 
-    newTrap(result);
+    newTrap(ಫಲಿತಾಂಶ);
 }
 
 
@@ -1760,26 +1760,26 @@ d_m3Op(CompileReturnCall)
 {
     rewrite_op(op_ReturnCall);
 
-    IM3Function function = immediate(IM3Function);
+    IM3Function function = ತಕ್ಷಣ(IM3Function);
 
-    m3ret_t     result = m3Err_none;
+    m3ret_t     ಫಲಿತಾಂಶ = m3Err_none;
 
-    if (M3_UNLIKELY(not function->compiled)) {
-        result = CompileFunction(function);
+    ಆದರೆ (M3_UNLIKELY(not function->compiled)) {
+        ಫಲಿತಾಂಶ = CompileFunction(function);
     }
 
-    if (not result) {
+    ಆದರೆ (not ಫಲಿತಾಂಶ) {
         // patch up compiled pc and call rewritten op_ReturnCall
-        *((void**)--_pc) = (void*)(function->compiled);
+        *((ಶೂನ್ಯ**)--_pc) = (ಶೂನ್ಯ*)(function->compiled);
         --_pc;
-        nextOpDirect();
+        ಮುಂದಿನ_Op_ನೇರ();
     }
 
-    newTrap(result);
+    newTrap(ಫಲಿತಾಂಶ);
 }
 
 
-#if d_m3HasStackSwitching
+#ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
 // Suspending for a reason that is not a control tag - the host asked, or the
 // gas ran out. There is no handler to look for and no payload to carry, and
 // clearing the routing a previous suspend left behind is what keeps this from
@@ -1791,10 +1791,10 @@ d_m3Op(CompileReturnCall)
 // handler takes the suspend as its own, so naming the suspending continuation
 // would stop a suspend from inside a resumed one at that resume, with no stub
 // to run. Naming none sends it through every resume up to the host.
-static
-void SuspendWithoutTag (IM3Runtime io_runtime, IM3Continuation io_cont, M3SafePointKind i_kind,
+ಸ್ಥಿರ
+ಶೂನ್ಯ Suspend_Without_ಟ್ಯಾಗ್ (IM3Runtime io_runtime, IM3Continuation io_cont, M3_ಸುರಕ್ಷಿತ_ಬಿಂದು_ಬಗೆ i_ಬಗೆ,
                         pc_t i_pc, m3stack_t i_sp, m3reg_t i_r0
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
                         ,
                         f64 i_fp0
 #  endif
@@ -1802,26 +1802,26 @@ void SuspendWithoutTag (IM3Runtime io_runtime, IM3Continuation io_cont, M3SafePo
 {
     io_runtime->suspendRequested = false;
 
-    io_runtime->suspendTag = NULL;
-    io_runtime->suspendHandlerCont = NULL;
-    io_runtime->suspendStubPC = NULL;
-    io_runtime->switchTarget = NULL;
-    io_runtime->numSuspendPayload = 0;
+    io_runtime->suspend_ಟ್ಯಾಗ್ = ಖಾಲಿ;
+    io_runtime->suspendHandlerCont = ಖಾಲಿ;
+    io_runtime->suspendStubPC = ಖಾಲಿ;
+    io_runtime->switch_ಗುರಿ = ಖಾಲಿ;
+    io_runtime->ಅಂಕೆ_Suspend_Payload = 0;
 
     io_cont->pc = i_pc;
-    io_cont->suspendPoint = (u8)i_kind;
+    io_cont->suspend_ಬಿಂದು = (u8)i_ಬಗೆ;
     io_cont->sp = i_sp;
     io_cont->r0 = i_r0;
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
     io_cont->fp0 = i_fp0;
 #  endif
 
-    io_cont->numSuspendResults = 0;
+    io_cont->ಅಂಕೆ_Suspend_Results = 0;
 }
-#endif // d_m3HasStackSwitching
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasStackSwitching
 
 
-#if d_m3HasGasMetering
+#ಆದರೆ d_m3HasGasMetering
 
 // Pays for the straight-line segment of the function body that follows, before
 // any of it runs. The compiler adds up the segment's instruction costs while it
@@ -1833,126 +1833,126 @@ void SuspendWithoutTag (IM3Runtime io_runtime, IM3Continuation io_cont, M3SafePo
 d_m3Op(UseGas)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    u32        cost = immediate(u32);
+    u32        ವೆಚ್ಚ = ತಕ್ಷಣ(u32);
 
-    runtime->gasRemaining -= (i64)cost;
+    runtime->gas_ಉಳಿದ -= (i64)ವೆಚ್ಚ;
 
-    if (M3_UNLIKELY(runtime->gasRemaining < 0)) {
-#  if d_m3HasStackSwitching
+    ಆದರೆ (M3_UNLIKELY(runtime->gas_ಉಳಿದ < 0)) {
+#  ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
         // A runtime that can pause does, at the next pause point: running out
         // is a request to stop, like the host's, and the segment runs on to
         // it. The counter goes below zero by what it takes to get there.
-        if (runtime->isSuspendable and runtime->activeContinuation) {
+        ಆದರೆ (runtime->isSuspendable and runtime->ಸಕ್ರಿಯ_Continuation) {
             runtime->suspendRequested = true;
-            nextOp();
+            ಮುಂದಿನ_Op();
         }
 #  endif
-        newTrap(m3Err_trapOutOfGas);
+        newTrap(m3_Err_trap_ಹೊರಹೋಗು_ದ_Gas);
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
-#endif // d_m3HasGasMetering
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasGasMetering
 
 
 // Whether a function's frame fits the stack it is about to be entered on
-static inline
-bool EntryFits (IM3Function i_function, m3stack_t _sp, M3MemoryHeader* _mem)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ
+bool ನಮೂದು_ಹೊಂದುತ್ತದೆ (IM3Function i_function, m3stack_t _sp, M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* _mem)
 {
-#if d_m3SkipStackCheck
-    (void)i_function;
-    (void)_sp;
-    (void)_mem;
-    return true;
-#elif d_m3HasStackSwitching
-    IM3Continuation _act = (_mem ? m3MemRuntime(_mem)->activeContinuation : NULL);
-    void*           maxStack = (_act && _act->valStack)
-                                 ? (void*)(_act->valStack + _act->numStackSlots)
-                                 : (_mem ? _mem->maxStack : (void*)~(uintptr_t)0);
-    return M3_LIKELY((void*)(_sp + i_function->maxStackSlots) < maxStack);
-#else
-    return M3_LIKELY((void*)(_sp + i_function->maxStackSlots) < _mem->maxStack);
-#endif
+#ಆದರೆ d_m3_Skip_ರಾಶಿ_Check
+    (ಶೂನ್ಯ)i_function;
+    (ಶೂನ್ಯ)_sp;
+    (ಶೂನ್ಯ)_mem;
+    ಹಿಂತಿರುಗಿ true;
+#ಅಥವಾಆದರೆ d_m3_Has_ರಾಶಿ_Switching
+    IM3Continuation _act = (_mem ? m3MemRuntime(_mem)->ಸಕ್ರಿಯ_Continuation : ಖಾಲಿ);
+    ಶೂನ್ಯ*           max_ರಾಶಿ = (_act && _act->val_ರಾಶಿ)
+                                 ? (ಶೂನ್ಯ*)(_act->val_ರಾಶಿ + _act->ಅಂಕೆ_ರಾಶಿ_Slots)
+                                 : (_mem ? _mem->max_ರಾಶಿ : (ಶೂನ್ಯ*)~(uintptr_t)0);
+    ಹಿಂತಿರುಗಿ M3_LIKELY((ಶೂನ್ಯ*)(_sp + i_function->max_ರಾಶಿ_Slots) < max_ರಾಶಿ);
+#ಇಲ್ಲದಿದ್ದರೆ
+    ಹಿಂತಿರುಗಿ M3_LIKELY((ಶೂನ್ಯ*)(_sp + i_function->max_ರಾಶಿ_Slots) < _mem->max_ರಾಶಿ);
+#ಆದರೆ_ಅಂತ್ಯ
 }
 
 // Sets up a function's frame: its locals zeroed, and its constants copied in
-static inline
-void EnterFrame (IM3Function i_function, m3stack_t _sp)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ
+ಶೂನ್ಯ Enter_ಚೌಕಟ್ಟು (IM3Function i_function, m3stack_t _sp)
 {
-#if defined(DEBUG)
-    i_function->hits++;
-#endif
-    u8* stack = (u8*)((m3slot_t*)_sp + i_function->numRetAndArgSlots);
+#ಆದರೆ defined(DEBUG)
+    i_function->ದೊರಕಿದವು++;
+#ಆದರೆ_ಅಂತ್ಯ
+    u8* ರಾಶಿ = (u8*)((m3slot_t*)_sp + i_function->ಅಂಕೆ_Ret_And_Arg_Slots);
 
-    memset(stack, 0x0, i_function->numLocalBytes);
-    stack += i_function->numLocalBytes;
+    memset(ರಾಶಿ, 0x0, i_function->ಅಂಕೆ_Local_ಬೈಟುಗಳು);
+    ರಾಶಿ += i_function->ಅಂಕೆ_Local_ಬೈಟುಗಳು;
 
-    if (i_function->constants) {
-        memcpy(stack, i_function->constants, i_function->numConstantBytes);
+    ಆದರೆ (i_function->constants) {
+        ಸ್ಮರಣೆ_ನಕಲು(ರಾಶಿ, i_function->constants, i_function->ಅಂಕೆ_Constant_ಬೈಟುಗಳು);
     }
 }
 
 
-d_m3Op(Entry)
+d_m3Op(ನಮೂದು_2)
 {
     d_m3ClearRegisters
 
     d_m3TracePrepare
 
-    IM3Function function = immediate(IM3Function);
-#if d_m3EntryKeepsFrame
-    IM3Memory memory = m3MemInfo(_mem);
-#endif
+    IM3Function function = ತಕ್ಷಣ(IM3Function);
+#ಆದರೆ d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
+    IM3_ಸ್ಮರಣೆ ಸ್ಮರಣೆ = m3MemInfo(_mem);
+#ಆದರೆ_ಅಂತ್ಯ
 
-    if (EntryFits(function, _sp, _mem)) {
-        EnterFrame(function, _sp);
+    ಆದರೆ (ನಮೂದು_ಹೊಂದುತ್ತದೆ(function, _sp, _mem)) {
+        Enter_ಚೌಕಟ್ಟು(function, _sp);
 
-#if !d_m3EntryKeepsFrame
+#ಆದರೆ !d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
         // there's nothing left to do once the body returns, so hand this native frame
         // over to it. That's what lets op_ReturnCall tail-call in constant native stack.
-        nextOpDirect();
-#else
+        ಮುಂದಿನ_Op_ನೇರ();
+#ಇಲ್ಲದಿದ್ದರೆ
 
-#  if d_m3EnableStrace >= 2
-        d_m3TracePrint("%s %s {", m3_GetFunctionName(function), SPrintFunctionArgList(function, _sp + function->numRetSlots));
-        trace_rt->callDepth++;
+#  ಆದರೆ d_m3EnableStrace >= 2
+        d_m3TracePrint("%s %s {", m3_GetFunctionName(function), SPrintFunctionArgList(function, _sp + function->ಅಂಕೆ_Ret_Slots));
+        trace_rt->call_ಆಳ++;
 #  endif
 
-        m3ret_t r = nextOpImpl();
+        m3ret_t r = ಮುಂದಿನ_Op_Impl();
 
-#  if d_m3EnableStrace >= 2
-        trace_rt->callDepth--;
+#  ಆದರೆ d_m3EnableStrace >= 2
+        trace_rt->call_ಆಳ--;
 
-        if (r) {
-            d_m3TracePrint("} !trap = %s", (char*)r);
-        } else if (GetFunctionNumReturns(function)) {
+        ಆದರೆ (r) {
+            d_m3TracePrint("} !trap = %s", (ಅಕ್ಷರ*)r);
+        } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (Get_Function_ಅಂಕೆ_Returns(function)) {
             d_m3TracePrint("} = %s", SPrintFunctionRetList(function->funcType, _sp));
-        } else {
+        } ಇಲ್ಲದಿದ್ದರೆ {
             d_m3TracePrint("}");
         }
 #  endif
 
-        if (M3_UNLIKELY(r)) {
-            _mem = memory->mallocated;
-#  if d_m3HasStackSwitching
-            if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-                return RecordEntryFrame(m3MemRuntime(_mem), _pc, _sp, memory, function);
+        ಆದರೆ (M3_UNLIKELY(r)) {
+            _mem = ಸ್ಮರಣೆ->mallocated;
+#  ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
+            ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+                ಹಿಂತಿರುಗಿ ದಾಖಲೆ_ನಮೂದು_ಚೌಕಟ್ಟು(m3MemRuntime(_mem), _pc, _sp, ಸ್ಮರಣೆ, function);
             }
 #  endif
-            fillBacktraceFrame();
+            fill_Backtrace_ಚೌಕಟ್ಟು();
         }
         forwardTrap(r);
-#endif // d_m3EntryKeepsFrame
-    } else {
-        newTrap(m3Err_trapStackOverflow);
+#ಆದರೆ_ಅಂತ್ಯ // d_m3EntryKeepsFrame
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ರಾಶಿ_ಅತಿಪ್ರವಾಹ);
     }
 }
 
 
 d_m3Op(Loop)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_ರಾಶಿ();
 
     d_m3TracePrepare
 
@@ -1962,38 +1962,38 @@ d_m3Op(Loop)
 
     m3ret_t   r;
 
-    IM3Memory memory = m3MemInfo(_mem);
+    IM3_ಸ್ಮರಣೆ ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    do {
-#if d_m3EnableStrace >= 3
+    ಮಾಡು {
+#ಆದರೆ d_m3EnableStrace >= 3
         d_m3TracePrint("iter {");
-        trace_rt->callDepth++;
-#endif
-        r = nextOpImpl();
+        trace_rt->call_ಆಳ++;
+#ಆದರೆ_ಅಂತ್ಯ
+        r = ಮುಂದಿನ_Op_Impl();
 
-#if d_m3EnableStrace >= 3
-        trace_rt->callDepth--;
+#ಆದರೆ d_m3EnableStrace >= 3
+        trace_rt->call_ಆಳ--;
         d_m3TracePrint("}");
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
         // linear memory pointer needs refreshed here because the block it's looping over
         // can potentially invoke the grow operation.
-        _mem = memory->mallocated;
-    } while (r == _pc);
+        _mem = ಸ್ಮರಣೆ->mallocated;
+    } ಆಗ (r == _pc);
 
-#if d_m3HasStackSwitching
+#ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
     // The loop's identity is its own pc, which is also where its body starts,
     // so replaying it needs nothing else. Without this the continue sentinel
     // has no frame left to land in after a resume and gets mistaken for a trap.
-    if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-        return RecordLoopFrame(m3MemRuntime(_mem), _pc, _sp, memory);
+    ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+        ಹಿಂತಿರುಗಿ ದಾಖಲೆ_Loop_ಚೌಕಟ್ಟು(m3MemRuntime(_mem), _pc, _sp, ಸ್ಮರಣೆ);
     }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
     forwardTrap(r);
 }
 
 
-#if d_m3HasExceptionHandling
+#ಆದರೆ d_m3HasExceptionHandling
 
 // try_table. Like op_Loop this claims a native frame, and for the same reason:
 // a throw unwinds by returning m3Err_pendingException up the native stack, so
@@ -2010,48 +2010,48 @@ d_m3Op(Loop)
 // The handler stack is just a depth counter: an unwind stops at whichever frame
 // finds the count still standing at the value its own push produced, which is
 // the innermost try region that hasn't been popped.
-d_m3Op(TryTable)
+d_m3Op(Try_ಕೋಷ್ಟಕ)
 {
-    d_m3CheckNativeStack();
+    d_m3_Check_Native_ರಾಶಿ();
 
-    IM3Memory  memory = m3MemInfo(_mem);
+    IM3_ಸ್ಮರಣೆ  ಸ್ಮರಣೆ = m3MemInfo(_mem);
     IM3Runtime runtime = m3MemRuntime(_mem);
 
-    u32        numClauses = immediate(u32);
+    u32        ಅಂಕೆ_Clauses = ತಕ್ಷಣ(u32);
 
     pc_t       clauses = _pc;
-    pc_t       body = _pc + 2 * numClauses;
+    pc_t       body = _pc + 2 * ಅಂಕೆ_Clauses;
 
-    u32        depth = ++runtime->tryDepth;
+    u32        ಆಳ = ++runtime->try_ಆಳ;
 
     m3ret_t    r = jumpOpImpl(body);
 
     // the body can have grown linear memory out from under us
-    _mem = memory->mallocated;
+    _mem = ಸ್ಮರಣೆ->mallocated;
 
     // control is leaving this frame for good, so this try is done either way
-    bool isInnermost = (runtime->tryDepth == depth);
-    runtime->tryDepth = depth - 1;
+    bool isInnermost = (runtime->try_ಆಳ == ಆಳ);
+    runtime->try_ಆಳ = ಆಳ - 1;
 
-#  if d_m3HasStackSwitching
-    if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-        return RecordTryFrame(runtime, clauses, _sp, memory, numClauses, isInnermost);
+#  ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
+    ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+        ಹಿಂತಿರುಗಿ ದಾಖಲೆ_Try_ಚೌಕಟ್ಟು(runtime, clauses, _sp, ಸ್ಮರಣೆ, ಅಂಕೆ_Clauses, isInnermost);
     }
 #  endif
 
-    if (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
-        const M3Exception* exception = runtime->pendingException;
+    ಆದರೆ (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
+        ಸ್ಥಿರಾಂಕ M3Exception* exception = runtime->pendingException;
 
-        for (u32 i = 0; i < numClauses; ++i) {
-            IM3Tag tag = (IM3Tag)clauses[2 * i];
+        ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Clauses; ++i) {
+            IM3_ಟ್ಯಾಗ್ ಟ್ಯಾಗ್ = (IM3_ಟ್ಯಾಗ್)clauses[2 * i];
 
-            if (tag == NULL or tag == exception->tag) {
+            ಆದರೆ (ಟ್ಯಾಗ್ == ಖಾಲಿ or ಟ್ಯಾಗ್ == exception->ಟ್ಯಾಗ್) {
                 pc_t handler = (pc_t)clauses[2 * i + 1];
 
                 // an unwind leaves nothing meaningful in the registers
                 d_m3ClearRegisters
 
-                jumpOpDirect(handler);
+                jump_Op_ನೇರ(handler);
             }
         }
 
@@ -2075,30 +2075,30 @@ d_m3Op(CatchPayload)
     IM3Runtime   runtime = m3MemRuntime(_mem);
     M3Exception* exception = runtime->pendingException;
 
-    u32          numArgs = immediate(u32);
+    u32          ಅಂಕೆ_ವಾದಗಳು = ತಕ್ಷಣ(u32);
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 offset = immediate(i32);
-        u32 is64 = immediate(u32);
-        u64 value = exception->args[i];
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+        i32 offset = ತಕ್ಷಣ(i32);
+        u32 is64 = ತಕ್ಷಣ(u32);
+        u64 ಮೌಲ್ಯ = exception->ವಾದಗಳು[i];
 
-        if (is64) {
-            *(u64*)(_sp + offset) = value;
-        } else {
-            *(u32*)(_sp + offset) = (u32)value;
+        ಆದರೆ (is64) {
+            *(u64*)(_sp + offset) = ಮೌಲ್ಯ;
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            *(u32*)(_sp + offset) = (u32)ಮೌಲ್ಯ;
         }
     }
 
-    i32 refOffset = immediate(i32);
+    i32 ref_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
 
-    if (refOffset >= 0) {
-        *(M3Exception**)(_sp + refOffset) = exception;
+    ಆದರೆ (ref_ಸ್ಥಾನಾಂತರ >= 0) {
+        *(M3Exception**)(_sp + ref_ಸ್ಥಾನಾಂತರ) = exception;
         exception->reified = true;
-    } else if (not exception->reified) {
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (not exception->reified) {
         FreeException(runtime, exception);
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
@@ -2106,184 +2106,184 @@ d_m3Op(Throw)
 {
     IM3Runtime   runtime = m3MemRuntime(_mem);
 
-    IM3Tag       tag = immediate(IM3Tag);
-    u32          numArgs = immediate(u32);
+    IM3_ಟ್ಯಾಗ್       ಟ್ಯಾಗ್ = ತಕ್ಷಣ(IM3_ಟ್ಯಾಗ್);
+    u32          ಅಂಕೆ_ವಾದಗಳು = ತಕ್ಷಣ(u32);
 
-    M3Exception* exception = NewException(runtime, tag, numArgs);
+    M3Exception* exception = NewException(runtime, ಟ್ಯಾಗ್, ಅಂಕೆ_ವಾದಗಳು);
 
-    if (M3_UNLIKELY(not exception)) {
+    ಆದರೆ (M3_UNLIKELY(not exception)) {
         newTrap(m3Err_mallocFailed);
     }
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 offset = immediate(i32);
-        u32 is64 = immediate(u32);
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+        i32 offset = ತಕ್ಷಣ(i32);
+        u32 is64 = ತಕ್ಷಣ(u32);
 
-        exception->args[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
+        exception->ವಾದಗಳು[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
     }
 
     runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    ಹಿಂತಿರುಗಿ m3Err_pendingException;
 }
 
 
 d_m3Op(ThrowRef)
 {
-    M3Exception* exception = slot(M3Exception*);
+    M3Exception* exception = ಸ್ಥಾನ(M3Exception*);
 
-    if (M3_UNLIKELY(not exception)) {
+    ಆದರೆ (M3_UNLIKELY(not exception)) {
         newTrap(m3Err_trapNullReference);
     }
 
     m3MemRuntime(_mem)->pendingException = exception;
 
-    return m3Err_pendingException;
+    ಹಿಂತಿರುಗಿ m3Err_pendingException;
 }
 
 
 // Emitted where control leaves a try region without leaving op_TryTable's native
 // frame: falling out of the block's end, or branching past it. The count is how
 // many try regions the exit crosses.
-d_m3Op(PopHandlers)
+d_m3Op(ತೆಗೆ_Handlers)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
 
-    u32        count = immediate(u32);
+    u32        ಎಣಿಕೆ_2 = ತಕ್ಷಣ(u32);
 
-    runtime->tryDepth -= count;
+    runtime->try_ಆಳ -= ಎಣಿಕೆ_2;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
-#endif // d_m3HasExceptionHandling
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasExceptionHandling
 
-#if d_m3HasStackSwitching
+#ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
 
 d_m3Op(ContNew)
 {
     IM3Runtime  runtime = m3MemRuntime(_mem);
-    IM3FuncType funcType = immediate(IM3FuncType);
-    i32         dstSlot = immediate(i32);
-    i32         funcSlot = immediate(i32);
+    IM3FuncType funcType = ತಕ್ಷಣ(IM3FuncType);
+    i32         dst_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+    i32         func_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
 
-    IM3Function func = *(IM3Function*)(_sp + funcSlot);
-    if (M3_UNLIKELY(not func)) {
+    IM3Function func = *(IM3Function*)(_sp + func_ಸ್ಥಾನ);
+    ಆದರೆ (M3_UNLIKELY(not func)) {
         newTrap(m3Err_trapNullFunctionRef);
     }
 
     // refused before a record exists, so a trap here leaves nothing behind
-    if (M3_UNLIKELY(not Continuation_CanAcquireStack(runtime))) {
-        newTrap(m3Err_continuationLimitExceeded);
+    ಆದರೆ (M3_UNLIKELY(not Continuation_Can_Acquire_ರಾಶಿ(runtime))) {
+        newTrap(m3_Err_continuation_ಎಲ್ಲೆ_Exceeded);
     }
     IM3Continuation cont = Continuation_New(runtime, funcType, func);
-    if (M3_UNLIKELY(not cont)) {
+    ಆದರೆ (M3_UNLIKELY(not cont)) {
         newTrap(m3Err_mallocFailed);
     }
 
-    M3Result allocation = Continuation_AcquireStack(runtime, cont);
-    if (M3_UNLIKELY(allocation)) {
+    M3_ಫಲಿತಾಂಶ ಹಂಚಿಕೆ = Continuation_Acquire_ರಾಶಿ(runtime, cont);
+    ಆದರೆ (M3_UNLIKELY(ಹಂಚಿಕೆ)) {
         cont->state = cont_consumed;
-        newTrap(allocation);
+        newTrap(ಹಂಚಿಕೆ);
     }
-    *(IM3Continuation*)(_sp + dstSlot) = cont;
-    nextOp();
+    *(IM3Continuation*)(_sp + dst_ಸ್ಥಾನ) = cont;
+    ಮುಂದಿನ_Op();
 }
 
 
-static
+ಸ್ಥಿರ
 IM3Continuation InnermostSuspended (IM3Continuation i_cont);
 
 d_m3Op(ContBind)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3FuncType     ct1 = immediate(IM3FuncType);
-    IM3FuncType     ct2 = immediate(IM3FuncType);
-    i32             dstSlot = immediate(i32);
-    i32             contSlot = immediate(i32);
-    u32             numBound = immediate(u32);
+    IM3FuncType     ct1 = ತಕ್ಷಣ(IM3FuncType);
+    IM3FuncType     ct2 = ತಕ್ಷಣ(IM3FuncType);
+    i32             dst_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+    i32             cont_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+    u32             ಅಂಕೆ_Bound = ತಕ್ಷಣ(u32);
 
-    IM3Continuation srcCont = *(IM3Continuation*)(_sp + contSlot);
-    if (M3_UNLIKELY(not srcCont)) {
+    IM3Continuation srcCont = *(IM3Continuation*)(_sp + cont_ಸ್ಥಾನ);
+    ಆದರೆ (M3_UNLIKELY(not srcCont)) {
         newTrap(m3Err_trapNullContinuationRef);
     }
-    if (M3_UNLIKELY(srcCont->state == cont_consumed || srcCont->state == cont_running)) {
+    ಆದರೆ (M3_UNLIKELY(srcCont->state == cont_consumed || srcCont->state == cont_running)) {
         newTrap(m3Err_trapContinuationConsumed);
     }
 
-    IM3Continuation dstCont = Continuation_New(runtime, ct2, srcCont->entryFunction);
-    if (M3_UNLIKELY(not dstCont)) {
+    IM3Continuation dstCont = Continuation_New(runtime, ct2, srcCont->ನಮೂದು_Function);
+    ಆದರೆ (M3_UNLIKELY(not dstCont)) {
         newTrap(m3Err_mallocFailed);
     }
 
     // the bound continuation takes over the original's execution state whole,
     // recorded native frames included: binding a suspended continuation must
     // not cost it the frames it has to be resumed through
-    dstCont->entryFunction = srcCont->entryFunction;
-    dstCont->valStack = srcCont->valStack;
-    dstCont->numStackSlots = srcCont->numStackSlots;
-    dstCont->frames = srcCont->frames;
-    dstCont->framesCap = srcCont->framesCap;
-    dstCont->numFrames = srcCont->numFrames;
+    dstCont->ನಮೂದು_Function = srcCont->ನಮೂದು_Function;
+    dstCont->val_ರಾಶಿ = srcCont->val_ರಾಶಿ;
+    dstCont->ಅಂಕೆ_ರಾಶಿ_Slots = srcCont->ಅಂಕೆ_ರಾಶಿ_Slots;
+    dstCont->ಚೌಕಟ್ಟುಗಳು = srcCont->ಚೌಕಟ್ಟುಗಳು;
+    dstCont->ಚೌಕಟ್ಟುಗಳು_Cap = srcCont->ಚೌಕಟ್ಟುಗಳು_Cap;
+    dstCont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು = srcCont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು;
     dstCont->sp = srcCont->sp;
     dstCont->pc = srcCont->pc;
-    dstCont->suspendPoint = srcCont->suspendPoint;
+    dstCont->suspend_ಬಿಂದು = srcCont->suspend_ಬಿಂದು;
     dstCont->r0 = srcCont->r0;
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
     dstCont->fp0 = srcCont->fp0;
 #  endif
-    dstCont->boundArgsCount = srcCont->boundArgsCount;
+    dstCont->bound_ವಾದಗಳು_ಎಣಿಕೆ = srcCont->bound_ವಾದಗಳು_ಎಣಿಕೆ;
     dstCont->state = srcCont->state;
-#  if d_m3HasExceptionHandling
+#  ಆದರೆ d_m3HasExceptionHandling
     dstCont->resumeThrow = srcCont->resumeThrow;
-    srcCont->resumeThrow = NULL;
+    srcCont->resumeThrow = ಖಾಲಿ;
 #  endif
 
-    dstCont->numSuspendResults = srcCont->numSuspendResults;
-    for (u32 j = 0; j < srcCont->numSuspendResults; ++j) {
-        dstCont->suspendResultOffsets[j] = srcCont->suspendResultOffsets[j];
-        dstCont->suspendResultIs64[j] = srcCont->suspendResultIs64[j];
+    dstCont->ಅಂಕೆ_Suspend_Results = srcCont->ಅಂಕೆ_Suspend_Results;
+    ಗಾಗಿ (u32 j = 0; j < srcCont->ಅಂಕೆ_Suspend_Results; ++j) {
+        dstCont->suspend_ಫಲಿತಾಂಶ_Offsets[j] = srcCont->suspend_ಫಲಿತಾಂಶ_Offsets[j];
+        dstCont->suspend_ಫಲಿತಾಂಶ_Is64[j] = srcCont->suspend_ಫಲಿತಾಂಶ_Is64[j];
     }
 
-    if (dstCont->state == cont_allocated) {
-        u16 numRets = ct1->contFuncType ? GetFuncTypeNumResults(ct1->contFuncType) : 0;
-        for (u32 i = 0; i < numBound; ++i) {
-            i32 argSlot = immediate(i32);
-            u32 is64 = immediate(u32);
-            u32 targetIdx = (numRets + dstCont->boundArgsCount) * c_ioSlotCount;
-            if (is64) {
-                *(u64*)(dstCont->valStack + targetIdx) = *(u64*)(_sp + argSlot);
-            } else {
-                *(u32*)(dstCont->valStack + targetIdx) = *(u32*)(_sp + argSlot);
+    ಆದರೆ (dstCont->state == cont_allocated) {
+        u16 ಅಂಕೆ_Rets = ct1->contFuncType ? Get_Func_Type_ಅಂಕೆ_Results(ct1->contFuncType) : 0;
+        ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Bound; ++i) {
+            i32 arg_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+            u32 is64 = ತಕ್ಷಣ(u32);
+            u32 ಗುರಿ_Idx = (ಅಂಕೆ_Rets + dstCont->bound_ವಾದಗಳು_ಎಣಿಕೆ) * c_io_ಸ್ಥಾನ_ಎಣಿಕೆ;
+            ಆದರೆ (is64) {
+                *(u64*)(dstCont->val_ರಾಶಿ + ಗುರಿ_Idx) = *(u64*)(_sp + arg_ಸ್ಥಾನ);
+            } ಇಲ್ಲದಿದ್ದರೆ {
+                *(u32*)(dstCont->val_ರಾಶಿ + ಗುರಿ_Idx) = *(u32*)(_sp + arg_ಸ್ಥಾನ);
             }
-            dstCont->boundArgsCount++;
+            dstCont->bound_ವಾದಗಳು_ಎಣಿಕೆ++;
         }
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         IM3Continuation inner = InnermostSuspended(dstCont);
-        for (u32 i = 0; i < numBound; ++i) {
-            i32 argSlot = immediate(i32);
-            u32 is64 = immediate(u32);
-            u32 dstIdx = dstCont->boundArgsCount;
-            if (dstIdx < inner->numSuspendResults) {
-                i32 dstOffset = inner->suspendResultOffsets[dstIdx];
-                if (is64) {
-                    *(u64*)(inner->sp + dstOffset) = *(u64*)(_sp + argSlot);
-                } else {
-                    *(u32*)(inner->sp + dstOffset) = *(u32*)(_sp + argSlot);
+        ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Bound; ++i) {
+            i32 arg_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+            u32 is64 = ತಕ್ಷಣ(u32);
+            u32 dstIdx = dstCont->bound_ವಾದಗಳು_ಎಣಿಕೆ;
+            ಆದರೆ (dstIdx < inner->ಅಂಕೆ_Suspend_Results) {
+                i32 dst_ಸ್ಥಾನಾಂತರ = inner->suspend_ಫಲಿತಾಂಶ_Offsets[dstIdx];
+                ಆದರೆ (is64) {
+                    *(u64*)(inner->sp + dst_ಸ್ಥಾನಾಂತರ) = *(u64*)(_sp + arg_ಸ್ಥಾನ);
+                } ಇಲ್ಲದಿದ್ದರೆ {
+                    *(u32*)(inner->sp + dst_ಸ್ಥಾನಾಂತರ) = *(u32*)(_sp + arg_ಸ್ಥಾನ);
                 }
             }
-            dstCont->boundArgsCount++;
+            dstCont->bound_ವಾದಗಳು_ಎಣಿಕೆ++;
         }
     }
 
-    srcCont->valStack = NULL;
-    srcCont->frames = NULL;
-    srcCont->framesCap = 0;
-    srcCont->numFrames = 0;
+    srcCont->val_ರಾಶಿ = ಖಾಲಿ;
+    srcCont->ಚೌಕಟ್ಟುಗಳು = ಖಾಲಿ;
+    srcCont->ಚೌಕಟ್ಟುಗಳು_Cap = 0;
+    srcCont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು = 0;
     srcCont->state = cont_consumed;
 
-    *(IM3Continuation*)(_sp + dstSlot) = dstCont;
-    nextOp();
+    *(IM3Continuation*)(_sp + dst_ಸ್ಥಾನ) = dstCont;
+    ಮುಂದಿನ_Op();
 }
 
 
@@ -2292,29 +2292,29 @@ d_m3Op(ContBind)
 // 0 for (on $e $l), 1 for (on $e switch). The spec is explicit that the search
 // walks past a handler of the wrong sort even when the tag matches, so the
 // kind is part of the match rather than something checked afterwards.
-static
-IM3Continuation FindHandler (IM3Continuation i_cont, IM3Tag i_tag, u8 i_kind, pc_t* o_stubPC)
+ಸ್ಥಿರ
+IM3Continuation ಕಂಡುಹಿಡಿ_Handler (IM3Continuation i_cont, IM3_ಟ್ಯಾಗ್ i_ಟ್ಯಾಗ್, u8 i_ಬಗೆ, pc_t* o_stubPC)
 {
-    IM3Tag queryTag = (i_tag and i_tag->resolved) ? i_tag->resolved : i_tag;
+    IM3_ಟ್ಯಾಗ್ query_ಟ್ಯಾಗ್ = (i_ಟ್ಯಾಗ್ and i_ಟ್ಯಾಗ್->resolved) ? i_ಟ್ಯಾಗ್->resolved : i_ಟ್ಯಾಗ್;
 
-    for (IM3Continuation cont = i_cont; cont; cont = cont->parent) {
-        for (u32 h = 0; h < cont->numHandlers; ++h) {
-            pc_t   entry = cont->handlersPC + (h * 3);
-            IM3Tag handlerTag = (IM3Tag)(*(entry + 1));
-            if (handlerTag and handlerTag->resolved) {
-                handlerTag = handlerTag->resolved;
+    ಗಾಗಿ (IM3Continuation cont = i_cont; cont; cont = cont->ಪೋಷಕ) {
+        ಗಾಗಿ (u32 h = 0; h < cont->ಅಂಕೆ_Handlers; ++h) {
+            pc_t   ನಮೂದು = cont->handlersPC + (h * 3);
+            IM3_ಟ್ಯಾಗ್ handler_ಟ್ಯಾಗ್ = (IM3_ಟ್ಯಾಗ್)(*(ನಮೂದು + 1));
+            ಆದರೆ (handler_ಟ್ಯಾಗ್ and handler_ಟ್ಯಾಗ್->resolved) {
+                handler_ಟ್ಯಾಗ್ = handler_ಟ್ಯಾಗ್->resolved;
             }
 
-            if ((u32)(uintptr_t)(*entry) == i_kind and handlerTag == queryTag) {
-                if (o_stubPC) {
-                    *o_stubPC = (pc_t)(*(entry + 2));
+            ಆದರೆ ((u32)(uintptr_t)(*ನಮೂದು) == i_ಬಗೆ and handler_ಟ್ಯಾಗ್ == query_ಟ್ಯಾಗ್) {
+                ಆದರೆ (o_stubPC) {
+                    *o_stubPC = (pc_t)(*(ನಮೂದು + 2));
                 }
-                return cont;
+                ಹಿಂತಿರುಗಿ cont;
             }
         }
     }
 
-    return NULL;
+    ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 
@@ -2322,14 +2322,14 @@ IM3Continuation FindHandler (IM3Continuation i_cont, IM3Tag i_tag, u8 i_kind, pc
 // Until something writes them they are part of the suspended frame holding
 // nothing, and a snapshot taken meanwhile reads each one as the type it will
 // have: a reference there has to be null rather than whatever the slot held.
-static
-void ClearSuspendResults (IM3Continuation io_cont, m3stack_t i_sp)
+ಸ್ಥಿರ
+ಶೂನ್ಯ ClearSuspendResults (IM3Continuation io_cont, m3stack_t i_sp)
 {
-    for (u32 i = 0; i < io_cont->numSuspendResults; ++i) {
-        if (io_cont->suspendResultIs64[i]) {
-            *(u64*)(i_sp + io_cont->suspendResultOffsets[i]) = 0;
-        } else {
-            *(m3slot_t*)(i_sp + io_cont->suspendResultOffsets[i]) = 0;
+    ಗಾಗಿ (u32 i = 0; i < io_cont->ಅಂಕೆ_Suspend_Results; ++i) {
+        ಆದರೆ (io_cont->suspend_ಫಲಿತಾಂಶ_Is64[i]) {
+            *(u64*)(i_sp + io_cont->suspend_ಫಲಿತಾಂಶ_Offsets[i]) = 0;
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            *(m3slot_t*)(i_sp + io_cont->suspend_ಫಲಿತಾಂಶ_Offsets[i]) = 0;
         }
     }
 }
@@ -2338,83 +2338,83 @@ void ClearSuspendResults (IM3Continuation io_cont, m3stack_t i_sp)
 d_m3Op(Suspend)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3Continuation cont = runtime->activeContinuation;
-    if (M3_UNLIKELY(not cont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    IM3Continuation cont = runtime->ಸಕ್ರಿಯ_Continuation;
+    ಆದರೆ (M3_UNLIKELY(not cont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್);
     }
 
-    IM3Tag tag = immediate(IM3Tag);
-    u32    numParams = immediate(u32);
+    IM3_ಟ್ಯಾಗ್ ಟ್ಯಾಗ್ = ತಕ್ಷಣ(IM3_ಟ್ಯಾಗ್);
+    u32    ಅಂಕೆ_Params = ತಕ್ಷಣ(u32);
 
-    runtime->numSuspendPayload = numParams;
-    for (u32 i = 0; i < numParams; ++i) {
-        i32 paramSlot = immediate(i32);
-        u32 is64 = immediate(u32);
-        if (is64) {
-            runtime->suspendPayload[i] = *(u64*)(_sp + paramSlot);
-        } else {
-            runtime->suspendPayload[i] = (u64) * (u32*)(_sp + paramSlot);
+    runtime->ಅಂಕೆ_Suspend_Payload = ಅಂಕೆ_Params;
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Params; ++i) {
+        i32 param_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+        u32 is64 = ತಕ್ಷಣ(u32);
+        ಆದರೆ (is64) {
+            runtime->suspendPayload[i] = *(u64*)(_sp + param_ಸ್ಥಾನ);
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            runtime->suspendPayload[i] = (u64) * (u32*)(_sp + param_ಸ್ಥಾನ);
         }
         runtime->suspendPayloadIs64[i] = is64;
     }
 
-    u32 numResults = immediate(u32);
-    cont->numSuspendResults = numResults;
-    for (u32 i = 0; i < numResults; ++i) {
-        cont->suspendResultOffsets[i] = immediate(i32);
-        cont->suspendResultIs64[i] = immediate(u32);
+    u32 ಅಂಕೆ_Results = ತಕ್ಷಣ(u32);
+    cont->ಅಂಕೆ_Suspend_Results = ಅಂಕೆ_Results;
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Results; ++i) {
+        cont->suspend_ಫಲಿತಾಂಶ_Offsets[i] = ತಕ್ಷಣ(i32);
+        cont->suspend_ಫಲಿತಾಂಶ_Is64[i] = ತಕ್ಷಣ(u32);
     }
 
     ClearSuspendResults(cont, _sp);
 
-    pc_t            matchedStubPC = NULL;
-    IM3Continuation searchCont = FindHandler(cont, tag, 0, &matchedStubPC);
+    pc_t            matchedStubPC = ಖಾಲಿ;
+    IM3Continuation ಹುಡುಕು_Cont = ಕಂಡುಹಿಡಿ_Handler(cont, ಟ್ಯಾಗ್, 0, &matchedStubPC);
 
-    if (M3_UNLIKELY(not searchCont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    ಆದರೆ (M3_UNLIKELY(not ಹುಡುಕು_Cont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್);
     }
 
     runtime->suspendStubPC = matchedStubPC;
-    runtime->suspendHandlerCont = searchCont;
-    runtime->switchTarget = NULL;
-    runtime->suspendTag = tag;
+    runtime->suspendHandlerCont = ಹುಡುಕು_Cont;
+    runtime->switch_ಗುರಿ = ಖಾಲಿ;
+    runtime->suspend_ಟ್ಯಾಗ್ = ಟ್ಯಾಗ್;
 
     cont->pc = _pc;
-    cont->suspendPoint = safepoint_suspend;
+    cont->suspend_ಬಿಂದು = safepoint_suspend;
     cont->sp = _sp;
     cont->r0 = _r0;
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
     cont->fp0 = _fp0;
 #  endif
-    cont->boundArgsCount = 0;
+    cont->bound_ವಾದಗಳು_ಎಣಿಕೆ = 0;
 
-    return m3Err_continuationSuspended;
+    ಹಿಂತಿರುಗಿ m3Err_continuationSuspended;
 }
 
 
 // ReplayFrames and RunUnderHandlers call each other: a captured resume is a
 // frame like any other, and what it stands back up is a continuation with
 // frames of its own.
-static
-m3ret_t RunUnderHandlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
-                          pc_t i_handlersPC, u32 i_numHandlers, M3MemoryHeader** io_mem);
-static
-void TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp,
-                              pc_t i_resultsPC, u32 i_numResults);
-static
-m3ret_t ResumePastCheck (IM3Continuation i_cont, M3MemoryHeader* _mem);
+ಸ್ಥಿರ
+m3ret_t ಸತತ_Under_Handlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
+                          pc_t i_handlersPC, u32 i_ಅಂಕೆ_Handlers, M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ** io_mem);
+ಸ್ಥಿರ
+ಶೂನ್ಯ TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp,
+                              pc_t i_resultsPC, u32 i_ಅಂಕೆ_Results);
+ಸ್ಥಿರ
+m3ret_t ResumePastCheck (IM3Continuation i_cont, M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* _mem);
 
 // Whether the suspension point a replay has come down to is resumed past its
 // check. Only the first one reached answers to m3_ResumeRuntime's request: that
 // is the one the runtime paused at, and whatever it is, the request is spent.
-static inline
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ
 bool ResumesPastCheck (IM3Runtime io_runtime, IM3Continuation i_cont)
 {
     bool pass = io_runtime->resumePastCheck;
 
     io_runtime->resumePastCheck = false;
 
-    return pass and (i_cont->suspendPoint == safepoint_op or i_cont->suspendPoint == safepoint_entry);
+    ಹಿಂತಿರುಗಿ pass and (i_cont->suspend_ಬಿಂದು == safepoint_op or i_cont->suspend_ಬಿಂದು == safepoint_ನಮೂದು);
 }
 
 
@@ -2432,211 +2432,211 @@ bool ResumesPastCheck (IM3Runtime io_runtime, IM3Continuation i_cont)
 // inside the chain being rebuilt here. That second suspend refills frames[]
 // from index 0 while this walk is still in it, which is why every level takes
 // its own copy of the frame on the way down, before anything can run.
-static
-m3ret_t ReplayFrames (IM3Continuation i_cont, i32 i_depth, M3MemoryHeader* _mem)
+ಸ್ಥಿರ
+m3ret_t Replay_ಚೌಕಟ್ಟುಗಳು (IM3Continuation i_cont, i32 i_ಆಳ, M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* _mem)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
     m3ret_t    r = m3Err_none;
 
-#  if d_m3MaxNativeStack > 0
+#  ಆದರೆ d_m3_Max_Native_ರಾಶಿ > 0
     {
-        void* limit = runtime->stackLimit;
+        ಶೂನ್ಯ* ಎಲ್ಲೆ = runtime->ರಾಶಿ_ಎಲ್ಲೆ;
 
-        if (M3_UNLIKELY(limit and m3_NativeStackPtr() < limit)) {
-            return m3Err_trapStackOverflow;
+        ಆದರೆ (M3_UNLIKELY(ಎಲ್ಲೆ and m3_Native_ರಾಶಿ_Ptr() < ಎಲ್ಲೆ)) {
+            ಹಿಂತಿರುಗಿ m3_Err_trap_ರಾಶಿ_ಅತಿಪ್ರವಾಹ;
         }
     }
 #  endif
 
-    if (i_depth < 0) {
+    ಆದರೆ (i_ಆಳ < 0) {
         bool pastCheck = ResumesPastCheck(runtime, i_cont);
 
-#  if d_m3HasExceptionHandling
+#  ಆದರೆ d_m3HasExceptionHandling
         // resume_throw stops here: rather than carrying on from the suspension
         // point, the exception is raised at it and travels back out through the
         // try regions this walk has just rebuilt above
-        if (M3_UNLIKELY(i_cont->resumeThrow)) {
+        ಆದರೆ (M3_UNLIKELY(i_cont->resumeThrow)) {
             runtime->pendingException = i_cont->resumeThrow;
-            i_cont->resumeThrow = NULL;
+            i_cont->resumeThrow = ಖಾಲಿ;
 
-            return m3Err_pendingException;
+            ಹಿಂತಿರುಗಿ m3Err_pendingException;
         }
 #  endif
-        if (pastCheck) {
-            return ResumePastCheck(i_cont, _mem);
+        ಆದರೆ (pastCheck) {
+            ಹಿಂತಿರುಗಿ ResumePastCheck(i_cont, _mem);
         }
 
-        return d_m3CallWithRegs(i_cont->pc, i_cont->sp, _mem, i_cont->r0, i_cont->fp0);
+        ಹಿಂತಿರುಗಿ d_m3CallWithRegs(i_cont->pc, i_cont->sp, _mem, i_cont->r0, i_cont->fp0);
     }
 
-    M3Frame frame = i_cont->frames[i_depth];
+    M3_ಚೌಕಟ್ಟು ಚೌಕಟ್ಟು = i_cont->ಚೌಕಟ್ಟುಗಳು[i_ಆಳ];
 
     // frame_try brackets the recursion with its own bookkeeping, and
     // frame_resume descends into another continuation entirely, so neither
     // shares this one
-    bool    ownDescent = ((M3FrameKind)frame.kind == frame_resume);
+    bool    ownDescent = ((M3_ಚೌಕಟ್ಟು_ಬಗೆ)ಚೌಕಟ್ಟು.ಬಗೆ == ಚೌಕಟ್ಟು_resume);
 
-#  if d_m3HasExceptionHandling
-    ownDescent = ownDescent or ((M3FrameKind)frame.kind == frame_try);
+#  ಆದರೆ d_m3HasExceptionHandling
+    ownDescent = ownDescent or ((M3_ಚೌಕಟ್ಟು_ಬಗೆ)ಚೌಕಟ್ಟು.ಬಗೆ == ಚೌಕಟ್ಟು_try);
 #  endif
 
-    if (not ownDescent) {
-        r = ReplayFrames(i_cont, i_depth - 1, _mem);
-        _mem = frame.memory->mallocated;
+    ಆದರೆ (not ownDescent) {
+        r = Replay_ಚೌಕಟ್ಟುಗಳು(i_cont, i_ಆಳ - 1, _mem);
+        _mem = ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ->mallocated;
     }
 
-    switch ((M3FrameKind)frame.kind) {
-    case frame_call:
-        if (M3_LIKELY(not r)) {
+    ಆಯ್ಕೆ ((M3_ಚೌಕಟ್ಟು_ಬಗೆ)ಚೌಕಟ್ಟು.ಬಗೆ) {
+    ಸ್ಥಿತಿ ಚೌಕಟ್ಟು_call:
+        ಆದರೆ (M3_LIKELY(not r)) {
             // the callee returned: carry on in the caller, with the registers
             // op_Call's own frame had been holding across the call
-            return d_m3CallWithRegs(frame.pc, frame.sp, _mem, frame.call.r0, frame.call.fp0);
+            ಹಿಂತಿರುಗಿ d_m3CallWithRegs(ಚೌಕಟ್ಟು.pc, ಚೌಕಟ್ಟು.sp, _mem, ಚೌಕಟ್ಟು.call.r0, ಚೌಕಟ್ಟು.call.fp0);
         }
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            return Continuation_RecordFrame(runtime, &frame);
+        ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(runtime, &ಚೌಕಟ್ಟು);
         }
-#  if d_m3RecordBacktraces
-        PushBacktraceFrame(runtime, frame.pc - 1);
+#  ಆದರೆ d_m3_ದಾಖಲೆ_Backtraces
+        ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು(runtime, ಚೌಕಟ್ಟು.pc - 1);
 #  endif
-        return r;
+        ಹಿಂತಿರುಗಿ r;
 
-    case frame_loop: {
-        m3stack_t _sp = frame.sp;
+    ಸ್ಥಿತಿ ಚೌಕಟ್ಟು_loop: {
+        m3stack_t _sp = ಚೌಕಟ್ಟು.sp;
         m3reg_t   _r0 = 0;
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
         f64 _fp0 = 0.;
 #  endif
         // op_Loop's protocol: the body hands its own pc back to ask for
         // another lap. Dispatched the way op_Loop dispatches it, so a yield
         // hook sees the same back edges it always did.
-        while (r == (m3ret_t)frame.pc) {
-            r = jumpOpImpl(frame.pc);
-            _mem = frame.memory->mallocated;
+        ಆಗ (r == (m3ret_t)ಚೌಕಟ್ಟು.pc) {
+            r = jumpOpImpl(ಚೌಕಟ್ಟು.pc);
+            _mem = ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ->mallocated;
         }
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            return Continuation_RecordFrame(runtime, &frame);
+        ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(runtime, &ಚೌಕಟ್ಟು);
         }
-        return r;
+        ಹಿಂತಿರುಗಿ r;
     }
 
-#  if d_m3HasExceptionHandling
-    case frame_try: {
-        m3stack_t _sp = frame.sp;
+#  ಆದರೆ d_m3HasExceptionHandling
+    ಸ್ಥಿತಿ ಚೌಕಟ್ಟು_try: {
+        m3stack_t _sp = ಚೌಕಟ್ಟು.sp;
         m3reg_t   _r0 = 0;
-#    if d_m3HasFloat
+#    ಆದರೆ d_m3HasFloat
         f64 _fp0 = 0.;
 #    endif
-        (void)_sp;
-        (void)_r0;
-#    if d_m3HasFloat
-        (void)_fp0;
+        (ಶೂನ್ಯ)_sp;
+        (ಶೂನ್ಯ)_r0;
+#    ಆದರೆ d_m3HasFloat
+        (ಶೂನ್ಯ)_fp0;
 #    endif
 
         // this try region is standing again, so it counts towards the depth
         // once more - unless op_PopHandlers had already retired it before the
         // suspend, in which case it is only here to be walked past
-        u32 depth = ++runtime->tryDepth;
+        u32 ಆಳ = ++runtime->try_ಆಳ;
 
-        if (not frame.try_.handlersLive) {
-            runtime->tryDepth = depth - 1;
+        ಆದರೆ (not ಚೌಕಟ್ಟು.try_.handlers_ಜೀವಂತ) {
+            runtime->try_ಆಳ = ಆಳ - 1;
         }
 
-        r = ReplayFrames(i_cont, i_depth - 1, _mem);
-        _mem = frame.memory->mallocated;
+        r = Replay_ಚೌಕಟ್ಟುಗಳು(i_cont, i_ಆಳ - 1, _mem);
+        _mem = ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ->mallocated;
 
-        bool isInnermost = (runtime->tryDepth == depth);
-        runtime->tryDepth = depth - 1;
+        bool isInnermost = (runtime->try_ಆಳ == ಆಳ);
+        runtime->try_ಆಳ = ಆಳ - 1;
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            frame.try_.handlersLive = isInnermost;
-            return Continuation_RecordFrame(runtime, &frame);
+        ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            ಚೌಕಟ್ಟು.try_.handlers_ಜೀವಂತ = isInnermost;
+            ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(runtime, &ಚೌಕಟ್ಟು);
         }
 
-        if (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
-            const M3Exception* exception = runtime->pendingException;
+        ಆದರೆ (M3_UNLIKELY(r == m3Err_pendingException) and isInnermost) {
+            ಸ್ಥಿರಾಂಕ M3Exception* exception = runtime->pendingException;
 
-            for (u32 i = 0; i < frame.try_.numClauses; ++i) {
-                IM3Tag tag = (IM3Tag)frame.pc[2 * i];
+            ಗಾಗಿ (u32 i = 0; i < ಚೌಕಟ್ಟು.try_.ಅಂಕೆ_Clauses; ++i) {
+                IM3_ಟ್ಯಾಗ್ ಟ್ಯಾಗ್ = (IM3_ಟ್ಯಾಗ್)ಚೌಕಟ್ಟು.pc[2 * i];
 
-                if (tag == NULL or tag == exception->tag) {
-                    pc_t handler = (pc_t)frame.pc[2 * i + 1];
+                ಆದರೆ (ಟ್ಯಾಗ್ == ಖಾಲಿ or ಟ್ಯಾಗ್ == exception->ಟ್ಯಾಗ್) {
+                    pc_t handler = (pc_t)ಚೌಕಟ್ಟು.pc[2 * i + 1];
 
                     d_m3ClearRegisters
 
                     // op_TryTable hands its frame to the handler, but this is
                     // not an operation and cannot: the replay stands in for
                     // that frame, so it keeps it and passes the answer on.
-                    return jumpOpImpl(handler);
+                    ಹಿಂತಿರುಗಿ jumpOpImpl(handler);
                 }
             }
         }
-        return r;
+        ಹಿಂತಿರುಗಿ r;
     }
 #  endif
 
-    case frame_resume: {
+    ಸ್ಥಿತಿ ಚೌಕಟ್ಟು_resume: {
         // A resume that the suspend passed straight through. Standing it up
         // again means running the continuation it had under it, under the same
         // handlers - and that continuation carries the suspension point, so it
         // is where the rest of the replay happens.
-        IM3Continuation inner = frame.resume.cont;
+        IM3Continuation inner = ಚೌಕಟ್ಟು.resume.cont;
 
-        r = RunUnderHandlers(runtime, &inner, frame.resume.handlersPC,
-                             frame.resume.numHandlers, &_mem);
+        r = ಸತತ_Under_Handlers(runtime, &inner, ಚೌಕಟ್ಟು.resume.handlersPC,
+                             ಚೌಕಟ್ಟು.resume.ಅಂಕೆ_Handlers, &_mem);
 
-        if (r == m3Err_none) {
+        ಆದರೆ (r == m3Err_none) {
             inner->state = cont_consumed;
 
-            TakeContinuationResults(inner, frame.sp, frame.resume.resultsPC,
-                                    frame.resume.numResults);
-            Continuation_RecycleStack(runtime, inner);
+            TakeContinuationResults(inner, ಚೌಕಟ್ಟು.sp, ಚೌಕಟ್ಟು.resume.resultsPC,
+                                    ಚೌಕಟ್ಟು.resume.ಅಂಕೆ_Results);
+            Continuation_Recycle_ರಾಶಿ(runtime, inner);
 
-            return d_m3CallWithRegs(frame.pc, frame.sp, _mem, 0, 0.);
+            ಹಿಂತಿರುಗಿ d_m3CallWithRegs(ಚೌಕಟ್ಟು.pc, ಚೌಕಟ್ಟು.sp, _mem, 0, 0.);
         }
 
-        if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-            if (runtime->suspendHandlerCont != inner) {
-                frame.resume.cont = inner;
-                return Continuation_RecordFrame(runtime, &frame);
+        ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+            ಆದರೆ (runtime->suspendHandlerCont != inner) {
+                ಚೌಕಟ್ಟು.resume.cont = inner;
+                ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(runtime, &ಚೌಕಟ್ಟು);
             }
 
             IM3Continuation suspended = Continuation_ForkSuspended(runtime, inner);
-            if (M3_UNLIKELY(not suspended)) {
-                return m3Err_mallocFailed;
+            ಆದರೆ (M3_UNLIKELY(not suspended)) {
+                ಹಿಂತಿರುಗಿ m3Err_mallocFailed;
             }
             runtime->suspendedContinuation = suspended;
-            if (runtime->suspendStubPC) {
-                return d_m3CallWithRegs(runtime->suspendStubPC, frame.sp, _mem, 0, 0.);
-            } else {
-                return m3Err_trapUnhandledControlTag;
+            ಆದರೆ (runtime->suspendStubPC) {
+                ಹಿಂತಿರುಗಿ d_m3CallWithRegs(runtime->suspendStubPC, ಚೌಕಟ್ಟು.sp, _mem, 0, 0.);
+            } ಇಲ್ಲದಿದ್ದರೆ {
+                ಹಿಂತಿರುಗಿ m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್;
             }
-        } else {
+        } ಇಲ್ಲದಿದ್ದರೆ {
             inner->state = cont_consumed;
-            Continuation_RecycleStack(runtime, inner);
+            Continuation_Recycle_ರಾಶಿ(runtime, inner);
         }
 
-        return r;
+        ಹಿಂತಿರುಗಿ r;
     }
 
-#  if d_m3EntryKeepsFrame
-    case frame_entry:
-        if (M3_UNLIKELY(r)) {
-            if (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
-                return Continuation_RecordFrame(runtime, &frame);
+#  ಆದರೆ d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
+    ಸ್ಥಿತಿ ಚೌಕಟ್ಟು_ನಮೂದು:
+        ಆದರೆ (M3_UNLIKELY(r)) {
+            ಆದರೆ (M3_UNLIKELY(r == m3Err_continuationSuspended)) {
+                ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(runtime, &ಚೌಕಟ್ಟು);
             }
-#    if d_m3RecordBacktraces
-            FillBacktraceFunctionInfo(runtime, frame.entry.function);
-#    else
-            (void)frame.entry.function;
+#    ಆದರೆ d_m3_ದಾಖಲೆ_Backtraces
+            FillBacktraceFunctionInfo(runtime, ಚೌಕಟ್ಟು.ನಮೂದು.function);
+#    ಇಲ್ಲದಿದ್ದರೆ
+            (ಶೂನ್ಯ)ಚೌಕಟ್ಟು.ನಮೂದು.function;
 #    endif
         }
-        return r;
+        ಹಿಂತಿರುಗಿ r;
 #  endif
     }
 
-    return r;
+    ಹಿಂತಿರುಗಿ r;
 }
 
 
@@ -2644,52 +2644,52 @@ m3ret_t ReplayFrames (IM3Continuation i_cont, i32 i_depth, M3MemoryHeader* _mem)
 // started yet takes them as the arguments of its entry frame, laid out above
 // its return slots; one that is suspended takes them in the slots its own
 // suspend or switch left waiting.
-static
-void* ContinuationArgDest (IM3Continuation i_cont, u32 i_index)
+ಸ್ಥಿರ
+ಶೂನ್ಯ* ContinuationArgDest (IM3Continuation i_cont, u32 i_ಸೂಚ್ಯಂಕ)
 {
-    if (i_cont->state == cont_allocated) {
-        IM3FuncType inner = i_cont->type ? i_cont->type->contFuncType : NULL;
-        u16         numRets = inner ? GetFuncTypeNumResults(inner) : 0;
+    ಆದರೆ (i_cont->state == cont_allocated) {
+        IM3FuncType inner = i_cont->type ? i_cont->type->contFuncType : ಖಾಲಿ;
+        u16         ಅಂಕೆ_Rets = inner ? Get_Func_Type_ಅಂಕೆ_Results(inner) : 0;
 
-        return i_cont->valStack + (numRets + i_index) * c_ioSlotCount;
+        ಹಿಂತಿರುಗಿ i_cont->val_ರಾಶಿ + (ಅಂಕೆ_Rets + i_ಸೂಚ್ಯಂಕ) * c_io_ಸ್ಥಾನ_ಎಣಿಕೆ;
     }
 
-    if (i_index < i_cont->numSuspendResults) {
-        return i_cont->sp + i_cont->suspendResultOffsets[i_index];
+    ಆದರೆ (i_ಸೂಚ್ಯಂಕ < i_cont->ಅಂಕೆ_Suspend_Results) {
+        ಹಿಂತಿರುಗಿ i_cont->sp + i_cont->suspend_ಫಲಿತಾಂಶ_Offsets[i_ಸೂಚ್ಯಂಕ];
     }
 
-    return NULL;
+    ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 
 // Hands a switch's payload to the peer, and after it the continuation that
 // switched away - the reference that lets the peer come back this way.
-static
-void HandOverToPeer (IM3Runtime i_runtime, IM3Continuation io_peer, IM3Continuation i_from)
+ಸ್ಥಿರ
+ಶೂನ್ಯ Hand_Over_ಗಮ್ಯ_Peer (IM3Runtime i_runtime, IM3Continuation io_peer, IM3Continuation i_from)
 {
-    u32 numArgs = i_runtime->numSuspendPayload;
-    u32 base = (io_peer->state == cont_allocated) ? io_peer->boundArgsCount : 0;
+    u32 ಅಂಕೆ_ವಾದಗಳು = i_runtime->ಅಂಕೆ_Suspend_Payload;
+    u32 ತಳ = (io_peer->state == cont_allocated) ? io_peer->bound_ವಾದಗಳು_ಎಣಿಕೆ : 0;
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        void* dest = ContinuationArgDest(io_peer, base + i);
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+        ಶೂನ್ಯ* dest = ContinuationArgDest(io_peer, ತಳ + i);
 
-        if (dest) {
-            if (i_runtime->suspendPayloadIs64[i]) {
+        ಆದರೆ (dest) {
+            ಆದರೆ (i_runtime->suspendPayloadIs64[i]) {
                 *(u64*)dest = i_runtime->suspendPayload[i];
-            } else {
+            } ಇಲ್ಲದಿದ್ದರೆ {
                 *(u32*)dest = (u32)i_runtime->suspendPayload[i];
             }
         }
     }
 
-    void* refDest = ContinuationArgDest(io_peer, base + numArgs);
+    ಶೂನ್ಯ* refDest = ContinuationArgDest(io_peer, ತಳ + ಅಂಕೆ_ವಾದಗಳು);
 
-    if (refDest) {
+    ಆದರೆ (refDest) {
         *(IM3Continuation*)refDest = i_from;
     }
 
-    if (io_peer->state == cont_allocated) {
-        io_peer->boundArgsCount += numArgs + 1;
+    ಆದರೆ (io_peer->state == cont_allocated) {
+        io_peer->bound_ವಾದಗಳು_ಎಣಿಕೆ += ಅಂಕೆ_ವಾದಗಳು + 1;
     }
 }
 
@@ -2702,14 +2702,14 @@ void HandOverToPeer (IM3Runtime i_runtime, IM3Continuation io_peer, IM3Continuat
 // at the bottom of it, and so the one whose waiting slots any values handed to
 // the capture belong in. A resume the suspend travelled through leaves its
 // record at the foot of the frame list, which is the link to follow.
-static
+ಸ್ಥಿರ
 IM3Continuation InnermostSuspended (IM3Continuation i_cont)
 {
-    while (i_cont->numFrames and (M3FrameKind) i_cont->frames[0].kind == frame_resume) {
-        i_cont = i_cont->frames[0].resume.cont;
+    ಆಗ (i_cont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು and (M3_ಚೌಕಟ್ಟು_ಬಗೆ) i_cont->ಚೌಕಟ್ಟುಗಳು[0].ಬಗೆ == ಚೌಕಟ್ಟು_resume) {
+        i_cont = i_cont->ಚೌಕಟ್ಟುಗಳು[0].resume.cont;
     }
 
-    return i_cont;
+    ಹಿಂತಿರುಗಿ i_cont;
 }
 
 
@@ -2717,115 +2717,115 @@ IM3Continuation InnermostSuspended (IM3Continuation i_cont)
 // is not a switch, and reports which continuation was running when it did: a
 // switch under this table takes the place of the one that switched away, and
 // whatever is running is what the handler table belongs to.
-static
-m3ret_t RunUnderHandlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
-                          pc_t i_handlersPC, u32 i_numHandlers, M3MemoryHeader** io_mem)
+ಸ್ಥಿರ
+m3ret_t ಸತತ_Under_Handlers (IM3Runtime i_runtime, IM3Continuation* io_cont,
+                          pc_t i_handlersPC, u32 i_ಅಂಕೆ_Handlers, M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ** io_mem)
 {
     IM3Continuation cont = *io_cont;
-    IM3Continuation parent = i_runtime->activeContinuation;
-    IM3Memory       memory = m3MemInfo(*io_mem);
+    IM3Continuation ಪೋಷಕ = i_runtime->ಸಕ್ರಿಯ_Continuation;
+    IM3_ಸ್ಮರಣೆ       ಸ್ಮರಣೆ = m3MemInfo(*io_mem);
     m3ret_t         r;
 
-    for (;;) {
-#  if d_m3HasExceptionHandling
+    ಗಾಗಿ (;;) {
+#  ಆದರೆ d_m3HasExceptionHandling
         // aborting a continuation that never started: there is no suspension
         // point to raise at, so the exception simply comes straight back out
-        if (M3_UNLIKELY(cont->resumeThrow and cont->numFrames == 0)) {
+        ಆದರೆ (M3_UNLIKELY(cont->resumeThrow and cont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು == 0)) {
             i_runtime->pendingException = cont->resumeThrow;
-            cont->resumeThrow = NULL;
+            cont->resumeThrow = ಖಾಲಿ;
             cont->state = cont_consumed;
             r = m3Err_pendingException;
-            break;
+            ನಿಲ್ಲಿಸು;
         }
 #  endif
         bool isStarting = (cont->state == cont_allocated);
 
-        if (isStarting) {
-            if (M3_UNLIKELY(not cont->entryFunction->compiled)) {
-                r = CompileFunction(cont->entryFunction);
+        ಆದರೆ (isStarting) {
+            ಆದರೆ (M3_UNLIKELY(not cont->ನಮೂದು_Function->compiled)) {
+                r = CompileFunction(cont->ನಮೂದು_Function);
 
-                if (M3_UNLIKELY(r)) {
-                    break;
+                ಆದರೆ (M3_UNLIKELY(r)) {
+                    ನಿಲ್ಲಿಸು;
                 }
             }
-            cont->pc = cont->entryFunction->compiled;
-            cont->sp = cont->valStack;
-            cont->numFrames = 0;
+            cont->pc = cont->ನಮೂದು_Function->compiled;
+            cont->sp = cont->val_ರಾಶಿ;
+            cont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು = 0;
         }
 
         cont->handlersPC = i_handlersPC;
-        cont->numHandlers = i_numHandlers;
-        cont->parent = parent;
+        cont->ಅಂಕೆ_Handlers = i_ಅಂಕೆ_Handlers;
+        cont->ಪೋಷಕ = ಪೋಷಕ;
         cont->state = cont_running;
-        cont->boundArgsCount = 0;
+        cont->bound_ವಾದಗಳು_ಎಣಿಕೆ = 0;
 
-        i_runtime->activeContinuation = cont;
+        i_runtime->ಸಕ್ರಿಯ_Continuation = cont;
 
-        if (cont->numFrames) {
+        ಆದರೆ (cont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು) {
             // a suspended continuation: put back the native frames it unwound
             // through before landing on the suspension point. The count is
             // cleared first because a second suspend records into the same
             // array, starting over at index 0.
-            i32 outermost = (i32)cont->numFrames - 1;
-            cont->numFrames = 0;
+            i32 outermost = (i32)cont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು - 1;
+            cont->ಅಂಕೆ_ಚೌಕಟ್ಟುಗಳು = 0;
 
-            r = ReplayFrames(cont, outermost, *io_mem);
-        } else if (not isStarting and ResumesPastCheck(i_runtime, cont)) {
+            r = Replay_ಚೌಕಟ್ಟುಗಳು(cont, outermost, *io_mem);
+        } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (not isStarting and ResumesPastCheck(i_runtime, cont)) {
             r = ResumePastCheck(cont, *io_mem);
-        } else {
+        } ಇಲ್ಲದಿದ್ದರೆ {
             r = d_m3CallWithRegs(cont->pc, cont->sp, *io_mem, 0, 0.);
         }
 
-        *io_mem = memory->mallocated;
-        i_runtime->activeContinuation = parent;
+        *io_mem = ಸ್ಮರಣೆ->mallocated;
+        i_runtime->ಸಕ್ರಿಯ_Continuation = ಪೋಷಕ;
 
-        if (r != m3Err_continuationSuspended) {
-            break;
+        ಆದರೆ (r != m3Err_continuationSuspended) {
+            ನಿಲ್ಲಿಸು;
         }
 
         cont->state = cont_suspended;
 
         // not a switch, so it is a suspend and this is as far as we take it
-        if (not i_runtime->switchTarget or i_runtime->suspendHandlerCont != cont) {
-            break;
+        ಆದರೆ (not i_runtime->switch_ಗುರಿ or i_runtime->suspendHandlerCont != cont) {
+            ನಿಲ್ಲಿಸು;
         }
 
-        IM3Continuation peer = i_runtime->switchTarget;
-        i_runtime->switchTarget = NULL;
+        IM3Continuation peer = i_runtime->switch_ಗುರಿ;
+        i_runtime->switch_ಗುರಿ = ಖಾಲಿ;
 
         IM3Continuation suspended = Continuation_ForkSuspended(i_runtime, cont);
-        if (M3_UNLIKELY(not suspended)) {
+        ಆದರೆ (M3_UNLIKELY(not suspended)) {
             r = m3Err_mallocFailed;
-            break;
+            ನಿಲ್ಲಿಸು;
         }
         IM3FuncType peerType = peer->type->contFuncType;
-        suspended->type = Module_ContTypeOfRef(peer->entryFunction->module,
-                                               GetFuncTypeParamType(peerType, (u16)(GetFuncTypeNumParams(peerType) - 1)));
-        HandOverToPeer(i_runtime, peer, suspended);
+        suspended->type = Module_Cont_Type_ದ_Ref(peer->ನಮೂದು_Function->module,
+                                               GetFuncTypeParamType(peerType, (u16)(Get_Func_Type_ಅಂಕೆ_Params(peerType) - 1)));
+        Hand_Over_ಗಮ್ಯ_Peer(i_runtime, peer, suspended);
 
         cont = peer;
     }
 
     *io_cont = cont;
 
-    return r;
+    ಹಿಂತಿರುಗಿ r;
 }
 
 
 // Copies what a finished continuation left in its return slots into the slots
 // the resume site set aside for them.
-static
-void TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp, pc_t i_resultsPC, u32 i_numResults)
+ಸ್ಥಿರ
+ಶೂನ್ಯ TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp, pc_t i_resultsPC, u32 i_ಅಂಕೆ_Results)
 {
-    for (u32 i = 0; i < i_numResults; ++i) {
-        i32 resSlot = *(i32*)(i_resultsPC + 2 * i);
+    ಗಾಗಿ (u32 i = 0; i < i_ಅಂಕೆ_Results; ++i) {
+        i32 res_ಸ್ಥಾನ = *(i32*)(i_resultsPC + 2 * i);
         u32 is64 = *(u32*)(i_resultsPC + 2 * i + 1);
-        u32 srcIdx = i * c_ioSlotCount;
+        u32 srcIdx = i * c_io_ಸ್ಥಾನ_ಎಣಿಕೆ;
 
-        if (is64) {
-            *(u64*)(i_sp + resSlot) = *(u64*)(i_cont->valStack + srcIdx);
-        } else {
-            *(u32*)(i_sp + resSlot) = *(u32*)(i_cont->valStack + srcIdx);
+        ಆದರೆ (is64) {
+            *(u64*)(i_sp + res_ಸ್ಥಾನ) = *(u64*)(i_cont->val_ರಾಶಿ + srcIdx);
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            *(u32*)(i_sp + res_ಸ್ಥಾನ) = *(u32*)(i_cont->val_ರಾಶಿ + srcIdx);
         }
     }
 }
@@ -2838,150 +2838,150 @@ void TakeContinuationResults (IM3Continuation i_cont, m3stack_t i_sp, pc_t i_res
 d_m3Op(Resume)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3FuncType     contFuncType = immediate(IM3FuncType);
-    i32             contSlot = immediate(i32);
-    u32             mode = immediate(u32);
+    IM3FuncType     contFuncType = ತಕ್ಷಣ(IM3FuncType);
+    i32             cont_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+    u32             ಬಹುಲಕ = ತಕ್ಷಣ(u32);
 
-    IM3Continuation cont = *(IM3Continuation*)(_sp + contSlot);
-    if (M3_UNLIKELY(not cont)) {
+    IM3Continuation cont = *(IM3Continuation*)(_sp + cont_ಸ್ಥಾನ);
+    ಆದರೆ (M3_UNLIKELY(not cont)) {
         newTrap(m3Err_trapNullContinuationRef);
     }
-    if (M3_UNLIKELY(cont->state == cont_consumed or cont->state == cont_running)) {
+    ಆದರೆ (M3_UNLIKELY(cont->state == cont_consumed or cont->state == cont_running)) {
         newTrap(m3Err_trapContinuationConsumed);
     }
 
     IM3FuncType innerType = contFuncType->contFuncType ? contFuncType->contFuncType : contFuncType;
-    u16         numRets = GetFuncTypeNumResults(innerType);
+    u16         ಅಂಕೆ_Rets = Get_Func_Type_ಅಂಕೆ_Results(innerType);
 
-    if (mode == d_m3ResumeThrowRef) {
-        i32 exnSlot = immediate(i32);
+    ಆದರೆ (ಬಹುಲಕ == d_m3ResumeThrowRef) {
+        i32 exn_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
 
-#  if d_m3HasExceptionHandling
-        M3Exception* exception = *(M3Exception**)(_sp + exnSlot);
+#  ಆದರೆ d_m3HasExceptionHandling
+        M3Exception* exception = *(M3Exception**)(_sp + exn_ಸ್ಥಾನ);
 
-        if (M3_UNLIKELY(not exception)) {
+        ಆದರೆ (M3_UNLIKELY(not exception)) {
             newTrap(m3Err_trapNullReference);
         }
 
         InnermostSuspended(cont)->resumeThrow = exception;
-#  else
-        (void)exnSlot;
+#  ಇಲ್ಲದಿದ್ದರೆ
+        (ಶೂನ್ಯ)exn_ಸ್ಥಾನ;
         newTrap(m3Err_trapUnsupportedInstruction);
 #  endif
-    } else if (mode == d_m3ResumeThrow) {
-        IM3Tag exnTag = immediate(IM3Tag);
-        u32    numArgs = immediate(u32);
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಬಹುಲಕ == d_m3ResumeThrow) {
+        IM3_ಟ್ಯಾಗ್ exn_ಟ್ಯಾಗ್ = ತಕ್ಷಣ(IM3_ಟ್ಯಾಗ್);
+        u32    ಅಂಕೆ_ವಾದಗಳು = ತಕ್ಷಣ(u32);
 
-#  if d_m3HasExceptionHandling
-        M3Exception* exception = NewException(runtime, exnTag, numArgs);
+#  ಆದರೆ d_m3HasExceptionHandling
+        M3Exception* exception = NewException(runtime, exn_ಟ್ಯಾಗ್, ಅಂಕೆ_ವಾದಗಳು);
 
-        if (M3_UNLIKELY(not exception)) {
+        ಆದರೆ (M3_UNLIKELY(not exception)) {
             newTrap(m3Err_mallocFailed);
         }
 
-        for (u32 i = 0; i < numArgs; ++i) {
-            i32 offset = immediate(i32);
-            u32 is64 = immediate(u32);
+        ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+            i32 offset = ತಕ್ಷಣ(i32);
+            u32 is64 = ತಕ್ಷಣ(u32);
 
-            exception->args[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
+            exception->ವಾದಗಳು[i] = is64 ? *(u64*)(_sp + offset) : *(u32*)(_sp + offset);
         }
 
         InnermostSuspended(cont)->resumeThrow = exception;
-#  else
-        (void)exnTag;
-        (void)numArgs;
+#  ಇಲ್ಲದಿದ್ದರೆ
+        (ಶೂನ್ಯ)exn_ಟ್ಯಾಗ್;
+        (ಶೂನ್ಯ)ಅಂಕೆ_ವಾದಗಳು;
         newTrap(m3Err_trapUnsupportedInstruction);
 #  endif
-    } else {
-        u32 numArgs = immediate(u32);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        u32 ಅಂಕೆ_ವಾದಗಳು = ತಕ್ಷಣ(u32);
 
-        if (cont->state == cont_allocated) {
-            for (u32 i = 0; i < numArgs; ++i) {
-                i32 argSlot = immediate(i32);
-                u32 is64 = immediate(u32);
-                u32 targetIdx = (numRets + cont->boundArgsCount + i) * c_ioSlotCount;
-                if (is64) {
-                    *(u64*)(cont->valStack + targetIdx) = *(u64*)(_sp + argSlot);
-                } else {
-                    *(u32*)(cont->valStack + targetIdx) = *(u32*)(_sp + argSlot);
+        ಆದರೆ (cont->state == cont_allocated) {
+            ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+                i32 arg_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+                u32 is64 = ತಕ್ಷಣ(u32);
+                u32 ಗುರಿ_Idx = (ಅಂಕೆ_Rets + cont->bound_ವಾದಗಳು_ಎಣಿಕೆ + i) * c_io_ಸ್ಥಾನ_ಎಣಿಕೆ;
+                ಆದರೆ (is64) {
+                    *(u64*)(cont->val_ರಾಶಿ + ಗುರಿ_Idx) = *(u64*)(_sp + arg_ಸ್ಥಾನ);
+                } ಇಲ್ಲದಿದ್ದರೆ {
+                    *(u32*)(cont->val_ರಾಶಿ + ಗುರಿ_Idx) = *(u32*)(_sp + arg_ಸ್ಥಾನ);
                 }
             }
-            cont->boundArgsCount = 0;
-        } else {
+            cont->bound_ವಾದಗಳು_ಎಣಿಕೆ = 0;
+        } ಇಲ್ಲದಿದ್ದರೆ {
             // the waiting slots belong to whichever continuation holds the
             // suspension point, which is not this one if a resume was captured
             // along with it
             IM3Continuation inner = InnermostSuspended(cont);
 
-            for (u32 i = 0; i < numArgs; ++i) {
-                i32 argSlot = immediate(i32);
-                u32 is64 = immediate(u32);
-                u32 dstIdx = cont->boundArgsCount + i;
-                if (dstIdx < inner->numSuspendResults) {
-                    i32 dstOffset = inner->suspendResultOffsets[dstIdx];
-                    if (is64) {
-                        *(u64*)(inner->sp + dstOffset) = *(u64*)(_sp + argSlot);
-                    } else {
-                        *(u32*)(inner->sp + dstOffset) = *(u32*)(_sp + argSlot);
+            ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+                i32 arg_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+                u32 is64 = ತಕ್ಷಣ(u32);
+                u32 dstIdx = cont->bound_ವಾದಗಳು_ಎಣಿಕೆ + i;
+                ಆದರೆ (dstIdx < inner->ಅಂಕೆ_Suspend_Results) {
+                    i32 dst_ಸ್ಥಾನಾಂತರ = inner->suspend_ಫಲಿತಾಂಶ_Offsets[dstIdx];
+                    ಆದರೆ (is64) {
+                        *(u64*)(inner->sp + dst_ಸ್ಥಾನಾಂತರ) = *(u64*)(_sp + arg_ಸ್ಥಾನ);
+                    } ಇಲ್ಲದಿದ್ದರೆ {
+                        *(u32*)(inner->sp + dst_ಸ್ಥಾನಾಂತರ) = *(u32*)(_sp + arg_ಸ್ಥಾನ);
                     }
                 }
             }
         }
     }
 
-    u32  numHandlers = immediate(u32);
+    u32  ಅಂಕೆ_Handlers = ತಕ್ಷಣ(u32);
     pc_t handlersPC = _pc;
-    _pc += numHandlers * 3;
+    _pc += ಅಂಕೆ_Handlers * 3;
 
-    u32       numResults = immediate(u32);
+    u32       ಅಂಕೆ_Results = ತಕ್ಷಣ(u32);
     pc_t      resultsPC = _pc;
 
-    IM3Memory memory = m3MemInfo(_mem);
+    IM3_ಸ್ಮರಣೆ ಸ್ಮರಣೆ = m3MemInfo(_mem);
 
-    m3ret_t   r = RunUnderHandlers(runtime, &cont, handlersPC, numHandlers, &_mem);
+    m3ret_t   r = ಸತತ_Under_Handlers(runtime, &cont, handlersPC, ಅಂಕೆ_Handlers, &_mem);
 
-    if (r == m3Err_none) {
+    ಆದರೆ (r == m3Err_none) {
         cont->state = cont_consumed;
 
-        TakeContinuationResults(cont, _sp, resultsPC, numResults);
-        Continuation_RecycleStack(runtime, cont);
+        TakeContinuationResults(cont, _sp, resultsPC, ಅಂಕೆ_Results);
+        Continuation_Recycle_ರಾಶಿ(runtime, cont);
 
-        _pc += numResults * 2;
-        nextOp();
-    } else if (r == m3Err_continuationSuspended) {
-        if (M3_UNLIKELY(runtime->suspendHandlerCont != cont)) {
-            if (M3_UNLIKELY(not runtime->activeContinuation)) {
-                newTrap(m3Err_trapUnhandledControlTag);
+        _pc += ಅಂಕೆ_Results * 2;
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (r == m3Err_continuationSuspended) {
+        ಆದರೆ (M3_UNLIKELY(runtime->suspendHandlerCont != cont)) {
+            ಆದರೆ (M3_UNLIKELY(not runtime->ಸಕ್ರಿಯ_Continuation)) {
+                newTrap(m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್);
             }
-            M3Frame frame;
-            frame.kind = frame_resume;
-            frame.pc = resultsPC + numResults * 2;
-            frame.sp = _sp;
-            frame.memory = memory;
-            frame.resume.cont = cont;
-            frame.resume.handlersPC = handlersPC;
-            frame.resume.numHandlers = numHandlers;
-            frame.resume.resultsPC = resultsPC;
-            frame.resume.numResults = numResults;
+            M3_ಚೌಕಟ್ಟು ಚೌಕಟ್ಟು;
+            ಚೌಕಟ್ಟು.ಬಗೆ = ಚೌಕಟ್ಟು_resume;
+            ಚೌಕಟ್ಟು.pc = resultsPC + ಅಂಕೆ_Results * 2;
+            ಚೌಕಟ್ಟು.sp = _sp;
+            ಚೌಕಟ್ಟು.ಸ್ಮರಣೆ = ಸ್ಮರಣೆ;
+            ಚೌಕಟ್ಟು.resume.cont = cont;
+            ಚೌಕಟ್ಟು.resume.handlersPC = handlersPC;
+            ಚೌಕಟ್ಟು.resume.ಅಂಕೆ_Handlers = ಅಂಕೆ_Handlers;
+            ಚೌಕಟ್ಟು.resume.resultsPC = resultsPC;
+            ಚೌಕಟ್ಟು.resume.ಅಂಕೆ_Results = ಅಂಕೆ_Results;
 
-            return Continuation_RecordFrame(runtime, &frame);
+            ಹಿಂತಿರುಗಿ Continuation_ದಾಖಲೆ_ಚೌಕಟ್ಟು(runtime, &ಚೌಕಟ್ಟು);
         }
 
         IM3Continuation suspended = Continuation_ForkSuspended(runtime, cont);
-        if (M3_UNLIKELY(not suspended)) {
+        ಆದರೆ (M3_UNLIKELY(not suspended)) {
             newTrap(m3Err_mallocFailed);
         }
         runtime->suspendedContinuation = suspended;
 
-        if (runtime->suspendStubPC) {
-            jumpOpDirect(runtime->suspendStubPC);
-        } else {
-            newTrap(m3Err_trapUnhandledControlTag);
+        ಆದರೆ (runtime->suspendStubPC) {
+            jump_Op_ನೇರ(runtime->suspendStubPC);
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            newTrap(m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್);
         }
-    } else {
+    } ಇಲ್ಲದಿದ್ದರೆ {
         cont->state = cont_consumed;
-        Continuation_RecycleStack(runtime, cont);
-        pushBacktraceFrame();
+        Continuation_Recycle_ರಾಶಿ(runtime, cont);
+        ತಳ್ಳು_Backtrace_ಚೌಕಟ್ಟು_2();
         forwardTrap(r);
     }
 }
@@ -2995,26 +2995,26 @@ d_m3Op(ResumePayload)
     // was captured, which is not the same continuation once the suspend has
     // travelled out through a resume that had nothing to say about its tag.
     IM3Continuation cont = runtime->suspendedContinuation;
-    cont->type = immediate(IM3FuncType);
+    cont->type = ತಕ್ಷಣ(IM3FuncType);
 
-    u32 numArgs = immediate(u32);
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 offset = immediate(i32);
-        u32 is64 = immediate(u32);
-        u64 val = (i < runtime->numSuspendPayload) ? runtime->suspendPayload[i] : 0;
-        if (is64) {
+    u32 ಅಂಕೆ_ವಾದಗಳು = ತಕ್ಷಣ(u32);
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+        i32 offset = ತಕ್ಷಣ(i32);
+        u32 is64 = ತಕ್ಷಣ(u32);
+        u64 val = (i < runtime->ಅಂಕೆ_Suspend_Payload) ? runtime->suspendPayload[i] : 0;
+        ಆದರೆ (is64) {
             *(u64*)(_sp + offset) = val;
-        } else {
+        } ಇಲ್ಲದಿದ್ದರೆ {
             *(u32*)(_sp + offset) = (u32)val;
         }
     }
 
-    i32 contOffset = immediate(i32);
-    if (contOffset >= 0) {
-        *(IM3Continuation*)(_sp + contOffset) = cont;
+    i32 cont_ಸ್ಥಾನಾಂತರ = ತಕ್ಷಣ(i32);
+    ಆದರೆ (cont_ಸ್ಥಾನಾಂತರ >= 0) {
+        *(IM3Continuation*)(_sp + cont_ಸ್ಥಾನಾಂತರ) = cont;
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
@@ -3027,76 +3027,76 @@ d_m3Op(ResumePayload)
 d_m3Op(Switch)
 {
     IM3Runtime      runtime = m3MemRuntime(_mem);
-    IM3Continuation cont = runtime->activeContinuation;
+    IM3Continuation cont = runtime->ಸಕ್ರಿಯ_Continuation;
 
-    if (M3_UNLIKELY(not cont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    ಆದರೆ (M3_UNLIKELY(not cont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್);
     }
 
-    skip_immediate(IM3FuncType);
+    skip_ತಕ್ಷಣ(IM3FuncType);
 
-    IM3Tag          tag = immediate(IM3Tag);
-    i32             targetSlot = immediate(i32);
+    IM3_ಟ್ಯಾಗ್          ಟ್ಯಾಗ್ = ತಕ್ಷಣ(IM3_ಟ್ಯಾಗ್);
+    i32             ಗುರಿ_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
 
-    IM3Continuation target = *(IM3Continuation*)(_sp + targetSlot);
+    IM3Continuation ಗುರಿ = *(IM3Continuation*)(_sp + ಗುರಿ_ಸ್ಥಾನ);
 
-    if (M3_UNLIKELY(not target)) {
+    ಆದರೆ (M3_UNLIKELY(not ಗುರಿ)) {
         newTrap(m3Err_trapNullContinuationRef);
     }
-    if (M3_UNLIKELY(target->state == cont_consumed or target->state == cont_running)) {
+    ಆದರೆ (M3_UNLIKELY(ಗುರಿ->state == cont_consumed or ಗುರಿ->state == cont_running)) {
         newTrap(m3Err_trapContinuationConsumed);
     }
 
-    IM3Continuation handlerCont = FindHandler(cont, tag, 1, NULL);
+    IM3Continuation handlerCont = ಕಂಡುಹಿಡಿ_Handler(cont, ಟ್ಯಾಗ್, 1, ಖಾಲಿ);
 
-    if (M3_UNLIKELY(not handlerCont)) {
-        newTrap(m3Err_trapUnhandledControlTag);
+    ಆದರೆ (M3_UNLIKELY(not handlerCont)) {
+        newTrap(m3_Err_trap_Unhandled_Control_ಟ್ಯಾಗ್);
     }
 
     // the peer's arguments, and after them the room for the continuation
     // reference the resume will write once this one is safely suspended
-    u32 numArgs = immediate(u32);
+    u32 ಅಂಕೆ_ವಾದಗಳು = ತಕ್ಷಣ(u32);
 
-    runtime->numSuspendPayload = numArgs;
+    runtime->ಅಂಕೆ_Suspend_Payload = ಅಂಕೆ_ವಾದಗಳು;
 
-    for (u32 i = 0; i < numArgs; ++i) {
-        i32 argSlot = immediate(i32);
-        u32 is64 = immediate(u32);
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
+        i32 arg_ಸ್ಥಾನ = ತಕ್ಷಣ(i32);
+        u32 is64 = ತಕ್ಷಣ(u32);
 
-        runtime->suspendPayload[i] = is64 ? *(u64*)(_sp + argSlot) : (u64) * (u32*)(_sp + argSlot);
+        runtime->suspendPayload[i] = is64 ? *(u64*)(_sp + arg_ಸ್ಥಾನ) : (u64) * (u32*)(_sp + arg_ಸ್ಥಾನ);
         runtime->suspendPayloadIs64[i] = is64;
     }
 
     // where the values come back to, when something switches into this one
-    u32 numResults = immediate(u32);
+    u32 ಅಂಕೆ_Results = ತಕ್ಷಣ(u32);
 
-    cont->numSuspendResults = numResults;
+    cont->ಅಂಕೆ_Suspend_Results = ಅಂಕೆ_Results;
 
-    for (u32 i = 0; i < numResults; ++i) {
-        cont->suspendResultOffsets[i] = immediate(i32);
-        cont->suspendResultIs64[i] = immediate(u32);
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Results; ++i) {
+        cont->suspend_ಫಲಿತಾಂಶ_Offsets[i] = ತಕ್ಷಣ(i32);
+        cont->suspend_ಫಲಿತಾಂಶ_Is64[i] = ತಕ್ಷಣ(u32);
     }
 
     ClearSuspendResults(cont, _sp);
 
-    runtime->suspendStubPC = NULL;
+    runtime->suspendStubPC = ಖಾಲಿ;
     runtime->suspendHandlerCont = handlerCont;
-    runtime->switchTarget = target;
-    runtime->suspendTag = tag;
+    runtime->switch_ಗುರಿ = ಗುರಿ;
+    runtime->suspend_ಟ್ಯಾಗ್ = ಟ್ಯಾಗ್;
 
     cont->pc = _pc;
-    cont->suspendPoint = safepoint_suspend;
+    cont->suspend_ಬಿಂದು = safepoint_suspend;
     cont->sp = _sp;
     cont->r0 = _r0;
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
     cont->fp0 = _fp0;
 #  endif
 
-    return m3Err_continuationSuspended;
+    ಹಿಂತಿರುಗಿ m3Err_continuationSuspended;
 }
 
 
-#endif // d_m3HasStackSwitching
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasStackSwitching
 
 
 d_m3Op(Branch)
@@ -3109,11 +3109,11 @@ d_m3Op(If_r)
 {
     i32  condition = (i32)_r0;
 
-    pc_t elsePC = immediate(pc_t);
+    pc_t elsePC = ತಕ್ಷಣ(pc_t);
 
-    if (condition) {
-        nextOp();
-    } else {
+    ಆದರೆ (condition) {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
         jumpOp(elsePC);
     }
 }
@@ -3121,199 +3121,199 @@ d_m3Op(If_r)
 
 d_m3Op(If_s)
 {
-    i32  condition = slot(i32);
+    i32  condition = ಸ್ಥಾನ(i32);
 
-    pc_t elsePC = immediate(pc_t);
+    pc_t elsePC = ತಕ್ಷಣ(pc_t);
 
-    if (condition) {
-        nextOp();
-    } else {
+    ಆದರೆ (condition) {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
         jumpOp(elsePC);
     }
 }
 
 
-d_m3Op(BranchTable)
+d_m3Op(Branch_ಕೋಷ್ಟಕ)
 {
-    u32   branchIndex = slot(u32);           // branch index is always in a slot
-    u32   numTargets = immediate(u32);
+    u32   branch_ಸೂಚ್ಯಂಕ = ಸ್ಥಾನ(u32);           // branch index is always in a slot
+    u32   ಅಂಕೆ_Targets = ತಕ್ಷಣ(u32);
 
     pc_t* branches = (pc_t*)_pc;
 
-    if (branchIndex > numTargets) {
-        branchIndex = numTargets; // the default index
+    ಆದರೆ (branch_ಸೂಚ್ಯಂಕ > ಅಂಕೆ_Targets) {
+        branch_ಸೂಚ್ಯಂಕ = ಅಂಕೆ_Targets; // the default index
     }
 
-    jumpOp(branches[branchIndex]);
+    jumpOp(branches[branch_ಸೂಚ್ಯಂಕ]);
 }
 
 
-#define d_m3SetRegisterSetSlot(TYPE, REG) \
-d_m3Op  (SetRegister_##TYPE)            \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_ಗಣ_ರಿಜಿಸ್ಟರ್_ಗಣ_ಸ್ಥಾನ(TYPE, REG) \
+d_m3Op  (ಗಣ_ರಿಜಿಸ್ಟರ್_2##TYPE)            \
 {                                       \
-    TYPE * src = slot_ptr (TYPE);       \
-    d_m3PreloadNext ();                 \
+    TYPE * src = ಸ್ಥಾನ_ptr (TYPE);       \
+    d_m3_Preload_ಮುಂದಿನ ();                 \
     REG = * src;                        \
-    nextOpPreloaded ();                 \
+    ಮುಂದಿನ_Op_Preloaded ();                 \
 }                                       \
                                         \
-d_m3Op (SetSlot_##TYPE)                 \
+d_m3Op (ಗಣ_ಸ್ಥಾನ_2##TYPE)                 \
 {                                       \
-    TYPE * dst = slot_ptr (TYPE);       \
-    d_m3PreloadNext ();                 \
+    TYPE * dst = ಸ್ಥಾನ_ptr (TYPE);       \
+    d_m3_Preload_ಮುಂದಿನ ();                 \
     * dst = (TYPE) REG;                 \
-    nextOpPreloaded ();                 \
+    ಮುಂದಿನ_Op_Preloaded ();                 \
 }                                       \
                                         \
-d_m3Op (PreserveSetSlot_##TYPE)         \
+d_m3Op (Preserve_ಗಣ_ಸ್ಥಾನ_2##TYPE)         \
 {                                       \
-    TYPE * stack     = slot_ptr (TYPE); \
-    TYPE * preserve  = slot_ptr (TYPE); \
-    d_m3PreloadNext ();                 \
+    TYPE * ರಾಶಿ     = ಸ್ಥಾನ_ptr (TYPE); \
+    TYPE * preserve  = ಸ್ಥಾನ_ptr (TYPE); \
+    d_m3_Preload_ಮುಂದಿನ ();                 \
                                         \
-    * preserve = * stack;               \
-    * stack = (TYPE) REG;               \
+    * preserve = * ರಾಶಿ;               \
+    * ರಾಶಿ = (TYPE) REG;               \
                                         \
-    nextOpPreloaded ();                 \
+    ಮುಂದಿನ_Op_Preloaded ();                 \
 }
 
-d_m3SetRegisterSetSlot(i32, _r0)
-d_m3SetRegisterSetSlot(i64, _r0)
-#if d_m3HasFloat
-d_m3SetRegisterSetSlot(f32, _fp0)
-d_m3SetRegisterSetSlot(f64, _fp0)
-#endif
+d_m3_ಗಣ_ರಿಜಿಸ್ಟರ್_ಗಣ_ಸ್ಥಾನ(i32, _r0)
+d_m3_ಗಣ_ರಿಜಿಸ್ಟರ್_ಗಣ_ಸ್ಥಾನ(i64, _r0)
+#ಆದರೆ d_m3HasFloat
+d_m3_ಗಣ_ರಿಜಿಸ್ಟರ್_ಗಣ_ಸ್ಥಾನ(f32, _fp0)
+d_m3_ಗಣ_ರಿಜಿಸ್ಟರ್_ಗಣ_ಸ್ಥಾನ(f64, _fp0)
+#ಆದರೆ_ಅಂತ್ಯ
 
-d_m3Op(CopySlot_32)
+d_m3Op(Copy_ಸ್ಥಾನ_32)
 {
-    u32* dst = slot_ptr(u32);
-    u32* src = slot_ptr(u32);
-    d_m3PreloadNext();
+    u32* dst = ಸ್ಥಾನ_ptr(u32);
+    u32* src = ಸ್ಥಾನ_ptr(u32);
+    d_m3_Preload_ಮುಂದಿನ();
 
     *dst = *src;
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 
-d_m3Op(PreserveCopySlot_32)
+d_m3Op(Preserve_Copy_ಸ್ಥಾನ_32)
 {
-    u32* dest = slot_ptr(u32);
-    u32* src = slot_ptr(u32);
-    u32* preserve = slot_ptr(u32);
-    d_m3PreloadNext();
+    u32* dest = ಸ್ಥಾನ_ptr(u32);
+    u32* src = ಸ್ಥಾನ_ptr(u32);
+    u32* preserve = ಸ್ಥಾನ_ptr(u32);
+    d_m3_Preload_ಮುಂದಿನ();
 
     *preserve = *dest;
     *dest = *src;
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 
-d_m3Op(CopySlot_64)
+d_m3Op(Copy_ಸ್ಥಾನ_64)
 {
-    u64* dst = slot_ptr(u64);
-    u64* src = slot_ptr(u64);
-    d_m3PreloadNext();
+    u64* dst = ಸ್ಥಾನ_ptr(u64);
+    u64* src = ಸ್ಥಾನ_ptr(u64);
+    d_m3_Preload_ಮುಂದಿನ();
 
     *dst = *src;                  // printf ("copy: %p <- %" PRIi64 " <- %p\n", dst, * dst, src);
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 
-d_m3Op(PreserveCopySlot_64)
+d_m3Op(Preserve_Copy_ಸ್ಥಾನ_64)
 {
-    u64* dest = slot_ptr(u64);
-    u64* src = slot_ptr(u64);
-    u64* preserve = slot_ptr(u64);
-    d_m3PreloadNext();
+    u64* dest = ಸ್ಥಾನ_ptr(u64);
+    u64* src = ಸ್ಥಾನ_ptr(u64);
+    u64* preserve = ಸ್ಥಾನ_ptr(u64);
+    d_m3_Preload_ಮುಂದಿನ();
 
     *preserve = *dest;
     *dest = *src;
 
-    nextOpPreloaded();
+    ಮುಂದಿನ_Op_Preloaded();
 }
 
 
-#if d_m3EnableOpTracing
+#ಆದರೆ d_m3EnableOpTracing
 //--------------------------------------------------------------------------------------------------------
-d_m3Op(DumpStack)
+d_m3Op(Dump_ರಾಶಿ)
 {
-    u32         opcodeIndex = immediate(u32);
-    u32         stackHeight = immediate(u32);
-    IM3Function function = immediate(IM3Function);
+    u32         opcode_ಸೂಚ್ಯಂಕ = ತಕ್ಷಣ(u32);
+    u32         ರಾಶಿ_ಎತ್ತರ = ತಕ್ಷಣ(u32);
+    IM3Function function = ತಕ್ಷಣ(IM3Function);
 
     cstr_t      funcName = (function) ? m3_GetFunctionName(function) : "";
 
-    printf(" %4d ", opcodeIndex);
-    printf(" %-25s     r0: 0x%016" PRIx64 "  i:%" PRIi64 "  u:%" PRIu64 "\n", funcName, _r0, _r0, _r0);
-#  if d_m3HasFloat
-    printf("                                    fp0: %" PRIf64 "\n", _fp0);
+    ಬರೆ(" %4d ", opcode_ಸೂಚ್ಯಂಕ);
+    ಬರೆ(" %-25s     r0: 0x%016" PRIx64 "  i:%" PRIi64 "  u:%" PRIu64 "\n", funcName, _r0, _r0, _r0);
+#  ಆದರೆ d_m3HasFloat
+    ಬರೆ("                                    fp0: %" PRIf64 "\n", _fp0);
 #  endif
     m3stack_t sp = _sp;
 
-    for (u32 i = 0; i < stackHeight; ++i) {
-        cstr_t kind = "";
+    ಗಾಗಿ (u32 i = 0; i < ರಾಶಿ_ಎತ್ತರ; ++i) {
+        cstr_t ಬಗೆ = "";
 
-        printf("%p  %5s  %2d: 0x%" PRIx64 "  i:%" PRIi64 "\n", sp, kind, i, (u64) * (sp), (i64) * (sp));
+        ಬರೆ("%p  %5s  %2d: 0x%" PRIx64 "  i:%" PRIi64 "\n", sp, ಬಗೆ, i, (u64) * (sp), (i64) * (sp));
 
         ++sp;
     }
-    printf("---------------------------------------------------------------------------------------------------------\n");
+    ಬರೆ("---------------------------------------------------------------------------------------------------------\n");
 
-    nextOpDirect();
+    ಮುಂದಿನ_Op_ನೇರ();
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#define d_m3Select_i(TYPE, REG)                 \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Select_i(TYPE, REG)                 \
 d_m3Op  (Select_##TYPE##_rss)                   \
 {                                               \
     i32 condition = (i32) _r0;                  \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_srs)                   \
 {                                               \
-    i32 condition = slot (i32);                 \
+    i32 condition = ಸ್ಥಾನ (i32);                 \
                                                 \
     TYPE operand2 = (TYPE) REG;                 \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_ssr)                   \
 {                                               \
-    i32 condition = slot (i32);                 \
+    i32 condition = ಸ್ಥಾನ (i32);                 \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                \
     TYPE operand1 = (TYPE) REG;                 \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_sss)                   \
 {                                               \
-    i32 condition = slot (i32);                 \
+    i32 condition = ಸ್ಥಾನ (i32);                 \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }
 
 
@@ -3321,17 +3321,17 @@ d_m3Select_i(i32, _r0)
 d_m3Select_i(i64, _r0)
 
 
-#define d_m3Select_f(TYPE, REG, LABEL, SELECTOR)  \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Select_f(TYPE, REG, LABEL, SELECTOR)  \
 d_m3Op  (Select_##TYPE##_##LABEL##ss)           \
 {                                               \
     i32 condition = (i32) SELECTOR;             \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_##LABEL##rs)           \
@@ -3339,66 +3339,66 @@ d_m3Op  (Select_##TYPE##_##LABEL##rs)           \
     i32 condition = (i32) SELECTOR;             \
                                                 \
     TYPE operand2 = (TYPE) REG;                 \
-    TYPE operand1 = slot (TYPE);                \
+    TYPE operand1 = ಸ್ಥಾನ (TYPE);                \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }                                               \
                                                 \
 d_m3Op  (Select_##TYPE##_##LABEL##sr)           \
 {                                               \
     i32 condition = (i32) SELECTOR;             \
                                                 \
-    TYPE operand2 = slot (TYPE);                \
+    TYPE operand2 = ಸ್ಥಾನ (TYPE);                \
     TYPE operand1 = (TYPE) REG;                 \
                                                 \
     REG = (condition) ? operand1 : operand2;    \
                                                 \
-    nextOp ();                                  \
+    ಮುಂದಿನ_Op ();                                  \
 }
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3Select_f(f32, _fp0, r, _r0)
-d_m3Select_f(f32, _fp0, s, slot(i32))
+d_m3Select_f(f32, _fp0, s, ಸ್ಥಾನ(i32))
 
 d_m3Select_f(f64, _fp0, r, _r0)
-d_m3Select_f(f64, _fp0, s, slot(i32))
-#endif
+d_m3Select_f(f64, _fp0, s, ಸ್ಥಾನ(i32))
+#ಆದರೆ_ಅಂತ್ಯ
 
 d_m3Op(Return)
 {
-    m3StackCheck();
-    return m3Err_none;
+    m3_ರಾಶಿ_Check();
+    ಹಿಂತಿರುಗಿ m3Err_none;
 }
 
 
 d_m3Op(BranchIf_r)
 {
     i32  condition = (i32)_r0;
-    pc_t branch = immediate(pc_t);
+    pc_t branch = ತಕ್ಷಣ(pc_t);
 
-    if (condition) {
+    ಆದರೆ (condition) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಮುಂದಿನ_Op();
     }
 }
 
 
 d_m3Op(BranchIf_s)
 {
-    i32  condition = slot(i32);
-    pc_t branch = immediate(pc_t);
+    i32  condition = ಸ್ಥಾನ(i32);
+    pc_t branch = ತಕ್ಷಣ(pc_t);
 
-    if (condition) {
+    ಆದರೆ (condition) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಮುಂದಿನ_Op();
     }
 }
 
-#if d_m3FuseBranch
+#ಆದರೆ d_m3FuseBranch
 
 // fused compare+branch and compare+if: a compare retro-patched by the compiler when a br_if or if
 // immediately consumes its result. operand shapes and immediate order match the plain compare
@@ -3406,53 +3406,53 @@ d_m3Op(BranchIf_s)
 #  define d_m3FusedCmpBranch(TYPE, NAME, OPER)                \
   d_m3Op(TYPE##_BranchIf_##NAME##_rs)                         \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t branch  = immediate (pc_t);                        \
-      if (operand OPER ((TYPE) _r0))                          \
+      TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                             \
+      pc_t branch  = ತಕ್ಷಣ (pc_t);                        \
+      ಆದರೆ (ಕಾರ್ಯಾಂಶ OPER ((TYPE) _r0))                          \
           jumpOp (branch);                                    \
-      else nextOp ();                                         \
+      ಇಲ್ಲದಿದ್ದರೆ ಮುಂದಿನ_Op ();                                         \
   }                                                           \
   d_m3Op(TYPE##_BranchIf_##NAME##_sr)                         \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t branch  = immediate (pc_t);                        \
-      if (((TYPE) _r0) OPER operand)                          \
+      TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                             \
+      pc_t branch  = ತಕ್ಷಣ (pc_t);                        \
+      ಆದರೆ (((TYPE) _r0) OPER ಕಾರ್ಯಾಂಶ)                          \
           jumpOp (branch);                                    \
-      else nextOp ();                                         \
+      ಇಲ್ಲದಿದ್ದರೆ ಮುಂದಿನ_Op ();                                         \
   }                                                           \
   d_m3Op(TYPE##_BranchIf_##NAME##_ss)                         \
   {                                                           \
-      TYPE operand2 = slot (TYPE);                            \
-      TYPE operand1 = slot (TYPE);                            \
-      pc_t branch   = immediate (pc_t);                       \
-      if (operand1 OPER operand2)                             \
+      TYPE operand2 = ಸ್ಥಾನ (TYPE);                            \
+      TYPE operand1 = ಸ್ಥಾನ (TYPE);                            \
+      pc_t branch   = ತಕ್ಷಣ (pc_t);                       \
+      ಆದರೆ (operand1 OPER operand2)                             \
           jumpOp (branch);                                    \
-      else nextOp ();                                         \
+      ಇಲ್ಲದಿದ್ದರೆ ಮುಂದಿನ_Op ();                                         \
   }                                                           \
   d_m3Op(TYPE##_If_##NAME##_rs)                               \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t elsePC  = immediate (pc_t);                        \
-      if (operand OPER ((TYPE) _r0))                          \
-          nextOp ();                                          \
-      else jumpOp (elsePC);                                   \
+      TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                             \
+      pc_t elsePC  = ತಕ್ಷಣ (pc_t);                        \
+      ಆದರೆ (ಕಾರ್ಯಾಂಶ OPER ((TYPE) _r0))                          \
+          ಮುಂದಿನ_Op ();                                          \
+      ಇಲ್ಲದಿದ್ದರೆ jumpOp (elsePC);                                   \
   }                                                           \
   d_m3Op(TYPE##_If_##NAME##_sr)                               \
   {                                                           \
-      TYPE operand = slot (TYPE);                             \
-      pc_t elsePC  = immediate (pc_t);                        \
-      if (((TYPE) _r0) OPER operand)                          \
-          nextOp ();                                          \
-      else jumpOp (elsePC);                                   \
+      TYPE ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (TYPE);                             \
+      pc_t elsePC  = ತಕ್ಷಣ (pc_t);                        \
+      ಆದರೆ (((TYPE) _r0) OPER ಕಾರ್ಯಾಂಶ)                          \
+          ಮುಂದಿನ_Op ();                                          \
+      ಇಲ್ಲದಿದ್ದರೆ jumpOp (elsePC);                                   \
   }                                                           \
   d_m3Op(TYPE##_If_##NAME##_ss)                               \
   {                                                           \
-      TYPE operand2 = slot (TYPE);                            \
-      TYPE operand1 = slot (TYPE);                            \
-      pc_t elsePC   = immediate (pc_t);                       \
-      if (operand1 OPER operand2)                             \
-          nextOp ();                                          \
-      else jumpOp (elsePC);                                   \
+      TYPE operand2 = ಸ್ಥಾನ (TYPE);                            \
+      TYPE operand1 = ಸ್ಥಾನ (TYPE);                            \
+      pc_t elsePC   = ತಕ್ಷಣ (pc_t);                       \
+      ಆದರೆ (operand1 OPER operand2)                             \
+          ಮುಂದಿನ_Op ();                                          \
+      ಇಲ್ಲದಿದ್ದರೆ jumpOp (elsePC);                                   \
   }
 
 d_m3FusedCmpBranch(i32, Equal, ==)
@@ -3469,59 +3469,59 @@ d_m3FusedCmpBranch(u32, GreaterThanOrEqual, >=)
 // i32.eqz is unary: form _r has the operand in _r0 (no operand immediate), _s reads a slot
 d_m3Op(i32_BranchIfEqz_r)
 {
-    pc_t branch = immediate(pc_t);
-    if (((i32)_r0) == 0) {
+    pc_t branch = ತಕ್ಷಣ(pc_t);
+    ಆದರೆ (((i32)_r0) == 0) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಮುಂದಿನ_Op();
     }
 }
 
 d_m3Op(i32_BranchIfEqz_s)
 {
-    i32  operand = slot(i32);
-    pc_t branch = immediate(pc_t);
-    if (operand == 0) {
+    i32  ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ(i32);
+    pc_t branch = ತಕ್ಷಣ(pc_t);
+    ಆದರೆ (ಕಾರ್ಯಾಂಶ == 0) {
         jumpOp(branch);
-    } else {
-        nextOp();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಮುಂದಿನ_Op();
     }
 }
 
 d_m3Op(i32_IfEqz_r)
 {
-    pc_t elsePC = immediate(pc_t);
-    if (((i32)_r0) == 0) {
-        nextOp();
-    } else {
+    pc_t elsePC = ತಕ್ಷಣ(pc_t);
+    ಆದರೆ (((i32)_r0) == 0) {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
         jumpOp(elsePC);
     }
 }
 
 d_m3Op(i32_IfEqz_s)
 {
-    i32  operand = slot(i32);
-    pc_t elsePC = immediate(pc_t);
-    if (operand == 0) {
-        nextOp();
-    } else {
+    i32  ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ(i32);
+    pc_t elsePC = ತಕ್ಷಣ(pc_t);
+    ಆದರೆ (ಕಾರ್ಯಾಂಶ == 0) {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
         jumpOp(elsePC);
     }
 }
 
-#endif // d_m3FuseBranch
+#ಆದರೆ_ಅಂತ್ಯ // d_m3FuseBranch
 
 
 d_m3Op(BranchIfPrologue_r)
 {
     i32  condition = (i32)_r0;
-    pc_t branch = immediate(pc_t);
+    pc_t branch = ತಕ್ಷಣ(pc_t);
 
-    if (condition) {
+    ಆದರೆ (condition) {
         // this is the "prologue" that ends with
         // a plain branch to the actual target
-        nextOp();
-    } else {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
         jumpOp(branch); // jump over the prologue
     }
 }
@@ -3529,12 +3529,12 @@ d_m3Op(BranchIfPrologue_r)
 
 d_m3Op(BranchIfPrologue_s)
 {
-    i32  condition = slot(i32);
-    pc_t branch = immediate(pc_t);
+    i32  condition = ಸ್ಥಾನ(i32);
+    pc_t branch = ತಕ್ಷಣ(pc_t);
 
-    if (condition) {
-        nextOp();
-    } else {
+    ಆದರೆ (condition) {
+        ಮುಂದಿನ_Op();
+    } ಇಲ್ಲದಿದ್ದರೆ {
         jumpOp(branch);
     }
 }
@@ -3542,27 +3542,27 @@ d_m3Op(BranchIfPrologue_s)
 
 d_m3Op(ContinueLoop)
 {
-    m3StackCheck();
+    m3_ರಾಶಿ_Check();
 
-    void* loopId = immediate(void*);
-    return loopId;
+    ಶೂನ್ಯ* loopId = ತಕ್ಷಣ(ಶೂನ್ಯ*);
+    ಹಿಂತಿರುಗಿ loopId;
 }
 
 
 d_m3Op(ContinueLoopIf)
 {
     i32   condition = (i32)_r0;
-    void* loopId = immediate(void*);
+    ಶೂನ್ಯ* loopId = ತಕ್ಷಣ(ಶೂನ್ಯ*);
 
-    if (condition) {
-        return loopId;
-    } else {
-        nextOp();
+    ಆದರೆ (condition) {
+        ಹಿಂತಿರುಗಿ loopId;
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಮುಂದಿನ_Op();
     }
 }
 
 
-#if d_m3HasStackSwitching
+#ಆದರೆ d_m3_Has_ರಾಶಿ_Switching
 
 // This is where execution can "escape" the M3 code and callback to the client / fiber switch
 // OR it can go in the Loop operation. I think it's best to do here. adding code to the loop operation
@@ -3570,47 +3570,47 @@ d_m3Op(ContinueLoopIf)
 
 d_m3Op(ContinueLoop_Suspendable)
 {
-    m3StackCheck();
+    m3_ರಾಶಿ_Check();
 
     IM3Runtime runtime = m3MemRuntime(_mem);
-    if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-        SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_op, _pc - 1, _sp,
-                          d_m3ExpRegArgs(_r0, _fp0));
+    ಆದರೆ (M3_UNLIKELY(runtime->suspendRequested and runtime->ಸಕ್ರಿಯ_Continuation)) {
+        Suspend_Without_ಟ್ಯಾಗ್(runtime, runtime->ಸಕ್ರಿಯ_Continuation, safepoint_op, _pc - 1, _sp,
+                          d_m3_Exp_Reg_ವಾದಗಳು(_r0, _fp0));
 
-        return m3Err_continuationSuspended;
+        ಹಿಂತಿರುಗಿ m3Err_continuationSuspended;
     }
 
-    void* loopId = immediate(void*);
-    return loopId;
+    ಶೂನ್ಯ* loopId = ತಕ್ಷಣ(ಶೂನ್ಯ*);
+    ಹಿಂತಿರುಗಿ loopId;
 }
 
 
-#  if !d_m3EntryKeepsFrame
+#  ಆದರೆ !d_m3_ನಮೂದು_Keeps_ಚೌಕಟ್ಟು
 // op_Entry, in code compiled while the runtime is suspendable: once the frame is
 // set up, it checks for a pause request. Recursion passes one of these on every
 // lap, as a loop passes its back edge, so a pause the host requests reaches code
 // that has no loop. A pause here stops at the body's first operation, so going
 // on from it is going on past the check.
-d_m3Op(Entry_Suspendable)
+d_m3Op(ನಮೂದು_Suspendable)
 {
     d_m3ClearRegisters
 
-    IM3Function function = immediate(IM3Function);
+    IM3Function function = ತಕ್ಷಣ(IM3Function);
 
-    if (EntryFits(function, _sp, _mem)) {
-        EnterFrame(function, _sp);
+    ಆದರೆ (ನಮೂದು_ಹೊಂದುತ್ತದೆ(function, _sp, _mem)) {
+        Enter_ಚೌಕಟ್ಟು(function, _sp);
 
         IM3Runtime runtime = m3MemRuntime(_mem);
-        if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-            SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_entry, _pc, _sp,
-                              d_m3ExpRegArgs(_r0, _fp0));
+        ಆದರೆ (M3_UNLIKELY(runtime->suspendRequested and runtime->ಸಕ್ರಿಯ_Continuation)) {
+            Suspend_Without_ಟ್ಯಾಗ್(runtime, runtime->ಸಕ್ರಿಯ_Continuation, safepoint_ನಮೂದು, _pc, _sp,
+                              d_m3_Exp_Reg_ವಾದಗಳು(_r0, _fp0));
 
-            return m3Err_continuationSuspended;
+            ಹಿಂತಿರುಗಿ m3Err_continuationSuspended;
         }
 
-        nextOpDirect();
-    } else {
-        newTrap(m3Err_trapStackOverflow);
+        ಮುಂದಿನ_Op_ನೇರ();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        newTrap(m3_Err_trap_ರಾಶಿ_ಅತಿಪ್ರವಾಹ);
     }
 }
 #  endif
@@ -3619,36 +3619,36 @@ d_m3Op(Entry_Suspendable)
 // The check op_Entry_Suspendable makes, as an operation of its own for the
 // builds whose op_Entry keeps a frame and so cannot make it: the start of a
 // function's body, in code compiled while the runtime is suspendable
-d_m3Op(EntryCheck)
+d_m3Op(ನಮೂದು_Check)
 {
     IM3Runtime runtime = m3MemRuntime(_mem);
-    if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-        SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_entry, _pc - 1, _sp,
-                          d_m3ExpRegArgs(_r0, _fp0));
+    ಆದರೆ (M3_UNLIKELY(runtime->suspendRequested and runtime->ಸಕ್ರಿಯ_Continuation)) {
+        Suspend_Without_ಟ್ಯಾಗ್(runtime, runtime->ಸಕ್ರಿಯ_Continuation, safepoint_ನಮೂದು, _pc - 1, _sp,
+                          d_m3_Exp_Reg_ವಾದಗಳು(_r0, _fp0));
 
-        return m3Err_continuationSuspended;
+        ಹಿಂತಿರುಗಿ m3Err_continuationSuspended;
     }
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
 d_m3Op(ContinueLoopIf_Suspendable)
 {
     i32   condition = (i32)_r0;
-    void* loopId = immediate(void*);
+    ಶೂನ್ಯ* loopId = ತಕ್ಷಣ(ಶೂನ್ಯ*);
 
-    if (condition) {
+    ಆದರೆ (condition) {
         IM3Runtime runtime = m3MemRuntime(_mem);
-        if (M3_UNLIKELY(runtime->suspendRequested and runtime->activeContinuation)) {
-            SuspendWithoutTag(runtime, runtime->activeContinuation, safepoint_op, _pc - 2, _sp,
-                              d_m3ExpRegArgs(_r0, _fp0));
+        ಆದರೆ (M3_UNLIKELY(runtime->suspendRequested and runtime->ಸಕ್ರಿಯ_Continuation)) {
+            Suspend_Without_ಟ್ಯಾಗ್(runtime, runtime->ಸಕ್ರಿಯ_Continuation, safepoint_op, _pc - 2, _sp,
+                              d_m3_Exp_Reg_ವಾದಗಳು(_r0, _fp0));
 
-            return m3Err_continuationSuspended;
+            ಹಿಂತಿರುಗಿ m3Err_continuationSuspended;
         }
-        return loopId;
-    } else {
-        nextOp();
+        ಹಿಂತಿರುಗಿ loopId;
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಮುಂದಿನ_Op();
     }
 }
 
@@ -3657,53 +3657,53 @@ d_m3Op(ContinueLoopIf_Suspendable)
 // (see M3Runtime.resumePastCheck), by running the operation the check stands
 // in front of: the plain back edge on the same immediates, or whatever follows
 // the entry check.
-static
-m3ret_t ResumePastCheck (IM3Continuation i_cont, M3MemoryHeader* _mem)
+ಸ್ಥಿರ
+m3ret_t ResumePastCheck (IM3Continuation i_cont, M3_ಸ್ಮರಣೆ_ಶೀರ್ಷಿಕೆ* _mem)
 {
     pc_t         check = i_cont->pc;
     IM3Operation op = (IM3Operation)(*check);
     pc_t         _pc = check + 1;
     m3stack_t    _sp = i_cont->sp;
     m3reg_t      _r0 = i_cont->r0;
-#  if d_m3HasFloat
+#  ಆದರೆ d_m3HasFloat
     f64 _fp0 = i_cont->fp0;
 #  endif
 
-    if (op == op_ContinueLoop_Suspendable) {
+    ಆದರೆ (op == op_ContinueLoop_Suspendable) {
         op = op_ContinueLoop;
-    } else if (op == op_ContinueLoopIf_Suspendable) {
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (op == op_ContinueLoopIf_Suspendable) {
         op = op_ContinueLoopIf;
-    } else if (op == op_EntryCheck) {
-        return nextOpImpl();
-    } else {
-        return d_m3CallWithRegs(check, _sp, _mem, _r0, _fp0);
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (op == op_ನಮೂದು_Check) {
+        ಹಿಂತಿರುಗಿ ಮುಂದಿನ_Op_Impl();
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಹಿಂತಿರುಗಿ d_m3CallWithRegs(check, _sp, _mem, _r0, _fp0);
     }
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    return op(_pc, d_m3OpArgs, d_m3BaseCstr);
-#  else
-    return op(_pc, d_m3OpArgs);
+#  ಆದರೆ (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    ಹಿಂತಿರುಗಿ op(_pc, d_m3_Op_ವಾದಗಳು, d_m3_ತಳ_Cstr);
+#  ಇಲ್ಲದಿದ್ದರೆ
+    ಹಿಂತಿರುಗಿ op(_pc, d_m3_Op_ವಾದಗಳು);
 #  endif
 }
-#endif // d_m3HasStackSwitching
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasStackSwitching
 
 
 d_m3Op(Const32)
 {
-    u32 value = *(u32*)_pc++;
-    slot(u32) = value;
-    nextOp();
+    u32 ಮೌಲ್ಯ = *(u32*)_pc++;
+    ಸ್ಥಾನ(u32) = ಮೌಲ್ಯ;
+    ಮುಂದಿನ_Op();
 }
 
 
 d_m3Op(Const64)
 {
     // where a pointer is 32 bits the two lines are only 4-byte aligned
-    u64 value;
-    memcpy(&value, _pc, sizeof(value));
+    u64 ಮೌಲ್ಯ;
+    ಸ್ಮರಣೆ_ನಕಲು(&ಮೌಲ್ಯ, _pc, ಗಾತ್ರ(ಮೌಲ್ಯ));
     _pc += (M3_SIZEOF_PTR == 4) ? 2 : 1;
-    slot(u64) = value;
-    nextOp();
+    ಸ್ಥಾನ(u64) = ಮೌಲ್ಯ;
+    ಮುಂದಿನ_Op();
 }
 
 d_m3Op(Unsupported)
@@ -3713,56 +3713,56 @@ d_m3Op(Unsupported)
 
 d_m3Op(Unreachable)
 {
-    m3StackCheck();
+    m3_ರಾಶಿ_Check();
     newTrap(m3Err_trapUnreachable);
 }
 
 
-d_m3Op(End)
+d_m3Op(ಕೊನೆ_2)
 {
-    m3StackCheck();
-    return m3Err_none;
+    m3_ರಾಶಿ_Check();
+    ಹಿಂತಿರುಗಿ m3Err_none;
 }
 
 
-d_m3Op(SetGlobal_s32)
+d_m3Op(ಗಣ_Global_s32)
 {
-    u32* global = immediate(u32*);
-    *global = slot(u32);
+    u32* global = ತಕ್ಷಣ(u32*);
+    *global = ಸ್ಥಾನ(u32);
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(SetGlobal_s64)
+d_m3Op(ಗಣ_Global_s64)
 {
-    u64* global = immediate(u64*);
-    *global = slot(u64);
+    u64* global = ತಕ್ಷಣ(u64*);
+    *global = ಸ್ಥಾನ(u64);
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
-#if d_m3HasFloat
-d_m3Op(SetGlobal_f32)
+#ಆದರೆ d_m3HasFloat
+d_m3Op(ಗಣ_Global_f32)
 {
-    f32* global = immediate(f32*);
+    f32* global = ತಕ್ಷಣ(f32*);
     *global = (f32)_fp0;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
 
 
-d_m3Op(SetGlobal_f64)
+d_m3Op(ಗಣ_Global_f64)
 {
-    f64* global = immediate(f64*);
+    f64* global = ತಕ್ಷಣ(f64*);
     *global = _fp0;
 
-    nextOp();
+    ಮುಂದಿನ_Op();
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-#if d_m3HasMemory64
+#ಆದರೆ d_m3HasMemory64
 
 // Checks a 64-bit address and folds the memarg offset into it, leaving the
 // effective address in a slot the access that follows reads as an ordinary
@@ -3777,283 +3777,283 @@ d_m3Op(SetGlobal_f64)
 // lets past 32 bits, so the truncation below is exact.
 d_m3Op(CheckAddr64)
 {
-    u64  operand = slot(u64);
-    u32* address = slot_ptr(u32);
+    u64  ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ(u64);
+    u32* ವಿಳಾಸ = ಸ್ಥಾನ_ptr(u32);
 
     u64  offset;
-    memcpy(&offset, _pc, sizeof(offset));
+    ಸ್ಮರಣೆ_ನಕಲು(&offset, _pc, ಗಾತ್ರ(offset));
     _pc += (M3_SIZEOF_PTR == 4) ? 2 : 1;
 
-    if (M3_LIKELY(operand < d_m3AddressLimit)) {
-        u64 effective = operand + offset;
+    ಆದರೆ (M3_LIKELY(ಕಾರ್ಯಾಂಶ < d_m3_ವಿಳಾಸ_ಎಲ್ಲೆ)) {
+        u64 effective = ಕಾರ್ಯಾಂಶ + offset;
 
         // the access itself checks its own size against what is left
-        if (M3_LIKELY(effective < _mem->length)) {
-            *address = (u32)effective;
-            nextOp();
+        ಆದರೆ (M3_LIKELY(effective < _mem->ಉದ್ದಳತೆ)) {
+            *ವಿಳಾಸ = (u32)effective;
+            ಮುಂದಿನ_Op();
         }
     }
 
-    d_outOfBounds;
+    d_ಹೊರಹೋಗು_ದ_Bounds;
 }
 
-#endif // d_m3HasMemory64
+#ಆದರೆ_ಅಂತ್ಯ // d_m3HasMemory64
 
 
 // Under d_m3GuardedMemory there is nothing to check: every address one of these
 // operations can name lands inside the memory's reservation, and the part of it the
 // memory does not have is not committed, so the access faults and RunCodeChecked
 // turns that into the trap the spec asks for.
-#if d_m3SkipMemoryBoundsCheck || d_m3GuardedMemory
+#ಆದರೆ d_m3_Skip_ಸ್ಮರಣೆ_Bounds_Check || d_m3_Guarded_ಸ್ಮರಣೆ
 #  define m3MemCheck(x) true
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 #  define m3MemCheck(x) M3_LIKELY(x)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 // memcpy here is to support non-aligned access on some platforms.
 
-#define d_m3Load(REG,DEST_TYPE,SRC_TYPE)                \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_ತುಂಬು(REG,DEST_TYPE,SRC_TYPE)                \
 d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_r)                 \
 {                                                       \
     d_m3TracePrepare                                    \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    u64 operand = (u32) _r0;                            \
-    operand += offset;                                  \
+    u32 offset = ತಕ್ಷಣ (u32);                       \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    u64 ಕಾರ್ಯಾಂಶ = (u32) _r0;                            \
+    ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (SRC_TYPE) <= _mem->length     \
+    ಆದರೆ (m3MemCheck(                                     \
+        ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (SRC_TYPE) <= _mem->ಉದ್ದಳತೆ     \
     )) {                                                \
         {                                               \
-            u8* src8 = m3MemData(_mem) + operand;       \
-            SRC_TYPE value;                             \
-            memcpy(&value, src8, sizeof(value));        \
-            M3_BSWAP_##SRC_TYPE(value);                 \
-            REG = (DEST_TYPE)value;                     \
-            d_m3TraceLoad(DEST_TYPE, operand, REG);     \
+            u8* src8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;       \
+            SRC_TYPE ಮೌಲ್ಯ;                             \
+            ಸ್ಮರಣೆ_ನಕಲು(&ಮೌಲ್ಯ, src8, ಗಾತ್ರ(ಮೌಲ್ಯ));        \
+            M3_BSWAP_##SRC_TYPE(ಮೌಲ್ಯ);                 \
+            REG = (DEST_TYPE)ಮೌಲ್ಯ;                     \
+            d_m3_Trace_ತುಂಬು(DEST_TYPE, ಕಾರ್ಯಾಂಶ, REG);     \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        ಮುಂದಿನ_Op_Preloaded ();                             \
+    } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
 }                                                       \
 d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_s)                 \
 {                                                       \
     d_m3TracePrepare                                    \
-    u64 operand = slot (u32);                           \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    u64 ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (u32);                           \
+    u32 offset = ತಕ್ಷಣ (u32);                       \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (SRC_TYPE) <= _mem->length     \
+    ಆದರೆ (m3MemCheck(                                     \
+        ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (SRC_TYPE) <= _mem->ಉದ್ದಳತೆ     \
     )) {                                                \
         {                                               \
-            u8* src8 = m3MemData(_mem) + operand;       \
-            SRC_TYPE value;                             \
-            memcpy(&value, src8, sizeof(value));        \
-            M3_BSWAP_##SRC_TYPE(value);                 \
-            REG = (DEST_TYPE)value;                     \
-            d_m3TraceLoad(DEST_TYPE, operand, REG);     \
+            u8* src8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;       \
+            SRC_TYPE ಮೌಲ್ಯ;                             \
+            ಸ್ಮರಣೆ_ನಕಲು(&ಮೌಲ್ಯ, src8, ಗಾತ್ರ(ಮೌಲ್ಯ));        \
+            M3_BSWAP_##SRC_TYPE(ಮೌಲ್ಯ);                 \
+            REG = (DEST_TYPE)ಮೌಲ್ಯ;                     \
+            d_m3_Trace_ತುಂಬು(DEST_TYPE, ಕಾರ್ಯಾಂಶ, REG);     \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        ಮುಂದಿನ_Op_Preloaded ();                             \
+    } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
 }
 
 //  printf ("get: %d -> %d\n", operand + offset, (i64) REG);
 
 
-#define d_m3Load_i(DEST_TYPE, SRC_TYPE) d_m3Load(_r0, DEST_TYPE, SRC_TYPE)
-#define d_m3Load_f(DEST_TYPE, SRC_TYPE) d_m3Load(_fp0, DEST_TYPE, SRC_TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_ತುಂಬು_i(DEST_TYPE, SRC_TYPE) d_m3_ತುಂಬು(_r0, DEST_TYPE, SRC_TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_ತುಂಬು_f(DEST_TYPE, SRC_TYPE) d_m3_ತುಂಬು(_fp0, DEST_TYPE, SRC_TYPE)
 
-#if d_m3HasFloat
-d_m3Load_f(f32, f32);
-d_m3Load_f(f64, f64);
-#endif
+#ಆದರೆ d_m3HasFloat
+d_m3_ತುಂಬು_f(f32, f32);
+d_m3_ತುಂಬು_f(f64, f64);
+#ಆದರೆ_ಅಂತ್ಯ
 
-d_m3Load_i(i32, i8);
-d_m3Load_i(i32, u8);
-d_m3Load_i(i32, i16);
-d_m3Load_i(i32, u16);
-d_m3Load_i(i32, i32);
+d_m3_ತುಂಬು_i(i32, i8);
+d_m3_ತುಂಬು_i(i32, u8);
+d_m3_ತುಂಬು_i(i32, i16);
+d_m3_ತುಂಬು_i(i32, u16);
+d_m3_ತುಂಬು_i(i32, i32);
 
-d_m3Load_i(i64, i8);
-d_m3Load_i(i64, u8);
-d_m3Load_i(i64, i16);
-d_m3Load_i(i64, u16);
-d_m3Load_i(i64, i32);
-d_m3Load_i(i64, u32);
-d_m3Load_i(i64, i64);
+d_m3_ತುಂಬು_i(i64, i8);
+d_m3_ತುಂಬು_i(i64, u8);
+d_m3_ತುಂಬು_i(i64, i16);
+d_m3_ತುಂಬು_i(i64, u16);
+d_m3_ತುಂಬು_i(i64, i32);
+d_m3_ತುಂಬು_i(i64, u32);
+d_m3_ತುಂಬು_i(i64, i64);
 
-#if d_m3FoldSetLocal
+#ಆದರೆ d_m3_Fold_ಗಣ_Local
 
 // destination-folded loads: the value goes to a trailing destination slot instead of _r0.
 // operand immediates keep d_m3Load's order; the destination slot is the last immediate
-#  define d_m3LoadFold(REG, DEST_TYPE, SRC_TYPE)          \
+#  define d_m3_ತುಂಬು_Fold(REG, DEST_TYPE, SRC_TYPE)          \
   d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_r_f)               \
   {                                                       \
       d_m3TracePrepare                                    \
-      u32 offset = immediate (u32);                       \
-      DEST_TYPE * dest = slot_ptr (DEST_TYPE);            \
-      d_m3PreloadNext ();                                 \
-      u64 operand = (u32) _r0;                            \
-      operand += offset;                                  \
+      u32 offset = ತಕ್ಷಣ (u32);                       \
+      DEST_TYPE * dest = ಸ್ಥಾನ_ptr (DEST_TYPE);            \
+      d_m3_Preload_ಮುಂದಿನ ();                                 \
+      u64 ಕಾರ್ಯಾಂಶ = (u32) _r0;                            \
+      ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                           \
-      if (m3MemCheck(                                     \
-          operand + sizeof (SRC_TYPE) <= _mem->length     \
+      ಆದರೆ (m3MemCheck(                                     \
+          ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (SRC_TYPE) <= _mem->ಉದ್ದಳತೆ     \
       )) {                                                \
-          u8* src8 = m3MemData(_mem) + operand;           \
-          SRC_TYPE value;                                 \
-          memcpy(&value, src8, sizeof(value));            \
-          M3_BSWAP_##SRC_TYPE(value);                     \
-          DEST_TYPE result = (DEST_TYPE)value;            \
-          * dest = result;  REG = result;                 \
-          d_m3TraceLoad(DEST_TYPE, operand, result);      \
-          nextOpPreloaded ();                             \
-      } else d_outOfBounds;                               \
+          u8* src8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;           \
+          SRC_TYPE ಮೌಲ್ಯ;                                 \
+          ಸ್ಮರಣೆ_ನಕಲು(&ಮೌಲ್ಯ, src8, ಗಾತ್ರ(ಮೌಲ್ಯ));            \
+          M3_BSWAP_##SRC_TYPE(ಮೌಲ್ಯ);                     \
+          DEST_TYPE ಫಲಿತಾಂಶ = (DEST_TYPE)ಮೌಲ್ಯ;            \
+          * dest = ಫಲಿತಾಂಶ;  REG = ಫಲಿತಾಂಶ;                 \
+          d_m3_Trace_ತುಂಬು(DEST_TYPE, ಕಾರ್ಯಾಂಶ, ಫಲಿತಾಂಶ);      \
+          ಮುಂದಿನ_Op_Preloaded ();                             \
+      } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
   }                                                       \
   d_m3Op(DEST_TYPE##_Load_##SRC_TYPE##_s_f)               \
   {                                                       \
       d_m3TracePrepare                                    \
-      u64 operand = slot (u32);                           \
-      u32 offset = immediate (u32);                       \
-      DEST_TYPE * dest = slot_ptr (DEST_TYPE);            \
-      d_m3PreloadNext ();                                 \
-      operand += offset;                                  \
+      u64 ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (u32);                           \
+      u32 offset = ತಕ್ಷಣ (u32);                       \
+      DEST_TYPE * dest = ಸ್ಥಾನ_ptr (DEST_TYPE);            \
+      d_m3_Preload_ಮುಂದಿನ ();                                 \
+      ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                           \
-      if (m3MemCheck(                                     \
-          operand + sizeof (SRC_TYPE) <= _mem->length     \
+      ಆದರೆ (m3MemCheck(                                     \
+          ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (SRC_TYPE) <= _mem->ಉದ್ದಳತೆ     \
       )) {                                                \
-          u8* src8 = m3MemData(_mem) + operand;           \
-          SRC_TYPE value;                                 \
-          memcpy(&value, src8, sizeof(value));            \
-          M3_BSWAP_##SRC_TYPE(value);                     \
-          DEST_TYPE result = (DEST_TYPE)value;            \
-          * dest = result;  REG = result;                 \
-          d_m3TraceLoad(DEST_TYPE, operand, result);      \
-          nextOpPreloaded ();                             \
-      } else d_outOfBounds;                               \
+          u8* src8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;           \
+          SRC_TYPE ಮೌಲ್ಯ;                                 \
+          ಸ್ಮರಣೆ_ನಕಲು(&ಮೌಲ್ಯ, src8, ಗಾತ್ರ(ಮೌಲ್ಯ));            \
+          M3_BSWAP_##SRC_TYPE(ಮೌಲ್ಯ);                     \
+          DEST_TYPE ಫಲಿತಾಂಶ = (DEST_TYPE)ಮೌಲ್ಯ;            \
+          * dest = ಫಲಿತಾಂಶ;  REG = ಫಲಿತಾಂಶ;                 \
+          d_m3_Trace_ತುಂಬು(DEST_TYPE, ಕಾರ್ಯಾಂಶ, ಫಲಿತಾಂಶ);      \
+          ಮುಂದಿನ_Op_Preloaded ();                             \
+      } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
   }
 
-d_m3LoadFold(_r0, i32, i8)
-d_m3LoadFold(_r0, i32, u8)
-d_m3LoadFold(_r0, i32, i16)
-d_m3LoadFold(_r0, i32, u16)
-d_m3LoadFold(_r0, i32, i32)
+d_m3_ತುಂಬು_Fold(_r0, i32, i8)
+d_m3_ತುಂಬು_Fold(_r0, i32, u8)
+d_m3_ತುಂಬು_Fold(_r0, i32, i16)
+d_m3_ತುಂಬು_Fold(_r0, i32, u16)
+d_m3_ತುಂಬು_Fold(_r0, i32, i32)
 
 // The fold forms take the address from _r0 and write the result straight to the
 // destination slot, so they never touch _fp0 and the float widths need no register form.
-d_m3LoadFold(_r0, i64, i8)
-d_m3LoadFold(_r0, i64, u8)
-d_m3LoadFold(_r0, i64, i16)
-d_m3LoadFold(_r0, i64, u16)
-d_m3LoadFold(_r0, i64, i32)
-d_m3LoadFold(_r0, i64, u32)
-d_m3LoadFold(_r0, i64, i64)
-#  if d_m3HasFloat
-d_m3LoadFold(_fp0, f32, f32)
-d_m3LoadFold(_fp0, f64, f64)
+d_m3_ತುಂಬು_Fold(_r0, i64, i8)
+d_m3_ತುಂಬು_Fold(_r0, i64, u8)
+d_m3_ತುಂಬು_Fold(_r0, i64, i16)
+d_m3_ತುಂಬು_Fold(_r0, i64, u16)
+d_m3_ತುಂಬು_Fold(_r0, i64, i32)
+d_m3_ತುಂಬು_Fold(_r0, i64, u32)
+d_m3_ತುಂಬು_Fold(_r0, i64, i64)
+#  ಆದರೆ d_m3HasFloat
+d_m3_ತುಂಬು_Fold(_fp0, f32, f32)
+d_m3_ತುಂಬು_Fold(_fp0, f64, f64)
 #  endif
 
-#endif // d_m3FoldSetLocal
+#ಆದರೆ_ಅಂತ್ಯ // d_m3FoldSetLocal
 
-#define d_m3Store(REG, SRC_TYPE, DEST_TYPE)             \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Store(REG, SRC_TYPE, DEST_TYPE)             \
 d_m3Op  (SRC_TYPE##_Store_##DEST_TYPE##_rs)             \
 {                                                       \
     d_m3TracePrepare                                    \
-    u64 operand = slot (u32);                           \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    u64 ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (u32);                           \
+    u32 offset = ತಕ್ಷಣ (u32);                       \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (DEST_TYPE) <= _mem->length    \
+    ಆದರೆ (m3MemCheck(                                     \
+        ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (DEST_TYPE) <= _mem->ಉದ್ದಳತೆ    \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(SRC_TYPE, operand, REG);     \
-            u8* mem8 = m3MemData(_mem) + operand;       \
+            d_m3TraceStore(SRC_TYPE, ಕಾರ್ಯಾಂಶ, REG);     \
+            u8* mem8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;       \
             DEST_TYPE val = (DEST_TYPE) REG;            \
             M3_BSWAP_##DEST_TYPE(val);                  \
-            memcpy(mem8, &val, sizeof(val));            \
+            ಸ್ಮರಣೆ_ನಕಲು(mem8, &val, ಗಾತ್ರ(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        ಮುಂದಿನ_Op_Preloaded ();                             \
+    } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
 }                                                       \
 d_m3Op  (SRC_TYPE##_Store_##DEST_TYPE##_sr)             \
 {                                                       \
     d_m3TracePrepare                                    \
-    const SRC_TYPE value = slot (SRC_TYPE);             \
-    u64 operand = (u32) _r0;                            \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    ಸ್ಥಿರಾಂಕ SRC_TYPE ಮೌಲ್ಯ = ಸ್ಥಾನ (SRC_TYPE);             \
+    u64 ಕಾರ್ಯಾಂಶ = (u32) _r0;                            \
+    u32 offset = ತಕ್ಷಣ (u32);                       \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (DEST_TYPE) <= _mem->length    \
+    ಆದರೆ (m3MemCheck(                                     \
+        ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (DEST_TYPE) <= _mem->ಉದ್ದಳತೆ    \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(SRC_TYPE, operand, value);   \
-            u8* mem8 = m3MemData(_mem) + operand;       \
-            DEST_TYPE val = (DEST_TYPE) value;          \
+            d_m3TraceStore(SRC_TYPE, ಕಾರ್ಯಾಂಶ, ಮೌಲ್ಯ);   \
+            u8* mem8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;       \
+            DEST_TYPE val = (DEST_TYPE) ಮೌಲ್ಯ;          \
             M3_BSWAP_##DEST_TYPE(val);                  \
-            memcpy(mem8, &val, sizeof(val));            \
+            ಸ್ಮರಣೆ_ನಕಲು(mem8, &val, ಗಾತ್ರ(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        ಮುಂದಿನ_Op_Preloaded ();                             \
+    } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
 }                                                       \
 d_m3Op  (SRC_TYPE##_Store_##DEST_TYPE##_ss)             \
 {                                                       \
     d_m3TracePrepare                                    \
-    const SRC_TYPE value = slot (SRC_TYPE);             \
-    u64 operand = slot (u32);                           \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    ಸ್ಥಿರಾಂಕ SRC_TYPE ಮೌಲ್ಯ = ಸ್ಥಾನ (SRC_TYPE);             \
+    u64 ಕಾರ್ಯಾಂಶ = ಸ್ಥಾನ (u32);                           \
+    u32 offset = ತಕ್ಷಣ (u32);                       \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (DEST_TYPE) <= _mem->length    \
+    ಆದರೆ (m3MemCheck(                                     \
+        ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (DEST_TYPE) <= _mem->ಉದ್ದಳತೆ    \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(SRC_TYPE, operand, value);   \
-            u8* mem8 = m3MemData(_mem) + operand;       \
-            DEST_TYPE val = (DEST_TYPE) value;          \
+            d_m3TraceStore(SRC_TYPE, ಕಾರ್ಯಾಂಶ, ಮೌಲ್ಯ);   \
+            u8* mem8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;       \
+            DEST_TYPE val = (DEST_TYPE) ಮೌಲ್ಯ;          \
             M3_BSWAP_##DEST_TYPE(val);                  \
-            memcpy(mem8, &val, sizeof(val));            \
+            ಸ್ಮರಣೆ_ನಕಲು(mem8, &val, ಗಾತ್ರ(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        ಮುಂದಿನ_Op_Preloaded ();                             \
+    } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
 }
 
 // both operands can be in regs when storing a float
-#define d_m3StoreFp(REG, TYPE)                          \
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3StoreFp(REG, TYPE)                          \
 d_m3Op  (TYPE##_Store_##TYPE##_rr)                      \
 {                                                       \
     d_m3TracePrepare                                    \
-    u64 operand = (u32) _r0;                            \
-    u32 offset = immediate (u32);                       \
-    d_m3PreloadNext ();                                 \
-    operand += offset;                                  \
+    u64 ಕಾರ್ಯಾಂಶ = (u32) _r0;                            \
+    u32 offset = ತಕ್ಷಣ (u32);                       \
+    d_m3_Preload_ಮುಂದಿನ ();                                 \
+    ಕಾರ್ಯಾಂಶ += offset;                                  \
                                                         \
-    if (m3MemCheck(                                     \
-        operand + sizeof (TYPE) <= _mem->length         \
+    ಆದರೆ (m3MemCheck(                                     \
+        ಕಾರ್ಯಾಂಶ + ಗಾತ್ರ (TYPE) <= _mem->ಉದ್ದಳತೆ         \
     )) {                                                \
         {                                               \
-            d_m3TraceStore(TYPE, operand, REG);         \
-            u8* mem8 = m3MemData(_mem) + operand;       \
+            d_m3TraceStore(TYPE, ಕಾರ್ಯಾಂಶ, REG);         \
+            u8* mem8 = m3_Mem_ದತ್ತಾಂಶ(_mem) + ಕಾರ್ಯಾಂಶ;       \
             TYPE val = (TYPE) REG;                      \
             M3_BSWAP_##TYPE(val);                       \
-            memcpy(mem8, &val, sizeof(val));            \
+            ಸ್ಮರಣೆ_ನಕಲು(mem8, &val, ಗಾತ್ರ(val));            \
         }                                               \
-        nextOpPreloaded ();                             \
-    } else d_outOfBounds;                               \
+        ಮುಂದಿನ_Op_Preloaded ();                             \
+    } ಇಲ್ಲದಿದ್ದರೆ d_ಹೊರಹೋಗು_ದ_Bounds;                               \
 }
 
 
-#define d_m3Store_i(SRC_TYPE, DEST_TYPE) d_m3Store(_r0, SRC_TYPE, DEST_TYPE)
-#define d_m3Store_f(SRC_TYPE, DEST_TYPE) d_m3Store(_fp0, SRC_TYPE, DEST_TYPE) d_m3StoreFp (_fp0, SRC_TYPE);
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Store_i(SRC_TYPE, DEST_TYPE) d_m3Store(_r0, SRC_TYPE, DEST_TYPE)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3Store_f(SRC_TYPE, DEST_TYPE) d_m3Store(_fp0, SRC_TYPE, DEST_TYPE) d_m3StoreFp (_fp0, SRC_TYPE);
 
-#if d_m3HasFloat
+#ಆದರೆ d_m3HasFloat
 d_m3Store_f(f32, f32)
 d_m3Store_f(f64, f64)
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 d_m3Store_i(i32, u8)
 d_m3Store_i(i32, i16)
@@ -4064,47 +4064,47 @@ d_m3Store_i(i64, i16)
 d_m3Store_i(i64, i32)
 d_m3Store_i(i64, i64)
 
-#include "m3_exec_atomic.h"
+#ಅನ್ತರ್ಭಾವ "m3_exec_atomic.h"
 
-#undef m3MemCheck
+#ವ್ಯಾಖ್ಯಾನ_ರದ್ದು m3MemCheck
 
 
 //---------------------------------------------------------------------------------------------------------------------
 // debug/profiling
 //---------------------------------------------------------------------------------------------------------------------
-#if d_m3EnableOpTracing
+#ಆದರೆ d_m3EnableOpTracing
 d_m3RetSig debugOp (d_m3OpSig, cstr_t i_opcode)
 {
-    char name[100];
-    strcpy(name, strstr(i_opcode, "op_") + 3);
-    char* bracket = strstr(name, "(");
-    if (bracket) {
+    ಅಕ್ಷರ name[100];
+    strcpy(name, ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(i_opcode, "op_") + 3);
+    ಅಕ್ಷರ* bracket = ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(name, "(");
+    ಆದರೆ (bracket) {
         *bracket = 0;
     }
 
     puts(name);
-    nextOpDirect();
+    ಮುಂದಿನ_Op_ನೇರ();
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if d_m3EnableOpProfiling
+#ಆದರೆ d_m3EnableOpProfiling
 d_m3RetSig profileOp (d_m3OpSig, cstr_t i_operationName)
 {
-    ProfileHit(i_operationName);
+    Profile_ದೊರಕಿತು(i_operationName);
 
-    nextOpDirect();
+    ಮುಂದಿನ_Op_ನೇರ();
 }
 
 // Same, for an operation leaving by a branch: jumpOp hands the target pc in as _pc,
 // so dispatching from here lands exactly where jumpOpDirect would have.
 d_m3RetSig profileJumpOp (d_m3OpSig, cstr_t i_operationName)
 {
-    ProfileHit(i_operationName);
+    Profile_ದೊರಕಿತು(i_operationName);
 
-    nextOpDirect();
+    ಮುಂದಿನ_Op_ನೇರ();
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-d_m3EndExternC
+d_m3_ಕೊನೆ_Extern_C
 
-#endif // m3_exec_h
+#ಆದರೆ_ಅಂತ್ಯ // m3_exec_h

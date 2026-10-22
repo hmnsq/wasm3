@@ -15,62 +15,62 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_none_h
-#define m3_host_none_h
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ m3_host_none_h
+#ವ್ಯಾಖ್ಯಾನಿಸು m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#ಅನ್ತರ್ಭಾವ "m3_core.h"
+#ಅನ್ತರ್ಭಾವ "m3_host.h"
 
-void* m3_HostStackBase (void)
+ಶೂನ್ಯ* m3_Host_ರಾಶಿ_ತಳ (ಶೂನ್ಯ)
 {
-    return NULL;
+    ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+ಶೂನ್ಯ m3_Host_Install_ಅಡಚಣೆ_Handler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (ಶೂನ್ಯ)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+ಶೂನ್ಯ m3_Host_Remove_ಅಡಚಣೆ_Handler (ಶೂನ್ಯ)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_Host_ಸಮಯ_Ms (ಶೂನ್ಯ)
 {
-    return 0;
+    ಹಿಂತಿರುಗಿ 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+ಶೂನ್ಯ m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (ಶೂನ್ಯ)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_ಮಾರ್ಗ, size_t i_max_ಬೈಟುಗಳು, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    ಹಿಂತಿರುಗಿ m3_HostReadFile(i_ಮಾರ್ಗ, i_max_ಬೈಟುಗಳು, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+ಶೂನ್ಯ m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->ದತ್ತಾಂಶ);
 
-    io_file->size = 0;
+    io_file->ಗಾತ್ರ_2 = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_from, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_ಗಮ್ಯ)
 {
-    remove(i_to);
-    return rename(i_from, i_to) == 0;
+    remove(i_ಗಮ್ಯ);
+    ಹಿಂತಿರುಗಿ rename(i_from, i_ಗಮ್ಯ) == 0;
 }
 
-#if d_m3GuardedMemory
+#ಆದರೆ d_m3_Guarded_ಸ್ಮರಣೆ
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#endif // m3_host_none_h
+#ಆದರೆ_ಅಂತ್ಯ // m3_host_none_h

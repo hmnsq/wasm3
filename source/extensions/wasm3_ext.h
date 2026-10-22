@@ -7,15 +7,15 @@
 //  All rights reserved.
 //
 
-#ifndef wasm3_ext_h
-#define wasm3_ext_h
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ wasm3_ext_h
+#ವ್ಯಾಖ್ಯಾನಿಸು wasm3_ext_h
 
-#include "wasm3.h"
-#include <stdbool.h>
+#ಅನ್ತರ್ಭಾವ "wasm3.h"
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#ಆದರೆ defined(__cplusplus)
+ಬಾಹ್ಯ "C" {
+#ಆದರೆ_ಅಂತ್ಯ
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //  API extensions
@@ -34,18 +34,18 @@ IM3Module   m3_NewModule (IM3Environment i_environment);
 // To overwrite an existing function, set io_functionIndex to the desired element. i_signature must match the existing
 // function signature.
 // ** InjectFunction invalidates any existing IM3Function pointers
-M3Result    m3_InjectFunction (IM3Module            i_module,
-                               int32_t*             io_functionIndex,
-                               const char* const    i_signature,
-                               const uint8_t* const i_wasmBytes,            // i_wasmBytes is copied
+M3_ಫಲಿತಾಂಶ    m3_InjectFunction (IM3Module            i_module,
+                               int32_t*             io_function_ಸೂಚ್ಯಂಕ,
+                               ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* ಸ್ಥಿರಾಂಕ    i_signature,
+                               ಸ್ಥಿರಾಂಕ uint8_t* ಸ್ಥಿರಾಂಕ i_wasm_ಬೈಟುಗಳು,            // i_wasmBytes is copied
                                bool                 i_doCompilation);
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module,
-                                   uint32_t  i_index);
+IM3Function m3_Get_Function_By_ಸೂಚ್ಯಂಕ (IM3Module i_module,
+                                   uint32_t  i_ಸೂಚ್ಯಂಕ);
 
-#if defined(__cplusplus)
+#ಆದರೆ defined(__cplusplus)
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#endif // wasm3_h
+#ಆದರೆ_ಅಂತ್ಯ // wasm3_h

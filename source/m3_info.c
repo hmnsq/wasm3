@@ -5,45 +5,45 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_info.h"
-#include "m3_compile.h"
+#ಅನ್ತರ್ಭಾವ "m3_env.h"
+#ಅನ್ತರ್ಭಾವ "m3_info.h"
+#ಅನ್ತರ್ಭಾವ "m3_compile.h"
 
-#if defined(DEBUG) || (d_m3EnableStrace >= 1)
+#ಆದರೆ defined(DEBUG) || (d_m3EnableStrace >= 1)
 
-size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type)
+size_t SPrintArg (ಅಕ್ಷರ* o_string, size_t i_string_ಬಫರ್_ಗಾತ್ರ, voidptr_t i_sp, m3type_t i_type)
 {
-    int len = 0;
+    ಪೂರ್ಣಾಂಕ len = 0;
 
     *o_string = 0;
 
-    if (i_type == c_m3Type_i32) {
-        len = snprintf(o_string, i_stringBufferSize, "%" PRIi32, *(i32*)i_sp);
-    } else if (i_type == c_m3Type_i64) {
-        len = snprintf(o_string, i_stringBufferSize, "%" PRIi64, *(i64*)i_sp);
+    ಆದರೆ (i_type == c_m3Type_i32) {
+        len = snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%" PRIi32, *(i32*)i_sp);
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (i_type == c_m3Type_i64) {
+        len = snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%" PRIi64, *(i64*)i_sp);
     }
-#  if d_m3HasFloat
-    else if (i_type == c_m3Type_f32) {
-        len = snprintf(o_string, i_stringBufferSize, "%" PRIf32, *(f32*)i_sp);
-    } else if (i_type == c_m3Type_f64) {
-        len = snprintf(o_string, i_stringBufferSize, "%" PRIf64, *(f64*)i_sp);
+#  ಆದರೆ d_m3HasFloat
+    ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (i_type == c_m3Type_f32) {
+        len = snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%" PRIf32, *(f32*)i_sp);
+    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (i_type == c_m3Type_f64) {
+        len = snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%" PRIf64, *(f64*)i_sp);
     }
 #  endif
 
     len = M3_MAX(0, len);
 
-    return len;
+    ಹಿಂತಿರುಗಿ len;
 }
 
 
 cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 {
-    int ret;
+    ಪೂರ್ಣಾಂಕ ret;
 
-    static char string[256];
+    ಸ್ಥಿರ ಅಕ್ಷರ string[256];
 
-    char*   s = string;
-    ccstr_t e = string + sizeof(string) - 1;
+    ಅಕ್ಷರ*   s = string;
+    ccstr_t e = string + ಗಾತ್ರ(string) - 1;
 
     ret = snprintf(s, e - s, "(");
     s += M3_MAX(0, ret);
@@ -51,30 +51,30 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
     u64* argSp = (u64*)i_sp;
 
     IM3FuncType funcType = i_function->funcType;
-    if (funcType) {
-        u32 numArgs = funcType->numArgs;
+    ಆದರೆ (funcType) {
+        u32 ಅಂಕೆ_ವಾದಗಳು = funcType->ಅಂಕೆ_ವಾದಗಳು;
 
-        for (u32 i = 0; i < numArgs; ++i) {
+        ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_ವಾದಗಳು; ++i) {
             m3type_t type = d_FuncArgType(funcType, i);
 
-            ret = snprintf(s, e - s, "%s: ", c_waTypes[BaseTypeOf(type)]);
+            ret = snprintf(s, e - s, "%s: ", c_waTypes[ತಳ_Type_ದ(type)]);
             s += M3_MAX(0, ret);
 
             s += SPrintArg(s, e - s, argSp + i, type);
 
-            if (i != numArgs - 1) {
+            ಆದರೆ (i != ಅಂಕೆ_ವಾದಗಳು - 1) {
                 ret = snprintf(s, e - s, ", ");
                 s += M3_MAX(0, ret);
             }
         }
-    } else {
-        printf("null signature");
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಬರೆ("null signature");
     }
 
     ret = snprintf(s, e - s, ")");
     s += M3_MAX(0, ret);
 
-    return string;
+    ಹಿಂತಿರುಗಿ string;
 }
 
 // The results of a call, comma separated, for the strace return line. Empty when
@@ -83,89 +83,89 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 // layout m3_GetResults reads.
 cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 {
-    int ret;
+    ಪೂರ್ಣಾಂಕ ret;
 
-    static char string[256];
+    ಸ್ಥಿರ ಅಕ್ಷರ string[256];
 
-    char*   s = string;
-    ccstr_t e = string + sizeof(string) - 1;
+    ಅಕ್ಷರ*   s = string;
+    ccstr_t e = string + ಗಾತ್ರ(string) - 1;
 
     *s = 0;
 
     u64* retSp = (u64*)i_sp;
 
-    u32 numRets = i_funcType ? i_funcType->numRets : 0;
+    u32 ಅಂಕೆ_Rets = i_funcType ? i_funcType->ಅಂಕೆ_Rets : 0;
 
-    for (u32 i = 0; i < numRets; ++i) {
+    ಗಾಗಿ (u32 i = 0; i < ಅಂಕೆ_Rets; ++i) {
         s += SPrintArg(s, e - s, retSp + i, d_FuncRetType(i_funcType, i));
 
-        if (i != numRets - 1) {
+        ಆದರೆ (i != ಅಂಕೆ_Rets - 1) {
             ret = snprintf(s, e - s, ", ");
             s += M3_MAX(0, ret);
         }
     }
 
-    return string;
+    ಹಿಂತಿರುಗಿ string;
 }
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#ifdef DEBUG
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ DEBUG
 
 // a central function you can be breakpoint:
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message)
+ಶೂನ್ಯ ExceptionBreakpoint (cstr_t i_exception, cstr_t i_ಸಂದೇಶ)
 {
-    printf("\nexception: '%s' @ %s\n", i_exception, i_message);
-    return;
+    ಬರೆ("\nexception: '%s' @ %s\n", i_exception, i_ಸಂದೇಶ);
+    ಹಿಂತಿರುಗಿ;
 }
 
 
-typedef struct OpInfo {
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ರಚನೆ OpInfo {
     IM3OpInfo  info;
     m3opcode_t opcode;
 } OpInfo;
 
-void m3_PrintM3Info ()
+ಶೂನ್ಯ m3_PrintM3Info ()
 {
-    printf("\n-- m3 configuration --------------------------------------------\n");
+    ಬರೆ("\n-- m3 configuration --------------------------------------------\n");
     //  printf (" sizeof M3CodePage    : %zu bytes  (%d slots) \n", sizeof (M3CodePage), c_m3CodePageNumSlots);
-    printf(" sizeof M3MemPage     : %u bytes              \n", d_m3DefaultMemPageSize);
-    printf(" sizeof M3Compilation : %zu bytes             \n", sizeof(M3Compilation));
-    printf(" sizeof M3Function    : %zu bytes             \n", sizeof(M3Function));
-    printf("----------------------------------------------------------------\n\n");
+    ಬರೆ(" sizeof M3MemPage     : %u bytes              \n", d_m3_Default_Mem_ಪುಟ_ಗಾತ್ರ);
+    ಬರೆ(" sizeof M3Compilation : %zu bytes             \n", ಗಾತ್ರ(M3Compilation));
+    ಬರೆ(" sizeof M3Function    : %zu bytes             \n", ಗಾತ್ರ(M3Function));
+    ಬರೆ("----------------------------------------------------------------\n\n");
 }
 
 
-void* v_PrintEnvModuleInfo (IM3Module i_module, void* i_info)
+ಶೂನ್ಯ* v_PrintEnvModuleInfo (IM3Module i_module, ಶೂನ್ಯ* i_info)
 {
-    u32* io_index = (u32*)i_info;
-    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->numFunctions);
+    u32* io_ಸೂಚ್ಯಂಕ = (u32*)i_info;
+    ಬರೆ(" module [%u]  name: '%s'; funcs: %d  \n", (*io_ಸೂಚ್ಯಂಕ)++, i_module->name, i_module->ಅಂಕೆ_Functions);
 
-    return NULL;
+    ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 
-void m3_PrintRuntimeInfo (IM3Runtime i_runtime)
+ಶೂನ್ಯ m3_PrintRuntimeInfo (IM3Runtime i_runtime)
 {
-    printf("\n-- m3 runtime -------------------------------------------------\n");
+    ಬರೆ("\n-- m3 runtime -------------------------------------------------\n");
 
-    printf(" stack-size: %zu   \n\n", i_runtime->numStackSlots * sizeof(m3slot_t));
+    ಬರೆ(" stack-size: %zu   \n\n", i_runtime->ಅಂಕೆ_ರಾಶಿ_Slots * ಗಾತ್ರ(m3slot_t));
 
-    u32 moduleIndex = 0;
-    ForEachModule(i_runtime, v_PrintEnvModuleInfo, &moduleIndex);
+    u32 module_ಸೂಚ್ಯಂಕ = 0;
+    ForEachModule(i_runtime, v_PrintEnvModuleInfo, &module_ಸೂಚ್ಯಂಕ);
 
-    printf("----------------------------------------------------------------\n\n");
+    ಬರೆ("----------------------------------------------------------------\n\n");
 }
 
 
 cstr_t GetTypeName (m3type_t i_m3Type)
 {
-    u8 base = BaseTypeOf(i_m3Type);
+    u8 ತಳ = ತಳ_Type_ದ(i_m3Type);
 
-    if (base <= c_m3Type_unknown) {
-        return c_waTypes[base];
-    } else {
-        return "?";
+    ಆದರೆ (ತಳ <= c_m3Type_unknown) {
+        ಹಿಂತಿರುಗಿ c_waTypes[ತಳ];
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಹಿಂತಿರುಗಿ "?";
     }
 }
 
@@ -173,19 +173,19 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 // Appends to a string that is built up over several calls, and returns the length
 // reached. snprintf reports the length it wanted to write rather than the length
 // it wrote, so an append that truncates has to leave the cursor inside the buffer.
-static
-size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, ccstr_t i_format, ...)
+ಸ್ಥಿರ
+size_t SPrintAppend (ಅಕ್ಷರ* o_string, size_t i_string_ಬಫರ್_ಗಾತ್ರ, size_t i_len, ccstr_t i_format, ...)
 {
-    if (i_len + 1 >= i_stringBufferSize) {
-        return i_len;
+    ಆದರೆ (i_len + 1 >= i_string_ಬಫರ್_ಗಾತ್ರ) {
+        ಹಿಂತಿರುಗಿ i_len;
     }
 
-    va_list args;
-    va_start(args, i_format);
-    int ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
-    va_end(args);
+    va_list ವಾದಗಳು;
+    va_start(ವಾದಗಳು, i_format);
+    ಪೂರ್ಣಾಂಕ ret = vsnprintf(o_string + i_len, i_string_ಬಫರ್_ಗಾತ್ರ - i_len, i_format, ವಾದಗಳು);
+    va_end(ವಾದಗಳು);
 
-    return M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
+    ಹಿಂತಿರುಗಿ M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_string_ಬಫರ್_ಗಾತ್ರ - 1);
 }
 
 
@@ -194,60 +194,60 @@ size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, cc
 
 cstr_t SPrintFuncTypeSignature (IM3FuncType i_funcType)
 {
-    static char string[256];
+    ಸ್ಥಿರ ಅಕ್ಷರ string[256];
 
-    size_t len = SPrintAppend(string, sizeof(string), 0, "(");
+    size_t len = SPrintAppend(string, ಗಾತ್ರ(string), 0, "(");
 
-    for (u32 i = 0; i < i_funcType->numArgs; ++i) {
-        len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
+    ಗಾಗಿ (u32 i = 0; i < i_funcType->ಅಂಕೆ_ವಾದಗಳು; ++i) {
+        len = SPrintAppend(string, ಗಾತ್ರ(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncArgType(i_funcType, i)));
     }
 
-    len = SPrintAppend(string, sizeof(string), len, ") -> ");
+    len = SPrintAppend(string, ಗಾತ್ರ(string), len, ") -> ");
 
-    for (u32 i = 0; i < i_funcType->numRets; ++i) {
-        len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
+    ಗಾಗಿ (u32 i = 0; i < i_funcType->ಅಂಕೆ_Rets; ++i) {
+        len = SPrintAppend(string, ಗಾತ್ರ(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncRetType(i_funcType, i)));
     }
 
-    return string;
+    ಹಿಂತಿರುಗಿ string;
 }
 
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type)
+cstr_t SPrint_ಮೌಲ್ಯ (ಶೂನ್ಯ* i_ಮೌಲ್ಯ, m3type_t i_type)
 {
-    static char string[100];
-    SPrintArg(string, 100, (m3stack_t)i_value, i_type);
-    return string;
+    ಸ್ಥಿರ ಅಕ್ಷರ string[100];
+    SPrintArg(string, 100, (m3stack_t)i_ಮೌಲ್ಯ, i_type);
+    ಹಿಂತಿರುಗಿ string;
 }
 
 // Finds i_operation in one operation table. i_opcodeBase tags the result, so an
 // extended entry comes back as the 0xFCxx opcode the rest of the code speaks.
-static
-bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_numOps, m3opcode_t i_opcodeBase, IM3Operation i_operation)
+ಸ್ಥಿರ
+bool ಪರಿಶೀಲನೆ_Operation_ಕೋಷ್ಟಕ (OpInfo* io_info, IM3OpInfo i_ಕೋಷ್ಟಕ, u32 i_ಅಂಕೆ_Ops, m3opcode_t i_opcode_ತಳ, IM3Operation i_operation)
 {
-    for (u32 i = 0; i < i_numOps; ++i) {
-        IM3OpInfo oi = &i_table[i];
+    ಗಾಗಿ (u32 i = 0; i < i_ಅಂಕೆ_Ops; ++i) {
+        IM3OpInfo oi = &i_ಕೋಷ್ಟಕ[i];
 
-        for (u32 o = 0; o < 4; ++o) {
-            if (oi->operations[o] == i_operation) {
+        ಗಾಗಿ (u32 o = 0; o < 4; ++o) {
+            ಆದರೆ (oi->operations[o] == i_operation) {
                 io_info->info   = oi;
-                io_info->opcode = i_opcodeBase | i;
-                return true;
+                io_info->opcode = i_opcode_ತಳ | i;
+                ಹಿಂತಿರುಗಿ true;
             }
         }
     }
 
-    return false;
+    ಹಿಂತಿರುಗಿ false;
 }
 
-static
-OpInfo find_operation_info (IM3Operation i_operation)
+ಸ್ಥಿರ
+OpInfo ಕಂಡುಹಿಡಿ_operation_info (IM3Operation i_operation)
 {
-    OpInfo opInfo = { NULL, 0 };
+    OpInfo opInfo = { ಖಾಲಿ, 0 };
 
-    if (!i_operation) {
-        return opInfo;
+    ಆದರೆ (!i_operation) {
+        ಹಿಂತಿರುಗಿ opInfo;
     }
 
     // Scans the tables directly rather than through GetOpInfo (), which rejects
@@ -255,139 +255,139 @@ OpInfo find_operation_info (IM3Operation i_operation)
     // Reserved slots are zeroed, so they never match a real operation here.
     // c_operationsHigh is not scanned: every entry in it is compiler-driven with
     // an empty operation list, so nothing there could match.
-    if (not ScanOperationTable(&opInfo, c_operations, c_numOperations, 0, i_operation)) {
-        if (not ScanOperationTable(&opInfo, c_operationsFC, c_numOperationsFC, c_waOp_extended << 8, i_operation)) {
-#  if d_m3HasAtomics
+    ಆದರೆ (not ಪರಿಶೀಲನೆ_Operation_ಕೋಷ್ಟಕ(&opInfo, c_operations, c_ಅಂಕೆ_Operations, 0, i_operation)) {
+        ಆದರೆ (not ಪರಿಶೀಲನೆ_Operation_ಕೋಷ್ಟಕ(&opInfo, c_operationsFC, c_ಅಂಕೆ_Operations_FC, c_waOp_extended << 8, i_operation)) {
+#  ಆದರೆ d_m3HasAtomics
             // one entry serves a whole kind, so the opcode it comes back with is only the entry's index
-            ScanOperationTable(&opInfo, c_operationsFE, c_numOperationsFE, c_waOp_atomic << 8, i_operation);
+            ಪರಿಶೀಲನೆ_Operation_ಕೋಷ್ಟಕ(&opInfo, c_operationsFE, c_ಅಂಕೆ_Operations_FE, c_waOp_atomic << 8, i_operation);
 #  endif
         }
     }
 
-    return opInfo;
+    ಹಿಂತಿರುಗಿ opInfo;
 }
 
 
 #  undef fetch
 #  define fetch(TYPE) (* (TYPE *) ((*o_pc)++))
 
-#  define d_m3Decoder(FUNC) void Decode_##FUNC (char * o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t * o_pc)
+#  define d_m3Decoder(FUNC) ಶೂನ್ಯ Decode_##FUNC (ಅಕ್ಷರ * o_string, size_t i_string_ಬಫರ್_ಗಾತ್ರ, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t * o_pc)
 
 d_m3Decoder(Call)
 {
-    void* function    = fetch(void*);
-    i32   stackOffset = fetch(i32);
+    ಶೂನ್ಯ* function    = fetch(ಶೂನ್ಯ*);
+    i32   ರಾಶಿ_ಸ್ಥಾನಾಂತರ = fetch(i32);
 
-    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, stackOffset);
+    snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%p; stack-offset: %d", function, ರಾಶಿ_ಸ್ಥಾನಾಂತರ);
 }
 
 
-d_m3Decoder(Entry)
+d_m3Decoder(ನಮೂದು_2)
 {
     IM3Function function = fetch(IM3Function);
 
     // only prints out the first registered name for the function
-    snprintf(o_string, i_stringBufferSize, "%s", m3_GetFunctionName(function));
+    snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%s", m3_GetFunctionName(function));
 }
 
 
 d_m3Decoder(f64_Store)
 {
-    if (i_operation == i_opInfo->operations[0]) {
-        u32 operand = fetch(u32);
+    ಆದರೆ (i_operation == i_opInfo->operations[0]) {
+        u32 ಕಾರ್ಯಾಂಶ = fetch(u32);
         u32 offset  = fetch(u32);
 
-        snprintf(o_string, i_stringBufferSize, "offset= slot:%d + immediate:%d", operand, offset);
+        snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "offset= slot:%d + immediate:%d", ಕಾರ್ಯಾಂಶ, offset);
     }
 }
 
 
 d_m3Decoder(Branch)
 {
-    void* target = fetch(void*);
-    snprintf(o_string, i_stringBufferSize, "%p", target);
+    ಶೂನ್ಯ* ಗುರಿ = fetch(ಶೂನ್ಯ*);
+    snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, "%p", ಗುರಿ);
 }
 
-d_m3Decoder(BranchTable)
+d_m3Decoder(Branch_ಕೋಷ್ಟಕ)
 {
-    u32 slot = fetch(u32);
+    u32 ಸ್ಥಾನ = fetch(u32);
 
-    size_t len = SPrintAppend(o_string, i_stringBufferSize, 0, "slot: %" PRIu32 "; targets: ", slot);
+    size_t len = SPrintAppend(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, 0, "slot: %" PRIu32 "; targets: ", ಸ್ಥಾನ);
 
     //    IM3Function function = fetch2 (IM3Function);
 
     i32 targets = fetch(i32);
 
-    for (i32 i = 0; i < targets; ++i) {
+    ಗಾಗಿ (i32 i = 0; i < targets; ++i) {
         pc_t addr = fetch(pc_t);
-        len       = SPrintAppend(o_string, i_stringBufferSize, len, "%" PRIi32 "=%p, ", i, addr);
+        len       = SPrintAppend(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, len, "%" PRIi32 "=%p, ", i, addr);
     }
 
     pc_t addr = fetch(pc_t);
-    SPrintAppend(o_string, i_stringBufferSize, len, "def=%p ", addr);
+    SPrintAppend(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, len, "def=%p ", addr);
 }
 
 
 d_m3Decoder(Const)
 {
-    u64 value  = fetch(u64);
+    u64 ಮೌಲ್ಯ  = fetch(u64);
     i32 offset = fetch(i32);
-    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, value);
+    snprintf(o_string, i_string_ಬಫರ್_ಗಾತ್ರ, " slot [%d] = %" PRIu64, offset, ಮೌಲ್ಯ);
 }
 
 
 #  undef fetch
 
-void DecodeOperation (char* o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t* o_pc)
+ಶೂನ್ಯ DecodeOperation (ಅಕ್ಷರ* o_string, size_t i_string_ಬಫರ್_ಗಾತ್ರ, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t* o_pc)
 {
-#  define d_m3Decode(OPCODE, FUNC) case OPCODE: Decode_##FUNC (o_string, i_stringBufferSize, i_opcode, i_operation, i_opInfo, o_pc); break;
+#  define d_m3Decode(OPCODE, FUNC) ಸ್ಥಿತಿ OPCODE: Decode_##FUNC (o_string, i_string_ಬಫರ್_ಗಾತ್ರ, i_opcode, i_operation, i_opInfo, o_pc); ನಿಲ್ಲಿಸು;
 
-    switch (i_opcode) {
+    ಆಯ್ಕೆ (i_opcode) {
         //d_m3Decode (0xc0,                  Const)
-        d_m3Decode(0xc5, Entry)
+        d_m3Decode(0xc5, ನಮೂದು_2)
         d_m3Decode(c_waOp_call, Call)
         d_m3Decode(c_waOp_branch, Branch)
-        d_m3Decode(c_waOp_branchTable, BranchTable)
+        d_m3Decode(c_wa_Op_branch_ಕೋಷ್ಟಕ, Branch_ಕೋಷ್ಟಕ)
         d_m3Decode(0x39, f64_Store)
     }
 }
 
 // TODO: this isn't fully implemented. it blindly assumes each word is a Operation pointer
 // and, if an operation happens to missing from the c_operations table it won't be recognized here
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
+ಶೂನ್ಯ dump_ಸಂಕೇತ_ಪುಟ (IM3_ಸಂಕೇತ_ಪುಟ i_ಸಂಕೇತ_ಪುಟ, pc_t i_ಆರಂಭ_PC)
 {
-    m3log(code, "code page seq: %d", i_codePage->info.sequence);
+    m3log(ಸಂಕೇತ_2, "code page seq: %d", i_ಸಂಕೇತ_ಪುಟ->info.sequence);
 
-    pc_t pc  = i_startPC ? i_startPC : GetPageStartPC(i_codePage);
-    pc_t end = GetPagePC(i_codePage);
+    pc_t pc  = i_ಆರಂಭ_PC ? i_ಆರಂಭ_PC : Get_ಪುಟ_ಆರಂಭ_PC(i_ಸಂಕೇತ_ಪುಟ);
+    pc_t ಕೊನೆ = Get_ಪುಟ_PC(i_ಸಂಕೇತ_ಪುಟ);
 
-    m3log(code, "---------------------------------------------------------------------------------------");
+    m3log(ಸಂಕೇತ_2, "---------------------------------------------------------------------------------------");
 
-    while (pc < end) {
-        const pc_t operationPC = pc;
-        (void)operationPC;  // avoid unused variable warning if DEBUG is not defined
+    ಆಗ (pc < ಕೊನೆ) {
+        ಸ್ಥಿರಾಂಕ pc_t operationPC = pc;
+        (ಶೂನ್ಯ)operationPC;  // avoid unused variable warning if DEBUG is not defined
         IM3Operation op = (IM3Operation)(*pc++);
 
-        OpInfo i = find_operation_info(op);
+        OpInfo i = ಕಂಡುಹಿಡಿ_operation_info(op);
 
-        if (i.info) {
-            char infoString[8 * 1024] = { 0 };
+        ಆದರೆ (i.info) {
+            ಅಕ್ಷರ infoString[8 * 1024] = { 0 };
 
-            DecodeOperation(infoString, sizeof(infoString), i.opcode, op, i.info, &pc);
+            DecodeOperation(infoString, ಗಾತ್ರ(infoString), i.opcode, op, i.info, &pc);
 
-            m3log(code, "%p | %20s  %s", operationPC, i.info->name, infoString);
-        } else {
-            m3log(code, "%p | %p", operationPC, op);
+            m3log(ಸಂಕೇತ_2, "%p | %20s  %s", operationPC, i.info->name, infoString);
+        } ಇಲ್ಲದಿದ್ದರೆ {
+            m3log(ಸಂಕೇತ_2, "%p | %p", operationPC, op);
         }
     }
 
-    m3log(code, "---------------------------------------------------------------------------------------");
+    m3log(ಸಂಕೇತ_2, "---------------------------------------------------------------------------------------");
 
-    m3log(code, "free-lines: %d", i_codePage->info.numLines - i_codePage->info.lineIndex);
+    m3log(ಸಂಕೇತ_2, "free-lines: %d", i_ಸಂಕೇತ_ಪುಟ->info.ಅಂಕೆ_ಸಾಲುಗಳು - i_ಸಂಕೇತ_ಪುಟ->info.ಸಾಲು_ಸೂಚ್ಯಂಕ);
 }
 
 
-void dump_type_stack (IM3Compilation o)
+ಶೂನ್ಯ dump_type_ರಾಶಿ (IM3Compilation o)
 {
     /* Reminders about how the stack works! :)
      -- args & locals remain on the type stack for duration of the function. Denoted with a constant 'A' and 'L' in this dump.
@@ -405,212 +405,212 @@ void dump_type_stack (IM3Compilation o)
      */
 
     // for the assert at end of dump:
-    i32 regAllocated[2] = { (i32)IsRegisterAllocated(o, 0), (i32)IsRegisterAllocated(o, 1) };
+    i32 regAllocated[2] = { (i32)Is_ರಿಜಿಸ್ಟರ್_Allocated(o, 0), (i32)Is_ರಿಜಿಸ್ಟರ್_Allocated(o, 1) };
 
     // display whether r0 or fp0 is allocated. these should then also be reflected somewhere in the stack too.
-    d_m3Log(stack, "\n");
-    d_m3Log(stack, "        ");
-    printf("%s %s    ", regAllocated[0] ? "(r0)" : "    ", regAllocated[1] ? "(fp0)" : "     ");
-    printf("\n");
+    d_m3Log(ರಾಶಿ, "\n");
+    d_m3Log(ರಾಶಿ, "        ");
+    ಬರೆ("%s %s    ", regAllocated[0] ? "(r0)" : "    ", regAllocated[1] ? "(fp0)" : "     ");
+    ಬರೆ("\n");
 
-    for (u32 p = 1; p <= 2; ++p) {
-        d_m3Log(stack, "        ");
+    ಗಾಗಿ (u32 p = 1; p <= 2; ++p) {
+        d_m3Log(ರಾಶಿ, "        ");
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            if (i > 0 and i == o->stackFirstDynamicIndex) {
-                printf("#");
+        ಗಾಗಿ (u16 i = 0; i < o->ರಾಶಿ_ಸೂಚ್ಯಂಕ; ++i) {
+            ಆದರೆ (i > 0 and i == o->ರಾಶಿ_ಮೊದಲ_Dynamic_ಸೂಚ್ಯಂಕ) {
+                ಬರೆ("#");
             }
 
-            if (i == o->block.blockStackIndex) {
-                printf(">");
+            ಆದರೆ (i == o->ಖಂಡ.ಖಂಡ_ರಾಶಿ_ಸೂಚ್ಯಂಕ) {
+                ಬರೆ(">");
             }
 
-            const char* type = c_waCompactTypes[BaseTypeOf(o->typeStack[i])];
+            ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* type = c_waCompactTypes[ತಳ_Type_ದ(o->type_ರಾಶಿ[i])];
 
-            const char* location = "";
+            ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* location = "";
 
-            i32 slot = o->wasmStack[i];
+            i32 ಸ್ಥಾನ = o->wasm_ರಾಶಿ[i];
 
-            if (IsRegisterSlotAlias(slot)) {
-                bool isFp = IsFpRegisterSlotAlias(slot);
+            ಆದರೆ (Is_ರಿಜಿಸ್ಟರ್_ಸ್ಥಾನ_Alias(ಸ್ಥಾನ)) {
+                bool isFp = Is_Fp_ರಿಜಿಸ್ಟರ್_ಸ್ಥಾನ_Alias(ಸ್ಥಾನ);
                 location  = isFp ? "/f" : "/r";
 
                 regAllocated[isFp]--;
-                slot = -1;
-            } else {
-                if (slot < o->slotFirstDynamicIndex) {
-                    if (slot >= o->slotFirstConstIndex) {
+                ಸ್ಥಾನ = -1;
+            } ಇಲ್ಲದಿದ್ದರೆ {
+                ಆದರೆ (ಸ್ಥಾನ < o->ಸ್ಥಾನ_ಮೊದಲ_Dynamic_ಸೂಚ್ಯಂಕ) {
+                    ಆದರೆ (ಸ್ಥಾನ >= o->ಸ್ಥಾನ_ಮೊದಲ_Const_ಸೂಚ್ಯಂಕ) {
                         location = "c";
-                    } else if (slot >= o->function->numRetAndArgSlots) {
+                    } ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಸ್ಥಾನ >= o->function->ಅಂಕೆ_Ret_And_Arg_Slots) {
                         location = "L";
-                    } else {
+                    } ಇಲ್ಲದಿದ್ದರೆ {
                         location = "a";
                     }
                 }
             }
 
-            char item[100];
+            ಅಕ್ಷರ ಅಂಶ[100];
 
-            if (slot >= 0) {
-                snprintf(item, sizeof(item), "%s%s%d", type, location, slot);
-            } else {
-                snprintf(item, sizeof(item), "%s%s", type, location);
+            ಆದರೆ (ಸ್ಥಾನ >= 0) {
+                snprintf(ಅಂಶ, ಗಾತ್ರ(ಅಂಶ), "%s%s%d", type, location, ಸ್ಥಾನ);
+            } ಇಲ್ಲದಿದ್ದರೆ {
+                snprintf(ಅಂಶ, ಗಾತ್ರ(ಅಂಶ), "%s%s", type, location);
             }
 
-            if (p == 1) {
-                size_t s = strlen(item);
+            ಆದರೆ (p == 1) {
+                size_t s = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಅಂಶ);
 
-                snprintf(item, sizeof(item), "%d", i);
+                snprintf(ಅಂಶ, ಗಾತ್ರ(ಅಂಶ), "%d", i);
 
-                while (strlen(item) < s) {
-                    strcat(item, " ");
+                ಆಗ (ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಅಂಶ) < s) {
+                    strcat(ಅಂಶ, " ");
                 }
             }
 
-            printf("|%s ", item);
+            ಬರೆ("|%s ", ಅಂಶ);
         }
-        printf("\n");
+        ಬರೆ("\n");
     }
 
     //    for (u32 r = 0; r < 2; ++r)
     //    d_m3Assert (regAllocated [r] == 0);         // reg allocation & stack out of sync
 
-    u16 maxSlot = GetMaxUsedSlotPlusOne(o);
+    u16 max_ಸ್ಥಾನ = Get_Max_ಬಳಸಿದ_ಸ್ಥಾನ_Plus_One(o);
 
-    if (maxSlot > o->slotFirstDynamicIndex) {
-        d_m3Log(stack, "                      -");
+    ಆದರೆ (max_ಸ್ಥಾನ > o->ಸ್ಥಾನ_ಮೊದಲ_Dynamic_ಸೂಚ್ಯಂಕ) {
+        d_m3Log(ರಾಶಿ, "                      -");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
-            printf("----");
+        ಗಾಗಿ (u16 i = o->ಸ್ಥಾನ_ಮೊದಲ_Dynamic_ಸೂಚ್ಯಂಕ; i < max_ಸ್ಥಾನ; ++i) {
+            ಬರೆ("----");
         }
 
-        printf("\n");
+        ಬರೆ("\n");
 
-        d_m3Log(stack, "                 slot |");
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
-            printf("%3d|", i);
+        d_m3Log(ರಾಶಿ, "                 slot |");
+        ಗಾಗಿ (u16 i = o->ಸ್ಥಾನ_ಮೊದಲ_Dynamic_ಸೂಚ್ಯಂಕ; i < max_ಸ್ಥಾನ; ++i) {
+            ಬರೆ("%3d|", i);
         }
 
-        printf("\n");
-        d_m3Log(stack, "                alloc |");
+        ಬರೆ("\n");
+        d_m3Log(ರಾಶಿ, "                alloc |");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
-            printf("%3d|", o->m3Slots[i]);
+        ಗಾಗಿ (u16 i = o->ಸ್ಥಾನ_ಮೊದಲ_Dynamic_ಸೂಚ್ಯಂಕ; i < max_ಸ್ಥಾನ; ++i) {
+            ಬರೆ("%3d|", o->m3Slots[i]);
         }
 
-        printf("\n");
+        ಬರೆ("\n");
     }
-    d_m3Log(stack, "\n");
+    d_m3Log(ರಾಶಿ, "\n");
 }
 
 
-static
-const char* GetOpcodeIndentionString (i32 blockDepth)
+ಸ್ಥಿರ
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* GetOpcodeIndentionString (i32 ಖಂಡ_ಆಳ)
 {
-    blockDepth += 1;
+    ಖಂಡ_ಆಳ += 1;
 
-    if (blockDepth < 0) {
-        blockDepth = 0;
+    ಆದರೆ (ಖಂಡ_ಆಳ < 0) {
+        ಖಂಡ_ಆಳ = 0;
     }
 
-    static const char* s_spaces = ".......................................................................................";
+    ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* s_spaces = ".......................................................................................";
 
-    const char* indent = s_spaces + strlen(s_spaces);
-    indent -= (blockDepth * 2);
-    if (indent < s_spaces) {
+    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* indent = s_spaces + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(s_spaces);
+    indent -= (ಖಂಡ_ಆಳ * 2);
+    ಆದರೆ (indent < s_spaces) {
         indent = s_spaces;
     }
 
-    return indent;
+    ಹಿಂತಿರುಗಿ indent;
 }
 
 
-const char* get_indention_string (IM3Compilation o)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* get_indention_string (IM3Compilation o)
 {
-    return GetOpcodeIndentionString(o->block.depth + 4);
+    ಹಿಂತಿರುಗಿ GetOpcodeIndentionString(o->ಖಂಡ.ಆಳ + 4);
 }
 
 
-void log_opcode (IM3Compilation o, m3opcode_t i_opcode)
+ಶೂನ್ಯ log_opcode (IM3Compilation o, m3opcode_t i_opcode)
 {
-    i32 depth = o->block.depth;
-    if (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
-        depth--;
+    i32 ಆಳ = o->ಖಂಡ.ಆಳ;
+    ಆದರೆ (i_opcode == c_wa_Op_ಕೊನೆ or i_opcode == c_waOp_else) {
+        ಆಳ--;
     }
-    (void)depth;
+    (ಶೂನ್ಯ)ಆಳ;
 
-    m3log(compile, "%4d | 0x%02x  %s %s", o->numOpcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
+    m3log(compile, "%4d | 0x%02x  %s %s", o->ಅಂಕೆ_Opcodes++, i_opcode, GetOpcodeIndentionString(ಆಳ), GetOpInfo(i_opcode)->name);
 }
 
 
-void log_emit (IM3Compilation o, IM3Operation i_operation)
+ಶೂನ್ಯ log_emit (IM3Compilation o, IM3Operation i_operation)
 {
-    OpInfo i = find_operation_info(i_operation);
+    OpInfo i = ಕಂಡುಹಿಡಿ_operation_info(i_operation);
 
     d_m3Log(emit, "");
-    if (i.info) {
-        printf("%p: %s\n", GetPagePC(o->page), i.info->name);
-    } else {
-        printf("not found: %p\n", i_operation);
+    ಆದರೆ (i.info) {
+        ಬರೆ("%p: %s\n", Get_ಪುಟ_PC(o->ಪುಟ), i.info->name);
+    } ಇಲ್ಲದಿದ್ದರೆ {
+        ಬರೆ("not found: %p\n", i_operation);
     }
 }
 
-#endif // DEBUG
+#ಆದರೆ_ಅಂತ್ಯ // DEBUG
 
 
-#if d_m3EnableOpProfiling
+#ಆದರೆ d_m3EnableOpProfiling
 
-typedef struct M3ProfilerSlot {
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ರಚನೆ M3_Profiler_ಸ್ಥಾನ {
     cstr_t opName;
-    u64    hitCount;
-} M3ProfilerSlot;
+    u64    ದೊರಕಿತು_ಎಣಿಕೆ;
+} M3_Profiler_ಸ್ಥಾನ;
 
-static M3ProfilerSlot s_opProfilerCounts[d_m3ProfilerSlotMask + 1] = {};
+ಸ್ಥಿರ M3_Profiler_ಸ್ಥಾನ s_opProfilerCounts[d_m3_Profiler_ಸ್ಥಾನ_ಮುಖವಾಡ + 1] = {};
 
-void ProfileHit (cstr_t i_operationName)
+ಶೂನ್ಯ Profile_ದೊರಕಿತು (cstr_t i_operationName)
 {
     u64 ptr = (u64)i_operationName;
 
-    M3ProfilerSlot* slot = &s_opProfilerCounts[ptr & d_m3ProfilerSlotMask];
+    M3_Profiler_ಸ್ಥಾನ* ಸ್ಥಾನ = &s_opProfilerCounts[ptr & d_m3_Profiler_ಸ್ಥಾನ_ಮುಖವಾಡ];
 
-    if (slot->opName) {
-        if (slot->opName != i_operationName) {
+    ಆದರೆ (ಸ್ಥಾನ->opName) {
+        ಆದರೆ (ಸ್ಥಾನ->opName != i_operationName) {
             m3_Abort("profiler slot collision; increase d_m3ProfilerSlotMask");
         }
     }
 
-    slot->opName = i_operationName;
-    slot->hitCount++;
+    ಸ್ಥಾನ->opName = i_operationName;
+    ಸ್ಥಾನ->ದೊರಕಿತು_ಎಣಿಕೆ++;
 }
 
 
-void m3_PrintProfilerInfo ()
+ಶೂನ್ಯ m3_PrintProfilerInfo ()
 {
-    M3ProfilerSlot  dummy;
-    M3ProfilerSlot* maxSlot = &dummy;
+    M3_Profiler_ಸ್ಥಾನ  dummy;
+    M3_Profiler_ಸ್ಥಾನ* max_ಸ್ಥಾನ = &dummy;
 
-    do {
-        maxSlot->hitCount = 0;
+    ಮಾಡು {
+        max_ಸ್ಥಾನ->ದೊರಕಿತು_ಎಣಿಕೆ = 0;
 
-        for (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
-            M3ProfilerSlot* slot = &s_opProfilerCounts[i];
+        ಗಾಗಿ (u32 i = 0; i <= d_m3_Profiler_ಸ್ಥಾನ_ಮುಖವಾಡ; ++i) {
+            M3_Profiler_ಸ್ಥಾನ* ಸ್ಥಾನ = &s_opProfilerCounts[i];
 
-            if (slot->opName) {
-                if (slot->hitCount > maxSlot->hitCount) {
-                    maxSlot = slot;
+            ಆದರೆ (ಸ್ಥಾನ->opName) {
+                ಆದರೆ (ಸ್ಥಾನ->ದೊರಕಿತು_ಎಣಿಕೆ > max_ಸ್ಥಾನ->ದೊರಕಿತು_ಎಣಿಕೆ) {
+                    max_ಸ್ಥಾನ = ಸ್ಥಾನ;
                 }
             }
         }
 
-        if (maxSlot->opName) {
-            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hitCount, maxSlot->opName);
-            maxSlot->opName = NULL;
+        ಆದರೆ (max_ಸ್ಥಾನ->opName) {
+            fprintf(stderr, "%13" PRIu64 "  %s\n", max_ಸ್ಥಾನ->ದೊರಕಿತು_ಎಣಿಕೆ, max_ಸ್ಥಾನ->opName);
+            max_ಸ್ಥಾನ->opName = ಖಾಲಿ;
         }
-    } while (maxSlot->hitCount);
+    } ಆಗ (max_ಸ್ಥಾನ->ದೊರಕಿತು_ಎಣಿಕೆ);
 }
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
-void m3_PrintProfilerInfo () {}
+ಶೂನ್ಯ m3_PrintProfilerInfo () {}
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

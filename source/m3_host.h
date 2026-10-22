@@ -31,10 +31,10 @@
 //  act on, and only a build with d_m3GuardedMemory has any.
 //
 
-#ifndef m3_host_h
-#define m3_host_h
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ m3_host_h
+#ವ್ಯಾಖ್ಯಾನಿಸು m3_host_h
 
-#include "m3_core.h"
+#ಅನ್ತರ್ಭಾವ "m3_core.h"
 
 d_m3BeginExternC
 
@@ -43,20 +43,20 @@ d_m3BeginExternC
 // is the system's business - a guard page usually - so the answer bounds the
 // stack rather than describing what is safe to touch; d_m3NativeStackMargin is
 // what keeps the difference.
-void* m3_HostStackBase (void);
+ಶೂನ್ಯ* m3_Host_ರಾಶಿ_ತಳ (ಶೂನ್ಯ);
 
 // Suspension interrupt handlers (Ctrl+Z / SIGTSTP / SIGINT / Console Ctrl)
-void  m3_HostInstallInterruptHandler (IM3Runtime io_runtime);
-void  m3_HostRemoveInterruptHandler (void);
+ಶೂನ್ಯ  m3_Host_Install_ಅಡಚಣೆ_Handler (IM3Runtime io_runtime);
+ಶೂನ್ಯ  m3_Host_Remove_ಅಡಚಣೆ_Handler (ಶೂನ್ಯ);
 
 // The wall clock, in milliseconds since the Unix epoch, UTC. 0 when there is no
 // clock to ask. Only ever written down - a snapshot says when it was taken - so
 // nothing depends on it being right.
-u64   m3_HostTimeMs (void);
+u64   m3_Host_ಸಮಯ_Ms (ಶೂನ್ಯ);
 
 // Blocks the calling thread for at least the given time. A host with no clock to
 // wait on returns at once, as though the time had passed.
-void  m3_HostSleepNs (u64 i_ns);
+ಶೂನ್ಯ  m3_HostSleepNs (u64 i_ns);
 
 
 // A file's bytes and how they were come by.
@@ -66,11 +66,11 @@ void  m3_HostSleepNs (u64 i_ns);
 // the view holds the section which holds the file object and the share mode with it,
 // while POSIX has to hold the descriptor its lock lives on. So a mapped file may have
 // no handle, and d_m3HostNoHandle is what that looks like.
-#define d_m3HostNoHandle    ((intptr_t) -1)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3HostNoHandle    ((intptr_t) -1)
 
-typedef struct M3HostFile {
-    void*    data;
-    size_t   size;
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ರಚನೆ M3HostFile {
+    ಶೂನ್ಯ*    ದತ್ತಾಂಶ;
+    size_t   ಗಾತ್ರ_2;
     intptr_t handle;     // the host layer's, and d_m3HostNoHandle when there is none
     bool     mapped;
 } M3HostFile;
@@ -86,61 +86,61 @@ typedef struct M3HostFile {
 // anything is allocated for it; 0 accepts any size the system will hand over. False
 // is that, or the file not being readable at all, and o_file is written on success
 // only.
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file);
+bool m3_HostMapFile (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_ಮಾರ್ಗ, size_t i_max_ಬೈಟುಗಳು, M3HostFile* o_file);
 
 // Give the bytes back, releasing the mapping and its lock, or the heap block
-void m3_HostUnmapFile (M3HostFile* io_file);
+ಶೂನ್ಯ m3_HostUnmapFile (M3HostFile* io_file);
 
 // Move the file at i_from over i_to, replacing whatever is there. Where the system
 // can, in one step: a reader of i_to sees the old file or the new one, never one
 // half written, and a writer that dies part way leaves i_to as it was. False when
 // the move failed, with i_from left where it is.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to);
+bool m3_HostReplaceFile (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_from, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_ಗಮ್ಯ);
 
 // The reading half on its own: what each m3_HostMapFile falls back to, and the whole
 // of what a system with no mapping does. The same on every system, so it is here
 // rather than in any of them - and inline, so that a translation unit which never
 // calls it is not the one that drags stdio's FILE machinery into the link.
-static inline
-bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ
+bool m3_HostReadFile (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* i_ಮಾರ್ಗ, size_t i_max_ಬೈಟುಗಳು, M3HostFile* o_file)
 {
-    FILE* f = fopen(i_path, "rb");
-    if (f == NULL) {
-        return false;
+    FILE* f = fopen(i_ಮಾರ್ಗ, "rb");
+    ಆದರೆ (f == ಖಾಲಿ) {
+        ಹಿಂತಿರುಗಿ false;
     }
 
     // The size is taken before anything is allocated, so that a file too big to be
     // wanted is refused rather than read
     fseek(f, 0, SEEK_END);
-    long tell = ftell(f);
+    ದೀರ್ಘ tell = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    if (tell < 0 or (i_maxBytes and (size_t) tell > i_maxBytes)) {
+    ಆದರೆ (tell < 0 or (i_max_ಬೈಟುಗಳು and (size_t) tell > i_max_ಬೈಟುಗಳು)) {
         fclose(f);
-        return false;
+        ಹಿಂತಿರುಗಿ false;
     }
 
-    size_t size = (size_t)tell;
-    void*  data = m3_Malloc("Host File", size ? size : 1);
+    size_t ಗಾತ್ರ_2 = (size_t)tell;
+    ಶೂನ್ಯ*  ದತ್ತಾಂಶ = m3_Malloc("Host File", ಗಾತ್ರ_2 ? ಗಾತ್ರ_2 : 1);
 
-    if (data == NULL) {
+    ಆದರೆ (ದತ್ತಾಂಶ == ಖಾಲಿ) {
         fclose(f);
-        return false;
+        ಹಿಂತಿರುಗಿ false;
     }
 
-    bool read = (fread(data, 1, size, f) == size);
+    bool ಪಠ = (fread(ದತ್ತಾಂಶ, 1, ಗಾತ್ರ_2, f) == ಗಾತ್ರ_2);
     fclose(f);
 
-    if (not read) {
-        m3_Free(data);
-        return false;
+    ಆದರೆ (not ಪಠ) {
+        m3_Free(ದತ್ತಾಂಶ);
+        ಹಿಂತಿರುಗಿ false;
     }
 
-    o_file->data = data;
-    o_file->size = size;
+    o_file->ದತ್ತಾಂಶ = ದತ್ತಾಂಶ;
+    o_file->ಗಾತ್ರ_2 = ಗಾತ್ರ_2;
     o_file->handle = d_m3HostNoHandle;
     o_file->mapped = false;
-    return true;
+    ಹಿಂತಿರುಗಿ true;
 }
 
 // A module is parsed in place and keeps pointing into the mapped bytes for as long
@@ -162,40 +162,40 @@ bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
 //
 // So on POSIX this narrows the window rather than closing it.
 
-#if d_m3GuardedMemory
+#ಆದರೆ d_m3_Guarded_ಸ್ಮರಣೆ
 
-#  if M3_SIZEOF_PTR < 8
+#  ಆದರೆ M3_SIZEOF_PTR < 8
 #    error "d_m3GuardedMemory needs a 64-bit address space"
 #  endif
-#  if d_m3FixedHeap
+#  ಆದರೆ d_m3_Fixed_ರಾಶಿ
 #    error "d_m3GuardedMemory and d_m3FixedHeap are two different places for a linear memory to come from"
 #  endif
-#  if defined(_WIN32) && !defined(_MSC_VER)
+#  ಆದರೆ defined(_WIN32) && !defined(_MSC_VER)
 #    error "d_m3GuardedMemory on Windows needs __try/__except - build with MSVC or clang-cl"
 #  endif
 
 // The system's allocation granularity: what a reservation's size and a commit's
 // bounds are rounded to. Never zero.
-size_t m3_HostPageSize (void);
+size_t m3_Host_ಪುಟ_ಗಾತ್ರ (ಶೂನ್ಯ);
 
 // Reserve i_bytes of address space without backing any of it. Reading or writing it
 // faults until m3_HostCommit says otherwise, which is the whole point: the fault is
 // what a Wasm access past the end of its memory turns into. NULL if the system will
 // not.
-void*  m3_HostReserve (size_t i_bytes);
+ಶೂನ್ಯ*  m3_HostReserve (size_t i_ಬೈಟುಗಳು);
 
 // Back [i_address, i_address + i_bytes) with pages, which read as zero. The range
 // has to be inside a reservation from m3_HostReserve; committing what is already
 // committed is not an error and changes nothing.
-bool   m3_HostCommit (void* i_address, size_t i_bytes);
+bool   m3_HostCommit (ಶೂನ್ಯ* i_ವಿಳಾಸ, size_t i_ಬೈಟುಗಳು);
 
 // Undo m3_HostCommit for [i_address, i_address + i_bytes), giving the pages back to
 // the system and leaving the range reserved and unreachable again. What was written
 // there is gone: committing it once more reads as zero.
-bool   m3_HostDecommit (void* i_address, size_t i_bytes);
+bool   m3_HostDecommit (ಶೂನ್ಯ* i_ವಿಳಾಸ, size_t i_ಬೈಟುಗಳು);
 
 // Give back a whole reservation. i_bytes is what was reserved.
-void   m3_HostRelease (void* i_address, size_t i_bytes);
+ಶೂನ್ಯ   m3_HostRelease (ಶೂನ್ಯ* i_ವಿಳಾಸ, size_t i_ಬೈಟುಗಳು);
 
 // Run i_body(i_context) with a fault inside [i_guardLow, i_guardLow + i_guardBytes)
 // caught and reported rather than killing the process: false means the body touched
@@ -206,8 +206,8 @@ void   m3_HostRelease (void* i_address, size_t i_bytes);
 // per-thread. What the body was doing when it faulted is abandoned where it stands -
 // the caller has to be able to carry on without it, which for the interpreter means
 // the Wasm stack and the memory, both of which are just data.
-bool   m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
-                             void* i_guardLow, size_t i_guardBytes);
+bool   m3_HostProtectedCall (ಶೂನ್ಯ (*i_body)(ಶೂನ್ಯ*), ಶೂನ್ಯ* i_context,
+                             ಶೂನ್ಯ* i_guard_ಕೆಳಗಿನ, size_t i_guard_ಬೈಟುಗಳು);
 
 // Whether m3_HostProtectedCall can actually catch that fault, which is not a given:
 // a sanitizer takes the signal exclusively and a process is free to install whatever
@@ -217,10 +217,10 @@ bool   m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
 // Puts the catching in place where it is not there yet, so this is also the call that
 // installs it. Settled once, when it goes in: something that takes the fault away
 // afterwards is not noticed, which is the bargain any handler in a process makes.
-bool   m3_HostGuardsActive (void);
+bool   m3_Host_Guards_ಸಕ್ರಿಯ (ಶೂನ್ಯ);
 
-#endif // d_m3GuardedMemory
+#ಆದರೆ_ಅಂತ್ಯ // d_m3GuardedMemory
 
-d_m3EndExternC
+d_m3_ಕೊನೆ_Extern_C
 
-#endif // m3_host_h
+#ಆದರೆ_ಅಂತ್ಯ // m3_host_h

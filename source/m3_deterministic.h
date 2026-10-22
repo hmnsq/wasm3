@@ -4,10 +4,10 @@
 //  Copyright © 2026 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#ifndef m3_deterministic_h
-#define m3_deterministic_h
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ m3_deterministic_h
+#ವ್ಯಾಖ್ಯಾನಿಸು m3_deterministic_h
 
-#include "m3_env.h"
+#ಅನ್ತರ್ಭಾವ "m3_env.h"
 
 d_m3BeginExternC
 
@@ -23,37 +23,37 @@ d_m3BeginExternC
 // How far the clock moves on each reading, and so the finest interval it can tell
 // apart. A guest that waits by watching the clock has to see it move, and this is
 // how fast it does.
-#define d_m3DeterministicTickNs         UINT64_C(1000000)     // 1ms
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3DeterministicTickNs         UINT64_C(1000000)     // 1ms
 
 // Where the entropy stream starts. Nothing about the value matters except that it
 // is written down, since a replay has to produce the same bytes.
-#define d_m3DeterministicSeed           UINT64_C(0x9E3779B97F4A7C15)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3_Deterministic_ಬೀಜ           UINT64_C(0x9E3779B97F4A7C15)
 
 // Where the deterministic wall clock starts: 2020-01-01T00:00:00Z. Any fixed instant
 // would do; a real one keeps a guest that formats the date from printing something
 // absurd. The monotonic clocks start at zero, as they would anyway.
-#define d_m3WasiDeterministicEpochNs    UINT64_C(1577836800000000000)
+#ವ್ಯಾಖ್ಯಾನಿಸು d_m3WasiDeterministicEpochNs    UINT64_C(1577836800000000000)
 
-#if d_m3DeterministicProfile
+#ಆದರೆ d_m3DeterministicProfile
 
 // Start a runtime's clock and entropy where every other runtime starts them, which
 // is what makes a run replayable by making a fresh runtime.
-void Deterministic_InitRuntime (IM3Runtime io_runtime);
+ಶೂನ್ಯ Deterministic_InitRuntime (IM3Runtime io_runtime);
 
 // The clock counts from the moment the runtime was made, leaving it to the host API
 // to say what instant that was. Reading it advances it, so that a guest spinning
 // until time passes gets there.
-u64  Deterministic_Time (IM3Runtime io_runtime);
-void Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds);
-void Deterministic_Random (IM3Runtime io_runtime, void* o_buf, size_t i_length);
+u64  Deterministic_ಸಮಯ (IM3Runtime io_runtime);
+ಶೂನ್ಯ Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds);
+ಶೂನ್ಯ Deterministic_Random (IM3Runtime io_runtime, ಶೂನ್ಯ* o_buf, size_t i_ಉದ್ದಳತೆ);
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
 // Nothing to seed: the fields these would set are not on M3Runtime in this build
-#  define Deterministic_InitRuntime(RT)    do {} while (0)
+#  define Deterministic_InitRuntime(RT)    ಮಾಡು {} ಆಗ (0)
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-d_m3EndExternC
+d_m3_ಕೊನೆ_Extern_C
 
-#endif /* m3_deterministic_h */
+#ಆದರೆ_ಅಂತ್ಯ /* m3_deterministic_h */
