@@ -18,58 +18,58 @@
 #ifndef m3_host_none_h
 #define m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#অন্তর্ভাব "m3_core.h"
+#অন্তর্ভাব "m3_host.h"
 
-void* m3_HostStackBase (void)
+শূন্য* m3_Host_স্তূপ_Base (শূন্য)
 {
-    return NULL;
+    ফেরত ফাঁকা;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+শূন্য m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (শূন্য)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+শূন্য m3_HostRemoveInterruptHandler (শূন্য)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_HostTimeMs (শূন্য)
 {
-    return 0;
+    ফেরত 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+শূন্য m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (শূন্য)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (ধ্রুবক অক্ষর* i_path, size_t i_maxBytes, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    ফেরত m3_HostReadFile(i_path, i_maxBytes, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+শূন্য m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->তথ্য);
 
-    io_file->size = 0;
+    io_file->আকার_2 = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (ধ্রুবক অক্ষর* i_from, ধ্রুবক অক্ষর* i_to)
 {
     remove(i_to);
-    return rename(i_from, i_to) == 0;
+    ফেরত rename(i_from, i_to) == 0;
 }
 
-#if d_m3GuardedMemory
+#যদি d_m3GuardedMemory
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
 #endif
 

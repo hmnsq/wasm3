@@ -8,11 +8,11 @@
 #ifndef m3_api_libc_h
 #define m3_api_libc_h
 
-#include "m3_core.h"
+#অন্তর্ভাব "m3_core.h"
 
 d_m3BeginExternC
 
-M3Result m3_LinkLibC (IM3Module io_module);
+M3_ফলাফল m3_LinkLibC (IM3Module io_module);
 
 d_m3EndExternC
 

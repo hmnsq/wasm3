@@ -8,12 +8,12 @@
 #ifndef m3_api_wasi_h
 #define m3_api_wasi_h
 
-#include "m3_core.h"
+#অন্তর্ভাব "m3_core.h"
 
 // What every WASI backend hands the guest as its environment. A Wasm module gets
 // no host environment of its own, and a few programs want these set; WASM3 and
 // WASM3_ARCH are how a guest tells it is running under Wasm3 (see print_version).
-#if !defined(d_m3WasiDefaultEnvironment)
+#যদি !defined(d_m3WasiDefaultEnvironment)
 #  define d_m3WasiDefaultEnvironment          \
       "TERM=xterm-256color",                  \
       "COLORTERM=truecolor",                  \
@@ -25,18 +25,18 @@
       "WASM3_ARCH=" M3_ARCH
 #endif
 
-#if defined(d_m3HasUVWASI)
+#যদি defined(d_m3HasUVWASI)
 #  include "uvwasi.h"
 #endif
 
 d_m3BeginExternC
 
-typedef struct m3_wasi_context_t {
+প্রকারলেখ কাঠামো m3_wasi_context_t {
     i32      exit_code;
     u32      argc;
     ccstr_t* argv;
 
-#if defined(d_m3HasUVWASI)
+#যদি defined(d_m3HasUVWASI)
     uvwasi_t uvwasi;
 #endif
 } m3_wasi_context_t;
@@ -47,26 +47,26 @@ typedef struct m3_wasi_context_t {
 // Free-standing WASI
 // ----------------------------------------------------------------------
 
-M3Result m3_NewCustomWASI (M3WASI*);
-void     m3_FreeCustomWASI(M3WASI);
+M3_ফলাফল m3_NewCustomWASI (M3WASI*);
+শূন্য     m3_FreeCustomWASI(M3WASI);
 
-M3Result m3_LinkCustomWASI(IM3Module, M3WASI);
+M3_ফলাফল m3_LinkCustomWASI(IM3Module, M3WASI);
 
-#if defined(d_m3HasUVWASI)
-M3Result m3_LinkCustomWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
+#যদি defined(d_m3HasUVWASI)
+M3_ফলাফল m3_LinkCustomWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
 #endif
 
 
 // ----------------------------------------------------------------------
 // Global WASI
 // ----------------------------------------------------------------------
-M3Result m3_LinkWASI (IM3Module io_module);
+M3_ফলাফল m3_LinkWASI (IM3Module io_module);
 
-#if defined(d_m3HasUVWASI)
-M3Result m3_LinkWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
+#যদি defined(d_m3HasUVWASI)
+M3_ফলাফল m3_LinkWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
 #endif
 
-m3_wasi_context_t* m3_GetWasiContext (void);
+m3_wasi_context_t* m3_GetWasiContext (শূন্য);
 
 
 d_m3EndExternC

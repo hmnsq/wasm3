@@ -8,34 +8,34 @@
 // Allow using opcodes for compilation process
 #define M3_COMPILE_OPCODES
 
-#include "m3_env.h"
-#include "m3_compile.h"
-#include "m3_exec.h"
-#include "m3_exception.h"
-#include "m3_info.h"
-#include "m3_validate.h"
+#অন্তর্ভাব "m3_env.h"
+#অন্তর্ভাব "m3_compile.h"
+#অন্তর্ভাব "m3_exec.h"
+#অন্তর্ভাব "m3_exception.h"
+#অন্তর্ভাব "m3_info.h"
+#অন্তর্ভাব "m3_validate.h"
 
 // Resolves M3OpInfo.compiler, an index, to the function it names. Defined down
 // with c_compilers [], which has to follow every compiler it points at.
-static
+স্থির
 M3Compiler GetCompiler (IM3OpInfo i_opInfo);
 
 //----- EMIT --------------------------------------------------------------------------------------------------------------
 
-static inline
+স্থির অন্তঃরেখ
 pc_t GetPC (IM3Compilation o)
 {
-    return GetPagePC(o->page);
+    ফেরত GetPagePC(o->page);
 }
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
 
-#  define d_m3GrowSnapshotArray(TYPE, ARRAY, COUNT, CAPACITY)                    \
-    if ((COUNT) == (CAPACITY)) {                                                 \
+#  define d_m3GrowSnapshotArray(TYPE, ARRAY, গুনতি_2, CAPACITY)                    \
+    যদি ((গুনতি_2) == (CAPACITY)) {                                                 \
         u32   newCapacity = (CAPACITY) ? (CAPACITY) * 2 : 8;                     \
         TYPE* grown = m3_ReallocArray(TYPE, (ARRAY), newCapacity, (CAPACITY));   \
-        if (not grown) {                                                         \
-            return m3Err_mallocFailed;                                           \
+        যদি (not grown) {                                                         \
+            ফেরত m3Err_mallocFailed;                                           \
         }                                                                        \
         (ARRAY)    = grown;                                                      \
         (CAPACITY) = newCapacity;                                                \
@@ -43,10 +43,10 @@ pc_t GetPC (IM3Compilation o)
 
 // Where the instruction being compiled starts, counted from the start of the
 // function's body: the one position every build of every revision agrees on
-static inline
+স্থির অন্তঃরেখ
 u32 GetWasmOffset (IM3Compilation o)
 {
-    return (u32)(o->lastOpcodeStart - o->bodyStart);
+    ফেরত (u32)(o->lastOpcodeStart - o->bodyStart);
 }
 
 // Whether the operand stack entry at i_index is a value the frame holds. Every
@@ -55,31 +55,31 @@ u32 GetWasmOffset (IM3Compilation o)
 // CompileBlock). Those are landing pads rather than values: nothing need have
 // written them yet, and the slots they name may be in use for something else.
 // The function's own scope has none - that stretch is its arguments and locals.
-static
-bool IsLiveStackEntry (IM3Compilation o, u16 i_index)
+স্থির
+bool Is_Live_স্তূপ_Entry (IM3Compilation o, u16 i_সূচক)
 {
-    for (IM3CompilationScope scope = &o->block; scope->outer; scope = scope->outer) {
-        if (i_index >= scope->exitStackIndex and i_index < scope->blockStackIndex) {
-            return false;
+    জন্য (IM3CompilationScope scope = &o->block; scope->outer; scope = scope->outer) {
+        যদি (i_সূচক >= scope->exit_স্তূপ_সূচক and i_সূচক < scope->block_স্তূপ_সূচক) {
+            ফেরত false;
         }
     }
 
-    return true;
+    ফেরত true;
 }
 
-static
-M3Result AddSafePointValue (IM3Compilation o, M3SafePoint* io_point, u16 i_index)
+স্থির
+M3_ফলাফল Add_Safe_Point_মান (IM3Compilation o, M3SafePoint* io_point, u16 i_সূচক)
 {
     M3SnapshotMap* map = o->snapshotMap;
 
-    d_m3GrowSnapshotArray(M3SlotValue, map->values, map->numValues, o->valuesCapacity);
+    d_m3GrowSnapshotArray(M3_Slot_মান, map->মানসমূহ, map->অঙ্ক_মানসমূহ, o->মানসমূহ_Capacity);
 
-    map->values[map->numValues].slot = o->wasmStack[i_index];
-    map->values[map->numValues].type = o->typeStack[i_index];
-    map->numValues++;
-    io_point->numValues++;
+    map->মানসমূহ[map->অঙ্ক_মানসমূহ].slot = o->wasm_স্তূপ[i_সূচক];
+    map->মানসমূহ[map->অঙ্ক_মানসমূহ].type = o->type_স্তূপ[i_সূচক];
+    map->অঙ্ক_মানসমূহ++;
+    io_point->অঙ্ক_মানসমূহ++;
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
 // Records the pc i_wordsBack words before the current one as a safepoint, with
@@ -94,27 +94,27 @@ M3Result AddSafePointValue (IM3Compilation o, M3SafePoint* io_point, u16 i_index
 // A back edge to i_loop leaves the rest of the loop's body behind: what the
 // frame holds is what was live before the loop, and the loop's parameters,
 // which the branch has just written into its landing pads for the next lap.
-static
-M3Result RecordSafePoint (IM3Compilation o, M3SafePointKind i_kind, u32 i_wordsBack, u16 i_numResults,
+স্থির
+M3_ফলাফল RecordSafePoint (IM3Compilation o, M3SafePointKind i_kind, u32 i_শব্দগুলি_Back, u16 i_অঙ্ক_Results,
                           u16 i_aux, IM3CompilationScope i_loop)
 {
 _try {
     M3SnapshotMap* map = o->snapshotMap;
 
-    if (not map or not o->page) {
-        return m3Err_none;
+    যদি (not map or not o->page) {
+        ফেরত m3Err_none;
     }
 
-    d_m3GrowSnapshotArray(M3SafePoint, map->safePoints, map->numSafePoints, o->safePointsCapacity);
+    d_m3GrowSnapshotArray(M3SafePoint, map->safePoints, map->অঙ্ক_Safe_Points, o->safePointsCapacity);
 
     // grown before it is pointed at: adding values never moves the safepoints
-    M3SafePoint* point     = &map->safePoints[map->numSafePoints];
-    point->pc              = GetPC(o) - i_wordsBack;
+    M3SafePoint* point     = &map->safePoints[map->অঙ্ক_Safe_Points];
+    point->pc              = GetPC(o) - i_শব্দগুলি_Back;
     point->wasmOffset      = GetWasmOffset(o);
-    point->firstValue      = map->numValues;
-    point->firstLocalValue = UINT32_MAX;
-    point->numValues       = 0;
-    point->numResults      = i_numResults;
+    point->first_মান      = map->অঙ্ক_মানসমূহ;
+    point->first_Local_মান = UINT32_MAX;
+    point->অঙ্ক_মানসমূহ       = 0;
+    point->অঙ্ক_Results      = i_অঙ্ক_Results;
     point->aux             = i_aux;
     point->resumeType      = c_m3Type_none;
     point->kind            = (u8)i_kind;
@@ -123,55 +123,55 @@ _try {
     // Non-defaultable locals can still be uninitialized at a safepoint. Keep
     // their heap types, but allow the null placeholder until local.set makes
     // them definitely initialized. Branches to a loop use its entry context.
-    if (o->localInitDepth) {
-        point->firstLocalValue = map->numValues;
-        for (u32 i = 0; i < map->numLocals; ++i) {
-            d_m3GrowSnapshotArray(M3SlotValue, map->values, map->numValues, o->valuesCapacity);
-            M3SlotValue value = map->locals[i];
-            if (o->localInitDepth[i] == UINT32_MAX or
+    যদি (o->localInitDepth) {
+        point->first_Local_মান = map->অঙ্ক_মানসমূহ;
+        জন্য (u32 i = 0; i < map->অঙ্ক_Locals; ++i) {
+            d_m3GrowSnapshotArray(M3_Slot_মান, map->মানসমূহ, map->অঙ্ক_মানসমূহ, o->মানসমূহ_Capacity);
+            M3_Slot_মান মান = map->locals[i];
+            যদি (o->localInitDepth[i] == UINT32_MAX or
                 (i_loop and o->localInitDepth[i] >= (u32)i_loop->depth)) {
-                value.type &= ~d_m3Type_refNonNull;
+                মান.type &= ~d_m3Type_refNonNull;
             }
-            map->values[map->numValues++] = value;
+            map->মানসমূহ[map->অঙ্ক_মানসমূহ++] = মান;
         }
-        point->firstValue = map->numValues;
+        point->first_মান = map->অঙ্ক_মানসমূহ;
     }
 
-    u16 top = o->stackIndex;
+    u16 শীর্ষ = o->স্তূপ_সূচক;
 
-    if (i_kind != safepoint_suspend) {
-        top = (top > i_numResults) ? (u16)(top - i_numResults) : 0;
+    যদি (i_kind != safepoint_suspend) {
+        শীর্ষ = (শীর্ষ > i_অঙ্ক_Results) ? (u16)(শীর্ষ - i_অঙ্ক_Results) : 0;
     }
-    if (i_loop) {
-        top = M3_MIN(top, i_loop->exitStackIndex);
-    }
-
-    for (u16 i = o->stackFirstDynamicIndex; i < top; ++i) {
-        if (IsLiveStackEntry(o, i)) {
-_           (AddSafePointValue(o, point, i));
-        }
+    যদি (i_loop) {
+        শীর্ষ = M3_MIN(শীর্ষ, i_loop->exit_স্তূপ_সূচক);
     }
 
-    if (i_loop) {
-        u16 numParams = GetFuncTypeNumParams(i_loop->type);
-
-        for (u16 i = 0; i < numParams; ++i) {
-_           (AddSafePointValue(o, point, (u16)(i_loop->exitStackIndex + i)));
+    জন্য (u16 i = o->স্তূপ_First_Dynamic_সূচক; i < শীর্ষ; ++i) {
+        যদি (Is_Live_স্তূপ_Entry(o, i)) {
+_           (Add_Safe_Point_মান(o, point, i));
         }
     }
 
-    map->numSafePoints++;
+    যদি (i_loop) {
+        u16 অঙ্ক_Params = Get_Func_Type_অঙ্ক_Params(i_loop->type);
 
-} _catch: return result;
+        জন্য (u16 i = 0; i < অঙ্ক_Params; ++i) {
+_           (Add_Safe_Point_মান(o, point, (u16)(i_loop->exit_স্তূপ_সূচক + i)));
+        }
+    }
+
+    map->অঙ্ক_Safe_Points++;
+
+} _catch: ফেরত ফলাফল;
 }
 
 // A back edge: op_ContinueLoop, or op_ContinueLoopIf when i_isConditional, and
 // the loop it goes back to. The conditional one suspends before it has taken
 // the branch, so it has to be resumed with the condition that took it.
-static
-M3Result RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
+স্থির
+M3_ফলাফল RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     // the loop is named by its record in the map, which has to fit the field
     _throwif("a function has too many loops for its snapshot map",
@@ -179,11 +179,11 @@ M3Result RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_is
 
 _   (RecordSafePoint(o, safepoint_op, 2, 0, (u16)(i_loop->snapshotBlock - 1), i_loop));
 
-    if (i_isConditional and o->snapshotMap and o->page) {
-        o->snapshotMap->safePoints[o->snapshotMap->numSafePoints - 1].flags |= d_m3SafePointTakenBranch;
+    যদি (i_isConditional and o->snapshotMap and o->page) {
+        o->snapshotMap->safePoints[o->snapshotMap->অঙ্ক_Safe_Points - 1].flags |= d_m3SafePointTakenBranch;
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 // A call, waiting on its callee with i_numResults not yet written; the
@@ -191,142 +191,142 @@ _   (RecordSafePoint(o, safepoint_op, 2, 0, (u16)(i_loop->snapshotBlock - 1), i_
 // is compiled as a call is one too, since its frame stands while the callee
 // runs, but it is marked: in Wasm the callee has replaced it, so a snapshot
 // walks past it rather than writing it.
-static
-M3Result RecordCall (IM3Compilation o, u16 i_numResults, u16 i_calleeSlot, bool i_isReturnCall)
+স্থির
+M3_ফলাফল RecordCall (IM3Compilation o, u16 i_অঙ্ক_Results, u16 i_calleeSlot, bool i_isReturnCall)
 {
-    M3Result result = RecordSafePoint(o, safepoint_call, 0, i_numResults, i_calleeSlot, NULL);
+    M3_ফলাফল ফলাফল = RecordSafePoint(o, safepoint_call, 0, i_অঙ্ক_Results, i_calleeSlot, ফাঁকা);
 
-    if (not result and i_isReturnCall and o->snapshotMap and o->page) {
-        o->snapshotMap->safePoints[o->snapshotMap->numSafePoints - 1].flags |= d_m3SafePointTailCall;
+    যদি (not ফলাফল and i_isReturnCall and o->snapshotMap and o->page) {
+        o->snapshotMap->safePoints[o->snapshotMap->অঙ্ক_Safe_Points - 1].flags |= d_m3_Safe_Point_লেজ_Call;
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Where the function's arguments and locals are kept. Unlike the operand
 // stack, that never changes, so it is recorded once rather than at every
 // safepoint.
-static
-M3Result RecordLocals (IM3Compilation o)
+স্থির
+M3_ফলাফল RecordLocals (IM3Compilation o)
 {
     M3SnapshotMap* map = o->snapshotMap;
 
-    if (map and o->stackIndex) {
-        map->locals = m3_AllocArray(M3SlotValue, o->stackIndex);
+    যদি (map and o->স্তূপ_সূচক) {
+        map->locals = m3_AllocArray(M3_Slot_মান, o->স্তূপ_সূচক);
 
-        if (not map->locals) {
-            return m3Err_mallocFailed;
+        যদি (not map->locals) {
+            ফেরত m3Err_mallocFailed;
         }
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            map->locals[i].slot = o->wasmStack[i];
-            map->locals[i].type = o->typeStack[i];
+        জন্য (u16 i = 0; i < o->স্তূপ_সূচক; ++i) {
+            map->locals[i].slot = o->wasm_স্তূপ[i];
+            map->locals[i].type = o->type_স্তূপ[i];
         }
 
-        map->numLocals = o->stackIndex;
-        for (u32 i = GetFunctionNumArgs(o->function); i < map->numLocals; ++i) {
-            if (IsRefType(map->locals[i].type) and not IsNullableRef(map->locals[i].type)) {
-                o->localInitDepth = m3_AllocArray(u32, map->numLocals);
-                if (not o->localInitDepth) {
-                    return m3Err_mallocFailed;
+        map->অঙ্ক_Locals = o->স্তূপ_সূচক;
+        জন্য (u32 i = Get_Function_অঙ্ক_Args(o->function); i < map->অঙ্ক_Locals; ++i) {
+            যদি (IsRefType(map->locals[i].type) and not IsNullableRef(map->locals[i].type)) {
+                o->localInitDepth = m3_AllocArray(u32, map->অঙ্ক_Locals);
+                যদি (not o->localInitDepth) {
+                    ফেরত m3Err_mallocFailed;
                 }
-                for (u32 j = i; j < map->numLocals; ++j) {
-                    if (IsRefType(map->locals[j].type) and not IsNullableRef(map->locals[j].type)) {
+                জন্য (u32 j = i; j < map->অঙ্ক_Locals; ++j) {
+                    যদি (IsRefType(map->locals[j].type) and not IsNullableRef(map->locals[j].type)) {
                         o->localInitDepth[j] = UINT32_MAX;
                     }
                 }
-                break;
+                বিরতি;
             }
         }
     }
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
 // A loop or a try_table, whose native frame a snapshot names by the
 // instruction's offset. i_pc is what that frame records. The scope being
 // compiled keeps the record, so that RecordBlockEnd can close it.
-static
-M3Result RecordBlockStart (IM3Compilation o, m3opcode_t i_opcode, pc_t i_pc, u32 i_numClauses)
+স্থির
+M3_ফলাফল RecordBlockStart (IM3Compilation o, m3opcode_t i_opcode, pc_t i_pc, u32 i_অঙ্ক_Clauses)
 {
     M3SnapshotMap* map = o->snapshotMap;
 
-    if (map and o->page) {
-        d_m3GrowSnapshotArray(M3BlockStart, map->blocks, map->numBlocks, o->blocksCapacity);
+    যদি (map and o->page) {
+        d_m3GrowSnapshotArray(M3BlockStart, map->blocks, map->অঙ্ক_Blocks, o->blocksCapacity);
 
-        M3BlockStart* block = &map->blocks[map->numBlocks++];
+        M3BlockStart* block = &map->blocks[map->অঙ্ক_Blocks++];
         block->pc           = i_pc;
         block->wasmOffset   = GetWasmOffset(o);
         block->wasmEnd      = UINT32_MAX;
-        block->numClauses   = (u16)i_numClauses;
+        block->অঙ্ক_Clauses   = (u16)i_অঙ্ক_Clauses;
         block->opcode       = (u8)i_opcode;
 
-        o->block.snapshotBlock = map->numBlocks;
+        o->block.snapshotBlock = map->অঙ্ক_Blocks;
     }
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
 // Closes the scope's region, while the instruction just read is its end
-static
-void RecordBlockEnd (IM3Compilation o)
+স্থির
+শূন্য RecordBlockEnd (IM3Compilation o)
 {
-    if (o->snapshotMap and o->block.snapshotBlock) {
+    যদি (o->snapshotMap and o->block.snapshotBlock) {
         o->snapshotMap->blocks[o->block.snapshotBlock - 1].wasmEnd = GetWasmOffset(o);
     }
 }
 
 #  undef d_m3GrowSnapshotArray
 
-#else
+#অন্যথা
 
-static inline
-M3Result RecordSafePoint (IM3Compilation o, M3SafePointKind i_kind, u32 i_wordsBack, u16 i_numResults,
+স্থির অন্তঃরেখ
+M3_ফলাফল RecordSafePoint (IM3Compilation o, M3SafePointKind i_kind, u32 i_শব্দগুলি_Back, u16 i_অঙ্ক_Results,
                           u16 i_aux, IM3CompilationScope i_loop)
 {
-    (void)o;
-    (void)i_kind;
-    (void)i_wordsBack;
-    (void)i_numResults;
-    (void)i_aux;
-    (void)i_loop;
-    return m3Err_none;
+    (শূন্য)o;
+    (শূন্য)i_kind;
+    (শূন্য)i_শব্দগুলি_Back;
+    (শূন্য)i_অঙ্ক_Results;
+    (শূন্য)i_aux;
+    (শূন্য)i_loop;
+    ফেরত m3Err_none;
 }
 
-static inline
-M3Result RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
+স্থির অন্তঃরেখ
+M3_ফলাফল RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
 {
-    (void)o;
-    (void)i_loop;
-    (void)i_isConditional;
-    return m3Err_none;
+    (শূন্য)o;
+    (শূন্য)i_loop;
+    (শূন্য)i_isConditional;
+    ফেরত m3Err_none;
 }
 
-static inline
-M3Result RecordCall (IM3Compilation o, u16 i_numResults, u16 i_calleeSlot, bool i_isReturnCall)
+স্থির অন্তঃরেখ
+M3_ফলাফল RecordCall (IM3Compilation o, u16 i_অঙ্ক_Results, u16 i_calleeSlot, bool i_isReturnCall)
 {
-    (void)o;
-    (void)i_numResults;
-    (void)i_calleeSlot;
-    (void)i_isReturnCall;
-    return m3Err_none;
+    (শূন্য)o;
+    (শূন্য)i_অঙ্ক_Results;
+    (শূন্য)i_calleeSlot;
+    (শূন্য)i_isReturnCall;
+    ফেরত m3Err_none;
 }
 
 #endif // d_m3HasSnapshots
 
-static M3_NOINLINE
-M3Result EnsureCodePageNumLines (IM3Compilation o, u32 i_numLines)
+স্থির M3_NOINLINE
+M3_ফলাফল Ensure_Code_Page_অঙ্ক_সারিগুলি (IM3Compilation o, u32 i_অঙ্ক_সারিগুলি)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    i_numLines += 2; // room for Bridge
+    i_অঙ্ক_সারিগুলি += 2; // room for Bridge
 
-    if (M3_UNLIKELY(NumFreeLines(o->page) < i_numLines)) {
-        IM3CodePage page = AcquireCodePageWithCapacity(o->runtime, i_numLines);
+    যদি (M3_UNLIKELY(অঙ্ক_Free_সারিগুলি(o->page) < i_অঙ্ক_সারিগুলি)) {
+        IM3CodePage page = AcquireCodePageWithCapacity(o->runtime, i_অঙ্ক_সারিগুলি);
 
-        if (page) {
-            m3log(emit, "bridging new code page from: %d %p (free slots: %d) to: %d", o->page->info.sequence, GetPC(o), NumFreeLines(o->page), page->info.sequence);
-            d_m3Assert(NumFreeLines(o->page) >= 2);
+        যদি (page) {
+            m3log(emit, "bridging new code page from: %d %p (free slots: %d) to: %d", o->page->info.sequence, GetPC(o), অঙ্ক_Free_সারিগুলি(o->page), page->info.sequence);
+            d_m3Assert(অঙ্ক_Free_সারিগুলি(o->page) >= 2);
 
             EmitWord(o->page, op_Branch);
             EmitWord(o->page, GetPagePC(page));
@@ -334,105 +334,105 @@ M3Result EnsureCodePageNumLines (IM3Compilation o, u32 i_numLines)
             ReleaseCodePage(o->runtime, o->page);
 
             o->page = page;
-        } else {
-            result = m3Err_mallocFailedCodePage;
+        } অন্যথা {
+            ফলাফল = m3Err_mallocFailedCodePage;
         }
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 // invalidate the pending local.set fold candidate; called wherever code is emitted or a
 // branch target captures the current pc (a fold appends an immediate, moving that position)
-static inline
-void InvalidateFold (IM3Compilation o)
+স্থির অন্তঃরেখ
+শূন্য InvalidateFold (IM3Compilation o)
 {
-#if d_m3FoldSetLocal
-    o->foldPatchPC = NULL;
-#else
-    (void)o;
+#যদি d_m3FoldSetLocal
+    o->foldPatchPC = ফাঁকা;
+#অন্যথা
+    (শূন্য)o;
 #endif
 }
 
-static M3_NOINLINE
-M3Result EmitOp (IM3Compilation o, IM3Operation i_operation)
+স্থির M3_NOINLINE
+M3_ফলাফল EmitOp (IM3Compilation o, IM3Operation i_operation)
 {
-    M3Result result = m3Err_none;                                 d_m3Assert (i_operation or IsStackPolymorphic (o));
+    M3_ফলাফল ফলাফল = m3Err_none;                                 d_m3Assert (i_operation or Is_স্তূপ_Polymorphic (o));
 
     InvalidateFold(o);
 
     // it's OK for page to be null; when compile-walking the bytecode without emitting
-    if (o->page) {
-#if d_m3EnableOpTracing
-        if (i_operation != op_DumpStack) {
-            o->numEmits++;
+    যদি (o->page) {
+#যদি d_m3EnableOpTracing
+        যদি (i_operation != op_Dump_স্তূপ) {
+            o->অঙ্ক_Emits++;
         }
 #endif
 
         // have execution jump to a new page if slots are critically low
-        result = EnsureCodePageNumLines(o, d_m3CodePageFreeLinesThreshold);
+        ফলাফল = Ensure_Code_Page_অঙ্ক_সারিগুলি(o, d_m3_Code_Page_Free_সারিগুলি_Threshold);
 
-        if (M3_LIKELY(not result)) {
-            if (d_m3LogEmit) {
+        যদি (M3_LIKELY(not ফলাফল)) {
+            যদি (d_m3LogEmit) {
                 log_emit(o, i_operation);
             }
-#if d_m3RecordBacktraces
+#যদি d_m3RecordBacktraces
             EmitMappingEntry(o->page, (u32)(o->lastOpcodeStart - o->module->wasmStart));
 #endif // d_m3RecordBacktraces
             EmitWord(o->page, i_operation);
         }
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Push an immediate constant into the M3 codestream
-static M3_NOINLINE
-void EmitConstant32 (IM3Compilation o, const u32 i_immediate)
+স্থির M3_NOINLINE
+শূন্য EmitConstant32 (IM3Compilation o, ধ্রুবক u32 i_immediate)
 {
-    if (o->page) {                                                          m3log (emit, "const32: %ud", i_immediate);
+    যদি (o->page) {                                                          m3log (emit, "const32: %ud", i_immediate);
         EmitWord32(o->page, i_immediate);
     }
 }
 
-#if d_m3HasMemory64
+#যদি d_m3HasMemory64
 // Takes two lines of the code page where a pointer is 32 bits, so whatever
 // reads it back has to step _pc by the same amount - see op_Const64.
-static M3_NOINLINE
-void EmitConstant64 (IM3Compilation o, const u64 i_immediate)
+স্থির M3_NOINLINE
+শূন্য EmitConstant64 (IM3Compilation o, ধ্রুবক u64 i_immediate)
 {
-    if (o->page) {
+    যদি (o->page) {
         EmitWord64(o->page, i_immediate);
     }
 }
 #endif
 
-static M3_NOINLINE
-void EmitSlotOffset (IM3Compilation o, const i32 i_offset)
+স্থির M3_NOINLINE
+শূন্য EmitSlotOffset (IM3Compilation o, ধ্রুবক i32 i_offset)
 {
-    if (o->page) {                                                          m3log (emit, "slot: [%d]", i_offset);
+    যদি (o->page) {                                                          m3log (emit, "slot: [%d]", i_offset);
         EmitWord32(o->page, i_offset);
     }
 }
 
-static M3_NOINLINE
-pc_t EmitPointer (IM3Compilation o, const void* const i_pointer)
+স্থির M3_NOINLINE
+pc_t EmitPointer (IM3Compilation o, ধ্রুবক শূন্য* ধ্রুবক i_pointer)
 {
     pc_t ptr = GetPagePC(o->page);
 
-    if (o->page) {                                                          m3log (emit, "ptr: %p", i_pointer);
+    যদি (o->page) {                                                          m3log (emit, "ptr: %p", i_pointer);
         EmitWord(o->page, i_pointer);
     }
 
-    return ptr;
+    ফেরত ptr;
 }
 
-static M3_NOINLINE
-void* ReservePointer (IM3Compilation o)
+স্থির M3_NOINLINE
+শূন্য* ReservePointer (IM3Compilation o)
 {
     pc_t ptr = GetPagePC(o->page);
-    EmitPointer(o, NULL);
-    return (void*)ptr;
+    EmitPointer(o, ফাঁকা);
+    ফেরত (শূন্য*)ptr;
 }
 
 
@@ -448,168 +448,168 @@ void* ReservePointer (IM3Compilation o)
 #define none    c_m3Type_none
 #define any     (u8)-1
 
-#if d_m3HasFloat
+#যদি d_m3HasFloat
 #  define FPOP(x) x
-#else
-#  define FPOP(x) NULL
+#অন্যথা
+#  define FPOP(x) ফাঁকা
 #endif
 
 // These are indexed by M3ValueType, so every type up to c_m3Type_externref needs
 // an entry. A reference is one pointer-sized word, so it moves with the integer
 // operation of that width; v128 has no operations at all.
-#if M3_SIZEOF_PTR == 8
+#যদি M3_SIZEOF_PTR == 8
 #  define REFOP(NAME)  op_##NAME##_i64
-#else
+#অন্যথা
 #  define REFOP(NAME)  op_##NAME##_i32
 #endif
 
 // clang-format off
 
-static const IM3Operation c_preserveSetSlot[] = { NULL, op_PreserveSetSlot_i32,       op_PreserveSetSlot_i64,
+স্থির ধ্রুবক IM3Operation c_preserveSetSlot[] = { ফাঁকা, op_PreserveSetSlot_i32,       op_PreserveSetSlot_i64,
                                                     FPOP(op_PreserveSetSlot_f32), FPOP(op_PreserveSetSlot_f64),
-                                                    NULL, REFOP(PreserveSetSlot),  REFOP(PreserveSetSlot),
+                                                    ফাঁকা, REFOP(PreserveSetSlot),  REFOP(PreserveSetSlot),
                                                     REFOP(PreserveSetSlot),       REFOP(PreserveSetSlot) };
-static const IM3Operation c_setSetOps[] =       { NULL, op_SetSlot_i32,               op_SetSlot_i64,
+স্থির ধ্রুবক IM3Operation c_setSetOps[] =       { ফাঁকা, op_SetSlot_i32,               op_SetSlot_i64,
                                                     FPOP(op_SetSlot_f32),         FPOP(op_SetSlot_f64),
-                                                    NULL, REFOP(SetSlot),         REFOP(SetSlot),
+                                                    ফাঁকা, REFOP(SetSlot),         REFOP(SetSlot),
                                                     REFOP(SetSlot),               REFOP(SetSlot) };
-static const IM3Operation c_setGlobalOps[] =    { NULL, op_SetGlobal_i32,             op_SetGlobal_i64,
+স্থির ধ্রুবক IM3Operation c_setGlobalOps[] =    { ফাঁকা, op_SetGlobal_i32,             op_SetGlobal_i64,
                                                     FPOP(op_SetGlobal_f32),       FPOP(op_SetGlobal_f64),
-                                                    NULL, REFOP(SetGlobal),       REFOP(SetGlobal),
+                                                    ফাঁকা, REFOP(SetGlobal),       REFOP(SetGlobal),
                                                     REFOP(SetGlobal),             REFOP(SetGlobal) };
-static const IM3Operation c_setRegisterOps[] =  { NULL, op_SetRegister_i32,           op_SetRegister_i64,
+স্থির ধ্রুবক IM3Operation c_setRegisterOps[] =  { ফাঁকা, op_SetRegister_i32,           op_SetRegister_i64,
                                                     FPOP(op_SetRegister_f32),     FPOP(op_SetRegister_f64),
-                                                    NULL, REFOP(SetRegister),     REFOP(SetRegister),
+                                                    ফাঁকা, REFOP(SetRegister),     REFOP(SetRegister),
                                                     REFOP(SetRegister),           REFOP(SetRegister) };
 
 // A table shorter than the enum reads out of bounds, so tie the two together at
 // build time: adding a value type must not silently outgrow these.
 #define d_m3CheckTypeTable(TABLE) \
-    M3_STATIC_ASSERT (sizeof (TABLE) / sizeof (*(TABLE)) == c_m3Type_count, TABLE##_needs_one_entry_per_type)
+    M3_STATIC_ASSERT (আকার (TABLE) / আকার (*(TABLE)) == c_m3_Type_গুনতি, TABLE##_needs_one_entry_per_type)
 
 d_m3CheckTypeTable(c_preserveSetSlot);
 d_m3CheckTypeTable(c_setSetOps);
 d_m3CheckTypeTable(c_setGlobalOps);
 d_m3CheckTypeTable(c_setRegisterOps);
 
-#if d_m3FoldSetLocal
+#যদি d_m3FoldSetLocal
 
 // destination-folded variants of the hot binops, indexed by the operand-form index
 // recorded at emission: [0]=_rs [1]=_sr [2]=_ss [3]=(fp _rr, never folded)
-#define d_foldOpList(TYPE, NAME)            { op_##TYPE##_##NAME##_rs_f, op_##TYPE##_##NAME##_sr_f, op_##TYPE##_##NAME##_ss_f, NULL }
-#define d_foldCommutativeOpList(TYPE, NAME) { op_##TYPE##_##NAME##_rs_f, NULL,                      op_##TYPE##_##NAME##_ss_f, NULL }
+#define d_foldOpList(TYPE, NAME)            { op_##TYPE##_##NAME##_rs_f, op_##TYPE##_##NAME##_sr_f, op_##TYPE##_##NAME##_ss_f, ফাঁকা }
+#define d_foldCommutativeOpList(TYPE, NAME) { op_##TYPE##_##NAME##_rs_f, ফাঁকা,                      op_##TYPE##_##NAME##_ss_f, ফাঁকা }
 
-static const IM3Operation c_fold_i32_Add[]         = d_foldCommutativeOpList (i32, Add);
-static const IM3Operation c_fold_i32_Subtract[]    = d_foldOpList (i32, Subtract);
-static const IM3Operation c_fold_i32_Multiply[]    = d_foldCommutativeOpList (i32, Multiply);
-static const IM3Operation c_fold_u32_And[]         = d_foldCommutativeOpList (u32, And);
-static const IM3Operation c_fold_u32_Or[]          = d_foldCommutativeOpList (u32, Or);
-static const IM3Operation c_fold_u32_Xor[]         = d_foldCommutativeOpList (u32, Xor);
-static const IM3Operation c_fold_u32_ShiftLeft[]   = d_foldOpList (u32, ShiftLeft);
-static const IM3Operation c_fold_i32_ShiftRight[]  = d_foldOpList (i32, ShiftRight);
-static const IM3Operation c_fold_u32_ShiftRight[]  = d_foldOpList (u32, ShiftRight);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Add[]         = d_foldCommutativeOpList (i32, Add);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Subtract[]    = d_foldOpList (i32, Subtract);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Multiply[]    = d_foldCommutativeOpList (i32, Multiply);
+স্থির ধ্রুবক IM3Operation c_fold_u32_And[]         = d_foldCommutativeOpList (u32, And);
+স্থির ধ্রুবক IM3Operation c_fold_u32_Or[]          = d_foldCommutativeOpList (u32, Or);
+স্থির ধ্রুবক IM3Operation c_fold_u32_Xor[]         = d_foldCommutativeOpList (u32, Xor);
+স্থির ধ্রুবক IM3Operation c_fold_u32_Shift_বাম[]   = d_foldOpList (u32, Shift_বাম);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Shift_ডান[]  = d_foldOpList (i32, Shift_ডান);
+স্থির ধ্রুবক IM3Operation c_fold_u32_Shift_ডান[]  = d_foldOpList (u32, Shift_ডান);
 
-static const IM3Operation c_fold_i64_Add[]         = d_foldCommutativeOpList (i64, Add);
-static const IM3Operation c_fold_i64_Subtract[]    = d_foldOpList (i64, Subtract);
-static const IM3Operation c_fold_i64_Multiply[]    = d_foldCommutativeOpList (i64, Multiply);
-static const IM3Operation c_fold_u64_And[]         = d_foldCommutativeOpList (u64, And);
-static const IM3Operation c_fold_u64_Or[]          = d_foldCommutativeOpList (u64, Or);
-static const IM3Operation c_fold_u64_Xor[]         = d_foldCommutativeOpList (u64, Xor);
-static const IM3Operation c_fold_u64_ShiftLeft[]   = d_foldOpList (u64, ShiftLeft);
-static const IM3Operation c_fold_i64_ShiftRight[]  = d_foldOpList (i64, ShiftRight);
-static const IM3Operation c_fold_u64_ShiftRight[]  = d_foldOpList (u64, ShiftRight);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Add[]         = d_foldCommutativeOpList (i64, Add);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Subtract[]    = d_foldOpList (i64, Subtract);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Multiply[]    = d_foldCommutativeOpList (i64, Multiply);
+স্থির ধ্রুবক IM3Operation c_fold_u64_And[]         = d_foldCommutativeOpList (u64, And);
+স্থির ধ্রুবক IM3Operation c_fold_u64_Or[]          = d_foldCommutativeOpList (u64, Or);
+স্থির ধ্রুবক IM3Operation c_fold_u64_Xor[]         = d_foldCommutativeOpList (u64, Xor);
+স্থির ধ্রুবক IM3Operation c_fold_u64_Shift_বাম[]   = d_foldOpList (u64, Shift_বাম);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Shift_ডান[]  = d_foldOpList (i64, Shift_ডান);
+স্থির ধ্রুবক IM3Operation c_fold_u64_Shift_ডান[]  = d_foldOpList (u64, Shift_ডান);
 
-#  if d_m3HasFloat
-static const IM3Operation c_fold_f32_Add[]         = d_foldCommutativeOpList (f32, Add);
-static const IM3Operation c_fold_f32_Subtract[]    = d_foldOpList (f32, Subtract);
-static const IM3Operation c_fold_f32_Multiply[]    = d_foldCommutativeOpList (f32, Multiply);
-static const IM3Operation c_fold_f32_Divide[]      = d_foldOpList (f32, Divide);
-static const IM3Operation c_fold_f64_Add[]         = d_foldCommutativeOpList (f64, Add);
-static const IM3Operation c_fold_f64_Subtract[]    = d_foldOpList (f64, Subtract);
-static const IM3Operation c_fold_f64_Multiply[]    = d_foldCommutativeOpList (f64, Multiply);
-static const IM3Operation c_fold_f64_Divide[]      = d_foldOpList (f64, Divide);
+#  যদি d_m3HasFloat
+স্থির ধ্রুবক IM3Operation c_fold_f32_Add[]         = d_foldCommutativeOpList (f32, Add);
+স্থির ধ্রুবক IM3Operation c_fold_f32_Subtract[]    = d_foldOpList (f32, Subtract);
+স্থির ধ্রুবক IM3Operation c_fold_f32_Multiply[]    = d_foldCommutativeOpList (f32, Multiply);
+স্থির ধ্রুবক IM3Operation c_fold_f32_Divide[]      = d_foldOpList (f32, Divide);
+স্থির ধ্রুবক IM3Operation c_fold_f64_Add[]         = d_foldCommutativeOpList (f64, Add);
+স্থির ধ্রুবক IM3Operation c_fold_f64_Subtract[]    = d_foldOpList (f64, Subtract);
+স্থির ধ্রুবক IM3Operation c_fold_f64_Multiply[]    = d_foldCommutativeOpList (f64, Multiply);
+স্থির ধ্রুবক IM3Operation c_fold_f64_Divide[]      = d_foldOpList (f64, Divide);
 #  endif
 
 // loads are unary: [0]= address in _r0, [1]= address in a slot
-#define d_foldLoadList(DEST, SRC)       { op_##DEST##_Load_##SRC##_r_f, op_##DEST##_Load_##SRC##_s_f, NULL, NULL }
+#define d_foldLoadList(DEST, SRC)       { op_##DEST##_Load_##SRC##_r_f, op_##DEST##_Load_##SRC##_s_f, ফাঁকা, ফাঁকা }
 
-static const IM3Operation c_fold_i32_Load_i32[] = d_foldLoadList(i32, i32);
-static const IM3Operation c_fold_i32_Load_i8[] = d_foldLoadList(i32, i8);
-static const IM3Operation c_fold_i32_Load_u8[] = d_foldLoadList(i32, u8);
-static const IM3Operation c_fold_i32_Load_i16[] = d_foldLoadList(i32, i16);
-static const IM3Operation c_fold_i32_Load_u16[] = d_foldLoadList(i32, u16);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Load_i32[] = d_foldLoadList(i32, i32);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Load_i8[] = d_foldLoadList(i32, i8);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Load_u8[] = d_foldLoadList(i32, u8);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Load_i16[] = d_foldLoadList(i32, i16);
+স্থির ধ্রুবক IM3Operation c_fold_i32_Load_u16[] = d_foldLoadList(i32, u16);
 
-static const IM3Operation c_fold_i64_Load_i64[] = d_foldLoadList(i64, i64);
-static const IM3Operation c_fold_i64_Load_i8[] = d_foldLoadList(i64, i8);
-static const IM3Operation c_fold_i64_Load_u8[] = d_foldLoadList(i64, u8);
-static const IM3Operation c_fold_i64_Load_i16[] = d_foldLoadList(i64, i16);
-static const IM3Operation c_fold_i64_Load_u16[] = d_foldLoadList(i64, u16);
-static const IM3Operation c_fold_i64_Load_i32[] = d_foldLoadList(i64, i32);
-static const IM3Operation c_fold_i64_Load_u32[] = d_foldLoadList(i64, u32);
-#  if d_m3HasFloat
-static const IM3Operation c_fold_f32_Load_f32[] = d_foldLoadList(f32, f32);
-static const IM3Operation c_fold_f64_Load_f64[] = d_foldLoadList(f64, f64);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_i64[] = d_foldLoadList(i64, i64);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_i8[] = d_foldLoadList(i64, i8);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_u8[] = d_foldLoadList(i64, u8);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_i16[] = d_foldLoadList(i64, i16);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_u16[] = d_foldLoadList(i64, u16);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_i32[] = d_foldLoadList(i64, i32);
+স্থির ধ্রুবক IM3Operation c_fold_i64_Load_u32[] = d_foldLoadList(i64, u32);
+#  যদি d_m3HasFloat
+স্থির ধ্রুবক IM3Operation c_fold_f32_Load_f32[] = d_foldLoadList(f32, f32);
+স্থির ধ্রুবক IM3Operation c_fold_f64_Load_f64[] = d_foldLoadList(f64, f64);
 #  endif
 
-static
+স্থির
 IM3Operation GetFoldOp (m3opcode_t i_opcode, u8 i_form)
 {
-    if (i_form >= 4) {
-        return NULL;
+    যদি (i_form >= 4) {
+        ফেরত ফাঁকা;
     }
 
-    switch (i_opcode) {
-    case 0x6a:  return c_fold_i32_Add        [i_form];      // i32.add
-    case 0x6b:  return c_fold_i32_Subtract   [i_form];      // i32.sub
-    case 0x6c:  return c_fold_i32_Multiply   [i_form];      // i32.mul
-    case 0x71:  return c_fold_u32_And        [i_form];      // i32.and
-    case 0x72:  return c_fold_u32_Or         [i_form];      // i32.or
-    case 0x73:  return c_fold_u32_Xor        [i_form];      // i32.xor
-    case 0x74:  return c_fold_u32_ShiftLeft  [i_form];      // i32.shl
-    case 0x75:  return c_fold_i32_ShiftRight [i_form];      // i32.shr_s
-    case 0x76:  return c_fold_u32_ShiftRight [i_form];      // i32.shr_u
+    নির্বাচন (i_opcode) {
+    ক্ষেত্র 0x6a:  ফেরত c_fold_i32_Add        [i_form];      // i32.add
+    ক্ষেত্র 0x6b:  ফেরত c_fold_i32_Subtract   [i_form];      // i32.sub
+    ক্ষেত্র 0x6c:  ফেরত c_fold_i32_Multiply   [i_form];      // i32.mul
+    ক্ষেত্র 0x71:  ফেরত c_fold_u32_And        [i_form];      // i32.and
+    ক্ষেত্র 0x72:  ফেরত c_fold_u32_Or         [i_form];      // i32.or
+    ক্ষেত্র 0x73:  ফেরত c_fold_u32_Xor        [i_form];      // i32.xor
+    ক্ষেত্র 0x74:  ফেরত c_fold_u32_Shift_বাম  [i_form];      // i32.shl
+    ক্ষেত্র 0x75:  ফেরত c_fold_i32_Shift_ডান [i_form];      // i32.shr_s
+    ক্ষেত্র 0x76:  ফেরত c_fold_u32_Shift_ডান [i_form];      // i32.shr_u
 
-    case 0x7c:  return c_fold_i64_Add        [i_form];      // i64.add
-    case 0x7d:  return c_fold_i64_Subtract   [i_form];      // i64.sub
-    case 0x7e:  return c_fold_i64_Multiply   [i_form];      // i64.mul
-    case 0x83:  return c_fold_u64_And        [i_form];      // i64.and
-    case 0x84:  return c_fold_u64_Or         [i_form];      // i64.or
-    case 0x85:  return c_fold_u64_Xor        [i_form];      // i64.xor
-    case 0x86:  return c_fold_u64_ShiftLeft  [i_form];      // i64.shl
-    case 0x87:  return c_fold_i64_ShiftRight [i_form];      // i64.shr_s
-    case 0x88:  return c_fold_u64_ShiftRight [i_form];      // i64.shr_u
+    ক্ষেত্র 0x7c:  ফেরত c_fold_i64_Add        [i_form];      // i64.add
+    ক্ষেত্র 0x7d:  ফেরত c_fold_i64_Subtract   [i_form];      // i64.sub
+    ক্ষেত্র 0x7e:  ফেরত c_fold_i64_Multiply   [i_form];      // i64.mul
+    ক্ষেত্র 0x83:  ফেরত c_fold_u64_And        [i_form];      // i64.and
+    ক্ষেত্র 0x84:  ফেরত c_fold_u64_Or         [i_form];      // i64.or
+    ক্ষেত্র 0x85:  ফেরত c_fold_u64_Xor        [i_form];      // i64.xor
+    ক্ষেত্র 0x86:  ফেরত c_fold_u64_Shift_বাম  [i_form];      // i64.shl
+    ক্ষেত্র 0x87:  ফেরত c_fold_i64_Shift_ডান [i_form];      // i64.shr_s
+    ক্ষেত্র 0x88:  ফেরত c_fold_u64_Shift_ডান [i_form];      // i64.shr_u
 
-#  if d_m3HasFloat
-    case 0x92:  return c_fold_f32_Add        [i_form];      // f32.add
-    case 0x93:  return c_fold_f32_Subtract   [i_form];      // f32.sub
-    case 0x94:  return c_fold_f32_Multiply   [i_form];      // f32.mul
-    case 0x95:  return c_fold_f32_Divide     [i_form];      // f32.div
-    case 0xa0:  return c_fold_f64_Add        [i_form];      // f64.add
-    case 0xa1:  return c_fold_f64_Subtract   [i_form];      // f64.sub
-    case 0xa2:  return c_fold_f64_Multiply   [i_form];      // f64.mul
-    case 0xa3:  return c_fold_f64_Divide     [i_form];      // f64.div
+#  যদি d_m3HasFloat
+    ক্ষেত্র 0x92:  ফেরত c_fold_f32_Add        [i_form];      // f32.add
+    ক্ষেত্র 0x93:  ফেরত c_fold_f32_Subtract   [i_form];      // f32.sub
+    ক্ষেত্র 0x94:  ফেরত c_fold_f32_Multiply   [i_form];      // f32.mul
+    ক্ষেত্র 0x95:  ফেরত c_fold_f32_Divide     [i_form];      // f32.div
+    ক্ষেত্র 0xa0:  ফেরত c_fold_f64_Add        [i_form];      // f64.add
+    ক্ষেত্র 0xa1:  ফেরত c_fold_f64_Subtract   [i_form];      // f64.sub
+    ক্ষেত্র 0xa2:  ফেরত c_fold_f64_Multiply   [i_form];      // f64.mul
+    ক্ষেত্র 0xa3:  ফেরত c_fold_f64_Divide     [i_form];      // f64.div
 #  endif
 
-    case 0x28:  return c_fold_i32_Load_i32   [i_form];      // i32.load
-    case 0x2c:  return c_fold_i32_Load_i8    [i_form];      // i32.load8_s
-    case 0x2d:  return c_fold_i32_Load_u8    [i_form];      // i32.load8_u
-    case 0x2e:  return c_fold_i32_Load_i16   [i_form];      // i32.load16_s
-    case 0x2f:  return c_fold_i32_Load_u16   [i_form];      // i32.load16_u
+    ক্ষেত্র 0x28:  ফেরত c_fold_i32_Load_i32   [i_form];      // i32.load
+    ক্ষেত্র 0x2c:  ফেরত c_fold_i32_Load_i8    [i_form];      // i32.load8_s
+    ক্ষেত্র 0x2d:  ফেরত c_fold_i32_Load_u8    [i_form];      // i32.load8_u
+    ক্ষেত্র 0x2e:  ফেরত c_fold_i32_Load_i16   [i_form];      // i32.load16_s
+    ক্ষেত্র 0x2f:  ফেরত c_fold_i32_Load_u16   [i_form];      // i32.load16_u
 
-    case 0x29:  return c_fold_i64_Load_i64   [i_form];      // i64.load
-    case 0x30:  return c_fold_i64_Load_i8    [i_form];      // i64.load8_s
-    case 0x31:  return c_fold_i64_Load_u8    [i_form];      // i64.load8_u
-    case 0x32:  return c_fold_i64_Load_i16   [i_form];      // i64.load16_s
-    case 0x33:  return c_fold_i64_Load_u16   [i_form];      // i64.load16_u
-    case 0x34:  return c_fold_i64_Load_i32   [i_form];      // i64.load32_s
-    case 0x35:  return c_fold_i64_Load_u32   [i_form];      // i64.load32_u
+    ক্ষেত্র 0x29:  ফেরত c_fold_i64_Load_i64   [i_form];      // i64.load
+    ক্ষেত্র 0x30:  ফেরত c_fold_i64_Load_i8    [i_form];      // i64.load8_s
+    ক্ষেত্র 0x31:  ফেরত c_fold_i64_Load_u8    [i_form];      // i64.load8_u
+    ক্ষেত্র 0x32:  ফেরত c_fold_i64_Load_i16   [i_form];      // i64.load16_s
+    ক্ষেত্র 0x33:  ফেরত c_fold_i64_Load_u16   [i_form];      // i64.load16_u
+    ক্ষেত্র 0x34:  ফেরত c_fold_i64_Load_i32   [i_form];      // i64.load32_s
+    ক্ষেত্র 0x35:  ফেরত c_fold_i64_Load_u32   [i_form];      // i64.load32_u
 
-#  if d_m3HasFloat
-    case 0x2a:  return c_fold_f32_Load_f32   [i_form];      // f32.load
-    case 0x2b:  return c_fold_f64_Load_f64   [i_form];      // f64.load
+#  যদি d_m3HasFloat
+    ক্ষেত্র 0x2a:  ফেরত c_fold_f32_Load_f32   [i_form];      // f32.load
+    ক্ষেত্র 0x2b:  ফেরত c_fold_f64_Load_f64   [i_form];      // f64.load
 #  endif
 
-    default: return NULL;
+    পূর্বনির্ধারিত: ফেরত ফাঁকা;
     }
 }
 
@@ -617,14 +617,14 @@ IM3Operation GetFoldOp (m3opcode_t i_opcode, u8 i_form)
 
 // clang-format on
 
-#if d_m3FuseBranch
+#যদি d_m3FuseBranch
 
 // fused compare+branch/if variants, indexed like the fold lists: [0]=_rs [1]=_sr [2]=_ss [3]=unused.
 // the [1] entries are NULL for commutative compares: the compiler never records the _sr form for them
-#  define d_fuseCmpList(TYPE, NAME, KIND)             { op_##TYPE##_##KIND##_##NAME##_rs, op_##TYPE##_##KIND##_##NAME##_sr, op_##TYPE##_##KIND##_##NAME##_ss, NULL }
-#  define d_fuseCommutativeCmpList(TYPE, NAME, KIND)  { op_##TYPE##_##KIND##_##NAME##_rs, NULL,                             op_##TYPE##_##KIND##_##NAME##_ss, NULL }
+#  define d_fuseCmpList(TYPE, NAME, KIND)             { op_##TYPE##_##KIND##_##NAME##_rs, op_##TYPE##_##KIND##_##NAME##_sr, op_##TYPE##_##KIND##_##NAME##_ss, ফাঁকা }
+#  define d_fuseCommutativeCmpList(TYPE, NAME, KIND)  { op_##TYPE##_##KIND##_##NAME##_rs, ফাঁকা,                             op_##TYPE##_##KIND##_##NAME##_ss, ফাঁকা }
 
-typedef struct M3FusedCmpOps {
+প্রকারলেখ কাঠামো M3FusedCmpOps {
     IM3Operation branchIf[4];
     IM3Operation ifOp[4];
 } M3FusedCmpOps;
@@ -633,51 +633,51 @@ typedef struct M3FusedCmpOps {
 #  define d_fuseCommutativeCmp(TYPE, NAME)    { d_fuseCommutativeCmpList (TYPE, NAME, BranchIf), d_fuseCommutativeCmpList (TYPE, NAME, If) }
 
 // clang-format off
-static const M3FusedCmpOps c_fuse_i32_Equal              = d_fuseCommutativeCmp (i32, Equal);
-static const M3FusedCmpOps c_fuse_i32_NotEqual           = d_fuseCommutativeCmp (i32, NotEqual);
-static const M3FusedCmpOps c_fuse_i32_LessThan           = d_fuseCmp (i32, LessThan);
-static const M3FusedCmpOps c_fuse_u32_LessThan           = d_fuseCmp (u32, LessThan);
-static const M3FusedCmpOps c_fuse_i32_GreaterThan        = d_fuseCmp (i32, GreaterThan);
-static const M3FusedCmpOps c_fuse_u32_GreaterThan        = d_fuseCmp (u32, GreaterThan);
-static const M3FusedCmpOps c_fuse_i32_LessThanOrEqual    = d_fuseCmp (i32, LessThanOrEqual);
-static const M3FusedCmpOps c_fuse_u32_LessThanOrEqual    = d_fuseCmp (u32, LessThanOrEqual);
-static const M3FusedCmpOps c_fuse_i32_GreaterThanOrEqual = d_fuseCmp (i32, GreaterThanOrEqual);
-static const M3FusedCmpOps c_fuse_u32_GreaterThanOrEqual = d_fuseCmp (u32, GreaterThanOrEqual);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_Equal              = d_fuseCommutativeCmp (i32, Equal);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_NotEqual           = d_fuseCommutativeCmp (i32, NotEqual);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_LessThan           = d_fuseCmp (i32, LessThan);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_u32_LessThan           = d_fuseCmp (u32, LessThan);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_GreaterThan        = d_fuseCmp (i32, GreaterThan);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_u32_GreaterThan        = d_fuseCmp (u32, GreaterThan);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_LessThanOrEqual    = d_fuseCmp (i32, LessThanOrEqual);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_u32_LessThanOrEqual    = d_fuseCmp (u32, LessThanOrEqual);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_GreaterThanOrEqual = d_fuseCmp (i32, GreaterThanOrEqual);
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_u32_GreaterThanOrEqual = d_fuseCmp (u32, GreaterThanOrEqual);
 // clang-format on
 
 // i32.eqz is unary: [0]= operand in _r0, [1]= operand in a slot
-static const M3FusedCmpOps c_fuse_i32_Eqz = {
-    { op_i32_BranchIfEqz_r, op_i32_BranchIfEqz_s, NULL, NULL },
-    { op_i32_IfEqz_r,       op_i32_IfEqz_s,       NULL, NULL }
+স্থির ধ্রুবক M3FusedCmpOps c_fuse_i32_Eqz = {
+    { op_i32_BranchIfEqz_r, op_i32_BranchIfEqz_s, ফাঁকা, ফাঁকা },
+    { op_i32_IfEqz_r,       op_i32_IfEqz_s,       ফাঁকা, ফাঁকা }
 };
 
-static
-const M3FusedCmpOps* GetFusedCmpOps (m3opcode_t i_opcode)
+স্থির
+ধ্রুবক M3FusedCmpOps* GetFusedCmpOps (m3opcode_t i_opcode)
 {
-    switch (i_opcode) {
-    case 0x45: return &c_fuse_i32_Eqz;                    // i32.eqz
-    case 0x46: return &c_fuse_i32_Equal;                  // i32.eq
-    case 0x47: return &c_fuse_i32_NotEqual;               // i32.ne
-    case 0x48: return &c_fuse_i32_LessThan;               // i32.lt_s
-    case 0x49: return &c_fuse_u32_LessThan;               // i32.lt_u
-    case 0x4a: return &c_fuse_i32_GreaterThan;            // i32.gt_s
-    case 0x4b: return &c_fuse_u32_GreaterThan;            // i32.gt_u
-    case 0x4c: return &c_fuse_i32_LessThanOrEqual;        // i32.le_s
-    case 0x4d: return &c_fuse_u32_LessThanOrEqual;        // i32.le_u
-    case 0x4e: return &c_fuse_i32_GreaterThanOrEqual;     // i32.ge_s
-    case 0x4f: return &c_fuse_u32_GreaterThanOrEqual;     // i32.ge_u
-    default: return NULL;
+    নির্বাচন (i_opcode) {
+    ক্ষেত্র 0x45: ফেরত &c_fuse_i32_Eqz;                    // i32.eqz
+    ক্ষেত্র 0x46: ফেরত &c_fuse_i32_Equal;                  // i32.eq
+    ক্ষেত্র 0x47: ফেরত &c_fuse_i32_NotEqual;               // i32.ne
+    ক্ষেত্র 0x48: ফেরত &c_fuse_i32_LessThan;               // i32.lt_s
+    ক্ষেত্র 0x49: ফেরত &c_fuse_u32_LessThan;               // i32.lt_u
+    ক্ষেত্র 0x4a: ফেরত &c_fuse_i32_GreaterThan;            // i32.gt_s
+    ক্ষেত্র 0x4b: ফেরত &c_fuse_u32_GreaterThan;            // i32.gt_u
+    ক্ষেত্র 0x4c: ফেরত &c_fuse_i32_LessThanOrEqual;        // i32.le_s
+    ক্ষেত্র 0x4d: ফেরত &c_fuse_u32_LessThanOrEqual;        // i32.le_u
+    ক্ষেত্র 0x4e: ফেরত &c_fuse_i32_GreaterThanOrEqual;     // i32.ge_s
+    ক্ষেত্র 0x4f: ফেরত &c_fuse_u32_GreaterThanOrEqual;     // i32.ge_u
+    পূর্বনির্ধারিত: ফেরত ফাঁকা;
     }
 }
 
 #endif // d_m3FuseBranch
 
-static const IM3Operation c_intSelectOps[2][4] = {
+স্থির ধ্রুবক IM3Operation c_intSelectOps[2][4] = {
     { op_Select_i32_rss, op_Select_i32_srs, op_Select_i32_ssr, op_Select_i32_sss },
     { op_Select_i64_rss, op_Select_i64_srs, op_Select_i64_ssr, op_Select_i64_sss }
 };
-#if d_m3HasFloat
-static const IM3Operation c_fpSelectOps[2][2][3] = {
+#যদি d_m3HasFloat
+স্থির ধ্রুবক IM3Operation c_fpSelectOps[2][2][3] = {
     { { op_Select_f32_sss, op_Select_f32_srs, op_Select_f32_ssr }, // selector in slot
       { op_Select_f32_rss, op_Select_f32_rrs, op_Select_f32_rsr } }, // selector in reg
     { { op_Select_f64_sss, op_Select_f64_srs, op_Select_f64_ssr }, // selector in slot
@@ -687,27 +687,27 @@ static const IM3Operation c_fpSelectOps[2][2][3] = {
 
 // all args & returns are 64-bit aligned, so use 2 slots for a d_m3Use32BitSlots=1 build
 
-static
-M3Result AcquireCompilationCodePage (IM3Compilation o, IM3CodePage* o_codePage)
+স্থির
+M3_ফলাফল AcquireCompilationCodePage (IM3Compilation o, IM3CodePage* o_codePage)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     IM3CodePage page = AcquireCodePage(o->runtime);
 
-    if (page) {
-#if (d_m3EnableCodePageRefCounting)
+    যদি (page) {
+#যদি (d_m3EnableCodePageRefCounting)
         {
-            if (o->function) {
+            যদি (o->function) {
                 IM3Function func = o->function;
-                page->info.usageCount++;
+                page->info.usage_গুনতি++;
 
-                u32 index = func->numCodePageRefs++;
-_               (m3ReallocArray(&func->codePageRefs, IM3CodePage, func->numCodePageRefs, index));
+                u32 index = func->অঙ্ক_Code_Page_Refs++;
+_               (m3ReallocArray(&func->codePageRefs, IM3CodePage, func->অঙ্ক_Code_Page_Refs, index));
                 func->codePageRefs[index] = page;
             }
         }
 #endif
-    } else {
+    } অন্যথা {
         _throw(m3Err_mallocFailedCodePage);
     }
 
@@ -715,61 +715,61 @@ _               (m3ReallocArray(&func->codePageRefs, IM3CodePage, func->numCodeP
 
     *o_codePage = page;
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static inline
-void ReleaseCompilationCodePage (IM3Compilation o)
+স্থির অন্তঃরেখ
+শূন্য ReleaseCompilationCodePage (IM3Compilation o)
 {
     ReleaseCodePage(o->runtime, o->page);
 }
 
-static inline
-u16 GetTypeNumSlots (m3type_t i_type)
+স্থির অন্তঃরেখ
+u16 Get_Type_অঙ্ক_Slots (m3type_t i_type)
 {
     i_type = BaseTypeOf(i_type);
 
     // v128 is 16 bytes - 4 slots in 32-bit-slot mode, 2 in 64-bit.
     // (Slot-allocator only; no v128 ops execute.)
-    if (i_type == c_m3Type_v128)
-#if d_m3Use32BitSlots
-        return 4;
-#else
-        return 2;
+    যদি (i_type == c_m3Type_v128)
+#যদি d_m3Use32BitSlots
+        ফেরত 4;
+#অন্যথা
+        ফেরত 2;
 #endif
-#if d_m3Use32BitSlots
-    return Is64BitType(i_type) ? 2 : 1;
-#else
-    return 1;
+#যদি d_m3Use32BitSlots
+    ফেরত Is64BitType(i_type) ? 2 : 1;
+#অন্যথা
+    ফেরত 1;
 #endif
 }
 
-static inline
-void AlignSlotToType (u16* io_slot, m3type_t i_type)
+স্থির অন্তঃরেখ
+শূন্য AlignSlotToType (u16* io_slot, m3type_t i_type)
 {
     // align 64-bit words to even slots (if d_m3Use32BitSlots)
-    u16 numSlots = GetTypeNumSlots(i_type);
+    u16 অঙ্ক_Slots = Get_Type_অঙ্ক_Slots(i_type);
 
-    u16 mask = numSlots - 1;
+    u16 mask = অঙ্ক_Slots - 1;
     *io_slot = (*io_slot + mask) & ~mask;
 }
 
 // Deliberately unchecked. Validation rejects an empty operand stack before compilation.
-static inline
-i16 GetStackTopIndex (IM3Compilation o)
+স্থির অন্তঃরেখ
+i16 Get_স্তূপ_শীর্ষ_সূচক (IM3Compilation o)
 {
-    return o->stackIndex - 1;
+    ফেরত o->স্তূপ_সূচক - 1;
 }
 
-static inline
-M3Result GetStackTopIndexThrows (IM3Compilation o, i16* o_stackIndex)
+স্থির অন্তঃরেখ
+M3_ফলাফল Get_স্তূপ_শীর্ষ_সূচক_Throws (IM3Compilation o, i16* o_স্তূপ_সূচক)
 {
-    *o_stackIndex = o->stackIndex - 1;
+    *o_স্তূপ_সূচক = o->স্তূপ_সূচক - 1;
 
-    if (M3_LIKELY(o->stackIndex > o->stackFirstDynamicIndex or IsStackPolymorphic(o))) {
-        return m3Err_none;
-    } else {
-        return m3Err_functionStackUnderrun;
+    যদি (M3_LIKELY(o->স্তূপ_সূচক > o->স্তূপ_First_Dynamic_সূচক or Is_স্তূপ_Polymorphic(o))) {
+        ফেরত m3Err_none;
+    } অন্যথা {
+        ফেরত m3_Err_function_স্তূপ_Underrun;
     }
 }
 
@@ -777,685 +777,685 @@ M3Result GetStackTopIndexThrows (IM3Compilation o, i16* o_stackIndex)
 // Items in the static portion of the stack (args/locals) are hidden from GetStackTypeFromTop ()
 // In other words, only "real" Wasm stack items can be inspected.  This is important when
 // returning values, etc. and you need an accurate wasm-view of the stack.
-static
-m3type_t GetStackTypeFromTop (IM3Compilation o, u16 i_offset)
+স্থির
+m3type_t Get_স্তূপ_Type_From_শীর্ষ (IM3Compilation o, u16 i_offset)
 {
     m3type_t type = c_m3Type_none;
 
     ++i_offset;
-    if (o->stackIndex >= i_offset) {
-        u16 index = o->stackIndex - i_offset;
+    যদি (o->স্তূপ_সূচক >= i_offset) {
+        u16 index = o->স্তূপ_সূচক - i_offset;
 
-        if (index >= o->stackFirstDynamicIndex) {
-            type = o->typeStack[index];
+        যদি (index >= o->স্তূপ_First_Dynamic_সূচক) {
+            type = o->type_স্তূপ[index];
         }
     }
 
-    return type;
+    ফেরত type;
 }
 
-static inline
-m3type_t GetStackTopType (IM3Compilation o)
+স্থির অন্তঃরেখ
+m3type_t Get_স্তূপ_শীর্ষ_Type (IM3Compilation o)
 {
-    return GetStackTypeFromTop(o, 0);
+    ফেরত Get_স্তূপ_Type_From_শীর্ষ(o, 0);
 }
 
-static inline
-m3type_t GetStackTypeFromBottom (IM3Compilation o, u16 i_offset)
+স্থির অন্তঃরেখ
+m3type_t Get_স্তূপ_Type_From_Bottom (IM3Compilation o, u16 i_offset)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_offset < o->stackIndex) {
-        type = o->typeStack[i_offset];
+    যদি (i_offset < o->স্তূপ_সূচক) {
+        type = o->type_স্তূপ[i_offset];
     }
 
-    return type;
+    ফেরত type;
 }
 
 
-static inline
+স্থির অন্তঃরেখ
 bool IsConstantSlot (IM3Compilation o, u16 i_slot)
 {
-    return (i_slot >= o->slotFirstConstIndex and i_slot < o->slotMaxConstIndex);
+    ফেরত (i_slot >= o->slot_First_Const_সূচক and i_slot < o->slot_Max_Const_সূচক);
 }
-static inline
+স্থির অন্তঃরেখ
 bool IsSlotAllocated (IM3Compilation o, u16 i_slot)
 {
-    return o->m3Slots[i_slot];
+    ফেরত o->m3Slots[i_slot];
 }
 
-static inline
-bool IsStackIndexInRegister (IM3Compilation o, i32 i_stackIndex)
-{                                                                           d_m3Assert (i_stackIndex < o->stackIndex or IsStackPolymorphic (o));
-    if (i_stackIndex >= 0 and i_stackIndex < o->stackIndex) {
-        return (o->wasmStack[i_stackIndex] >= d_m3Reg0SlotAlias);
-    } else {
-        return false;
+স্থির অন্তঃরেখ
+bool Is_স্তূপ_সূচক_In_Register (IM3Compilation o, i32 i_স্তূপ_সূচক)
+{                                                                           d_m3Assert (i_স্তূপ_সূচক < o->স্তূপ_সূচক or Is_স্তূপ_Polymorphic (o));
+    যদি (i_স্তূপ_সূচক >= 0 and i_স্তূপ_সূচক < o->স্তূপ_সূচক) {
+        ফেরত (o->wasm_স্তূপ[i_স্তূপ_সূচক] >= d_m3Reg0SlotAlias);
+    } অন্যথা {
+        ফেরত false;
     }
 }
 
-static inline
-u16 GetNumBlockValuesOnStack (IM3Compilation o)
+স্থির অন্তঃরেখ
+u16 Get_অঙ্ক_Block_মানসমূহ_On_স্তূপ (IM3Compilation o)
 {
-    return o->stackIndex - o->block.blockStackIndex;
+    ফেরত o->স্তূপ_সূচক - o->block.block_স্তূপ_সূচক;
 }
 
-static inline
-bool IsStackTopInRegister (IM3Compilation o)
+স্থির অন্তঃরেখ
+bool Is_স্তূপ_শীর্ষ_In_Register (IM3Compilation o)
 {
-    return IsStackIndexInRegister(o, (i32)GetStackTopIndex(o));
+    ফেরত Is_স্তূপ_সূচক_In_Register(o, (i32)Get_স্তূপ_শীর্ষ_সূচক(o));
 }
-static inline
-bool IsStackTopMinus1InRegister (IM3Compilation o)
+স্থির অন্তঃরেখ
+bool Is_স্তূপ_শীর্ষ_Minus1_In_Register (IM3Compilation o)
 {
-    return IsStackIndexInRegister(o, (i32)GetStackTopIndex(o) - 1);
+    ফেরত Is_স্তূপ_সূচক_In_Register(o, (i32)Get_স্তূপ_শীর্ষ_সূচক(o) - 1);
 }
-static inline
-bool IsStackTopMinus2InRegister (IM3Compilation o)
+স্থির অন্তঃরেখ
+bool Is_স্তূপ_শীর্ষ_Minus2_In_Register (IM3Compilation o)
 {
-    return IsStackIndexInRegister(o, (i32)GetStackTopIndex(o) - 2);
-}
-
-static inline
-bool IsStackTopInSlot (IM3Compilation o)
-{
-    return not IsStackTopInRegister(o);
+    ফেরত Is_স্তূপ_সূচক_In_Register(o, (i32)Get_স্তূপ_শীর্ষ_সূচক(o) - 2);
 }
 
-static inline
+স্থির অন্তঃরেখ
+bool Is_স্তূপ_শীর্ষ_In_Slot (IM3Compilation o)
+{
+    ফেরত not Is_স্তূপ_শীর্ষ_In_Register(o);
+}
+
+স্থির অন্তঃরেখ
 bool IsValidSlot (u16 i_slot)
 {
-    return (i_slot < d_m3MaxFunctionSlots);
+    ফেরত (i_slot < d_m3MaxFunctionSlots);
 }
 
-static inline
-u16 GetStackTopSlotNumber (IM3Compilation o)
+স্থির অন্তঃরেখ
+u16 Get_স্তূপ_শীর্ষ_Slot_সংখ্যা (IM3Compilation o)
 {
-    i16 i = GetStackTopIndex(o);
+    i16 i = Get_স্তূপ_শীর্ষ_সূচক(o);
 
     u16 slot = c_slotUnused;
 
-    if (i >= 0) {
-        slot = o->wasmStack[i];
+    যদি (i >= 0) {
+        slot = o->wasm_স্তূপ[i];
     }
 
-    return slot;
+    ফেরত slot;
 }
 
 
 // from bottom
-static inline
-u16 GetSlotForStackIndex (IM3Compilation o, u16 i_stackIndex)
-{                                                                   d_m3Assert (i_stackIndex < o->stackIndex or IsStackPolymorphic (o));
+স্থির অন্তঃরেখ
+u16 Get_Slot_For_স্তূপ_সূচক (IM3Compilation o, u16 i_স্তূপ_সূচক)
+{                                                                   d_m3Assert (i_স্তূপ_সূচক < o->স্তূপ_সূচক or Is_স্তূপ_Polymorphic (o));
     u16 slot = c_slotUnused;
 
-    if (i_stackIndex < o->stackIndex) {
-        slot = o->wasmStack[i_stackIndex];
+    যদি (i_স্তূপ_সূচক < o->স্তূপ_সূচক) {
+        slot = o->wasm_স্তূপ[i_স্তূপ_সূচক];
     }
 
-    return slot;
+    ফেরত slot;
 }
 
-static inline
-u16 GetExtraSlotForStackIndex (IM3Compilation o, u16 i_stackIndex)
+স্থির অন্তঃরেখ
+u16 Get_Extra_Slot_For_স্তূপ_সূচক (IM3Compilation o, u16 i_স্তূপ_সূচক)
 {
-    u16 baseSlot = GetSlotForStackIndex(o, i_stackIndex);
+    u16 baseSlot = Get_Slot_For_স্তূপ_সূচক(o, i_স্তূপ_সূচক);
 
-    if (baseSlot != c_slotUnused) {
-        u16 extraSlot = GetTypeNumSlots(GetStackTypeFromBottom(o, i_stackIndex)) - 1;
+    যদি (baseSlot != c_slotUnused) {
+        u16 extraSlot = Get_Type_অঙ্ক_Slots(Get_স্তূপ_Type_From_Bottom(o, i_স্তূপ_সূচক)) - 1;
         baseSlot += extraSlot;
     }
 
-    return baseSlot;
+    ফেরত baseSlot;
 }
 
 
-static inline
-void TouchSlot (IM3Compilation o, u16 i_slot)
+স্থির অন্তঃরেখ
+শূন্য TouchSlot (IM3Compilation o, u16 i_slot)
 {
     // op_Entry uses this value to track and detect stack overflow
-    o->maxStackSlots = M3_MAX(o->maxStackSlots, i_slot + 1);
+    o->max_স্তূপ_Slots = M3_MAX(o->max_স্তূপ_Slots, i_slot + 1);
 }
 
-static inline
-void MarkSlotAllocated (IM3Compilation o, u16 i_slot)
+স্থির অন্তঃরেখ
+শূন্য MarkSlotAllocated (IM3Compilation o, u16 i_slot)
 {                                                                   d_m3Assert (o->m3Slots [i_slot] == 0); // shouldn't be already allocated
     o->m3Slots[i_slot] = 1;
 
-    o->slotMaxAllocatedIndexPlusOne = M3_MAX(o->slotMaxAllocatedIndexPlusOne, i_slot + 1);
+    o->slot_Max_Allocated_সূচক_Plus_One = M3_MAX(o->slot_Max_Allocated_সূচক_Plus_One, i_slot + 1);
 
     TouchSlot(o, i_slot);
 }
 
-static inline
-M3Result MarkSlotsAllocated (IM3Compilation o, u16 i_slot, u16 i_numSlots)
+স্থির অন্তঃরেখ
+M3_ফলাফল MarkSlotsAllocated (IM3Compilation o, u16 i_slot, u16 i_অঙ্ক_Slots)
 {
-    if (M3_UNLIKELY(i_slot + i_numSlots > d_m3MaxFunctionSlots)) {
-        return m3Err_functionStackOverflow;
+    যদি (M3_UNLIKELY(i_slot + i_অঙ্ক_Slots > d_m3MaxFunctionSlots)) {
+        ফেরত m3_Err_function_স্তূপ_Overflow;
     }
 
-    while (i_numSlots--) {
+    যখন (i_অঙ্ক_Slots--) {
         MarkSlotAllocated(o, i_slot++);
     }
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
-static inline
-M3Result MarkSlotsAllocatedByType (IM3Compilation o, u16 i_slot, m3type_t i_type)
+স্থির অন্তঃরেখ
+M3_ফলাফল MarkSlotsAllocatedByType (IM3Compilation o, u16 i_slot, m3type_t i_type)
 {
-    u16 numSlots = GetTypeNumSlots(i_type);
-    return MarkSlotsAllocated(o, i_slot, numSlots);
+    u16 অঙ্ক_Slots = Get_Type_অঙ্ক_Slots(i_type);
+    ফেরত MarkSlotsAllocated(o, i_slot, অঙ্ক_Slots);
 }
 
 
-static
-M3Result AllocateSlotsWithinRange (IM3Compilation o, u16* o_slot, m3type_t i_type, u16 i_startSlot, u16 i_endSlot)
+স্থির
+M3_ফলাফল AllocateSlotsWithinRange (IM3Compilation o, u16* o_slot, m3type_t i_type, u16 i_startSlot, u16 i_endSlot)
 {
-    M3Result result = m3Err_functionStackOverflow;
+    M3_ফলাফল ফলাফল = m3_Err_function_স্তূপ_Overflow;
 
-    u16 numSlots     = GetTypeNumSlots(i_type);
-    u16 searchOffset = numSlots - 1;
+    u16 অঙ্ক_Slots     = Get_Type_অঙ্ক_Slots(i_type);
+    u16 অনুসন্ধান_Offset = অঙ্ক_Slots - 1;
 
     AlignSlotToType(&i_startSlot, i_type);
 
     // search for 1 or 2 consecutive slots in the execution stack
     u16 i = i_startSlot;
-    while (i + searchOffset < i_endSlot) {
-        if (i + searchOffset < d_m3MaxFunctionSlots and o->m3Slots[i] == 0 and o->m3Slots[i + searchOffset] == 0) {
-            MarkSlotsAllocated(o, i, numSlots);
+    যখন (i + অনুসন্ধান_Offset < i_endSlot) {
+        যদি (i + অনুসন্ধান_Offset < d_m3MaxFunctionSlots and o->m3Slots[i] == 0 and o->m3Slots[i + অনুসন্ধান_Offset] == 0) {
+            MarkSlotsAllocated(o, i, অঙ্ক_Slots);
 
             *o_slot = i;
-            result  = m3Err_none;
-            break;
+            ফলাফল  = m3Err_none;
+            বিরতি;
         }
 
         // keep 2-slot allocations even-aligned
-        i += numSlots;
+        i += অঙ্ক_Slots;
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static inline
-M3Result AllocateSlots (IM3Compilation o, u16* o_slot, m3type_t i_type)
+স্থির অন্তঃরেখ
+M3_ফলাফল AllocateSlots (IM3Compilation o, u16* o_slot, m3type_t i_type)
 {
-    return AllocateSlotsWithinRange(o, o_slot, i_type, o->slotFirstDynamicIndex, d_m3MaxFunctionSlots);
+    ফেরত AllocateSlotsWithinRange(o, o_slot, i_type, o->slot_First_Dynamic_সূচক, d_m3MaxFunctionSlots);
 }
 
-static inline
-M3Result AllocateConstantSlots (IM3Compilation o, u16* o_slot, m3type_t i_type)
+স্থির অন্তঃরেখ
+M3_ফলাফল AllocateConstantSlots (IM3Compilation o, u16* o_slot, m3type_t i_type)
 {
-    u16 maxTableIndex = o->slotFirstConstIndex + d_m3MaxConstantTableSize;
-    return AllocateSlotsWithinRange(o, o_slot, i_type, o->slotFirstConstIndex, M3_MIN(o->slotFirstDynamicIndex, maxTableIndex));
+    u16 max_Table_সূচক = o->slot_First_Const_সূচক + d_m3_Max_Constant_Table_আকার;
+    ফেরত AllocateSlotsWithinRange(o, o_slot, i_type, o->slot_First_Const_সূচক, M3_MIN(o->slot_First_Dynamic_সূচক, max_Table_সূচক));
 }
 
 
 // TOQUE: this usage count system could be eliminated. real world code doesn't frequently trigger it.  just copy to multiple
 // unique slots.
-static inline
-M3Result IncrementSlotUsageCount (IM3Compilation o, u16 i_slot)
+স্থির অন্তঃরেখ
+M3_ফলাফল Increment_Slot_Usage_গুনতি (IM3Compilation o, u16 i_slot)
 {                                                                                       d_m3Assert (i_slot < d_m3MaxFunctionSlots);
-    M3Result result = m3Err_none;                                                       d_m3Assert (o->m3Slots [i_slot] > 0);
+    M3_ফলাফল ফলাফল = m3Err_none;                                                       d_m3Assert (o->m3Slots [i_slot] > 0);
 
     // OPTZ (memory): 'm3Slots' could still be fused with 'typeStack' if 4 bits were used to indicate: [0,1,2,many]. The many-case
     // would scan 'wasmStack' to determine the actual usage count
-    if (M3_LIKELY(o->m3Slots[i_slot] < 0xFF)) {
+    যদি (M3_LIKELY(o->m3Slots[i_slot] < 0xFF)) {
         o->m3Slots[i_slot]++;
-    } else {
-        result = "slot usage count overflow";
+    } অন্যথা {
+        ফলাফল = "slot usage count overflow";
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static inline
-void DeallocateSlot (IM3Compilation o, i16 i_slot, m3type_t i_type)
-{                                                                                       d_m3Assert (i_slot >= o->slotFirstDynamicIndex);
-                                                                                        d_m3Assert (i_slot < o->slotMaxAllocatedIndexPlusOne);
-    for (u16 i = 0; i < GetTypeNumSlots(i_type); ++i, ++i_slot) {                       d_m3Assert (o->m3Slots [i_slot]);
+স্থির অন্তঃরেখ
+শূন্য DeallocateSlot (IM3Compilation o, i16 i_slot, m3type_t i_type)
+{                                                                                       d_m3Assert (i_slot >= o->slot_First_Dynamic_সূচক);
+                                                                                        d_m3Assert (i_slot < o->slot_Max_Allocated_সূচক_Plus_One);
+    জন্য (u16 i = 0; i < Get_Type_অঙ্ক_Slots(i_type); ++i, ++i_slot) {                       d_m3Assert (o->m3Slots [i_slot]);
         --o->m3Slots[i_slot];
     }
 }
 
 
-static inline
+স্থির অন্তঃরেখ
 bool IsRegisterTypeAllocated (IM3Compilation o, u8 i_type)
 {
-    return IsRegisterAllocated(o, IsFpType(i_type));
+    ফেরত IsRegisterAllocated(o, IsFpType(i_type));
 }
 
-static inline
-void AllocateRegister (IM3Compilation o, u32 i_register, u16 i_stackIndex)
+স্থির অন্তঃরেখ
+শূন্য AllocateRegister (IM3Compilation o, u32 i_register, u16 i_স্তূপ_সূচক)
 {                                                                                       d_m3Assert (not IsRegisterAllocated (o, i_register));
-    o->regStackIndexPlusOne[i_register] = i_stackIndex + 1;
+    o->reg_স্তূপ_সূচক_Plus_One[i_register] = i_স্তূপ_সূচক + 1;
 }
 
-static inline
-void DeallocateRegister (IM3Compilation o, u32 i_register)
+স্থির অন্তঃরেখ
+শূন্য DeallocateRegister (IM3Compilation o, u32 i_register)
 {                                                                                       d_m3Assert (IsRegisterAllocated (o, i_register));
-    o->regStackIndexPlusOne[i_register] = c_m3RegisterUnallocated;
+    o->reg_স্তূপ_সূচক_Plus_One[i_register] = c_m3RegisterUnallocated;
 }
 
-static inline
-u16 GetRegisterStackIndex (IM3Compilation o, u32 i_register)
+স্থির অন্তঃরেখ
+u16 Get_Register_স্তূপ_সূচক (IM3Compilation o, u32 i_register)
 {                                                                                       d_m3Assert (IsRegisterAllocated (o, i_register));
-    return o->regStackIndexPlusOne[i_register] - 1;
+    ফেরত o->reg_স্তূপ_সূচক_Plus_One[i_register] - 1;
 }
 
 u16 GetMaxUsedSlotPlusOne (IM3Compilation o)
 {
-    while (o->slotMaxAllocatedIndexPlusOne > o->slotFirstDynamicIndex) {
-        if (IsSlotAllocated(o, o->slotMaxAllocatedIndexPlusOne - 1)) {
-            break;
+    যখন (o->slot_Max_Allocated_সূচক_Plus_One > o->slot_First_Dynamic_সূচক) {
+        যদি (IsSlotAllocated(o, o->slot_Max_Allocated_সূচক_Plus_One - 1)) {
+            বিরতি;
         }
 
-        o->slotMaxAllocatedIndexPlusOne--;
+        o->slot_Max_Allocated_সূচক_Plus_One--;
     }
 
 #ifdef DEBUG
-    u16 maxSlot = o->slotMaxAllocatedIndexPlusOne;
-    while (maxSlot < d_m3MaxFunctionSlots) {
+    u16 maxSlot = o->slot_Max_Allocated_সূচক_Plus_One;
+    যখন (maxSlot < d_m3MaxFunctionSlots) {
         d_m3Assert(o->m3Slots[maxSlot] == 0);
         maxSlot++;
     }
 #endif
 
-    return o->slotMaxAllocatedIndexPlusOne;
+    ফেরত o->slot_Max_Allocated_সূচক_Plus_One;
 }
 
-static
-M3Result PreserveRegisterIfOccupied (IM3Compilation o, m3type_t i_registerType)
+স্থির
+M3_ফলাফল PreserveRegisterIfOccupied (IM3Compilation o, m3type_t i_registerType)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     u32 regSelect = IsFpType(i_registerType);
 
-    if (IsRegisterAllocated(o, regSelect)) {
-        u16 stackIndex = GetRegisterStackIndex(o, regSelect);
+    যদি (IsRegisterAllocated(o, regSelect)) {
+        u16 স্তূপ_সূচক = Get_Register_স্তূপ_সূচক(o, regSelect);
         DeallocateRegister(o, regSelect);
 
-        m3type_t type = GetStackTypeFromBottom(o, stackIndex);
+        m3type_t type = Get_স্তূপ_Type_From_Bottom(o, স্তূপ_সূচক);
 
         // and point to a exec slot
         u16 slot = c_slotUnused;
 _       (AllocateSlots(o, &slot, type));
-        o->wasmStack[stackIndex] = slot;
+        o->wasm_স্তূপ[স্তূপ_সূচক] = slot;
 
         // Ensure type is within the valid range
-        if (M3_LIKELY(BaseTypeOf(type) < c_m3Type_count)) {
+        যদি (M3_LIKELY(BaseTypeOf(type) < c_m3_Type_গুনতি)) {
 _           (EmitOp(o, c_setSetOps[BaseTypeOf(type)]));
-        } else {
+        } অন্যথা {
             _throw(m3Err_unknownType);
         }
 
         EmitSlotOffset(o, slot);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 // all values must be in slots before entering loop, if, and else blocks
 // otherwise they'd end up preserve-copied in the block to probably different locations (if/else)
-static inline
-M3Result PreserveRegisters (IM3Compilation o)
+স্থির অন্তঃরেখ
+M3_ফলাফল PreserveRegisters (IM3Compilation o)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
 _   (PreserveRegisterIfOccupied(o, c_m3Type_f64));
 _   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result PreserveNonTopRegisters (IM3Compilation o)
+স্থির
+M3_ফলাফল Preserve_Non_শীর্ষ_Registers (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    i16 stackTop = GetStackTopIndex(o);
+    i16 স্তূপ_শীর্ষ = Get_স্তূপ_শীর্ষ_সূচক(o);
 
-    if (stackTop >= 0) {
-        if (IsRegisterAllocated(o, 0))     // r0
+    যদি (স্তূপ_শীর্ষ >= 0) {
+        যদি (IsRegisterAllocated(o, 0))     // r0
         {
-            if (GetRegisterStackIndex(o, 0) != stackTop) {
+            যদি (Get_Register_স্তূপ_সূচক(o, 0) != স্তূপ_শীর্ষ) {
 _               (PreserveRegisterIfOccupied(o, c_m3Type_i64));
             }
         }
 
-        if (IsRegisterAllocated(o, 1))     // fp0
+        যদি (IsRegisterAllocated(o, 1))     // fp0
         {
-            if (GetRegisterStackIndex(o, 1) != stackTop) {
+            যদি (Get_Register_স্তূপ_সূচক(o, 1) != স্তূপ_শীর্ষ) {
 _               (PreserveRegisterIfOccupied(o, c_m3Type_f64));
             }
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static
-M3Result Push (IM3Compilation o, m3type_t i_type, u16 i_slot)
+স্থির
+M3_ফলাফল ঠেলো (IM3Compilation o, m3type_t i_type, u16 i_slot)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-#if !d_m3HasFloat
-    if (i_type == c_m3Type_f32 || i_type == c_m3Type_f64) {
-        return m3Err_unknownOpcode;
+#যদি !d_m3HasFloat
+    যদি (i_type == c_m3Type_f32 || i_type == c_m3Type_f64) {
+        ফেরত m3Err_unknownOpcode;
     }
 #endif
 
-    if (M3_UNLIKELY(o->stackIndex >= d_m3MaxFunctionStackHeight)) {
-        return m3Err_functionStackOverflow;
+    যদি (M3_UNLIKELY(o->স্তূপ_সূচক >= d_m3_Max_Function_স্তূপ_Height)) {
+        ফেরত m3_Err_function_স্তূপ_Overflow;
     }
 
-    u16 stackIndex = o->stackIndex++;                                       // printf ("push: %d\n", (i32) i);
+    u16 স্তূপ_সূচক = o->স্তূপ_সূচক++;                                       // printf ("push: %d\n", (i32) i);
 
-    o->wasmStack[stackIndex] = i_slot;
-    o->typeStack[stackIndex] = i_type;
+    o->wasm_স্তূপ[স্তূপ_সূচক] = i_slot;
+    o->type_স্তূপ[স্তূপ_সূচক] = i_type;
 
-    if (IsRegisterSlotAlias(i_slot)) {
+    যদি (IsRegisterSlotAlias(i_slot)) {
         u32 regSelect = IsFpRegisterSlotAlias(i_slot);
-        AllocateRegister(o, regSelect, stackIndex);
+        AllocateRegister(o, regSelect, স্তূপ_সূচক);
     }
 
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    যদি (d_m3_Log_Wasm_স্তূপ) {
+        dump_type_স্তূপ(o);
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static inline
-M3Result PushRegister (IM3Compilation o, m3type_t i_type)
+স্থির অন্তঃরেখ
+M3_ফলাফল ঠেলো_Register (IM3Compilation o, m3type_t i_type)
 {
-    M3Result result = m3Err_none;                                                       d_m3Assert ((u16) d_m3Reg0SlotAlias > (u16) d_m3MaxFunctionSlots);
-    u16      slot   = IsFpType(i_type) ? d_m3Fp0SlotAlias : d_m3Reg0SlotAlias;          d_m3Assert (i_type or IsStackPolymorphic (o));
+    M3_ফলাফল ফলাফল = m3Err_none;                                                       d_m3Assert ((u16) d_m3Reg0SlotAlias > (u16) d_m3MaxFunctionSlots);
+    u16      slot   = IsFpType(i_type) ? d_m3Fp0SlotAlias : d_m3Reg0SlotAlias;          d_m3Assert (i_type or Is_স্তূপ_Polymorphic (o));
 
-_   (Push(o, i_type, slot));
+_   (ঠেলো(o, i_type, slot));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Pop (IM3Compilation o)
+স্থির
+M3_ফলাফল বের_করো (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (M3_LIKELY(o->stackIndex > o->block.blockStackIndex)) {
-        o->stackIndex--;                                                //  printf ("pop: %d\n", (i32) o->stackIndex);
+    যদি (M3_LIKELY(o->স্তূপ_সূচক > o->block.block_স্তূপ_সূচক)) {
+        o->স্তূপ_সূচক--;                                                //  printf ("pop: %d\n", (i32) o->stackIndex);
 
-        u16      slot = o->wasmStack[o->stackIndex];
-        m3type_t type = o->typeStack[o->stackIndex];
+        u16      slot = o->wasm_স্তূপ[o->স্তূপ_সূচক];
+        m3type_t type = o->type_স্তূপ[o->স্তূপ_সূচক];
 
-        if (IsRegisterSlotAlias(slot)) {
+        যদি (IsRegisterSlotAlias(slot)) {
             u32 regSelect = IsFpRegisterSlotAlias(slot);
             DeallocateRegister(o, regSelect);
-        } else if (M3_UNLIKELY(slot >= o->slotMaxAllocatedIndexPlusOne)) {
-            return m3Err_functionStackUnderrun; // Return error for invalid slot indices
-        } else if (slot >= o->slotFirstDynamicIndex) {
+        } অন্যথা যদি (M3_UNLIKELY(slot >= o->slot_Max_Allocated_সূচক_Plus_One)) {
+            ফেরত m3_Err_function_স্তূপ_Underrun; // Return error for invalid slot indices
+        } অন্যথা যদি (slot >= o->slot_First_Dynamic_সূচক) {
             DeallocateSlot(o, slot, type);
         }
-    } else if (not IsStackPolymorphic(o)) {
-        result = m3Err_functionStackUnderrun;
+    } অন্যথা যদি (not Is_স্তূপ_Polymorphic(o)) {
+        ফলাফল = m3_Err_function_স্তূপ_Underrun;
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result PopType (IM3Compilation o, m3type_t i_type)
+স্থির
+M3_ফলাফল বের_করো_Type (IM3Compilation o, m3type_t i_type)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    m3type_t topType = GetStackTopType(o);
+    m3type_t শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
 
-    if (M3_LIKELY(IsSubTypeOf(topType, i_type) or o->block.isPolymorphic)) {
-_       (Pop(o));
-    } else {
+    যদি (M3_LIKELY(IsSubTypeOf(শীর্ষ_Type, i_type) or o->block.isPolymorphic)) {
+_       (বের_করো(o));
+    } অন্যথা {
         _throw(m3Err_typeMismatch);
     }
 
     _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result _PushAllocatedSlotAndEmit (IM3Compilation o, m3type_t i_type, bool i_doEmit)
+স্থির
+M3_ফলাফল ঠেলো_Allocated_Slot_And_Emit (IM3Compilation o, m3type_t i_type, bool i_doEmit)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     u16 slot = c_slotUnused;
 
 _   (AllocateSlots(o, &slot, i_type));
-_   (Push(o, i_type, slot));
+_   (ঠেলো(o, i_type, slot));
 
-    if (i_doEmit) {
+    যদি (i_doEmit) {
         EmitSlotOffset(o, slot);
     }
 
     //    printf ("push: %d\n", (u32) slot);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static inline
-M3Result PushAllocatedSlotAndEmit (IM3Compilation o, m3type_t i_type)
+স্থির অন্তঃরেখ
+M3_ফলাফল ঠেলো_Allocated_Slot_And_Emit_2 (IM3Compilation o, m3type_t i_type)
 {
-    return _PushAllocatedSlotAndEmit(o, i_type, true);
+    ফেরত ঠেলো_Allocated_Slot_And_Emit(o, i_type, true);
 }
 
-static inline
-M3Result PushAllocatedSlot (IM3Compilation o, m3type_t i_type)
+স্থির অন্তঃরেখ
+M3_ফলাফল ঠেলো_Allocated_Slot (IM3Compilation o, m3type_t i_type)
 {
-    return _PushAllocatedSlotAndEmit(o, i_type, false);
+    ফেরত ঠেলো_Allocated_Slot_And_Emit(o, i_type, false);
 }
 
-static
-M3Result PushConst (IM3Compilation o, u64 i_word, m3type_t i_type)
+স্থির
+M3_ফলাফল ঠেলো_Const (IM3Compilation o, u64 i_word, m3type_t i_type)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     // When compile-walking a constant expression without emitting there is no
     // constant table to place the value in, but the type still has to land on
     // the stack: extended-const arithmetic downstream consumes it.
-    if (M3_UNLIKELY(!o->page)) {
-        return PushAllocatedSlot(o, i_type);
+    যদি (M3_UNLIKELY(!o->page)) {
+        ফেরত ঠেলো_Allocated_Slot(o, i_type);
     }
 
     bool matchFound  = false;
     bool is64BitType = Is64BitType(i_type);
 
-    u16 numRequiredSlots  = GetTypeNumSlots(i_type);
-    u16 numUsedConstSlots = o->slotMaxConstIndex - o->slotFirstConstIndex;
+    u16 অঙ্ক_Required_Slots  = Get_Type_অঙ্ক_Slots(i_type);
+    u16 অঙ্ক_Used_Const_Slots = o->slot_Max_Const_সূচক - o->slot_First_Const_সূচক;
 
     // search for duplicate matching constant slot to reuse
-    if (numRequiredSlots == 2 and numUsedConstSlots >= 2) {
-        u16 firstConstSlot = o->slotFirstConstIndex;
+    যদি (অঙ্ক_Required_Slots == 2 and অঙ্ক_Used_Const_Slots >= 2) {
+        u16 firstConstSlot = o->slot_First_Const_সূচক;
         AlignSlotToType(&firstConstSlot, c_m3Type_i64);
 
-        for (u16 slot = firstConstSlot; slot < o->slotMaxConstIndex - 1; slot += 2) {
-            if (IsSlotAllocated(o, slot) and IsSlotAllocated(o, slot + 1)) {
+        জন্য (u16 slot = firstConstSlot; slot < o->slot_Max_Const_সূচক - 1; slot += 2) {
+            যদি (IsSlotAllocated(o, slot) and IsSlotAllocated(o, slot + 1)) {
                 u64 constant;
-                memcpy(&constant, &o->constants[slot - o->slotFirstConstIndex], sizeof(constant));
+                memcpy(&constant, &o->constants[slot - o->slot_First_Const_সূচক], আকার(constant));
 
-                if (constant == i_word) {
+                যদি (constant == i_word) {
                     matchFound = true;
-_                   (Push(o, i_type, slot));
-                    break;
+_                   (ঠেলো(o, i_type, slot));
+                    বিরতি;
                 }
             }
         }
-    } else if (numRequiredSlots == 1) {
-        for (u16 i = 0; i < numUsedConstSlots; ++i) {
-            u16 slot = o->slotFirstConstIndex + i;
+    } অন্যথা যদি (অঙ্ক_Required_Slots == 1) {
+        জন্য (u16 i = 0; i < অঙ্ক_Used_Const_Slots; ++i) {
+            u16 slot = o->slot_First_Const_সূচক + i;
 
-            if (IsSlotAllocated(o, slot)) {
+            যদি (IsSlotAllocated(o, slot)) {
                 bool matches;
-                if (is64BitType) {
+                যদি (is64BitType) {
                     u64 constant;
-                    memcpy(&constant, &o->constants[i], sizeof(constant));
+                    memcpy(&constant, &o->constants[i], আকার(constant));
                     matches = (constant == i_word);
-                } else {
+                } অন্যথা {
                     u32 constant;
-                    memcpy(&constant, &o->constants[i], sizeof(constant));
+                    memcpy(&constant, &o->constants[i], আকার(constant));
                     matches = (constant == i_word);
                 }
-                if (matches) {
+                যদি (matches) {
                     matchFound = true;
-_                   (Push(o, i_type, slot));
-                    break;
+_                   (ঠেলো(o, i_type, slot));
+                    বিরতি;
                 }
             }
         }
     }
 
-    if (not matchFound) {
+    যদি (not matchFound) {
         u16 slot = c_slotUnused;
-        result   = AllocateConstantSlots(o, &slot, i_type);
+        ফলাফল   = AllocateConstantSlots(o, &slot, i_type);
 
-        if (result || slot == c_slotUnused) // no more constant table space; use inline constants
+        যদি (ফলাফল || slot == c_slotUnused) // no more constant table space; use inline constants
         {
-            result = m3Err_none;
+            ফলাফল = m3Err_none;
 
-            if (is64BitType) {
+            যদি (is64BitType) {
 _               (EmitOp(o, op_Const64));
                 EmitWord64(o->page, i_word);
-            } else {
+            } অন্যথা {
 _               (EmitOp(o, op_Const32));
                 EmitWord32(o->page, (u32)i_word);
             }
 
-_           (PushAllocatedSlotAndEmit(o, i_type));
-        } else {
-            u16 constTableIndex = slot - o->slotFirstConstIndex;
+_           (ঠেলো_Allocated_Slot_And_Emit_2(o, i_type));
+        } অন্যথা {
+            u16 const_Table_সূচক = slot - o->slot_First_Const_সূচক;
 
-            d_m3Assert(constTableIndex < d_m3MaxConstantTableSize);
+            d_m3Assert(const_Table_সূচক < d_m3_Max_Constant_Table_আকার);
 
-            if (is64BitType) {
-                memcpy(&o->constants[constTableIndex], &i_word, sizeof(i_word));
-            } else {
+            যদি (is64BitType) {
+                memcpy(&o->constants[const_Table_সূচক], &i_word, আকার(i_word));
+            } অন্যথা {
                 u32 word32 = (u32)i_word;
-                memcpy(&o->constants[constTableIndex], &word32, sizeof(word32));
+                memcpy(&o->constants[const_Table_সূচক], &word32, আকার(word32));
             }
 
-_           (Push(o, i_type, slot));
+_           (ঠেলো(o, i_type, slot));
 
-            o->slotMaxConstIndex = M3_MAX(slot + numRequiredSlots, o->slotMaxConstIndex);
+            o->slot_Max_Const_সূচক = M3_MAX(slot + অঙ্ক_Required_Slots, o->slot_Max_Const_সূচক);
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static inline
-M3Result EmitSlotNumOfStackTopAndPop (IM3Compilation o)
+স্থির অন্তঃরেখ
+M3_ফলাফল Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো (IM3Compilation o)
 {
     // no emit if value is in register
-    if (IsStackTopInSlot(o)) {
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+    যদি (Is_স্তূপ_শীর্ষ_In_Slot(o)) {
+        EmitSlotOffset(o, Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o));
     }
 
-    return Pop(o);
+    ফেরত বের_করো(o);
 }
 
 
 // Or, maybe: EmitTrappingOp
-M3Result AddTrapRecord (IM3Compilation o)
+M3_ফলাফল AddTrapRecord (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (o->function) {
+    যদি (o->function) {
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result UnwindBlockStack (IM3Compilation o)
+স্থির
+M3_ফলাফল Unwind_Block_স্তূপ (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u32 popCount = 0;
-    while (o->stackIndex > o->block.blockStackIndex) {
-_       (Pop(o));
-        ++popCount;
+    u32 বের_করো_গুনতি = 0;
+    যখন (o->স্তূপ_সূচক > o->block.block_স্তূপ_সূচক) {
+_       (বের_করো(o));
+        ++বের_করো_গুনতি;
     }
 
-    if (popCount) {
-        m3log(compile, "unwound stack top: %d", popCount);
+    যদি (বের_করো_গুনতি) {
+        m3log(compile, "unwound stack top: %d", বের_করো_গুনতি);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static inline
-M3Result SetStackPolymorphic (IM3Compilation o)
+স্থির অন্তঃরেখ
+M3_ফলাফল Set_স্তূপ_Polymorphic (IM3Compilation o)
 {
     o->block.isPolymorphic = true;                              m3log (compile, "stack set polymorphic");
-    return UnwindBlockStack(o);
+    ফেরত Unwind_Block_স্তূপ(o);
 }
 
-static
-void PatchBranches (IM3Compilation o)
+স্থির
+শূন্য PatchBranches (IM3Compilation o)
 {
     InvalidateFold(o);         // patched branches land at the current pc
 
     pc_t pc = GetPC(o);
 
     pc_t patches     = o->block.patches;
-    o->block.patches = NULL;
+    o->block.patches = ফাঁকা;
 
-    while (patches) {                                           m3log (compile, "patching location: %p to pc: %p", patches, pc);
-        pc_t next       = *(pc_t*)patches;
+    যখন (patches) {                                           m3log (compile, "patching location: %p to pc: %p", patches, pc);
+        pc_t পরবর্তী       = *(pc_t*)patches;
         *(pc_t*)patches = pc;
-        patches         = next;
+        patches         = পরবর্তী;
     }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------
 
-static
-M3Result CopyStackIndexToSlot (IM3Compilation o, u16 i_destSlot, u16 i_stackIndex)  // NoPushPop
+স্থির
+M3_ফলাফল Copy_স্তূপ_সূচক_To_Slot (IM3Compilation o, u16 i_destSlot, u16 i_স্তূপ_সূচক)  // NoPushPop
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     IM3Operation op;
 
-    m3type_t type       = GetStackTypeFromBottom(o, i_stackIndex);
-    bool     inRegister = IsStackIndexInRegister(o, i_stackIndex);
+    m3type_t type       = Get_স্তূপ_Type_From_Bottom(o, i_স্তূপ_সূচক);
+    bool     inRegister = Is_স্তূপ_সূচক_In_Register(o, i_স্তূপ_সূচক);
 
-    if (inRegister) {
+    যদি (inRegister) {
         op = c_setSetOps[BaseTypeOf(type)];
-    } else {
+    } অন্যথা {
         op = Is64BitType(type) ? op_CopySlot_64 : op_CopySlot_32;
     }
 
 _   (EmitOp(o, op));
     EmitSlotOffset(o, i_destSlot);
 
-    if (not inRegister) {
-        u16 srcSlot = GetSlotForStackIndex(o, i_stackIndex);
+    যদি (not inRegister) {
+        u16 srcSlot = Get_Slot_For_স্তূপ_সূচক(o, i_স্তূপ_সূচক);
         EmitSlotOffset(o, srcSlot);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result CopyStackTopToSlot (IM3Compilation o, u16 i_destSlot)  // NoPushPop
+স্থির
+M3_ফলাফল Copy_স্তূপ_শীর্ষ_To_Slot (IM3Compilation o, u16 i_destSlot)  // NoPushPop
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    i16 stackTop;
-_   (GetStackTopIndexThrows(o, &stackTop));
-_   (CopyStackIndexToSlot(o, i_destSlot, (u16)stackTop));
+    i16 স্তূপ_শীর্ষ;
+_   (Get_স্তূপ_শীর্ষ_সূচক_Throws(o, &স্তূপ_শীর্ষ));
+_   (Copy_স্তূপ_সূচক_To_Slot(o, i_destSlot, (u16)স্তূপ_শীর্ষ));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
@@ -1466,108 +1466,108 @@ _   (CopyStackIndexToSlot(o, i_destSlot, (u16)stackTop));
 // TODO: consider getting rid of these specialized operations: PreserveSetSlot & PreserveCopySlot.
 // They likely just take up space (which seems to reduce performance) without improving performance.
 // => unconfirmed in preliminary testing.
-static
-M3Result PreservedCopyTopSlot (IM3Compilation o, u16 i_destSlot, u16 i_preserveSlot)
+স্থির
+M3_ফলাফল Preserved_Copy_শীর্ষ_Slot (IM3Compilation o, u16 i_destSlot, u16 i_preserveSlot)
 {
-    M3Result result = m3Err_none;             d_m3Assert (i_destSlot != i_preserveSlot);
+    M3_ফলাফল ফলাফল = m3Err_none;             d_m3Assert (i_destSlot != i_preserveSlot);
 
     IM3Operation op;
 
-    m3type_t type = GetStackTopType(o);
+    m3type_t type = Get_স্তূপ_শীর্ষ_Type(o);
 
-    if (IsStackTopInRegister(o)) {
+    যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
         op = c_preserveSetSlot[BaseTypeOf(type)];
-    } else {
+    } অন্যথা {
         op = Is64BitType(type) ? op_PreserveCopySlot_64 : op_PreserveCopySlot_32;
     }
 
 _   (EmitOp(o, op));
     EmitSlotOffset(o, i_destSlot);
 
-    if (IsStackTopInSlot(o)) {
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+    যদি (Is_স্তূপ_শীর্ষ_In_Slot(o)) {
+        EmitSlotOffset(o, Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o));
     }
 
     EmitSlotOffset(o, i_preserveSlot);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result CopyStackTopToRegister (IM3Compilation o, bool i_updateStack)
+স্থির
+M3_ফলাফল Copy_স্তূপ_শীর্ষ_To_Register (IM3Compilation o, bool i_update_স্তূপ)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (IsStackTopInSlot(o)) {
-        m3type_t type = GetStackTopType(o);
+    যদি (Is_স্তূপ_শীর্ষ_In_Slot(o)) {
+        m3type_t type = Get_স্তূপ_শীর্ষ_Type(o);
 
 _       (PreserveRegisterIfOccupied(o, type));
 
         IM3Operation op = c_setRegisterOps[BaseTypeOf(type)];
 
 _       (EmitOp(o, op));
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+        EmitSlotOffset(o, Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o));
 
-        if (i_updateStack) {
-_           (PopType(o, type));
-_           (PushRegister(o, type));
+        যদি (i_update_স্তূপ) {
+_           (বের_করো_Type(o, type));
+_           (ঠেলো_Register(o, type));
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 // if local is unreferenced, o_preservedSlotNumber will be equal to localIndex on return
-static
-M3Result FindReferencedLocalWithinCurrentBlock (IM3Compilation o, u16* o_preservedSlotNumber, u32 i_localSlot)
+স্থির
+M3_ফলাফল FindReferencedLocalWithinCurrentBlock (IM3Compilation o, u16* o_preserved_Slot_সংখ্যা, u32 i_localSlot)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     IM3CompilationScope scope = &o->block;
 
-    u16 startIndex = scope->blockStackIndex;
+    u16 start_সূচক = scope->block_স্তূপ_সূচক;
 
-    while (scope->opcode == c_waOp_block) {
+    যখন (scope->opcode == c_waOp_block) {
         scope = scope->outer;
-        if (not scope) {
-            break;
+        যদি (not scope) {
+            বিরতি;
         }
 
-        startIndex = scope->blockStackIndex;
+        start_সূচক = scope->block_স্তূপ_সূচক;
     }
 
-    *o_preservedSlotNumber = (u16)i_localSlot;
+    *o_preserved_Slot_সংখ্যা = (u16)i_localSlot;
 
-    for (u32 i = startIndex; i < o->stackIndex; ++i) {
-        if (o->wasmStack[i] == i_localSlot) {
-            m3type_t type = GetStackTypeFromBottom(o, i);                         d_m3Assert (type != c_m3Type_none)
+    জন্য (u32 i = start_সূচক; i < o->স্তূপ_সূচক; ++i) {
+        যদি (o->wasm_স্তূপ[i] == i_localSlot) {
+            m3type_t type = Get_স্তূপ_Type_From_Bottom(o, i);                         d_m3Assert (type != c_m3Type_none)
 
-            if (*o_preservedSlotNumber == i_localSlot) {
-_               (AllocateSlots(o, o_preservedSlotNumber, type));
-            } else {
+            যদি (*o_preserved_Slot_সংখ্যা == i_localSlot) {
+_               (AllocateSlots(o, o_preserved_Slot_সংখ্যা, type));
+            } অন্যথা {
                 // A 64-bit value spans two slots, and allocating or releasing it
                 // counts both, so a second reference has to count both as well.
-                for (u16 s = 0; s < GetTypeNumSlots(type); ++s) {
-_                   (IncrementSlotUsageCount(o, (u16)(*o_preservedSlotNumber + s)));
+                জন্য (u16 s = 0; s < Get_Type_অঙ্ক_Slots(type); ++s) {
+_                   (Increment_Slot_Usage_গুনতি(o, (u16)(*o_preserved_Slot_সংখ্যা + s)));
                 }
             }
 
-            o->wasmStack[i] = *o_preservedSlotNumber;
+            o->wasm_স্তূপ[i] = *o_preserved_Slot_সংখ্যা;
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result GetBlockScope (IM3Compilation o, IM3CompilationScope* o_scope, u32 i_depth)
+স্থির
+M3_ফলাফল GetBlockScope (IM3Compilation o, IM3CompilationScope* o_scope, u32 i_depth)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     IM3CompilationScope scope = &o->block;
 
-    while (i_depth--) {
+    যখন (i_depth--) {
         scope = scope->outer;
         _throwif("invalid block depth", not scope);
     }
@@ -1575,232 +1575,232 @@ M3Result GetBlockScope (IM3Compilation o, IM3CompilationScope* o_scope, u32 i_de
     *o_scope = scope;
 
     _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result CopyStackSlotsR (IM3Compilation o, u16 i_targetSlotStackIndex, u16 i_stackIndex, u16 i_endStackIndex, u16 i_tempSlot)
+স্থির
+M3_ফলাফল Copy_স্তূপ_Slots_R (IM3Compilation o, u16 i_target_Slot_স্তূপ_সূচক, u16 i_স্তূপ_সূচক, u16 i_end_স্তূপ_সূচক, u16 i_অস্থায়ী_Slot)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (i_stackIndex < i_endStackIndex) {
-        u16 srcSlot = GetSlotForStackIndex(o, i_stackIndex);
+    যদি (i_স্তূপ_সূচক < i_end_স্তূপ_সূচক) {
+        u16 srcSlot = Get_Slot_For_স্তূপ_সূচক(o, i_স্তূপ_সূচক);
 
-        m3type_t type      = GetStackTypeFromBottom(o, i_stackIndex);
-        u16      numSlots  = GetTypeNumSlots(type);
-        u16      extraSlot = numSlots - 1;
+        m3type_t type      = Get_স্তূপ_Type_From_Bottom(o, i_স্তূপ_সূচক);
+        u16      অঙ্ক_Slots  = Get_Type_অঙ্ক_Slots(type);
+        u16      extraSlot = অঙ্ক_Slots - 1;
 
-        u16 targetSlot = GetSlotForStackIndex(o, i_targetSlotStackIndex);
+        u16 targetSlot = Get_Slot_For_স্তূপ_সূচক(o, i_target_Slot_স্তূপ_সূচক);
 
-        u16 preserveIndex = i_stackIndex;
+        u16 preserve_সূচক = i_স্তূপ_সূচক;
         u16 collisionSlot = srcSlot;
 
-        if (targetSlot != srcSlot) {
+        যদি (targetSlot != srcSlot) {
             // search for collisions
-            u16 checkIndex = i_stackIndex + 1;
-            while (checkIndex < i_endStackIndex) {
-                u16 otherSlot1 = GetSlotForStackIndex(o, checkIndex);
-                u16 otherSlot2 = GetExtraSlotForStackIndex(o, checkIndex);
+            u16 check_সূচক = i_স্তূপ_সূচক + 1;
+            যখন (check_সূচক < i_end_স্তূপ_সূচক) {
+                u16 otherSlot1 = Get_Slot_For_স্তূপ_সূচক(o, check_সূচক);
+                u16 otherSlot2 = Get_Extra_Slot_For_স্তূপ_সূচক(o, check_সূচক);
 
-                if (targetSlot == otherSlot1 or
+                যদি (targetSlot == otherSlot1 or
                     targetSlot == otherSlot2 or
                     targetSlot + extraSlot == otherSlot1) {
-                    _throwif(m3Err_functionStackOverflow, i_tempSlot >= d_m3MaxFunctionSlots);
+                    _throwif(m3_Err_function_স্তূপ_Overflow, i_অস্থায়ী_Slot >= d_m3MaxFunctionSlots);
 
-_                   (CopyStackIndexToSlot(o, i_tempSlot, checkIndex));
-                    o->wasmStack[checkIndex] = i_tempSlot;
-                    i_tempSlot += GetTypeNumSlots(c_m3Type_i64);
-                    TouchSlot(o, i_tempSlot - 1);
+_                   (Copy_স্তূপ_সূচক_To_Slot(o, i_অস্থায়ী_Slot, check_সূচক));
+                    o->wasm_স্তূপ[check_সূচক] = i_অস্থায়ী_Slot;
+                    i_অস্থায়ী_Slot += Get_Type_অঙ্ক_Slots(c_m3Type_i64);
+                    TouchSlot(o, i_অস্থায়ী_Slot - 1);
 
                     // restore this on the way back down
-                    preserveIndex = checkIndex;
+                    preserve_সূচক = check_সূচক;
                     collisionSlot = otherSlot1;
 
-                    break;
+                    বিরতি;
                 }
 
-                ++checkIndex;
+                ++check_সূচক;
             }
 
-_           (CopyStackIndexToSlot(o, targetSlot, i_stackIndex));                                                m3log (compile, " copying slot: %d to slot: %d", srcSlot, targetSlot);
-            o->wasmStack[i_stackIndex] = targetSlot;
+_           (Copy_স্তূপ_সূচক_To_Slot(o, targetSlot, i_স্তূপ_সূচক));                                                m3log (compile, " copying slot: %d to slot: %d", srcSlot, targetSlot);
+            o->wasm_স্তূপ[i_স্তূপ_সূচক] = targetSlot;
         }
 
-_       (CopyStackSlotsR(o, i_targetSlotStackIndex + 1, i_stackIndex + 1, i_endStackIndex, i_tempSlot));
+_       (Copy_স্তূপ_Slots_R(o, i_target_Slot_স্তূপ_সূচক + 1, i_স্তূপ_সূচক + 1, i_end_স্তূপ_সূচক, i_অস্থায়ী_Slot));
 
         // restore the stack state
-        o->wasmStack[i_stackIndex]  = srcSlot;
-        o->wasmStack[preserveIndex] = collisionSlot;
+        o->wasm_স্তূপ[i_স্তূপ_সূচক]  = srcSlot;
+        o->wasm_স্তূপ[preserve_সূচক] = collisionSlot;
     }
 
     _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result ResolveBlockResults (IM3Compilation o, IM3CompilationScope i_targetBlock, bool i_isBranch)
+স্থির
+M3_ফলাফল ResolveBlockResults (IM3Compilation o, IM3CompilationScope i_targetBlock, bool i_isBranch)
 {
-    M3Result result = m3Err_none;
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    M3_ফলাফল ফলাফল = m3Err_none;
+    যদি (d_m3_Log_Wasm_স্তূপ) {
+        dump_type_স্তূপ(o);
     }
 
     bool isLoop = (i_targetBlock->opcode == c_waOp_loop and i_isBranch);
 
-    u16 numParams  = GetFuncTypeNumParams(i_targetBlock->type);
-    u16 numResults = GetFuncTypeNumResults(i_targetBlock->type);
+    u16 অঙ্ক_Params  = Get_Func_Type_অঙ্ক_Params(i_targetBlock->type);
+    u16 অঙ্ক_Results = Get_Func_Type_অঙ্ক_Results(i_targetBlock->type);
 
-    u16 slotRecords = i_targetBlock->exitStackIndex;
+    u16 slotRecords = i_targetBlock->exit_স্তূপ_সূচক;
 
-    u16 numValues;
+    u16 অঙ্ক_মানসমূহ;
 
-    if (not isLoop) {
-        numValues = numResults;
-        slotRecords += numParams;
-    } else {
-        numValues = numParams;
+    যদি (not isLoop) {
+        অঙ্ক_মানসমূহ = অঙ্ক_Results;
+        slotRecords += অঙ্ক_Params;
+    } অন্যথা {
+        অঙ্ক_মানসমূহ = অঙ্ক_Params;
     }
 
-    u16 blockHeight = GetNumBlockValuesOnStack(o);
+    u16 blockHeight = Get_অঙ্ক_Block_মানসমূহ_On_স্তূপ(o);
 
-    _throwif(m3Err_typeCountMismatch, i_isBranch ? (blockHeight < numValues) : (blockHeight != numValues));
+    _throwif(m3_Err_type_গুনতি_Mismatch, i_isBranch ? (blockHeight < অঙ্ক_মানসমূহ) : (blockHeight != অঙ্ক_মানসমূহ));
 
-    if (numValues) {
-        u16 endIndex     = GetStackTopIndex(o) + 1;
-        u16 numRemValues = numValues;
+    যদি (অঙ্ক_মানসমূহ) {
+        u16 end_সূচক     = Get_স্তূপ_শীর্ষ_সূচক(o) + 1;
+        u16 অঙ্ক_Rem_মানসমূহ = অঙ্ক_মানসমূহ;
 
         // The last result is taken from _fp0. See PushBlockResults.
-        if (not isLoop and IsFpType(GetStackTopType(o))) {
-_           (CopyStackTopToRegister(o, false));
-            --endIndex;
-            --numRemValues;
+        যদি (not isLoop and IsFpType(Get_স্তূপ_শীর্ষ_Type(o))) {
+_           (Copy_স্তূপ_শীর্ষ_To_Register(o, false));
+            --end_সূচক;
+            --অঙ্ক_Rem_মানসমূহ;
         }
 
         // tempslot affects maxStackSlots, so can grow unnecess each time.
         // in practice, this is hardly ever hit.
-        u16 tempSlot = o->maxStackSlots;// GetMaxUsedSlotPlusOne (o); doesn't work cause can collide with slotRecords
-        AlignSlotToType(&tempSlot, c_m3Type_i64);
+        u16 অস্থায়ী_Slot = o->max_স্তূপ_Slots;// GetMaxUsedSlotPlusOne (o); doesn't work cause can collide with slotRecords
+        AlignSlotToType(&অস্থায়ী_Slot, c_m3Type_i64);
 
-_       (CopyStackSlotsR(o, slotRecords, endIndex - numRemValues, endIndex, tempSlot));
+_       (Copy_স্তূপ_Slots_R(o, slotRecords, end_সূচক - অঙ্ক_Rem_মানসমূহ, end_সূচক, অস্থায়ী_Slot));
 
-        if (d_m3LogWasmStack) {
-            dump_type_stack(o);
+        যদি (d_m3_Log_Wasm_স্তূপ) {
+            dump_type_স্তূপ(o);
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-static
-M3Result ReturnValues (IM3Compilation o, IM3CompilationScope i_functionBlock, bool i_isBranch)
+স্থির
+M3_ফলাফল Return_মানসমূহ (IM3Compilation o, IM3CompilationScope i_functionBlock, bool i_isBranch)
 {
-    M3Result result = m3Err_none;
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    M3_ফলাফল ফলাফল = m3Err_none;
+    যদি (d_m3_Log_Wasm_স্তূপ) {
+        dump_type_স্তূপ(o);
     }
 
-    u16 numReturns  = GetFuncTypeNumResults(i_functionBlock->type);     // could just o->function too...
-    u16 blockHeight = GetNumBlockValuesOnStack(o);
+    u16 অঙ্ক_Returns  = Get_Func_Type_অঙ্ক_Results(i_functionBlock->type);     // could just o->function too...
+    u16 blockHeight = Get_অঙ্ক_Block_মানসমূহ_On_স্তূপ(o);
 
-    if (not IsStackPolymorphic(o)) {
-        _throwif(m3Err_typeCountMismatch, i_isBranch ? (blockHeight < numReturns) : (blockHeight != numReturns));
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
+        _throwif(m3_Err_type_গুনতি_Mismatch, i_isBranch ? (blockHeight < অঙ্ক_Returns) : (blockHeight != অঙ্ক_Returns));
     }
 
-    if (numReturns) {
+    যদি (অঙ্ক_Returns) {
         // return slots like args are 64-bit aligned
-        u16 returnSlot = numReturns * c_ioSlotCount;
-        u16 stackTop   = GetStackTopIndex(o);
+        u16 returnSlot = অঙ্ক_Returns * c_io_Slot_গুনতি;
+        u16 স্তূপ_শীর্ষ   = Get_স্তূপ_শীর্ষ_সূচক(o);
 
-        for (u16 i = 0; i < numReturns; ++i) {
-            m3type_t returnType = GetFuncTypeResultType(i_functionBlock->type, numReturns - 1 - i);
+        জন্য (u16 i = 0; i < অঙ্ক_Returns; ++i) {
+            m3type_t returnType = Get_Func_Type_ফলাফল_Type(i_functionBlock->type, অঙ্ক_Returns - 1 - i);
 
-            m3type_t stackType = GetStackTypeFromTop(o, i);  // using FromTop so that only dynamic items are checked
+            m3type_t স্তূপ_Type = Get_স্তূপ_Type_From_শীর্ষ(o, i);  // using FromTop so that only dynamic items are checked
 
-            if (IsStackPolymorphic(o) and stackType == c_m3Type_none) {
-                stackType = returnType;
+            যদি (Is_স্তূপ_Polymorphic(o) and স্তূপ_Type == c_m3Type_none) {
+                স্তূপ_Type = returnType;
             }
 
-            _throwif(m3Err_typeMismatch, not IsSubTypeOf(stackType, returnType));
+            _throwif(m3Err_typeMismatch, not IsSubTypeOf(স্তূপ_Type, returnType));
 
-            if (not IsStackPolymorphic(o)) {
-                returnSlot -= c_ioSlotCount;
-_               (CopyStackIndexToSlot(o, returnSlot, stackTop--));
+            যদি (not Is_স্তূপ_Polymorphic(o)) {
+                returnSlot -= c_io_Slot_গুনতি;
+_               (Copy_স্তূপ_সূচক_To_Slot(o, returnSlot, স্তূপ_শীর্ষ--));
             }
         }
 
-        if (not i_isBranch) {
-            while (numReturns--) {
-_               (Pop(o));
+        যদি (not i_isBranch) {
+            যখন (অঙ্ক_Returns--) {
+_               (বের_করো(o));
             }
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 //-------------------------------------------------------------------------------------------------------------------------
 
-static
-M3Result Compile_Const_i32 (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Const_i32 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    i32 value;
-_   (ReadLEB_i32(&value, &o->wasm, o->wasmEnd));
-_   (PushConst(o, value, c_m3Type_i32));                        m3log (compile, d_indent " (const i32 = %" PRIi32 ")", get_indention_string (o), value);
-    _catch: return result;
+    i32 মান;
+_   (ReadLEB_i32(&মান, &o->wasm, o->wasmEnd));
+_   (ঠেলো_Const(o, মান, c_m3Type_i32));                        m3log (compile, d_indent " (const i32 = %" PRIi32 ")", get_indention_string (o), মান);
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Const_i64 (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Const_i64 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    i64 value;
-_   (ReadLEB_i64(&value, &o->wasm, o->wasmEnd));
-_   (PushConst(o, value, c_m3Type_i64));                        m3log (compile, d_indent " (const i64 = %" PRIi64 ")", get_indention_string (o), value);
-    _catch: return result;
+    i64 মান;
+_   (ReadLEB_i64(&মান, &o->wasm, o->wasmEnd));
+_   (ঠেলো_Const(o, মান, c_m3Type_i64));                        m3log (compile, d_indent " (const i64 = %" PRIi64 ")", get_indention_string (o), মান);
+    _catch: ফেরত ফলাফল;
 }
 
 
-#if d_m3ImplementFloat
-static
-M3Result Compile_Const_f32 (IM3Compilation o, m3opcode_t i_opcode)
+#যদি d_m3ImplementFloat
+স্থির
+M3_ফলাফল Compile_Const_f32 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    union {
+    সংঘ {
         u32 u;
         f32 f;
-    } value = { 0 };
+    } মান = { 0 };
 
-_   (Read_f32(&value.f, &o->wasm, o->wasmEnd));                 m3log (compile, d_indent " (const f32 = %" PRIf32 ")", get_indention_string (o), value.f);
-_   (PushConst(o, value.u, c_m3Type_f32));
+_   (Read_f32(&মান.f, &o->wasm, o->wasmEnd));                 m3log (compile, d_indent " (const f32 = %" PRIf32 ")", get_indention_string (o), মান.f);
+_   (ঠেলো_Const(o, মান.u, c_m3Type_f32));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Const_f64 (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Const_f64 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    union {
+    সংঘ {
         u64 u;
         f64 f;
-    } value = { 0 };
+    } মান = { 0 };
 
-_   (Read_f64(&value.f, &o->wasm, o->wasmEnd));                 m3log (compile, d_indent " (const f64 = %" PRIf64 ")", get_indention_string (o), value.f);
-_   (PushConst(o, value.u, c_m3Type_f64));
+_   (Read_f64(&মান.f, &o->wasm, o->wasmEnd));                 m3log (compile, d_indent " (const f64 = %" PRIf64 ")", get_indention_string (o), মান.f);
+_   (ঠেলো_Const(o, মান.u, c_m3Type_f64));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 #endif
 
-static
-M3Result Compile_ExtendedOpcode (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_ExtendedOpcode (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     u32 opcode;
@@ -1824,58 +1824,58 @@ _   ((*compiler)(o, i_opcode));
 
     o->previousOpcode = i_opcode;
 
-    } _catch: return result;
+    } _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Return (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Return (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
         IM3CompilationScope functionScope;
 _       (GetBlockScope(o, &functionScope, o->block.depth));
 
-_       (ReturnValues(o, functionScope, true));
+_       (Return_মানসমূহ(o, functionScope, true));
 
 _       (EmitOp(o, op_Return));
 
-_       (SetStackPolymorphic(o));
+_       (Set_স্তূপ_Polymorphic(o));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result ValidateBlockEnd (IM3Compilation o)
+স্থির
+M3_ফলাফল ValidateBlockEnd (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u16 numResults  = GetFuncTypeNumResults(o->block.type);
-    u16 blockHeight = GetNumBlockValuesOnStack(o);
+    u16 অঙ্ক_Results  = Get_Func_Type_অঙ্ক_Results(o->block.type);
+    u16 blockHeight = Get_অঙ্ক_Block_মানসমূহ_On_স্তূপ(o);
 
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
         // Spec: at block end, stack height must match the number of results
-        _throwif(m3Err_typeCountMismatch, blockHeight != numResults);
+        _throwif(m3_Err_type_গুনতি_Mismatch, blockHeight != অঙ্ক_Results);
 
         // Spec: result types must match expected types
-        for (u16 i = 0; i < numResults; ++i) {
-            m3type_t expectedType = GetFuncTypeResultType(o->block.type, numResults - 1 - i);
-            m3type_t actualType   = GetStackTypeFromTop(o, i);
+        জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+            m3type_t expectedType = Get_Func_Type_ফলাফল_Type(o->block.type, অঙ্ক_Results - 1 - i);
+            m3type_t actualType   = Get_স্তূপ_Type_From_শীর্ষ(o, i);
             _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_End (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_End (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;                   //dump_type_stack (o);
+    M3_ফলাফল ফলাফল = m3Err_none;                   //dump_type_stack (o);
 
     // function end:
-    if (o->block.depth == 0) {
+    যদি (o->block.depth == 0) {
         ValidateBlockEnd(o);
 
         //      if (not IsStackPolymorphic (o))
@@ -1884,55 +1884,55 @@ M3Result Compile_End (IM3Compilation o, m3opcode_t i_opcode)
             // has to be copied down to slot 0, where EvaluateExpression reads it
             // back. The non-emitting init-expr walk is skipped: it has no block
             // type to return against.
-            if (o->function or o->page) {
-_               (ReturnValues(o, &o->block, false));
+            যদি (o->function or o->page) {
+_               (Return_মানসমূহ(o, &o->block, false));
             }
 
 _           (EmitOp(o, op_Return));
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-static
-M3Result Compile_SetLocal (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_SetLocal (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    u32 localIndex;
-_   (ReadLEB_u32(&localIndex, &o->wasm, o->wasmEnd));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), localIndex);
+    u32 local_সূচক;
+_   (ReadLEB_u32(&local_সূচক, &o->wasm, o->wasmEnd));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), local_সূচক);
 
-    if (localIndex < GetFunctionNumArgsAndLocals(o->function)) {
+    যদি (local_সূচক < Get_Function_অঙ্ক_Args_And_Locals(o->function)) {
         // Spec: value type must match local type
-        if (not IsStackPolymorphic(o)) {
-            m3type_t localType    = GetStackTypeFromBottom(o, localIndex);
-            m3type_t stackTopType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, stackTopType != c_m3Type_none and localType != c_m3Type_none and
-                                           not IsSubTypeOf(stackTopType, localType));
-#if d_m3HasSnapshots
-            if (o->localInitDepth and o->localInitDepth[localIndex] == UINT32_MAX) {
-                o->localInitDepth[localIndex] = (u32)o->block.depth;
+        যদি (not Is_স্তূপ_Polymorphic(o)) {
+            m3type_t localType    = Get_স্তূপ_Type_From_Bottom(o, local_সূচক);
+            m3type_t স্তূপ_শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
+            _throwif(m3Err_typeMismatch, স্তূপ_শীর্ষ_Type != c_m3Type_none and localType != c_m3Type_none and
+                                           not IsSubTypeOf(স্তূপ_শীর্ষ_Type, localType));
+#যদি d_m3HasSnapshots
+            যদি (o->localInitDepth and o->localInitDepth[local_সূচক] == UINT32_MAX) {
+                o->localInitDepth[local_সূচক] = (u32)o->block.depth;
             }
 #endif
         }
 
-        u16 localSlot = GetSlotForStackIndex(o, localIndex);
+        u16 localSlot = Get_Slot_For_স্তূপ_সূচক(o, local_সূচক);
 
         u16 preserveSlot;
 _       (FindReferencedLocalWithinCurrentBlock(o, &preserveSlot, localSlot));  // preserve will be different than local, if referenced
 
         bool folded = false;
 
-#if d_m3FoldSetLocal
+#যদি d_m3FoldSetLocal
         // destination folding: when the value was produced by the immediately preceding op (nothing
         // emitted since, result on top in _r0, no copy-on-write preservation needed), retro-patch the
         // producer to a variant that writes straight to the local's slot and skip the SetSlot op
-        if (o->foldPatchPC and preserveSlot == localSlot and IsStackTopInRegister(o) and GetStackTopIndex(o) == (i16)o->foldStackIndex) {
+        যদি (o->foldPatchPC and preserveSlot == localSlot and Is_স্তূপ_শীর্ষ_In_Register(o) and Get_স্তূপ_শীর্ষ_সূচক(o) == (i16)o->fold_স্তূপ_সূচক) {
             IM3Operation foldOp = GetFoldOp(o->foldOpcode, o->foldForm);
 
-            if (foldOp) {
+            যদি (foldOp) {
                 *(IM3Operation*)o->foldPatchPC = foldOp;     // retro-patch the producer
                 EmitSlotOffset(o, localSlot);                  // append its destination
                 InvalidateFold(o);
@@ -1941,160 +1941,160 @@ _       (FindReferencedLocalWithinCurrentBlock(o, &preserveSlot, localSlot));  /
         }
 #endif
 
-        if (folded) {
-            m3type_t type = GetStackTopType(o);
-_           (Pop(o));                              // the value now lives in the local's slot
+        যদি (folded) {
+            m3type_t type = Get_স্তূপ_শীর্ষ_Type(o);
+_           (বের_করো(o));                              // the value now lives in the local's slot
 
             // A folded op writes its result through to the register as well, so a tee
             // can keep it there. Pushing the slot instead would make the next use that
             // wants a register reload the slot this op just stored to.
-            if (i_opcode == c_waOp_teeLocal) {
-_               (PushRegister(o, type));
+            যদি (i_opcode == c_waOp_teeLocal) {
+_               (ঠেলো_Register(o, type));
             }
-        } else {
-            if (preserveSlot == localSlot) {
-_               (CopyStackTopToSlot(o, localSlot))
-            } else {
-_               (PreservedCopyTopSlot(o, localSlot, preserveSlot))
+        } অন্যথা {
+            যদি (preserveSlot == localSlot) {
+_               (Copy_স্তূপ_শীর্ষ_To_Slot(o, localSlot))
+            } অন্যথা {
+_               (Preserved_Copy_শীর্ষ_Slot(o, localSlot, preserveSlot))
             }
 
-            if (i_opcode != c_waOp_teeLocal) {
-_               (Pop(o));
+            যদি (i_opcode != c_waOp_teeLocal) {
+_               (বের_করো(o));
             }
         }
-    } else {
+    } অন্যথা {
         _throw("local index out of bounds");
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_GetLocal (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_GetLocal (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
 
-    u32 localIndex;
-_   (ReadLEB_u32(&localIndex, &o->wasm, o->wasmEnd));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), localIndex);
+    u32 local_সূচক;
+_   (ReadLEB_u32(&local_সূচক, &o->wasm, o->wasmEnd));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), local_সূচক);
 
-    if (localIndex >= GetFunctionNumArgsAndLocals(o->function)) {
+    যদি (local_সূচক >= Get_Function_অঙ্ক_Args_And_Locals(o->function)) {
         _throw("local index out of bounds");
     }
 
-    m3type_t type = GetStackTypeFromBottom(o, localIndex);
-    u16      slot = GetSlotForStackIndex(o, localIndex);
+    m3type_t type = Get_স্তূপ_Type_From_Bottom(o, local_সূচক);
+    u16      slot = Get_Slot_For_স্তূপ_সূচক(o, local_সূচক);
 
-_   (Push(o, type, slot));
+_   (ঠেলো(o, type, slot));
 
-    } _catch: return result;
+    } _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_GetGlobal (IM3Compilation o, M3Global* i_global)
+স্থির
+M3_ফলাফল Compile_GetGlobal (IM3Compilation o, M3Global* i_global)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
     IM3Operation op = Is64BitType(i_global->type) ? op_GetGlobal_s64 : op_GetGlobal_s32;
 _   (EmitOp(o, op));
-    EmitPointer(o, &i_global->i64Value);
-_   (PushAllocatedSlotAndEmit(o, i_global->type));
+    EmitPointer(o, &i_global->i64_মান);
+_   (ঠেলো_Allocated_Slot_And_Emit_2(o, i_global->type));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_SetGlobal (IM3Compilation o, M3Global* i_global)
+স্থির
+M3_ফলাফল Compile_SetGlobal (IM3Compilation o, M3Global* i_global)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (i_global->isMutable) {
+    যদি (i_global->isMutable) {
         // Spec: value type must match global type
-        if (not IsStackPolymorphic(o)) {
-            m3type_t stackTopType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, stackTopType != c_m3Type_none and
-                                           not IsSubTypeOf(stackTopType, i_global->type));
+        যদি (not Is_স্তূপ_Polymorphic(o)) {
+            m3type_t স্তূপ_শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
+            _throwif(m3Err_typeMismatch, স্তূপ_শীর্ষ_Type != c_m3Type_none and
+                                           not IsSubTypeOf(স্তূপ_শীর্ষ_Type, i_global->type));
         }
 
         IM3Operation op;
-        m3type_t     type = GetStackTopType(o);
+        m3type_t     type = Get_স্তূপ_শীর্ষ_Type(o);
 
-        if (IsStackTopInRegister(o)) {
+        যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
             op = c_setGlobalOps[BaseTypeOf(type)];
-        } else {
+        } অন্যথা {
             op = Is64BitType(type) ? op_SetGlobal_s64 : op_SetGlobal_s32;
         }
 
 _       (EmitOp(o, op));
-        EmitPointer(o, &i_global->i64Value);
+        EmitPointer(o, &i_global->i64_মান);
 
-        if (IsStackTopInSlot(o)) {
-            EmitSlotOffset(o, GetStackTopSlotNumber(o));
+        যদি (Is_স্তূপ_শীর্ষ_In_Slot(o)) {
+            EmitSlotOffset(o, Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o));
         }
 
-_       (Pop(o));
-    } else {
+_       (বের_করো(o));
+    } অন্যথা {
         _throw(m3Err_settingImmutableGlobal);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_GetSetGlobal (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_GetSetGlobal (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u32 globalIndex;
-_   (ReadLEB_u32(&globalIndex, &o->wasm, o->wasmEnd));
+    u32 global_সূচক;
+_   (ReadLEB_u32(&global_সূচক, &o->wasm, o->wasmEnd));
 
-    if (globalIndex < o->module->numGlobals) {
-        if (o->module->globals) {
-            M3Global* global = &o->module->globals[globalIndex];
+    যদি (global_সূচক < o->module->অঙ্ক_Globals) {
+        যদি (o->module->globals) {
+            M3Global* global = &o->module->globals[global_সূচক];
 
             // Spec: a constant expression may only read an imported immutable
             // global. The module's own globals are counted before their
             // initializer is walked, so a bare index check would let one
             // reference itself. These describe how the module declared the
             // global, so they are checked before following any link.
-            _throwif(m3Err_globaIndexOutOfBounds, o->isInitExpr and not global->imported);
-            _throwif(m3Err_wasmMalformed, o->isInitExpr and global->isMutable);
+            _throwif(m3_Err_globa_সূচক_Out_Of_Bounds, o->is_Init_রাশিমালা and not global->imported);
+            _throwif(m3Err_wasmMalformed, o->is_Init_রাশিমালা and global->isMutable);
 
             // an import linked to another module reads and writes that module's
             // cell, not the placeholder standing in for it here
-            if (global->resolved) {
+            যদি (global->resolved) {
                 global = global->resolved;
             }
 
 _           ((i_opcode == c_waOp_getGlobal) ? Compile_GetGlobal(o, global) : Compile_SetGlobal(o, global));
-        } else {
+        } অন্যথা {
             _throw(ErrorCompile(m3Err_globalMemoryNotAllocated, o, "module '%s' is missing global memory", o->module->name));
         }
-    } else {
-        _throw(m3Err_globaIndexOutOfBounds);
+    } অন্যথা {
+        _throw(m3_Err_globa_সূচক_Out_Of_Bounds);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-void EmitPatchingBranchPointer (IM3Compilation o, IM3CompilationScope i_scope)
+স্থির
+শূন্য EmitPatchingBranchPointer (IM3Compilation o, IM3CompilationScope i_scope)
 {
     pc_t patch       = EmitPointer(o, i_scope->patches);                m3log (compile, "branch patch required at: %p", patch);
     i_scope->patches = patch;
 }
 
-static
-M3Result EmitPatchingBranch (IM3Compilation o, IM3CompilationScope i_scope)
+স্থির
+M3_ফলাফল EmitPatchingBranch (IM3Compilation o, IM3CompilationScope i_scope)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
 _   (EmitOp(o, op_Branch));
     EmitPatchingBranchPointer(o, i_scope);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
 
 // How many try_table handler records an exit from i_from out to i_target takes
 // down with it. Walking outward from the block the branch sits in, every
@@ -2103,22 +2103,22 @@ _   (EmitOp(o, op_Branch));
 //
 // A loop label is the exception, but a loop is never a try_table, so the count
 // is the same either way: the loop itself is not on the list.
-static
-u32 CountTryFramesToExit (IM3CompilationScope i_from, IM3CompilationScope i_target)
+স্থির
+u32 গুনতি_Try_Frames_To_Exit (IM3CompilationScope i_from, IM3CompilationScope i_target)
 {
-    u32 count = 0;
+    u32 গুনতি = 0;
 
-    for (IM3CompilationScope scope = i_from; scope; scope = scope->outer) {
-        if (scope->opcode == c_waOp_tryTable) {
-            ++count;
+    জন্য (IM3CompilationScope scope = i_from; scope; scope = scope->outer) {
+        যদি (scope->opcode == c_waOp_tryTable) {
+            ++গুনতি;
         }
 
-        if (scope == i_target) {
-            break;
+        যদি (scope == i_target) {
+            বিরতি;
         }
     }
 
-    return count;
+    ফেরত গুনতি;
 }
 
 
@@ -2131,34 +2131,34 @@ u32 CountTryFramesToExit (IM3CompilationScope i_from, IM3CompilationScope i_targ
 // i_from is where the walk starts, which is not always the block the branch is
 // written in: a catch stub passes the scope outside its try, because
 // op_TryTable takes its own record off before jumping to the stub.
-static
-u32 NumTryFramesToPop (IM3CompilationScope i_from, IM3CompilationScope i_target)
+স্থির
+u32 অঙ্ক_Try_Frames_To_বের_করো (IM3CompilationScope i_from, IM3CompilationScope i_target)
 {
-    if (i_target->depth == 0) {
-        return 0;
+    যদি (i_target->depth == 0) {
+        ফেরত 0;
     }
 
     // the walk only ever runs inward-to-outward; a target that is already
     // outside i_from has nothing between them
-    if (not i_from or i_from->depth < i_target->depth) {
-        return 0;
+    যদি (not i_from or i_from->depth < i_target->depth) {
+        ফেরত 0;
     }
 
-    return CountTryFramesToExit(i_from, i_target);
+    ফেরত গুনতি_Try_Frames_To_Exit(i_from, i_target);
 }
 
 
-static
-M3Result EmitPopTryFrames (IM3Compilation o, u32 i_numFrames)
+স্থির
+M3_ফলাফল Emit_বের_করো_Try_Frames (IM3Compilation o, u32 i_অঙ্ক_Frames)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (i_numFrames) {
-_       (EmitOp(o, op_PopHandlers));
-        EmitConstant32(o, i_numFrames);
+    যদি (i_অঙ্ক_Frames) {
+_       (EmitOp(o, op_বের_করো_Handlers));
+        EmitConstant32(o, i_অঙ্ক_Frames);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
@@ -2168,111 +2168,111 @@ _       (EmitOp(o, op_PopHandlers));
 // op_ReturnCall tail-jumps with op_TryTable's frames still standing, and the
 // fallback shape is an ordinary call sitting inside them. Either way the
 // handler records have to come off first.
-static
-M3Result EmitPopTryFramesForReturnCall (IM3Compilation o)
+স্থির
+M3_ফলাফল Emit_বের_করো_Try_Frames_For_Return_Call (IM3Compilation o)
 {
-    u32 count = 0;
+    u32 গুনতি = 0;
 
-    for (IM3CompilationScope scope = &o->block; scope; scope = scope->outer) {
-        if (scope->opcode == c_waOp_tryTable) {
-            ++count;
+    জন্য (IM3CompilationScope scope = &o->block; scope; scope = scope->outer) {
+        যদি (scope->opcode == c_waOp_tryTable) {
+            ++গুনতি;
         }
     }
 
-    return EmitPopTryFrames(o, count);
+    ফেরত Emit_বের_করো_Try_Frames(o, গুনতি);
 }
 
-#else
+#অন্যথা
 
-static
-M3Result EmitPopTryFrames (IM3Compilation o, u32 i_numFrames)
+স্থির
+M3_ফলাফল Emit_বের_করো_Try_Frames (IM3Compilation o, u32 i_অঙ্ক_Frames)
 {
-    (void)o;
-    (void)i_numFrames;
-    return m3Err_none;
+    (শূন্য)o;
+    (শূন্য)i_অঙ্ক_Frames;
+    ফেরত m3Err_none;
 }
 
 #endif // d_m3HasExceptionHandling
 
-#if d_m3FuseBranch
+#যদি d_m3FuseBranch
 // when the pending fold candidate is a compare whose result sits on top in _r0, return the fused
 // variant that absorbs an immediately following br_if (i_isIf false) or if (i_isIf true)
-static
+স্থির
 IM3Operation GetBranchFusionOp (IM3Compilation o, bool i_isIf)
 {
-    if (o->foldPatchPC and o->foldForm < 4 and IsStackTopInRegister(o) and GetStackTopIndex(o) == (i16)o->foldStackIndex) {
-        const M3FusedCmpOps* ops = GetFusedCmpOps(o->foldOpcode);
+    যদি (o->foldPatchPC and o->foldForm < 4 and Is_স্তূপ_শীর্ষ_In_Register(o) and Get_স্তূপ_শীর্ষ_সূচক(o) == (i16)o->fold_স্তূপ_সূচক) {
+        ধ্রুবক M3FusedCmpOps* ops = GetFusedCmpOps(o->foldOpcode);
 
-        if (ops) {
-            return i_isIf ? ops->ifOp[o->foldForm] : ops->branchIf[o->foldForm];
+        যদি (ops) {
+            ফেরত i_isIf ? ops->ifOp[o->foldForm] : ops->branchIf[o->foldForm];
         }
     }
 
-    return NULL;
+    ফেরত ফাঁকা;
 }
 #endif // d_m3FuseBranch
 
-static inline
+স্থির অন্তঃরেখ
 IM3Operation Op_ContinueLoop (IM3Compilation o)
 {
-#if d_m3HasStackSwitching
-    if (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
-        return op_ContinueLoop_Suspendable;
+#যদি d_m3_Has_স্তূপ_Switching
+    যদি (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
+        ফেরত op_ContinueLoop_Suspendable;
     }
 #endif
-    return op_ContinueLoop;
+    ফেরত op_ContinueLoop;
 }
 
-static inline
+স্থির অন্তঃরেখ
 IM3Operation Op_ContinueLoopIf (IM3Compilation o)
 {
-#if d_m3HasStackSwitching
-    if (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
-        return op_ContinueLoopIf_Suspendable;
+#যদি d_m3_Has_স্তূপ_Switching
+    যদি (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
+        ফেরত op_ContinueLoopIf_Suspendable;
     }
 #endif
-    return op_ContinueLoopIf;
+    ফেরত op_ContinueLoopIf;
 }
 
 
-static
-M3Result Compile_Branch (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Branch (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
-    u32      numTryFrames = 0;
+    M3_ফলাফল ফলাফল;
+    u32      অঙ্ক_Try_Frames = 0;
 
     u32 depth;
 _   (ReadLEB_u32(&depth, &o->wasm, o->wasmEnd));
 
     // Spec: br_if condition must be i32
-    if (i_opcode == c_waOp_branchIf and not IsStackPolymorphic(o)) {
-        m3type_t condType = GetStackTopType(o);
+    যদি (i_opcode == c_waOp_branchIf and not Is_স্তূপ_Polymorphic(o)) {
+        m3type_t condType = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, condType != c_m3Type_none and condType != c_m3Type_i32);
     }
 
     IM3CompilationScope scope;
 _   (GetBlockScope(o, &scope, depth));
 
-#if d_m3HasExceptionHandling
-    numTryFrames = NumTryFramesToPop(&o->block, scope);
+#যদি d_m3HasExceptionHandling
+    অঙ্ক_Try_Frames = অঙ্ক_Try_Frames_To_বের_করো(&o->block, scope);
 #endif
 
     // branch target is a loop (continue)
-    if (scope->opcode == c_waOp_loop) {
-        if (i_opcode == c_waOp_branchIf) {
+    যদি (scope->opcode == c_waOp_loop) {
+        যদি (i_opcode == c_waOp_branchIf) {
             // a handler pop belongs on the taken path only, so it forces the
             // jump-over form even where the target takes no parameters
-            if (GetFuncTypeNumParams(scope->type) or numTryFrames) {
-                IM3Operation op = IsStackTopInRegister(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
+            যদি (Get_Func_Type_অঙ্ক_Params(scope->type) or অঙ্ক_Try_Frames) {
+                IM3Operation op = Is_স্তূপ_শীর্ষ_In_Register(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
 
 _               (EmitOp(o, op));
-_               (EmitSlotNumOfStackTopAndPop(o));
+_               (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
 
                 pc_t* jumpTo = (pc_t*)ReservePointer(o);
 
-_               (EmitPopTryFrames(o, numTryFrames));
+_               (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames));
 
-                if (not IsStackPolymorphic(o)) {
+                যদি (not Is_স্তূপ_Polymorphic(o)) {
 _                   (ResolveBlockResults(o, scope, /* isBranch: */ true));
                 }
 
@@ -2281,10 +2281,10 @@ _               (EmitOp(o, Op_ContinueLoop(o)));
 _               (RecordBackEdge(o, scope, false));
 
                 *jumpTo = GetPC(o);
-            } else {
+            } অন্যথা {
                 // move the condition to a register
-_               (CopyStackTopToRegister(o, false));
-_               (PopType(o, c_m3Type_i32));
+_               (Copy_স্তূপ_শীর্ষ_To_Register(o, false));
+_               (বের_করো_Type(o, c_m3Type_i32));
 
 _               (EmitOp(o, Op_ContinueLoopIf(o)));
                 EmitPointer(o, scope->pc);
@@ -2292,12 +2292,12 @@ _               (RecordBackEdge(o, scope, true));
             }
 
             //          dump_type_stack(o);
-        } else // is c_waOp_branch
+        } অন্যথা // is c_waOp_branch
         {
-_           (EmitPopTryFrames(o, numTryFrames));
+_           (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames));
 
             // the branch operands become the loop's parameters on the next iteration
-            if (not IsStackPolymorphic(o)) {
+            যদি (not Is_স্তূপ_Polymorphic(o)) {
 _               (ResolveBlockResults(o, scope, /* isBranch: */ true));
             }
 
@@ -2306,106 +2306,106 @@ _           (EmitOp(o, Op_ContinueLoop(o)));
 _           (RecordBackEdge(o, scope, false));
             o->block.isPolymorphic = true;
         }
-    } else // forward branch
+    } অন্যথা // forward branch
     {
-        pc_t* jumpTo = NULL;
+        pc_t* jumpTo = ফাঁকা;
 
         bool isReturn         = (scope->depth == 0);
-        bool targetHasResults = GetFuncTypeNumResults(scope->type);
+        bool targetHasResults = Get_Func_Type_অঙ্ক_Results(scope->type);
 
-        if (i_opcode == c_waOp_branchIf) {
-            if (targetHasResults or isReturn or numTryFrames) {
-                IM3Operation op = IsStackTopInRegister(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
+        যদি (i_opcode == c_waOp_branchIf) {
+            যদি (targetHasResults or isReturn or অঙ্ক_Try_Frames) {
+                IM3Operation op = Is_স্তূপ_শীর্ষ_In_Register(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
 
 _               (EmitOp(o, op));
-_               (EmitSlotNumOfStackTopAndPop(o)); // condition
+_               (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o)); // condition
 
                 // this is continuation point, if the branch isn't taken
                 jumpTo = (pc_t*)ReservePointer(o);
-            } else {
-#if d_m3FuseBranch
+            } অন্যথা {
+#যদি d_m3FuseBranch
                 IM3Operation fuseOp = GetBranchFusionOp(o, false);
 
-                if (fuseOp) {
+                যদি (fuseOp) {
                     // absorb the branch into the compare that produced the condition
                     *(IM3Operation*)o->foldPatchPC = fuseOp;
                     InvalidateFold(o);
 
-_                   (Pop(o));                      // the condition is consumed inside the fused op
+_                   (বের_করো(o));                      // the condition is consumed inside the fused op
 
                     EmitPatchingBranchPointer(o, scope);
-                    goto _catch;
+                    যাও _catch;
                 }
 #endif
-                IM3Operation op = IsStackTopInRegister(o) ? op_BranchIf_r : op_BranchIf_s;
+                IM3Operation op = Is_স্তূপ_শীর্ষ_In_Register(o) ? op_BranchIf_r : op_BranchIf_s;
 
 _               (EmitOp(o, op));
-_               (EmitSlotNumOfStackTopAndPop(o)); // condition
+_               (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o)); // condition
 
                 EmitPatchingBranchPointer(o, scope);
-                goto _catch;
+                যাও _catch;
             }
         }
 
-        if (not IsStackPolymorphic(o)) {
-            if (isReturn) {
-_               (ReturnValues(o, scope, true));
+        যদি (not Is_স্তূপ_Polymorphic(o)) {
+            যদি (isReturn) {
+_               (Return_মানসমূহ(o, scope, true));
 _               (EmitOp(o, op_Return));
-            } else {
-_               (EmitPopTryFrames(o, numTryFrames));
+            } অন্যথা {
+_               (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames));
 
 _               (ResolveBlockResults(o, scope, true));
 _               (EmitPatchingBranch(o, scope));
             }
         }
 
-        if (jumpTo) {
+        যদি (jumpTo) {
             *jumpTo = GetPC(o);
         }
 
-        if (i_opcode == c_waOp_branch) {
-_           (SetStackPolymorphic(o));
+        যদি (i_opcode == c_waOp_branch) {
+_           (Set_স্তূপ_Polymorphic(o));
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_BranchTable (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_BranchTable (IM3Compilation o, m3opcode_t i_opcode)
 {
     // the page a continue-op page is standing in for; non-NULL only while that
     // page is installed in o->page, so the catch below knows to put it back
-    IM3CodePage displacedPage = NULL;
+    IM3CodePage displacedPage = ফাঁকা;
     // indexed by label depth: the continuation stub already emitted for that target
     // within this table, or NULL if this table has not reached it yet
-    pc_t* targetStubs = NULL;
+    pc_t* targetStubs = ফাঁকা;
 _try {
-    u32 targetCount;
-_   (ReadLEB_u32(&targetCount, &o->wasm, o->wasmEnd));
+    u32 target_গুনতি;
+_   (ReadLEB_u32(&target_গুনতি, &o->wasm, o->wasmEnd));
 
     // Spec: validate that the branch index operand is i32
-    if (not IsStackPolymorphic(o)) {
-        m3type_t indexType = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, indexType != c_m3Type_none and indexType != c_m3Type_i32);
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
+        m3type_t সূচক_Type = Get_স্তূপ_শীর্ষ_Type(o);
+        _throwif(m3Err_typeMismatch, সূচক_Type != c_m3Type_none and সূচক_Type != c_m3Type_i32);
     }
 
 _   (PreserveRegisterIfOccupied(o, c_m3Type_i64));         // move branch operand to a slot
-    u16 slot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    u16 slot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_   (বের_করো(o));
 
     // OPTZ: according to spec: "forward branches that target a control instruction with a non-empty
     // result type consume matching operands first and push them back on the operand stack after unwinding"
     // So, this move-to-reg is only necessary if the target scopes have a type.
 
-    u32 numCodeLines = targetCount + 4; // 3 => IM3Operation + slot + target_count + default_target
-_   (EnsureCodePageNumLines(o, numCodeLines));
+    u32 অঙ্ক_Code_সারিগুলি = target_গুনতি + 4; // 3 => IM3Operation + slot + target_count + default_target
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, অঙ্ক_Code_সারিগুলি));
 
 _   (EmitOp(o, op_BranchTable));
     EmitSlotOffset(o, slot);
-    EmitConstant32(o, targetCount);
+    EmitConstant32(o, target_গুনতি);
 
-    IM3CodePage continueOpPage = NULL;
+    IM3CodePage continueOpPage = ফাঁকা;
 
     // The label types are checked by ValidateFunction, which runs under the same
     // d_m3EnableValidation guard just before this compilation pass. Comparing each
@@ -2413,7 +2413,7 @@ _   (EmitOp(o, op_BranchTable));
     // target against the operand stack, so in unreachable code the operands are the
     // bottom type and the targets may legitimately differ (unreached-valid.wast).
 
-    ++targetCount; // include default
+    ++target_গুনতি; // include default
 
     // Every entry of one br_table is resolved from the same compilation state - each
     // stub restores whatever it touched - so two entries naming the same label emit
@@ -2423,21 +2423,21 @@ _   (EmitOp(o, op_BranchTable));
     targetStubs = m3_AllocArray(pc_t, (size_t)o->block.depth + 1);
     _throwifnull(targetStubs);
 
-    for (u32 i = 0; i < targetCount; ++i) {
+    জন্য (u32 i = 0; i < target_গুনতি; ++i) {
         u32 target;
 _       (ReadLEB_u32(&target, &o->wasm, o->wasmEnd));
 
         IM3CompilationScope scope;
 _       (GetBlockScope(o, &scope, target));
 
-        if (targetStubs[target]) {
+        যদি (targetStubs[target]) {
             EmitPointer(o, targetStubs[target]);
-            continue;
+            চালু;
         }
 
-        u32 numTryFrames = 0;
-#if d_m3HasExceptionHandling
-        numTryFrames = NumTryFramesToPop(&o->block, scope);
+        u32 অঙ্ক_Try_Frames = 0;
+#যদি d_m3HasExceptionHandling
+        অঙ্ক_Try_Frames = অঙ্ক_Try_Frames_To_বের_করো(&o->block, scope);
 #endif
 
         // A forward branch to a block that carries no results and leaves no try
@@ -2449,10 +2449,10 @@ _       (GetBlockScope(o, &scope, target));
         //
         // Each such entry is patched on its own, so none is recorded in targetStubs:
         // there is no shared stub for a later entry naming this label to point at.
-        if (scope->opcode != c_waOp_loop and scope->depth > 0 and numTryFrames == 0 and
-            (IsStackPolymorphic(o) or GetFuncTypeNumResults(scope->type) == 0)) {
+        যদি (scope->opcode != c_waOp_loop and scope->depth > 0 and অঙ্ক_Try_Frames == 0 and
+            (Is_স্তূপ_Polymorphic(o) or Get_Func_Type_অঙ্ক_Results(scope->type) == 0)) {
             EmitPatchingBranchPointer(o, scope);
-            continue;
+            চালু;
         }
 
 _       (AcquireCompilationCodePage(o, &continueOpPage));
@@ -2461,23 +2461,23 @@ _       (AcquireCompilationCodePage(o, &continueOpPage));
         displacedPage = o->page;
         o->page       = continueOpPage;
 
-        if (scope->opcode == c_waOp_loop) {
-_           (EmitPopTryFrames(o, numTryFrames));
+        যদি (scope->opcode == c_waOp_loop) {
+_           (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames));
 
-            if (not IsStackPolymorphic(o)) {
+            যদি (not Is_স্তূপ_Polymorphic(o)) {
 _               (ResolveBlockResults(o, scope, true));
             }
 
 _           (EmitOp(o, Op_ContinueLoop(o)));
             EmitPointer(o, scope->pc);
 _           (RecordBackEdge(o, scope, false));
-        } else {
-            if (not IsStackPolymorphic(o)) {
-                if (scope->depth == 0) {
-_                   (ReturnValues(o, scope, true));
+        } অন্যথা {
+            যদি (not Is_স্তূপ_Polymorphic(o)) {
+                যদি (scope->depth == 0) {
+_                   (Return_মানসমূহ(o, scope, true));
 _                   (EmitOp(o, op_Return));
-                } else {
-_                   (EmitPopTryFrames(o, numTryFrames));
+                } অন্যথা {
+_                   (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames));
 
 _                   (ResolveBlockResults(o, scope, true));
 
@@ -2487,7 +2487,7 @@ _                   (EmitPatchingBranch(o, scope));
         }
 
         IM3CodePage returnTo = displacedPage;
-        displacedPage        = NULL;
+        displacedPage        = ফাঁকা;
 
         ReleaseCompilationCodePage(o);
         o->page = returnTo;
@@ -2496,67 +2496,67 @@ _                   (EmitPatchingBranch(o, scope));
         targetStubs[target] = startPC;
     }
 
-_   (SetStackPolymorphic(o));
+_   (Set_স্তূপ_Polymorphic(o));
 } _catch:
 
     // thrown out of the loop above with a continue-op page installed: release it
     // and restore the one it displaced, which the caller's catch then releases.
     // Otherwise the displaced page is on no list and simply leaks.
-    if (displacedPage) {
+    যদি (displacedPage) {
         ReleaseCompilationCodePage(o);
         o->page = displacedPage;
     }
 
     m3_Free(targetStubs);
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result CompileCallArgsAndReturn (IM3Compilation o, u16* o_stackOffset, IM3FuncType i_type, bool i_isIndirect)
+স্থির
+M3_ফলাফল CompileCallArgsAndReturn (IM3Compilation o, u16* o_স্তূপ_Offset, IM3FuncType i_type, bool i_isIndirect)
 {
 _try {
 
-    u16 topSlot = GetMaxUsedSlotPlusOne(o);
+    u16 শীর্ষ_Slot = GetMaxUsedSlotPlusOne(o);
 
     // force use of at least one stack slot; this is to help ensure
     // the m3 stack overflows (and traps) before the native stack can overflow.
     // e.g. see Wasm spec test 'runaway' in call.wast
-    topSlot = M3_MAX(1, topSlot);
+    শীর্ষ_Slot = M3_MAX(1, শীর্ষ_Slot);
 
     // stack frame is 64-bit aligned
-    AlignSlotToType(&topSlot, c_m3Type_i64);
+    AlignSlotToType(&শীর্ষ_Slot, c_m3Type_i64);
 
-    *o_stackOffset = topSlot;
+    *o_স্তূপ_Offset = শীর্ষ_Slot;
 
     // wait to pop this here so that topSlot search is correct
-    if (i_isIndirect) {
-_       (Pop(o));
+    যদি (i_isIndirect) {
+_       (বের_করো(o));
     }
 
-    u16 numArgs = GetFuncTypeNumParams(i_type);
-    u16 numRets = GetFuncTypeNumResults(i_type);
+    u16 অঙ্ক_Args = Get_Func_Type_অঙ্ক_Params(i_type);
+    u16 অঙ্ক_Rets = Get_Func_Type_অঙ্ক_Results(i_type);
 
-    u16 argTop = topSlot + (numArgs + numRets) * c_ioSlotCount;
+    u16 arg_শীর্ষ = শীর্ষ_Slot + (অঙ্ক_Args + অঙ্ক_Rets) * c_io_Slot_গুনতি;
 
-    TouchSlot(o, argTop - 1);
+    TouchSlot(o, arg_শীর্ষ - 1);
 
-    while (numArgs--) {
-_       (CopyStackTopToSlot(o, argTop -= c_ioSlotCount));
-_       (Pop(o));
+    যখন (অঙ্ক_Args--) {
+_       (Copy_স্তূপ_শীর্ষ_To_Slot(o, arg_শীর্ষ -= c_io_Slot_গুনতি));
+_       (বের_করো(o));
     }
 
     u16 i = 0;
-    while (numRets--) {
-        m3type_t type = GetFuncTypeResultType(i_type, i++);
+    যখন (অঙ্ক_Rets--) {
+        m3type_t type = Get_Func_Type_ফলাফল_Type(i_type, i++);
 
-_       (Push(o, type, topSlot));
-_       (MarkSlotsAllocatedByType(o, topSlot, type));
+_       (ঠেলো(o, type, শীর্ষ_Slot));
+_       (MarkSlotsAllocatedByType(o, শীর্ষ_Slot, type));
 
-        topSlot += c_ioSlotCount;
+        শীর্ষ_Slot += c_io_Slot_গুনতি;
     }
 
-    } _catch: return result;
+    } _catch: ফেরত ফলাফল;
 }
 
 // A tail call hands the current frame over to the callee instead of stacking a new one.
@@ -2564,139 +2564,139 @@ _       (MarkSlotsAllocatedByType(o, topSlot, type));
 // return slots and only the arguments move: they're staged above the caller's stack here
 // (the argument expressions can still be reading the args/locals they're about to land on)
 // and slid down onto the frame base at runtime, by op_ReturnCall[Indirect].
-static
-M3Result CompileTailCallArgs (IM3Compilation o, u16* o_stackOffset, u16* o_numArgSlots, IM3FuncType i_type, bool i_isIndirect)
+স্থির
+M3_ফলাফল Compile_লেজ_Call_Args (IM3Compilation o, u16* o_স্তূপ_Offset, u16* o_অঙ্ক_Arg_Slots, IM3FuncType i_type, bool i_isIndirect)
 {
 _try {
     IM3FuncType funcType = o->function->funcType;
 
-    u16 numRets = GetFuncTypeNumResults(i_type);
-    _throwif(m3Err_typeMismatch, numRets != GetFuncTypeNumResults(funcType));
+    u16 অঙ্ক_Rets = Get_Func_Type_অঙ্ক_Results(i_type);
+    _throwif(m3Err_typeMismatch, অঙ্ক_Rets != Get_Func_Type_অঙ্ক_Results(funcType));
 
-    for (u16 i = 0; i < numRets; ++i) {
-        _throwif(m3Err_typeMismatch, GetFuncTypeResultType(i_type, i) != GetFuncTypeResultType(funcType, i));
+    জন্য (u16 i = 0; i < অঙ্ক_Rets; ++i) {
+        _throwif(m3Err_typeMismatch, Get_Func_Type_ফলাফল_Type(i_type, i) != Get_Func_Type_ফলাফল_Type(funcType, i));
     }
 
-    u16 topSlot = GetMaxUsedSlotPlusOne(o);
+    u16 শীর্ষ_Slot = GetMaxUsedSlotPlusOne(o);
 
-    topSlot = M3_MAX(1, topSlot);
+    শীর্ষ_Slot = M3_MAX(1, শীর্ষ_Slot);
 
     // stack frame is 64-bit aligned
-    AlignSlotToType(&topSlot, c_m3Type_i64);
+    AlignSlotToType(&শীর্ষ_Slot, c_m3Type_i64);
 
-    *o_stackOffset = topSlot;
+    *o_স্তূপ_Offset = শীর্ষ_Slot;
 
     // wait to pop this here so that topSlot search is correct
-    if (i_isIndirect) {
-_       (Pop(o));
+    যদি (i_isIndirect) {
+_       (বের_করো(o));
     }
 
-    u16 numArgs     = GetFuncTypeNumParams(i_type);
-    u16 numArgSlots = numArgs * c_ioSlotCount;
+    u16 অঙ্ক_Args     = Get_Func_Type_অঙ্ক_Params(i_type);
+    u16 অঙ্ক_Arg_Slots = অঙ্ক_Args * c_io_Slot_গুনতি;
 
-    *o_numArgSlots = numArgSlots;
+    *o_অঙ্ক_Arg_Slots = অঙ্ক_Arg_Slots;
 
-    u16 argTop = topSlot + numArgSlots;
-    _throwif(m3Err_functionStackOverflow, argTop > d_m3MaxFunctionSlots);
+    u16 arg_শীর্ষ = শীর্ষ_Slot + অঙ্ক_Arg_Slots;
+    _throwif(m3_Err_function_স্তূপ_Overflow, arg_শীর্ষ > d_m3MaxFunctionSlots);
 
     // the staging area is written by the caller, so op_Entry has to account for it
-    TouchSlot(o, argTop - 1);
+    TouchSlot(o, arg_শীর্ষ - 1);
 
-    while (numArgs--) {
-_       (CopyStackTopToSlot(o, argTop -= c_ioSlotCount));
-_       (Pop(o));
+    যখন (অঙ্ক_Args--) {
+_       (Copy_স্তূপ_শীর্ষ_To_Slot(o, arg_শীর্ষ -= c_io_Slot_গুনতি));
+_       (বের_করো(o));
     }
 
-    } _catch: return result;
+    } _catch: ফেরত ফলাফল;
 }
 
 
-#if d_m3HasTypedRefs
+#যদি d_m3HasTypedRefs
 
 // call_ref $t: the callee is the reference on top of the stack, so the operand
 // order is the same as call_indirect's, minus the table.
-static
-M3Result Compile_CallRef (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_CallRef (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
+    u32 type_সূচক;
+_   (ReadLEB_u32(&type_সূচক, &o->wasm, o->wasmEnd));
 
-    _throwif("function call type index out of range", typeIndex >= o->module->numFuncTypes);
+    _throwif("function call type index out of range", type_সূচক >= o->module->অঙ্ক_Func_Types);
 
-    IM3FuncType type = o->module->funcTypes[typeIndex];
+    IM3FuncType type = o->module->funcTypes[type_সূচক];
 
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
         // whatever shape the reference has, it must be a function of this type
-        m3type_t refType = GetStackTopType(o);
+        m3type_t refType = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, not IsSubTypeOf(refType, RefTypeOfFuncType(type, false)));
     }
 
-    if (IsStackTopInRegister(o)) {
+    যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
 _       (PreserveRegisterIfOccupied(o, c_m3Type_funcref));
     }
 
-    u16 functionSlot = GetStackTopSlotNumber(o);
+    u16 functionSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
 
     bool isReturnCall = (i_opcode == c_waOp_returnCallRef);
-    bool useTailCall  = isReturnCall and d_m3CanTailCall;
+    bool use_লেজ_Call  = isReturnCall and d_m3_Can_লেজ_Call;
 
-    u16 execTop, numArgSlots = 0;
+    u16 exec_শীর্ষ, অঙ্ক_Arg_Slots = 0;
 
-    if (useTailCall) {
-_       (CompileTailCallArgs(o, &execTop, &numArgSlots, type, true));
-    } else {
-_       (CompileCallArgsAndReturn(o, &execTop, type, true));
+    যদি (use_লেজ_Call) {
+_       (Compile_লেজ_Call_Args(o, &exec_শীর্ষ, &অঙ্ক_Arg_Slots, type, true));
+    } অন্যথা {
+_       (CompileCallArgsAndReturn(o, &exec_শীর্ষ, type, true));
     }
 
-#  if d_m3HasExceptionHandling
-    if (isReturnCall) {
-_       (EmitPopTryFramesForReturnCall(o));
+#  যদি d_m3HasExceptionHandling
+    যদি (isReturnCall) {
+_       (Emit_বের_করো_Try_Frames_For_Return_Call(o));
     }
 #  endif
 
-_   (EmitOp(o, useTailCall ? op_ReturnCallRef : op_CallRef));
+_   (EmitOp(o, use_লেজ_Call ? op_ReturnCallRef : op_CallRef));
     EmitSlotOffset(o, functionSlot);
     EmitPointer(o, type);
-    EmitSlotOffset(o, execTop);
+    EmitSlotOffset(o, exec_শীর্ষ);
 
-    if (not useTailCall) {
-_       (RecordCall(o, GetFuncTypeNumResults(type), execTop, isReturnCall));
+    যদি (not use_লেজ_Call) {
+_       (RecordCall(o, Get_Func_Type_অঙ্ক_Results(type), exec_শীর্ষ, isReturnCall));
     }
 
-    if (useTailCall) {
-        EmitSlotOffset(o, o->function->numRetSlots);
-        EmitConstant32(o, numArgSlots);
+    যদি (use_লেজ_Call) {
+        EmitSlotOffset(o, o->function->অঙ্ক_Ret_Slots);
+        EmitConstant32(o, অঙ্ক_Arg_Slots);
 
-_       (SetStackPolymorphic(o));
-    } else if (isReturnCall) {
+_       (Set_স্তূপ_Polymorphic(o));
+    } অন্যথা যদি (isReturnCall) {
 _       (Compile_Return(o, i_opcode));
     }
 
 } _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 
 // ref.as_non_null only sharpens the type; the value is unchanged, so the stack
 // entry is re-pushed with the null stripped out of its type.
-static
-M3Result Compile_Ref_AsNonNull (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Ref_AsNonNull (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (not IsStackPolymorphic(o)) {
-        m3type_t type = GetStackTopType(o);
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
+        m3type_t type = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, not IsRefType(type));
 
         // op_RefAsNonNull only knows how to read its operand out of a slot; a
         // value still sitting in the register has to be spilled first, the way
         // every other single-op reader of the stack top does
-        if (IsStackTopInRegister(o)) {
+        যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
 _           (PreserveRegisterIfOccupied(o, type));
         }
 
-        u16 slot = GetStackTopSlotNumber(o);
+        u16 slot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
 
 _       (EmitOp(o, op_RefAsNonNull));
         EmitSlotOffset(o, slot);
@@ -2709,10 +2709,10 @@ _       (EmitOp(o, op_RefAsNonNull));
         // the slot keeps the one reference it already had; a Pop()/Push() of
         // the same slot would drop that reference's count without anything
         // to put it back, so the type above it is corrected in place instead
-        o->typeStack[GetStackTopIndex(o)] = nonNull;
+        o->type_স্তূপ[Get_স্তূপ_শীর্ষ_সূচক(o)] = nonNull;
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasTypedRefs
@@ -2723,66 +2723,66 @@ _       (EmitOp(o, op_RefAsNonNull));
 // validator refuses that already; this keeps a build without one from reaching
 // the interpreter with it. c_m3Type_none means the operand is not on the
 // dynamic stack to inspect, which is not this check's business.
-static
-M3Result CheckOperandType (IM3Compilation o, u16 i_depthFromTop, m3type_t i_type)
+স্থির
+M3_ফলাফল CheckOperandType (IM3Compilation o, u16 i_depth_From_শীর্ষ, m3type_t i_type)
 {
     m3type_t actual;
 
-    if (IsStackPolymorphic(o)) {
-        return m3Err_none;
+    যদি (Is_স্তূপ_Polymorphic(o)) {
+        ফেরত m3Err_none;
     }
 
-    actual = GetStackTypeFromTop(o, i_depthFromTop);
+    actual = Get_স্তূপ_Type_From_শীর্ষ(o, i_depth_From_শীর্ষ);
 
-    return (actual == c_m3Type_none or BaseTypeOf(actual) == i_type) ? m3Err_none
+    ফেরত (actual == c_m3Type_none or BaseTypeOf(actual) == i_type) ? m3Err_none
                                                                      : m3Err_typeMismatch;
 }
 
 
 // Swaps the _mem register onto a given memory. Only ever emitted in pairs --
 // see op_SetMemory.
-static
-M3Result EmitSetMemoryPtr (IM3Compilation o, IM3Memory i_memory)
+স্থির
+M3_ফলাফল EmitSetMemoryPtr (IM3Compilation o, IM3Memory i_memory)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
 _   (EmitOp(o, op_SetMemory));
     EmitPointer(o, i_memory);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 // ...onto one of the compiling module's own memories, by index. Only reached
 // with a non-zero index under multi-memory, but the index has already been
 // bounds-checked by ReadMemoryIndex either way.
-static inline
-M3Result EmitSetMemory (IM3Compilation o, u32 i_memoryIdx)
+স্থির অন্তঃরেখ
+M3_ফলাফল EmitSetMemory (IM3Compilation o, u32 i_memoryIdx)
 {
-#if d_m3HasMultiMemory
-    return EmitSetMemoryPtr(o, o->module->memories[i_memoryIdx]);
-#else
-    (void)o;
-    (void)i_memoryIdx;
-    return m3Err_unknownMemory;
+#যদি d_m3HasMultiMemory
+    ফেরত EmitSetMemoryPtr(o, o->module->memories[i_memoryIdx]);
+#অন্যথা
+    (শূন্য)o;
+    (শূন্য)i_memoryIdx;
+    ফেরত m3Err_unknownMemory;
 #endif
 }
 
-static
-M3Result Compile_Call (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Call (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 functionIndex;
-_   (ReadLEB_u32(&functionIndex, &o->wasm, o->wasmEnd));
+    u32 function_সূচক;
+_   (ReadLEB_u32(&function_সূচক, &o->wasm, o->wasmEnd));
 
-    IM3Function function = Module_GetFunction(o->module, functionIndex);
+    IM3Function function = Module_GetFunction(o->module, function_সূচক);
 
-    if (function) {                                                     m3log (compile, d_indent " (func= [%d] '%s'; args= %d)",
-                                                                                get_indention_string (o), functionIndex, m3_GetFunctionName (function), function->funcType->numArgs);
+    যদি (function) {                                                     m3log (compile, d_indent " (func= [%d] '%s'; args= %d)",
+                                                                                get_indention_string (o), function_সূচক, m3_GetFunctionName (function), function->funcType->অঙ্ক_Args);
         // an import linked to another module's export runs that module's body
         IM3Function target = Function_Implementation(function);
 
-        if (target->module) {
+        যদি (target->module) {
             bool isReturnCall = (i_opcode == c_waOp_returnCall);
 
             // The callee's body runs against its own module's memory, so a call
@@ -2790,155 +2790,155 @@ _   (ReadLEB_u32(&functionIndex, &o->wasm, o->wasmEnd));
             // tail call never returns to run the second one, so those compile
             // as a plain call followed by a return instead.
             bool crossModule = (target->module != o->module);
-            bool useTailCall = isReturnCall and d_m3CanTailCall and not crossModule;
+            bool use_লেজ_Call = isReturnCall and d_m3_Can_লেজ_Call and not crossModule;
 
-            u16 slotTop, numArgSlots = 0;
+            u16 slot_শীর্ষ, অঙ্ক_Arg_Slots = 0;
 
-            if (useTailCall) {
-_               (CompileTailCallArgs(o, &slotTop, &numArgSlots, target->funcType, false));
-            } else {
-_               (CompileCallArgsAndReturn(o, &slotTop, target->funcType, false));
+            যদি (use_লেজ_Call) {
+_               (Compile_লেজ_Call_Args(o, &slot_শীর্ষ, &অঙ্ক_Arg_Slots, target->funcType, false));
+            } অন্যথা {
+_               (CompileCallArgsAndReturn(o, &slot_শীর্ষ, target->funcType, false));
             }
 
             IM3Operation op;
-            const void*  operand;
+            ধ্রুবক শূন্য*  operand;
 
-            if (target->compiled) {
-                op      = useTailCall ? op_ReturnCall : op_Call;
+            যদি (target->compiled) {
+                op      = use_লেজ_Call ? op_ReturnCall : op_Call;
                 operand = target->compiled;
-            } else {
-                op      = useTailCall ? op_CompileReturnCall : op_Compile;
+            } অন্যথা {
+                op      = use_লেজ_Call ? op_CompileReturnCall : op_Compile;
                 operand = target;
             }
 
-#if d_m3HasExceptionHandling
-            if (isReturnCall) {
-_               (EmitPopTryFramesForReturnCall(o));
+#যদি d_m3HasExceptionHandling
+            যদি (isReturnCall) {
+_               (Emit_বের_করো_Try_Frames_For_Return_Call(o));
             }
 #endif
 
-            if (crossModule) {
+            যদি (crossModule) {
 _               (EmitSetMemoryPtr(o, Module_Memory0(target->module)));
             }
 
 _           (EmitOp(o, op));
             EmitPointer(o, operand);
-            EmitSlotOffset(o, slotTop);
+            EmitSlotOffset(o, slot_শীর্ষ);
 
-            if (not useTailCall) {
+            যদি (not use_লেজ_Call) {
                 // a suspend inside the callee leaves this frame waiting here, its
                 // results not yet written
-_               (RecordCall(o, GetFuncTypeNumResults(target->funcType), slotTop, isReturnCall));
+_               (RecordCall(o, Get_Func_Type_অঙ্ক_Results(target->funcType), slot_শীর্ষ, isReturnCall));
             }
 
-            if (useTailCall) {
-                EmitSlotOffset(o, o->function->numRetSlots);
-                EmitConstant32(o, numArgSlots);
+            যদি (use_লেজ_Call) {
+                EmitSlotOffset(o, o->function->অঙ্ক_Ret_Slots);
+                EmitConstant32(o, অঙ্ক_Arg_Slots);
 
-_               (SetStackPolymorphic(o));
-            } else {
-                if (crossModule) {
+_               (Set_স্তূপ_Polymorphic(o));
+            } অন্যথা {
+                যদি (crossModule) {
 _                   (EmitSetMemoryPtr(o, Module_Memory0(o->module)));
                 }
 
-                if (isReturnCall) {
+                যদি (isReturnCall) {
 _                   (Compile_Return(o, i_opcode));
                 }
             }
-        } else {
+        } অন্যথা {
             _throw(ErrorCompile(m3Err_functionImportMissing, o, "'%s.%s'", GetFunctionImportModuleName(function), m3_GetFunctionName(function)));
         }
-    } else {
-        _throw(ErrorCompile(m3Err_functionLookupFailed, o, "index: %d", functionIndex));
+    } অন্যথা {
+        _throw(ErrorCompile(m3Err_functionLookupFailed, o, "index: %d", function_সূচক));
     }
 
-    } _catch: return result;
+    } _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_CallIndirect (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_CallIndirect (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
+    u32 type_সূচক;
+_   (ReadLEB_u32(&type_সূচক, &o->wasm, o->wasmEnd));
 
-    u32 tableIndex;
-_   (ReadLEB_u32(&tableIndex, &o->wasm, o->wasmEnd));
+    u32 table_সূচক;
+_   (ReadLEB_u32(&table_সূচক, &o->wasm, o->wasmEnd));
 
-    _throwif("function call type index out of range", typeIndex >= o->module->numFuncTypes);
-    _throwif("table index out of range", tableIndex >= o->module->numTables);
-    _throwif(m3Err_typeMismatch, BaseTypeOf(o->module->tables[tableIndex]->type) != c_m3Type_funcref);
+    _throwif("function call type index out of range", type_সূচক >= o->module->অঙ্ক_Func_Types);
+    _throwif("table index out of range", table_সূচক >= o->module->অঙ্ক_Tables);
+    _throwif(m3Err_typeMismatch, BaseTypeOf(o->module->tables[table_সূচক]->type) != c_m3Type_funcref);
 
-_   (CheckOperandType(o, 0, Table_AddrType(o->module->tables[tableIndex])));
+_   (CheckOperandType(o, 0, Table_AddrType(o->module->tables[table_সূচক])));
 
-    if (IsStackTopInRegister(o)) {
+    যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
 _       (PreserveRegisterIfOccupied(o, c_m3Type_i32));
     }
 
-    u16 tableIndexSlot = GetStackTopSlotNumber(o);
+    u16 table_সূচক_Slot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
 
     bool isReturnCall = (i_opcode == c_waOp_returnCallIndirect);
-    bool useTailCall  = isReturnCall and d_m3CanTailCall;
+    bool use_লেজ_Call  = isReturnCall and d_m3_Can_লেজ_Call;
 
-    u16         execTop, numArgSlots = 0;
-    IM3FuncType type = o->module->funcTypes[typeIndex];
+    u16         exec_শীর্ষ, অঙ্ক_Arg_Slots = 0;
+    IM3FuncType type = o->module->funcTypes[type_সূচক];
 
-    if (useTailCall) {
-_       (CompileTailCallArgs(o, &execTop, &numArgSlots, type, true));
-    } else {
-_       (CompileCallArgsAndReturn(o, &execTop, type, true));
+    যদি (use_লেজ_Call) {
+_       (Compile_লেজ_Call_Args(o, &exec_শীর্ষ, &অঙ্ক_Arg_Slots, type, true));
+    } অন্যথা {
+_       (CompileCallArgsAndReturn(o, &exec_শীর্ষ, type, true));
     }
 
-#if d_m3HasExceptionHandling
-    if (isReturnCall) {
-_       (EmitPopTryFramesForReturnCall(o));
+#যদি d_m3HasExceptionHandling
+    যদি (isReturnCall) {
+_       (Emit_বের_করো_Try_Frames_For_Return_Call(o));
     }
 #endif
 
     // the table comes first: how wide its indexes are is what says how much of
     // the slot below holds one
-_   (EmitOp(o, useTailCall ? op_ReturnCallIndirect : op_CallIndirect));
-    EmitPointer(o, o->module->tables[tableIndex]);
-    EmitSlotOffset(o, tableIndexSlot);
+_   (EmitOp(o, use_লেজ_Call ? op_ReturnCallIndirect : op_CallIndirect));
+    EmitPointer(o, o->module->tables[table_সূচক]);
+    EmitSlotOffset(o, table_সূচক_Slot);
     EmitPointer(o, type);
-    EmitSlotOffset(o, execTop);
+    EmitSlotOffset(o, exec_শীর্ষ);
 
-    if (not useTailCall) {
-_       (RecordCall(o, GetFuncTypeNumResults(type), execTop, isReturnCall));
+    যদি (not use_লেজ_Call) {
+_       (RecordCall(o, Get_Func_Type_অঙ্ক_Results(type), exec_শীর্ষ, isReturnCall));
     }
 
-    if (useTailCall) {
-        EmitSlotOffset(o, o->function->numRetSlots);
-        EmitConstant32(o, numArgSlots);
+    যদি (use_লেজ_Call) {
+        EmitSlotOffset(o, o->function->অঙ্ক_Ret_Slots);
+        EmitConstant32(o, অঙ্ক_Arg_Slots);
 
-_       (SetStackPolymorphic(o));
-    } else if (isReturnCall) {
+_       (Set_স্তূপ_Polymorphic(o));
+    } অন্যথা যদি (isReturnCall) {
 _       (Compile_Return(o, i_opcode));
     }
 
 } _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Reads the memory index a memory instruction names, and checks it against the
 // module's index space. Without multi-memory the immediate is a reserved byte
 // that has to be zero, which is the same check.
-static
-M3Result ReadMemoryIndex (IM3Compilation o, u32* o_memoryIdx)
+স্থির
+M3_ফলাফল Read_Memory_সূচক (IM3Compilation o, u32* o_memoryIdx)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
 _   (ReadLEB_u32(o_memoryIdx, &o->wasm, o->wasmEnd));
 
-    _throwif(m3Err_unknownMemory, *o_memoryIdx >= o->module->numMemories);
+    _throwif(m3Err_unknownMemory, *o_memoryIdx >= o->module->অঙ্ক_Memories);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Memory_Size (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Memory_আকার (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
     u32 memoryIdx;
 
@@ -2946,69 +2946,69 @@ M3Result Compile_Memory_Size (IM3Compilation o, m3opcode_t i_opcode)
     // so the throws below don't jump over its initialization.
     m3type_t addrType = c_m3Type_i32;
 
-_   (ReadMemoryIndex(o, &memoryIdx));
+_   (Read_Memory_সূচক(o, &memoryIdx));
 
     addrType = Memory_AddrType(o->module->memories[memoryIdx]);
 
 _   (PreserveRegisterIfOccupied(o, addrType));
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, memoryIdx));
     }
 
     // op_MemSize writes the whole register either way; the slot it is pushed
     // to is what decides how much of it the module gets to see
-_   (EmitOp(o, op_MemSize));
+_   (EmitOp(o, op_Mem_আকার));
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, 0));
     }
 
-_   (PushRegister(o, addrType));
+_   (ঠেলো_Register(o, addrType));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Memory_Grow (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Memory_Grow (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
     u32 memoryIdx;
 
     // see Compile_Memory_Size
     m3type_t addrType = c_m3Type_i32;
 
-_   (ReadMemoryIndex(o, &memoryIdx));
+_   (Read_Memory_সূচক(o, &memoryIdx));
 
     addrType = Memory_AddrType(o->module->memories[memoryIdx]);
 
-_   (CopyStackTopToRegister(o, false));
-_   (PopType(o, addrType));
+_   (Copy_স্তূপ_শীর্ষ_To_Register(o, false));
+_   (বের_করো_Type(o, addrType));
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, memoryIdx));
     }
 
-#if d_m3HasMemory64
+#যদি d_m3HasMemory64
 _   (EmitOp(o, (addrType == c_m3Type_i64) ? op_MemGrow64 : op_MemGrow));
-#else
+#অন্যথা
 _   (EmitOp(o, op_MemGrow));
 #endif
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, 0));
     }
 
-_   (PushRegister(o, addrType));
+_   (ঠেলো_Register(o, addrType));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Memory_CopyFill (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Memory_CopyFill (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     // memory.copy names the destination first and then the source; memory.fill
     // names only the one it writes.
@@ -3021,27 +3021,27 @@ M3Result Compile_Memory_CopyFill (IM3Compilation o, m3opcode_t i_opcode)
     // Declared up here so the throws below don't jump over them.
     m3type_t targetType = c_m3Type_i32;
     m3type_t sourceType = c_m3Type_i32;
-    m3type_t lengthType = c_m3Type_i32;
+    m3type_t দৈর্ঘ্য_Type = c_m3Type_i32;
 
-    _throwif(m3Err_wasmMalformed, o->module->numMemories == 0);
+    _throwif(m3Err_wasmMalformed, o->module->অঙ্ক_Memories == 0);
 
-_   (ReadMemoryIndex(o, &targetMemoryIdx));
+_   (Read_Memory_সূচক(o, &targetMemoryIdx));
 
-    if (isCopy) {
-_       (ReadMemoryIndex(o, &sourceMemoryIdx));
+    যদি (isCopy) {
+_       (Read_Memory_সূচক(o, &sourceMemoryIdx));
     }
 
     targetType = Memory_AddrType(o->module->memories[targetMemoryIdx]);
     sourceType = isCopy ? Memory_AddrType(o->module->memories[sourceMemoryIdx])
                         : targetType;
-    lengthType = (targetType == c_m3Type_i64 and sourceType == c_m3Type_i64)
+    দৈর্ঘ্য_Type = (targetType == c_m3Type_i64 and sourceType == c_m3Type_i64)
                    ? c_m3Type_i64
                    : c_m3Type_i32;
 
-_   (CopyStackTopToRegister(o, false));
+_   (Copy_স্তূপ_শীর্ষ_To_Register(o, false));
 
-#if d_m3HasMultiMemory
-    if (isCopy and sourceMemoryIdx != targetMemoryIdx) {
+#যদি d_m3HasMultiMemory
+    যদি (isCopy and sourceMemoryIdx != targetMemoryIdx) {
         // two memories at once: _mem can only name one, so the op takes both
 _       (EmitOp(o, op_MemCopy_x));
         EmitPointer(o, o->module->memories[targetMemoryIdx]);
@@ -3051,18 +3051,18 @@ _       (EmitOp(o, op_MemCopy_x));
         // each of the operands: bit 0 the destination, bit 1 the source
         EmitConstant32(o, ((targetType == c_m3Type_i64) ? 0x1u : 0u) |
                             ((sourceType == c_m3Type_i64) ? 0x2u : 0u));
-    } else
+    } অন্যথা
 #endif
     {
         IM3Operation op = isCopy ? op_MemCopy : op_MemFill;
 
-#if d_m3HasMemory64
-        if (targetType == c_m3Type_i64) {
+#যদি d_m3HasMemory64
+        যদি (targetType == c_m3Type_i64) {
             op = isCopy ? op_MemCopy64 : op_MemFill64;
         }
 #endif
 
-        if (targetMemoryIdx) {
+        যদি (targetMemoryIdx) {
 _           (EmitSetMemory(o, targetMemoryIdx));
         }
 
@@ -3071,89 +3071,89 @@ _       (EmitOp(o, op));
 
     // the length is in the register; the other two are named by slot, at
     // whatever width their stack entries were pushed with
-_   (PopType(o, lengthType));
-_   (EmitSlotNumOfStackTopAndPop(o));      // the source, or the byte to fill with
-_   (EmitSlotNumOfStackTopAndPop(o));      // the destination
+_   (বের_করো_Type(o, দৈর্ঘ্য_Type));
+_   (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));      // the source, or the byte to fill with
+_   (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));      // the destination
 
-    if (targetMemoryIdx and not (isCopy and sourceMemoryIdx != targetMemoryIdx)) {
+    যদি (targetMemoryIdx and not (isCopy and sourceMemoryIdx != targetMemoryIdx)) {
 _       (EmitSetMemory(o, 0));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 // memory.init and data.drop address a data segment by index. Both are only valid
 // when a data count section declared the segments up front.
-static
-M3Result ReadDataSegment (IM3Compilation o, M3DataSegment** o_segment)
+স্থির
+M3_ফলাফল Read_তথ্য_Segment (IM3Compilation o, M3_তথ্য_Segment** o_segment)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     u32 index;
 _   (ReadLEB_u32(&index, &o->wasm, o->wasmEnd));
 
-    _throwif("data count section required", not o->module->hasDataCount);
-    _throwif(m3Err_wasmMalformed, index >= o->module->numDataSegments);
+    _throwif("data count section required", not o->module->has_তথ্য_গুনতি);
+    _throwif(m3Err_wasmMalformed, index >= o->module->অঙ্ক_তথ্য_Segments);
 
-    *o_segment = &o->module->dataSegments[index];
+    *o_segment = &o->module->তথ্য_Segments[index];
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Memory_Init (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Memory_Init (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    M3DataSegment* segment = NULL;
+    M3_তথ্য_Segment* segment = ফাঁকা;
     u32            memoryIdx;
 
-    _throwif(m3Err_wasmMalformed, o->module->numMemories == 0);
+    _throwif(m3Err_wasmMalformed, o->module->অঙ্ক_Memories == 0);
 
-_   (ReadDataSegment(o, &segment));
-_   (ReadMemoryIndex(o, &memoryIdx));
+_   (Read_তথ্য_Segment(o, &segment));
+_   (Read_Memory_সূচক(o, &memoryIdx));
 
-_   (CopyStackTopToRegister(o, false));
+_   (Copy_স্তূপ_শীর্ষ_To_Register(o, false));
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, memoryIdx));
     }
 
-#if d_m3HasMemory64
+#যদি d_m3HasMemory64
     // only the destination follows the memory's address type: a data segment
     // is indexed as an i32 however the memory it is copied into is addressed
 _   (EmitOp(o, o->module->memories[memoryIdx]->isMemory64 ? op_MemInit64 : op_MemInit));
-#else
+#অন্যথা
 _   (EmitOp(o, op_MemInit));
 #endif
     EmitPointer(o, segment);
-_   (PopType(o, c_m3Type_i32));
-_   (EmitSlotNumOfStackTopAndPop(o));
-_   (EmitSlotNumOfStackTopAndPop(o));
+_   (বের_করো_Type(o, c_m3Type_i32));
+_   (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
+_   (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, 0));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
 
-static
-M3Result Compile_Select (IM3Compilation o, m3opcode_t i_opcode);
+স্থির
+M3_ফলাফল Compile_Select (IM3Compilation o, m3opcode_t i_opcode);
 
 // select with an explicit result type vector. The types only matter to the
 // validator; the operands are laid out exactly as for the untyped select.
-M3Result Compile_Select_Typed (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Select_Typed (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u32 numTypes;
-_   (ReadLEB_u32(&numTypes, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_wasmMalformed, numTypes != 1);
+    u32 অঙ্ক_Types;
+_   (ReadLEB_u32(&অঙ্ক_Types, &o->wasm, o->wasmEnd));
+    _throwif(m3Err_wasmMalformed, অঙ্ক_Types != 1);
 
     i8 waType;
     u8 type;
@@ -3162,32 +3162,32 @@ _   (NormalizeType(&type, waType));
 
 _   (Compile_Select(o, i_opcode));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 // A reference is one pointer-sized word and null is 0, so null-testing it is
 // just an integer eqz of the matching width.
-#  if M3_SIZEOF_PTR == 8
+#  যদি M3_SIZEOF_PTR == 8
 #    define d_m3RefIsNull_r   op_i64_EqualToZero_r
 #    define d_m3RefIsNull_s   op_i64_EqualToZero_s
-#  else
+#  অন্যথা
 #    define d_m3RefIsNull_r   op_i32_EqualToZero_r
 #    define d_m3RefIsNull_s   op_i32_EqualToZero_s
 #  endif
 
-static
-M3Result ReadRefType (IM3Compilation o, m3type_t* o_type)
+স্থির
+M3_ফলাফল ReadRefType (IM3Compilation o, m3type_t* o_type)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-#  if d_m3HasTypedRefs
+#  যদি d_m3HasTypedRefs
     // ref.null names a heap type: func, extern, or a function type index
     m3type_t heapBits;
 _   (ParseHeapType(o->module, &heapBits, &o->wasm, o->wasmEnd));
 
     *o_type = d_m3Type_ref | heapBits;
-#  else
+#  অন্যথা
     i8 waType;
     u8 plainType;
 _   (ReadLEB_i7(&waType, &o->wasm, o->wasmEnd));
@@ -3196,97 +3196,97 @@ _   (NormalizeType(&plainType, waType));
     _throwif(m3Err_wasmMalformed, not IsRefType(*o_type));
 #  endif
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Ref_Null (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Ref_Null (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     m3type_t type;
 _   (ReadRefType(o, &type));
-_   (PushConst(o, 0, type));
+_   (ঠেলো_Const(o, 0, type));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Ref_IsNull (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Ref_IsNull (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     IM3Operation op;
 
-    if (not IsStackPolymorphic(o)) {
-        _throwif(m3Err_typeMismatch, not IsRefType(GetStackTopType(o)));
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
+        _throwif(m3Err_typeMismatch, not IsRefType(Get_স্তূপ_শীর্ষ_Type(o)));
     }
 
-    if (IsStackTopInRegister(o)) {
+    যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
         op = d_m3RefIsNull_r;
-    } else {
+    } অন্যথা {
 _       (PreserveRegisterIfOccupied(o, c_m3Type_i32));
         op = d_m3RefIsNull_s;
     }
 
 _   (EmitOp(o, op));
-_   (EmitSlotNumOfStackTopAndPop(o));
-_   (PushRegister(o, c_m3Type_i32));
+_   (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
+_   (ঠেলো_Register(o, c_m3Type_i32));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Ref_Func (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Ref_Func (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u32 funcIndex;
+    u32 func_সূচক;
 
     // declared before the throws below, which jump past this point to _catch
     m3type_t    refType   = c_m3Type_funcref;
-    IM3Function reference = NULL;
+    IM3Function reference = ফাঁকা;
 
-_   (ReadLEB_u32(&funcIndex, &o->wasm, o->wasmEnd));
-    _throwif("function index out of range", funcIndex >= o->module->numFunctions);
+_   (ReadLEB_u32(&func_সূচক, &o->wasm, o->wasmEnd));
+    _throwif("function index out of range", func_সূচক >= o->module->অঙ্ক_Functions);
 
     // Inside a constant expression ref.func is itself a declaration; inside a
     // function body the function must already have been declared elsewhere.
-    if (o->function) {
-        _throwif("undeclared function reference", not Module_IsFunctionDeclared(o->module, funcIndex));
-    } else {
-_       (Module_DeclareFunction(o->module, funcIndex));
+    যদি (o->function) {
+        _throwif("undeclared function reference", not Module_IsFunctionDeclared(o->module, func_সূচক));
+    } অন্যথা {
+_       (Module_DeclareFunction(o->module, func_সূচক));
     }
 
-#  if d_m3HasTypedRefs
-    refType = RefTypeOfFuncType(o->module->functions[funcIndex].funcType, true);
+#  যদি d_m3HasTypedRefs
+    refType = RefTypeOfFuncType(o->module->functions[func_সূচক].funcType, true);
 #  endif
 
     // A reference denotes the function that actually runs, so a ref.func naming
     // an import linked to another module is the same reference that module's
     // own ref.func would produce - and carries the defining module with it.
-    reference = Function_Implementation(&o->module->functions[funcIndex]);
+    reference = Function_Implementation(&o->module->functions[func_সূচক]);
 
-_   (PushConst(o, (u64)(uintptr_t)reference, refType));
+_   (ঠেলো_Const(o, (u64)(uintptr_t)reference, refType));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
 // table.get/set/size/grow/fill all name a table by index; the table struct goes
 // into the codestream so the operation doesn't have to walk the module.
-static
-M3Result ReadTable (IM3Compilation o, M3Table** o_table)
+স্থির
+M3_ফলাফল ReadTable (IM3Compilation o, M3Table** o_table)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     u32 index;
 _   (ReadLEB_u32(&index, &o->wasm, o->wasmEnd));
-    _throwif("table index out of range", index >= o->module->numTables);
+    _throwif("table index out of range", index >= o->module->অঙ্ক_Tables);
 
     *o_table = o->module->tables[index];
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
@@ -3294,56 +3294,56 @@ _   (ReadLEB_u32(&index, &o->wasm, o->wasmEnd));
 // register first: after this each EmitSlotNumOfStackTopAndPop () emits a real
 // slot offset, and the register is free for the result. Operands are emitted
 // from the top of the stack downwards, which is the order the ops read them.
-static
-M3Result Compile_Table_Op (IM3Compilation o, IM3Operation i_op, M3Table* i_table, u32 i_numOperands, m3type_t i_retType)
+স্থির
+M3_ফলাফল Compile_Table_Op (IM3Compilation o, IM3Operation i_op, M3Table* i_table, u32 i_অঙ্ক_Operands, m3type_t i_retType)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
 _   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
 
 _   (EmitOp(o, i_op));
     EmitPointer(o, i_table);
 
-    for (u32 i = 0; i < i_numOperands; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    জন্য (u32 i = 0; i < i_অঙ্ক_Operands; ++i) {
+_       (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
     }
 
-    if (i_retType != c_m3Type_none) {
-_       (PushRegister(o, i_retType));
+    যদি (i_retType != c_m3Type_none) {
+_       (ঠেলো_Register(o, i_retType));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Table_GetSet (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Table_GetSet (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     M3Table* table;
 _   (ReadTable(o, &table));
 
-    if (i_opcode == c_waOp_tableGet) {
+    যদি (i_opcode == c_waOp_tableGet) {
 _       (CheckOperandType(o, 0, Table_AddrType(table)));
 _       (Compile_Table_Op(o, op_TableGet, table, 1, table->type));
-    } else {
+    } অন্যথা {
 _       (CheckOperandType(o, 1, Table_AddrType(table)));
 _       (Compile_Table_Op(o, op_TableSet, table, 2, c_m3Type_none));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Table_Init (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Table_Init (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u32      elemIndex;
+    u32      elem_সূচক;
     M3Table* table;
 
-_   (ReadLEB_u32(&elemIndex, &o->wasm, o->wasmEnd));
-    _throwif("element segment index out of range", elemIndex >= o->module->numElementSegments);
+_   (ReadLEB_u32(&elem_সূচক, &o->wasm, o->wasmEnd));
+    _throwif("element segment index out of range", elem_সূচক >= o->module->অঙ্ক_Element_Segments);
 _   (ReadTable(o, &table));
 
 _   (CheckOperandType(o, 2, Table_AddrType(table)));
@@ -3351,34 +3351,34 @@ _   (CheckOperandType(o, 2, Table_AddrType(table)));
 _   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
 _   (EmitOp(o, op_TableInit));
     EmitPointer(o, table);
-    EmitPointer(o, &o->module->elementSegments[elemIndex]);
+    EmitPointer(o, &o->module->elementSegments[elem_সূচক]);
 
-    for (u32 i = 0; i < 3; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    জন্য (u32 i = 0; i < 3; ++i) {
+_       (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Elem_Drop (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Elem_Drop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u32 elemIndex;
-_   (ReadLEB_u32(&elemIndex, &o->wasm, o->wasmEnd));
-    _throwif("element segment index out of range", elemIndex >= o->module->numElementSegments);
+    u32 elem_সূচক;
+_   (ReadLEB_u32(&elem_সূচক, &o->wasm, o->wasmEnd));
+    _throwif("element segment index out of range", elem_সূচক >= o->module->অঙ্ক_Element_Segments);
 
 _   (EmitOp(o, op_ElemDrop));
-    EmitPointer(o, &o->module->elementSegments[elemIndex]);
+    EmitPointer(o, &o->module->elementSegments[elem_সূচক]);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Table_Copy (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Table_Copy (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     M3Table* dst;
     M3Table* src;
@@ -3396,174 +3396,174 @@ _   (EmitOp(o, op_TableCopy));
     EmitPointer(o, dst);
     EmitPointer(o, src);
 
-    for (u32 i = 0; i < 3; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    জন্য (u32 i = 0; i < 3; ++i) {
+_       (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Table_Size (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Table_আকার (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     M3Table* table;
 _   (ReadTable(o, &table));
 
     // a table size is given in the table's own index type
-_   (Compile_Table_Op(o, op_TableSize, table, 0, Table_AddrType(table)));
+_   (Compile_Table_Op(o, op_Table_আকার, table, 0, Table_AddrType(table)));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result Compile_Table_GrowFill (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_Table_GrowFill (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     M3Table* table;
 _   (ReadTable(o, &table));
 
-    if (i_opcode == c_waOp_tableGrow) {
+    যদি (i_opcode == c_waOp_tableGrow) {
 _       (CheckOperandType(o, 0, Table_AddrType(table)));
 _       (Compile_Table_Op(o, op_TableGrow, table, 2, Table_AddrType(table)));
-    } else {
+    } অন্যথা {
 _       (CheckOperandType(o, 0, Table_AddrType(table)));
 _       (CheckOperandType(o, 2, Table_AddrType(table)));
 _       (Compile_Table_Op(o, op_TableFill, table, 3, c_m3Type_none));
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasRefTypes
 
 
-M3Result Compile_Data_Drop (IM3Compilation o, m3opcode_t i_opcode)
+M3_ফলাফল Compile_তথ্য_Drop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    M3DataSegment* segment = NULL;
-_   (ReadDataSegment(o, &segment));
+    M3_তথ্য_Segment* segment = ফাঁকা;
+_   (Read_তথ্য_Segment(o, &segment));
 
-_   (EmitOp(o, op_DataDrop));
+_   (EmitOp(o, op_তথ্য_Drop));
     EmitPointer(o, segment);
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-static
-M3Result ReadBlockType (IM3Compilation o, IM3FuncType* o_blockType)
+স্থির
+M3_ফলাফল ReadBlockType (IM3Compilation o, IM3FuncType* o_blockType)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-#if d_m3HasTypedRefs
+#যদি d_m3HasTypedRefs
     // a spelled-out reference type is two bytes, so it cannot be told apart
     // from a type index by the s33 that block types otherwise use
-    if (o->wasm < o->wasmEnd and (*o->wasm == d_waEncode_ref or *o->wasm == d_waEncode_refNull)) {
+    যদি (o->wasm < o->wasmEnd and (*o->wasm == d_waEncode_ref or *o->wasm == d_waEncode_refNull)) {
         m3type_t refType;
-_       (ParseValueType(o->module, &refType, &o->wasm, o->wasmEnd));
-        IM3FuncType ftype = NULL;
+_       (Parse_মান_Type(o->module, &refType, &o->wasm, o->wasmEnd));
+        IM3FuncType ftype = ফাঁকা;
 _       (AllocFuncType(&ftype, 1));
-        ftype->numRets  = 1;
+        ftype->অঙ্ক_Rets  = 1;
         ftype->types[0] = refType;
 _       (Environment_AddFuncType(o->module->environment, &ftype));
         *o_blockType = ftype;
-        return result;
+        ফেরত ফলাফল;
     }
 #endif
 
     i64 type;
 _   (ReadLebSigned(&type, 33, &o->wasm, o->wasmEnd));
 
-    if (type < 0) {
+    যদি (type < 0) {
         _throwif(m3Err_invalidTypeId, type < -64);
-        u8 valueType;
-_       (NormalizeType(&valueType, (i8)type));                                 m3log (compile, d_indent " (type: %s)", get_indention_string (o), c_waTypes [valueType]);
-        *o_blockType = o->module->environment->retFuncTypes[valueType];
-    } else {
-        _throwif("func type out of bounds", type >= o->module->numFuncTypes);
+        u8 মান_Type;
+_       (NormalizeType(&মান_Type, (i8)type));                                 m3log (compile, d_indent " (type: %s)", get_indention_string (o), c_waTypes [মান_Type]);
+        *o_blockType = o->module->environment->retFuncTypes[মান_Type];
+    } অন্যথা {
+        _throwif("func type out of bounds", type >= o->module->অঙ্ক_Func_Types);
         *o_blockType = o->module->funcTypes[type];                         m3log (compile, d_indent " (type: %s)", get_indention_string (o), SPrintFuncTypeSignature (*o_blockType));
     }
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result PreserveArgsAndLocals (IM3Compilation o)
+স্থির
+M3_ফলাফল PreserveArgsAndLocals (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (o->stackIndex > o->stackFirstDynamicIndex) {
-        u32 numArgsAndLocals = GetFunctionNumArgsAndLocals(o->function);
+    যদি (o->স্তূপ_সূচক > o->স্তূপ_First_Dynamic_সূচক) {
+        u32 অঙ্ক_Args_And_Locals = Get_Function_অঙ্ক_Args_And_Locals(o->function);
 
-        for (u32 i = 0; i < numArgsAndLocals; ++i) {
-            u16 slot = GetSlotForStackIndex(o, i);
+        জন্য (u32 i = 0; i < অঙ্ক_Args_And_Locals; ++i) {
+            u16 slot = Get_Slot_For_স্তূপ_সূচক(o, i);
 
-            u16 preservedSlotNumber;
-_           (FindReferencedLocalWithinCurrentBlock(o, &preservedSlotNumber, slot));
+            u16 preserved_Slot_সংখ্যা;
+_           (FindReferencedLocalWithinCurrentBlock(o, &preserved_Slot_সংখ্যা, slot));
 
-            if (preservedSlotNumber != slot) {
-                m3type_t     type = GetStackTypeFromBottom(o, i);                 d_m3Assert (type != c_m3Type_none)
+            যদি (preserved_Slot_সংখ্যা != slot) {
+                m3type_t     type = Get_স্তূপ_Type_From_Bottom(o, i);                 d_m3Assert (type != c_m3Type_none)
                 IM3Operation op   = Is64BitType(type) ? op_CopySlot_64 : op_CopySlot_32;
 
                 EmitOp(o, op);
-                EmitSlotOffset(o, preservedSlotNumber);
+                EmitSlotOffset(o, preserved_Slot_সংখ্যা);
                 EmitSlotOffset(o, slot);
             }
         }
     }
 
     _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_LoopOrBlock (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_LoopOrBlock (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    IM3FuncType blockType = NULL;
+    IM3FuncType blockType = ফাঁকা;
 
 _   (PreserveRegisters(o));
 _   (PreserveArgsAndLocals(o));
 
 _   (ReadBlockType(o, &blockType));
 
-    if (i_opcode == c_waOp_loop) {
-        u16 numParams = GetFuncTypeNumParams(blockType);
-        if (numParams) {
+    যদি (i_opcode == c_waOp_loop) {
+        u16 অঙ্ক_Params = Get_Func_Type_অঙ্ক_Params(blockType);
+        যদি (অঙ্ক_Params) {
             // instantiate constants
-            u16 numValues = GetNumBlockValuesOnStack(o);
+            u16 অঙ্ক_মানসমূহ = Get_অঙ্ক_Block_মানসমূহ_On_স্তূপ(o);
 
-            if (numValues >= numParams) {
-                u16 stackTop = GetStackTopIndex(o) + 1;
+            যদি (অঙ্ক_মানসমূহ >= অঙ্ক_Params) {
+                u16 স্তূপ_শীর্ষ = Get_স্তূপ_শীর্ষ_সূচক(o) + 1;
 
-                for (u16 i = stackTop - numParams; i < stackTop; ++i) {
-                    u16      slot = GetSlotForStackIndex(o, i);
-                    m3type_t type = GetStackTypeFromBottom(o, i);
+                জন্য (u16 i = স্তূপ_শীর্ষ - অঙ্ক_Params; i < স্তূপ_শীর্ষ; ++i) {
+                    u16      slot = Get_Slot_For_স্তূপ_সূচক(o, i);
+                    m3type_t type = Get_স্তূপ_Type_From_Bottom(o, i);
 
-                    if (IsConstantSlot(o, slot)) {
+                    যদি (IsConstantSlot(o, slot)) {
                         u16 newSlot = c_slotUnused;
 _                       (AllocateSlots(o, &newSlot, type));
-_                       (CopyStackIndexToSlot(o, newSlot, i));
-                        o->wasmStack[i] = newSlot;
+_                       (Copy_স্তূপ_সূচক_To_Slot(o, newSlot, i));
+                        o->wasm_স্তূপ[i] = newSlot;
                     }
                 }
             }
         }
 
 _       (EmitOp(o, op_Loop));
-    } else {
+    } অন্যথা {
     }
 
 _   (CompileBlock(o, blockType, i_opcode));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
 
 // Emits one out-of-line stub per catch clause, and writes each stub's address
 // into the slot op_TryTable reserved for it.
@@ -3575,26 +3575,26 @@ _   (CompileBlock(o, blockType, i_opcode));
 // ResolveBlockResults copies the topmost values into the label's landing pads.
 // Popping them again afterwards puts the compiler's stack back where the body
 // expects to find it.
-static
-M3Result EmitCatchStubs (IM3Compilation o)
+স্থির
+M3_ফলাফল EmitCatchStubs (IM3Compilation o)
 {
-    IM3CodePage displacedPage = NULL;
+    IM3CodePage displacedPage = ফাঁকা;
 _try {
     M3CatchClause* clauses    = o->tryClauses;
-    u32            numClauses = o->numTryClauses;
+    u32            অঙ্ক_Clauses = o->অঙ্ক_Try_Clauses;
 
     // the body must not see these: a nested try_table sets up its own
-    o->tryClauses    = NULL;
-    o->numTryClauses = 0;
+    o->tryClauses    = ফাঁকা;
+    o->অঙ্ক_Try_Clauses = 0;
 
-    for (u32 i = 0; i < numClauses; ++i) {
+    জন্য (u32 i = 0; i < অঙ্ক_Clauses; ++i) {
         M3CatchClause* clause = &clauses[i];
 
         IM3CompilationScope scope;
 _       (GetBlockScope(o, &scope, clause->labelDepth + 1));
 
-        IM3FuncType payload = clause->tag ? clause->tag->type : NULL;
-        u16         numArgs = GetFuncTypeNumParams(payload);
+        IM3FuncType payload = clause->tag ? clause->tag->type : ফাঁকা;
+        u16         অঙ্ক_Args = Get_Func_Type_অঙ্ক_Params(payload);
 
         // What the stub hands the label - the payload, then the exnref for a
         // _ref clause - has to be what the label takes. ResolveBlockResults
@@ -3603,16 +3603,16 @@ _       (GetBlockScope(o, &scope, clause->labelDepth + 1));
         // that takes (ref $t) has to be rejected.
         {
             bool isLoop         = (scope->opcode == c_waOp_loop);
-            u16  numLabelValues = isLoop ? GetFuncTypeNumParams(scope->type)
-                                         : GetFuncTypeNumResults(scope->type);
+            u16  অঙ্ক_Label_মানসমূহ = isLoop ? Get_Func_Type_অঙ্ক_Params(scope->type)
+                                         : Get_Func_Type_অঙ্ক_Results(scope->type);
 
-            _throwif(m3Err_typeCountMismatch, numLabelValues != numArgs + (clause->hasRef ? 1 : 0));
+            _throwif(m3_Err_type_গুনতি_Mismatch, অঙ্ক_Label_মানসমূহ != অঙ্ক_Args + (clause->hasRef ? 1 : 0));
 
-            for (u16 a = 0; a < numLabelValues; ++a) {
-                m3type_t given  = (a < numArgs) ? GetFuncTypeParamType(payload, a)
+            জন্য (u16 a = 0; a < অঙ্ক_Label_মানসমূহ; ++a) {
+                m3type_t given  = (a < অঙ্ক_Args) ? GetFuncTypeParamType(payload, a)
                                                 : (m3type_t)c_m3Type_exnref;
                 m3type_t wanted = isLoop ? GetFuncTypeParamType(scope->type, a)
-                                         : GetFuncTypeResultType(scope->type, a);
+                                         : Get_Func_Type_ফলাফল_Type(scope->type, a);
 
                 _throwif(m3Err_typeMismatch, not IsSubTypeOf(given, wanted));
             }
@@ -3625,57 +3625,57 @@ _       (AcquireCompilationCodePage(o, &stubPage));
         displacedPage = o->page;
         o->page       = stubPage;
 
-        u16 firstIndex = o->stackIndex;
+        u16 first_সূচক = o->স্তূপ_সূচক;
 
-        for (u16 a = 0; a < numArgs; ++a) {
-_           (PushAllocatedSlot(o, GetFuncTypeParamType(payload, a)));
+        জন্য (u16 a = 0; a < অঙ্ক_Args; ++a) {
+_           (ঠেলো_Allocated_Slot(o, GetFuncTypeParamType(payload, a)));
         }
 
-        if (clause->hasRef) {
-_           (PushAllocatedSlot(o, c_m3Type_exnref));
+        যদি (clause->hasRef) {
+_           (ঠেলো_Allocated_Slot(o, c_m3Type_exnref));
         }
 
         // emitted even with nothing to move: this is also where an exception
         // no clause will reify gets released
-_       (EnsureCodePageNumLines(o, 2 * numArgs + 3 + d_m3CodePageFreeLinesThreshold));
+_       (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 2 * অঙ্ক_Args + 3 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 
 _       (EmitOp(o, op_CatchPayload));
-        EmitConstant32(o, numArgs);
+        EmitConstant32(o, অঙ্ক_Args);
 
-        for (u16 a = 0; a < numArgs; ++a) {
-            u16 index = firstIndex + a;
-            EmitSlotOffset(o, GetSlotForStackIndex(o, index));
-            EmitConstant32(o, Is64BitType(GetStackTypeFromBottom(o, index)));
+        জন্য (u16 a = 0; a < অঙ্ক_Args; ++a) {
+            u16 index = first_সূচক + a;
+            EmitSlotOffset(o, Get_Slot_For_স্তূপ_সূচক(o, index));
+            EmitConstant32(o, Is64BitType(Get_স্তূপ_Type_From_Bottom(o, index)));
         }
 
-        EmitSlotOffset(o, clause->hasRef ? (i32)GetSlotForStackIndex(o, firstIndex + numArgs) : -1);
+        EmitSlotOffset(o, clause->hasRef ? (i32)Get_Slot_For_স্তূপ_সূচক(o, first_সূচক + অঙ্ক_Args) : -1);
 
-_       (EmitPopTryFrames(o, NumTryFramesToPop(o->block.outer, scope)));
+_       (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames_To_বের_করো(o->block.outer, scope)));
 
-        if (scope->opcode == c_waOp_loop) {
+        যদি (scope->opcode == c_waOp_loop) {
 _           (ResolveBlockResults(o, scope, /* isBranch: */ true));
 
 _           (EmitOp(o, Op_ContinueLoop(o)));
             EmitPointer(o, scope->pc);
 _           (RecordBackEdge(o, scope, false));
-        } else if (scope->depth == 0) {
-_           (ReturnValues(o, scope, /* isBranch: */ true));
+        } অন্যথা যদি (scope->depth == 0) {
+_           (Return_মানসমূহ(o, scope, /* isBranch: */ true));
 _           (EmitOp(o, op_Return));
-        } else {
+        } অন্যথা {
 _           (ResolveBlockResults(o, scope, /* isBranch: */ true));
 _           (EmitPatchingBranch(o, scope));
         }
 
         IM3CodePage returnTo = displacedPage;
-        displacedPage        = NULL;
+        displacedPage        = ফাঁকা;
 
         ReleaseCompilationCodePage(o);
         o->page = returnTo;
 
         *(pc_t*)clause->stubSlot = startPC;
 
-        while (o->stackIndex > firstIndex) {
-_           (Pop(o));
+        যখন (o->স্তূপ_সূচক > first_সূচক) {
+_           (বের_করো(o));
         }
     }
 
@@ -3683,52 +3683,52 @@ _           (Pop(o));
 
     // thrown with a stub page installed: release it and put back the one it
     // displaced, which the caller's catch then releases
-    if (displacedPage) {
+    যদি (displacedPage) {
         ReleaseCompilationCodePage(o);
         o->page = displacedPage;
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 
-static
-M3Result Compile_TryTable (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_TryTable (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3CatchClause* clauses = NULL;
+    M3CatchClause* clauses = ফাঁকা;
 _try {
     // a catch entry has to be able to assume the operand stack is entirely in
     // slots: an unwind leaves nothing in the registers
 _   (PreserveRegisters(o));
 _   (PreserveArgsAndLocals(o));
 
-    IM3FuncType blockType = NULL;
+    IM3FuncType blockType = ফাঁকা;
 _   (ReadBlockType(o, &blockType));
 
-    u32 numClauses;
-_   (ReadLEB_u32(&numClauses, &o->wasm, o->wasmEnd));
+    u32 অঙ্ক_Clauses;
+_   (ReadLEB_u32(&অঙ্ক_Clauses, &o->wasm, o->wasmEnd));
 
-    _throwif("too many catch clauses", numClauses > d_m3MaxSaneTagsCount);
+    _throwif("too many catch clauses", অঙ্ক_Clauses > d_m3_Max_Sane_Tags_গুনতি);
 
-    if (numClauses) {
-        clauses = m3_AllocArray(M3CatchClause, numClauses);
+    যদি (অঙ্ক_Clauses) {
+        clauses = m3_AllocArray(M3CatchClause, অঙ্ক_Clauses);
         _throwifnull(clauses);
     }
 
-    for (u32 i = 0; i < numClauses; ++i) {
+    জন্য (u32 i = 0; i < অঙ্ক_Clauses; ++i) {
         u8 kind;
 _       (Read_u8(&kind, &o->wasm, o->wasmEnd));
         _throwif(m3Err_wasmMalformed, kind > 0x03);
 
-        clauses[i].tag    = NULL;
+        clauses[i].tag    = ফাঁকা;
         clauses[i].hasRef = (kind == 0x01 or kind == 0x03);
 
-        if (kind == 0x00 or kind == 0x01) {
-            u32 tagIndex;
-_           (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-            _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+        যদি (kind == 0x00 or kind == 0x01) {
+            u32 tag_সূচক;
+_           (ReadLEB_u32(&tag_সূচক, &o->wasm, o->wasmEnd));
+            _throwif(m3Err_unknownTag, tag_সূচক >= o->module->অঙ্ক_Tags);
 
-            IM3Tag tag     = &o->module->tags[tagIndex];
+            IM3Tag tag     = &o->module->tags[tag_সূচক];
             clauses[i].tag = tag->resolved ? tag->resolved : tag;
         }
 
@@ -3737,127 +3737,127 @@ _       (ReadLEB_u32(&clauses[i].labelDepth, &o->wasm, o->wasmEnd));
 
     // op_TryTable, the clause count, and two words per clause, all of which have
     // to land on one page: the op reads the table by offset from its own pc
-_   (EnsureCodePageNumLines(o, 2 * numClauses + 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 2 * অঙ্ক_Clauses + 2 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 
 _   (EmitOp(o, op_TryTable));
-    EmitConstant32(o, numClauses);
+    EmitConstant32(o, অঙ্ক_Clauses);
 
-    for (u32 i = 0; i < numClauses; ++i) {
+    জন্য (u32 i = 0; i < অঙ্ক_Clauses; ++i) {
         EmitPointer(o, clauses[i].tag);
         clauses[i].stubSlot = ReservePointer(o);
     }
 
     o->tryClauses    = clauses;
-    o->numTryClauses = numClauses;
+    o->অঙ্ক_Try_Clauses = অঙ্ক_Clauses;
 
 _   (CompileBlock(o, blockType, c_waOp_tryTable));
 
 } _catch:
 
-    o->tryClauses    = NULL;
-    o->numTryClauses = 0;
+    o->tryClauses    = ফাঁকা;
+    o->অঙ্ক_Try_Clauses = 0;
 
     m3_Free(clauses);
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 
-static
-M3Result Compile_Throw (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Throw (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 tagIndex;
-_   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    u32 tag_সূচক;
+_   (ReadLEB_u32(&tag_সূচক, &o->wasm, o->wasmEnd));
+    _throwif(m3Err_unknownTag, tag_সূচক >= o->module->অঙ্ক_Tags);
 
-    IM3Tag tag = &o->module->tags[tagIndex];
-    if (tag->resolved) {
+    IM3Tag tag = &o->module->tags[tag_সূচক];
+    যদি (tag->resolved) {
         tag = tag->resolved;
     }
 
-    u16 numArgs = GetFuncTypeNumParams(tag->type);
+    u16 অঙ্ক_Args = Get_Func_Type_অঙ্ক_Params(tag->type);
 
     // the payload is read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
     // check the payload before emitting anything, so a mistyped throw does not
     // leave half an operation behind
-    bool isPolymorphic = IsStackPolymorphic(o);
+    bool isPolymorphic = Is_স্তূপ_Polymorphic(o);
 
-    if (not isPolymorphic) {
-        _throwif(m3Err_typeCountMismatch, GetNumBlockValuesOnStack(o) < numArgs);
+    যদি (not isPolymorphic) {
+        _throwif(m3_Err_type_গুনতি_Mismatch, Get_অঙ্ক_Block_মানসমূহ_On_স্তূপ(o) < অঙ্ক_Args);
 
-        for (u16 i = 0; i < numArgs; ++i) {
-            u16 index = (u16)(o->stackIndex - numArgs + i);
+        জন্য (u16 i = 0; i < অঙ্ক_Args; ++i) {
+            u16 index = (u16)(o->স্তূপ_সূচক - অঙ্ক_Args + i);
 
-            _throwif(m3Err_typeMismatch, not IsSubTypeOf(GetStackTypeFromBottom(o, index),
+            _throwif(m3Err_typeMismatch, not IsSubTypeOf(Get_স্তূপ_Type_From_Bottom(o, index),
                                                          GetFuncTypeParamType(tag->type, i)));
         }
     }
 
-_   (EnsureCodePageNumLines(o, 2 * numArgs + 3 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 2 * অঙ্ক_Args + 3 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 
 _   (EmitOp(o, op_Throw));
     EmitPointer(o, tag);
-    EmitConstant32(o, numArgs);
+    EmitConstant32(o, অঙ্ক_Args);
 
     // the payload is named in the order the tag declares it, so the deepest of
     // the arguments on the stack comes first. In unreachable code there is
     // nothing on the stack to name and nothing will run this, so slot 0 stands
     // in for an operand that isn't there.
-    for (u16 i = 0; i < numArgs; ++i) {
+    জন্য (u16 i = 0; i < অঙ্ক_Args; ++i) {
         m3type_t type = GetFuncTypeParamType(tag->type, i);
 
-        EmitSlotOffset(o, isPolymorphic ? 0 : GetSlotForStackIndex(o, (u16)(o->stackIndex - numArgs + i)));
+        EmitSlotOffset(o, isPolymorphic ? 0 : Get_Slot_For_স্তূপ_সূচক(o, (u16)(o->স্তূপ_সূচক - অঙ্ক_Args + i)));
         EmitConstant32(o, Is64BitType(type));
     }
 
-    if (not isPolymorphic) {
-        for (u16 i = 0; i < numArgs; ++i) {
-_           (Pop(o));
+    যদি (not isPolymorphic) {
+        জন্য (u16 i = 0; i < অঙ্ক_Args; ++i) {
+_           (বের_করো(o));
         }
     }
 
-_   (SetStackPolymorphic(o));
+_   (Set_স্তূপ_Polymorphic(o));
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
 
-static
-M3Result Compile_ThrowRef (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_ThrowRef (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
 _       (PreserveRegisterIfOccupied(o, c_m3Type_i64));
 
-        _throwif(m3Err_typeMismatch, BaseTypeOf(GetStackTopType(o)) != c_m3Type_exnref);
+        _throwif(m3Err_typeMismatch, BaseTypeOf(Get_স্তূপ_শীর্ষ_Type(o)) != c_m3Type_exnref);
 
 _       (EmitOp(o, op_ThrowRef));
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+        EmitSlotOffset(o, Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o));
 
-_       (Pop(o));
+_       (বের_করো(o));
     }
 
-_   (SetStackPolymorphic(o));
+_   (Set_স্তূপ_Polymorphic(o));
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasExceptionHandling
 
-#if d_m3HasStackSwitching
+#যদি d_m3_Has_স্তূপ_Switching
 
-static
-M3Result Compile_ContNew (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_ContNew (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex >= o->module->numFuncTypes);
+    u32 type_সূচক;
+_   (ReadLEB_u32(&type_সূচক, &o->wasm, o->wasmEnd));
+    _throwif(m3_Err_type_গুনতি_Mismatch, type_সূচক >= o->module->অঙ্ক_Func_Types);
 
-    IM3FuncType funcType = o->module->funcTypes[typeIndex];
+    IM3FuncType funcType = o->module->funcTypes[type_সূচক];
     _throwif("type is not a continuation", not funcType->isContinuation);
 
     // the operands are read out of slots, so nothing may still be in a register
@@ -3865,35 +3865,35 @@ _   (PreserveRegisters(o));
 
     // cont.new $ct : [(ref null $ft)] -> [(ref $ct)], where $ct ~~ cont $ft:
     // the function has to be one this continuation type can run
-    m3type_t topType = GetStackTopType(o);
+    m3type_t শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
     _throwif(m3Err_typeMismatch,
-             not IsSubTypeOf(topType, RefTypeOfFuncType(funcType->contFuncType, false)));
+             not IsSubTypeOf(শীর্ষ_Type, RefTypeOfFuncType(funcType->contFuncType, false)));
 
-    u16 funcSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    u16 funcSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_   (বের_করো(o));
 
     u16 dstSlot;
-_   (PushAllocatedSlot(o, RefTypeOfFuncType(funcType, true)));
-    dstSlot = GetStackTopSlotNumber(o);
+_   (ঠেলো_Allocated_Slot(o, RefTypeOfFuncType(funcType, true)));
+    dstSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
 
-_   (EnsureCodePageNumLines(o, 4 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 4 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 _   (EmitOp(o, op_ContNew));
     EmitPointer(o, funcType);
     EmitSlotOffset(o, dstSlot);
     EmitSlotOffset(o, funcSlot);
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_ContBind (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_ContBind (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     u32 typeIndex1, typeIndex2;
 _   (ReadLEB_u32(&typeIndex1, &o->wasm, o->wasmEnd));
 _   (ReadLEB_u32(&typeIndex2, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex1 >= o->module->numFuncTypes);
-    _throwif(m3Err_typeCountMismatch, typeIndex2 >= o->module->numFuncTypes);
+    _throwif(m3_Err_type_গুনতি_Mismatch, typeIndex1 >= o->module->অঙ্ক_Func_Types);
+    _throwif(m3_Err_type_গুনতি_Mismatch, typeIndex2 >= o->module->অঙ্ক_Func_Types);
 
     IM3FuncType ct1 = o->module->funcTypes[typeIndex1];
     IM3FuncType ct2 = o->module->funcTypes[typeIndex2];
@@ -3902,115 +3902,115 @@ _   (ReadLEB_u32(&typeIndex2, &o->wasm, o->wasmEnd));
     // the operands are read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
-    m3type_t contType = GetStackTopType(o);
+    m3type_t contType = Get_স্তূপ_শীর্ষ_Type(o);
     _throwif(m3Err_typeMismatch, not IsSubTypeOf(contType, RefTypeOfFuncType(ct1, false)));
-    u16 contSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    u16 contSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_   (বের_করো(o));
 
     IM3FuncType ft1 = ct1->contFuncType ? ct1->contFuncType : ct1;
     IM3FuncType ft2 = ct2->contFuncType ? ct2->contFuncType : ct2;
 
-    u16 numParams1 = GetFuncTypeNumParams(ft1);
-    u16 numParams2 = GetFuncTypeNumParams(ft2);
-    _throwif(m3Err_typeMismatch, numParams1 < numParams2);
-    u32 numBound = numParams1 - numParams2;
+    u16 অঙ্ক_Params1 = Get_Func_Type_অঙ্ক_Params(ft1);
+    u16 অঙ্ক_Params2 = Get_Func_Type_অঙ্ক_Params(ft2);
+    _throwif(m3Err_typeMismatch, অঙ্ক_Params1 < অঙ্ক_Params2);
+    u32 অঙ্ক_Bound = অঙ্ক_Params1 - অঙ্ক_Params2;
 
-    u16 numResults1 = GetFuncTypeNumResults(ft1);
-    u16 numResults2 = GetFuncTypeNumResults(ft2);
-    _throwif(m3Err_typeMismatch, numResults1 != numResults2);
-    for (u16 i = 0; i < numResults1; ++i) {
-        _throwif(m3Err_typeMismatch, GetFuncTypeResultType(ft1, i) != GetFuncTypeResultType(ft2, i));
+    u16 অঙ্ক_Results1 = Get_Func_Type_অঙ্ক_Results(ft1);
+    u16 অঙ্ক_Results2 = Get_Func_Type_অঙ্ক_Results(ft2);
+    _throwif(m3Err_typeMismatch, অঙ্ক_Results1 != অঙ্ক_Results2);
+    জন্য (u16 i = 0; i < অঙ্ক_Results1; ++i) {
+        _throwif(m3Err_typeMismatch, Get_Func_Type_ফলাফল_Type(ft1, i) != Get_Func_Type_ফলাফল_Type(ft2, i));
     }
-    for (u16 i = 0; i < numParams2; ++i) {
-        _throwif(m3Err_typeMismatch, GetFuncTypeParamType(ft1, numBound + i) != GetFuncTypeParamType(ft2, i));
+    জন্য (u16 i = 0; i < অঙ্ক_Params2; ++i) {
+        _throwif(m3Err_typeMismatch, GetFuncTypeParamType(ft1, অঙ্ক_Bound + i) != GetFuncTypeParamType(ft2, i));
     }
 
     u16 argSlots[d_m3MaxContinuationPayload];
-    _throwif("too many bound args", numBound > d_m3MaxContinuationPayload);
+    _throwif("too many bound args", অঙ্ক_Bound > d_m3MaxContinuationPayload);
 
-    for (u32 i = 0; i < numBound; ++i) {
-        u32      paramIdx     = numBound - 1 - i;
+    জন্য (u32 i = 0; i < অঙ্ক_Bound; ++i) {
+        u32      paramIdx     = অঙ্ক_Bound - 1 - i;
         m3type_t expectedType = GetFuncTypeParamType(ft1, paramIdx);
-        m3type_t actualType   = GetStackTopType(o);
+        m3type_t actualType   = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        argSlots[paramIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        argSlots[paramIdx] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_       (বের_করো(o));
     }
 
     u16 dstSlot;
-_   (PushAllocatedSlot(o, RefTypeOfFuncType(ct2, true)));
-    dstSlot = GetStackTopSlotNumber(o);
+_   (ঠেলো_Allocated_Slot(o, RefTypeOfFuncType(ct2, true)));
+    dstSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
 
-_   (EnsureCodePageNumLines(o, 6 + numBound * 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 6 + অঙ্ক_Bound * 2 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 _   (EmitOp(o, op_ContBind));
     EmitPointer(o, ct1);
     EmitPointer(o, ct2);
     EmitSlotOffset(o, dstSlot);
     EmitSlotOffset(o, contSlot);
-    EmitConstant32(o, numBound);
-    for (u32 i = 0; i < numBound; ++i) {
+    EmitConstant32(o, অঙ্ক_Bound);
+    জন্য (u32 i = 0; i < অঙ্ক_Bound; ++i) {
         EmitSlotOffset(o, argSlots[i]);
         EmitConstant32(o, Is64BitType(GetFuncTypeParamType(ft1, i)));
     }
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Suspend (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Suspend (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 tagIndex;
-_   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    u32 tag_সূচক;
+_   (ReadLEB_u32(&tag_সূচক, &o->wasm, o->wasmEnd));
+    _throwif(m3Err_unknownTag, tag_সূচক >= o->module->অঙ্ক_Tags);
 
-    IM3Tag tag = &o->module->tags[tagIndex];
-    if (tag->resolved) {
+    IM3Tag tag = &o->module->tags[tag_সূচক];
+    যদি (tag->resolved) {
         tag = tag->resolved;
     }
-    u16 numParams  = GetFuncTypeNumParams(tag->type);
-    u16 numResults = GetFuncTypeNumResults(tag->type);
+    u16 অঙ্ক_Params  = Get_Func_Type_অঙ্ক_Params(tag->type);
+    u16 অঙ্ক_Results = Get_Func_Type_অঙ্ক_Results(tag->type);
 
 _   (PreserveRegisters(o));
 
     u16 paramSlots[d_m3MaxContinuationPayload];
-    _throwif("too many tag params", numParams > d_m3MaxContinuationPayload);
-    for (u16 i = 0; i < numParams; ++i) {
-        u16      pIdx         = numParams - 1 - i;
+    _throwif("too many tag params", অঙ্ক_Params > d_m3MaxContinuationPayload);
+    জন্য (u16 i = 0; i < অঙ্ক_Params; ++i) {
+        u16      pIdx         = অঙ্ক_Params - 1 - i;
         m3type_t expectedType = GetFuncTypeParamType(tag->type, pIdx);
-        m3type_t actualType   = GetStackTopType(o);
+        m3type_t actualType   = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        paramSlots[pIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        paramSlots[pIdx] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_       (বের_করো(o));
     }
 
-    u16 resultSlots[d_m3MaxContinuationPayload];
-    _throwif("too many tag results", numResults > d_m3MaxContinuationPayload);
-    for (u16 i = 0; i < numResults; ++i) {
-        m3type_t rtype = GetFuncTypeResultType(tag->type, i);
-_       (PushAllocatedSlot(o, rtype));
-        resultSlots[i] = GetStackTopSlotNumber(o);
+    u16 ফলাফল_Slots[d_m3MaxContinuationPayload];
+    _throwif("too many tag results", অঙ্ক_Results > d_m3MaxContinuationPayload);
+    জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+        m3type_t rtype = Get_Func_Type_ফলাফল_Type(tag->type, i);
+_       (ঠেলো_Allocated_Slot(o, rtype));
+        ফলাফল_Slots[i] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
     }
 
-_   (EnsureCodePageNumLines(o, 4 + numParams * 2 + numResults * 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 4 + অঙ্ক_Params * 2 + অঙ্ক_Results * 2 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 _   (EmitOp(o, op_Suspend));
     EmitPointer(o, tag);
-    EmitConstant32(o, numParams);
-    for (u16 i = 0; i < numParams; ++i) {
+    EmitConstant32(o, অঙ্ক_Params);
+    জন্য (u16 i = 0; i < অঙ্ক_Params; ++i) {
         EmitSlotOffset(o, paramSlots[i]);
         EmitConstant32(o, Is64BitType(GetFuncTypeParamType(tag->type, i)));
     }
-    EmitConstant32(o, numResults);
-    for (u16 i = 0; i < numResults; ++i) {
-        EmitSlotOffset(o, resultSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeResultType(tag->type, i)));
+    EmitConstant32(o, অঙ্ক_Results);
+    জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+        EmitSlotOffset(o, ফলাফল_Slots[i]);
+        EmitConstant32(o, Is64BitType(Get_Func_Type_ফলাফল_Type(tag->type, i)));
     }
 
     // the results are part of the frame here: op_Suspend clears them, and
     // whatever resumes this writes them before anything reads them
-_   (RecordSafePoint(o, safepoint_suspend, 0, numResults, 0, NULL));
+_   (RecordSafePoint(o, safepoint_suspend, 0, অঙ্ক_Results, 0, ফাঁকা));
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
 // resume, resume_throw and resume_throw_ref. All three run a continuation
@@ -4020,78 +4020,78 @@ _   (RecordSafePoint(o, safepoint_suspend, 0, numResults, 0, NULL));
 // Emitted as: the continuation type, the slot holding it, the operands that
 // belong to this form, the handler table, then the result slots. Keeping the
 // tail identical is what lets one runtime path finish all three.
-static
-M3Result Compile_Resume (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Resume (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3ResumeHandler* handlers      = NULL;
-    IM3CodePage      displacedPage = NULL;
+    M3ResumeHandler* handlers      = ফাঁকা;
+    IM3CodePage      displacedPage = ফাঁকা;
 _try {
     bool isThrow    = (i_opcode == c_waOp_resumeThrow);
     bool isThrowRef = (i_opcode == c_waOp_resumeThrowRef);
 
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex >= o->module->numFuncTypes);
+    u32 type_সূচক;
+_   (ReadLEB_u32(&type_সূচক, &o->wasm, o->wasmEnd));
+    _throwif(m3_Err_type_গুনতি_Mismatch, type_সূচক >= o->module->অঙ্ক_Func_Types);
 
-    IM3FuncType contFuncType = o->module->funcTypes[typeIndex];
+    IM3FuncType contFuncType = o->module->funcTypes[type_সূচক];
     _throwif("type is not a continuation", not contFuncType->isContinuation);
 
     IM3FuncType innerType      = contFuncType->contFuncType;
-    u16         numContResults = GetFuncTypeNumResults(innerType);
+    u16         অঙ্ক_Cont_Results = Get_Func_Type_অঙ্ক_Results(innerType);
 
-    IM3Tag exnTag      = NULL;
-    u16    numOperands = 0;
+    IM3Tag exnTag      = ফাঁকা;
+    u16    অঙ্ক_Operands = 0;
 
-    if (isThrow) {
-        u32 tagIndex;
-_       (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-        _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    যদি (isThrow) {
+        u32 tag_সূচক;
+_       (ReadLEB_u32(&tag_সূচক, &o->wasm, o->wasmEnd));
+        _throwif(m3Err_unknownTag, tag_সূচক >= o->module->অঙ্ক_Tags);
 
-        exnTag = &o->module->tags[tagIndex];
+        exnTag = &o->module->tags[tag_সূচক];
 
         // it is an exception that gets raised, so the tag must be one throw
         // could have raised: no results
-        _throwif(m3Err_typeMismatch, GetFuncTypeNumResults(exnTag->type) != 0);
+        _throwif(m3Err_typeMismatch, Get_Func_Type_অঙ্ক_Results(exnTag->type) != 0);
 
-        numOperands = GetFuncTypeNumParams(exnTag->type);
-    } else if (not isThrowRef) {
+        অঙ্ক_Operands = Get_Func_Type_অঙ্ক_Params(exnTag->type);
+    } অন্যথা যদি (not isThrowRef) {
         // a plain resume hands over the continuation's own parameters. An
         // aborted one never receives them, so they are unconstrained there.
-        numOperands = GetFuncTypeNumParams(innerType);
+        অঙ্ক_Operands = Get_Func_Type_অঙ্ক_Params(innerType);
     }
 
-    u32 numClauses;
-_   (ReadLEB_u32(&numClauses, &o->wasm, o->wasmEnd));
+    u32 অঙ্ক_Clauses;
+_   (ReadLEB_u32(&অঙ্ক_Clauses, &o->wasm, o->wasmEnd));
 
     u32 clauseLabelDepths[16];
-    _throwif("too many resume clauses", numClauses > 16);
+    _throwif("too many resume clauses", অঙ্ক_Clauses > 16);
 
-    if (numClauses) {
-        handlers = m3_AllocArray(M3ResumeHandler, numClauses);
+    যদি (অঙ্ক_Clauses) {
+        handlers = m3_AllocArray(M3ResumeHandler, অঙ্ক_Clauses);
         _throwifnull(handlers);
     }
 
-    for (u32 i = 0; i < numClauses; ++i) {
+    জন্য (u32 i = 0; i < অঙ্ক_Clauses; ++i) {
         u8 kind;
 _       (Read_u8(&kind, &o->wasm, o->wasmEnd));
         _throwif(m3Err_wasmMalformed, kind > 0x01);
 
         handlers[i].kind = kind;
 
-        u32 tagIndex;
-_       (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-        _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+        u32 tag_সূচক;
+_       (ReadLEB_u32(&tag_সূচক, &o->wasm, o->wasmEnd));
+        _throwif(m3Err_unknownTag, tag_সূচক >= o->module->অঙ্ক_Tags);
 
-        IM3Tag tag         = &o->module->tags[tagIndex];
+        IM3Tag tag         = &o->module->tags[tag_সূচক];
         handlers[i].tag    = tag->resolved ? tag->resolved : tag;
-        handlers[i].stubPC = NULL;
+        handlers[i].stubPC = ফাঁকা;
 
-        if (kind == 0x00) {
+        যদি (kind == 0x00) {
 _           (ReadLEB_u32(&clauseLabelDepths[i], &o->wasm, o->wasmEnd));
-        } else {
+        } অন্যথা {
             // (on $e switch): the tag carries no payload, and what the switch
             // site yields is what this resume yields
-            _throwif(m3Err_typeMismatch, GetFuncTypeNumParams(handlers[i].tag->type) != 0);
+            _throwif(m3Err_typeMismatch, Get_Func_Type_অঙ্ক_Params(handlers[i].tag->type) != 0);
             clauseLabelDepths[i] = 0;
         }
     }
@@ -4099,48 +4099,48 @@ _           (ReadLEB_u32(&clauseLabelDepths[i], &o->wasm, o->wasmEnd));
     // the operands are read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
-    m3type_t contTopType = GetStackTopType(o);
-    _throwif(m3Err_typeMismatch, not IsSubTypeOf(contTopType, RefTypeOfFuncType(contFuncType, false)));
-    u16 contSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    m3type_t cont_শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
+    _throwif(m3Err_typeMismatch, not IsSubTypeOf(cont_শীর্ষ_Type, RefTypeOfFuncType(contFuncType, false)));
+    u16 contSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_   (বের_করো(o));
 
     u16 exnSlot = 0;
 
-    if (isThrowRef) {
-        m3type_t exnType = GetStackTopType(o);
+    যদি (isThrowRef) {
+        m3type_t exnType = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, BaseTypeOf(exnType) != c_m3Type_exnref);
-        exnSlot = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        exnSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_       (বের_করো(o));
     }
 
     u16 operandSlots[d_m3MaxContinuationPayload];
-    _throwif("too many resume operands", numOperands > d_m3MaxContinuationPayload);
+    _throwif("too many resume operands", অঙ্ক_Operands > d_m3MaxContinuationPayload);
 
     IM3FuncType operandType = isThrow ? exnTag->type : innerType;
 
-    for (u16 i = 0; i < numOperands; ++i) {
-        u16      pIdx         = (u16)(numOperands - 1 - i);
+    জন্য (u16 i = 0; i < অঙ্ক_Operands; ++i) {
+        u16      pIdx         = (u16)(অঙ্ক_Operands - 1 - i);
         m3type_t expectedType = GetFuncTypeParamType(operandType, pIdx);
-        m3type_t actualType   = GetStackTopType(o);
+        m3type_t actualType   = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        operandSlots[pIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        operandSlots[pIdx] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_       (বের_করো(o));
     }
 
-    for (u32 i = 0; i < numClauses; ++i) {
-        if (handlers[i].kind != 0x00) {
-            continue;
+    জন্য (u32 i = 0; i < অঙ্ক_Clauses; ++i) {
+        যদি (handlers[i].kind != 0x00) {
+            চালু;
         }
 
         IM3CompilationScope scope;
 _       (GetBlockScope(o, &scope, clauseLabelDepths[i]));
 
         IM3Tag tag        = handlers[i].tag;
-        u16    numPayload = GetFuncTypeNumParams(tag->type);
+        u16    অঙ্ক_Payload = Get_Func_Type_অঙ্ক_Params(tag->type);
 
         m3type_t labelContType = (scope->opcode == c_waOp_loop)
-                                   ? GetFuncTypeParamType(scope->type, numPayload)
-                                   : GetFuncTypeResultType(scope->type, numPayload);
+                                   ? GetFuncTypeParamType(scope->type, অঙ্ক_Payload)
+                                   : Get_Func_Type_ফলাফল_Type(scope->type, অঙ্ক_Payload);
 
         IM3CodePage stubPage;
 _       (AcquireCompilationCodePage(o, &stubPage));
@@ -4148,132 +4148,132 @@ _       (AcquireCompilationCodePage(o, &stubPage));
         displacedPage = o->page;
         o->page       = stubPage;
 
-        u16 firstIndex = o->stackIndex;
-        for (u16 a = 0; a < numPayload; ++a) {
-_           (PushAllocatedSlot(o, GetFuncTypeParamType(tag->type, a)));
+        u16 first_সূচক = o->স্তূপ_সূচক;
+        জন্য (u16 a = 0; a < অঙ্ক_Payload; ++a) {
+_           (ঠেলো_Allocated_Slot(o, GetFuncTypeParamType(tag->type, a)));
         }
 
         // The handler is handed the suspended continuation.
-_       (PushAllocatedSlot(o, labelContType));
+_       (ঠেলো_Allocated_Slot(o, labelContType));
 
-_       (EnsureCodePageNumLines(o, 2 * numPayload + 5 + d_m3CodePageFreeLinesThreshold));
+_       (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 2 * অঙ্ক_Payload + 5 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 _       (EmitOp(o, op_ResumePayload));
         EmitPointer(o, Module_ContTypeOfRef(o->module, labelContType));
-        EmitConstant32(o, numPayload);
-        for (u16 a = 0; a < numPayload; ++a) {
-            u16 index = firstIndex + a;
-            EmitSlotOffset(o, GetSlotForStackIndex(o, index));
-            EmitConstant32(o, Is64BitType(GetStackTypeFromBottom(o, index)));
+        EmitConstant32(o, অঙ্ক_Payload);
+        জন্য (u16 a = 0; a < অঙ্ক_Payload; ++a) {
+            u16 index = first_সূচক + a;
+            EmitSlotOffset(o, Get_Slot_For_স্তূপ_সূচক(o, index));
+            EmitConstant32(o, Is64BitType(Get_স্তূপ_Type_From_Bottom(o, index)));
         }
-        EmitSlotOffset(o, GetSlotForStackIndex(o, firstIndex + numPayload));
+        EmitSlotOffset(o, Get_Slot_For_স্তূপ_সূচক(o, first_সূচক + অঙ্ক_Payload));
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
         // the clause leaves every try region between the resume and its label,
         // and leaving one retires its handlers, the way a branch does
-_       (EmitPopTryFrames(o, NumTryFramesToPop(&o->block, scope)));
+_       (Emit_বের_করো_Try_Frames(o, অঙ্ক_Try_Frames_To_বের_করো(&o->block, scope)));
 #  endif
 
-        if (scope->opcode == c_waOp_loop) {
+        যদি (scope->opcode == c_waOp_loop) {
 _           (ResolveBlockResults(o, scope, true));
 _           (EmitOp(o, Op_ContinueLoop(o)));
             EmitPointer(o, scope->pc);
 _           (RecordBackEdge(o, scope, false));
-        } else if (scope->depth == 0) {
-_           (ReturnValues(o, scope, true));
+        } অন্যথা যদি (scope->depth == 0) {
+_           (Return_মানসমূহ(o, scope, true));
 _           (EmitOp(o, op_Return));
-        } else {
+        } অন্যথা {
 _           (ResolveBlockResults(o, scope, true));
 _           (EmitPatchingBranch(o, scope));
         }
 
         IM3CodePage returnTo = displacedPage;
-        displacedPage        = NULL;
+        displacedPage        = ফাঁকা;
 
         ReleaseCompilationCodePage(o);
         o->page = returnTo;
 
         handlers[i].stubPC = startPC;
 
-        while (o->stackIndex > firstIndex) {
-_           (Pop(o));
+        যখন (o->স্তূপ_সূচক > first_সূচক) {
+_           (বের_করো(o));
         }
     }
 
     u16 resSlots[d_m3MaxContinuationPayload];
-    _throwif("too many cont results", numContResults > d_m3MaxContinuationPayload);
-    for (u16 i = 0; i < numContResults; ++i) {
-        m3type_t rtype = GetFuncTypeResultType(innerType, i);
-_       (PushAllocatedSlot(o, rtype));
-        resSlots[i] = GetStackTopSlotNumber(o);
+    _throwif("too many cont results", অঙ্ক_Cont_Results > d_m3MaxContinuationPayload);
+    জন্য (u16 i = 0; i < অঙ্ক_Cont_Results; ++i) {
+        m3type_t rtype = Get_Func_Type_ফলাফল_Type(innerType, i);
+_       (ঠেলো_Allocated_Slot(o, rtype));
+        resSlots[i] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
     }
 
-_   (EnsureCodePageNumLines(o, 8 + numOperands * 2 + numClauses * 3 + numContResults * 2 +
-                                  d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 8 + অঙ্ক_Operands * 2 + অঙ্ক_Clauses * 3 + অঙ্ক_Cont_Results * 2 +
+                                  d_m3_Code_Page_Free_সারিগুলি_Threshold));
 
 _   (EmitOp(o, op_Resume));
     EmitPointer(o, contFuncType);
     EmitSlotOffset(o, contSlot);
     EmitConstant32(o, isThrow ? d_m3ResumeThrow : (isThrowRef ? d_m3ResumeThrowRef : d_m3ResumeNormal));
 
-    if (isThrowRef) {
+    যদি (isThrowRef) {
         EmitSlotOffset(o, exnSlot);
-    } else {
-        if (isThrow) {
+    } অন্যথা {
+        যদি (isThrow) {
             EmitPointer(o, exnTag);
         }
 
-        EmitConstant32(o, numOperands);
-        for (u16 i = 0; i < numOperands; ++i) {
+        EmitConstant32(o, অঙ্ক_Operands);
+        জন্য (u16 i = 0; i < অঙ্ক_Operands; ++i) {
             EmitSlotOffset(o, operandSlots[i]);
             EmitConstant32(o, Is64BitType(GetFuncTypeParamType(operandType, i)));
         }
     }
 
-    EmitConstant32(o, numClauses);
-    for (u32 i = 0; i < numClauses; ++i) {
+    EmitConstant32(o, অঙ্ক_Clauses);
+    জন্য (u32 i = 0; i < অঙ্ক_Clauses; ++i) {
         EmitConstant32(o, handlers[i].kind);
         EmitPointer(o, handlers[i].tag);
         EmitPointer(o, handlers[i].stubPC);
     }
 
-    EmitConstant32(o, numContResults);
-    for (u16 i = 0; i < numContResults; ++i) {
+    EmitConstant32(o, অঙ্ক_Cont_Results);
+    জন্য (u16 i = 0; i < অঙ্ক_Cont_Results; ++i) {
         EmitSlotOffset(o, resSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeResultType(innerType, i)));
+        EmitConstant32(o, Is64BitType(Get_Func_Type_ফলাফল_Type(innerType, i)));
     }
 
     // a suspend passing through the resumed continuation leaves this frame
     // waiting here, with the continuation's results not yet taken
-_   (RecordSafePoint(o, safepoint_resume, 0, numContResults, (u16)numClauses, NULL));
-#  if d_m3HasSnapshots
-    if (o->snapshotMap and o->page) {
-        o->snapshotMap->safePoints[o->snapshotMap->numSafePoints - 1].resumeType = RefTypeOfFuncType(contFuncType, true);
+_   (RecordSafePoint(o, safepoint_resume, 0, অঙ্ক_Cont_Results, (u16)অঙ্ক_Clauses, ফাঁকা));
+#  যদি d_m3HasSnapshots
+    যদি (o->snapshotMap and o->page) {
+        o->snapshotMap->safePoints[o->snapshotMap->অঙ্ক_Safe_Points - 1].resumeType = RefTypeOfFuncType(contFuncType, true);
     }
 #  endif
 
 } _catch:
-    if (displacedPage) {
+    যদি (displacedPage) {
         ReleaseCompilationCodePage(o);
         o->page = displacedPage;
     }
     m3_Free(handlers);
-    return result;
+    ফেরত ফলাফল;
 }
 
 
-static
-M3Result Compile_Switch (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Switch (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex, tagIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
-_   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex >= o->module->numFuncTypes);
-    _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    u32 type_সূচক, tag_সূচক;
+_   (ReadLEB_u32(&type_সূচক, &o->wasm, o->wasmEnd));
+_   (ReadLEB_u32(&tag_সূচক, &o->wasm, o->wasmEnd));
+    _throwif(m3_Err_type_গুনতি_Mismatch, type_সূচক >= o->module->অঙ্ক_Func_Types);
+    _throwif(m3Err_unknownTag, tag_সূচক >= o->module->অঙ্ক_Tags);
 
-    IM3FuncType targetContType = o->module->funcTypes[typeIndex];
-    IM3Tag      tag            = &o->module->tags[tagIndex];
-    if (tag->resolved) {
+    IM3FuncType targetContType = o->module->funcTypes[type_সূচক];
+    IM3Tag      tag            = &o->module->tags[tag_সূচক];
+    যদি (tag->resolved) {
         tag = tag->resolved;
     }
 
@@ -4281,7 +4281,7 @@ _   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
 
     // a switch tag carries no payload of its own: the values travel as the
     // peer's arguments, and the tag's results are what the switch site yields
-    _throwif(m3Err_typeMismatch, GetFuncTypeNumParams(tag->type) != 0);
+    _throwif(m3Err_typeMismatch, Get_Func_Type_অঙ্ক_Params(tag->type) != 0);
 
     // switch $ct1 : [t1* (ref null $ct1)] -> [t2*]
     //   where $ct1 = cont [t1* (ref null? $ct2)] -> [..]
@@ -4292,74 +4292,74 @@ _   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
     // is not $ct1's results but $ct2's parameters - the values whoever comes
     // back this way will hand over.
     IM3FuncType targetType = targetContType->contFuncType;
-    u16         numParams  = GetFuncTypeNumParams(targetType);
+    u16         অঙ্ক_Params  = Get_Func_Type_অঙ্ক_Params(targetType);
 
-    _throwif("switch target takes no continuation", numParams == 0);
+    _throwif("switch target takes no continuation", অঙ্ক_Params == 0);
 
-    m3type_t    peerRefType  = GetFuncTypeParamType(targetType, (u16)(numParams - 1));
+    m3type_t    peerRefType  = GetFuncTypeParamType(targetType, (u16)(অঙ্ক_Params - 1));
     IM3FuncType selfContType = Module_ContTypeOfRef(o->module, peerRefType);
 
     _throwif(m3Err_typeMismatch, not selfContType);
 
     IM3FuncType selfType   = selfContType->contFuncType;
-    u16         numArgs    = (u16)(numParams - 1);
-    u16         numResults = GetFuncTypeNumParams(selfType);
+    u16         অঙ্ক_Args    = (u16)(অঙ্ক_Params - 1);
+    u16         অঙ্ক_Results = Get_Func_Type_অঙ্ক_Params(selfType);
 
     // the operands are read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
-    m3type_t contTopType = GetStackTopType(o);
-    _throwif(m3Err_typeMismatch, not IsSubTypeOf(contTopType, RefTypeOfFuncType(targetContType, false)));
-    u16 targetContSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    m3type_t cont_শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
+    _throwif(m3Err_typeMismatch, not IsSubTypeOf(cont_শীর্ষ_Type, RefTypeOfFuncType(targetContType, false)));
+    u16 targetContSlot = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_   (বের_করো(o));
 
     u16 argSlots[d_m3MaxContinuationPayload];
-    _throwif("too many switch params", numArgs > d_m3MaxContinuationPayload);
+    _throwif("too many switch params", অঙ্ক_Args > d_m3MaxContinuationPayload);
 
-    for (u16 i = 0; i < numArgs; ++i) {
-        u16      pIdx         = (u16)(numArgs - 1 - i);
+    জন্য (u16 i = 0; i < অঙ্ক_Args; ++i) {
+        u16      pIdx         = (u16)(অঙ্ক_Args - 1 - i);
         m3type_t expectedType = GetFuncTypeParamType(targetType, pIdx);
-        m3type_t actualType   = GetStackTopType(o);
+        m3type_t actualType   = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        argSlots[pIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        argSlots[pIdx] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_       (বের_করো(o));
     }
 
-    u16 resultSlots[d_m3MaxContinuationPayload];
-    _throwif("too many switch results", numResults > d_m3MaxContinuationPayload);
+    u16 ফলাফল_Slots[d_m3MaxContinuationPayload];
+    _throwif("too many switch results", অঙ্ক_Results > d_m3MaxContinuationPayload);
 
-    for (u16 i = 0; i < numResults; ++i) {
-_       (PushAllocatedSlot(o, GetFuncTypeParamType(selfType, i)));
-        resultSlots[i] = GetStackTopSlotNumber(o);
+    জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+_       (ঠেলো_Allocated_Slot(o, GetFuncTypeParamType(selfType, i)));
+        ফলাফল_Slots[i] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
     }
 
-_   (EnsureCodePageNumLines(o, 6 + numArgs * 2 + numResults * 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_Code_Page_অঙ্ক_সারিগুলি(o, 6 + অঙ্ক_Args * 2 + অঙ্ক_Results * 2 + d_m3_Code_Page_Free_সারিগুলি_Threshold));
 _   (EmitOp(o, op_Switch));
     EmitPointer(o, targetContType);
     EmitPointer(o, tag);
     EmitSlotOffset(o, targetContSlot);
-    EmitConstant32(o, numArgs);
-    for (u16 i = 0; i < numArgs; ++i) {
+    EmitConstant32(o, অঙ্ক_Args);
+    জন্য (u16 i = 0; i < অঙ্ক_Args; ++i) {
         EmitSlotOffset(o, argSlots[i]);
         EmitConstant32(o, Is64BitType(GetFuncTypeParamType(targetType, i)));
     }
-    EmitConstant32(o, numResults);
-    for (u16 i = 0; i < numResults; ++i) {
-        EmitSlotOffset(o, resultSlots[i]);
+    EmitConstant32(o, অঙ্ক_Results);
+    জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+        EmitSlotOffset(o, ফলাফল_Slots[i]);
         EmitConstant32(o, Is64BitType(GetFuncTypeParamType(selfType, i)));
     }
 
     // as with suspend: op_Switch clears the results before it leaves
-_   (RecordSafePoint(o, safepoint_suspend, 0, numResults, 0, NULL));
+_   (RecordSafePoint(o, safepoint_suspend, 0, অঙ্ক_Results, 0, ফাঁকা));
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasStackSwitching
 
 
-static
-M3Result CompileElseBlock (IM3Compilation o, pc_t* o_startPC, IM3FuncType i_blockType)
+স্থির
+M3_ফলাফল CompileElseBlock (IM3Compilation o, pc_t* o_startPC, IM3FuncType i_blockType)
 {
     IM3CodePage savedPage = o->page;
 _try {
@@ -4377,17 +4377,17 @@ _   (EmitOp(o, op_Branch));
     EmitPointer(o, GetPagePC(savedPage));
 } _catch:
 
-    if (o->page != savedPage) {
+    যদি (o->page != savedPage) {
         ReleaseCompilationCodePage(o);
     }
 
     o->page = savedPage;
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_If (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_If (IM3Compilation o, m3opcode_t i_opcode)
 {
     /*      [   op_If   ]
             [ <else-pc> ]   ---->   [ ..else..  ]
@@ -4398,208 +4398,208 @@ M3Result Compile_If (IM3Compilation o, m3opcode_t i_opcode)
 _try {
 
     // Spec: if condition must be i32
-    if (not IsStackPolymorphic(o)) {
-        m3type_t condType = GetStackTopType(o);
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
+        m3type_t condType = Get_স্তূপ_শীর্ষ_Type(o);
         _throwif(m3Err_typeMismatch, condType != c_m3Type_none and condType != c_m3Type_i32);
     }
 
-_   (PreserveNonTopRegisters(o));
+_   (Preserve_Non_শীর্ষ_Registers(o));
 _   (PreserveArgsAndLocals(o));
 
-#if d_m3FuseBranch
+#যদি d_m3FuseBranch
     IM3Operation fuseOp = GetBranchFusionOp(o, true);
 
-    if (fuseOp) {
+    যদি (fuseOp) {
         // absorb the if into the compare that produced the condition
         *(IM3Operation*)o->foldPatchPC = fuseOp;
         InvalidateFold(o);
 
-_       (Pop(o));                          // the condition is consumed inside the fused op
-    } else
+_       (বের_করো(o));                          // the condition is consumed inside the fused op
+    } অন্যথা
 #endif
     {
-        IM3Operation op = IsStackTopInRegister(o) ? op_If_r : op_If_s;
+        IM3Operation op = Is_স্তূপ_শীর্ষ_In_Register(o) ? op_If_r : op_If_s;
 
 _       (EmitOp(o, op));
-_       (EmitSlotNumOfStackTopAndPop(o));
+_       (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
     }
 
     pc_t* pc = (pc_t*)ReservePointer(o);
 
-    IM3FuncType blockType = NULL;
+    IM3FuncType blockType = ফাঁকা;
 _   (ReadBlockType(o, &blockType));     //  dump_type_stack (o);
 
-    u16 stackIndex = o->stackIndex;
+    u16 স্তূপ_সূচক = o->স্তূপ_সূচক;
 
 _   (CompileBlock(o, blockType, i_opcode));
 
-    if (o->previousOpcode == c_waOp_else) {
-        o->stackIndex = stackIndex;
+    যদি (o->previousOpcode == c_waOp_else) {
+        o->স্তূপ_সূচক = স্তূপ_সূচক;
 _       (CompileElseBlock(o, pc, blockType));
-    } else {
+    } অন্যথা {
         // if block produces values and there isn't a defined else
         // case, then we need to make one up so that the pass-through
         // results end up in the right place
-        if (GetFuncTypeNumResults(blockType)) {
+        যদি (Get_Func_Type_অঙ্ক_Results(blockType)) {
             // rewind to the if's end to create a fake else block
             o->wasm--;
-            o->stackIndex = stackIndex;     // dump_type_stack (o);
+            o->স্তূপ_সূচক = স্তূপ_সূচক;     // dump_type_stack (o);
 
 _           (CompileElseBlock(o, pc, blockType));
-        } else {
+        } অন্যথা {
             *pc = GetPC(o);
         }
     }
 
-    } _catch: return result;
+    } _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Select (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Select (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     u16 slots[3] = { c_slotUnused, c_slotUnused, c_slotUnused };
 
-    IM3Operation op = NULL;
+    IM3Operation op = ফাঁকা;
 
-    m3type_t type = GetStackTypeFromTop(o, 1); // get type of selection
+    m3type_t type = Get_স্তূপ_Type_From_শীর্ষ(o, 1); // get type of selection
 
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
         // Spec: the condition operand (top) must be i32
-        m3type_t condType = GetStackTypeFromTop(o, 0);
+        m3type_t condType = Get_স্তূপ_Type_From_শীর্ষ(o, 0);
         _throwif(m3Err_typeMismatch, condType != c_m3Type_none and condType != c_m3Type_i32);
 
         // Spec: the two value operands (below condition) must have matching types
-        m3type_t type2 = GetStackTypeFromTop(o, 2);
+        m3type_t type2 = Get_স্তূপ_Type_From_শীর্ষ(o, 2);
         _throwif(m3Err_typeMismatch, type != c_m3Type_none and type2 != c_m3Type_none and
                                        not (IsSubTypeOf(type, type2) or IsSubTypeOf(type2, type)));
     }
 
-    if (IsFpType(type)) {
-#if d_m3HasFloat
+    যদি (IsFpType(type)) {
+#যদি d_m3HasFloat
         // not consuming a fp reg, so preserve
-        if (not IsStackTopMinus1InRegister(o) and
-            not IsStackTopMinus2InRegister(o)) {
+        যদি (not Is_স্তূপ_শীর্ষ_Minus1_In_Register(o) and
+            not Is_স্তূপ_শীর্ষ_Minus2_In_Register(o)) {
 _           (PreserveRegisterIfOccupied(o, type));
         }
 
-        bool selectorInReg = IsStackTopInRegister(o);
-        slots[0]           = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        bool selectorInReg = Is_স্তূপ_শীর্ষ_In_Register(o);
+        slots[0]           = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
+_       (বের_করো(o));
 
-        u32 opIndex = 0;
+        u32 op_সূচক = 0;
 
-        for (u32 i = 1; i <= 2; ++i) {
-            if (IsStackTopInRegister(o)) {
-                opIndex = i;
-            } else {
-                slots[i] = GetStackTopSlotNumber(o);
+        জন্য (u32 i = 1; i <= 2; ++i) {
+            যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
+                op_সূচক = i;
+            } অন্যথা {
+                slots[i] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
             }
 
-_           (Pop(o));
+_           (বের_করো(o));
         }
 
-        op = c_fpSelectOps[type - c_m3Type_f32][selectorInReg][opIndex];
-#else
+        op = c_fpSelectOps[type - c_m3Type_f32][selectorInReg][op_সূচক];
+#অন্যথা
         _throw(m3Err_unknownOpcode);
 #endif
-    } else if (IsIntType(type) or IsRefType(type)) {
+    } অন্যথা যদি (IsIntType(type) or IsRefType(type)) {
         // 'sss' operation doesn't consume a register, so might have to protected its contents
-        if (not IsStackTopInRegister(o) and
-            not IsStackTopMinus1InRegister(o) and
-            not IsStackTopMinus2InRegister(o)) {
+        যদি (not Is_স্তূপ_শীর্ষ_In_Register(o) and
+            not Is_স্তূপ_শীর্ষ_Minus1_In_Register(o) and
+            not Is_স্তূপ_শীর্ষ_Minus2_In_Register(o)) {
 _           (PreserveRegisterIfOccupied(o, type));
         }
 
-        u32 opIndex = 3;  // op_Select_*_sss
+        u32 op_সূচক = 3;  // op_Select_*_sss
 
-        for (u32 i = 0; i < 3; ++i) {
-            if (IsStackTopInRegister(o)) {
-                opIndex = i;
-            } else {
-                slots[i] = GetStackTopSlotNumber(o);
+        জন্য (u32 i = 0; i < 3; ++i) {
+            যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
+                op_সূচক = i;
+            } অন্যথা {
+                slots[i] = Get_স্তূপ_শীর্ষ_Slot_সংখ্যা(o);
             }
 
-_           (Pop(o));
+_           (বের_করো(o));
         }
 
         // a reference is a pointer-sized integer as far as select is concerned
-        u32 typeIndex = IsRefType(type) ? ((M3_SIZEOF_PTR == 8) ? 1 : 0)
+        u32 type_সূচক = IsRefType(type) ? ((M3_SIZEOF_PTR == 8) ? 1 : 0)
                                         : (u32)(type - c_m3Type_i32);
 
-        op = c_intSelectOps[typeIndex][opIndex];
-    } else if (not IsStackPolymorphic(o)) {
-        _throw(m3Err_functionStackUnderrun);
+        op = c_intSelectOps[type_সূচক][op_সূচক];
+    } অন্যথা যদি (not Is_স্তূপ_Polymorphic(o)) {
+        _throw(m3_Err_function_স্তূপ_Underrun);
     }
 
     EmitOp(o, op);
-    for (u32 i = 0; i < 3; i++) {
-        if (IsValidSlot(slots[i])) {
+    জন্য (u32 i = 0; i < 3; i++) {
+        যদি (IsValidSlot(slots[i])) {
             EmitSlotOffset(o, slots[i]);
         }
     }
-_   (PushRegister(o, type));
+_   (ঠেলো_Register(o, type));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Drop (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Drop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = Pop(o);
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    M3_ফলাফল ফলাফল = বের_করো(o);
+    যদি (d_m3_Log_Wasm_স্তূপ) {
+        dump_type_স্তূপ(o);
     }
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Nop (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Nop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
-static
-M3Result Compile_Unreachable (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Unreachable (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
 _   (AddTrapRecord(o));
 
 _   (EmitOp(o, op_Unreachable));
-_   (SetStackPolymorphic(o));
+_   (Set_স্তূপ_Polymorphic(o));
 
     _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 
 // OPTZ: currently all stack slot indices take up a full word, but
 // dual stack source operands could be packed together
-static
-M3Result Compile_Operator (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Operator (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
     // Declared before the first throw below, which jumps past this point to
     // _catch and so must not skip an initialization.
-    IM3Operation op = NULL;
+    IM3Operation op = ফাঁকা;
 
     IM3OpInfo opInfo = GetOpInfo(i_opcode);
     _throwif(m3Err_unknownOpcode, not opInfo);
 
     // Spec: validate operand types for load/store operations
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
         // For load ops (stackOffset == 0, unary), the operand is always i32 (address)
-        if (i_opcode >= 0x28 and i_opcode <= 0x35) {
-            m3type_t topType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, topType != c_m3Type_none and topType != c_m3Type_i32);
+        যদি (i_opcode >= 0x28 and i_opcode <= 0x35) {
+            m3type_t শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
+            _throwif(m3Err_typeMismatch, শীর্ষ_Type != c_m3Type_none and শীর্ষ_Type != c_m3Type_i32);
         }
 
         // For store ops (stackOffset == -2), the address operand must be i32
-        if (i_opcode >= 0x36 and i_opcode <= 0x3e) {
-            m3type_t addrType = GetStackTypeFromTop(o, 1);
+        যদি (i_opcode >= 0x36 and i_opcode <= 0x3e) {
+            m3type_t addrType = Get_স্তূপ_Type_From_শীর্ষ(o, 1);
             _throwif(m3Err_typeMismatch, addrType != c_m3Type_none and addrType != c_m3Type_i32);
         }
     }
@@ -4610,143 +4610,143 @@ M3Result Compile_Operator (IM3Compilation o, m3opcode_t i_opcode)
     // moving out the way might be the optimal solution most often?
     // otherwise, the _r0 reg can get buried down in the stack
     // and be idle & wasted for a moment.
-    if (M3_UNLIKELY(IsFpType(GetStackTopType(o)) and IsIntType(opInfo->type))) {
+    যদি (M3_UNLIKELY(IsFpType(Get_স্তূপ_শীর্ষ_Type(o)) and IsIntType(opInfo->type))) {
 _       (PreserveRegisterIfOccupied(o, opInfo->type));
     }
 
-    if (opInfo->stackOffset == 0) {
-        if (IsStackTopInRegister(o)) {
+    যদি (opInfo->স্তূপ_Offset == 0) {
+        যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
             op = opInfo->operations[0]; // _s
-        } else {
+        } অন্যথা {
 _           (PreserveRegisterIfOccupied(o, opInfo->type));
             op = opInfo->operations[1]; // _r
         }
-    } else {
-        if (IsStackTopInRegister(o)) {
+    } অন্যথা {
+        যদি (Is_স্তূপ_শীর্ষ_In_Register(o)) {
             op = opInfo->operations[0];  // _rs
 
-            if (IsStackTopMinus1InRegister(o)) {    d_m3Assert (i_opcode == c_waOp_store_f32 or i_opcode == c_waOp_store_f64);
+            যদি (Is_স্তূপ_শীর্ষ_Minus1_In_Register(o)) {    d_m3Assert (i_opcode == c_waOp_store_f32 or i_opcode == c_waOp_store_f64);
                 op = opInfo->operations[3]; // _rr for fp.store
             }
-        } else if (IsStackTopMinus1InRegister(o)) {
+        } অন্যথা যদি (Is_স্তূপ_শীর্ষ_Minus1_In_Register(o)) {
             op = opInfo->operations[1]; // _sr
 
-            if (not op) {  // must be commutative, then
+            যদি (not op) {  // must be commutative, then
                 op = opInfo->operations[0];
             }
-        } else {
+        } অন্যথা {
 _           (PreserveRegisterIfOccupied(o, opInfo->type));     // _ss
             op = opInfo->operations[2];
         }
     }
 
-    if (M3_LIKELY(op)) {
+    যদি (M3_LIKELY(op)) {
 _       (EmitOp(o, op));
 
-#if d_m3FoldSetLocal
+#যদি d_m3FoldSetLocal
         // the op word just written (EmitOp may have bridged pages); NULL in the page-less compile-walk mode
-        pc_t patchPC = o->page ? GetPC(o) - 1 : NULL;
+        pc_t patchPC = o->page ? GetPC(o) - 1 : ফাঁকা;
 #endif
 
-_       (EmitSlotNumOfStackTopAndPop(o));
+_       (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
 
-        if (opInfo->stackOffset < 0) {
-_           (EmitSlotNumOfStackTopAndPop(o));
+        যদি (opInfo->স্তূপ_Offset < 0) {
+_           (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
         }
 
-        if (opInfo->type != c_m3Type_none) {
-_           (PushRegister(o, opInfo->type));
+        যদি (opInfo->type != c_m3Type_none) {
+_           (ঠেলো_Register(o, opInfo->type));
 
-#if d_m3FoldSetLocal
+#যদি d_m3FoldSetLocal
             // record this op as a fold candidate for an immediately following local.set;
             // the operand-form index is recovered by matching against the variant table
-            if (patchPC) {
-                for (u8 form = 0; form < 4; ++form) {
-                    if (opInfo->operations[form] == op) {
+            যদি (patchPC) {
+                জন্য (u8 form = 0; form < 4; ++form) {
+                    যদি (opInfo->operations[form] == op) {
                         o->foldPatchPC    = patchPC;
                         o->foldOpcode     = i_opcode;
                         o->foldForm       = form;
-                        o->foldStackIndex = (u16)GetStackTopIndex(o);
-                        break;
+                        o->fold_স্তূপ_সূচক = (u16)Get_স্তূপ_শীর্ষ_সূচক(o);
+                        বিরতি;
                     }
                 }
             }
 #endif
         }
-    } else {
+    } অন্যথা {
 #ifdef DEBUG
-        result = ErrorCompile("no operation found for opcode", o, "'%s'", opInfo->name);
-#else
-        result = ErrorCompile("no operation found for opcode", o, "%x", i_opcode);
+        ফলাফল = ErrorCompile("no operation found for opcode", o, "'%s'", opInfo->name);
+#অন্যথা
+        ফলাফল = ErrorCompile("no operation found for opcode", o, "%x", i_opcode);
 #endif
-        _throw(result);
+        _throw(ফলাফল);
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result Compile_Convert (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Convert (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     IM3OpInfo opInfo = GetOpInfo(i_opcode);
     _throwif(m3Err_unknownOpcode, not opInfo);
 
     // Spec: validate source operand type for conversion instructions
-    if (not IsStackPolymorphic(o)) {
+    যদি (not Is_স্তূপ_Polymorphic(o)) {
         u8 sourceType = c_m3Type_none;
-        switch (i_opcode)
+        নির্বাচন (i_opcode)
         // clang-format off
         {
-        case 0xa7:              // i32.wrap/i64
-            sourceType = c_m3Type_i64; break;
-        case 0xa8: case 0xa9:   // i32.trunc_s/f32, i32.trunc_u/f32
-        case 0xae: case 0xaf:   // i64.trunc_s/f32, i64.trunc_u/f32
-        case 0xbb:              // f64.promote/f32
-        case 0xbc:              // i32.reinterpret/f32
-            sourceType = c_m3Type_f32; break;
-        case 0xaa: case 0xab:   // i32.trunc_s/f64, i32.trunc_u/f64
-        case 0xb0: case 0xb1:   // i64.trunc_s/f64, i64.trunc_u/f64
-        case 0xb6:              // f32.demote/f64
-        case 0xbd:              // i64.reinterpret/f64
-            sourceType = c_m3Type_f64; break;
-        case 0xac: case 0xad:   // i64.extend_s/i32, i64.extend_u/i32
-        case 0xb2: case 0xb3:   // f32.convert_s/i32, f32.convert_u/i32
-        case 0xb7: case 0xb8:   // f64.convert_s/i32, f64.convert_u/i32
-        case 0xbe:              // f32.reinterpret/i32
-            sourceType = c_m3Type_i32; break;
-        case 0xb4: case 0xb5:   // f32.convert_s/i64, f32.convert_u/i64
-        case 0xb9: case 0xba:   // f64.convert_s/i64, f64.convert_u/i64
-        case 0xbf:              // f64.reinterpret/i64
-            sourceType = c_m3Type_i64; break;
-        default: break;
+        ক্ষেত্র 0xa7:              // i32.wrap/i64
+            sourceType = c_m3Type_i64; বিরতি;
+        ক্ষেত্র 0xa8: ক্ষেত্র 0xa9:   // i32.trunc_s/f32, i32.trunc_u/f32
+        ক্ষেত্র 0xae: ক্ষেত্র 0xaf:   // i64.trunc_s/f32, i64.trunc_u/f32
+        ক্ষেত্র 0xbb:              // f64.promote/f32
+        ক্ষেত্র 0xbc:              // i32.reinterpret/f32
+            sourceType = c_m3Type_f32; বিরতি;
+        ক্ষেত্র 0xaa: ক্ষেত্র 0xab:   // i32.trunc_s/f64, i32.trunc_u/f64
+        ক্ষেত্র 0xb0: ক্ষেত্র 0xb1:   // i64.trunc_s/f64, i64.trunc_u/f64
+        ক্ষেত্র 0xb6:              // f32.demote/f64
+        ক্ষেত্র 0xbd:              // i64.reinterpret/f64
+            sourceType = c_m3Type_f64; বিরতি;
+        ক্ষেত্র 0xac: ক্ষেত্র 0xad:   // i64.extend_s/i32, i64.extend_u/i32
+        ক্ষেত্র 0xb2: ক্ষেত্র 0xb3:   // f32.convert_s/i32, f32.convert_u/i32
+        ক্ষেত্র 0xb7: ক্ষেত্র 0xb8:   // f64.convert_s/i32, f64.convert_u/i32
+        ক্ষেত্র 0xbe:              // f32.reinterpret/i32
+            sourceType = c_m3Type_i32; বিরতি;
+        ক্ষেত্র 0xb4: ক্ষেত্র 0xb5:   // f32.convert_s/i64, f32.convert_u/i64
+        ক্ষেত্র 0xb9: ক্ষেত্র 0xba:   // f64.convert_s/i64, f64.convert_u/i64
+        ক্ষেত্র 0xbf:              // f64.reinterpret/i64
+            sourceType = c_m3Type_i64; বিরতি;
+        পূর্বনির্ধারিত: বিরতি;
         }
         // clang-format on
 
-        if (sourceType != c_m3Type_none) {
-            m3type_t topType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, topType != c_m3Type_none and not IsSubTypeOf(topType, sourceType));
+        যদি (sourceType != c_m3Type_none) {
+            m3type_t শীর্ষ_Type = Get_স্তূপ_শীর্ষ_Type(o);
+            _throwif(m3Err_typeMismatch, শীর্ষ_Type != c_m3Type_none and not IsSubTypeOf(শীর্ষ_Type, sourceType));
         }
     }
 
     bool destInSlot   = IsRegisterTypeAllocated(o, opInfo->type);
-    bool sourceInSlot = IsStackTopInSlot(o);
+    bool sourceInSlot = Is_স্তূপ_শীর্ষ_In_Slot(o);
 
     IM3Operation op = opInfo->operations[destInSlot * 2 + sourceInSlot];
 
 _   (EmitOp(o, op));
-_   (EmitSlotNumOfStackTopAndPop(o));
+_   (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
 
-    if (destInSlot) {
-_       (PushAllocatedSlotAndEmit(o, opInfo->type))
-    } else {
-_       (PushRegister(o, opInfo->type))
+    যদি (destInSlot) {
+_       (ঠেলো_Allocated_Slot_And_Emit_2(o, opInfo->type))
+    } অন্যথা {
+_       (ঠেলো_Register(o, opInfo->type))
     }
 }
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-#if d_m3HasWideArithmetic
+#যদি d_m3HasWideArithmetic
 
 // The wide arithmetic proposal: i64.add128 and i64.sub128 over two 128-bit values
 // given as i64 halves, and i64.mul_wide_s/u giving the full product of two i64s.
@@ -4754,21 +4754,21 @@ _       (PushRegister(o, opInfo->type))
 // all read from slots, and of the two results the high half, which ends up on top,
 // goes to _r0 and the low half to a newly allocated slot - so every operation has
 // the one form, whatever shape the stack was in.
-static
-M3Result Compile_WideArithmetic (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_WideArithmetic (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     IM3Operation op          = op_i64_Add128;
-    u32          numOperands = 4;
+    u32          অঙ্ক_Operands = 4;
 
-    switch (i_opcode)
+    নির্বাচন (i_opcode)
     // clang-format off
     {
-    case c_waOp_i64Sub128:   op = op_i64_Sub128;                          break;
-    case c_waOp_i64MulWideS: op = op_i64_MultiplyWide; numOperands = 2;   break;
-    case c_waOp_i64MulWideU: op = op_u64_MultiplyWide; numOperands = 2;   break;
-    default: break;
+    ক্ষেত্র c_waOp_i64Sub128:   op = op_i64_Sub128;                          বিরতি;
+    ক্ষেত্র c_waOp_i64MulWideS: op = op_i64_MultiplyWide; অঙ্ক_Operands = 2;   বিরতি;
+    ক্ষেত্র c_waOp_i64MulWideU: op = op_u64_MultiplyWide; অঙ্ক_Operands = 2;   বিরতি;
+    পূর্বনির্ধারিত: বিরতি;
     }
     // clang-format on
 
@@ -4778,19 +4778,19 @@ _   (EmitOp(o, op));
 
     // the top of the stack first: the high half of the second operand, for the
     // 128-bit ones
-    for (u32 i = 0; i < numOperands; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    জন্য (u32 i = 0; i < অঙ্ক_Operands; ++i) {
+_       (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
     }
 
-_   (PushAllocatedSlotAndEmit(o, c_m3Type_i64));      // the low half
-_   (PushRegister(o, c_m3Type_i64));                  // the high half
+_   (ঠেলো_Allocated_Slot_And_Emit_2(o, c_m3Type_i64));      // the low half
+_   (ঠেলো_Register(o, c_m3Type_i64));                  // the high half
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasWideArithmetic
 
-#if d_m3HasMemory64
+#যদি d_m3HasMemory64
 
 // Replaces the 64-bit address operand of a load or store with the checked
 // 32-bit effective address op_CheckAddr64 leaves behind, so that the access
@@ -4801,10 +4801,10 @@ _   (PushRegister(o, c_m3Type_i64));                  // the high half
 // operands of an atomic - it is rewritten where it stands rather than popped:
 // its stack entry is repointed at the scratch slot and retyped, and the slot it
 // used to occupy released. i_numOperands counts the address and all above it.
-static
-M3Result EmitCheckAddr64 (IM3Compilation o, u64 i_offset, u16 i_numOperands)
+স্থির
+M3_ফলাফল EmitCheckAddr64 (IM3Compilation o, u64 i_offset, u16 i_অঙ্ক_Operands)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     // The address has to be in a slot for op_CheckAddr64 to read it. Spilling
     // r0 wholesale also keeps the value of a store out of it, which is what
@@ -4812,14 +4812,14 @@ M3Result EmitCheckAddr64 (IM3Compilation o, u64 i_offset, u16 i_numOperands)
 _   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
 
     // unreachable code: the operands the instruction names may not be there
-    if (o->stackIndex < o->block.blockStackIndex + i_numOperands) {
-        return result;
+    যদি (o->স্তূপ_সূচক < o->block.block_স্তূপ_সূচক + i_অঙ্ক_Operands) {
+        ফেরত ফলাফল;
     }
 
     {
-        u16      stackIndex = (u16)(o->stackIndex - i_numOperands);
-        u16      srcSlot    = o->wasmStack[stackIndex];
-        m3type_t srcType    = o->typeStack[stackIndex];
+        u16      স্তূপ_সূচক = (u16)(o->স্তূপ_সূচক - i_অঙ্ক_Operands);
+        u16      srcSlot    = o->wasm_স্তূপ[স্তূপ_সূচক];
+        m3type_t srcType    = o->type_স্তূপ[স্তূপ_সূচক];
 
         u16 dstSlot = c_slotUnused;
 
@@ -4831,7 +4831,7 @@ _   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
         // an address is an integer, so nothing should be left in a register
         // once r0 has been preserved
         _throwif(m3Err_typeMismatch, IsRegisterSlotAlias(srcSlot));
-        _throwif(m3Err_functionStackUnderrun, srcSlot >= o->slotMaxAllocatedIndexPlusOne);
+        _throwif(m3_Err_function_স্তূপ_Underrun, srcSlot >= o->slot_Max_Allocated_সূচক_Plus_One);
 
         // allocated before the source is released, so the two cannot be the
         // same slot - op_CheckAddr64 reads one and writes the other
@@ -4842,24 +4842,24 @@ _       (EmitOp(o, op_CheckAddr64));
         EmitSlotOffset(o, dstSlot);
         EmitConstant64(o, i_offset);
 
-        o->wasmStack[stackIndex] = dstSlot;
-        o->typeStack[stackIndex] = c_m3Type_i32;
+        o->wasm_স্তূপ[স্তূপ_সূচক] = dstSlot;
+        o->type_স্তূপ[স্তূপ_সূচক] = c_m3Type_i32;
 
         // locals and the constant table outlive the instruction; a dynamic
         // slot the address was computed into does not
-        if (srcSlot >= o->slotFirstDynamicIndex) {
+        যদি (srcSlot >= o->slot_First_Dynamic_সূচক) {
             DeallocateSlot(o, srcSlot, srcType);
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasMemory64
 
 
-static
-M3Result Compile_Load_Store (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Load_Store (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     u32 alignHint, memoryIdx;
@@ -4868,7 +4868,7 @@ _try {
     // alignHint is checked by the validator
 _   (ReadMemoryArg(&alignHint, &memoryIdx, &memoryOffset, &o->wasm, o->wasmEnd));
                                                                         m3log (compile, d_indent " (memory = %d; offset = %llu)", get_indention_string (o), memoryIdx, (unsigned long long) memoryOffset);
-    _throwif(m3Err_unknownMemory, memoryIdx >= o->module->numMemories);
+    _throwif(m3Err_unknownMemory, memoryIdx >= o->module->অঙ্ক_Memories);
 
     IM3OpInfo opInfo = GetOpInfo(i_opcode);
     _throwif(m3Err_unknownOpcode, not opInfo);
@@ -4880,24 +4880,24 @@ _   (ReadMemoryArg(&alignHint, &memoryIdx, &memoryOffset, &o->wasm, o->wasmEnd))
     // refuses the module rather than silently truncating the offset.
     _throwif(m3Err_wasmMalformed, not isMemory64 and memoryOffset > 0xFFFFFFFFull);
 
-    if (IsFpType(opInfo->type)) {
+    যদি (IsFpType(opInfo->type)) {
 _       (PreserveRegisterIfOccupied(o, c_m3Type_f64));
     }
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, memoryIdx));
     }
 
-#if d_m3HasMemory64
-    if (isMemory64) {
+#যদি d_m3HasMemory64
+    যদি (isMemory64) {
         // An offset this far out puts every address out of bounds, so rather
         // than carrying it, clamp it to the limit: op_CheckAddr64 then traps
         // on whatever address it is given, which is the outcome either way.
-        if (memoryOffset > d_m3AddressLimit) {
+        যদি (memoryOffset > d_m3AddressLimit) {
             memoryOffset = d_m3AddressLimit;
         }
 
-_       (EmitCheckAddr64(o, memoryOffset, opInfo->stackOffset < 0 ? 2 : 1));
+_       (EmitCheckAddr64(o, memoryOffset, opInfo->স্তূপ_Offset < 0 ? 2 : 1));
 
         // op_CheckAddr64 has folded the offset in already
         memoryOffset = 0;
@@ -4908,15 +4908,15 @@ _   (Compile_Operator(o, i_opcode));
 
     EmitConstant32(o, (u32)memoryOffset);
 
-    if (memoryIdx) {
+    যদি (memoryIdx) {
 _       (EmitSetMemory(o, 0));
     }
 }
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-#if d_m3HasAtomics
+#যদি d_m3HasAtomics
 
 // What an atomic instruction takes and gives back, from its sub-opcode. The
 // accesses come in runs of seven, one per combination of value type and cell width:
@@ -4926,69 +4926,69 @@ _       (EmitSetMemory(o, 0));
 // The operand count includes the address. The top operand is the one that ends up
 // in a register, so its type is the one to check on the way out; a store has no
 // result, which is c_m3Type_none.
-static
-void GetAtomicShape (u32 i_sub, u16* o_numOperands, m3type_t* o_topType, m3type_t* o_resultType)
+স্থির
+শূন্য GetAtomicShape (u32 i_sub, u16* o_অঙ্ক_Operands, m3type_t* o_শীর্ষ_Type, m3type_t* o_ফলাফল_Type)
 {
     // clang-format off
-    static const m3type_t c_valueTypes [7] = {
+    স্থির ধ্রুবক m3type_t c_মান_Types [7] = {
         c_m3Type_i32, c_m3Type_i64,
         c_m3Type_i32, c_m3Type_i32,
         c_m3Type_i64, c_m3Type_i64, c_m3Type_i64
     };
     // clang-format on
 
-    if (i_sub == 0x00) {                    // memory.atomic.notify: address, count
-        *o_numOperands = 2;
-        *o_topType     = c_m3Type_i32;
-        *o_resultType  = c_m3Type_i32;
-    } else if (i_sub <= 0x02) {             // memory.atomic.wait32/64: address, expected, timeout
-        *o_numOperands = 3;
-        *o_topType     = c_m3Type_i64;
-        *o_resultType  = c_m3Type_i32;
-    } else if (i_sub <= 0x16) {             // loads: address
-        *o_numOperands = 1;
-        *o_topType     = c_m3Type_i32;
-        *o_resultType  = c_valueTypes[i_sub - 0x10];
-    } else if (i_sub <= 0x1d) {             // stores: address, value
-        *o_numOperands = 2;
-        *o_topType     = c_valueTypes[i_sub - 0x17];
-        *o_resultType  = c_m3Type_none;
-    } else if (i_sub <= 0x47) {             // read-modify-write: address, value
-        *o_numOperands = 2;
-        *o_topType     = c_valueTypes[(i_sub - 0x1e) % 7];
-        *o_resultType  = *o_topType;
-    } else {                                // cmpxchg: address, expected, replacement
-        *o_numOperands = 3;
-        *o_topType     = c_valueTypes[i_sub - 0x48];
-        *o_resultType  = *o_topType;
+    যদি (i_sub == 0x00) {                    // memory.atomic.notify: address, count
+        *o_অঙ্ক_Operands = 2;
+        *o_শীর্ষ_Type     = c_m3Type_i32;
+        *o_ফলাফল_Type  = c_m3Type_i32;
+    } অন্যথা যদি (i_sub <= 0x02) {             // memory.atomic.wait32/64: address, expected, timeout
+        *o_অঙ্ক_Operands = 3;
+        *o_শীর্ষ_Type     = c_m3Type_i64;
+        *o_ফলাফল_Type  = c_m3Type_i32;
+    } অন্যথা যদি (i_sub <= 0x16) {             // loads: address
+        *o_অঙ্ক_Operands = 1;
+        *o_শীর্ষ_Type     = c_m3Type_i32;
+        *o_ফলাফল_Type  = c_মান_Types[i_sub - 0x10];
+    } অন্যথা যদি (i_sub <= 0x1d) {             // stores: address, value
+        *o_অঙ্ক_Operands = 2;
+        *o_শীর্ষ_Type     = c_মান_Types[i_sub - 0x17];
+        *o_ফলাফল_Type  = c_m3Type_none;
+    } অন্যথা যদি (i_sub <= 0x47) {             // read-modify-write: address, value
+        *o_অঙ্ক_Operands = 2;
+        *o_শীর্ষ_Type     = c_মান_Types[(i_sub - 0x1e) % 7];
+        *o_ফলাফল_Type  = *o_শীর্ষ_Type;
+    } অন্যথা {                                // cmpxchg: address, expected, replacement
+        *o_অঙ্ক_Operands = 3;
+        *o_শীর্ষ_Type     = c_মান_Types[i_sub - 0x48];
+        *o_ফলাফল_Type  = *o_শীর্ষ_Type;
     }
 }
 
 
 // The description an access takes as its last immediate: see m3_exec_atomic.h
-static
+স্থির
 u32 GetAtomicDesc (u32 i_sub)
 {
     // per variant, the log2 of the width of the cell
-    static const u8 c_log2Widths[7] = { 2, 3, 0, 1, 0, 1, 2 };
+    স্থির ধ্রুবক u8 c_log2Widths[7] = { 2, 3, 0, 1, 0, 1, 2 };
 
     u32 variant, kind = 0;
 
-    if (i_sub <= 0x16) {
+    যদি (i_sub <= 0x16) {
         variant = i_sub - 0x10;
-    } else if (i_sub <= 0x1d) {
+    } অন্যথা যদি (i_sub <= 0x1d) {
         variant = i_sub - 0x17;
-    } else if (i_sub <= 0x47) {
+    } অন্যথা যদি (i_sub <= 0x47) {
         variant = (i_sub - 0x1e) % 7;
         kind    = (i_sub - 0x1e) / 7;         // add, sub, and, or, xor, xchg
-    } else {
+    } অন্যথা {
         variant = i_sub - 0x48;
     }
 
     // variants 1 and 4..6 are the i64 ones
     u32 is64 = (variant == 1 or variant >= 4) ? 1u : 0u;
 
-    return c_log2Widths[variant] | (is64 << 2) | (kind << 3);
+    ফেরত c_log2Widths[variant] | (is64 << 2) | (kind << 3);
 }
 
 
@@ -4997,27 +4997,27 @@ u32 GetAtomicDesc (u32 i_sub)
 // (or, for a load, the register), followed by the memarg offset. The ops check the
 // address themselves: for an atomic that includes its alignment, which only the
 // effective address can be asked.
-static
-M3Result Compile_Atomic (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল Compile_Atomic (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     u32 alignHint, memoryIdx;
     u64 memoryOffset;
 
-    u16      numOperands = 0;
-    m3type_t topType     = c_m3Type_none;
-    m3type_t resultType  = c_m3Type_none;
+    u16      অঙ্ক_Operands = 0;
+    m3type_t শীর্ষ_Type     = c_m3Type_none;
+    m3type_t ফলাফল_Type  = c_m3Type_none;
 
-    if (i_opcode == c_waOp_atomicFence) {
+    যদি (i_opcode == c_waOp_atomicFence) {
         // the reserved byte, which the validator has checked to be zero. There
         // is nothing to order between accesses that one thread makes in sequence.
         u8 reserved;
 _       (Read_u8(&reserved, &o->wasm, o->wasmEnd));
-    } else {
+    } অন্যথা {
         // alignHint is checked by the validator
 _       (ReadMemoryArg(&alignHint, &memoryIdx, &memoryOffset, &o->wasm, o->wasmEnd));
                                                                         m3log (compile, d_indent " (memory = %d; offset = %llu)", get_indention_string (o), memoryIdx, (unsigned long long) memoryOffset);
-        _throwif(m3Err_unknownMemory, memoryIdx >= o->module->numMemories);
+        _throwif(m3Err_unknownMemory, memoryIdx >= o->module->অঙ্ক_Memories);
 
         IM3OpInfo opInfo = GetOpInfo(i_opcode);
         _throwif(m3Err_unknownOpcode, not opInfo);
@@ -5027,59 +5027,59 @@ _       (ReadMemoryArg(&alignHint, &memoryIdx, &memoryOffset, &o->wasm, o->wasmE
         // see Compile_Load_Store
         _throwif(m3Err_wasmMalformed, not isMemory64 and memoryOffset > 0xFFFFFFFFull);
 
-        GetAtomicShape(i_opcode & 0xFF, &numOperands, &topType, &resultType);
+        GetAtomicShape(i_opcode & 0xFF, &অঙ্ক_Operands, &শীর্ষ_Type, &ফলাফল_Type);
 
-        if (memoryIdx) {
+        যদি (memoryIdx) {
 _           (EmitSetMemory(o, memoryIdx));
         }
 
-#  if d_m3HasMemory64
-        if (isMemory64) {
+#  যদি d_m3HasMemory64
+        যদি (isMemory64) {
             // see Compile_Load_Store
-            if (memoryOffset > d_m3AddressLimit) {
+            যদি (memoryOffset > d_m3AddressLimit) {
                 memoryOffset = d_m3AddressLimit;
             }
 
-_           (EmitCheckAddr64(o, memoryOffset, numOperands));
+_           (EmitCheckAddr64(o, memoryOffset, অঙ্ক_Operands));
             memoryOffset = 0;
         }
 #  endif
 
-_       (CopyStackTopToRegister(o, false));
+_       (Copy_স্তূপ_শীর্ষ_To_Register(o, false));
 _       (EmitOp(o, opInfo->operations[0]));
-_       (PopType(o, topType));
+_       (বের_করো_Type(o, শীর্ষ_Type));
 
-        for (u16 i = 1; i < numOperands; ++i) {
-_           (EmitSlotNumOfStackTopAndPop(o));
+        জন্য (u16 i = 1; i < অঙ্ক_Operands; ++i) {
+_           (Emit_Slot_অঙ্ক_Of_স্তূপ_শীর্ষ_And_বের_করো(o));
         }
 
         EmitConstant32(o, (u32)memoryOffset);
-        if (i_opcode >= c_waOp_atomicFirstAccess) {
+        যদি (i_opcode >= c_waOp_atomicFirstAccess) {
             EmitConstant32(o, GetAtomicDesc(i_opcode & 0xFF));
         }
 
-        if (memoryIdx) {
+        যদি (memoryIdx) {
 _           (EmitSetMemory(o, 0));
         }
 
-        if (resultType != c_m3Type_none) {
-_           (PushRegister(o, resultType));
+        যদি (ফলাফল_Type != c_m3Type_none) {
+_           (ঠেলো_Register(o, ফলাফল_Type));
         }
     }
 }
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasAtomics
 
 
-M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const void* i_function, const void* i_userdata)
+M3_ফলাফল CompileRawFunction (IM3Module io_module, IM3Function io_function, ধ্রুবক শূন্য* i_function, ধ্রুবক শূন্য* i_userdata)
 {
     d_m3Assert(io_module->runtime);
 
     IM3CodePage page = AcquireCodePageWithCapacity(io_module->runtime, 4);
 
-    if (page) {
+    যদি (page) {
         io_function->compiled = GetPagePC(page);
         io_function->module   = io_module;
 
@@ -5093,9 +5093,9 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
         EmitWord(page, i_userdata);
 
         ReleaseCodePage(io_module->runtime, page);
-        return m3Err_none;
-    } else {
-        return m3Err_mallocFailedCodePage;
+        ফেরত m3Err_none;
+    } অন্যথা {
+        ফেরত m3Err_mallocFailedCodePage;
     }
 }
 
@@ -5106,14 +5106,14 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
 // d_logOp, d_logOp2 macros aren't actually used by the compiler, just codepage decoding (d_m3LogCodePages = 1)
 #define d_ops(...)                          .operations = { __VA_ARGS__ }
 
-#define d_logOp(OP)                         d_ops( op_##OP,                 NULL,                       NULL,                       NULL )
-#define d_logOp2(OP1,OP2)                   d_ops( op_##OP1,                op_##OP2,                   NULL,                       NULL )
+#define d_logOp(OP)                         d_ops( op_##OP,                 ফাঁকা,                       ফাঁকা,                       ফাঁকা )
+#define d_logOp2(OP1,OP2)                   d_ops( op_##OP1,                op_##OP2,                   ফাঁকা,                       ফাঁকা )
 
-#define d_emptyOpList                       d_ops( NULL,                    NULL,                       NULL,                       NULL )
-#define d_unaryOpList(TYPE, NAME)           d_ops( op_##TYPE##_##NAME##_r,  op_##TYPE##_##NAME##_s,     NULL,                       NULL )
-#define d_binOpList(TYPE, NAME)             d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    NULL )
+#define d_emptyOpList                       d_ops( ফাঁকা,                    ফাঁকা,                       ফাঁকা,                       ফাঁকা )
+#define d_unaryOpList(TYPE, NAME)           d_ops( op_##TYPE##_##NAME##_r,  op_##TYPE##_##NAME##_s,     ফাঁকা,                       ফাঁকা )
+#define d_binOpList(TYPE, NAME)             d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    ফাঁকা )
 #define d_storeFpOpList(TYPE, NAME)         d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    op_##TYPE##_##NAME##_rr )
-#define d_commutativeBinOpList(TYPE, NAME)  d_ops( op_##TYPE##_##NAME##_rs, NULL,                       op_##TYPE##_##NAME##_ss,    NULL )
+#define d_commutativeBinOpList(TYPE, NAME)  d_ops( op_##TYPE##_##NAME##_rs, ফাঁকা,                       op_##TYPE##_##NAME##_ss,    ফাঁকা )
 
 #define d_convertOpList(OP)                 d_ops( op_##OP##_r_r,           op_##OP##_r_s,              op_##OP##_s_r,              op_##OP##_s_s )
 
@@ -5138,11 +5138,11 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
     _( Compile_SetLocal )               \
     _( Compile_GetSetGlobal )           \
     _( Compile_Load_Store )             \
-    _( Compile_Memory_Size )            \
+    _( Compile_Memory_আকার )            \
     _( Compile_Memory_Grow )            \
     _( Compile_Memory_Init )            \
     _( Compile_Memory_CopyFill )        \
-    _( Compile_Data_Drop )              \
+    _( Compile_তথ্য_Drop )              \
     _( Compile_Const_i32 )              \
     _( Compile_Const_i64 )              \
     _( Compile_Convert )                \
@@ -5153,17 +5153,17 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
     d_m3CompilerList_typedRefs( _ )     \
     d_m3CompilerList_eh( _ )            \
     d_m3CompilerList_wide( _ )          \
-    d_m3CompilerList_stackSwitching( _ )
+    d_m3_Compiler_List_স্তূপ_Switching( _ )
 
-#if d_m3ImplementFloat
+#যদি d_m3ImplementFloat
 #  define d_m3CompilerList_f(_)         \
     _( Compile_Const_f32 )              \
     _( Compile_Const_f64 )
-#else
+#অন্যথা
 #  define d_m3CompilerList_f(_)
 #endif
 
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
 #  define d_m3CompilerList_refTypes(_)  \
     _( Compile_Select_Typed )           \
     _( Compile_Ref_Null )               \
@@ -5172,66 +5172,66 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
     _( Compile_Table_GetSet )           \
     _( Compile_Table_Init )             \
     _( Compile_Table_Copy )             \
-    _( Compile_Table_Size )             \
+    _( Compile_Table_আকার )             \
     _( Compile_Table_GrowFill )         \
     _( Compile_Elem_Drop )
-#else
+#অন্যথা
 #  define d_m3CompilerList_refTypes(_)
 #endif
 
-#if d_m3HasTypedRefs
+#যদি d_m3HasTypedRefs
 #  define d_m3CompilerList_typedRefs(_) \
     _( Compile_CallRef )                \
     _( Compile_Ref_AsNonNull )
-#else
+#অন্যথা
 #  define d_m3CompilerList_typedRefs(_)
 #endif
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
 #  define d_m3CompilerList_eh(_)        \
     _( Compile_Throw )                  \
     _( Compile_ThrowRef )               \
     _( Compile_TryTable )
-#else
+#অন্যথা
 #  define d_m3CompilerList_eh(_)
 #endif
 
-#if d_m3HasAtomics
+#যদি d_m3HasAtomics
 #  define d_m3CompilerList_atomics(_)   \
     _( Compile_Atomic )
-#else
+#অন্যথা
 #  define d_m3CompilerList_atomics(_)
 #endif
 
-#if d_m3HasWideArithmetic
+#যদি d_m3HasWideArithmetic
 #  define d_m3CompilerList_wide(_)      \
     _( Compile_WideArithmetic )
-#else
+#অন্যথা
 #  define d_m3CompilerList_wide(_)
 #endif
 
-#if d_m3HasStackSwitching
-#  define d_m3CompilerList_stackSwitching(_) \
+#যদি d_m3_Has_স্তূপ_Switching
+#  define d_m3_Compiler_List_স্তূপ_Switching(_) \
     _( Compile_ContNew )                     \
     _( Compile_ContBind )                    \
     _( Compile_Suspend )                     \
     _( Compile_Resume )                      \
     _( Compile_Switch )
-#else
-#  define d_m3CompilerList_stackSwitching(_)
+#অন্যথা
+#  define d_m3_Compiler_List_স্তূপ_Switching(_)
 #endif
 
 // Index 0 is "this opcode has no compiler", so that a zeroed entry - which is
 // what M3OP_RESERVED and the reserved holes in the tables are - reads as one.
-enum {
+গণনা {
     c_cc_NULL = 0,
 #define d_m3CompilerEnum(NAME)  c_cc_##NAME,
     d_m3CompilerList(d_m3CompilerEnum)
 #undef d_m3CompilerEnum
 };
 
-static const M3Compiler c_compilers[] = {
-    NULL,
+স্থির ধ্রুবক M3Compiler c_compilers[] = {
+    ফাঁকা,
 #define d_m3CompilerPtr(NAME)   NAME,
     d_m3CompilerList(d_m3CompilerPtr)
 #undef d_m3CompilerPtr
@@ -5240,15 +5240,15 @@ static const M3Compiler c_compilers[] = {
 // Names a table entry's compiler by index. d_cc (NULL) is the no-compiler entry.
 #define d_cc(NAME)                          .compiler = c_cc_##NAME
 
-static
+স্থির
 M3Compiler GetCompiler (IM3OpInfo i_opInfo)
 {
-    d_m3Assert(i_opInfo->compiler < M3_COUNT_OF(c_compilers));
-    return c_compilers[i_opInfo->compiler];
+    d_m3Assert(i_opInfo->compiler < M3_গুনতি_OF(c_compilers));
+    ফেরত c_compilers[i_opInfo->compiler];
 }
 
 // clang-format off
-const M3OpInfo c_operations[] =
+ধ্রুবক M3OpInfo c_operations[] =
 {
     M3OP( "unreachable",           0,  none,   d_cc(Compile_Unreachable),  d_logOp (Unreachable) ),                   // 0x00
     M3OP( "nop",                   0,  none,   d_cc(Compile_Nop),          d_emptyOpList ),                           // 0x01 .
@@ -5259,11 +5259,11 @@ const M3OpInfo c_operations[] =
 
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x06...0x07
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
     M3OP( "throw",                 0,  none,   d_cc(Compile_Throw),        d_logOp (Throw) ),                         // 0x08
     M3OP_RESERVED,                                                                                                    // 0x09
     M3OP( "throw_ref",             0,  none,   d_cc(Compile_ThrowRef),     d_logOp (ThrowRef) ),                      // 0x0a
-#else
+#অন্যথা
     M3OP_RESERVED,  M3OP_RESERVED, M3OP_RESERVED,                                                                     // 0x08...0x0a
 #endif
 
@@ -5277,10 +5277,10 @@ const M3OpInfo c_operations[] =
     M3OP( "return_call",           0,  any,    d_cc(Compile_Call),         d_logOp (ReturnCall) ),                    // 0x12
     M3OP( "return_call_indirect",  0,  any,    d_cc(Compile_CallIndirect), d_logOp (ReturnCallIndirect) ),            // 0x13
 
-#if d_m3HasTypedRefs
+#যদি d_m3HasTypedRefs
     M3OP( "call_ref",              0,  any,    d_cc(Compile_CallRef),      d_logOp (CallRef) ),                       // 0x14
     M3OP( "return_call_ref",       0,  any,    d_cc(Compile_CallRef),      d_logOp (ReturnCallRef) ),                 // 0x15
-#else
+#অন্যথা
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x14...
 #endif
     M3OP_RESERVED,  M3OP_RESERVED, M3OP_RESERVED, M3OP_RESERVED,                                                      // ...0x19
@@ -5288,16 +5288,16 @@ const M3OpInfo c_operations[] =
     M3OP( "drop",                  -1, none,   d_cc(Compile_Drop),         d_emptyOpList ),                           // 0x1a
     M3OP( "select",                -2, any,    d_cc(Compile_Select),       d_emptyOpList ),                           // 0x1b
 
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
     M3OP( "select.t",              -2, any,    d_cc(Compile_Select_Typed), d_emptyOpList ),                           // 0x1c
-#else
+#অন্যথা
     M3OP_RESERVED,                                                                                                    // 0x1c
 #endif
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x1d...0x1e
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
     M3OP( "try_table",             0,  none,   d_cc(Compile_TryTable),     d_logOp (TryTable) ),                      // 0x1f
-#else
+#অন্যথা
     M3OP_RESERVED,                                                                                                    // 0x1f
 #endif
 
@@ -5307,10 +5307,10 @@ const M3OpInfo c_operations[] =
     M3OP( "global.get",            1,  none,   d_cc(Compile_GetSetGlobal), d_emptyOpList ),                           // 0x23
     M3OP( "global.set",            1,  none,   d_cc(Compile_GetSetGlobal), d_emptyOpList ),                           // 0x24
 
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
     M3OP( "table.get",             0,  any,    d_cc(Compile_Table_GetSet), d_emptyOpList ),                           // 0x25
     M3OP( "table.set",             -2, none,   d_cc(Compile_Table_GetSet), d_emptyOpList ),                           // 0x26
-#else
+#অন্যথা
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x25...0x26
 #endif
     M3OP_RESERVED,                                                                                                    // 0x27
@@ -5344,7 +5344,7 @@ const M3OpInfo c_operations[] =
     M3OP( "i64.store16",           -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i64, Store_i16) ),            // 0x3d
     M3OP( "i64.store32",           -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i64, Store_i32) ),            // 0x3e
 
-    M3OP( "memory.size",           1,  i_32,   d_cc(Compile_Memory_Size),  d_logOp (MemSize) ),                       // 0x3f
+    M3OP( "memory.size",           1,  i_32,   d_cc(Compile_Memory_আকার),  d_logOp (Mem_আকার) ),                       // 0x3f
     M3OP( "memory.grow",           1,  i_32,   d_cc(Compile_Memory_Grow),  d_logOp (MemGrow) ),                       // 0x40
 
     M3OP( "i32.const",             1,  i_32,   d_cc(Compile_Const_i32),    d_logOp (Const32) ),                       // 0x41
@@ -5352,124 +5352,124 @@ const M3OpInfo c_operations[] =
     M3OP_F( "f32.const",           1,  f_32,   d_cc(Compile_Const_f32),    d_emptyOpList ),                           // 0x43
     M3OP_F( "f64.const",           1,  f_64,   d_cc(Compile_Const_f64),    d_emptyOpList ),                           // 0x44
 
-    M3OP( "i32.eqz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, EqualToZero) ),        // 0x45
-    M3OP( "i32.eq",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, Equal) ),     // 0x46
-    M3OP( "i32.ne",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, NotEqual) ),  // 0x47
-    M3OP( "i32.lt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, LessThan) ),             // 0x48
-    M3OP( "i32.lt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, LessThan) ),             // 0x49
-    M3OP( "i32.gt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, GreaterThan) ),          // 0x4a
-    M3OP( "i32.gt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, GreaterThan) ),          // 0x4b
-    M3OP( "i32.le_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, LessThanOrEqual) ),      // 0x4c
-    M3OP( "i32.le_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, LessThanOrEqual) ),      // 0x4d
-    M3OP( "i32.ge_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, GreaterThanOrEqual) ),   // 0x4e
-    M3OP( "i32.ge_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, GreaterThanOrEqual) ),   // 0x4f
+    M3OP( "i32.eqz",               0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (i32, EqualToZero) ),        // 0x45
+    M3OP( "i32.eq",                -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i32, Equal) ),     // 0x46
+    M3OP( "i32.ne",                -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i32, NotEqual) ),  // 0x47
+    M3OP( "i32.lt_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, LessThan) ),             // 0x48
+    M3OP( "i32.lt_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, LessThan) ),             // 0x49
+    M3OP( "i32.gt_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, GreaterThan) ),          // 0x4a
+    M3OP( "i32.gt_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, GreaterThan) ),          // 0x4b
+    M3OP( "i32.le_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, LessThanOrEqual) ),      // 0x4c
+    M3OP( "i32.le_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, LessThanOrEqual) ),      // 0x4d
+    M3OP( "i32.ge_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, GreaterThanOrEqual) ),   // 0x4e
+    M3OP( "i32.ge_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, GreaterThanOrEqual) ),   // 0x4f
 
-    M3OP( "i64.eqz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (i64, EqualToZero) ),        // 0x50
-    M3OP( "i64.eq",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i64, Equal) ),     // 0x51
-    M3OP( "i64.ne",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i64, NotEqual) ),  // 0x52
-    M3OP( "i64.lt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, LessThan) ),             // 0x53
-    M3OP( "i64.lt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, LessThan) ),             // 0x54
-    M3OP( "i64.gt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, GreaterThan) ),          // 0x55
-    M3OP( "i64.gt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, GreaterThan) ),          // 0x56
-    M3OP( "i64.le_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, LessThanOrEqual) ),      // 0x57
-    M3OP( "i64.le_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, LessThanOrEqual) ),      // 0x58
-    M3OP( "i64.ge_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, GreaterThanOrEqual) ),   // 0x59
-    M3OP( "i64.ge_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, GreaterThanOrEqual) ),   // 0x5a
+    M3OP( "i64.eqz",               0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (i64, EqualToZero) ),        // 0x50
+    M3OP( "i64.eq",                -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i64, Equal) ),     // 0x51
+    M3OP( "i64.ne",                -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i64, NotEqual) ),  // 0x52
+    M3OP( "i64.lt_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i64, LessThan) ),             // 0x53
+    M3OP( "i64.lt_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u64, LessThan) ),             // 0x54
+    M3OP( "i64.gt_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i64, GreaterThan) ),          // 0x55
+    M3OP( "i64.gt_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u64, GreaterThan) ),          // 0x56
+    M3OP( "i64.le_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i64, LessThanOrEqual) ),      // 0x57
+    M3OP( "i64.le_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u64, LessThanOrEqual) ),      // 0x58
+    M3OP( "i64.ge_s",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i64, GreaterThanOrEqual) ),   // 0x59
+    M3OP( "i64.ge_u",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u64, GreaterThanOrEqual) ),   // 0x5a
 
-    M3OP_F( "f32.eq",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Equal) ),     // 0x5b
-    M3OP_F( "f32.ne",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, NotEqual) ),  // 0x5c
-    M3OP_F( "f32.lt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, LessThan) ),             // 0x5d
-    M3OP_F( "f32.gt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, GreaterThan) ),          // 0x5e
-    M3OP_F( "f32.le",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, LessThanOrEqual) ),      // 0x5f
-    M3OP_F( "f32.ge",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, GreaterThanOrEqual) ),   // 0x60
+    M3OP_F( "f32.eq",              -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f32, Equal) ),     // 0x5b
+    M3OP_F( "f32.ne",              -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f32, NotEqual) ),  // 0x5c
+    M3OP_F( "f32.lt",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f32, LessThan) ),             // 0x5d
+    M3OP_F( "f32.gt",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f32, GreaterThan) ),          // 0x5e
+    M3OP_F( "f32.le",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f32, LessThanOrEqual) ),      // 0x5f
+    M3OP_F( "f32.ge",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f32, GreaterThanOrEqual) ),   // 0x60
 
-    M3OP_F( "f64.eq",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f64, Equal) ),     // 0x61
-    M3OP_F( "f64.ne",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f64, NotEqual) ),  // 0x62
-    M3OP_F( "f64.lt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, LessThan) ),             // 0x63
-    M3OP_F( "f64.gt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, GreaterThan) ),          // 0x64
-    M3OP_F( "f64.le",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, LessThanOrEqual) ),      // 0x65
-    M3OP_F( "f64.ge",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, GreaterThanOrEqual) ),   // 0x66
+    M3OP_F( "f64.eq",              -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f64, Equal) ),     // 0x61
+    M3OP_F( "f64.ne",              -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f64, NotEqual) ),  // 0x62
+    M3OP_F( "f64.lt",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f64, LessThan) ),             // 0x63
+    M3OP_F( "f64.gt",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f64, GreaterThan) ),          // 0x64
+    M3OP_F( "f64.le",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f64, LessThanOrEqual) ),      // 0x65
+    M3OP_F( "f64.ge",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (f64, GreaterThanOrEqual) ),   // 0x66
 
-    M3OP( "i32.clz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (u32, Clz) ),                // 0x67
-    M3OP( "i32.ctz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (u32, Ctz) ),                // 0x68
-    M3OP( "i32.popcnt",            0,  i_32,   d_cc(NULL),                 d_unaryOpList (u32, Popcnt) ),             // 0x69
+    M3OP( "i32.clz",               0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (u32, Clz) ),                // 0x67
+    M3OP( "i32.ctz",               0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (u32, Ctz) ),                // 0x68
+    M3OP( "i32.popcnt",            0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (u32, Popcnt) ),             // 0x69
 
-    M3OP( "i32.add",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, Add) ),       // 0x6a
-    M3OP( "i32.sub",               -1, i_32,   d_cc(NULL),                 d_binOpList (i32, Subtract) ),             // 0x6b
-    M3OP( "i32.mul",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, Multiply) ),  // 0x6c
-    M3OP( "i32.div_s",             -1, i_32,   d_cc(NULL),                 d_binOpList (i32, Divide) ),               // 0x6d
-    M3OP( "i32.div_u",             -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Divide) ),               // 0x6e
-    M3OP( "i32.rem_s",             -1, i_32,   d_cc(NULL),                 d_binOpList (i32, Remainder) ),            // 0x6f
-    M3OP( "i32.rem_u",             -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Remainder) ),            // 0x70
-    M3OP( "i32.and",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (u32, And) ),       // 0x71
-    M3OP( "i32.or",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (u32, Or) ),        // 0x72
-    M3OP( "i32.xor",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (u32, Xor) ),       // 0x73
-    M3OP( "i32.shl",               -1, i_32,   d_cc(NULL),                 d_binOpList (u32, ShiftLeft) ),            // 0x74
-    M3OP( "i32.shr_s",             -1, i_32,   d_cc(NULL),                 d_binOpList (i32, ShiftRight) ),           // 0x75
-    M3OP( "i32.shr_u",             -1, i_32,   d_cc(NULL),                 d_binOpList (u32, ShiftRight) ),           // 0x76
-    M3OP( "i32.rotl",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Rotl) ),                 // 0x77
-    M3OP( "i32.rotr",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Rotr) ),                 // 0x78
+    M3OP( "i32.add",               -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i32, Add) ),       // 0x6a
+    M3OP( "i32.sub",               -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, Subtract) ),             // 0x6b
+    M3OP( "i32.mul",               -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i32, Multiply) ),  // 0x6c
+    M3OP( "i32.div_s",             -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, Divide) ),               // 0x6d
+    M3OP( "i32.div_u",             -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, Divide) ),               // 0x6e
+    M3OP( "i32.rem_s",             -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, Remainder) ),            // 0x6f
+    M3OP( "i32.rem_u",             -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, Remainder) ),            // 0x70
+    M3OP( "i32.and",               -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (u32, And) ),       // 0x71
+    M3OP( "i32.or",                -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (u32, Or) ),        // 0x72
+    M3OP( "i32.xor",               -1, i_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (u32, Xor) ),       // 0x73
+    M3OP( "i32.shl",               -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, Shift_বাম) ),            // 0x74
+    M3OP( "i32.shr_s",             -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (i32, Shift_ডান) ),           // 0x75
+    M3OP( "i32.shr_u",             -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, Shift_ডান) ),           // 0x76
+    M3OP( "i32.rotl",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, Rotl) ),                 // 0x77
+    M3OP( "i32.rotr",              -1, i_32,   d_cc(ফাঁকা),                 d_binOpList (u32, Rotr) ),                 // 0x78
 
-    M3OP( "i64.clz",               0,  i_64,   d_cc(NULL),                 d_unaryOpList (u64, Clz) ),                // 0x79
-    M3OP( "i64.ctz",               0,  i_64,   d_cc(NULL),                 d_unaryOpList (u64, Ctz) ),                // 0x7a
-    M3OP( "i64.popcnt",            0,  i_64,   d_cc(NULL),                 d_unaryOpList (u64, Popcnt) ),             // 0x7b
+    M3OP( "i64.clz",               0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (u64, Clz) ),                // 0x79
+    M3OP( "i64.ctz",               0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (u64, Ctz) ),                // 0x7a
+    M3OP( "i64.popcnt",            0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (u64, Popcnt) ),             // 0x7b
 
-    M3OP( "i64.add",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (i64, Add) ),       // 0x7c
-    M3OP( "i64.sub",               -1, i_64,   d_cc(NULL),                 d_binOpList (i64, Subtract) ),             // 0x7d
-    M3OP( "i64.mul",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (i64, Multiply) ),  // 0x7e
-    M3OP( "i64.div_s",             -1, i_64,   d_cc(NULL),                 d_binOpList (i64, Divide) ),               // 0x7f
-    M3OP( "i64.div_u",             -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Divide) ),               // 0x80
-    M3OP( "i64.rem_s",             -1, i_64,   d_cc(NULL),                 d_binOpList (i64, Remainder) ),            // 0x81
-    M3OP( "i64.rem_u",             -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Remainder) ),            // 0x82
-    M3OP( "i64.and",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (u64, And) ),       // 0x83
-    M3OP( "i64.or",                -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (u64, Or) ),        // 0x84
-    M3OP( "i64.xor",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (u64, Xor) ),       // 0x85
-    M3OP( "i64.shl",               -1, i_64,   d_cc(NULL),                 d_binOpList (u64, ShiftLeft) ),            // 0x86
-    M3OP( "i64.shr_s",             -1, i_64,   d_cc(NULL),                 d_binOpList (i64, ShiftRight) ),           // 0x87
-    M3OP( "i64.shr_u",             -1, i_64,   d_cc(NULL),                 d_binOpList (u64, ShiftRight) ),           // 0x88
-    M3OP( "i64.rotl",              -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Rotl) ),                 // 0x89
-    M3OP( "i64.rotr",              -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Rotr) ),                 // 0x8a
+    M3OP( "i64.add",               -1, i_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i64, Add) ),       // 0x7c
+    M3OP( "i64.sub",               -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (i64, Subtract) ),             // 0x7d
+    M3OP( "i64.mul",               -1, i_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (i64, Multiply) ),  // 0x7e
+    M3OP( "i64.div_s",             -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (i64, Divide) ),               // 0x7f
+    M3OP( "i64.div_u",             -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (u64, Divide) ),               // 0x80
+    M3OP( "i64.rem_s",             -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (i64, Remainder) ),            // 0x81
+    M3OP( "i64.rem_u",             -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (u64, Remainder) ),            // 0x82
+    M3OP( "i64.and",               -1, i_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (u64, And) ),       // 0x83
+    M3OP( "i64.or",                -1, i_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (u64, Or) ),        // 0x84
+    M3OP( "i64.xor",               -1, i_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (u64, Xor) ),       // 0x85
+    M3OP( "i64.shl",               -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (u64, Shift_বাম) ),            // 0x86
+    M3OP( "i64.shr_s",             -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (i64, Shift_ডান) ),           // 0x87
+    M3OP( "i64.shr_u",             -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (u64, Shift_ডান) ),           // 0x88
+    M3OP( "i64.rotl",              -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (u64, Rotl) ),                 // 0x89
+    M3OP( "i64.rotr",              -1, i_64,   d_cc(ফাঁকা),                 d_binOpList (u64, Rotr) ),                 // 0x8a
 
-    M3OP_F( "f32.abs",             0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Abs) ),                 // 0x8b
-    M3OP_F( "f32.neg",             0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Negate) ),              // 0x8c
-    M3OP_F( "f32.ceil",            0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Ceil) ),                // 0x8d
-    M3OP_F( "f32.floor",           0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Floor) ),               // 0x8e
-    M3OP_F( "f32.trunc",           0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Trunc) ),               // 0x8f
-    M3OP_F( "f32.nearest",         0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Nearest) ),             // 0x90
-    M3OP_F( "f32.sqrt",            0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Sqrt) ),                // 0x91
+    M3OP_F( "f32.abs",             0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Abs) ),                 // 0x8b
+    M3OP_F( "f32.neg",             0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Negate) ),              // 0x8c
+    M3OP_F( "f32.ceil",            0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Ceil) ),                // 0x8d
+    M3OP_F( "f32.floor",           0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Floor) ),               // 0x8e
+    M3OP_F( "f32.trunc",           0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Trunc) ),               // 0x8f
+    M3OP_F( "f32.nearest",         0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Nearest) ),             // 0x90
+    M3OP_F( "f32.sqrt",            0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList(f32, Sqrt) ),                // 0x91
 
-    M3OP_F( "f32.add",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Add) ),       // 0x92
-    M3OP_F( "f32.sub",             -1, f_32,   d_cc(NULL),                 d_binOpList (f32, Subtract) ),             // 0x93
-    M3OP_F( "f32.mul",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Multiply) ),  // 0x94
-    M3OP_F( "f32.div",             -1, f_32,   d_cc(NULL),                 d_binOpList (f32, Divide) ),               // 0x95
-    M3OP_F( "f32.min",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Min) ),       // 0x96
-    M3OP_F( "f32.max",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Max) ),       // 0x97
-    M3OP_F( "f32.copysign",        -1, f_32,   d_cc(NULL),                 d_binOpList (f32, CopySign) ),             // 0x98
+    M3OP_F( "f32.add",             -1, f_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f32, Add) ),       // 0x92
+    M3OP_F( "f32.sub",             -1, f_32,   d_cc(ফাঁকা),                 d_binOpList (f32, Subtract) ),             // 0x93
+    M3OP_F( "f32.mul",             -1, f_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f32, Multiply) ),  // 0x94
+    M3OP_F( "f32.div",             -1, f_32,   d_cc(ফাঁকা),                 d_binOpList (f32, Divide) ),               // 0x95
+    M3OP_F( "f32.min",             -1, f_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f32, Min) ),       // 0x96
+    M3OP_F( "f32.max",             -1, f_32,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f32, Max) ),       // 0x97
+    M3OP_F( "f32.copysign",        -1, f_32,   d_cc(ফাঁকা),                 d_binOpList (f32, CopySign) ),             // 0x98
 
-    M3OP_F( "f64.abs",             0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Abs) ),                 // 0x99
-    M3OP_F( "f64.neg",             0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Negate) ),              // 0x9a
-    M3OP_F( "f64.ceil",            0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Ceil) ),                // 0x9b
-    M3OP_F( "f64.floor",           0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Floor) ),               // 0x9c
-    M3OP_F( "f64.trunc",           0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Trunc) ),               // 0x9d
-    M3OP_F( "f64.nearest",         0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Nearest) ),             // 0x9e
-    M3OP_F( "f64.sqrt",            0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Sqrt) ),                // 0x9f
+    M3OP_F( "f64.abs",             0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Abs) ),                 // 0x99
+    M3OP_F( "f64.neg",             0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Negate) ),              // 0x9a
+    M3OP_F( "f64.ceil",            0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Ceil) ),                // 0x9b
+    M3OP_F( "f64.floor",           0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Floor) ),               // 0x9c
+    M3OP_F( "f64.trunc",           0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Trunc) ),               // 0x9d
+    M3OP_F( "f64.nearest",         0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Nearest) ),             // 0x9e
+    M3OP_F( "f64.sqrt",            0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList(f64, Sqrt) ),                // 0x9f
 
-    M3OP_F( "f64.add",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Add) ),       // 0xa0
-    M3OP_F( "f64.sub",             -1, f_64,   d_cc(NULL),                 d_binOpList (f64, Subtract) ),             // 0xa1
-    M3OP_F( "f64.mul",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Multiply) ),  // 0xa2
-    M3OP_F( "f64.div",             -1, f_64,   d_cc(NULL),                 d_binOpList (f64, Divide) ),               // 0xa3
-    M3OP_F( "f64.min",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Min) ),       // 0xa4
-    M3OP_F( "f64.max",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Max) ),       // 0xa5
-    M3OP_F( "f64.copysign",        -1, f_64,   d_cc(NULL),                 d_binOpList (f64, CopySign) ),             // 0xa6
+    M3OP_F( "f64.add",             -1, f_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f64, Add) ),       // 0xa0
+    M3OP_F( "f64.sub",             -1, f_64,   d_cc(ফাঁকা),                 d_binOpList (f64, Subtract) ),             // 0xa1
+    M3OP_F( "f64.mul",             -1, f_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f64, Multiply) ),  // 0xa2
+    M3OP_F( "f64.div",             -1, f_64,   d_cc(ফাঁকা),                 d_binOpList (f64, Divide) ),               // 0xa3
+    M3OP_F( "f64.min",             -1, f_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f64, Min) ),       // 0xa4
+    M3OP_F( "f64.max",             -1, f_64,   d_cc(ফাঁকা),                 d_commutativeBinOpList (f64, Max) ),       // 0xa5
+    M3OP_F( "f64.copysign",        -1, f_64,   d_cc(ফাঁকা),                 d_binOpList (f64, CopySign) ),             // 0xa6
 
-    M3OP( "i32.wrap/i64",          0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, Wrap_i64) ),           // 0xa7
+    M3OP( "i32.wrap/i64",          0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (i32, Wrap_i64) ),           // 0xa7
     M3OP_F( "i32.trunc_s/f32",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (i32_Trunc_f32) ),         // 0xa8
     M3OP_F( "i32.trunc_u/f32",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (u32_Trunc_f32) ),         // 0xa9
     M3OP_F( "i32.trunc_s/f64",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (i32_Trunc_f64) ),         // 0xaa
     M3OP_F( "i32.trunc_u/f64",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (u32_Trunc_f64) ),         // 0xab
 
-    M3OP( "i64.extend_s/i32",      0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend_i32) ),         // 0xac
-    M3OP( "i64.extend_u/i32",      0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend_u32) ),         // 0xad
+    M3OP( "i64.extend_s/i32",      0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (i64, Extend_i32) ),         // 0xac
+    M3OP( "i64.extend_u/i32",      0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (i64, Extend_u32) ),         // 0xad
 
     M3OP_F( "i64.trunc_s/f32",     0,  i_64,   d_cc(Compile_Convert),      d_convertOpList (i64_Trunc_f32) ),         // 0xae
     M3OP_F( "i64.trunc_u/f32",     0,  i_64,   d_cc(Compile_Convert),      d_convertOpList (u64_Trunc_f32) ),         // 0xaf
@@ -5481,34 +5481,34 @@ const M3OpInfo c_operations[] =
     M3OP_F( "f32.convert_s/i64",   0,  f_32,   d_cc(Compile_Convert),      d_convertOpList (f32_Convert_i64) ),       // 0xb4
     M3OP_F( "f32.convert_u/i64",   0,  f_32,   d_cc(Compile_Convert),      d_convertOpList (f32_Convert_u64) ),       // 0xb5
 
-    M3OP_F( "f32.demote/f64",      0,  f_32,   d_cc(NULL),                 d_unaryOpList (f32, Demote_f64) ),         // 0xb6
+    M3OP_F( "f32.demote/f64",      0,  f_32,   d_cc(ফাঁকা),                 d_unaryOpList (f32, Demote_f64) ),         // 0xb6
 
     M3OP_F( "f64.convert_s/i32",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_i32) ),       // 0xb7
     M3OP_F( "f64.convert_u/i32",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_u32) ),       // 0xb8
     M3OP_F( "f64.convert_s/i64",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_i64) ),       // 0xb9
     M3OP_F( "f64.convert_u/i64",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_u64) ),       // 0xba
 
-    M3OP_F( "f64.promote/f32",     0,  f_64,   d_cc(NULL),                 d_unaryOpList (f64, Promote_f32) ),        // 0xbb
+    M3OP_F( "f64.promote/f32",     0,  f_64,   d_cc(ফাঁকা),                 d_unaryOpList (f64, Promote_f32) ),        // 0xbb
 
     M3OP_F( "i32.reinterpret/f32", 0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (i32_Reinterpret_f32) ),   // 0xbc
     M3OP_F( "i64.reinterpret/f64", 0,  i_64,   d_cc(Compile_Convert),      d_convertOpList (i64_Reinterpret_f64) ),   // 0xbd
     M3OP_F( "f32.reinterpret/i32", 0,  f_32,   d_cc(Compile_Convert),      d_convertOpList (f32_Reinterpret_i32) ),   // 0xbe
     M3OP_F( "f64.reinterpret/i64", 0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Reinterpret_i64) ),   // 0xbf
 
-    M3OP( "i32.extend8_s",         0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, Extend8_s) ),          // 0xc0
-    M3OP( "i32.extend16_s",        0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, Extend16_s) ),         // 0xc1
-    M3OP( "i64.extend8_s",         0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend8_s) ),          // 0xc2
-    M3OP( "i64.extend16_s",        0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend16_s) ),         // 0xc3
-    M3OP( "i64.extend32_s",        0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend32_s) ),         // 0xc4
+    M3OP( "i32.extend8_s",         0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (i32, Extend8_s) ),          // 0xc0
+    M3OP( "i32.extend16_s",        0,  i_32,   d_cc(ফাঁকা),                 d_unaryOpList (i32, Extend16_s) ),         // 0xc1
+    M3OP( "i64.extend8_s",         0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (i64, Extend8_s) ),          // 0xc2
+    M3OP( "i64.extend16_s",        0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (i64, Extend16_s) ),         // 0xc3
+    M3OP( "i64.extend32_s",        0,  i_64,   d_cc(ফাঁকা),                 d_unaryOpList (i64, Extend32_s) ),         // 0xc4
 
 // Internal operations, for codepage logging only. They sit past c_waOp_lastCore,
 // the last opcode this table covers, so GetOpInfo () can never reach them.
 # ifdef DEBUG // for codepage logging. the order doesn't matter:
 #define d_m3DebugOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP))
 
-# if d_m3HasFloat
+# যদি d_m3HasFloat
 #define d_m3DebugTypedOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP##_i32, op_##OP##_i64, op_##OP##_f32, op_##OP##_f64))
-# else
+# অন্যথা
 #define d_m3DebugTypedOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP##_i32, op_##OP##_i64))
 # endif
 
@@ -5516,9 +5516,9 @@ const M3OpInfo c_operations[] =
     d_m3DebugOp (Unsupported),      d_m3DebugOp (CallRawFunction),
 
     d_m3DebugOp (GetGlobal_s32),    d_m3DebugOp (GetGlobal_s64),    d_m3DebugOp (ContinueLoop),     d_m3DebugOp (ContinueLoopIf),
-# if d_m3HasStackSwitching
+# যদি d_m3_Has_স্তূপ_Switching
     d_m3DebugOp (ContinueLoop_Suspendable), d_m3DebugOp (ContinueLoopIf_Suspendable), d_m3DebugOp (EntryCheck),
-#  if !d_m3EntryKeepsFrame
+#  যদি !d_m3EntryKeepsFrame
     d_m3DebugOp (Entry_Suspendable),
 #  endif
 # endif
@@ -5529,7 +5529,7 @@ const M3OpInfo c_operations[] =
     d_m3DebugOp (Select_i32_rss),   d_m3DebugOp (Select_i32_srs),   d_m3DebugOp (Select_i32_ssr),   d_m3DebugOp (Select_i32_sss),
     d_m3DebugOp (Select_i64_rss),   d_m3DebugOp (Select_i64_srs),   d_m3DebugOp (Select_i64_ssr),   d_m3DebugOp (Select_i64_sss),
 
-# if d_m3HasFloat
+# যদি d_m3HasFloat
     d_m3DebugOp (Select_f32_sss),   d_m3DebugOp (Select_f32_srs),   d_m3DebugOp (Select_f32_ssr),
     d_m3DebugOp (Select_f32_rss),   d_m3DebugOp (Select_f32_rrs),   d_m3DebugOp (Select_f32_rsr),
 
@@ -5537,14 +5537,14 @@ const M3OpInfo c_operations[] =
     d_m3DebugOp (Select_f64_rss),   d_m3DebugOp (Select_f64_rrs),   d_m3DebugOp (Select_f64_rsr),
 # endif
 
-    d_m3DebugOp (MemFill),          d_m3DebugOp (MemCopy),          d_m3DebugOp (MemInit),          d_m3DebugOp (DataDrop),
+    d_m3DebugOp (MemFill),          d_m3DebugOp (MemCopy),          d_m3DebugOp (MemInit),          d_m3DebugOp (তথ্য_Drop),
 
-# if d_m3HasGasMetering
+# যদি d_m3HasGasMetering
     d_m3DebugOp (UseGas),
 # endif
 
-# if d_m3HasRefTypes
-    d_m3DebugOp (TableGet),         d_m3DebugOp (TableSet),         d_m3DebugOp (TableSize),
+# যদি d_m3HasRefTypes
+    d_m3DebugOp (TableGet),         d_m3DebugOp (TableSet),         d_m3DebugOp (Table_আকার),
     d_m3DebugOp (TableGrow),        d_m3DebugOp (TableFill),        d_m3DebugOp (TableInit),
     d_m3DebugOp (ElemDrop),         d_m3DebugOp (TableCopy),
 # endif
@@ -5559,7 +5559,7 @@ const M3OpInfo c_operations[] =
 # endif
 };
 
-const M3OpInfo c_operationsFC[] =
+ধ্রুবক M3OpInfo c_operationsFC[] =
 {
     M3OP_F( "i32.trunc_s:sat/f32", 0, i_32,   d_cc(Compile_Convert),         d_convertOpList (i32_TruncSat_f32) ),  // 0x00
     M3OP_F( "i32.trunc_u:sat/f32", 0, i_32,   d_cc(Compile_Convert),         d_convertOpList (u32_TruncSat_f32) ),  // 0x01
@@ -5571,28 +5571,28 @@ const M3OpInfo c_operationsFC[] =
     M3OP_F( "i64.trunc_u:sat/f64", 0, i_64,   d_cc(Compile_Convert),         d_convertOpList (u64_TruncSat_f64) ),  // 0x07
 
     M3OP( "memory.init",           0, none,   d_cc(Compile_Memory_Init),     d_emptyOpList ),                       // 0x08
-    M3OP( "data.drop",             0, none,   d_cc(Compile_Data_Drop),       d_emptyOpList ),                       // 0x09
+    M3OP( "data.drop",             0, none,   d_cc(Compile_তথ্য_Drop),       d_emptyOpList ),                       // 0x09
 
     M3OP( "memory.copy",           0, none,   d_cc(Compile_Memory_CopyFill), d_emptyOpList ),                       // 0x0a
     M3OP( "memory.fill",           0, none,   d_cc(Compile_Memory_CopyFill), d_emptyOpList ),                       // 0x0b
 
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
     M3OP( "table.init",            0, none,   d_cc(Compile_Table_Init),      d_emptyOpList ),                       // 0x0c
     M3OP( "elem.drop",             0, none,   d_cc(Compile_Elem_Drop),       d_emptyOpList ),                       // 0x0d
     M3OP( "table.copy",            0, none,   d_cc(Compile_Table_Copy),      d_emptyOpList ),                       // 0x0e
-#else
+#অন্যথা
     M3OP_RESERVED, M3OP_RESERVED, M3OP_RESERVED,                                                                    // 0x0c...0x0e
 #endif
 
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
     M3OP( "table.grow",            0, i_32,   d_cc(Compile_Table_GrowFill),  d_emptyOpList ),                       // 0x0f
-    M3OP( "table.size",            1, i_32,   d_cc(Compile_Table_Size),      d_emptyOpList ),                       // 0x10
+    M3OP( "table.size",            1, i_32,   d_cc(Compile_Table_আকার),      d_emptyOpList ),                       // 0x10
     M3OP( "table.fill",            0, none,   d_cc(Compile_Table_GrowFill),  d_emptyOpList ),                       // 0x11
-#else
+#অন্যথা
     M3OP_RESERVED, M3OP_RESERVED, M3OP_RESERVED,                                                                    // 0x0f...0x11
 #endif
 
-#if d_m3HasWideArithmetic
+#যদি d_m3HasWideArithmetic
     M3OP_RESERVED,                                                                                                  // 0x12
 
     M3OP( "i64.add128",            -2, i_64,  d_cc(Compile_WideArithmetic), d_logOp (i64_Add128) ),              // 0x13
@@ -5607,12 +5607,12 @@ const M3OpInfo c_operationsFC[] =
 # endif
 };
 
-#if d_m3HasAtomics
+#যদি d_m3HasAtomics
 
 // The 0xFE instructions share one entry per kind rather than each having its own: what
 // tells them apart, the width of the cell and the operation, is worked out from the
 // sub-opcode by Compile_Atomic. GetAtomicInfoIndex () maps a sub-opcode onto this table.
-enum {
+গণনা {
     c_opAtomic_notify,
     c_opAtomic_wait32,
     c_opAtomic_wait64,
@@ -5623,7 +5623,7 @@ enum {
     c_opAtomic_cmpxchg
 };
 
-const M3OpInfo c_operationsFE[] =
+ধ্রুবক M3OpInfo c_operationsFE[] =
 {
     M3OP( "memory.atomic.notify",  -1, i_32,  d_cc(Compile_Atomic), d_logOp (AtomicNotify) ),    // c_opAtomic_notify
     M3OP( "memory.atomic.wait32",  -2, i_32,  d_cc(Compile_Atomic), d_logOp (AtomicWait32) ),    // c_opAtomic_wait32
@@ -5635,21 +5635,21 @@ const M3OpInfo c_operationsFE[] =
     M3OP( "atomic.rmw.cmpxchg",    -2, any,   d_cc(Compile_Atomic), d_logOp (AtomicCmpxchg) ),   // c_opAtomic_cmpxchg
 };
 
-const u32 c_numOperationsFE = M3_COUNT_OF(c_operationsFE);
+ধ্রুবক u32 c_অঙ্ক_Operations_FE = M3_গুনতি_OF(c_operationsFE);
 
 // The entry a 0xFE sub-opcode uses, or -1 for one that names nothing: the spec leaves
 // 0x04..0x0f and everything past cmpxchg unassigned. The accesses come in runs of seven,
 // one per pairing of value type and cell width.
-static inline
-i32 GetAtomicInfoIndex (u32 i_sub)
+স্থির অন্তঃরেখ
+i32 Get_Atomic_Info_সূচক (u32 i_sub)
 {
-    if (i_sub <= 0x03) return (i32)i_sub;
-    if (i_sub < 0x10) return -1;
-    if (i_sub <= 0x16) return c_opAtomic_load;
-    if (i_sub <= 0x1d) return c_opAtomic_store;
-    if (i_sub <= 0x47) return c_opAtomic_rmw;
-    if (i_sub <= c_waOp_lastAtomic) return c_opAtomic_cmpxchg;
-    return -1;
+    যদি (i_sub <= 0x03) ফেরত (i32)i_sub;
+    যদি (i_sub < 0x10) ফেরত -1;
+    যদি (i_sub <= 0x16) ফেরত c_opAtomic_load;
+    যদি (i_sub <= 0x1d) ফেরত c_opAtomic_store;
+    যদি (i_sub <= 0x47) ফেরত c_opAtomic_rmw;
+    যদি (i_sub <= c_waOp_lastAtomic) ফেরত c_opAtomic_cmpxchg;
+    ফেরত -1;
 }
 
 #endif // d_m3HasAtomics
@@ -5658,43 +5658,43 @@ i32 GetAtomicInfoIndex (u32 i_sub)
 // 0xd0..0xd2 and 0xd4, and the 0xfc extended-opcode prefix. Indexing c_operations out to
 // 0xfc to reach them would leave ~50 empty entries there, so they get their own
 // table, which GetHighOpIndex () maps the opcode onto.
-enum {
-#if d_m3HasRefTypes
-    c_opHigh_refNull,
-    c_opHigh_refIsNull,
-    c_opHigh_refFunc,
-#  if d_m3HasTypedRefs
-    c_opHigh_refAsNonNull,
+গণনা {
+#যদি d_m3HasRefTypes
+    c_op_উপরের_ref_Null,
+    c_op_উপরের_ref_Is_Null,
+    c_op_উপরের_ref_Func,
+#  যদি d_m3HasTypedRefs
+    c_op_উপরের_ref_As_Non_Null,
 #  endif
 #endif
-#if d_m3HasStackSwitching
-    c_opHigh_contNew,
-    c_opHigh_contBind,
-    c_opHigh_suspend,
-    c_opHigh_resume,
-    c_opHigh_resumeThrow,
-    c_opHigh_resumeThrowRef,
-    c_opHigh_switch,
+#যদি d_m3_Has_স্তূপ_Switching
+    c_op_উপরের_cont_New,
+    c_op_উপরের_cont_Bind,
+    c_op_উপরের_suspend,
+    c_op_উপরের_resume,
+    c_op_উপরের_resume_Throw,
+    c_op_উপরের_resume_Throw_Ref,
+    c_op_উপরের_switch,
 #endif
-#if d_m3HasAtomics
-    c_opHigh_atomic,
+#যদি d_m3HasAtomics
+    c_op_উপরের_atomic,
 #endif
-    c_opHigh_extended   // always present, so the enum is never empty
+    c_op_উপরের_extended   // always present, so the enum is never empty
 };
 
 // Positional, so the table must stay in c_opHigh_* order: array designators
 // are not valid C++, which the maintenance builds compile this as.
-static const M3OpInfo c_operationsHigh[] =
+স্থির ধ্রুবক M3OpInfo c_operations_উপরের[] =
 {
-#if d_m3HasRefTypes
+#যদি d_m3HasRefTypes
     M3OP( "ref.null",        1, any,               d_cc(Compile_Ref_Null),       d_emptyOpList ),  // 0xd0  c_opHigh_refNull
     M3OP( "ref.is_null",     0, i_32,              d_cc(Compile_Ref_IsNull),     d_emptyOpList ),  // 0xd1  c_opHigh_refIsNull
     M3OP( "ref.func",        1, any,               d_cc(Compile_Ref_Func),       d_emptyOpList ),  // 0xd2  c_opHigh_refFunc
-#  if d_m3HasTypedRefs
+#  যদি d_m3HasTypedRefs
     M3OP( "ref.as_non_null", 0, any,               d_cc(Compile_Ref_AsNonNull),  d_emptyOpList ),  // 0xd4  c_opHigh_refAsNonNull
 #  endif
 #endif
-#if d_m3HasStackSwitching
+#যদি d_m3_Has_স্তূপ_Switching
     M3OP( "cont.new",          1, any,             d_cc(Compile_ContNew),        d_emptyOpList ),  // 0xe0  c_opHigh_contNew
     M3OP( "cont.bind",         2, any,             d_cc(Compile_ContBind),       d_emptyOpList ),  // 0xe1  c_opHigh_contBind
     M3OP( "suspend",           1, any,             d_cc(Compile_Suspend),        d_emptyOpList ),  // 0xe2  c_opHigh_suspend
@@ -5704,95 +5704,95 @@ static const M3OpInfo c_operationsHigh[] =
     M3OP( "switch",            2, any,             d_cc(Compile_Switch),         d_emptyOpList ),  // 0xe6  c_opHigh_switch
 #endif
 
-#if d_m3HasAtomics
+#যদি d_m3HasAtomics
     M3OP( "0xFE",            0, c_m3Type_unknown,  d_cc(Compile_ExtendedOpcode), d_emptyOpList ),  // 0xfe  c_opHigh_atomic
 #endif
     M3OP( "0xFC",            0, c_m3Type_unknown,  d_cc(Compile_ExtendedOpcode), d_emptyOpList ),  // 0xfc  c_opHigh_extended
 };
-M3_STATIC_ASSERT (M3_COUNT_OF (c_operationsHigh) == c_opHigh_extended + 1, c_operationsHigh_needs_one_entry_per_c_opHigh);
+M3_STATIC_ASSERT (M3_গুনতি_OF (c_operations_উপরের) == c_op_উপরের_extended + 1, c_operations_উপরের_needs_one_entry_per_c_op_উপরের);
 
 // clang-format on
 
 
 // Opcodes the spec reserves leave zeroed holes in the tables above: no compiler
 // and no operations. Every implemented op has at least one of the two.
-static inline
+স্থির অন্তঃরেখ
 bool IsImplementedOp (IM3OpInfo i_info)
 {
-    return (i_info->compiler != c_cc_NULL or i_info->operations[0] != NULL);
+    ফেরত (i_info->compiler != c_cc_NULL or i_info->operations[0] != ফাঁকা);
 }
 
-const u32 c_numOperations   = M3_COUNT_OF(c_operations);
-const u32 c_numOperationsFC = M3_COUNT_OF(c_operationsFC);
+ধ্রুবক u32 c_অঙ্ক_Operations   = M3_গুনতি_OF(c_operations);
+ধ্রুবক u32 c_অঙ্ক_Operations_FC = M3_গুনতি_OF(c_operationsFC);
 
 // Maps one of the sparse opcodes above c_waOp_lastCore onto c_operationsHigh,
 // or -1 for anything else in that range.
-static inline
-i32 GetHighOpIndex (m3opcode_t opcode)
+স্থির অন্তঃরেখ
+i32 Get_উপরের_Op_সূচক (m3opcode_t opcode)
 {
-    switch (opcode) {
-#if d_m3HasRefTypes
-    case c_waOp_refNull: return c_opHigh_refNull;
-    case c_waOp_refIsNull: return c_opHigh_refIsNull;
-    case c_waOp_refFunc: return c_opHigh_refFunc;
-#  if d_m3HasTypedRefs
-    case c_waOp_refAsNonNull: return c_opHigh_refAsNonNull;
+    নির্বাচন (opcode) {
+#যদি d_m3HasRefTypes
+    ক্ষেত্র c_waOp_refNull: ফেরত c_op_উপরের_ref_Null;
+    ক্ষেত্র c_waOp_refIsNull: ফেরত c_op_উপরের_ref_Is_Null;
+    ক্ষেত্র c_waOp_refFunc: ফেরত c_op_উপরের_ref_Func;
+#  যদি d_m3HasTypedRefs
+    ক্ষেত্র c_waOp_refAsNonNull: ফেরত c_op_উপরের_ref_As_Non_Null;
 #  endif
 #endif
-#if d_m3HasStackSwitching
-    case c_waOp_contNew: return c_opHigh_contNew;
-    case c_waOp_contBind: return c_opHigh_contBind;
-    case c_waOp_suspend: return c_opHigh_suspend;
-    case c_waOp_resume: return c_opHigh_resume;
-    case c_waOp_resumeThrow: return c_opHigh_resumeThrow;
-    case c_waOp_resumeThrowRef: return c_opHigh_resumeThrowRef;
-    case c_waOp_switch: return c_opHigh_switch;
+#যদি d_m3_Has_স্তূপ_Switching
+    ক্ষেত্র c_waOp_contNew: ফেরত c_op_উপরের_cont_New;
+    ক্ষেত্র c_waOp_contBind: ফেরত c_op_উপরের_cont_Bind;
+    ক্ষেত্র c_waOp_suspend: ফেরত c_op_উপরের_suspend;
+    ক্ষেত্র c_waOp_resume: ফেরত c_op_উপরের_resume;
+    ক্ষেত্র c_waOp_resumeThrow: ফেরত c_op_উপরের_resume_Throw;
+    ক্ষেত্র c_waOp_resumeThrowRef: ফেরত c_op_উপরের_resume_Throw_Ref;
+    ক্ষেত্র c_waOp_switch: ফেরত c_op_উপরের_switch;
 #endif
-    case c_waOp_extended: return c_opHigh_extended;
-#if d_m3HasAtomics
-    case c_waOp_atomic: return c_opHigh_atomic;
+    ক্ষেত্র c_waOp_extended: ফেরত c_op_উপরের_extended;
+#যদি d_m3HasAtomics
+    ক্ষেত্র c_waOp_atomic: ফেরত c_op_উপরের_atomic;
 #endif
-    default: return -1;
+    পূর্বনির্ধারিত: ফেরত -1;
     }
 }
 
 IM3OpInfo GetOpInfo (m3opcode_t opcode)
 {
-    IM3OpInfo info = NULL;
+    IM3OpInfo info = ফাঁকা;
 
-    switch (opcode >> 8) {
-    case 0x00:
+    নির্বাচন (opcode >> 8) {
+    ক্ষেত্র 0x00:
         // c_operations is indexed by opcode only up to c_waOp_lastCore; past that
         // it holds internal operations (DEBUG builds), unreachable by opcode.
-        if (M3_LIKELY(opcode <= c_waOp_lastCore)) {
+        যদি (M3_LIKELY(opcode <= c_waOp_lastCore)) {
             info = &c_operations[opcode];
-        } else {
-            i32 high = GetHighOpIndex(opcode);
-            if (high >= 0) {
-                info = &c_operationsHigh[high];
+        } অন্যথা {
+            i32 উপরের = Get_উপরের_Op_সূচক(opcode);
+            যদি (উপরের >= 0) {
+                info = &c_operations_উপরের[উপরের];
             }
         }
-        break;
-    case c_waOp_extended:
+        বিরতি;
+    ক্ষেত্র c_waOp_extended:
         opcode &= 0xFF;
-        if (M3_LIKELY(opcode <= c_waOp_lastExtended)) {
+        যদি (M3_LIKELY(opcode <= c_waOp_lastExtended)) {
             info = &c_operationsFC[opcode];
         }
-        break;
-#if d_m3HasAtomics
-    case c_waOp_atomic: {
-        i32 index = GetAtomicInfoIndex(opcode & 0xFF);
-        if (index >= 0) {
+        বিরতি;
+#যদি d_m3HasAtomics
+    ক্ষেত্র c_waOp_atomic: {
+        i32 index = Get_Atomic_Info_সূচক(opcode & 0xFF);
+        যদি (index >= 0) {
             info = &c_operationsFE[index];
         }
-    } break;
+    } বিরতি;
 #endif
     }
 
-    return (info and IsImplementedOp(info)) ? info : NULL;
+    ফেরত (info and IsImplementedOp(info)) ? info : ফাঁকা;
 }
 
-#if d_m3HasGasMetering
+#যদি d_m3HasGasMetering
 
 //----- GAS METERING ------------------------------------------------------------------------------------------------------
 //
@@ -5820,13 +5820,13 @@ IM3OpInfo GetOpInfo (m3opcode_t opcode)
 // reference, bulk memory and exception instructions, which are priced as the
 // nearest thing it does list: a table access as a memory access, an operation
 // over a whole region as memory.grow, a throw as a branch.
-enum {
+গণনা {
     c_gasLocal   = 1,          // charged once per declared local, at function entry
     c_gasNominal = 1,          // nop, block, loop, if, const
     c_gasArith   = 45,
     c_gasShift   = 67,
     c_gasBranch  = 90,
-    c_gasMemSize = 100,
+    c_gas_Mem_আকার = 100,
     c_gasAccess  = 120,        // a local, global, table or memory access
     c_gasHeavy   = 10000,      // an indirect call, or anything that works over a whole region
     c_gasDivide  = 36000
@@ -5836,72 +5836,72 @@ enum {
 // consecutive charges, which prepays exactly the same amount.
 #  define d_m3MaxSegmentGas   0xFFFFFFFF
 
-static
+স্থির
 u32 GetGasCost (m3opcode_t i_opcode)
 {
-    switch (i_opcode) {
-    case 0x00:                        // unreachable
-    case 0x01:                        // nop
-    case c_waOp_block:
-    case c_waOp_loop:
-    case c_waOp_if:
-    case c_waOp_tryTable:             // a block that also installs handlers
-    case c_waOp_refNull:              // a constant, by another name
-    case c_waOp_refFunc:
-        return c_gasNominal;
+    নির্বাচন (i_opcode) {
+    ক্ষেত্র 0x00:                        // unreachable
+    ক্ষেত্র 0x01:                        // nop
+    ক্ষেত্র c_waOp_block:
+    ক্ষেত্র c_waOp_loop:
+    ক্ষেত্র c_waOp_if:
+    ক্ষেত্র c_waOp_tryTable:             // a block that also installs handlers
+    ক্ষেত্র c_waOp_refNull:              // a constant, by another name
+    ক্ষেত্র c_waOp_refFunc:
+        ফেরত c_gasNominal;
 
-    case c_waOp_end:
-        return 0;                     // the one control instruction the table prices at nothing
+    ক্ষেত্র c_waOp_end:
+        ফেরত 0;                     // the one control instruction the table prices at nothing
 
-    case c_waOp_else:
-    case c_waOp_branch:
-    case c_waOp_branchIf:
-    case c_waOp_return:
-    case c_waOp_call:
-    case c_waOp_returnCall:
-    case c_waOp_throw:
-    case c_waOp_throwRef:
-        return c_gasBranch;
+    ক্ষেত্র c_waOp_else:
+    ক্ষেত্র c_waOp_branch:
+    ক্ষেত্র c_waOp_branchIf:
+    ক্ষেত্র c_waOp_return:
+    ক্ষেত্র c_waOp_call:
+    ক্ষেত্র c_waOp_returnCall:
+    ক্ষেত্র c_waOp_throw:
+    ক্ষেত্র c_waOp_throwRef:
+        ফেরত c_gasBranch;
 
-    case c_waOp_branchTable:
-    case 0x1a:                        // drop
-    case 0x1b:                        // select
-    case c_waOp_selectTyped:
-        return c_gasAccess;
+    ক্ষেত্র c_waOp_branchTable:
+    ক্ষেত্র 0x1a:                        // drop
+    ক্ষেত্র 0x1b:                        // select
+    ক্ষেত্র c_waOp_selectTyped:
+        ফেরত c_gasAccess;
 
-    case c_waOp_callIndirect:
-    case c_waOp_returnCallIndirect:
-    case c_waOp_callRef:
-    case c_waOp_returnCallRef:
-    case c_waOp_memoryInit:
-    case c_waOp_memoryCopy:
-    case c_waOp_memoryFill:
-    case c_waOp_tableInit:
-    case c_waOp_tableCopy:
-    case c_waOp_tableGrow:
-    case c_waOp_tableFill:
-    case 0x40:                        // memory.grow
-        return c_gasHeavy;
+    ক্ষেত্র c_waOp_callIndirect:
+    ক্ষেত্র c_waOp_returnCallIndirect:
+    ক্ষেত্র c_waOp_callRef:
+    ক্ষেত্র c_waOp_returnCallRef:
+    ক্ষেত্র c_waOp_memoryInit:
+    ক্ষেত্র c_waOp_memoryCopy:
+    ক্ষেত্র c_waOp_memoryFill:
+    ক্ষেত্র c_waOp_tableInit:
+    ক্ষেত্র c_waOp_tableCopy:
+    ক্ষেত্র c_waOp_tableGrow:
+    ক্ষেত্র c_waOp_tableFill:
+    ক্ষেত্র 0x40:                        // memory.grow
+        ফেরত c_gasHeavy;
 
-    case c_waOp_dataDrop:
-    case c_waOp_elemDrop:
-    case c_waOp_tableSize:
-    case 0x3f:                        // memory.size
-        return c_gasMemSize;
+    ক্ষেত্র c_wa_Op_তথ্য_Drop:
+    ক্ষেত্র c_waOp_elemDrop:
+    ক্ষেত্র c_wa_Op_table_আকার:
+    ক্ষেত্র 0x3f:                        // memory.size
+        ফেরত c_gas_Mem_আকার;
 
-    case c_waOp_refIsNull:
-    case c_waOp_refAsNonNull:
-        return c_gasArith;
+    ক্ষেত্র c_waOp_refIsNull:
+    ক্ষেত্র c_waOp_refAsNonNull:
+        ফেরত c_gasArith;
 
-    default:
-        break;
+    পূর্বনির্ধারিত:
+        বিরতি;
     }
 
     // The two integer arithmetic runs are priced by position, i32 at 0x6a and
     // i64 at 0x7c, the table giving both the same shape
-    if ((i_opcode >= 0x6a and i_opcode <= 0x78) or (i_opcode >= 0x7c and i_opcode <= 0x8a)) {
+    যদি ((i_opcode >= 0x6a and i_opcode <= 0x78) or (i_opcode >= 0x7c and i_opcode <= 0x8a)) {
         // clang-format off
-        static const u16 c_arithmeticCosts [] = {
+        স্থির ধ্রুবক u16 c_arithmeticCosts [] = {
             c_gasArith,  c_gasArith,  c_gasArith,                   // add, sub, mul
             c_gasDivide, c_gasDivide, c_gasDivide, c_gasDivide,     // div_s, div_u, rem_s, rem_u
             c_gasArith,  c_gasArith,  c_gasArith,                   // and, or, xor
@@ -5910,71 +5910,71 @@ u32 GetGasCost (m3opcode_t i_opcode)
         };
         // clang-format on
 
-        return c_arithmeticCosts[i_opcode - (i_opcode <= 0x78 ? 0x6a : 0x7c)];
+        ফেরত c_arithmeticCosts[i_opcode - (i_opcode <= 0x78 ? 0x6a : 0x7c)];
     }
 
     // the atomic accesses are memory accesses; what waits, wakes or orders is worth
     // as much as an operation over a whole region
-    if (i_opcode >= (c_waOp_atomic << 8) and i_opcode <= ((c_waOp_atomic << 8) | c_waOp_lastAtomic)) {
-        return (i_opcode <= c_waOp_atomicFence) ? c_gasHeavy : c_gasAccess;
+    যদি (i_opcode >= (c_waOp_atomic << 8) and i_opcode <= ((c_waOp_atomic << 8) | c_waOp_lastAtomic)) {
+        ফেরত (i_opcode <= c_waOp_atomicFence) ? c_gasHeavy : c_gasAccess;
     }
-    if (i_opcode >= 0x20 and i_opcode <= 0x3e) {
-        return c_gasAccess;           // locals, globals, table accesses, loads and stores
+    যদি (i_opcode >= 0x20 and i_opcode <= 0x3e) {
+        ফেরত c_gasAccess;           // locals, globals, table accesses, loads and stores
     }
-    if (i_opcode >= 0x41 and i_opcode <= 0x44) {
-        return c_gasNominal;          // i32/i64/f32/f64.const
+    যদি (i_opcode >= 0x41 and i_opcode <= 0x44) {
+        ফেরত c_gasNominal;          // i32/i64/f32/f64.const
     }
-    if (i_opcode >= 0x8b and i_opcode <= 0xa6) {
+    যদি (i_opcode >= 0x8b and i_opcode <= 0xa6) {
         // the float run, priced as integer arithmetic except where it divides
         bool divides = (i_opcode == 0x91 or i_opcode == 0x95 or     // f32.sqrt, f32.div
                         i_opcode == 0x9f or i_opcode == 0xa3);      // f64.sqrt, f64.div
 
-        return divides ? c_gasDivide : c_gasArith;
+        ফেরত divides ? c_gasDivide : c_gasArith;
     }
 
     // comparisons and clz/ctz/popcnt (0x45..0x69, 0x79..0x7b), the conversions
     // and sign extensions (0xa7..0xc4), the saturating truncations, the wide
     // arithmetic, and anything else that reaches here: plain arithmetic
-    return c_gasArith;
+    ফেরত c_gasArith;
 }
 
 // The instructions ewasm's design segments a body at. A segment runs up to and
 // including the next one of these, so every cycle a body can execute - a loop's
 // back edge, a branch out of a block, falling off the end of a function - passes
 // through at least one, and no path can run unmetered however it is entered.
-static
+স্থির
 bool IsGasSegmentEnd (m3opcode_t i_opcode)
 {
-    switch (i_opcode) {
-    case c_waOp_loop:
-    case c_waOp_if:
-    case c_waOp_else:
-    case c_waOp_end:
-    case c_waOp_branch:
-    case c_waOp_branchIf:
-    case c_waOp_branchTable:
-    case c_waOp_return:
-    case c_waOp_returnCall:
-    case c_waOp_returnCallIndirect:
-    case c_waOp_returnCallRef:
-        return true;
-    default:
-        return false;
+    নির্বাচন (i_opcode) {
+    ক্ষেত্র c_waOp_loop:
+    ক্ষেত্র c_waOp_if:
+    ক্ষেত্র c_waOp_else:
+    ক্ষেত্র c_waOp_end:
+    ক্ষেত্র c_waOp_branch:
+    ক্ষেত্র c_waOp_branchIf:
+    ক্ষেত্র c_waOp_branchTable:
+    ক্ষেত্র c_waOp_return:
+    ক্ষেত্র c_waOp_returnCall:
+    ক্ষেত্র c_waOp_returnCallIndirect:
+    ক্ষেত্র c_waOp_returnCallRef:
+        ফেরত true;
+    পূর্বনির্ধারিত:
+        ফেরত false;
     }
 }
 
 // Ends the open segment by writing what it accumulated into the immediate its
 // op_UseGas is still waiting on. Emitting onto a later code page does not move
 // an earlier one, so the reservation is still where it was left.
-static
-void CloseGasSegment (IM3Compilation o)
+স্থির
+শূন্য CloseGasSegment (IM3Compilation o)
 {
-    if (o->isGasSegmentOpen) {
-        if (o->gasPatch) {
+    যদি (o->isGasSegmentOpen) {
+        যদি (o->gasPatch) {
             u32 cost = o->gasCost;
-            memcpy(o->gasPatch, &cost, sizeof(cost));
+            memcpy(o->gasPatch, &cost, আকার(cost));
 
-            o->gasPatch = NULL;
+            o->gasPatch = ফাঁকা;
         }
         o->gasCost          = 0;
         o->isGasSegmentOpen = false;
@@ -5982,10 +5982,10 @@ void CloseGasSegment (IM3Compilation o)
 }
 
 // Whether this compilation emits the charges
-static inline
+স্থির অন্তঃরেখ
 bool IsMetering (IM3Compilation o)
 {
-    return o->runtime->gasLimit != 0;
+    ফেরত o->runtime->gasLimit != 0;
 }
 
 // Charges one instruction to the segment being compiled, opening a segment at
@@ -5996,69 +5996,69 @@ bool IsMetering (IM3Compilation o)
 // if, else - compiles its body from inside its own compiler. The body then opens
 // a segment of its own, inside the loop or the arm, where it is charged on every
 // pass rather than once on the way in.
-static
-M3Result MeterOpcode (IM3Compilation o, m3opcode_t i_opcode)
+স্থির
+M3_ফলাফল MeterOpcode (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     // constant expressions are not metered: they run once at instantiation,
     // before the module is anything a gas budget was handed out for
-    if (o->function and o->page and IsMetering(o)) {
+    যদি (o->function and o->page and IsMetering(o)) {
         // only the 0xFC or 0xFE prefix has been read so far; the instruction it names is
         // the LEB128 u32 the compiler is about to take. Peek it without consuming.
         // Anything the tables do not cover leaves the prefix priced on its own,
         // which is moot - the compile fails on it a moment later.
-        if (i_opcode == c_waOp_extended or i_opcode == c_waOp_atomic) {
+        যদি (i_opcode == c_waOp_extended or i_opcode == c_waOp_atomic) {
             bytes_t peek = o->wasm;
             u32     sub;
             u32     last = (i_opcode == c_waOp_atomic) ? c_waOp_lastAtomic : c_waOp_lastExtended;
 
-            if (not ReadLEB_u32(&sub, &peek, o->wasmEnd) and sub <= last) {
+            যদি (not ReadLEB_u32(&sub, &peek, o->wasmEnd) and sub <= last) {
                 i_opcode = (m3opcode_t)((i_opcode << 8) | sub);
             }
         }
 
         u32 cost = GetGasCost(i_opcode);
 
-        if (o->isGasSegmentOpen and o->gasCost > d_m3MaxSegmentGas - cost) {
+        যদি (o->isGasSegmentOpen and o->gasCost > d_m3MaxSegmentGas - cost) {
             CloseGasSegment(o);
         }
 
-        if (not o->isGasSegmentOpen) {
+        যদি (not o->isGasSegmentOpen) {
             o->isGasSegmentOpen = true;
 
 _           (EmitOp(o, op_UseGas));
-            o->gasPatch = (void*)GetPagePC(o->page);
+            o->gasPatch = (শূন্য*)GetPagePC(o->page);
             EmitConstant32(o, 0);
         }
 
         o->gasCost += cost;
 
-        if (IsGasSegmentEnd(i_opcode)) {
+        যদি (IsGasSegmentEnd(i_opcode)) {
             CloseGasSegment(o);
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 #endif // d_m3HasGasMetering
 
 
-M3Result CompileBlockStatements (IM3Compilation o)
+M3_ফলাফল CompileBlockStatements (IM3Compilation o)
 {
-    M3Result result   = m3Err_none;
+    M3_ফলাফল ফলাফল   = m3Err_none;
     bool     validEnd = false;
 
-    while (o->wasm < o->wasmEnd) {
-#if d_m3EnableOpTracing
-        if (o->numEmits) {
-            EmitOp(o, op_DumpStack);
-            EmitConstant32(o, o->numOpcodes);
+    যখন (o->wasm < o->wasmEnd) {
+#যদি d_m3EnableOpTracing
+        যদি (o->অঙ্ক_Emits) {
+            EmitOp(o, op_Dump_স্তূপ);
+            EmitConstant32(o, o->অঙ্ক_Opcodes);
             EmitConstant32(o, GetMaxUsedSlotPlusOne(o));
             EmitPointer(o, o->function);
 
-            o->numEmits = 0;
+            o->অঙ্ক_Emits = 0;
         }
 #endif
 
@@ -6068,21 +6068,21 @@ _       (Read_opcode(&opcode, &o->wasm, o->wasmEnd));
         log_opcode(o, opcode);
 
         // Restrict opcodes when evaluating expressions
-        if (M3_UNLIKELY(not o->function)) {
+        যদি (M3_UNLIKELY(not o->function)) {
             // clang-format off
-            switch (opcode) {
-            case c_waOp_i32_const: case c_waOp_i64_const:
-            case c_waOp_f32_const: case c_waOp_f64_const:
-            case c_waOp_getGlobal: case c_waOp_end:
-#if d_m3HasRefTypes
-            case c_waOp_refNull:   case c_waOp_refFunc:
+            নির্বাচন (opcode) {
+            ক্ষেত্র c_waOp_i32_const: ক্ষেত্র c_waOp_i64_const:
+            ক্ষেত্র c_waOp_f32_const: ক্ষেত্র c_waOp_f64_const:
+            ক্ষেত্র c_waOp_getGlobal: ক্ষেত্র c_waOp_end:
+#যদি d_m3HasRefTypes
+            ক্ষেত্র c_waOp_refNull:   ক্ষেত্র c_waOp_refFunc:
 #endif
-#if d_m3HasExtendedConst
-            case c_waOp_i32_add:   case c_waOp_i32_sub:   case c_waOp_i32_mul:
-            case c_waOp_i64_add:   case c_waOp_i64_sub:   case c_waOp_i64_mul:
+#যদি d_m3HasExtendedConst
+            ক্ষেত্র c_waOp_i32_add:   ক্ষেত্র c_waOp_i32_sub:   ক্ষেত্র c_waOp_i32_mul:
+            ক্ষেত্র c_waOp_i64_add:   ক্ষেত্র c_waOp_i64_sub:   ক্ষেত্র c_waOp_i64_mul:
 #endif
-                break;
-            default:
+                বিরতি;
+            পূর্বনির্ধারিত:
                 _throw(m3Err_restrictedOpcode);
             }
             // clang-format on
@@ -6090,59 +6090,59 @@ _       (Read_opcode(&opcode, &o->wasm, o->wasmEnd));
 
         IM3OpInfo opinfo = GetOpInfo(opcode);
 
-        if (M3_UNLIKELY(opinfo == NULL)) {
+        যদি (M3_UNLIKELY(opinfo == ফাঁকা)) {
             _throw(ErrorCompile(m3Err_unknownOpcode, o, "opcode '%x' not available", opcode));
         }
 
-#if d_m3HasGasMetering
+#যদি d_m3HasGasMetering
 _       (MeterOpcode(o, opcode));
 #endif
 
-        if (opinfo->compiler != c_cc_NULL) {
+        যদি (opinfo->compiler != c_cc_NULL) {
 _           ((*GetCompiler(opinfo))(o, opcode))
-        } else {
+        } অন্যথা {
 _           (Compile_Operator(o, opcode));
         }
 
         o->previousOpcode = opcode;
 
-        if (opcode == c_waOp_else) {
+        যদি (opcode == c_waOp_else) {
             _throwif(m3Err_wasmMalformed, o->block.opcode != c_waOp_if);
             validEnd = true;
-            break;
-        } else if (opcode == c_waOp_end) {
+            বিরতি;
+        } অন্যথা যদি (opcode == c_waOp_end) {
             validEnd = true;
-            break;
+            বিরতি;
         }
     }
     _throwif(m3Err_wasmMalformed, not validEnd);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result PushBlockResults (IM3Compilation o)
+স্থির
+M3_ফলাফল ঠেলো_Block_Results (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    u16 numResults = GetFuncTypeNumResults(o->block.type);
+    u16 অঙ্ক_Results = Get_Func_Type_অঙ্ক_Results(o->block.type);
 
-    for (u16 i = 0; i < numResults; ++i) {
-        m3type_t type = GetFuncTypeResultType(o->block.type, i);
+    জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+        m3type_t type = Get_Func_Type_ফলাফল_Type(o->block.type, i);
 
-        if (i == numResults - 1 and IsFpType(type)) {
-_           (PushRegister(o, type));
-        } else {
-_           (PushAllocatedSlot(o, type));
+        যদি (i == অঙ্ক_Results - 1 and IsFpType(type)) {
+_           (ঠেলো_Register(o, type));
+        } অন্যথা {
+_           (ঠেলো_Allocated_Slot(o, type));
         }
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result CompileBlock (IM3Compilation o, IM3FuncType i_blockType, m3opcode_t i_blockOpcode)
+M3_ফলাফল CompileBlock (IM3Compilation o, IM3FuncType i_blockType, m3opcode_t i_blockOpcode)
 {
                                                                                         d_m3Assert (not IsRegisterAllocated (o, 0));
                                                                                         d_m3Assert (not IsRegisterAllocated (o, 1));
@@ -6153,7 +6153,7 @@ M3Result CompileBlock (IM3Compilation o, IM3FuncType i_blockType, m3opcode_t i_b
 
     block->outer   = &outerScope;
     block->pc      = GetPagePC(o->page);
-    block->patches = NULL;
+    block->patches = ফাঁকা;
     block->type    = i_blockType;
     block->opcode  = i_blockOpcode;
     block->depth++;
@@ -6180,75 +6180,75 @@ M3Result CompileBlock (IM3Compilation o, IM3FuncType i_blockType, m3opcode_t i_b
     */
 
 _try {
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     // op_Loop's frame records the body, which is also the loop's identity;
     // op_TryTable's records its clause table, two words a clause back from it
-    if (i_blockOpcode == c_waOp_loop) {
+    যদি (i_blockOpcode == c_waOp_loop) {
 _       (RecordBlockStart(o, i_blockOpcode, block->pc, 0));
     }
-#  if d_m3HasExceptionHandling
-    else if (i_blockOpcode == c_waOp_tryTable) {
-_       (RecordBlockStart(o, i_blockOpcode, block->pc - 2 * o->numTryClauses, o->numTryClauses));
+#  যদি d_m3HasExceptionHandling
+    অন্যথা যদি (i_blockOpcode == c_waOp_tryTable) {
+_       (RecordBlockStart(o, i_blockOpcode, block->pc - 2 * o->অঙ্ক_Try_Clauses, o->অঙ্ক_Try_Clauses));
     }
 #  endif
 #endif
 
     // validate and dealloc params ----------------------------
 
-    u16 stackIndex = o->stackIndex;
+    u16 স্তূপ_সূচক = o->স্তূপ_সূচক;
 
-    u16 numParams = GetFuncTypeNumParams(i_blockType);
+    u16 অঙ্ক_Params = Get_Func_Type_অঙ্ক_Params(i_blockType);
 
-    if (i_blockOpcode != c_waOp_else) {
-        for (u16 i = 0; i < numParams; ++i) {
-            m3type_t type = GetFuncTypeParamType(i_blockType, numParams - 1 - i);
-_           (PopType(o, type));
+    যদি (i_blockOpcode != c_waOp_else) {
+        জন্য (u16 i = 0; i < অঙ্ক_Params; ++i) {
+            m3type_t type = GetFuncTypeParamType(i_blockType, অঙ্ক_Params - 1 - i);
+_           (বের_করো_Type(o, type));
         }
-    } else {
-        if (IsStackPolymorphic(o) && o->block.blockStackIndex + numParams > o->stackIndex) {
-            o->stackIndex = o->block.blockStackIndex;
-        } else {
-            o->stackIndex -= numParams;
+    } অন্যথা {
+        যদি (Is_স্তূপ_Polymorphic(o) && o->block.block_স্তূপ_সূচক + অঙ্ক_Params > o->স্তূপ_সূচক) {
+            o->স্তূপ_সূচক = o->block.block_স্তূপ_সূচক;
+        } অন্যথা {
+            o->স্তূপ_সূচক -= অঙ্ক_Params;
         }
     }
 
-    u16 paramIndex        = o->stackIndex;
-    block->exitStackIndex = paramIndex; // consume the params at block exit
+    u16 param_সূচক        = o->স্তূপ_সূচক;
+    block->exit_স্তূপ_সূচক = param_সূচক; // consume the params at block exit
 
     // keep copies of param slots in the stack
-    o->stackIndex = stackIndex;
+    o->স্তূপ_সূচক = স্তূপ_সূচক;
 
     // find slots for the results ----------------------------
-_   (PushBlockResults(o));
+_   (ঠেলো_Block_Results(o));
 
-    stackIndex = o->stackIndex;
+    স্তূপ_সূচক = o->স্তূপ_সূচক;
 
     // dealloc but keep record of the result slots in the stack
-    u16 numResults = GetFuncTypeNumResults(i_blockType);
-    while (numResults--) {
-        Pop(o);
+    u16 অঙ্ক_Results = Get_Func_Type_অঙ্ক_Results(i_blockType);
+    যখন (অঙ্ক_Results--) {
+        বের_করো(o);
     }
 
-    block->blockStackIndex = o->stackIndex = stackIndex;
+    block->block_স্তূপ_সূচক = o->স্তূপ_সূচক = স্তূপ_সূচক;
 
     // push the params back onto the stack -------------------
-    for (u16 i = 0; i < numParams; ++i) {
+    জন্য (u16 i = 0; i < অঙ্ক_Params; ++i) {
         m3type_t type = GetFuncTypeParamType(i_blockType, i);
 
-        u16 slot = GetSlotForStackIndex(o, paramIndex + i);
-        Push(o, type, slot);
+        u16 slot = Get_Slot_For_স্তূপ_সূচক(o, param_সূচক + i);
+        ঠেলো(o, type, slot);
 
-        if (slot >= o->slotFirstDynamicIndex && slot != c_slotUnused) {
+        যদি (slot >= o->slot_First_Dynamic_সূচক && slot != c_slotUnused) {
 _           (MarkSlotsAllocatedByType(o, slot, type));
         }
     }
 
     //--------------------------------------------------------
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
     // with the scope pushed and the params back on, a catch label of 0 names
     // this block - which is what the proposal says it should
-    if (i_blockOpcode == c_waOp_tryTable) {
+    যদি (i_blockOpcode == c_waOp_tryTable) {
 _       (EmitCatchStubs(o));
     }
 #endif
@@ -6257,38 +6257,38 @@ _   (CompileBlockStatements(o));
 
 _   (ValidateBlockEnd(o));
 
-    if (o->function)    // skip for expressions
+    যদি (o->function)    // skip for expressions
     {
-        if (not IsStackPolymorphic(o)) {
+        যদি (not Is_স্তূপ_Polymorphic(o)) {
 _           (ResolveBlockResults(o, &o->block, /* isBranch: */ false));
         }
 
-#if d_m3HasExceptionHandling
+#যদি d_m3HasExceptionHandling
         // Falling out of the end of a try region retires its handler. This sits
         // ahead of PatchBranches so branches into the block's exit land past it:
         // a branch out of the try popped its own handler at the branch site.
-        if (i_blockOpcode == c_waOp_tryTable) {
-_           (EmitOp(o, op_PopHandlers));
+        যদি (i_blockOpcode == c_waOp_tryTable) {
+_           (EmitOp(o, op_বের_করো_Handlers));
             EmitConstant32(o, 1);
         }
 #endif
 
-_       (UnwindBlockStack(o))
+_       (Unwind_Block_স্তূপ(o))
 
-        if (not ((i_blockOpcode == c_waOp_if and numResults) or o->previousOpcode == c_waOp_else)) {
-            o->stackIndex = o->block.exitStackIndex;
-_           (PushBlockResults(o));
+        যদি (not ((i_blockOpcode == c_waOp_if and অঙ্ক_Results) or o->previousOpcode == c_waOp_else)) {
+            o->স্তূপ_সূচক = o->block.exit_স্তূপ_সূচক;
+_           (ঠেলো_Block_Results(o));
         }
     }
 
     PatchBranches(o);
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     RecordBlockEnd(o);
 
-    if (o->localInitDepth) {
-        for (u32 i = 0; i < o->snapshotMap->numLocals; ++i) {
-            if (o->localInitDepth[i] >= (u32)o->block.depth) {
+    যদি (o->localInitDepth) {
+        জন্য (u32 i = 0; i < o->snapshotMap->অঙ্ক_Locals; ++i) {
+            যদি (o->localInitDepth[i] >= (u32)o->block.depth) {
                 o->localInitDepth[i] = UINT32_MAX;
             }
         }
@@ -6296,139 +6296,139 @@ _           (PushBlockResults(o));
 #endif
     o->block = outerScope;
 
-} _catch: return result;
+} _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result CompileLocals (IM3Compilation o)
+স্থির
+M3_ফলাফল CompileLocals (IM3Compilation o)
 {
-    M3Result result;
+    M3_ফলাফল ফলাফল;
 
-    u32 numLocals = 0;
-    u32 numLocalBlocks;
-_   (ReadLEB_u32(&numLocalBlocks, &o->wasm, o->wasmEnd));
+    u32 অঙ্ক_Locals = 0;
+    u32 অঙ্ক_Local_Blocks;
+_   (ReadLEB_u32(&অঙ্ক_Local_Blocks, &o->wasm, o->wasmEnd));
 
-    for (u32 l = 0; l < numLocalBlocks; ++l) {
-        u32      varCount;
+    জন্য (u32 l = 0; l < অঙ্ক_Local_Blocks; ++l) {
+        u32      var_গুনতি;
         m3type_t localType;
 
-_       (ReadLEB_u32(&varCount, &o->wasm, o->wasmEnd));
-_       (ParseValueType(o->module, &localType, &o->wasm, o->wasmEnd));
-        numLocals += varCount;                                                          m3log (compile, "pushing locals. count: %d; type: %s", varCount, c_waTypes [BaseTypeOf(localType)]);
-        while (varCount--) {
-_           (PushAllocatedSlot(o, localType));
+_       (ReadLEB_u32(&var_গুনতি, &o->wasm, o->wasmEnd));
+_       (Parse_মান_Type(o->module, &localType, &o->wasm, o->wasmEnd));
+        অঙ্ক_Locals += var_গুনতি;                                                          m3log (compile, "pushing locals. count: %d; type: %s", var_গুনতি, c_waTypes [BaseTypeOf(localType)]);
+        যখন (var_গুনতি--) {
+_           (ঠেলো_Allocated_Slot(o, localType));
         }
     }
 
-    if (o->function) {
-        o->function->numLocals = numLocals;
+    যদি (o->function) {
+        o->function->অঙ্ক_Locals = অঙ্ক_Locals;
     }
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
-static
-M3Result ReserveConstants (IM3Compilation o)
+স্থির
+M3_ফলাফল ReserveConstants (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     // in the interest of speed, this blindly scans the Wasm code looking for any byte
     // that looks like an const opcode.
-    u16 numConstantSlots = 0;
+    u16 অঙ্ক_Constant_Slots = 0;
 
     bytes_t wa = o->wasm;
-    while (wa < o->wasmEnd) {
+    যখন (wa < o->wasmEnd) {
         u8  code     = *wa++;
         u16 addSlots = 0;
 
-        if (code == c_waOp_i32_const or code == c_waOp_f32_const) {
+        যদি (code == c_waOp_i32_const or code == c_waOp_f32_const) {
             addSlots = 1;
-        } else if (code == c_waOp_i64_const or code == c_waOp_f64_const) {
-            addSlots = GetTypeNumSlots(c_m3Type_i64);
+        } অন্যথা যদি (code == c_waOp_i64_const or code == c_waOp_f64_const) {
+            addSlots = Get_Type_অঙ্ক_Slots(c_m3Type_i64);
         }
 
-        if (numConstantSlots + addSlots >= d_m3MaxConstantTableSize) {
-            break;
+        যদি (অঙ্ক_Constant_Slots + addSlots >= d_m3_Max_Constant_Table_আকার) {
+            বিরতি;
         }
 
-        numConstantSlots += addSlots;
+        অঙ্ক_Constant_Slots += addSlots;
     }
 
     // if constants overflow their reserved stack space, the compiler simply emits op_Const
     // operations as needed. Compiled expressions (global inits) don't pass through this
     // ReserveConstants function and thus always produce inline constants.
 
-    AlignSlotToType(&numConstantSlots, c_m3Type_i64);                                           m3log (compile, "reserved constant slots: %d", numConstantSlots);
+    AlignSlotToType(&অঙ্ক_Constant_Slots, c_m3Type_i64);                                           m3log (compile, "reserved constant slots: %d", অঙ্ক_Constant_Slots);
 
-    o->slotFirstDynamicIndex = o->slotFirstConstIndex + numConstantSlots;
+    o->slot_First_Dynamic_সূচক = o->slot_First_Const_সূচক + অঙ্ক_Constant_Slots;
 
-    if (o->slotFirstDynamicIndex >= d_m3MaxFunctionSlots) {
-        _throw(m3Err_functionStackOverflow);
+    যদি (o->slot_First_Dynamic_সূচক >= d_m3MaxFunctionSlots) {
+        _throw(m3_Err_function_স্তূপ_Overflow);
     }
 
     _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 
 // A constant expression compiles like a miniature function root block: no args,
 // no locals and a single result, which Compile_End copies down into slot 0 for
 // EvaluateExpression to read back.
-M3Result CompileExpression (IM3Compilation o, IM3FuncType i_resultType)
+M3_ফলাফল CompileExpression (IM3Compilation o, IM3FuncType i_ফলাফল_Type)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    o->block.type = i_resultType;
+    o->block.type = i_ফলাফল_Type;
 
-    u16 numRetSlots = GetFuncTypeNumResults(i_resultType) * c_ioSlotCount;
+    u16 অঙ্ক_Ret_Slots = Get_Func_Type_অঙ্ক_Results(i_ফলাফল_Type) * c_io_Slot_গুনতি;
 
-    for (u16 i = 0; i < numRetSlots; ++i) {
+    জন্য (u16 i = 0; i < অঙ্ক_Ret_Slots; ++i) {
         MarkSlotAllocated(o, i);
     }
 
-    o->maxStackSlots = o->slotMaxAllocatedIndexPlusOne = o->slotFirstDynamicIndex = numRetSlots;
+    o->max_স্তূপ_Slots = o->slot_Max_Allocated_সূচক_Plus_One = o->slot_First_Dynamic_সূচক = অঙ্ক_Ret_Slots;
 
 _   (CompileBlockStatements(o));
 
-    _catch: return result;
+    _catch: ফেরত ফলাফল;
 }
 
 
-M3Result CompileFunction (IM3Function io_function)
+M3_ফলাফল CompileFunction (IM3Function io_function)
 {
-    if (!io_function->wasm) {
+    যদি (!io_function->wasm) {
         // An import. Either linking pointed it at another module's function -
         // in which case that one carries the body - or a host function was
         // bound to it, or it is simply unsatisfied.
         IM3Function impl = Function_Implementation(io_function);
 
-        if (impl != io_function) {
-            if (not impl->compiled) {
-                M3Result r = CompileFunction(impl);
-                if (r) {
-                    return r;
+        যদি (impl != io_function) {
+            যদি (not impl->compiled) {
+                M3_ফলাফল r = CompileFunction(impl);
+                যদি (r) {
+                    ফেরত r;
                 }
             }
 
             // keep the placeholder callable too, for anything still holding it
             io_function->compiled = impl->compiled;
-            return m3Err_none;
+            ফেরত m3Err_none;
         }
 
-        if (io_function->compiled) {
-            return m3Err_none;
+        যদি (io_function->compiled) {
+            ফেরত m3Err_none;
         }
 
-        return ErrorModule(m3Err_functionImportMissing, io_function->module, "'%s.%s'",
+        ফেরত ErrorModule(m3Err_functionImportMissing, io_function->module, "'%s.%s'",
                            GetFunctionImportModuleName(io_function),
                            m3_GetFunctionName(io_function));
     }
 
-#if d_m3EnableValidation
-    if (not io_function->module->runtime->skipValidation) {
-        M3Result vr = ValidateFunction(io_function);
-        if (vr) {
-            return vr;
+#যদি d_m3EnableValidation
+    যদি (not io_function->module->runtime->skipValidation) {
+        M3_ফলাফল vr = ValidateFunction(io_function);
+        যদি (vr) {
+            ফেরত vr;
         }
     }
 #endif
@@ -6437,8 +6437,8 @@ M3Result CompileFunction (IM3Function io_function)
                                                                         io_function->index, m3_GetFunctionName (io_function), SPrintFuncTypeSignature (funcType), (u32) (io_function->wasmEnd - io_function->wasm));
     IM3Runtime runtime = io_function->module->runtime;
 
-    IM3Compilation o = &runtime->compilation;                       d_m3Assert (d_m3MaxFunctionSlots >= d_m3MaxFunctionStackHeight * (d_m3Use32BitSlots + 1))  // need twice as many slots in 32-bit mode
-    memset(o, 0x0, sizeof(M3Compilation));
+    IM3Compilation o = &runtime->compilation;                       d_m3Assert (d_m3MaxFunctionSlots >= d_m3_Max_Function_স্তূপ_Height * (d_m3Use32BitSlots + 1))  // need twice as many slots in 32-bit mode
+    memset(o, 0x0, আকার(M3Compilation));
 
     o->runtime    = runtime;
     o->module     = io_function->module;
@@ -6449,16 +6449,16 @@ M3Result CompileFunction (IM3Function io_function)
 
 _try {
     // skip over code size. the end was already calculated during parse phase
-    u32 size;
-_   (ReadLEB_u32(&size, &o->wasm, o->wasmEnd));                     d_m3Assert (size == (o->wasmEnd - o->wasm))
+    u32 আকার_2;
+_   (ReadLEB_u32(&আকার_2, &o->wasm, o->wasmEnd));                     d_m3Assert (আকার_2 == (o->wasmEnd - o->wasm))
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     o->bodyStart = o->wasm;
 #endif
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     // only code that can be suspended can end up in a snapshot
-    if (runtime->isSuspendable) {
+    যদি (runtime->isSuspendable) {
         o->snapshotMap = m3_AllocStruct(M3SnapshotMap);
         _throwifnull(o->snapshotMap);
     }
@@ -6468,71 +6468,71 @@ _   (AcquireCompilationCodePage(o, &o->page));
 
     pc_t pc = GetPagePC(o->page);
 
-    u16 numRetSlots = GetFunctionNumReturns(o->function) * c_ioSlotCount;
+    u16 অঙ্ক_Ret_Slots = Get_Function_অঙ্ক_Returns(o->function) * c_io_Slot_গুনতি;
 
-    for (u16 i = 0; i < numRetSlots; ++i) {
+    জন্য (u16 i = 0; i < অঙ্ক_Ret_Slots; ++i) {
         MarkSlotAllocated(o, i);
     }
 
-    o->function->numRetSlots = o->slotFirstDynamicIndex = numRetSlots;
+    o->function->অঙ্ক_Ret_Slots = o->slot_First_Dynamic_সূচক = অঙ্ক_Ret_Slots;
 
-    u16 numArgs = GetFunctionNumArgs(o->function);
+    u16 অঙ্ক_Args = Get_Function_অঙ্ক_Args(o->function);
 
     // push the arg types to the type stack
-    for (u16 i = 0; i < numArgs; ++i) {
+    জন্য (u16 i = 0; i < অঙ্ক_Args; ++i) {
         m3type_t type = GetFunctionArgType(o->function, i);
-_       (PushAllocatedSlot(o, type));
+_       (ঠেলো_Allocated_Slot(o, type));
 
         // prevent allocator fill-in
-        o->slotFirstDynamicIndex += c_ioSlotCount;
+        o->slot_First_Dynamic_সূচক += c_io_Slot_গুনতি;
     }
 
-    o->slotMaxAllocatedIndexPlusOne = o->function->numRetAndArgSlots = o->slotFirstLocalIndex = o->slotFirstDynamicIndex;
+    o->slot_Max_Allocated_সূচক_Plus_One = o->function->অঙ্ক_Ret_And_Arg_Slots = o->slot_First_Local_সূচক = o->slot_First_Dynamic_সূচক;
 
 _   (CompileLocals(o));
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
 _   (RecordLocals(o));
 #endif
 
-#if d_m3HasGasMetering
+#যদি d_m3HasGasMetering
     // the table charges for a function's locals as well as for its instructions.
     // op_Entry is what sets them up, so the charge rides on the body's first
     // segment, which is emitted right after it
-    o->gasCost = o->function->numLocals * c_gasLocal;
+    o->gasCost = o->function->অঙ্ক_Locals * c_gasLocal;
 #endif
 
     u16 maxSlot = GetMaxUsedSlotPlusOne(o);
 
-    o->function->numLocalBytes = (maxSlot - o->slotFirstLocalIndex) * sizeof(m3slot_t);
+    o->function->অঙ্ক_Local_Bytes = (maxSlot - o->slot_First_Local_সূচক) * আকার(m3slot_t);
 
-    o->slotFirstConstIndex = o->slotMaxConstIndex = maxSlot;
+    o->slot_First_Const_সূচক = o->slot_Max_Const_সূচক = maxSlot;
 
     // ReserveConstants initializes o->firstDynamicSlotNumber
 _   (ReserveConstants(o));
 
     // start tracking the max stack used (Push() also updates this value) so that op_Entry can precisely detect stack overflow
-    o->maxStackSlots = o->slotMaxAllocatedIndexPlusOne = o->slotFirstDynamicIndex;
+    o->max_স্তূপ_Slots = o->slot_Max_Allocated_সূচক_Plus_One = o->slot_First_Dynamic_সূচক;
 
-    o->block.blockStackIndex = o->stackFirstDynamicIndex = o->stackIndex;                           m3log (compile, "start stack index: %u; max stack slots: %u",
-                                                                                                           (u32) o->stackFirstDynamicIndex, (u32) o->maxStackSlots);
-#if d_m3HasStackSwitching
+    o->block.block_স্তূপ_সূচক = o->স্তূপ_First_Dynamic_সূচক = o->স্তূপ_সূচক;                           m3log (compile, "start stack index: %u; max stack slots: %u",
+                                                                                                           (u32) o->স্তূপ_First_Dynamic_সূচক, (u32) o->max_স্তূপ_Slots);
+#যদি d_m3_Has_স্তূপ_Switching
     // A suspendable body opens by checking for a pause request, once its frame
     // is set up. The pause point's offset is the first instruction's, just past
     // the local declarations - the body's end, when it has no other.
-    if (runtime->isSuspendable) {
+    যদি (runtime->isSuspendable) {
         o->lastOpcodeStart = o->wasm;
-#  if d_m3EntryKeepsFrame
+#  যদি d_m3EntryKeepsFrame
 _       (EmitOp(o, op_Entry));
         EmitPointer(o, io_function);
 _       (EmitOp(o, op_EntryCheck));
-_       (RecordSafePoint(o, safepoint_entry, 1, 0, 0, NULL));
-#  else
+_       (RecordSafePoint(o, safepoint_entry, 1, 0, 0, ফাঁকা));
+#  অন্যথা
 _       (EmitOp(o, op_Entry_Suspendable));
         EmitPointer(o, io_function);
-_       (RecordSafePoint(o, safepoint_entry, 0, 0, 0, NULL));
+_       (RecordSafePoint(o, safepoint_entry, 0, 0, 0, ফাঁকা));
 #  endif
-    } else
+    } অন্যথা
 #endif
     {
 _       (EmitOp(o, op_Entry));
@@ -6544,60 +6544,60 @@ _   (CompileBlockStatements(o));
     _throwif(m3Err_wasmMalformed, o->previousOpcode != c_waOp_end);
 
     io_function->compiled      = pc;
-    io_function->maxStackSlots = o->maxStackSlots;
+    io_function->max_স্তূপ_Slots = o->max_স্তূপ_Slots;
 
-    u16 numConstantSlots = o->slotMaxConstIndex - o->slotFirstConstIndex;                           m3log (compile, "unique constant slots: %u; unused slots: %u",
-                                                                                                           numConstantSlots, o->slotFirstDynamicIndex - o->slotMaxConstIndex);
-    io_function->numConstantBytes = numConstantSlots * sizeof(m3slot_t);
+    u16 অঙ্ক_Constant_Slots = o->slot_Max_Const_সূচক - o->slot_First_Const_সূচক;                           m3log (compile, "unique constant slots: %u; unused slots: %u",
+                                                                                                           অঙ্ক_Constant_Slots, o->slot_First_Dynamic_সূচক - o->slot_Max_Const_সূচক);
+    io_function->অঙ্ক_Constant_Bytes = অঙ্ক_Constant_Slots * আকার(m3slot_t);
 
-    if (numConstantSlots) {
-        io_function->constants = m3_CopyMem((cbytes_t)o->constants, io_function->numConstantBytes);
+    যদি (অঙ্ক_Constant_Slots) {
+        io_function->constants = m3_CopyMem((cbytes_t)o->constants, io_function->অঙ্ক_Constant_Bytes);
         _throwifnull(io_function->constants);
     }
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     io_function->snapshotMap = o->snapshotMap;
-    o->snapshotMap           = NULL;
+    o->snapshotMap           = ফাঁকা;
 #endif
 
 } _catch:
 
     ReleaseCompilationCodePage(o);
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     SnapshotMap_Free(o->snapshotMap);
-    o->snapshotMap = NULL;
+    o->snapshotMap = ফাঁকা;
     m3_Free(o->localInitDepth);
 #endif
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-#if d_m3HasStackSwitching
+#যদি d_m3_Has_স্তূপ_Switching
 m3ret_t ResumeContinuation (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
-    if (M3_UNLIKELY(!i_cont || i_cont->state != cont_suspended)) {
-        return m3Err_none;
+    যদি (M3_UNLIKELY(!i_cont || i_cont->state != cont_suspended)) {
+        ফেরত m3Err_none;
     }
 
-    M3MemoryHeader* _mem = i_cont->entryFunction ? Module_MemoryHeader(i_cont->entryFunction->module) : NULL;
+    M3MemoryHeader* _mem = i_cont->entryFunction ? Module_MemoryHeader(i_cont->entryFunction->module) : ফাঁকা;
 
     i_runtime->activeContinuation = i_cont;
     i_cont->state                 = cont_running;
 
-    i32 outermost     = (i32)i_cont->numFrames - 1;
-    i_cont->numFrames = 0;
+    i32 outermost     = (i32)i_cont->অঙ্ক_Frames - 1;
+    i_cont->অঙ্ক_Frames = 0;
 
     // with no frames standing, this lands straight on the suspension point
     m3ret_t r = ReplayFrames(i_cont, outermost, _mem);
 
-    if (r == m3Err_continuationSuspended) {
+    যদি (r == m3Err_continuationSuspended) {
         i_cont->state = cont_suspended;
-    } else {
+    } অন্যথা {
         i_cont->state = cont_returned;
     }
-    i_runtime->activeContinuation = NULL;
+    i_runtime->activeContinuation = ফাঁকা;
 
-    return r;
+    ফেরত r;
 }
 #endif

@@ -19,13 +19,13 @@
 #ifndef m3_atomic_h
 #define m3_atomic_h
 
-#include "m3_core.h"
+#অন্তর্ভাব "m3_core.h"
 
-#if d_m3HasAtomics
+#যদি d_m3HasAtomics
 
 d_m3BeginExternC
 
-enum {
+গণনা {
     c_atomicAdd,
     c_atomicSub,
     c_atomicAnd,
@@ -35,18 +35,18 @@ enum {
 };
 
 #  define d_m3AtomicTyped(T)                                            \
-    static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
+    স্থির অন্তঃরেখ T m3_AtomicLoad_##T (ধ্রুবক u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T মান;                                                        \
+        memcpy (& মান, i_cell, আকার (মান));                       \
+        M3_BSWAP_##T (মান);                                           \
+        ফেরত মান;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    স্থির অন্তঃরেখ শূন্য m3_AtomicStore_##T (u8* o_cell, T i_মান)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_মান);                                         \
+        memcpy (o_cell, & i_মান, আকার (i_মান));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -54,57 +54,57 @@ d_m3AtomicTyped(u16);
 d_m3AtomicTyped(u32);
 d_m3AtomicTyped(u64);
 
-static inline
-u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
+স্থির অন্তঃরেখ
+u64 m3_AtomicLoadW (ধ্রুবক u8* i_cell, u32 i_log2Width)
 {
-    switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    নির্বাচন (i_log2Width) {
+    ক্ষেত্র 0: ফেরত m3_AtomicLoad_u8(i_cell);
+    ক্ষেত্র 1: ফেরত m3_AtomicLoad_u16(i_cell);
+    ক্ষেত্র 2: ফেরত m3_AtomicLoad_u32(i_cell);
+    পূর্বনির্ধারিত: ফেরত m3_AtomicLoad_u64(i_cell);
     }
 }
 
-static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+স্থির অন্তঃরেখ
+শূন্য m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_মান)
 {
-    switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    নির্বাচন (i_log2Width) {
+    ক্ষেত্র 0: m3_AtomicStore_u8(o_cell, (u8)i_মান); বিরতি;
+    ক্ষেত্র 1: m3_AtomicStore_u16(o_cell, (u16)i_মান); বিরতি;
+    ক্ষেত্র 2: m3_AtomicStore_u32(o_cell, (u32)i_মান); বিরতি;
+    পূর্বনির্ধারিত: m3_AtomicStore_u64(o_cell, i_মান); বিরতি;
     }
 }
 
-static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+স্থির অন্তঃরেখ
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_মান)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 updated;
 
-    switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    নির্বাচন (i_kind) {
+    ক্ষেত্র c_atomicAdd: updated = old + i_মান; বিরতি;
+    ক্ষেত্র c_atomicSub: updated = old - i_মান; বিরতি;
+    ক্ষেত্র c_atomicAnd: updated = old & i_মান; বিরতি;
+    ক্ষেত্র c_atomicOr: updated = old | i_মান; বিরতি;
+    ক্ষেত্র c_atomicXor: updated = old ^ i_মান; বিরতি;
+    পূর্বনির্ধারিত: updated = i_মান; বিরতি;
     }
 
     m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    ফেরত old;
 }
 
-static inline
+স্থির অন্তঃরেখ
 u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_replacement)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
 
-    if (old == (i_expected & mask)) {
+    যদি (old == (i_expected & mask)) {
         m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
     }
-    return old;
+    ফেরত old;
 }
 
 d_m3EndExternC

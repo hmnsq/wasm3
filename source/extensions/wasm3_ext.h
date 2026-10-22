@@ -10,11 +10,11 @@
 #ifndef wasm3_ext_h
 #define wasm3_ext_h
 
-#include "wasm3.h"
-#include <stdbool.h>
+#অন্তর্ভাব "wasm3.h"
+#অন্তর্ভাব <stdbool.h>
 
-#if defined(__cplusplus)
-extern "C" {
+#যদি defined(__cplusplus)
+বাহ্যিক "C" {
 #endif
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -34,17 +34,17 @@ IM3Module   m3_NewModule (IM3Environment i_environment);
 // To overwrite an existing function, set io_functionIndex to the desired element. i_signature must match the existing
 // function signature.
 // ** InjectFunction invalidates any existing IM3Function pointers
-M3Result    m3_InjectFunction (IM3Module            i_module,
-                               int32_t*             io_functionIndex,
-                               const char* const    i_signature,
-                               const uint8_t* const i_wasmBytes,            // i_wasmBytes is copied
+M3_ফলাফল    m3_InjectFunction (IM3Module            i_module,
+                               int32_t*             io_function_সূচক,
+                               ধ্রুবক অক্ষর* ধ্রুবক    i_signature,
+                               ধ্রুবক uint8_t* ধ্রুবক i_wasmBytes,            // i_wasmBytes is copied
                                bool                 i_doCompilation);
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module,
-                                   uint32_t  i_index);
+IM3Function m3_Get_Function_By_সূচক (IM3Module i_module,
+                                   uint32_t  i_সূচক);
 
-#if defined(__cplusplus)
+#যদি defined(__cplusplus)
 }
 #endif
 

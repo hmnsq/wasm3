@@ -20,14 +20,14 @@
 //  interpreter needs from what its own code says they hold.
 //
 
-#include "m3_env.h"
-#include "m3_compile.h"
-#include "m3_exception.h"
-#include "m3_host.h"
+#অন্তর্ভাব "m3_env.h"
+#অন্তর্ভাব "m3_compile.h"
+#অন্তর্ভাব "m3_exception.h"
+#অন্তর্ভাব "m3_host.h"
 
-#include <limits.h>
+#অন্তর্ভাব <limits.h>
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //  format
@@ -36,10 +36,10 @@
 // The container opens the way a Wasm binary does: four bytes of magic and a
 // fixed 32-bit version, little endian. Eight bytes, at a fixed place, whatever
 // the version turns out to say.
-static const u8  c_snapshotMagic[4] = { 0x00, 'd', 'm', 'p' };
-static const u32 c_snapshotVersion  = 1;
+স্থির ধ্রুবক u8  c_snapshotMagic[4] = { 0x00, 'd', 'm', 'p' };
+স্থির ধ্রুবক u32 c_snapshotVersion  = 1;
 
-enum {
+গণনা {
     d_m3SnapshotSection_Meta         = 0,
     d_m3SnapshotSection_Memory       = 1,
     d_m3SnapshotSection_Table        = 2,
@@ -54,7 +54,7 @@ enum {
 
 // The longest <name> in a "snapshot.<name>" custom section. A name is a label
 // the embedder picks, not something the format needs room to grow.
-#  define d_m3MaxSnapshotNameLength   200
+#  define d_m3_Max_Snapshot_Name_দৈর্ঘ্য   200
 
 // no index, and no reference
 #  define d_m3SnapshotNone            UINT32_MAX
@@ -62,7 +62,7 @@ enum {
 
 // A continuation's state, as the file spells it. A running continuation can
 // only be written into a postmortem, where it is as finished as the rest.
-enum {
+গণনা {
     snapshot_contAllocated = 0,
     snapshot_contSuspended = 1,
     snapshot_contFinished  = 2
@@ -83,10 +83,10 @@ enum {
 // names, debug information and snapshots) can change without changing its identity.
 // A module whose bytes are gone has no identity to check, and a snapshot is
 // neither saved from one nor loaded into one.
-static
-M3Result ModuleFingerprint (IM3Module i_module, u64* o_hash)
+স্থির
+M3_ফলাফল ModuleFingerprint (IM3Module i_module, u64* o_hash)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     Xxh64    hash;
 
     *o_hash = 0;
@@ -100,16 +100,16 @@ M3Result ModuleFingerprint (IM3Module i_module, u64* o_hash)
 
         Xxh64_Init(&hash, 0);
 
-        while (pos < end) {
+        যখন (pos < end) {
             bytes_t start     = pos;
             u8      sectionId = *pos++;
-            u32     size      = 0;
+            u32     আকার_2      = 0;
 
-_           (ReadLEB_u32(&size, &pos, end));
-            _throwif(m3Err_wasmUnderrun, size > (size_t)(end - pos));
+_           (ReadLEB_u32(&আকার_2, &pos, end));
+            _throwif(m3Err_wasmUnderrun, আকার_2 > (size_t)(end - pos));
 
-            pos += size;
-            if (sectionId != 0) {
+            pos += আকার_2;
+            যদি (sectionId != 0) {
                 Xxh64_Update(&hash, start, (size_t)(pos - start));
             }
         }
@@ -118,7 +118,7 @@ _           (ReadLEB_u32(&size, &pos, end));
     *o_hash = Xxh64_Digest(&hash);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 
@@ -126,139 +126,139 @@ _catch:
 //  safepoints
 //---------------------------------------------------------------------------------------------------------------------------------
 
-static
-const M3SafePoint* FindSafePoint (IM3Function i_function, pc_t i_pc, u8 i_kind)
+স্থির
+ধ্রুবক M3SafePoint* FindSafePoint (IM3Function i_function, pc_t i_pc, u8 i_kind)
 {
-    const M3SnapshotMap* map = i_function->snapshotMap;
+    ধ্রুবক M3SnapshotMap* map = i_function->snapshotMap;
 
-    if (map) {
-        for (u32 i = 0; i < map->numSafePoints; ++i) {
-            if (map->safePoints[i].pc == i_pc and map->safePoints[i].kind == i_kind) {
-                return &map->safePoints[i];
+    যদি (map) {
+        জন্য (u32 i = 0; i < map->অঙ্ক_Safe_Points; ++i) {
+            যদি (map->safePoints[i].pc == i_pc and map->safePoints[i].kind == i_kind) {
+                ফেরত &map->safePoints[i];
             }
         }
     }
 
-    return NULL;
+    ফেরত ফাঁকা;
 }
 
 // The safepoint of i_kind at the instruction at i_wasmOffset, and for a back
 // edge, the one that goes to the loop at i_targetLoop. Two clauses of one
 // instruction can go to the same loop; they leave the same frame, so either of
 // their safepoints does.
-static
-const M3SafePoint* FindSafePointAt (const M3SnapshotMap* i_map, u32 i_wasmOffset, u8 i_kind, u32 i_targetLoop)
+স্থির
+ধ্রুবক M3SafePoint* FindSafePointAt (ধ্রুবক M3SnapshotMap* i_map, u32 i_wasmOffset, u8 i_kind, u32 i_targetLoop)
 {
-    u32 low  = 0;
-    u32 high = i_map->numSafePoints;
+    u32 নিচের  = 0;
+    u32 উপরের = i_map->অঙ্ক_Safe_Points;
 
-    while (low < high) {
-        u32 middle = low + (high - low) / 2;
+    যখন (নিচের < উপরের) {
+        u32 মধ্য = নিচের + (উপরের - নিচের) / 2;
 
-        if (i_map->safePoints[middle].wasmOffset < i_wasmOffset) {
-            low = middle + 1;
-        } else {
-            high = middle;
+        যদি (i_map->safePoints[মধ্য].wasmOffset < i_wasmOffset) {
+            নিচের = মধ্য + 1;
+        } অন্যথা {
+            উপরের = মধ্য;
         }
     }
 
-    for (u32 i = low; i < i_map->numSafePoints and i_map->safePoints[i].wasmOffset == i_wasmOffset; ++i) {
-        const M3SafePoint* point = &i_map->safePoints[i];
+    জন্য (u32 i = নিচের; i < i_map->অঙ্ক_Safe_Points and i_map->safePoints[i].wasmOffset == i_wasmOffset; ++i) {
+        ধ্রুবক M3SafePoint* point = &i_map->safePoints[i];
 
-        if (point->kind != i_kind or (point->flags & d_m3SafePointTailCall)) {
-            continue;
+        যদি (point->kind != i_kind or (point->flags & d_m3_Safe_Point_লেজ_Call)) {
+            চালু;
         }
-        if (i_kind != safepoint_op or i_map->blocks[point->aux].wasmOffset == i_targetLoop) {
-            return point;
+        যদি (i_kind != safepoint_op or i_map->blocks[point->aux].wasmOffset == i_targetLoop) {
+            ফেরত point;
         }
     }
 
-    return NULL;
+    ফেরত ফাঁকা;
 }
 
-static
-const M3BlockStart* FindBlockAt (const M3SnapshotMap* i_map, u8 i_opcode, u32 i_wasmOffset)
+স্থির
+ধ্রুবক M3BlockStart* FindBlockAt (ধ্রুবক M3SnapshotMap* i_map, u8 i_opcode, u32 i_wasmOffset)
 {
-    for (u32 i = 0; i < i_map->numBlocks; ++i) {
-        if (i_map->blocks[i].opcode == i_opcode and i_map->blocks[i].wasmOffset == i_wasmOffset) {
-            return &i_map->blocks[i];
+    জন্য (u32 i = 0; i < i_map->অঙ্ক_Blocks; ++i) {
+        যদি (i_map->blocks[i].opcode == i_opcode and i_map->blocks[i].wasmOffset == i_wasmOffset) {
+            ফেরত &i_map->blocks[i];
         }
     }
 
-    return NULL;
+    ফেরত ফাঁকা;
 }
 
 // Whether a loop or try_table encloses the instruction at i_wasmOffset (see
 // M3BlockStart)
-static inline
-bool EnclosesOffset (const M3BlockStart* i_block, u32 i_wasmOffset)
+স্থির অন্তঃরেখ
+bool EnclosesOffset (ধ্রুবক M3BlockStart* i_block, u32 i_wasmOffset)
 {
-    return i_block->wasmOffset < i_wasmOffset and i_wasmOffset < i_block->wasmEnd;
+    ফেরত i_block->wasmOffset < i_wasmOffset and i_wasmOffset < i_block->wasmEnd;
 }
 
 // Whether the handlers of a try_table around a safepoint are in force there.
 // A back edge has retired those of the try_tables it leaves: the ones inside
 // the loop it goes to.
-static inline
-bool HandlersLiveAt (const M3SnapshotMap* i_map, const M3SafePoint* i_point, const M3BlockStart* i_try)
+স্থির অন্তঃরেখ
+bool HandlersLiveAt (ধ্রুবক M3SnapshotMap* i_map, ধ্রুবক M3SafePoint* i_point, ধ্রুবক M3BlockStart* i_try)
 {
-    return not (i_point->kind == safepoint_op and i_try->wasmOffset > i_map->blocks[i_point->aux].wasmOffset);
+    ফেরত not (i_point->kind == safepoint_op and i_try->wasmOffset > i_map->blocks[i_point->aux].wasmOffset);
 }
 
 // The type a call safepoint's instruction calls through, read back out of the
 // caller's body: what its callee has to return
-static
-M3Result CallSiteType (IM3Function i_caller, const M3SafePoint* i_point, IM3FuncType* o_type)
+স্থির
+M3_ফলাফল CallSiteType (IM3Function i_caller, ধ্রুবক M3SafePoint* i_point, IM3FuncType* o_type)
 {
-    M3Result   result = m3Err_none;
+    M3_ফলাফল   ফলাফল = m3Err_none;
     IM3Module  module = i_caller->module;
     bytes_t    pos    = i_caller->wasm;
     cbytes_t   end    = i_caller->wasmEnd;
-    u32        size   = 0;
+    u32        আকার_2   = 0;
     u32        index  = 0;
     m3opcode_t opcode = 0;
 
-    *o_type = NULL;
+    *o_type = ফাঁকা;
 
-_   (ReadLEB_u32(&size, &pos, end));
+_   (ReadLEB_u32(&আকার_2, &pos, end));
     _throwif(m3Err_wasmUnderrun, i_point->wasmOffset >= (size_t)(end - pos));
     pos += i_point->wasmOffset;
 
 _   (Read_opcode(&opcode, &pos, end));
 _   (ReadLEB_u32(&index, &pos, end));
 
-    if (opcode == c_waOp_call) {
-        _throwif(m3Err_wasmMalformed, index >= module->numFunctions);
+    যদি (opcode == c_waOp_call) {
+        _throwif(m3Err_wasmMalformed, index >= module->অঙ্ক_Functions);
         *o_type = module->functions[index].funcType;
-    } else {
+    } অন্যথা {
         _throwif(m3Err_wasmMalformed, opcode != c_waOp_callIndirect and opcode != c_waOp_callRef);
-        _throwif(m3Err_wasmMalformed, index >= module->numFuncTypes);
+        _throwif(m3Err_wasmMalformed, index >= module->অঙ্ক_Func_Types);
         *o_type = module->funcTypes[index];
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Whether a function can stand where i_expected was called: it returns as
 // many values, each a subtype of the one expected - which is what a
 // return_call asks of the function it hands its frame to
-static
+স্থির
 bool ReturnsWhat (IM3FuncType i_type, IM3FuncType i_expected)
 {
-    u16 numResults = GetFuncTypeNumResults(i_expected);
+    u16 অঙ্ক_Results = Get_Func_Type_অঙ্ক_Results(i_expected);
 
-    if (not i_type or GetFuncTypeNumResults(i_type) != numResults) {
-        return false;
+    যদি (not i_type or Get_Func_Type_অঙ্ক_Results(i_type) != অঙ্ক_Results) {
+        ফেরত false;
     }
 
-    for (u16 i = 0; i < numResults; ++i) {
-        if (not IsSubTypeOf(GetFuncTypeResultType(i_type, i), GetFuncTypeResultType(i_expected, i))) {
-            return false;
+    জন্য (u16 i = 0; i < অঙ্ক_Results; ++i) {
+        যদি (not IsSubTypeOf(Get_Func_Type_ফলাফল_Type(i_type, i), Get_Func_Type_ফলাফল_Type(i_expected, i))) {
+            ফেরত false;
         }
     }
 
-    return true;
+    ফেরত true;
 }
 
 
@@ -268,180 +268,180 @@ bool ReturnsWhat (IM3FuncType i_type, IM3FuncType i_expected)
 
 // The registers a frame goes on with. A frame that goes on with clear ones - a
 // resume - has none, and a value the map puts in one cannot be there.
-typedef struct M3FrameRegisters {
+প্রকারলেখ কাঠামো M3FrameRegisters {
     m3reg_t* r0;
-#  if d_m3HasFloat
+#  যদি d_m3HasFloat
     f64* fp0;
 #  endif
 } M3FrameRegisters;
 
 // The stack a continuation's frames are on: the runtime's own for the root
-static
-M3Result ContinuationStack (IM3Runtime i_runtime, IM3Continuation i_cont, m3slot_t** o_base, u32* o_numSlots)
+স্থির
+M3_ফলাফল Continuation_স্তূপ (IM3Runtime i_runtime, IM3Continuation i_cont, m3slot_t** o_base, u32* o_অঙ্ক_Slots)
 {
-    if (i_cont == i_runtime->rootContinuation) {
-        *o_base     = (m3slot_t*)i_runtime->originStack;
-        *o_numSlots = i_runtime->numStackSlots;
-    } else {
-        *o_base     = i_cont->valStack;
-        *o_numSlots = i_cont->numStackSlots;
+    যদি (i_cont == i_runtime->মূল_Continuation) {
+        *o_base     = (m3slot_t*)i_runtime->origin_স্তূপ;
+        *o_অঙ্ক_Slots = i_runtime->অঙ্ক_স্তূপ_Slots;
+    } অন্যথা {
+        *o_base     = i_cont->val_স্তূপ;
+        *o_অঙ্ক_Slots = i_cont->অঙ্ক_স্তূপ_Slots;
     }
 
-    return (*o_base) ? m3Err_none : "a suspended continuation has no stack";
+    ফেরত (*o_base) ? m3Err_none : "a suspended continuation has no stack";
 }
 
 // Where a value is kept, or NULL for a register; o_bytes is how much of the
 // frame it takes, which has to be inside the stack the frame is on
-static
-M3Result LocateValue (m3slot_t* i_base, u32 i_numSlots, m3stack_t i_sp, const M3SlotValue* i_value, u8** o_where)
+স্থির
+M3_ফলাফল Locate_মান (m3slot_t* i_base, u32 i_অঙ্ক_Slots, m3stack_t i_sp, ধ্রুবক M3_Slot_মান* i_মান, u8** o_where)
 {
-    M3Result result = m3Err_none;
-    u8       type   = BaseTypeOf(i_value->type);
+    M3_ফলাফল ফলাফল = m3Err_none;
+    u8       type   = BaseTypeOf(i_মান->type);
 
-    *o_where = NULL;
+    *o_where = ফাঁকা;
 
     _throwif(m3Err_wasmMalformed, type == c_m3Type_none or type > c_m3Type_contref);
 
     // no operation reads or writes one, so a v128 only ever sits in slots
-    _throwif("a v128 value is kept in a register", type == c_m3Type_v128 and IsRegisterSlotAlias(i_value->slot));
+    _throwif("a v128 value is kept in a register", type == c_m3Type_v128 and IsRegisterSlotAlias(i_মান->slot));
 
-    if (not IsRegisterSlotAlias(i_value->slot)) {
-        size_t size   = (type == c_m3Type_v128) ? 16
-                                                : (IsRefType(type) ? sizeof(void*)
-                                                                   : (Is64BitType(type) ? sizeof(u64) : sizeof(u32)));
-        size_t offset = (size_t)((m3slot_t*)i_sp - i_base + i_value->slot) * sizeof(m3slot_t);
+    যদি (not IsRegisterSlotAlias(i_মান->slot)) {
+        size_t আকার_2   = (type == c_m3Type_v128) ? 16
+                                                : (IsRefType(type) ? আকার(শূন্য*)
+                                                                   : (Is64BitType(type) ? আকার(u64) : আকার(u32)));
+        size_t offset = (size_t)((m3slot_t*)i_sp - i_base + i_মান->slot) * আকার(m3slot_t);
 
-        _throwif("a value is outside the stack its frame is on", offset + size > (size_t)i_numSlots * sizeof(m3slot_t));
+        _throwif("a value is outside the stack its frame is on", offset + আকার_2 > (size_t)i_অঙ্ক_Slots * আকার(m3slot_t));
 
         *o_where = (u8*)i_base + offset;
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // A value as the file holds it before a reference is named: a number's bits,
 // zero-extended to 64, or the reference itself
-static
-M3Result ReadValue (u8* i_where, const M3FrameRegisters* i_registers, const M3SlotValue* i_value, u64* o_bits,
-                    void** o_reference)
+স্থির
+M3_ফলাফল Read_মান (u8* i_where, ধ্রুবক M3FrameRegisters* i_registers, ধ্রুবক M3_Slot_মান* i_মান, u64* o_bits,
+                    শূন্য** o_reference)
 {
-    M3Result result = m3Err_none;
-    u8       type   = BaseTypeOf(i_value->type);
+    M3_ফলাফল ফলাফল = m3Err_none;
+    u8       type   = BaseTypeOf(i_মান->type);
 
     *o_bits      = 0;
-    *o_reference = NULL;
+    *o_reference = ফাঁকা;
 
-    if (i_where) {
-        if (IsRefType(type)) {
-            memcpy(o_reference, i_where, sizeof(void*));
-        } else if (Is64BitType(type)) {
-            memcpy(o_bits, i_where, sizeof(u64));
-        } else {
+    যদি (i_where) {
+        যদি (IsRefType(type)) {
+            memcpy(o_reference, i_where, আকার(শূন্য*));
+        } অন্যথা যদি (Is64BitType(type)) {
+            memcpy(o_bits, i_where, আকার(u64));
+        } অন্যথা {
             u32 narrow;
-            memcpy(&narrow, i_where, sizeof(narrow));
+            memcpy(&narrow, i_where, আকার(narrow));
             *o_bits = narrow;
         }
-    } else if (IsFpRegisterSlotAlias(i_value->slot)) {
-#  if d_m3HasFloat
+    } অন্যথা যদি (IsFpRegisterSlotAlias(i_মান->slot)) {
+#  যদি d_m3HasFloat
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->fp0);
 
-        if (type == c_m3Type_f32) {
+        যদি (type == c_m3Type_f32) {
             f32 narrow = (f32)*i_registers->fp0;
             u32 bits;
-            memcpy(&bits, &narrow, sizeof(bits));
+            memcpy(&bits, &narrow, আকার(bits));
             *o_bits = bits;
-        } else {
+        } অন্যথা {
             _throwif(m3Err_wasmMalformed, type != c_m3Type_f64);
-            memcpy(o_bits, i_registers->fp0, sizeof(u64));
+            memcpy(o_bits, i_registers->fp0, আকার(u64));
         }
-#  else
+#  অন্যথা
         _throw(m3Err_wasmMalformed);
 #  endif
-    } else {
+    } অন্যথা {
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->r0);
 
         m3reg_t r0 = *i_registers->r0;
 
-        if (IsRefType(type)) {
-            *o_reference = (void*)(uintptr_t)r0;
-        } else if (Is64BitType(type)) {
+        যদি (IsRefType(type)) {
+            *o_reference = (শূন্য*)(uintptr_t)r0;
+        } অন্যথা যদি (Is64BitType(type)) {
             *o_bits = (u64)r0;
-        } else {
+        } অন্যথা {
             *o_bits = (u32)r0;
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result WriteValue (u8* o_where, const M3FrameRegisters* i_registers, const M3SlotValue* i_value, u64 i_bits,
-                     void* i_reference)
+স্থির
+M3_ফলাফল Write_মান (u8* o_where, ধ্রুবক M3FrameRegisters* i_registers, ধ্রুবক M3_Slot_মান* i_মান, u64 i_bits,
+                     শূন্য* i_reference)
 {
-    M3Result result = m3Err_none;
-    u8       type   = BaseTypeOf(i_value->type);
+    M3_ফলাফল ফলাফল = m3Err_none;
+    u8       type   = BaseTypeOf(i_মান->type);
 
-    if (o_where) {
-        if (IsRefType(type)) {
-            memcpy(o_where, &i_reference, sizeof(void*));
-        } else if (Is64BitType(type)) {
-            memcpy(o_where, &i_bits, sizeof(u64));
-        } else {
+    যদি (o_where) {
+        যদি (IsRefType(type)) {
+            memcpy(o_where, &i_reference, আকার(শূন্য*));
+        } অন্যথা যদি (Is64BitType(type)) {
+            memcpy(o_where, &i_bits, আকার(u64));
+        } অন্যথা {
             u32 narrow = (u32)i_bits;
-            memcpy(o_where, &narrow, sizeof(narrow));
+            memcpy(o_where, &narrow, আকার(narrow));
         }
-    } else if (IsFpRegisterSlotAlias(i_value->slot)) {
-#  if d_m3HasFloat
+    } অন্যথা যদি (IsFpRegisterSlotAlias(i_মান->slot)) {
+#  যদি d_m3HasFloat
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->fp0);
 
-        if (type == c_m3Type_f32) {
+        যদি (type == c_m3Type_f32) {
             u32 bits = (u32)i_bits;
             f32 narrow;
-            memcpy(&narrow, &bits, sizeof(narrow));
+            memcpy(&narrow, &bits, আকার(narrow));
             *i_registers->fp0 = narrow;
-        } else {
+        } অন্যথা {
             _throwif(m3Err_wasmMalformed, type != c_m3Type_f64);
-            memcpy(i_registers->fp0, &i_bits, sizeof(u64));
+            memcpy(i_registers->fp0, &i_bits, আকার(u64));
         }
-#  else
+#  অন্যথা
         _throw(m3Err_wasmMalformed);
 #  endif
-    } else {
+    } অন্যথা {
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->r0);
 
-        if (IsRefType(type)) {
+        যদি (IsRefType(type)) {
             *i_registers->r0 = (m3reg_t)(uintptr_t)i_reference;
-        } else {
+        } অন্যথা {
             *i_registers->r0 = (m3reg_t)i_bits;
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The value a safepoint lists at i_index: the function's locals first, then
 // the operand stack
-static
-const M3SlotValue* FrameValue (const M3SnapshotMap* i_map, const M3SafePoint* i_point, u32 i_index)
+স্থির
+ধ্রুবক M3_Slot_মান* Frame_মান (ধ্রুবক M3SnapshotMap* i_map, ধ্রুবক M3SafePoint* i_point, u32 i_সূচক)
 {
-    if (i_index < i_map->numLocals) {
-        return i_point->firstLocalValue == UINT32_MAX ? &i_map->locals[i_index]
-                                                      : &i_map->values[i_point->firstLocalValue + i_index];
+    যদি (i_সূচক < i_map->অঙ্ক_Locals) {
+        ফেরত i_point->first_Local_মান == UINT32_MAX ? &i_map->locals[i_সূচক]
+                                                      : &i_map->মানসমূহ[i_point->first_Local_মান + i_সূচক];
     }
-    return &i_map->values[i_point->firstValue + i_index - i_map->numLocals];
+    ফেরত &i_map->মানসমূহ[i_point->first_মান + i_সূচক - i_map->অঙ্ক_Locals];
 }
 
 // A frame's constants are copied in by op_Entry, and op_Entry already ran
-static
-void RestoreConstants (IM3Function i_function, m3stack_t i_sp)
+স্থির
+শূন্য RestoreConstants (IM3Function i_function, m3stack_t i_sp)
 {
-    if (i_function->constants) {
-        u8* where = (u8*)((m3slot_t*)i_sp + i_function->numRetAndArgSlots) + i_function->numLocalBytes;
+    যদি (i_function->constants) {
+        u8* where = (u8*)((m3slot_t*)i_sp + i_function->অঙ্ক_Ret_And_Arg_Slots) + i_function->অঙ্ক_Local_Bytes;
 
-        memcpy(where, i_function->constants, i_function->numConstantBytes);
+        memcpy(where, i_function->constants, i_function->অঙ্ক_Constant_Bytes);
     }
 }
 
@@ -452,77 +452,77 @@ void RestoreConstants (IM3Function i_function, m3stack_t i_sp)
 
 // Pointers numbered in the order they were first added, with a hash index so
 // the lookup does not have to walk them
-typedef struct M3PointerIds {
-    void** items;
-    u32    count;
+প্রকারলেখ কাঠামো M3PointerIds {
+    শূন্য** বস্তুসমূহ;
+    u32    গুনতি;
     u32    capacity;
 
     u32* index;               // id + 1, or 0 for an empty bucket
-    u32  indexCapacity;       // a power of two, kept at least twice count
+    u32  সূচক_Capacity;       // a power of two, kept at least twice count
 } M3PointerIds;
 
-static
-u32 PointerBucket (void* i_pointer, u32 i_capacity)
+স্থির
+u32 PointerBucket (শূন্য* i_pointer, u32 i_capacity)
 {
     u64 bits = (u64)(uintptr_t)i_pointer;
 
-    return (u32)((bits * 0x9E3779B97F4A7C15ULL) >> 32) & (i_capacity - 1);
+    ফেরত (u32)((bits * 0x9E3779B97F4A7C15ULL) >> 32) & (i_capacity - 1);
 }
 
-static
-u32 PointerIds_Find (const M3PointerIds* i_ids, void* i_pointer)
+স্থির
+u32 PointerIds_Find (ধ্রুবক M3PointerIds* i_ids, শূন্য* i_pointer)
 {
-    if (i_ids->indexCapacity) {
-        u32 bucket = PointerBucket(i_pointer, i_ids->indexCapacity);
+    যদি (i_ids->সূচক_Capacity) {
+        u32 bucket = PointerBucket(i_pointer, i_ids->সূচক_Capacity);
 
-        while (i_ids->index[bucket]) {
+        যখন (i_ids->index[bucket]) {
             u32 id = i_ids->index[bucket] - 1;
 
-            if (i_ids->items[id] == i_pointer) {
-                return id;
+            যদি (i_ids->বস্তুসমূহ[id] == i_pointer) {
+                ফেরত id;
             }
 
-            bucket = (bucket + 1) & (i_ids->indexCapacity - 1);
+            bucket = (bucket + 1) & (i_ids->সূচক_Capacity - 1);
         }
     }
 
-    return d_m3SnapshotNone;
+    ফেরত d_m3SnapshotNone;
 }
 
-static
-M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
+স্থির
+M3_ফলাফল PointerIds_Add (M3PointerIds* io_ids, শূন্য* i_pointer, u32* o_id)
 {
     u32 id = PointerIds_Find(io_ids, i_pointer);
 
-    if (id != d_m3SnapshotNone) {
+    যদি (id != d_m3SnapshotNone) {
         *o_id = id;
-        return m3Err_none;
+        ফেরত m3Err_none;
     }
 
-    if (io_ids->count == io_ids->capacity) {
+    যদি (io_ids->গুনতি == io_ids->capacity) {
         u32    capacity = io_ids->capacity ? io_ids->capacity * 2 : 16;
-        void** items    = m3_ReallocArray(void*, io_ids->items, capacity, io_ids->capacity);
+        শূন্য** বস্তুসমূহ    = m3_ReallocArray(শূন্য*, io_ids->বস্তুসমূহ, capacity, io_ids->capacity);
 
-        if (not items) {
-            return m3Err_mallocFailed;
+        যদি (not বস্তুসমূহ) {
+            ফেরত m3Err_mallocFailed;
         }
 
-        io_ids->items    = items;
+        io_ids->বস্তুসমূহ    = বস্তুসমূহ;
         io_ids->capacity = capacity;
     }
 
-    if ((io_ids->count + 1) * 2 > io_ids->indexCapacity) {
-        u32  capacity = io_ids->indexCapacity ? io_ids->indexCapacity * 2 : 32;
+    যদি ((io_ids->গুনতি + 1) * 2 > io_ids->সূচক_Capacity) {
+        u32  capacity = io_ids->সূচক_Capacity ? io_ids->সূচক_Capacity * 2 : 32;
         u32* index    = m3_AllocArray(u32, capacity);
 
-        if (not index) {
-            return m3Err_mallocFailed;
+        যদি (not index) {
+            ফেরত m3Err_mallocFailed;
         }
 
-        for (u32 i = 0; i < io_ids->count; ++i) {
-            u32 bucket = PointerBucket(io_ids->items[i], capacity);
+        জন্য (u32 i = 0; i < io_ids->গুনতি; ++i) {
+            u32 bucket = PointerBucket(io_ids->বস্তুসমূহ[i], capacity);
 
-            while (index[bucket]) {
+            যখন (index[bucket]) {
                 bucket = (bucket + 1) & (capacity - 1);
             }
 
@@ -531,31 +531,31 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
 
         m3_Free(io_ids->index);
         io_ids->index         = index;
-        io_ids->indexCapacity = capacity;
+        io_ids->সূচক_Capacity = capacity;
     }
 
-    id                = io_ids->count++;
-    io_ids->items[id] = i_pointer;
+    id                = io_ids->গুনতি++;
+    io_ids->বস্তুসমূহ[id] = i_pointer;
 
-    u32 bucket = PointerBucket(i_pointer, io_ids->indexCapacity);
+    u32 bucket = PointerBucket(i_pointer, io_ids->সূচক_Capacity);
 
-    while (io_ids->index[bucket]) {
-        bucket = (bucket + 1) & (io_ids->indexCapacity - 1);
+    যখন (io_ids->index[bucket]) {
+        bucket = (bucket + 1) & (io_ids->সূচক_Capacity - 1);
     }
 
     io_ids->index[bucket] = id + 1;
 
     *o_id = id;
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
-static
-void PointerIds_Free (M3PointerIds* io_ids)
+স্থির
+শূন্য PointerIds_Free (M3PointerIds* io_ids)
 {
-    m3_Free(io_ids->items);
+    m3_Free(io_ids->বস্তুসমূহ);
     m3_Free(io_ids->index);
-    memset(io_ids, 0, sizeof(*io_ids));
+    memset(io_ids, 0, আকার(*io_ids));
 }
 
 
@@ -563,59 +563,59 @@ void PointerIds_Free (M3PointerIds* io_ids)
 //  buffers
 //---------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3BufferWriter {
-    u8*    buffer;
-    size_t size;
+প্রকারলেখ কাঠামো M3_বাফার_Writer {
+    u8*    বাফার;
+    size_t আকার_2;
     size_t capacity;
-} M3BufferWriter;
+} M3_বাফার_Writer;
 
-static
-M3Result BufferWriter_Write (const void* i_data, size_t i_size, void* i_userdata)
+স্থির
+M3_ফলাফল বাফার_Writer_Write (ধ্রুবক শূন্য* i_তথ্য, size_t i_আকার, শূন্য* i_userdata)
 {
-    M3BufferWriter* bw = (M3BufferWriter*)i_userdata;
+    M3_বাফার_Writer* bw = (M3_বাফার_Writer*)i_userdata;
 
-    if (bw->size + i_size > bw->capacity) {
+    যদি (bw->আকার_2 + i_আকার > bw->capacity) {
         size_t newCap = bw->capacity ? bw->capacity * 2 : 4096;
-        while (bw->size + i_size > newCap) {
+        যখন (bw->আকার_2 + i_আকার > newCap) {
             newCap *= 2;
         }
-        u8* newBuf = m3_ReallocArray(u8, bw->buffer, newCap, bw->capacity);
-        if (!newBuf) {
-            return m3Err_mallocFailed;
+        u8* newBuf = m3_ReallocArray(u8, bw->বাফার, newCap, bw->capacity);
+        যদি (!newBuf) {
+            ফেরত m3Err_mallocFailed;
         }
-        bw->buffer   = newBuf;
+        bw->বাফার   = newBuf;
         bw->capacity = newCap;
     }
 
-    if (i_size) {
-        memcpy(bw->buffer + bw->size, i_data, i_size);
-        bw->size += i_size;
+    যদি (i_আকার) {
+        memcpy(bw->বাফার + bw->আকার_2, i_তথ্য, i_আকার);
+        bw->আকার_2 += i_আকার;
     }
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
-typedef struct M3BufferReader {
-    const u8* buffer;
-    size_t    size;
+প্রকারলেখ কাঠামো M3_বাফার_Reader {
+    ধ্রুবক u8* বাফার;
+    size_t    আকার_2;
     size_t    cursor;
-} M3BufferReader;
+} M3_বাফার_Reader;
 
-static
-M3Result BufferReader_Read (void* o_buffer, size_t i_size, void* i_userdata)
+স্থির
+M3_ফলাফল বাফার_Reader_Read (শূন্য* o_বাফার, size_t i_আকার, শূন্য* i_userdata)
 {
-    M3BufferReader* br = (M3BufferReader*)i_userdata;
+    M3_বাফার_Reader* br = (M3_বাফার_Reader*)i_userdata;
 
-    if (i_size > br->size - br->cursor) {
-        return m3Err_wasmMalformed;
+    যদি (i_আকার > br->আকার_2 - br->cursor) {
+        ফেরত m3Err_wasmMalformed;
     }
 
-    if (i_size) {
-        memcpy(o_buffer, br->buffer + br->cursor, i_size);
-        br->cursor += i_size;
+    যদি (i_আকার) {
+        memcpy(o_বাফার, br->বাফার + br->cursor, i_আকার);
+        br->cursor += i_আকার;
     }
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
 
@@ -629,11 +629,11 @@ M3Result BufferReader_Read (void* o_buffer, size_t i_size, void* i_userdata)
 // second pass writes, and by then every reference has the id it will be
 // written as - which the file needs up front, since what a reference names can
 // come later in it than the reference does.
-typedef struct M3SnapshotSave {
+প্রকারলেখ কাঠামো M3SnapshotSave {
     IM3Runtime       runtime;
     IM3Module        module;
     M3SnapshotWriter writer;
-    void*            userdata;
+    শূন্য*            userdata;
 
     bool postmortem;
     bool embedded;
@@ -645,220 +645,220 @@ typedef struct M3SnapshotSave {
     M3PointerIds exceptions;
 } M3SnapshotSave;
 
-static inline
+স্থির অন্তঃরেখ
 u8 M3TypeToValType (m3type_t i_type)
 {
-    switch (BaseTypeOf(i_type)) {
-    case c_m3Type_i32: return 0x7F;
-    case c_m3Type_i64: return 0x7E;
-    case c_m3Type_f32: return 0x7D;
-    case c_m3Type_f64: return 0x7C;
-    case c_m3Type_v128: return 0x7B;
-    case c_m3Type_funcref: return 0x70;
-    case c_m3Type_externref: return 0x6F;
-    case c_m3Type_exnref: return 0x69;
-    case c_m3Type_contref: return 0x68;
-    default: return 0x00;
+    নির্বাচন (BaseTypeOf(i_type)) {
+    ক্ষেত্র c_m3Type_i32: ফেরত 0x7F;
+    ক্ষেত্র c_m3Type_i64: ফেরত 0x7E;
+    ক্ষেত্র c_m3Type_f32: ফেরত 0x7D;
+    ক্ষেত্র c_m3Type_f64: ফেরত 0x7C;
+    ক্ষেত্র c_m3Type_v128: ফেরত 0x7B;
+    ক্ষেত্র c_m3Type_funcref: ফেরত 0x70;
+    ক্ষেত্র c_m3Type_externref: ফেরত 0x6F;
+    ক্ষেত্র c_m3Type_exnref: ফেরত 0x69;
+    ক্ষেত্র c_m3Type_contref: ফেরত 0x68;
+    পূর্বনির্ধারিত: ফেরত 0x00;
     }
 }
 
-static inline
+স্থির অন্তঃরেখ
 m3type_t ValTypeToM3Type (u8 i_valtype)
 {
-    switch (i_valtype) {
-    case 0x7F: return c_m3Type_i32;
-    case 0x7E: return c_m3Type_i64;
-    case 0x7D: return c_m3Type_f32;
-    case 0x7C: return c_m3Type_f64;
-    case 0x7B: return c_m3Type_v128;
-    case 0x70: return c_m3Type_funcref;
-    case 0x6F: return c_m3Type_externref;
-    case 0x69: return c_m3Type_exnref;
-    case 0x68: return c_m3Type_contref;
-    default: return c_m3Type_none;
+    নির্বাচন (i_valtype) {
+    ক্ষেত্র 0x7F: ফেরত c_m3Type_i32;
+    ক্ষেত্র 0x7E: ফেরত c_m3Type_i64;
+    ক্ষেত্র 0x7D: ফেরত c_m3Type_f32;
+    ক্ষেত্র 0x7C: ফেরত c_m3Type_f64;
+    ক্ষেত্র 0x7B: ফেরত c_m3Type_v128;
+    ক্ষেত্র 0x70: ফেরত c_m3Type_funcref;
+    ক্ষেত্র 0x6F: ফেরত c_m3Type_externref;
+    ক্ষেত্র 0x69: ফেরত c_m3Type_exnref;
+    ক্ষেত্র 0x68: ফেরত c_m3Type_contref;
+    পূর্বনির্ধারিত: ফেরত c_m3Type_none;
     }
 }
 
-static
-M3Result Put (M3SnapshotSave* s, const void* i_data, size_t i_size)
+স্থির
+M3_ফলাফল Put (M3SnapshotSave* s, ধ্রুবক শূন্য* i_তথ্য, size_t i_আকার)
 {
-    return s->writing ? s->writer(i_data, i_size, s->userdata) : m3Err_none;
+    ফেরত s->writing ? s->writer(i_তথ্য, i_আকার, s->userdata) : m3Err_none;
 }
 
-static
-M3Result PutU8 (M3SnapshotSave* s, u8 i_value)
+স্থির
+M3_ফলাফল PutU8 (M3SnapshotSave* s, u8 i_মান)
 {
-    return Put(s, &i_value, sizeof(i_value));
+    ফেরত Put(s, &i_মান, আকার(i_মান));
 }
 
 
-static
-M3Result PutLEB_u32 (M3SnapshotSave* s, u32 i_value)
+স্থির
+M3_ফলাফল PutLEB_u32 (M3SnapshotSave* s, u32 i_মান)
 {
     u8  bytes[5];
     u32 len = 0;
 
-    do {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if (i_value != 0) {
+    করো {
+        u8 byte = i_মান & 0x7F;
+        i_মান >>= 7;
+        যদি (i_মান != 0) {
             byte |= 0x80;
         }
         bytes[len++] = byte;
-    } while (i_value != 0);
+    } যখন (i_মান != 0);
 
-    return Put(s, bytes, len);
+    ফেরত Put(s, bytes, len);
 }
 
-static
-M3Result PutLEB_u64 (M3SnapshotSave* s, u64 i_value)
+স্থির
+M3_ফলাফল PutLEB_u64 (M3SnapshotSave* s, u64 i_মান)
 {
     u8  bytes[10];
     u32 len = 0;
 
-    do {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if (i_value != 0) {
+    করো {
+        u8 byte = i_মান & 0x7F;
+        i_মান >>= 7;
+        যদি (i_মান != 0) {
             byte |= 0x80;
         }
         bytes[len++] = byte;
-    } while (i_value != 0);
+    } যখন (i_মান != 0);
 
-    return Put(s, bytes, len);
+    ফেরত Put(s, bytes, len);
 }
 
-static
-M3Result PutLEB_i64 (M3SnapshotSave* s, i64 i_value)
+স্থির
+M3_ফলাফল PutLEB_i64 (M3SnapshotSave* s, i64 i_মান)
 {
     u8   bytes[10];
     u32  len  = 0;
     bool more = true;
 
-    while (more) {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if ((i_value == 0 && !(byte & 0x40)) || (i_value == -1 && (byte & 0x40))) {
+    যখন (more) {
+        u8 byte = i_মান & 0x7F;
+        i_মান >>= 7;
+        যদি ((i_মান == 0 && !(byte & 0x40)) || (i_মান == -1 && (byte & 0x40))) {
             more = false;
-        } else {
+        } অন্যথা {
             byte |= 0x80;
         }
         bytes[len++] = byte;
     }
 
-    return Put(s, bytes, len);
+    ফেরত Put(s, bytes, len);
 }
 
 // What one section writes. Every section body takes the save state and nothing
 // else, so SaveSection can drive them all the same way.
-typedef M3Result (*M3SnapshotSectionFn)(M3SnapshotSave* s);
+প্রকারলেখ M3_ফলাফল (*M3SnapshotSectionFn)(M3SnapshotSave* s);
 
 // Writes one section: the body into a buffer first, so its length can go in
 // front of it, then the whole thing to the real writer. The buffer writer is
 // swapped onto s itself rather than onto a copy of it - a body may name a
 // reference, and the ids that name one belong to s, not to a copy that is
 // about to be thrown away.
-static
-M3Result SaveSection (M3SnapshotSave* s, u8 i_sectionId, M3SnapshotSectionFn i_body)
+স্থির
+M3_ফলাফল SaveSection (M3SnapshotSave* s, u8 i_sectionId, M3SnapshotSectionFn i_body)
 {
-    M3Result         result   = m3Err_none;
-    M3BufferWriter   bw       = { NULL, 0, 0 };
+    M3_ফলাফল         ফলাফল   = m3Err_none;
+    M3_বাফার_Writer   bw       = { ফাঁকা, 0, 0 };
     M3SnapshotWriter writer   = s->writer;
-    void*            userdata = s->userdata;
+    শূন্য*            userdata = s->userdata;
 
-    s->writer   = BufferWriter_Write;
+    s->writer   = বাফার_Writer_Write;
     s->userdata = &bw;
 
-    result = i_body(s);
+    ফলাফল = i_body(s);
 
     s->writer   = writer;
     s->userdata = userdata;
 
-    if (result) {
-        goto _catch;
+    যদি (ফলাফল) {
+        যাও _catch;
     }
 
     // a section with nothing in it is left out
-    if (bw.size) {
-        _throwif("snapshot section is too large", bw.size > UINT32_MAX);
+    যদি (bw.আকার_2) {
+        _throwif("snapshot section is too large", bw.আকার_2 > UINT32_MAX);
 _       (PutU8(s, i_sectionId));
-_       (PutLEB_u32(s, (u32)bw.size));
-_       (Put(s, bw.buffer, bw.size));
+_       (PutLEB_u32(s, (u32)bw.আকার_2));
+_       (Put(s, bw.বাফার, bw.আকার_2));
     }
 
 _catch:
-    m3_Free(bw.buffer);
+    m3_Free(bw.বাফার);
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-u32 FunctionIndex (IM3Module i_module, IM3Function i_function)
+স্থির
+u32 Function_সূচক (IM3Module i_module, IM3Function i_function)
 {
-    if (i_function and i_function >= i_module->functions and i_function < i_module->functions + i_module->numFunctions) {
-        return (u32)(i_function - i_module->functions);
+    যদি (i_function and i_function >= i_module->functions and i_function < i_module->functions + i_module->অঙ্ক_Functions) {
+        ফেরত (u32)(i_function - i_module->functions);
     }
 
-    return d_m3SnapshotNone;
+    ফেরত d_m3SnapshotNone;
 }
 
-static
-u32 FuncTypeIndex (IM3Module i_module, IM3FuncType i_type)
+স্থির
+u32 Func_Type_সূচক (IM3Module i_module, IM3FuncType i_type)
 {
-    for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
-        if (i_module->funcTypes[i] == i_type) {
-            return i;
+    জন্য (u32 i = 0; i < i_module->অঙ্ক_Func_Types; ++i) {
+        যদি (i_module->funcTypes[i] == i_type) {
+            ফেরত i;
         }
     }
 
-    return d_m3SnapshotNone;
+    ফেরত d_m3SnapshotNone;
 }
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
 
 // Code refers to a tag as whatever it resolved to, so that is what an
 // exception holds
-static
-IM3Tag TagOfIndex (IM3Module i_module, u32 i_index)
+স্থির
+IM3Tag Tag_Of_সূচক (IM3Module i_module, u32 i_সূচক)
 {
-    IM3Tag tag = &i_module->tags[i_index];
+    IM3Tag tag = &i_module->tags[i_সূচক];
 
-    return tag->resolved ? tag->resolved : tag;
+    ফেরত tag->resolved ? tag->resolved : tag;
 }
 
-static
-u32 TagIndex (IM3Module i_module, IM3Tag i_tag)
+স্থির
+u32 Tag_সূচক (IM3Module i_module, IM3Tag i_tag)
 {
-    for (u32 i = 0; i < i_module->numTags; ++i) {
-        if (TagOfIndex(i_module, i) == i_tag) {
-            return i;
+    জন্য (u32 i = 0; i < i_module->অঙ্ক_Tags; ++i) {
+        যদি (Tag_Of_সূচক(i_module, i) == i_tag) {
+            ফেরত i;
         }
     }
 
-    return d_m3SnapshotNone;
+    ফেরত d_m3SnapshotNone;
 }
 
 #  endif
 
 // The word a reference is written as: a function index, an object id, the
 // embedder's name for an externref, or d_m3SnapshotNullRef
-static
-M3Result NameReference (M3SnapshotSave* s, u8 i_type, void* i_reference, u64* o_word)
+স্থির
+M3_ফলাফল NameReference (M3SnapshotSave* s, u8 i_type, শূন্য* i_reference, u64* o_word)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     u32      id     = d_m3SnapshotNone;
 
     *o_word = d_m3SnapshotNullRef;
 
-    if (not i_reference) {
-        return m3Err_none;
+    যদি (not i_reference) {
+        ফেরত m3Err_none;
     }
 
-    if (i_type == c_m3Type_funcref) {
-        id = FunctionIndex(s->module, (IM3Function)i_reference);
+    যদি (i_type == c_m3Type_funcref) {
+        id = Function_সূচক(s->module, (IM3Function)i_reference);
         _throwif("a funcref names a function of another module", id == d_m3SnapshotNone);
-    } else if (i_type == c_m3Type_externref) {
-        const M3SnapshotHooks* hooks = &s->runtime->snapshotHooks;
+    } অন্যথা যদি (i_type == c_m3Type_externref) {
+        ধ্রুবক M3SnapshotHooks* hooks = &s->runtime->snapshotHooks;
 
         _throwif("an externref belongs to the host, and cannot be saved", not hooks->nameExternRef);
 
@@ -867,65 +867,65 @@ _       (hooks->nameExternRef(hooks->userdata, i_reference, &name));
         _throwif("the host named an externref as null", name == d_m3SnapshotNullRef);
 
         *o_word = name;
-        goto _catch;
+        যাও _catch;
     }
-#  if d_m3HasExceptionHandling
-    else if (i_type == c_m3Type_exnref) {
+#  যদি d_m3HasExceptionHandling
+    অন্যথা যদি (i_type == c_m3Type_exnref) {
         _throwif("an exnref names an exception that no longer exists",
                  PointerIds_Find(&s->liveExceptions, i_reference) == d_m3SnapshotNone);
 
-        u32 count = s->exceptions.count;
+        u32 গুনতি = s->exceptions.গুনতি;
 _       (PointerIds_Add(&s->exceptions, i_reference, &id));
-        _throwif("internal: an exception was found only while writing", s->writing and s->exceptions.count != count);
+        _throwif("internal: an exception was found only while writing", s->writing and s->exceptions.গুনতি != গুনতি);
     }
 #  endif
-    else if (i_type == c_m3Type_contref) {
+    অন্যথা যদি (i_type == c_m3Type_contref) {
         _throwif("a contref names a continuation that no longer exists",
                  PointerIds_Find(&s->liveContinuations, i_reference) == d_m3SnapshotNone);
 
-        u32 count = s->continuations.count;
+        u32 গুনতি = s->continuations.গুনতি;
 _       (PointerIds_Add(&s->continuations, i_reference, &id));
-        _throwif("internal: a continuation was found only while writing", s->writing and s->continuations.count != count);
-    } else {
+        _throwif("internal: a continuation was found only while writing", s->writing and s->continuations.গুনতি != গুনতি);
+    } অন্যথা {
         _throw("a reference of an unknown type");
     }
 
     *o_word = id;
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 //// A value held in memory - a global's cell, a bound argument - as the file
 // holds it: a reference by name, a 64-bit value whole, anything narrower
 // zero-extended
-static
-M3Result PutRefValue (M3SnapshotSave* s, u8 i_type, void* i_reference)
+স্থির
+M3_ফলাফল Put_Ref_মান (M3SnapshotSave* s, u8 i_type, শূন্য* i_reference)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     u64      word   = 0;
 
 _   (NameReference(s, i_type, i_reference, &word));
 
-    if (not s->writing) {
-        return m3Err_none;
+    যদি (not s->writing) {
+        ফেরত m3Err_none;
     }
 
-    if (word == d_m3SnapshotNullRef) {
+    যদি (word == d_m3SnapshotNullRef) {
 _       (PutU8(s, 0x00));
-    } else {
+    } অন্যথা {
         u8 kind = 0;
-        if (i_type == c_m3Type_funcref) {
+        যদি (i_type == c_m3Type_funcref) {
             kind = 0x01;
-        } else if (i_type == c_m3Type_externref) {
+        } অন্যথা যদি (i_type == c_m3Type_externref) {
             kind = 0x02;
         }
-#  if d_m3HasExceptionHandling
-        else if (i_type == c_m3Type_exnref) {
+#  যদি d_m3HasExceptionHandling
+        অন্যথা যদি (i_type == c_m3Type_exnref) {
             kind = 0x03;
         }
 #  endif
-        else if (i_type == c_m3Type_contref) {
+        অন্যথা যদি (i_type == c_m3Type_contref) {
             kind = 0x04;
         }
 
@@ -934,7 +934,7 @@ _       (PutLEB_u64(s, word));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The fixed-width quantities: the container's version, and a float's bit
@@ -942,149 +942,149 @@ _catch:
 // a LEB128, but a float has to survive as an exact 32- or 64-bit pattern, NaN
 // payloads and all, and the version has to sit where a reader can find it
 // before it knows anything else about the file.
-static
-M3Result PutLE32 (M3SnapshotSave* s, u32 i_value)
+স্থির
+M3_ফলাফল PutLE32 (M3SnapshotSave* s, u32 i_মান)
 {
     u8 bytes[4];
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
-        bytes[i] = (u8)(i_value >> (8 * i));
+    জন্য (u32 i = 0; i < আকার(bytes); ++i) {
+        bytes[i] = (u8)(i_মান >> (8 * i));
     }
 
-    return Put(s, bytes, sizeof(bytes));
+    ফেরত Put(s, bytes, আকার(bytes));
 }
 
-static
-M3Result PutLE64 (M3SnapshotSave* s, u64 i_value)
+স্থির
+M3_ফলাফল PutLE64 (M3SnapshotSave* s, u64 i_মান)
 {
     u8 bytes[8];
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
-        bytes[i] = (u8)(i_value >> (8 * i));
+    জন্য (u32 i = 0; i < আকার(bytes); ++i) {
+        bytes[i] = (u8)(i_মান >> (8 * i));
     }
 
-    return Put(s, bytes, sizeof(bytes));
+    ফেরত Put(s, bytes, আকার(bytes));
 }
 
 // The body of a value the caller already holds as bits, with a narrow type in
 // the low bits - what ReadValue hands back for a frame slot, and what an
 // exception payload is. Bits rather than a location: on a big-endian host the
 // low half of a u64 is not the half its address points at.
-static
-M3Result PutValueBody (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
+স্থির
+M3_ফলাফল Put_মান_Body (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
 {
-    if (IsRefType(i_type)) {
-        return PutRefValue(s, BaseTypeOf(i_type), (void*)(uintptr_t)i_bits);
+    যদি (IsRefType(i_type)) {
+        ফেরত Put_Ref_মান(s, BaseTypeOf(i_type), (শূন্য*)(uintptr_t)i_bits);
     }
 
-    switch (BaseTypeOf(i_type)) {
-    case c_m3Type_i32: return PutLEB_i64(s, (i32)(u32)i_bits);
-    case c_m3Type_i64: return PutLEB_i64(s, (i64)i_bits);
-    case c_m3Type_f32: return PutLE32(s, (u32)i_bits);
-    case c_m3Type_f64: return PutLE64(s, i_bits);
-    default: return "a snapshot cannot hold a value of this type as bits";
+    নির্বাচন (BaseTypeOf(i_type)) {
+    ক্ষেত্র c_m3Type_i32: ফেরত PutLEB_i64(s, (i32)(u32)i_bits);
+    ক্ষেত্র c_m3Type_i64: ফেরত PutLEB_i64(s, (i64)i_bits);
+    ক্ষেত্র c_m3Type_f32: ফেরত PutLE32(s, (u32)i_bits);
+    ক্ষেত্র c_m3Type_f64: ফেরত PutLE64(s, i_bits);
+    পূর্বনির্ধারিত: ফেরত "a snapshot cannot hold a value of this type as bits";
     }
 }
 
-static
-M3Result PutValueTag (M3SnapshotSave* s, m3type_t i_type)
+স্থির
+M3_ফলাফল Put_মান_Tag (M3SnapshotSave* s, m3type_t i_type)
 {
     u8 valtype = M3TypeToValType(i_type);
 
-    if (not valtype) {
-        return "a snapshot has no tag for a value of this type";
+    যদি (not valtype) {
+        ফেরত "a snapshot has no tag for a value of this type";
     }
 
-    return PutU8(s, valtype);
+    ফেরত PutU8(s, valtype);
 }
 
-static
-M3Result PutValueBits (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
+স্থির
+M3_ফলাফল Put_মান_Bits (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-_   (PutValueTag(s, i_type));
-_   (PutValueBody(s, i_type, i_bits));
+_   (Put_মান_Tag(s, i_type));
+_   (Put_মান_Body(s, i_type, i_bits));
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // A value as a memory location holds it: a global's cell, a bound argument, a
 // table element. Narrow types are read at their own width first, so what goes
 // on the wire is the value and not the bytes around it.
-static
-M3Result PutValue (M3SnapshotSave* s, m3type_t i_type, const void* i_where)
+স্থির
+M3_ফলাফল Put_মান (M3SnapshotSave* s, m3type_t i_type, ধ্রুবক শূন্য* i_where)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-_   (PutValueTag(s, i_type));
+_   (Put_মান_Tag(s, i_type));
 
-    if (IsRefType(i_type)) {
-        void* reference;
-        memcpy(&reference, i_where, sizeof(reference));
-_       (PutValueBody(s, i_type, (u64)(uintptr_t)reference));
-    } else if (BaseTypeOf(i_type) == c_m3Type_v128) {
+    যদি (IsRefType(i_type)) {
+        শূন্য* reference;
+        memcpy(&reference, i_where, আকার(reference));
+_       (Put_মান_Body(s, i_type, (u64)(uintptr_t)reference));
+    } অন্যথা যদি (BaseTypeOf(i_type) == c_m3Type_v128) {
         // a v128 is a vector of bytes, and has no byte order of its own
         u8 bytes[16];
-        memcpy(bytes, i_where, sizeof(bytes));
-_       (Put(s, bytes, sizeof(bytes)));
-    } else if (Is64BitType(i_type)) {
+        memcpy(bytes, i_where, আকার(bytes));
+_       (Put(s, bytes, আকার(bytes)));
+    } অন্যথা যদি (Is64BitType(i_type)) {
         u64 bits;
-        memcpy(&bits, i_where, sizeof(bits));
-_       (PutValueBody(s, i_type, bits));
-    } else {
+        memcpy(&bits, i_where, আকার(bits));
+_       (Put_মান_Body(s, i_type, bits));
+    } অন্যথা {
         u32 narrow;
-        memcpy(&narrow, i_where, sizeof(narrow));
-_       (PutValueBody(s, i_type, narrow));
+        memcpy(&narrow, i_where, আকার(narrow));
+_       (Put_মান_Body(s, i_type, narrow));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result PutMemoryChunks (M3SnapshotSave* s, const u8* i_bytes, size_t i_size)
+স্থির
+M3_ফলাফল PutMemoryChunks (M3SnapshotSave* s, ধ্রুবক u8* i_bytes, size_t i_আকার)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     size_t   cursor = 0;
 
-    while (cursor < i_size) {
+    যখন (cursor < i_আকার) {
         u8     byte = i_bytes[cursor];
         size_t run  = 1;
 
-        while (cursor + run < i_size and i_bytes[cursor + run] == byte) {
+        যখন (cursor + run < i_আকার and i_bytes[cursor + run] == byte) {
             run++;
         }
 
-        if ((byte == 0x00 or byte == 0xFF) and run >= d_m3SnapshotRunThreshold) {
+        যদি ((byte == 0x00 or byte == 0xFF) and run >= d_m3SnapshotRunThreshold) {
             // the memory is zeroed before it is filled in, so a run of zeros
             // is written as nothing at all
-            if (byte == 0xFF) {
+            যদি (byte == 0xFF) {
 _               (PutU8(s, d_m3ChunkFillFF));
 _               (PutLEB_u32(s, (u32)cursor));
 _               (PutLEB_u32(s, (u32)run));
             }
 
             cursor += run;
-            continue;
+            চালু;
         }
 
         size_t rawStart = cursor;
 
-        while (cursor < i_size) {
+        যখন (cursor < i_আকার) {
             u8     b      = i_bytes[cursor];
-            size_t length = 1;
+            size_t দৈর্ঘ্য = 1;
 
-            while (cursor + length < i_size and i_bytes[cursor + length] == b) {
-                length++;
+            যখন (cursor + দৈর্ঘ্য < i_আকার and i_bytes[cursor + দৈর্ঘ্য] == b) {
+                দৈর্ঘ্য++;
             }
 
-            if ((b == 0x00 or b == 0xFF) and length >= d_m3SnapshotRunThreshold) {
-                break;
+            যদি ((b == 0x00 or b == 0xFF) and দৈর্ঘ্য >= d_m3SnapshotRunThreshold) {
+                বিরতি;
             }
 
-            cursor += length;
+            cursor += দৈর্ঘ্য;
         }
 
 _       (PutU8(s, d_m3ChunkRaw));
@@ -1096,53 +1096,53 @@ _       (Put(s, i_bytes + rawStart, cursor - rawStart));
 _   (PutU8(s, d_m3ChunkEnd));
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Two imports can name the same memory or table, so one can stand at several
 // indices. The file stores it once, at the first of them, and the record at
 // any other index names that first one instead.
-static
-u32 Memory_FirstIndex (IM3Module module, u32 index)
+স্থির
+u32 Memory_First_সূচক (IM3Module module, u32 index)
 {
     u32 j = 0;
-    while (module->memories[j] != module->memories[index]) {
+    যখন (module->memories[j] != module->memories[index]) {
         ++j;
     }
-    return j;
+    ফেরত j;
 }
 
-static
-u32 Table_FirstIndex (IM3Module module, u32 index)
+স্থির
+u32 Table_First_সূচক (IM3Module module, u32 index)
 {
     u32 j = 0;
-    while (module->tables[j] != module->tables[index]) {
+    যখন (module->tables[j] != module->tables[index]) {
         ++j;
     }
-    return j;
+    ফেরত j;
 }
 
-static
-M3Result SaveMemories (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveMemories (M3SnapshotSave* s)
 {
-    M3Result  result = m3Err_none;
+    M3_ফলাফল  ফলাফল = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numMemories));
+_   (PutLEB_u32(s, module->অঙ্ক_Memories));
 
-    for (u32 m = 0; m < module->numMemories; ++m) {
+    জন্য (u32 m = 0; m < module->অঙ্ক_Memories; ++m) {
         IM3Memory memory   = module->memories[m];
-        u32       first    = Memory_FirstIndex(module, m);
-        bool      hasData  = memory and memory->mallocated;
-        u32       pageSize = memory ? Memory_PageSize(memory) : d_m3DefaultMemPageSize;
-        u64       bytes    = memory ? memory->numPages * (u64)pageSize : 0;
+        u32       first    = Memory_First_সূচক(module, m);
+        bool      has_তথ্য  = memory and memory->mallocated;
+        u32       page_আকার = memory ? Memory_Page_আকার(memory) : d_m3_Default_Mem_Page_আকার;
+        u64       bytes    = memory ? memory->অঙ্ক_Pages * (u64)page_আকার : 0;
         u32       pageBits = 0;
 
 _       (PutLEB_u32(s, m));
 _       (PutLEB_u32(s, first));
 
-        if (first != m) {
-            continue;
+        যদি (first != m) {
+            চালু;
         }
 
         // a shared memory belongs to every runtime that maps it, and the file
@@ -1153,149 +1153,149 @@ _       (PutLEB_u32(s, first));
         // the memory's pages are, so one this large has no encoding here
         _throwif("the memory is too large for a snapshot", bytes > UINT32_MAX);
         _throwif("shrunken memory cannot be saved in a snapshot",
-                 memory and memory->mallocated and memory->mallocated->length < bytes);
+                 memory and memory->mallocated and memory->mallocated->দৈর্ঘ্য < bytes);
 
         // a page size is a power of two, written the way custom page sizes
         // writes one: as that power
-        while ((1u << pageBits) < pageSize) {
+        যখন ((1u << pageBits) < page_আকার) {
             ++pageBits;
         }
 
 _       (PutLEB_u32(s, pageBits));
-_       (PutLEB_u32(s, memory ? (u32)memory->numPages : 0));
+_       (PutLEB_u32(s, memory ? (u32)memory->অঙ্ক_Pages : 0));
 
         // linear memory is little endian whatever the host is, and nothing in
         // it is a reference, so the discovery pass has no reason to read it
-        if (not s->writing) {
-            continue;
+        যদি (not s->writing) {
+            চালু;
         }
 
-        if (hasData) {
-_           (PutMemoryChunks(s, m3MemData(memory->mallocated), (size_t)bytes));
-        } else {
+        যদি (has_তথ্য) {
+_           (PutMemoryChunks(s, m3_Mem_তথ্য(memory->mallocated), (size_t)bytes));
+        } অন্যথা {
 _           (PutU8(s, d_m3ChunkEnd));
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result SaveGlobals (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveGlobals (M3SnapshotSave* s)
 {
-    M3Result  result = m3Err_none;
+    M3_ফলাফল  ফলাফল = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numGlobals));
+_   (PutLEB_u32(s, module->অঙ্ক_Globals));
 
-    for (u32 g = 0; g < module->numGlobals; ++g) {
+    জন্য (u32 g = 0; g < module->অঙ্ক_Globals; ++g) {
         M3Global* global = &module->globals[g];
         M3Global* cell   = global->resolved ? global->resolved : global;
 
 _       (PutLEB_u32(s, g));
-_       (PutValue(s, global->type, &cell->i64Value));
+_       (Put_মান(s, global->type, &cell->i64_মান));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result SaveTables (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveTables (M3SnapshotSave* s)
 {
-    M3Result  result = m3Err_none;
+    M3_ফলাফল  ফলাফল = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numTables));
+_   (PutLEB_u32(s, module->অঙ্ক_Tables));
 
-    for (u32 t = 0; t < module->numTables; ++t) {
+    জন্য (u32 t = 0; t < module->অঙ্ক_Tables; ++t) {
         IM3Table table = module->tables[t];
-        u32      first = Table_FirstIndex(module, t);
+        u32      first = Table_First_সূচক(module, t);
 
 _       (PutLEB_u32(s, t));
 _       (PutLEB_u32(s, first));
 
         // the first record holds the elements, and the discovery pass has
         // followed their references there
-        if (first != t) {
-            continue;
+        যদি (first != t) {
+            চালু;
         }
 
 _       (PutU8(s, M3TypeToValType(table->type)));
-_       (PutLEB_u32(s, table->size));
+_       (PutLEB_u32(s, table->আকার_2));
 
-        for (u32 e = 0; e < table->size; ++e) {
-_           (PutRefValue(s, BaseTypeOf(table->type), table->elements[e]));
+        জন্য (u32 e = 0; e < table->আকার_2; ++e) {
+_           (Put_Ref_মান(s, BaseTypeOf(table->type), table->elements[e]));
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result SaveSegments (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveSegments (M3SnapshotSave* s)
 {
-    M3Result  result = m3Err_none;
+    M3_ফলাফল  ফলাফল = m3Err_none;
     IM3Module module = s->module;
 
-_   (PutLEB_u32(s, module->numDataSegments));
+_   (PutLEB_u32(s, module->অঙ্ক_তথ্য_Segments));
 
-    for (u32 i = 0; i < module->numDataSegments; ++i) {
-_       (PutU8(s, module->dataSegments[i].dropped));
+    জন্য (u32 i = 0; i < module->অঙ্ক_তথ্য_Segments; ++i) {
+_       (PutU8(s, module->তথ্য_Segments[i].dropped));
     }
 
-_   (PutLEB_u32(s, module->numElementSegments));
+_   (PutLEB_u32(s, module->অঙ্ক_Element_Segments));
 
-    for (u32 i = 0; i < module->numElementSegments; ++i) {
+    জন্য (u32 i = 0; i < module->অঙ্ক_Element_Segments; ++i) {
 _       (PutU8(s, module->elementSegments[i].dropped));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
 
-static
-M3Result SaveExceptions (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveExceptions (M3SnapshotSave* s)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-_   (PutLEB_u32(s, s->exceptions.count));
+_   (PutLEB_u32(s, s->exceptions.গুনতি));
 
-    for (u32 i = 0; i < s->exceptions.count; ++i) {
-        M3Exception* exn  = (M3Exception*)s->exceptions.items[i];
+    জন্য (u32 i = 0; i < s->exceptions.গুনতি; ++i) {
+        M3Exception* exn  = (M3Exception*)s->exceptions.বস্তুসমূহ[i];
         IM3FuncType  type = exn->tag->type;
 
-        _throwif(m3Err_wasmMalformed, exn->numArgs != GetFuncTypeNumParams(type));
+        _throwif(m3Err_wasmMalformed, exn->অঙ্ক_Args != Get_Func_Type_অঙ্ক_Params(type));
 
 _       (PutLEB_u32(s, i));
-_       (PutLEB_u32(s, exn->numArgs));
+_       (PutLEB_u32(s, exn->অঙ্ক_Args));
 
-        for (u32 a = 0; a < exn->numArgs; ++a) {
+        জন্য (u32 a = 0; a < exn->অঙ্ক_Args; ++a) {
             m3type_t argType = GetFuncTypeParamType(type, (u16)a);
-_           (PutValueBits(s, argType, exn->args[a]));
+_           (Put_মান_Bits(s, argType, exn->args[a]));
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 #  endif
 
 // One function's frame within a suspended continuation, as the native frames
 // the interpreter recorded describe it
-typedef struct M3Activation {
+প্রকারলেখ কাঠামো M3Activation {
     IM3Function        function;
-    const M3SafePoint* point;           // the safepoint it stands at
+    ধ্রুবক M3SafePoint* point;           // the safepoint it stands at
     m3stack_t          sp;
     pc_t               pc;
     u8                 kind;            // M3SafePointKind
     M3FrameRegisters   registers;       // the ones it goes on with
-    const M3Frame*     resume;          // the resume it waits in, for safepoint_resume
+    ধ্রুবক M3Frame*     resume;          // the resume it waits in, for safepoint_resume
     i32                firstFrame;      // its frames, outermost first: firstFrame down to lastFrame
     i32                lastFrame;
 } M3Activation;
@@ -1303,33 +1303,33 @@ typedef struct M3Activation {
 // The safepoint a frame stands at, and so the function it stands in. That is
 // the function the call into it named, io_function, unless a tail call has
 // since replaced it; then it is whichever function has a safepoint at i_pc.
-static
-const M3SafePoint* FindFrameSafePoint (IM3Module i_module, IM3Function* io_function, pc_t i_pc, u8 i_kind)
+স্থির
+ধ্রুবক M3SafePoint* FindFrameSafePoint (IM3Module i_module, IM3Function* io_function, pc_t i_pc, u8 i_kind)
 {
-    const M3SafePoint* point = *io_function ? FindSafePoint(*io_function, i_pc, i_kind) : NULL;
+    ধ্রুবক M3SafePoint* point = *io_function ? FindSafePoint(*io_function, i_pc, i_kind) : ফাঁকা;
 
-    for (u32 i = 0; not point and i < i_module->numFunctions; ++i) {
+    জন্য (u32 i = 0; not point and i < i_module->অঙ্ক_Functions; ++i) {
         point = FindSafePoint(&i_module->functions[i], i_pc, i_kind);
-        if (point) {
+        যদি (point) {
             *io_function = &i_module->functions[i];
         }
     }
 
-    return point;
+    ফেরত point;
 }
 
 // The activation that starts at frame i_first, walking inward: the loops, try
 // regions and entry frame standing in the function, up to the call or resume it
 // waits on - or, for the innermost, up to the continuation's own suspension
 // point. i_function is the function the call into it named.
-static
-M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function i_function, m3stack_t i_sp,
+স্থির
+M3_ফলাফল পরবর্তী_Activation (IM3Module i_module, IM3Continuation i_cont, IM3Function i_function, m3stack_t i_sp,
                          i32 i_first, M3Activation* o_act)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     i32      i      = i_first;
 
-    memset(o_act, 0, sizeof(*o_act));
+    memset(o_act, 0, আকার(*o_act));
 
     o_act->function   = i_function;
     o_act->sp         = i_sp;
@@ -1338,37 +1338,37 @@ M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function
     _throwif("a suspended call does not say what it called", not i_function);
     _throwif("a function in the snapshot was compiled before the runtime was made suspendable", not i_function->snapshotMap);
 
-    for (; i >= 0; --i) {
-        const M3Frame* frame = &i_cont->frames[i];
+    জন্য (; i >= 0; --i) {
+        ধ্রুবক M3Frame* frame = &i_cont->frames[i];
 
         _throwif("a suspended frame runs against another module's memory", frame->memory != Module_Memory0(i_module));
         _throwif("a suspended frame is not where its function's frame is", frame->sp != i_sp);
 
-        if (frame->kind == frame_call) {
+        যদি (frame->kind == frame_call) {
             o_act->pc           = frame->pc;
             o_act->kind         = safepoint_call;
             o_act->registers.r0 = (m3reg_t*)&frame->call.r0;
-#  if d_m3HasFloat
+#  যদি d_m3HasFloat
             o_act->registers.fp0 = (f64*)&frame->call.fp0;
 #  endif
-            break;
-        } else if (frame->kind == frame_resume) {
+            বিরতি;
+        } অন্যথা যদি (frame->kind == frame_resume) {
             _throwif("a suspended resume is not the innermost frame", i != 0);
 
             o_act->pc     = frame->pc;
             o_act->kind   = safepoint_resume;
             o_act->resume = frame;
-            break;
+            বিরতি;
         }
     }
 
-    if (i < 0) {
+    যদি (i < 0) {
         _throwif("a suspended frame is not where its function's frame is", i_cont->sp != i_sp);
 
         o_act->pc           = i_cont->pc;
         o_act->kind         = i_cont->suspendPoint;
         o_act->registers.r0 = &i_cont->r0;
-#  if d_m3HasFloat
+#  যদি d_m3HasFloat
         o_act->registers.fp0 = &i_cont->fp0;
 #  endif
     }
@@ -1380,70 +1380,70 @@ M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function
     _throwif("a function in the snapshot was compiled before the runtime was made suspendable",
              not o_act->function->snapshotMap);
 
-#  if d_m3EntryKeepsFrame
-    for (i32 k = i_first; k > o_act->lastFrame; --k) {
-        const M3Frame* frame = &i_cont->frames[k];
+#  যদি d_m3EntryKeepsFrame
+    জন্য (i32 k = i_first; k > o_act->lastFrame; --k) {
+        ধ্রুবক M3Frame* frame = &i_cont->frames[k];
         _throwif("a suspended frame is not the function it is entered with",
                  frame->kind == frame_entry and frame->entry.function != o_act->function);
     }
 #  endif
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // A function's frame: which function, the safepoint it waits at, and every
 // value it holds there
-static
-M3Result SaveActivation (M3SnapshotSave* s, m3slot_t* i_base, u32 i_numSlots, const M3Activation* i_act)
+স্থির
+M3_ফলাফল SaveActivation (M3SnapshotSave* s, m3slot_t* i_base, u32 i_অঙ্ক_Slots, ধ্রুবক M3Activation* i_act)
 {
-    M3Result             result        = m3Err_none;
+    M3_ফলাফল             ফলাফল        = m3Err_none;
     IM3Function          function      = i_act->function;
-    const M3SnapshotMap* map           = function->snapshotMap;
-    u32                  functionIndex = FunctionIndex(s->module, function);
-    const M3SafePoint*   point         = i_act->point;
-    u32                  numValues;
+    ধ্রুবক M3SnapshotMap* map           = function->snapshotMap;
+    u32                  function_সূচক = Function_সূচক(s->module, function);
+    ধ্রুবক M3SafePoint*   point         = i_act->point;
+    u32                  অঙ্ক_মানসমূহ;
 
-    _throwif("a suspended frame belongs to another module", functionIndex == d_m3SnapshotNone);
+    _throwif("a suspended frame belongs to another module", function_সূচক == d_m3SnapshotNone);
 
-_   (PutLEB_u32(s, functionIndex));
+_   (PutLEB_u32(s, function_সূচক));
 _   (PutU8(s, point->kind));
 _   (PutLEB_u32(s, point->wasmOffset));
 
-    if (point->kind == safepoint_op) {
+    যদি (point->kind == safepoint_op) {
 _       (PutLEB_u32(s, map->blocks[point->aux].wasmOffset));
     }
 
-    numValues = map->numLocals + point->numValues;
+    অঙ্ক_মানসমূহ = map->অঙ্ক_Locals + point->অঙ্ক_মানসমূহ;
 
-_   (PutLEB_u32(s, numValues));
+_   (PutLEB_u32(s, অঙ্ক_মানসমূহ));
 
-    for (u32 v = 0; v < numValues; ++v) {
-        const M3SlotValue* value = FrameValue(map, point, v);
+    জন্য (u32 v = 0; v < অঙ্ক_মানসমূহ; ++v) {
+        ধ্রুবক M3_Slot_মান* মান = Frame_মান(map, point, v);
         u8*                where;
         u64                word;
-        void*              reference;
+        শূন্য*              reference;
 
-_       (LocateValue(i_base, i_numSlots, i_act->sp, value, &where));
+_       (Locate_মান(i_base, i_অঙ্ক_Slots, i_act->sp, মান, &where));
 
         // a v128 has no byte order of its own, and no bits path can carry it
-        if (BaseTypeOf(value->type) == c_m3Type_v128) {
-_           (PutValueTag(s, value->type));
+        যদি (BaseTypeOf(মান->type) == c_m3Type_v128) {
+_           (Put_মান_Tag(s, মান->type));
 _           (Put(s, where, 16));
-            continue;
+            চালু;
         }
 
-_       (ReadValue(where, &i_act->registers, value, &word, &reference));
+_       (Read_মান(where, &i_act->registers, মান, &word, &reference));
 
-_       (PutValueBits(s, value->type, IsRefType(value->type) ? (u64)(uintptr_t)reference : word));
+_       (Put_মান_Bits(s, মান->type, IsRefType(মান->type) ? (u64)(uintptr_t)reference : word));
     }
 
-    if (point->kind == safepoint_resume) {
-_       (PutRefValue(s, c_m3Type_contref, i_act->resume->resume.cont));
+    যদি (point->kind == safepoint_resume) {
+_       (Put_Ref_মান(s, c_m3Type_contref, i_act->resume->resume.cont));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // A suspended continuation, as the functions it is in the middle of, outermost
@@ -1454,40 +1454,40 @@ _catch:
 // A caller left waiting at a return_call compiled as a call is walked past and
 // not written: in Wasm its callee has taken its place, and a build that reuses
 // the frame has nothing there to write.
-static
-M3Result SaveSuspendedBody (M3SnapshotSave* s, IM3Continuation i_cont)
+স্থির
+M3_ফলাফল SaveSuspendedBody (M3SnapshotSave* s, IM3Continuation i_cont)
 {
-    M3Result      result   = m3Err_none;
-    M3Activation* acts     = NULL;
-    u32           numActs  = 0;
+    M3_ফলাফল      ফলাফল   = m3Err_none;
+    M3Activation* acts     = ফাঁকা;
+    u32           অঙ্ক_Acts  = 0;
     IM3Function   function = i_cont->entryFunction;
-    i32           first    = (i32)i_cont->numFrames - 1;
+    i32           first    = (i32)i_cont->অঙ্ক_Frames - 1;
     m3slot_t*     base;
-    u32           numSlots;
+    u32           অঙ্ক_Slots;
     m3stack_t     sp;
 
-_   (ContinuationStack(s->runtime, i_cont, &base, &numSlots));
+_   (Continuation_স্তূপ(s->runtime, i_cont, &base, &অঙ্ক_Slots));
 
     // one activation for each call frame at most, and the innermost
-    acts = m3_AllocArray(M3Activation, i_cont->numFrames + 1);
+    acts = m3_AllocArray(M3Activation, i_cont->অঙ্ক_Frames + 1);
     _throwifnull(acts);
 
     sp = base;
 
-    while (true) {
-        M3Activation* act = &acts[numActs];
+    যখন (true) {
+        M3Activation* act = &acts[অঙ্ক_Acts];
 
-_       (NextActivation(s->module, i_cont, function, sp, first, act));
+_       (পরবর্তী_Activation(s->module, i_cont, function, sp, first, act));
 
-        if (act->kind != safepoint_call) {
-            numActs++;
-            break;
+        যদি (act->kind != safepoint_call) {
+            অঙ্ক_Acts++;
+            বিরতি;
         }
 
         _throwif("a suspended continuation stops at a call", act->lastFrame < 0);
 
-        if (not (act->point->flags & d_m3SafePointTailCall)) {
-            numActs++;
+        যদি (not (act->point->flags & d_m3_Safe_Point_লেজ_Call)) {
+            অঙ্ক_Acts++;
         }
 
         function = i_cont->frames[act->lastFrame].call.function;
@@ -1495,146 +1495,146 @@ _       (NextActivation(s->module, i_cont, function, sp, first, act));
         first    = act->lastFrame - 1;
     }
 
-_   (PutLEB_u32(s, numActs));
+_   (PutLEB_u32(s, অঙ্ক_Acts));
 
-    for (u32 a = 0; a < numActs; ++a) {
-_       (SaveActivation(s, base, numSlots, &acts[a]));
+    জন্য (u32 a = 0; a < অঙ্ক_Acts; ++a) {
+_       (SaveActivation(s, base, অঙ্ক_Slots, &acts[a]));
     }
 
 _catch:
     m3_Free(acts);
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result SaveContinuation (M3SnapshotSave* s, u32 i_id, IM3Continuation i_cont)
+স্থির
+M3_ফলাফল SaveContinuation (M3SnapshotSave* s, u32 i_id, IM3Continuation i_cont)
 {
-    M3Result  result    = m3Err_none;
+    M3_ফলাফল  ফলাফল    = m3Err_none;
     IM3Module module    = s->module;
-    bool      isRoot    = (i_cont == s->runtime->rootContinuation);
+    bool      is_মূল    = (i_cont == s->runtime->মূল_Continuation);
     u8        state     = snapshot_contFinished;
-    u32       typeIndex = isRoot ? d_m3SnapshotNone : FuncTypeIndex(module, i_cont->type);
+    u32       type_সূচক = is_মূল ? d_m3SnapshotNone : Func_Type_সূচক(module, i_cont->type);
 
-    if (i_cont->state == cont_allocated) {
+    যদি (i_cont->state == cont_allocated) {
         state = snapshot_contAllocated;
-    } else if (i_cont->state == cont_suspended) {
+    } অন্যথা যদি (i_cont->state == cont_suspended) {
         state = snapshot_contSuspended;
-    } else if (i_cont->state == cont_running) {
+    } অন্যথা যদি (i_cont->state == cont_running) {
         _throwif("a continuation is running", not s->postmortem);
     }
 
     _throwif("a continuation was made with no function", not i_cont->entryFunction);
-    _throwif("a continuation belongs to another module", FunctionIndex(module, i_cont->entryFunction) == d_m3SnapshotNone);
+    _throwif("a continuation belongs to another module", Function_সূচক(module, i_cont->entryFunction) == d_m3SnapshotNone);
 
-    _throwif("a continuation has a type of another module", not isRoot and typeIndex == d_m3SnapshotNone);
+    _throwif("a continuation has a type of another module", not is_মূল and type_সূচক == d_m3SnapshotNone);
 
 _   (PutLEB_u32(s, i_id));
 _   (PutU8(s, state));
-_   (PutU8(s, isRoot));
-_   (PutLEB_u32(s, typeIndex));
-_   (PutLEB_u32(s, FunctionIndex(module, i_cont->entryFunction)));
-#  if d_m3HasExceptionHandling
-_   (PutRefValue(s, c_m3Type_exnref, i_cont->resumeThrow));
-#  else
-_   (PutRefValue(s, c_m3Type_exnref, NULL));
+_   (PutU8(s, is_মূল));
+_   (PutLEB_u32(s, type_সূচক));
+_   (PutLEB_u32(s, Function_সূচক(module, i_cont->entryFunction)));
+#  যদি d_m3HasExceptionHandling
+_   (Put_Ref_মান(s, c_m3Type_exnref, i_cont->resumeThrow));
+#  অন্যথা
+_   (Put_Ref_মান(s, c_m3Type_exnref, ফাঁকা));
 #  endif
 
     // a postmortem has nothing to resume, so it does not say how
-    if (s->postmortem) {
-        goto _catch;
+    যদি (s->postmortem) {
+        যাও _catch;
     }
 
-    if (state == snapshot_contAllocated) {
-        IM3FuncType inner   = i_cont->entryFunction ? i_cont->entryFunction->funcType : NULL;
-        u16         numRets = inner ? GetFuncTypeNumResults(inner) : 0;
+    যদি (state == snapshot_contAllocated) {
+        IM3FuncType inner   = i_cont->entryFunction ? i_cont->entryFunction->funcType : ফাঁকা;
+        u16         অঙ্ক_Rets = inner ? Get_Func_Type_অঙ্ক_Results(inner) : 0;
 
-        _throwif(m3Err_wasmMalformed, not inner or i_cont->boundArgsCount > GetFuncTypeNumParams(inner));
+        _throwif(m3Err_wasmMalformed, not inner or i_cont->bound_Args_গুনতি > Get_Func_Type_অঙ্ক_Params(inner));
 
-_       (PutLEB_u32(s, i_cont->boundArgsCount));
+_       (PutLEB_u32(s, i_cont->bound_Args_গুনতি));
 
-        for (u32 i = 0; i < i_cont->boundArgsCount; ++i) {
+        জন্য (u32 i = 0; i < i_cont->bound_Args_গুনতি; ++i) {
             m3type_t type = GetFuncTypeParamType(inner, (u16)i);
 
-_           (PutValue(s, type, i_cont->valStack + (numRets + i) * c_ioSlotCount));
+_           (Put_মান(s, type, i_cont->val_স্তূপ + (অঙ্ক_Rets + i) * c_io_Slot_গুনতি));
         }
-    } else if (state == snapshot_contSuspended) {
-_       (PutLEB_u32(s, i_cont->boundArgsCount));
+    } অন্যথা যদি (state == snapshot_contSuspended) {
+_       (PutLEB_u32(s, i_cont->bound_Args_গুনতি));
 _       (SaveSuspendedBody(s, i_cont));
-    } else {
+    } অন্যথা {
 _       (PutLEB_u32(s, 0));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result SaveContinuations (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveContinuations (M3SnapshotSave* s)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-_   (PutLEB_u32(s, s->continuations.count));
+_   (PutLEB_u32(s, s->continuations.গুনতি));
 
-    for (u32 i = 0; i < s->continuations.count; ++i) {
-_       (SaveContinuation(s, i, (IM3Continuation)s->continuations.items[i]));
+    জন্য (u32 i = 0; i < s->continuations.গুনতি; ++i) {
+_       (SaveContinuation(s, i, (IM3Continuation)s->continuations.বস্তুসমূহ[i]));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The embedder's own state: the whole section, whose length is where it ends.
 // Nothing saved is no section at all. Only the writing pass asks for it: it
 // holds no references to follow.
-static
-M3Result SaveHostState (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveHostState (M3SnapshotSave* s)
 {
-    M3Result               result = m3Err_none;
-    const M3SnapshotHooks* hooks  = &s->runtime->snapshotHooks;
-    M3BufferWriter         bw     = { NULL, 0, 0 };
+    M3_ফলাফল               ফলাফল = m3Err_none;
+    ধ্রুবক M3SnapshotHooks* hooks  = &s->runtime->snapshotHooks;
+    M3_বাফার_Writer         bw     = { ফাঁকা, 0, 0 };
 
-    if (s->writing and hooks->saveHostState and not s->postmortem) {
-_       (hooks->saveHostState(hooks->userdata, BufferWriter_Write, &bw));
+    যদি (s->writing and hooks->saveHostState and not s->postmortem) {
+_       (hooks->saveHostState(hooks->userdata, বাফার_Writer_Write, &bw));
     }
 
-    if (bw.size > 0) {
-_       (Put(s, bw.buffer, bw.size));
+    যদি (bw.আকার_2 > 0) {
+_       (Put(s, bw.বাফার, bw.আকার_2));
     }
 
 _catch:
-    m3_Free(bw.buffer);
+    m3_Free(bw.বাফার);
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-void SnapshotResourceTotals (IM3Module module, u64* memoryBytes, u64* tableElements)
+স্থির
+শূন্য SnapshotResourceTotals (IM3Module module, u64* memoryBytes, u64* tableElements)
 {
     *memoryBytes = *tableElements = 0;
-    for (u32 i = 0; i < module->numMemories; ++i) {
+    জন্য (u32 i = 0; i < module->অঙ্ক_Memories; ++i) {
         IM3Memory memory = module->memories[i];
-        if (Memory_FirstIndex(module, i) == i and memory) {
-            *memoryBytes += memory->numPages * (u64)Memory_PageSize(memory);
+        যদি (Memory_First_সূচক(module, i) == i and memory) {
+            *memoryBytes += memory->অঙ্ক_Pages * (u64)Memory_Page_আকার(memory);
         }
     }
-    for (u32 i = 0; i < module->numTables; ++i) {
+    জন্য (u32 i = 0; i < module->অঙ্ক_Tables; ++i) {
         IM3Table table = module->tables[i];
-        if (Table_FirstIndex(module, i) == i and table) {
-            *tableElements += table->size;
+        যদি (Table_First_সূচক(module, i) == i and table) {
+            *tableElements += table->আকার_2;
         }
     }
 }
 
-static
-M3Result SaveMeta (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveMeta (M3SnapshotSave* s)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     u64      hash   = 0;
     u64      memoryBytes, tableElements;
     u32      activeStacks = 0;
-    for (u32 i = 0; i < s->continuations.count; ++i) {
-        IM3Continuation cont = (IM3Continuation)s->continuations.items[i];
-        if (cont != s->runtime->rootContinuation and
+    জন্য (u32 i = 0; i < s->continuations.গুনতি; ++i) {
+        IM3Continuation cont = (IM3Continuation)s->continuations.বস্তুসমূহ[i];
+        যদি (cont != s->runtime->মূল_Continuation and
             (cont->state == cont_allocated or cont->state == cont_suspended)) {
             activeStacks++;
         }
@@ -1646,36 +1646,36 @@ _   (ModuleFingerprint(s->module, &hash));
 _   (PutLEB_u32(s, s->postmortem ? d_m3SnapshotFlagPostmortem : 0));
 _   (PutLEB_u64(s, m3_HostTimeMs()));
 _   (PutLEB_u64(s, hash));
-_   (PutLEB_u32(s, s->continuations.count));
-_   (PutLEB_u32(s, s->exceptions.count));
+_   (PutLEB_u32(s, s->continuations.গুনতি));
+_   (PutLEB_u32(s, s->exceptions.গুনতি));
 _   (PutLEB_u64(s, memoryBytes));
 _   (PutLEB_u64(s, tableElements));
 _   (PutLEB_u32(s, activeStacks));
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
     // each exception's tag before any of their payloads, so a reader can make
     // all of them before resolving a reference to one
-    for (u32 i = 0; i < s->exceptions.count; ++i) {
-        M3Exception* exception = (M3Exception*)s->exceptions.items[i];
-        u32          tagIndex  = TagIndex(s->module, exception->tag);
+    জন্য (u32 i = 0; i < s->exceptions.গুনতি; ++i) {
+        M3Exception* exception = (M3Exception*)s->exceptions.বস্তুসমূহ[i];
+        u32          tag_সূচক  = Tag_সূচক(s->module, exception->tag);
 
-        _throwif("an exception was thrown with another module's tag", tagIndex == d_m3SnapshotNone);
+        _throwif("an exception was thrown with another module's tag", tag_সূচক == d_m3SnapshotNone);
 
-_       (PutLEB_u32(s, tagIndex));
+_       (PutLEB_u32(s, tag_সূচক));
     }
 #  endif
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The discovery pass. Reaching a continuation or an exception can find more of
 // either, so it goes round until neither list grows; the writing pass then
 // finds nothing new and can lay the sections out in order.
-static
-M3Result DiscoverReferences (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল DiscoverReferences (M3SnapshotSave* s)
 {
-    M3Result result            = m3Err_none;
+    M3_ফলাফল ফলাফল            = m3Err_none;
     u32      doneContinuations = 0;
     u32      doneExceptions    = 0;
 
@@ -1684,40 +1684,40 @@ _   (SaveGlobals(s));
 _   (SaveTables(s));
 _   (SaveSegments(s));
 
-    while (doneContinuations < s->continuations.count or doneExceptions < s->exceptions.count) {
-#  if d_m3HasExceptionHandling
-        while (doneExceptions < s->exceptions.count) {
-            M3Exception* exception = (M3Exception*)s->exceptions.items[doneExceptions++];
+    যখন (doneContinuations < s->continuations.গুনতি or doneExceptions < s->exceptions.গুনতি) {
+#  যদি d_m3HasExceptionHandling
+        যখন (doneExceptions < s->exceptions.গুনতি) {
+            M3Exception* exception = (M3Exception*)s->exceptions.বস্তুসমূহ[doneExceptions++];
             IM3FuncType  type      = exception->tag->type;
 
-            _throwif(m3Err_wasmMalformed, exception->numArgs != GetFuncTypeNumParams(type));
+            _throwif(m3Err_wasmMalformed, exception->অঙ্ক_Args != Get_Func_Type_অঙ্ক_Params(type));
 
-            for (u32 a = 0; a < exception->numArgs; ++a) {
-_               (PutValueBits(s, GetFuncTypeParamType(type, (u16)a), exception->args[a]));
+            জন্য (u32 a = 0; a < exception->অঙ্ক_Args; ++a) {
+_               (Put_মান_Bits(s, GetFuncTypeParamType(type, (u16)a), exception->args[a]));
             }
         }
 #  endif
-        while (doneContinuations < s->continuations.count and doneExceptions == s->exceptions.count) {
+        যখন (doneContinuations < s->continuations.গুনতি and doneExceptions == s->exceptions.গুনতি) {
             u32 id = doneContinuations++;
-_           (SaveContinuation(s, id, (IM3Continuation)s->continuations.items[id]));
+_           (SaveContinuation(s, id, (IM3Continuation)s->continuations.বস্তুসমূহ[id]));
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result SaveSections (M3SnapshotSave* s)
+স্থির
+M3_ফলাফল SaveSections (M3SnapshotSave* s)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (not s->writing) {
-        return DiscoverReferences(s);
+    যদি (not s->writing) {
+        ফেরত DiscoverReferences(s);
     }
 
-    if (not s->embedded) {
-_       (Put(s, c_snapshotMagic, sizeof(c_snapshotMagic)));
+    যদি (not s->embedded) {
+_       (Put(s, c_snapshotMagic, আকার(c_snapshotMagic)));
 _       (PutLE32(s, c_snapshotVersion));
     }
 
@@ -1725,26 +1725,26 @@ _       (PutLE32(s, c_snapshotVersion));
     // no Memory section, rather than one that lists none
 _   (SaveSection(s, d_m3SnapshotSection_Meta, SaveMeta));
 
-    if (s->module->numMemories) {
+    যদি (s->module->অঙ্ক_Memories) {
 _       (SaveSection(s, d_m3SnapshotSection_Memory, SaveMemories));
     }
-    if (s->module->numTables) {
+    যদি (s->module->অঙ্ক_Tables) {
 _       (SaveSection(s, d_m3SnapshotSection_Table, SaveTables));
     }
-    if (s->module->numGlobals) {
+    যদি (s->module->অঙ্ক_Globals) {
 _       (SaveSection(s, d_m3SnapshotSection_Global, SaveGlobals));
     }
-    if (s->module->numDataSegments or s->module->numElementSegments) {
+    যদি (s->module->অঙ্ক_তথ্য_Segments or s->module->অঙ্ক_Element_Segments) {
 _       (SaveSection(s, d_m3SnapshotSection_Segment, SaveSegments));
     }
 
-#  if d_m3HasExceptionHandling
-    if (s->exceptions.count) {
+#  যদি d_m3HasExceptionHandling
+    যদি (s->exceptions.গুনতি) {
 _       (SaveSection(s, d_m3SnapshotSection_Exception, SaveExceptions));
     }
 #  endif
 
-    if (s->continuations.count) {
+    যদি (s->continuations.গুনতি) {
 _       (SaveSection(s, d_m3SnapshotSection_Continuation, SaveContinuations));
     }
 
@@ -1752,33 +1752,33 @@ _       (SaveSection(s, d_m3SnapshotSection_Continuation, SaveContinuations));
 _   (SaveSection(s, d_m3SnapshotSection_HostState, SaveHostState));
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //  loading
 //---------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3SnapshotSuspendSite {
-    const M3SnapshotMap* map;
-    const M3SafePoint*   point;
+প্রকারলেখ কাঠামো M3SnapshotSuspendSite {
+    ধ্রুবক M3SnapshotMap* map;
+    ধ্রুবক M3SafePoint*   point;
     u32                  target;             // child at a resume site, or zero
     bool                 resumed;
     m3type_t             expectedType; // concrete heap type required by references to this record
 } M3SnapshotSuspendSite;
 
-typedef struct M3SnapshotLoad {
+প্রকারলেখ কাঠামো M3SnapshotLoad {
     IM3Runtime       runtime;
     IM3Module        module;
     M3SnapshotReader reader;
-    void*            userdata;
+    শূন্য*            userdata;
 
     bool      started;              // past the header, and so changing the runtime
-    m3slot_t* checkStack;
+    m3slot_t* check_স্তূপ;
     bool      changed;              // past Meta: a section has been applied to the module
 
     IM3Continuation*       continuations;
-    u32                    numContinuations;
+    u32                    অঙ্ক_Continuations;
     u64                    requiredMemoryBytes;
     u64                    requiredTableElements;
     u64                    loadedMemoryBytes;
@@ -1787,10 +1787,10 @@ typedef struct M3SnapshotLoad {
     u32                    loadedStacks;
     M3SnapshotSuspendSite* suspendSites;
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
     M3Exception** exceptions;
 #  endif
-    u32 numExceptions;
+    u32 অঙ্ক_Exceptions;
 
     M3Frame* frames;           // a suspended continuation's frames as they are put together, outermost first
 
@@ -1802,178 +1802,178 @@ typedef struct M3SnapshotLoad {
     bool    seenSections[256];
 } M3SnapshotLoad;
 
-static
-M3Result Get (M3SnapshotLoad* l, void* o_data, size_t i_size)
+স্থির
+M3_ফলাফল Get (M3SnapshotLoad* l, শূন্য* o_তথ্য, size_t i_আকার)
 {
-    if (not l->inSection) {
-        return l->reader(o_data, i_size, l->userdata);
+    যদি (not l->inSection) {
+        ফেরত l->reader(o_তথ্য, i_আকার, l->userdata);
     }
-    if (i_size > (size_t)(l->end - l->pos)) {
-        return m3Err_wasmUnderrun;
+    যদি (i_আকার > (size_t)(l->end - l->pos)) {
+        ফেরত m3Err_wasmUnderrun;
     }
-    if (i_size) {
-        memcpy(o_data, l->pos, i_size);
-        l->pos += i_size;
+    যদি (i_আকার) {
+        memcpy(o_তথ্য, l->pos, i_আকার);
+        l->pos += i_আকার;
     }
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
-static
-M3Result GetU8 (M3SnapshotLoad* l, u8* o_value)
+স্থির
+M3_ফলাফল GetU8 (M3SnapshotLoad* l, u8* o_মান)
 {
-    return Get(l, o_value, sizeof(*o_value));
+    ফেরত Get(l, o_মান, আকার(*o_মান));
 }
 
-static
-M3Result GetBool (M3SnapshotLoad* l, u8* o_value)
+স্থির
+M3_ফলাফল GetBool (M3SnapshotLoad* l, u8* o_মান)
 {
-    M3Result result = GetU8(l, o_value);
-    return result ? result : (*o_value <= 1 ? m3Err_none : m3Err_wasmMalformed);
+    M3_ফলাফল ফলাফল = GetU8(l, o_মান);
+    ফেরত ফলাফল ? ফলাফল : (*o_মান <= 1 ? m3Err_none : m3Err_wasmMalformed);
 }
 
-static
-M3Result GetLEB_u32 (M3SnapshotLoad* l, u32* o_value)
+স্থির
+M3_ফলাফল GetLEB_u32 (M3SnapshotLoad* l, u32* o_মান)
 {
-    if (l->inSection) {
-        return ReadLEB_u32(o_value, &l->pos, l->end);
+    যদি (l->inSection) {
+        ফেরত ReadLEB_u32(o_মান, &l->pos, l->end);
     }
 
     // Only the section envelope is streamed. Collect its length and let the
     // same decoder used for Wasm modules check its width and terminal bits.
     u8 encoded[5];
-    for (u32 i = 0; i < sizeof(encoded); ++i) {
-        M3Result result = GetU8(l, &encoded[i]);
-        if (result) {
-            return result;
+    জন্য (u32 i = 0; i < আকার(encoded); ++i) {
+        M3_ফলাফল ফলাফল = GetU8(l, &encoded[i]);
+        যদি (ফলাফল) {
+            ফেরত ফলাফল;
         }
-        if (not (encoded[i] & 0x80)) {
+        যদি (not (encoded[i] & 0x80)) {
             bytes_t pos = encoded;
-            return ReadLEB_u32(o_value, &pos, encoded + i + 1);
+            ফেরত ReadLEB_u32(o_মান, &pos, encoded + i + 1);
         }
     }
-    return m3Err_lebOverflow;
+    ফেরত m3Err_lebOverflow;
 }
 
-static
-M3Result GetLEB_u64 (M3SnapshotLoad* l, u64* o_value)
+স্থির
+M3_ফলাফল GetLEB_u64 (M3SnapshotLoad* l, u64* o_মান)
 {
-    return ReadLebUnsigned(o_value, 64, &l->pos, l->end);
+    ফেরত ReadLebUnsigned(o_মান, 64, &l->pos, l->end);
 }
 
-static
-M3Result GetLEB_i64 (M3SnapshotLoad* l, i64* o_value)
+স্থির
+M3_ফলাফল GetLEB_i64 (M3SnapshotLoad* l, i64* o_মান)
 {
-    return ReadLEB_i64(o_value, &l->pos, l->end);
+    ফেরত ReadLEB_i64(o_মান, &l->pos, l->end);
 }
 
-static
-M3Result SkipBytes (M3SnapshotLoad* l, size_t i_size)
+স্থির
+M3_ফলাফল SkipBytes (M3SnapshotLoad* l, size_t i_আকার)
 {
-    if (i_size > (size_t)(l->end - l->pos)) {
-        return m3Err_wasmUnderrun;
+    যদি (i_আকার > (size_t)(l->end - l->pos)) {
+        ফেরত m3Err_wasmUnderrun;
     }
-    l->pos += i_size;
-    return m3Err_none;
+    l->pos += i_আকার;
+    ফেরত m3Err_none;
 }
 
 
-static
-M3Result GetRefValue (M3SnapshotLoad* l, m3type_t i_type, void** o_reference)
+স্থির
+M3_ফলাফল Get_Ref_মান (M3SnapshotLoad* l, m3type_t i_type, শূন্য** o_reference)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     u8       kind   = 0;
     u64      id     = 0;
 
-    *o_reference = NULL;
+    *o_reference = ফাঁকা;
 
 _   (GetU8(l, &kind));
-    if (kind == 0x00) {
-        return (IsNullableRef(i_type) or l->allowUnfilledRef) ? m3Err_none : "null in a non-nullable snapshot reference";
+    যদি (kind == 0x00) {
+        ফেরত (IsNullableRef(i_type) or l->allowUnfilledRef) ? m3Err_none : "null in a non-nullable snapshot reference";
     }
 
 _   (GetLEB_u64(l, &id));
 
-    if (kind == 0x01) {
+    যদি (kind == 0x01) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_funcref);
-        _throwif(m3Err_wasmMalformed, id >= l->module->numFunctions);
-#  if d_m3HasTypedRefs
+        _throwif(m3Err_wasmMalformed, id >= l->module->অঙ্ক_Functions);
+#  যদি d_m3HasTypedRefs
         _throwif("a snapshot function reference has the wrong type", not IsSubTypeOf(RefTypeOfFuncType(l->module->functions[id].funcType, true), i_type));
 #  endif
         *o_reference = &l->module->functions[id];
-    } else if (kind == 0x02) {
+    } অন্যথা যদি (kind == 0x02) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_externref);
-        const M3SnapshotHooks* hooks = &l->runtime->snapshotHooks;
+        ধ্রুবক M3SnapshotHooks* hooks = &l->runtime->snapshotHooks;
         _throwif("the snapshot holds an externref, and nothing here can bind one", not hooks->bindExternRef);
-        if (not l->checking) {
+        যদি (not l->checking) {
 _           (hooks->bindExternRef(hooks->userdata, id, o_reference));
             _throwif(m3Err_wasmMalformed, not *o_reference and not IsNullableRef(i_type));
         }
     }
-#  if d_m3HasExceptionHandling
-    else if (kind == 0x03) {
+#  যদি d_m3HasExceptionHandling
+    অন্যথা যদি (kind == 0x03) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_exnref);
-        _throwif(m3Err_wasmMalformed, id >= l->numExceptions);
+        _throwif(m3Err_wasmMalformed, id >= l->অঙ্ক_Exceptions);
         *o_reference = l->exceptions[id];
     }
 #  endif
-    else if (kind == 0x04) {
+    অন্যথা যদি (kind == 0x04) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_contref);
-        _throwif(m3Err_wasmMalformed, id == 0 or id >= l->numContinuations);
+        _throwif(m3Err_wasmMalformed, id == 0 or id >= l->অঙ্ক_Continuations);
         *o_reference = l->continuations[id];
-#  if d_m3HasTypedRefs
+#  যদি d_m3HasTypedRefs
         // The record may appear later, even in another section. Check its
         // concrete heap type once all continuation records have been read.
-        if (not l->checking and HeapTypeOf(i_type) != d_m3Type_heapAbstract) {
+        যদি (not l->checking and HeapTypeOf(i_type) != d_m3Type_heapAbstract) {
             m3type_t expected = i_type | d_m3Type_refNonNull;
             _throwif(m3Err_wasmMalformed, l->suspendSites[id].expectedType and
                                             l->suspendSites[id].expectedType != expected);
             l->suspendSites[id].expectedType = expected;
         }
 #  endif
-    } else {
+    } অন্যথা {
         _throw(m3Err_wasmMalformed);
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result GetLE32 (M3SnapshotLoad* l, u32* o_value)
+স্থির
+M3_ফলাফল GetLE32 (M3SnapshotLoad* l, u32* o_মান)
 {
     u8       bytes[4];
-    M3Result result = Get(l, bytes, sizeof(bytes));
+    M3_ফলাফল ফলাফল = Get(l, bytes, আকার(bytes));
 
-    *o_value = 0;
+    *o_মান = 0;
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
-        *o_value |= (u32)bytes[i] << (8 * i);
+    জন্য (u32 i = 0; i < আকার(bytes); ++i) {
+        *o_মান |= (u32)bytes[i] << (8 * i);
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result GetLE64 (M3SnapshotLoad* l, u64* o_value)
+স্থির
+M3_ফলাফল GetLE64 (M3SnapshotLoad* l, u64* o_মান)
 {
     u8       bytes[8];
-    M3Result result = Get(l, bytes, sizeof(bytes));
+    M3_ফলাফল ফলাফল = Get(l, bytes, আকার(bytes));
 
-    *o_value = 0;
+    *o_মান = 0;
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
-        *o_value |= (u64)bytes[i] << (8 * i);
+    জন্য (u32 i = 0; i < আকার(bytes); ++i) {
+        *o_মান |= (u64)bytes[i] << (8 * i);
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Reads the tag of a value and says what it holds, refusing one the file's
 // type does not agree with. c_m3Type_none expects anything.
-static
-M3Result GetValueTag (M3SnapshotLoad* l, m3type_t i_expectedType, m3type_t* o_type)
+স্থির
+M3_ফলাফল Get_মান_Tag (M3SnapshotLoad* l, m3type_t i_expectedType, m3type_t* o_type)
 {
-    M3Result result  = m3Err_none;
+    M3_ফলাফল ফলাফল  = m3Err_none;
     u8       valtype = 0;
 
 _   (GetU8(l, &valtype));
@@ -1983,314 +1983,314 @@ _   (GetU8(l, &valtype));
     _throwif(m3Err_wasmMalformed, *o_type == c_m3Type_none);
     _throwif(m3Err_wasmMalformed,
              i_expectedType != c_m3Type_none and BaseTypeOf(*o_type) != BaseTypeOf(i_expectedType));
-    if (i_expectedType != c_m3Type_none) {
+    যদি (i_expectedType != c_m3Type_none) {
         *o_type = i_expectedType;
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The mirror of PutValueBody: narrow types come back in the low bits
-static
-M3Result GetValueBody (M3SnapshotLoad* l, m3type_t i_type, u64* o_bits)
+স্থির
+M3_ফলাফল Get_মান_Body (M3SnapshotLoad* l, m3type_t i_type, u64* o_bits)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
     *o_bits = 0;
 
-    if (IsRefType(i_type)) {
-        void* reference = NULL;
-_       (GetRefValue(l, i_type, &reference));
+    যদি (IsRefType(i_type)) {
+        শূন্য* reference = ফাঁকা;
+_       (Get_Ref_মান(l, i_type, &reference));
         *o_bits = (u64)(uintptr_t)reference;
-    } else if (BaseTypeOf(i_type) == c_m3Type_i32) {
-        i32 value = 0;
-_       (ReadLEB_i32(&value, &l->pos, l->end));
-        *o_bits = (u32)value;
-    } else if (BaseTypeOf(i_type) == c_m3Type_i64) {
-        i64 value = 0;
-_       (GetLEB_i64(l, &value));
-        *o_bits = (u64)value;
-    } else if (BaseTypeOf(i_type) == c_m3Type_f32) {
+    } অন্যথা যদি (BaseTypeOf(i_type) == c_m3Type_i32) {
+        i32 মান = 0;
+_       (ReadLEB_i32(&মান, &l->pos, l->end));
+        *o_bits = (u32)মান;
+    } অন্যথা যদি (BaseTypeOf(i_type) == c_m3Type_i64) {
+        i64 মান = 0;
+_       (GetLEB_i64(l, &মান));
+        *o_bits = (u64)মান;
+    } অন্যথা যদি (BaseTypeOf(i_type) == c_m3Type_f32) {
         u32 bits = 0;
 _       (GetLE32(l, &bits));
         *o_bits = bits;
-    } else if (BaseTypeOf(i_type) == c_m3Type_f64) {
+    } অন্যথা যদি (BaseTypeOf(i_type) == c_m3Type_f64) {
 _       (GetLE64(l, o_bits));
-    } else {
+    } অন্যথা {
         _throw(m3Err_wasmMalformed);
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result GetValueBits (M3SnapshotLoad* l, m3type_t i_expectedType, u64* o_bits)
+স্থির
+M3_ফলাফল Get_মান_Bits (M3SnapshotLoad* l, m3type_t i_expectedType, u64* o_bits)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     m3type_t type;
 
-_   (GetValueTag(l, i_expectedType, &type));
-_   (GetValueBody(l, type, o_bits));
+_   (Get_মান_Tag(l, i_expectedType, &type));
+_   (Get_মান_Body(l, type, o_bits));
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result GetValue (M3SnapshotLoad* l, m3type_t i_expectedType, void* o_where)
+স্থির
+M3_ফলাফল Get_মান (M3SnapshotLoad* l, m3type_t i_expectedType, শূন্য* o_where)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     m3type_t type;
     u8       scratch[16];
-    if (l->checking) {
+    যদি (l->checking) {
         o_where = scratch;
     }
 
-_   (GetValueTag(l, i_expectedType, &type));
+_   (Get_মান_Tag(l, i_expectedType, &type));
 
-    if (IsRefType(type)) {
-        void* reference = NULL;
+    যদি (IsRefType(type)) {
+        শূন্য* reference = ফাঁকা;
         u64   bits      = 0;
-_       (GetValueBody(l, type, &bits));
-        reference = (void*)(uintptr_t)bits;
-        memcpy(o_where, &reference, sizeof(reference));
-    } else if (BaseTypeOf(type) == c_m3Type_v128) {
+_       (Get_মান_Body(l, type, &bits));
+        reference = (শূন্য*)(uintptr_t)bits;
+        memcpy(o_where, &reference, আকার(reference));
+    } অন্যথা যদি (BaseTypeOf(type) == c_m3Type_v128) {
 _       (Get(l, o_where, 16));
-    } else {
+    } অন্যথা {
         u64 bits = 0;
-_       (GetValueBody(l, type, &bits));
+_       (Get_মান_Body(l, type, &bits));
 
-        if (Is64BitType(type)) {
-            memcpy(o_where, &bits, sizeof(bits));
-        } else {
+        যদি (Is64BitType(type)) {
+            memcpy(o_where, &bits, আকার(bits));
+        } অন্যথা {
             u32 narrow = (u32)bits;
-            memcpy(o_where, &narrow, sizeof(narrow));
+            memcpy(o_where, &narrow, আকার(narrow));
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result GetFunction (M3SnapshotLoad* l, IM3Function* o_function)
+স্থির
+M3_ফলাফল GetFunction (M3SnapshotLoad* l, IM3Function* o_function)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     u32      index  = 0;
 
 _   (GetLEB_u32(l, &index));
 
-    _throwif(m3Err_wasmMalformed, index >= l->module->numFunctions);
+    _throwif(m3Err_wasmMalformed, index >= l->module->অঙ্ক_Functions);
     *o_function = &l->module->functions[index];
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadMemoryChunks (M3SnapshotLoad* l, u8* o_bytes, size_t i_size)
+স্থির
+M3_ফলাফল LoadMemoryChunks (M3SnapshotLoad* l, u8* o_bytes, size_t i_আকার)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    for (;;) {
+    জন্য (;;) {
         u8  chunkType = 0;
-        u32 offset = 0, length = 0;
+        u32 offset = 0, দৈর্ঘ্য = 0;
 
 _       (GetU8(l, &chunkType));
 
-        if (chunkType == d_m3ChunkEnd) {
-            break;
+        যদি (chunkType == d_m3ChunkEnd) {
+            বিরতি;
         }
 
 _       (GetLEB_u32(l, &offset));
-_       (GetLEB_u32(l, &length));
+_       (GetLEB_u32(l, &দৈর্ঘ্য));
 
-        _throwif(m3Err_wasmMalformed, (size_t)offset > i_size or length > i_size - (size_t)offset);
+        _throwif(m3Err_wasmMalformed, (size_t)offset > i_আকার or দৈর্ঘ্য > i_আকার - (size_t)offset);
 
-        if (chunkType == d_m3ChunkRaw) {
-            if (l->checking or length == 0) {
-_               (SkipBytes(l, length));
-            } else {
-_               (Get(l, o_bytes + offset, length));
+        যদি (chunkType == d_m3ChunkRaw) {
+            যদি (l->checking or দৈর্ঘ্য == 0) {
+_               (SkipBytes(l, দৈর্ঘ্য));
+            } অন্যথা {
+_               (Get(l, o_bytes + offset, দৈর্ঘ্য));
             }
-        } else if (chunkType == d_m3ChunkFillFF) {
-            if (not l->checking and length) {
-                memset(o_bytes + offset, 0xFF, length);
+        } অন্যথা যদি (chunkType == d_m3ChunkFillFF) {
+            যদি (not l->checking and দৈর্ঘ্য) {
+                memset(o_bytes + offset, 0xFF, দৈর্ঘ্য);
             }
-        } else {
+        } অন্যথা {
             _throw(m3Err_wasmMalformed);
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadMemories (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadMemories (M3SnapshotLoad* l)
 {
-    M3Result  result      = m3Err_none;
+    M3_ফলাফল  ফলাফল      = m3Err_none;
     IM3Module module      = l->module;
-    u32       numMemories = 0;
+    u32       অঙ্ক_Memories = 0;
     l->loadedMemoryBytes  = 0;
 
-_   (GetLEB_u32(l, &numMemories));
+_   (GetLEB_u32(l, &অঙ্ক_Memories));
     // a section is present only when it has something to say
-    _throwif(m3Err_wasmMalformed, numMemories == 0 or numMemories != module->numMemories);
+    _throwif(m3Err_wasmMalformed, অঙ্ক_Memories == 0 or অঙ্ক_Memories != module->অঙ্ক_Memories);
 
-    for (u32 m = 0; m < numMemories; ++m) {
-        u32       memIndex = 0, firstIndex = 0, pageBits = 0, numPages = 0;
+    জন্য (u32 m = 0; m < অঙ্ক_Memories; ++m) {
+        u32       mem_সূচক = 0, first_সূচক = 0, pageBits = 0, অঙ্ক_Pages = 0;
         IM3Memory memory;
 
-_       (GetLEB_u32(l, &memIndex));
-_       (GetLEB_u32(l, &firstIndex));
+_       (GetLEB_u32(l, &mem_সূচক));
+_       (GetLEB_u32(l, &first_সূচক));
 
         // every memory is listed, in index order, so the index is a check
-        _throwif(m3Err_wasmMalformed, memIndex != m);
+        _throwif(m3Err_wasmMalformed, mem_সূচক != m);
 
         // which imports share a memory is settled by linking, not by the
         // module, so the instance restored into has to share the same ones
         _throwif("the snapshot shares memories between imports differently",
-                 firstIndex != Memory_FirstIndex(module, m));
-        if (firstIndex != m) {
-            continue;
+                 first_সূচক != Memory_First_সূচক(module, m));
+        যদি (first_সূচক != m) {
+            চালু;
         }
 
 _       (GetLEB_u32(l, &pageBits));
-_       (GetLEB_u32(l, &numPages));
+_       (GetLEB_u32(l, &অঙ্ক_Pages));
 
-        memory = module->memories[memIndex];
+        memory = module->memories[mem_সূচক];
         _throwif("a shared memory cannot be restored from a snapshot", memory and memory->isShared);
 
         size_t bytes = 0;
-        u8*    data  = NULL;
+        u8*    তথ্য  = ফাঁকা;
 
-        if (memory) {
-            _throwif(m3Err_wasmMalformed, pageBits >= 32 or (1u << pageBits) != Memory_PageSize(memory));
-            _throwif(m3Err_wasmMalformed, numPages < memory->numPages or numPages > memory->maxPages);
-            _throwif(m3Err_wasmMalformed, numPages > SIZE_MAX / Memory_PageSize(memory));
-            bytes = (size_t)numPages * Memory_PageSize(memory);
+        যদি (memory) {
+            _throwif(m3Err_wasmMalformed, pageBits >= 32 or (1u << pageBits) != Memory_Page_আকার(memory));
+            _throwif(m3Err_wasmMalformed, অঙ্ক_Pages < memory->অঙ্ক_Pages or অঙ্ক_Pages > memory->maxPages);
+            _throwif(m3Err_wasmMalformed, অঙ্ক_Pages > SIZE_MAX / Memory_Page_আকার(memory));
+            bytes = (size_t)অঙ্ক_Pages * Memory_Page_আকার(memory);
 
             _throwif("shrunken memory cannot be restored from a snapshot",
                      l->runtime->memoryLimit and bytes > (size_t)l->runtime->memoryLimit);
 
-            if (not l->checking) {
-                if (memory->numPages < numPages) {
-_                   (ResizeMemory(l->runtime, memory, numPages));
+            যদি (not l->checking) {
+                যদি (memory->অঙ্ক_Pages < অঙ্ক_Pages) {
+_                   (ResizeMemory(l->runtime, memory, অঙ্ক_Pages));
                 }
                 _throwif("shrunken memory cannot be restored from a snapshot",
-                         memory->mallocated and memory->mallocated->length < bytes);
+                         memory->mallocated and memory->mallocated->দৈর্ঘ্য < bytes);
             }
 
             l->loadedMemoryBytes += bytes;
 
-            if (bytes and memory->mallocated) {
-                data = m3MemData(memory->mallocated);
+            যদি (bytes and memory->mallocated) {
+                তথ্য = m3_Mem_তথ্য(memory->mallocated);
             }
-        } else {
-            _throwif(m3Err_wasmMalformed, numPages != 0);
+        } অন্যথা {
+            _throwif(m3Err_wasmMalformed, অঙ্ক_Pages != 0);
         }
 
         // every memory carries a chunk stream, an unbacked one an empty stream,
         // so a memory this runtime does not hold still has to be read past
-        if (data and not l->checking) {
-            memset(data, 0, bytes);
+        যদি (তথ্য and not l->checking) {
+            memset(তথ্য, 0, bytes);
         }
 
-_       (LoadMemoryChunks(l, data, bytes));
+_       (LoadMemoryChunks(l, তথ্য, bytes));
     }
     _throwif(m3Err_wasmMalformed, l->loadedMemoryBytes != l->requiredMemoryBytes);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadGlobals (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadGlobals (M3SnapshotLoad* l)
 {
-    M3Result  result     = m3Err_none;
+    M3_ফলাফল  ফলাফল     = m3Err_none;
     IM3Module module     = l->module;
-    u32       numGlobals = 0;
+    u32       অঙ্ক_Globals = 0;
 
-_   (GetLEB_u32(l, &numGlobals));
-    _throwif(m3Err_wasmMalformed, numGlobals == 0 or numGlobals != module->numGlobals);
+_   (GetLEB_u32(l, &অঙ্ক_Globals));
+    _throwif(m3Err_wasmMalformed, অঙ্ক_Globals == 0 or অঙ্ক_Globals != module->অঙ্ক_Globals);
 
-    for (u32 g = 0; g < numGlobals; ++g) {
-        u32       globalIndex = 0;
+    জন্য (u32 g = 0; g < অঙ্ক_Globals; ++g) {
+        u32       global_সূচক = 0;
         M3Global* global;
         M3Global* cell;
 
-_       (GetLEB_u32(l, &globalIndex));
-        _throwif(m3Err_wasmMalformed, globalIndex != g);
+_       (GetLEB_u32(l, &global_সূচক));
+        _throwif(m3Err_wasmMalformed, global_সূচক != g);
 
-        global = &module->globals[globalIndex];
+        global = &module->globals[global_সূচক];
         cell   = global->resolved ? global->resolved : global;
 
-_       (GetValue(l, global->type, &cell->i64Value));
+_       (Get_মান(l, global->type, &cell->i64_মান));
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadTables (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadTables (M3SnapshotLoad* l)
 {
-    M3Result  result       = m3Err_none;
+    M3_ফলাফল  ফলাফল       = m3Err_none;
     IM3Module module       = l->module;
-    u32       numTables    = 0;
+    u32       অঙ্ক_Tables    = 0;
     l->loadedTableElements = 0;
 
-_   (GetLEB_u32(l, &numTables));
-    _throwif(m3Err_wasmMalformed, numTables == 0 or numTables != module->numTables);
+_   (GetLEB_u32(l, &অঙ্ক_Tables));
+    _throwif(m3Err_wasmMalformed, অঙ্ক_Tables == 0 or অঙ্ক_Tables != module->অঙ্ক_Tables);
 
-    for (u32 t = 0; t < numTables; ++t) {
-        u32      tableIndex = 0, firstIndex = 0, size = 0;
+    জন্য (u32 t = 0; t < অঙ্ক_Tables; ++t) {
+        u32      table_সূচক = 0, first_সূচক = 0, আকার_2 = 0;
         u8       valtype = 0;
         IM3Table table;
 
-_       (GetLEB_u32(l, &tableIndex));
-_       (GetLEB_u32(l, &firstIndex));
+_       (GetLEB_u32(l, &table_সূচক));
+_       (GetLEB_u32(l, &first_সূচক));
 
-        _throwif(m3Err_wasmMalformed, tableIndex != t);
+        _throwif(m3Err_wasmMalformed, table_সূচক != t);
         _throwif("the snapshot shares tables between imports differently",
-                 firstIndex != Table_FirstIndex(module, t));
-        if (firstIndex != t) {
-            continue;
+                 first_সূচক != Table_First_সূচক(module, t));
+        যদি (first_সূচক != t) {
+            চালু;
         }
 
 _       (GetU8(l, &valtype));
-_       (GetLEB_u32(l, &size));
+_       (GetLEB_u32(l, &আকার_2));
 
-        table = module->tables[tableIndex];
+        table = module->tables[table_সূচক];
 
         _throwif(m3Err_wasmMalformed, valtype != M3TypeToValType(table->type));
-        _throwif(m3Err_wasmMalformed, size > (table->hasMax ? table->maxSize : d_m3MaxSaneTableSize));
+        _throwif(m3Err_wasmMalformed, আকার_2 > (table->hasMax ? table->max_আকার : d_m3_Max_Sane_Table_আকার));
 
         // the table can only have grown since it was instantiated
-        _throwif(m3Err_wasmMalformed, size < table->size);
+        _throwif(m3Err_wasmMalformed, আকার_2 < table->আকার_2);
 
-        l->loadedTableElements += size;
+        l->loadedTableElements += আকার_2;
 
-        if (not l->checking and size != table->size) {
-            void** elements;
+        যদি (not l->checking and আকার_2 != table->আকার_2) {
+            শূন্য** elements;
 
             _throwif(m3Err_tableLimitExceeded, l->runtime->tableElementsLimit and
-                                                 size - table->size > l->runtime->tableElementsLimit - l->runtime->tableElementsUsed);
-            elements = m3_ReallocArray(void*, table->elements, size, table->size);
+                                                 আকার_2 - table->আকার_2 > l->runtime->tableElementsLimit - l->runtime->tableElementsUsed);
+            elements = m3_ReallocArray(শূন্য*, table->elements, আকার_2, table->আকার_2);
             _throwifnull(elements);
 
-            l->runtime->tableElementsUsed += size - table->size;
+            l->runtime->tableElementsUsed += আকার_2 - table->আকার_2;
             table->elements = elements;
-            table->size     = size;
+            table->আকার_2     = আকার_2;
         }
 
-        for (u32 e = 0; e < size; ++e) {
-            void* reference = NULL;
-_           (GetRefValue(l, table->type, &reference));
-            if (not l->checking) {
+        জন্য (u32 e = 0; e < আকার_2; ++e) {
+            শূন্য* reference = ফাঁকা;
+_           (Get_Ref_মান(l, table->type, &reference));
+            যদি (not l->checking) {
                 table->elements[e] = reference;
             }
         }
@@ -2298,205 +2298,205 @@ _           (GetRefValue(l, table->type, &reference));
     _throwif(m3Err_wasmMalformed, l->loadedTableElements != l->requiredTableElements);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadSegments (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadSegments (M3SnapshotLoad* l)
 {
-    M3Result  result = m3Err_none;
+    M3_ফলাফল  ফলাফল = m3Err_none;
     IM3Module module = l->module;
-    u32       count  = 0;
+    u32       গুনতি  = 0;
 
-_   (GetLEB_u32(l, &count));
-    _throwif(m3Err_wasmMalformed, count != module->numDataSegments);
-    _throwif(m3Err_wasmMalformed, module->numDataSegments == 0 and module->numElementSegments == 0);
+_   (GetLEB_u32(l, &গুনতি));
+    _throwif(m3Err_wasmMalformed, গুনতি != module->অঙ্ক_তথ্য_Segments);
+    _throwif(m3Err_wasmMalformed, module->অঙ্ক_তথ্য_Segments == 0 and module->অঙ্ক_Element_Segments == 0);
 
-    for (u32 i = 0; i < count; ++i) {
+    জন্য (u32 i = 0; i < গুনতি; ++i) {
         u8 dropped = 0;
 _       (GetBool(l, &dropped));
-        if (not l->checking) {
-            module->dataSegments[i].dropped = dropped;
+        যদি (not l->checking) {
+            module->তথ্য_Segments[i].dropped = dropped;
         }
     }
 
-_   (GetLEB_u32(l, &count));
-    _throwif(m3Err_wasmMalformed, count != module->numElementSegments);
+_   (GetLEB_u32(l, &গুনতি));
+    _throwif(m3Err_wasmMalformed, গুনতি != module->অঙ্ক_Element_Segments);
 
-    for (u32 i = 0; i < count; ++i) {
+    জন্য (u32 i = 0; i < গুনতি; ++i) {
         u8 dropped = 0;
 _       (GetBool(l, &dropped));
-        if (not l->checking) {
+        যদি (not l->checking) {
             module->elementSegments[i].dropped = dropped;
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // A frame for the continuation being put together, outermost first
-static
-M3Result AddFrame (M3SnapshotLoad* l, u32* io_numFrames, M3FrameKind i_kind, m3stack_t i_sp, M3Frame** o_frame)
+স্থির
+M3_ফলাফল AddFrame (M3SnapshotLoad* l, u32* io_অঙ্ক_Frames, M3FrameKind i_kind, m3stack_t i_sp, M3Frame** o_frame)
 {
-    if (*io_numFrames >= d_m3ContinuationMaxFrames) {
-        return "the snapshot's frames do not fit this build's";
+    যদি (*io_অঙ্ক_Frames >= d_m3ContinuationMaxFrames) {
+        ফেরত "the snapshot's frames do not fit this build's";
     }
 
-    M3Frame* frame = &l->frames[(*io_numFrames)++];
+    M3Frame* frame = &l->frames[(*io_অঙ্ক_Frames)++];
 
-    memset(frame, 0, sizeof(*frame));
+    memset(frame, 0, আকার(*frame));
     frame->kind   = (u8)i_kind;
     frame->sp     = i_sp;
     frame->memory = Module_Memory0(l->module);
 
     *o_frame = frame;
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
 // Compiled, and with a snapshot map: where a function's frame in a snapshot is
 // found in this build's code
-static
-M3Result PrepareFunction (IM3Function i_function)
+স্থির
+M3_ফলাফল PrepareFunction (IM3Function i_function)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    if (not i_function->compiled) {
+    যদি (not i_function->compiled) {
 _       (CompileFunction(i_function));
     }
 
     _throwif("a function in the snapshot was compiled before the runtime was made suspendable", not i_function->snapshotMap);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The native frames the interpreter keeps for the loops and try_tables around
 // a safepoint, outermost first. They are fixed by where the frame stands, so
 // the snapshot does not list them: they come from this build's own map.
-static
-M3Result AddBlockFrames (M3SnapshotLoad* l, const M3SnapshotMap* i_map, const M3SafePoint* i_point, m3stack_t i_sp,
-                         u32* io_numFrames)
+স্থির
+M3_ফলাফল AddBlockFrames (M3SnapshotLoad* l, ধ্রুবক M3SnapshotMap* i_map, ধ্রুবক M3SafePoint* i_point, m3stack_t i_sp,
+                         u32* io_অঙ্ক_Frames)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    for (u32 b = 0; b < i_map->numBlocks; ++b) {
-        const M3BlockStart* block = &i_map->blocks[b];
+    জন্য (u32 b = 0; b < i_map->অঙ্ক_Blocks; ++b) {
+        ধ্রুবক M3BlockStart* block = &i_map->blocks[b];
         M3Frame*            frame;
 
-        if (not EnclosesOffset(block, i_point->wasmOffset)) {
-            continue;
+        যদি (not EnclosesOffset(block, i_point->wasmOffset)) {
+            চালু;
         }
 
-        if (block->opcode == c_waOp_loop) {
-_           (AddFrame(l, io_numFrames, frame_loop, i_sp, &frame));
+        যদি (block->opcode == c_waOp_loop) {
+_           (AddFrame(l, io_অঙ্ক_Frames, frame_loop, i_sp, &frame));
             frame->pc = block->pc;
         }
-#  if d_m3HasExceptionHandling
-        else {
-_           (AddFrame(l, io_numFrames, frame_try, i_sp, &frame));
+#  যদি d_m3HasExceptionHandling
+        অন্যথা {
+_           (AddFrame(l, io_অঙ্ক_Frames, frame_try, i_sp, &frame));
             frame->pc                = block->pc;
-            frame->try_.numClauses   = block->numClauses;
+            frame->try_.অঙ্ক_Clauses   = block->অঙ্ক_Clauses;
             frame->try_.handlersLive = HandlersLiveAt(i_map, i_point, block);
         }
 #  endif
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Puts a function's values where this build keeps them at the safepoint
-static
-M3Result LoadValues (M3SnapshotLoad* l, m3slot_t* i_base, u32 i_numSlots, m3stack_t i_sp,
-                     const M3SnapshotMap* i_map, const M3SafePoint* i_point, const M3FrameRegisters* i_registers)
+স্থির
+M3_ফলাফল Load_মানসমূহ (M3SnapshotLoad* l, m3slot_t* i_base, u32 i_অঙ্ক_Slots, m3stack_t i_sp,
+                     ধ্রুবক M3SnapshotMap* i_map, ধ্রুবক M3SafePoint* i_point, ধ্রুবক M3FrameRegisters* i_registers)
 {
-    M3Result result    = m3Err_none;
-    u32      numValues = 0;
+    M3_ফলাফল ফলাফল    = m3Err_none;
+    u32      অঙ্ক_মানসমূহ = 0;
 
-_   (GetLEB_u32(l, &numValues));
-    _throwif("the snapshot's frame does not match what this build compiled", numValues != i_map->numLocals + i_point->numValues);
+_   (GetLEB_u32(l, &অঙ্ক_মানসমূহ));
+    _throwif("the snapshot's frame does not match what this build compiled", অঙ্ক_মানসমূহ != i_map->অঙ্ক_Locals + i_point->অঙ্ক_মানসমূহ);
 
-    for (u32 v = 0; v < numValues; ++v) {
-        const M3SlotValue* value     = FrameValue(i_map, i_point, v);
+    জন্য (u32 v = 0; v < অঙ্ক_মানসমূহ; ++v) {
+        ধ্রুবক M3_Slot_মান* মান     = Frame_মান(i_map, i_point, v);
         u64                word      = 0;
-        void*              reference = NULL;
+        শূন্য*              reference = ফাঁকা;
         u8*                where;
 
-_       (LocateValue(i_base, i_numSlots, i_sp, value, &where));
+_       (Locate_মান(i_base, i_অঙ্ক_Slots, i_sp, মান, &where));
 
         // a v128 has no byte order of its own, and no bits path can carry it
-        if (BaseTypeOf(value->type) == c_m3Type_v128) {
+        যদি (BaseTypeOf(মান->type) == c_m3Type_v128) {
             m3type_t type;
-_           (GetValueTag(l, value->type, &type));
-            if (l->checking) {
+_           (Get_মান_Tag(l, মান->type, &type));
+            যদি (l->checking) {
 _               (SkipBytes(l, 16));
-            } else {
+            } অন্যথা {
 _               (Get(l, where, 16));
             }
-            continue;
+            চালু;
         }
 
         l->allowUnfilledRef = i_point->kind == safepoint_suspend and
-                              v >= numValues - i_point->numResults;
-_       (GetValueBits(l, value->type, &word));
+                              v >= অঙ্ক_মানসমূহ - i_point->অঙ্ক_Results;
+_       (Get_মান_Bits(l, মান->type, &word));
         l->allowUnfilledRef = false;
 
-        if (IsRefType(value->type)) {
-            reference = (void*)(uintptr_t)word;
+        যদি (IsRefType(মান->type)) {
+            reference = (শূন্য*)(uintptr_t)word;
         }
 
-        if (not l->checking) {
-_           (WriteValue(where, i_registers, value, word, reference));
+        যদি (not l->checking) {
+_           (Write_মান(where, i_registers, মান, word, reference));
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // The functions a suspended continuation is in the middle of, outermost first.
 // Each one's frame is found in this build's code, its values put where this
 // build keeps them, and the native frames the interpreter needs to stand it
 // back up are made from what its own maps say about them.
-static
-M3Result LoadSuspendedBody (M3SnapshotLoad* l, IM3Continuation io_cont, u32 i_id)
+স্থির
+M3_ফলাফল LoadSuspendedBody (M3SnapshotLoad* l, IM3Continuation io_cont, u32 i_id)
 {
-    M3Result    result    = m3Err_none;
-    u32         numFrames = 0;
-    M3Frame*    callFrame = NULL;
-    IM3Function function  = NULL;
+    M3_ফলাফল    ফলাফল    = m3Err_none;
+    u32         অঙ্ক_Frames = 0;
+    M3Frame*    callFrame = ফাঁকা;
+    IM3Function function  = ফাঁকা;
     m3slot_t*   base;
-    u32         numSlots;
-    u32         numActivations = 0;
+    u32         অঙ্ক_Slots;
+    u32         অঙ্ক_Activations = 0;
     IM3FuncType expected       = io_cont->entryFunction->funcType;
     m3stack_t   sp;
 
-_   (ContinuationStack(l->runtime, io_cont, &base, &numSlots));
+_   (Continuation_স্তূপ(l->runtime, io_cont, &base, &অঙ্ক_Slots));
 
-_   (GetLEB_u32(l, &numActivations));
-    _throwif(m3Err_wasmMalformed, numActivations == 0 or numActivations > d_m3ContinuationMaxFrames);
+_   (GetLEB_u32(l, &অঙ্ক_Activations));
+    _throwif(m3Err_wasmMalformed, অঙ্ক_Activations == 0 or অঙ্ক_Activations > d_m3ContinuationMaxFrames);
 
-    io_cont->pc                = NULL;
+    io_cont->pc                = ফাঁকা;
     io_cont->r0                = 0;
-    io_cont->numSuspendResults = 0;
+    io_cont->অঙ্ক_Suspend_Results = 0;
     io_cont->suspendPoint      = safepoint_op;
-#  if d_m3HasFloat
+#  যদি d_m3HasFloat
     io_cont->fp0 = 0.;
 #  endif
 
     sp = base;
 
-    for (u32 a = 0; a < numActivations; ++a) {
-        bool                 isInnermost = (a + 1 == numActivations);
-        const M3SafePoint*   point;
+    জন্য (u32 a = 0; a < অঙ্ক_Activations; ++a) {
+        bool                 isInnermost = (a + 1 == অঙ্ক_Activations);
+        ধ্রুবক M3SafePoint*   point;
         M3FrameRegisters     registers;
         u8                   kind       = 0;
         u32                  wasmOffset = 0, targetLoop = 0;
-        const M3SnapshotMap* map;
+        ধ্রুবক M3SnapshotMap* map;
 
-        memset(&registers, 0, sizeof(registers));
+        memset(&registers, 0, আকার(registers));
 
 _       (GetFunction(l, &function));
 
@@ -2512,17 +2512,17 @@ _       (PrepareFunction(function));
         map = function->snapshotMap;
 
         _throwif("the snapshot's stack does not fit this runtime's",
-                 (u32)(sp - base) + function->maxStackSlots > numSlots);
+                 (u32)(sp - base) + function->max_স্তূপ_Slots > অঙ্ক_Slots);
 
         // the call the frame outside this one is waiting on
-        if (callFrame) {
+        যদি (callFrame) {
             callFrame->call.function = function;
         }
 
-#  if d_m3EntryKeepsFrame
+#  যদি d_m3EntryKeepsFrame
         {
             M3Frame* entry;
-_           (AddFrame(l, &numFrames, frame_entry, sp, &entry));
+_           (AddFrame(l, &অঙ্ক_Frames, frame_entry, sp, &entry));
             entry->pc             = function->compiled;
             entry->entry.function = function;
         }
@@ -2534,8 +2534,8 @@ _       (GetLEB_u32(l, &wasmOffset));
         // A back edge says which loop it goes to. That has to be a loop around
         // the instruction; one the instruction does not branch to has no
         // safepoint to match.
-        if (kind == safepoint_op) {
-            const M3BlockStart* loop;
+        যদি (kind == safepoint_op) {
+            ধ্রুবক M3BlockStart* loop;
 
 _           (GetLEB_u32(l, &targetLoop));
 
@@ -2548,456 +2548,456 @@ _           (GetLEB_u32(l, &targetLoop));
         point = FindSafePointAt(map, wasmOffset, kind, targetLoop);
         _throwif("a frame in the snapshot is not at a safepoint of this build's", not point);
 
-_       (AddBlockFrames(l, map, point, sp, &numFrames));
+_       (AddBlockFrames(l, map, point, sp, &অঙ্ক_Frames));
 
-        if (not isInnermost) {
+        যদি (not isInnermost) {
             _throwif(m3Err_wasmMalformed, kind != safepoint_call);
 
-_           (AddFrame(l, &numFrames, frame_call, sp, &callFrame));
+_           (AddFrame(l, &অঙ্ক_Frames, frame_call, sp, &callFrame));
             callFrame->pc = point->pc;
             registers.r0  = &callFrame->call.r0;
-#  if d_m3HasFloat
+#  যদি d_m3HasFloat
             registers.fp0 = &callFrame->call.fp0;
 #  endif
-        } else if (kind == safepoint_resume) {
+        } অন্যথা যদি (kind == safepoint_resume) {
             M3Frame* frame;
-            u32      numResults = point->numResults;
-            pc_t     resultsPC  = point->pc - 2 * numResults;
+            u32      অঙ্ক_Results = point->অঙ্ক_Results;
+            pc_t     resultsPC  = point->pc - 2 * অঙ্ক_Results;
 
-_           (AddFrame(l, &numFrames, frame_resume, sp, &frame));
+_           (AddFrame(l, &অঙ্ক_Frames, frame_resume, sp, &frame));
             frame->pc                 = point->pc;
             frame->resume.resultsPC   = resultsPC;
-            frame->resume.numResults  = numResults;
-            frame->resume.numHandlers = point->aux;
+            frame->resume.অঙ্ক_Results  = অঙ্ক_Results;
+            frame->resume.অঙ্ক_Handlers = point->aux;
             frame->resume.handlersPC  = resultsPC - 1 - 3 * point->aux;
 
             // a replayed resume carries on with clear registers, so the frame
             // keeps nothing in them
             callFrame = frame;
-        } else {
+        } অন্যথা {
             _throwif(m3Err_wasmMalformed, kind != safepoint_op and kind != safepoint_entry and kind != safepoint_suspend);
 
             io_cont->pc           = point->pc;
             io_cont->suspendPoint = kind;
             registers.r0          = &io_cont->r0;
-#  if d_m3HasFloat
+#  যদি d_m3HasFloat
             registers.fp0 = &io_cont->fp0;
 #  endif
         }
 
-_       (LoadValues(l, base, numSlots, sp, map, point, &registers));
+_       (Load_মানসমূহ(l, base, অঙ্ক_Slots, sp, map, point, &registers));
 
-        if (not l->checking) {
+        যদি (not l->checking) {
             RestoreConstants(function, sp);
         }
 
-        if (not isInnermost) {
+        যদি (not isInnermost) {
             sp = sp + point->aux;
 _           (CallSiteType(function, point, &expected));
-        } else if (kind == safepoint_resume) {
-            void* cont = NULL;
-_           (GetRefValue(l, c_m3Type_contref, &cont));
-            _throwif(m3Err_wasmMalformed, cont == NULL);
+        } অন্যথা যদি (kind == safepoint_resume) {
+            শূন্য* cont = ফাঁকা;
+_           (Get_Ref_মান(l, c_m3Type_contref, &cont));
+            _throwif(m3Err_wasmMalformed, cont == ফাঁকা);
 
             callFrame->resume.cont = (IM3Continuation)cont;
-            if (not l->checking) {
+            যদি (not l->checking) {
                 l->suspendSites[i_id].point = point;
-                for (u32 i = 1; i < l->numContinuations; ++i) {
-                    if (l->continuations[i] == cont) {
+                জন্য (u32 i = 1; i < l->অঙ্ক_Continuations; ++i) {
+                    যদি (l->continuations[i] == cont) {
                         // a continuation runs under one resume at a time
                         _throwif("a snapshot continuation is resumed by two frames", l->suspendSites[i].resumed);
 
                         l->suspendSites[i_id].target = i;
                         l->suspendSites[i].resumed   = true;
-                        break;
+                        বিরতি;
                     }
                 }
             }
-        } else {
+        } অন্যথা {
             // op_ContinueLoopIf suspends before it has branched, and goes on
             // by reading the condition again
-            if (point->flags & d_m3SafePointTakenBranch) {
+            যদি (point->flags & d_m3SafePointTakenBranch) {
                 io_cont->r0 = 1;
             }
 
             // a suspend waits for its results in the slots at the top of what
             // it holds, which is where whatever resumes it writes them
-            if (kind == safepoint_suspend) {
-                _throwif(m3Err_wasmMalformed, point->numResults > point->numValues or
-                                                point->numResults > d_m3MaxContinuationPayload);
+            যদি (kind == safepoint_suspend) {
+                _throwif(m3Err_wasmMalformed, point->অঙ্ক_Results > point->অঙ্ক_মানসমূহ or
+                                                point->অঙ্ক_Results > d_m3MaxContinuationPayload);
 
-                io_cont->numSuspendResults = point->numResults;
-                if (not l->checking) {
+                io_cont->অঙ্ক_Suspend_Results = point->অঙ্ক_Results;
+                যদি (not l->checking) {
                     l->suspendSites[i_id].map   = map;
                     l->suspendSites[i_id].point = point;
                 }
 
-                for (u32 i = 0; i < point->numResults; ++i) {
-                    const M3SlotValue* value = &map->values[point->firstValue + point->numValues - point->numResults + i];
+                জন্য (u32 i = 0; i < point->অঙ্ক_Results; ++i) {
+                    ধ্রুবক M3_Slot_মান* মান = &map->মানসমূহ[point->first_মান + point->অঙ্ক_মানসমূহ - point->অঙ্ক_Results + i];
 
-                    _throwif(m3Err_wasmMalformed, IsRegisterSlotAlias(value->slot));
+                    _throwif(m3Err_wasmMalformed, IsRegisterSlotAlias(মান->slot));
 
-                    io_cont->suspendResultOffsets[i] = value->slot;
-                    io_cont->suspendResultIs64[i]    = Is64BitType(value->type);
+                    io_cont->suspend_ফলাফল_Offsets[i] = মান->slot;
+                    io_cont->suspend_ফলাফল_Is64[i]    = Is64BitType(মান->type);
                 }
             }
         }
     }
 
     io_cont->sp = sp;
-    if (l->checking) {
-        return m3Err_none;
+    যদি (l->checking) {
+        ফেরত m3Err_none;
     }
 
     // held innermost first
-    if (numFrames > io_cont->framesCap) {
-        M3Frame* frames = m3_ReallocArray(M3Frame, io_cont->frames, numFrames, io_cont->framesCap);
+    যদি (অঙ্ক_Frames > io_cont->framesCap) {
+        M3Frame* frames = m3_ReallocArray(M3Frame, io_cont->frames, অঙ্ক_Frames, io_cont->framesCap);
         _throwifnull(frames);
 
         io_cont->frames    = frames;
-        io_cont->framesCap = numFrames;
+        io_cont->framesCap = অঙ্ক_Frames;
     }
 
-    for (u32 k = 0; k < numFrames; ++k) {
-        io_cont->frames[numFrames - 1 - k] = l->frames[k];
+    জন্য (u32 k = 0; k < অঙ্ক_Frames; ++k) {
+        io_cont->frames[অঙ্ক_Frames - 1 - k] = l->frames[k];
     }
 
-    io_cont->numFrames = numFrames;
+    io_cont->অঙ্ক_Frames = অঙ্ক_Frames;
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadContinuation (M3SnapshotLoad* l, u32 i_id)
+স্থির
+M3_ফলাফল LoadContinuation (M3SnapshotLoad* l, u32 i_id)
 {
-    M3Result        result = m3Err_none;
+    M3_ফলাফল        ফলাফল = m3Err_none;
     IM3Module       module = l->module;
     IM3Continuation cont   = l->continuations[i_id];
     M3Continuation  scratch;
-    if (l->checking) {
+    যদি (l->checking) {
         scratch          = *cont;
-        scratch.valStack = l->checkStack;
-        if (i_id == 0) {
-            scratch.valStack = (m3slot_t*)l->runtime->originStack;
+        scratch.val_স্তূপ = l->check_স্তূপ;
+        যদি (i_id == 0) {
+            scratch.val_স্তূপ = (m3slot_t*)l->runtime->origin_স্তূপ;
         }
         cont = &scratch;
     }
 
-    u32 contId = 0, typeIndex = 0, entryIndex = 0, boundArgsCount = 0;
-    u8  state = 0, isRoot = 0;
+    u32 contId = 0, type_সূচক = 0, entry_সূচক = 0, bound_Args_গুনতি = 0;
+    u8  state = 0, is_মূল = 0;
 
 _   (GetLEB_u32(l, &contId));
 _   (GetU8(l, &state));
-_   (GetBool(l, &isRoot));
-_   (GetLEB_u32(l, &typeIndex));
-_   (GetLEB_u32(l, &entryIndex));
+_   (GetBool(l, &is_মূল));
+_   (GetLEB_u32(l, &type_সূচক));
+_   (GetLEB_u32(l, &entry_সূচক));
 
     _throwif(m3Err_wasmMalformed, contId != i_id);
-    _throwif(m3Err_wasmMalformed, (bool)isRoot != (i_id == 0));
-    _throwif(m3Err_wasmMalformed, isRoot and state != snapshot_contSuspended);
-    if (not isRoot and (state == snapshot_contAllocated or state == snapshot_contSuspended)) {
+    _throwif(m3Err_wasmMalformed, (bool)is_মূল != (i_id == 0));
+    _throwif(m3Err_wasmMalformed, is_মূল and state != snapshot_contSuspended);
+    যদি (not is_মূল and (state == snapshot_contAllocated or state == snapshot_contSuspended)) {
         l->loadedStacks++;
     }
-    _throwif(m3Err_wasmMalformed, typeIndex != d_m3SnapshotNone and typeIndex >= module->numFuncTypes);
+    _throwif(m3Err_wasmMalformed, type_সূচক != d_m3SnapshotNone and type_সূচক >= module->অঙ্ক_Func_Types);
     // every continuation, the root included, was made with a function
-    _throwif(m3Err_wasmMalformed, entryIndex >= module->numFunctions);
-    _throwif(m3Err_wasmMalformed, isRoot ? typeIndex != d_m3SnapshotNone : (typeIndex == d_m3SnapshotNone or not module->funcTypes[typeIndex]->isContinuation));
+    _throwif(m3Err_wasmMalformed, entry_সূচক >= module->অঙ্ক_Functions);
+    _throwif(m3Err_wasmMalformed, is_মূল ? type_সূচক != d_m3SnapshotNone : (type_সূচক == d_m3SnapshotNone or not module->funcTypes[type_সূচক]->isContinuation));
 
-    if (not l->checking and not isRoot and state != snapshot_contFinished) {
-_       (Continuation_AcquireStack(l->runtime, cont));
+    যদি (not l->checking and not is_মূল and state != snapshot_contFinished) {
+_       (Continuation_Acquire_স্তূপ(l->runtime, cont));
     }
-    cont->type          = (typeIndex != d_m3SnapshotNone) ? module->funcTypes[typeIndex] : NULL;
-    cont->entryFunction = &module->functions[entryIndex];
-    cont->numHandlers   = 0;
-    cont->handlersPC    = NULL;
-    cont->parent        = NULL;
-    cont->numFrames     = 0;
+    cont->type          = (type_সূচক != d_m3SnapshotNone) ? module->funcTypes[type_সূচক] : ফাঁকা;
+    cont->entryFunction = &module->functions[entry_সূচক];
+    cont->অঙ্ক_Handlers   = 0;
+    cont->handlersPC    = ফাঁকা;
+    cont->parent        = ফাঁকা;
+    cont->অঙ্ক_Frames     = 0;
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
     {
-        void* ref = NULL;
-_       (GetRefValue(l, c_m3Type_exnref, &ref));
+        শূন্য* ref = ফাঁকা;
+_       (Get_Ref_মান(l, c_m3Type_exnref, &ref));
         cont->resumeThrow = (M3Exception*)ref;
     }
     // the root was not resumed by anything, and a finished continuation has
     // nowhere left to raise an exception
-    _throwif(m3Err_wasmMalformed, (isRoot or state == snapshot_contFinished) and cont->resumeThrow != NULL);
-#  else
+    _throwif(m3Err_wasmMalformed, (is_মূল or state == snapshot_contFinished) and cont->resumeThrow != ফাঁকা);
+#  অন্যথা
     {
-        void* ref = NULL;
-_       (GetRefValue(l, c_m3Type_exnref, &ref));
-        _throwif(m3Err_wasmMalformed, ref != NULL);
+        শূন্য* ref = ফাঁকা;
+_       (Get_Ref_মান(l, c_m3Type_exnref, &ref));
+        _throwif(m3Err_wasmMalformed, ref != ফাঁকা);
     }
 #  endif
 
-    if (state == snapshot_contAllocated) {
+    যদি (state == snapshot_contAllocated) {
         IM3FuncType inner;
-        u16         numRets;
+        u16         অঙ্ক_Rets;
 
-_       (GetLEB_u32(l, &boundArgsCount));
-        cont->boundArgsCount = boundArgsCount;
+_       (GetLEB_u32(l, &bound_Args_গুনতি));
+        cont->bound_Args_গুনতি = bound_Args_গুনতি;
         inner                = cont->entryFunction->funcType;
 
-        _throwif(m3Err_wasmMalformed, boundArgsCount > GetFuncTypeNumParams(inner));
+        _throwif(m3Err_wasmMalformed, bound_Args_গুনতি > Get_Func_Type_অঙ্ক_Params(inner));
 
         {
             IM3FuncType remaining = cont->type->contFuncType;
             _throwif(m3Err_wasmMalformed, not remaining or
-                                            GetFuncTypeNumParams(remaining) != GetFuncTypeNumParams(inner) - boundArgsCount or
-                                            GetFuncTypeNumResults(remaining) != GetFuncTypeNumResults(inner));
-            for (u16 i = 0; i < GetFuncTypeNumResults(inner); ++i) {
-                _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(inner, i) != GetFuncTypeResultType(remaining, i));
+                                            Get_Func_Type_অঙ্ক_Params(remaining) != Get_Func_Type_অঙ্ক_Params(inner) - bound_Args_গুনতি or
+                                            Get_Func_Type_অঙ্ক_Results(remaining) != Get_Func_Type_অঙ্ক_Results(inner));
+            জন্য (u16 i = 0; i < Get_Func_Type_অঙ্ক_Results(inner); ++i) {
+                _throwif(m3Err_wasmMalformed, Get_Func_Type_ফলাফল_Type(inner, i) != Get_Func_Type_ফলাফল_Type(remaining, i));
             }
-            for (u16 i = 0; i < GetFuncTypeNumParams(remaining); ++i) {
-                _throwif(m3Err_wasmMalformed, GetFuncTypeParamType(inner, (u16)(boundArgsCount + i)) != GetFuncTypeParamType(remaining, i));
+            জন্য (u16 i = 0; i < Get_Func_Type_অঙ্ক_Params(remaining); ++i) {
+                _throwif(m3Err_wasmMalformed, GetFuncTypeParamType(inner, (u16)(bound_Args_গুনতি + i)) != GetFuncTypeParamType(remaining, i));
             }
         }
 
-        numRets = GetFuncTypeNumResults(inner);
+        অঙ্ক_Rets = Get_Func_Type_অঙ্ক_Results(inner);
 
-        _throwif(m3Err_wasmMalformed, (numRets + boundArgsCount) * c_ioSlotCount > cont->numStackSlots);
+        _throwif(m3Err_wasmMalformed, (অঙ্ক_Rets + bound_Args_গুনতি) * c_io_Slot_গুনতি > cont->অঙ্ক_স্তূপ_Slots);
 
-        for (u32 i = 0; i < boundArgsCount; ++i) {
-_           (GetValue(l, GetFuncTypeParamType(inner, (u16)i), cont->valStack + (numRets + i) * c_ioSlotCount));
+        জন্য (u32 i = 0; i < bound_Args_গুনতি; ++i) {
+_           (Get_মান(l, GetFuncTypeParamType(inner, (u16)i), cont->val_স্তূপ + (অঙ্ক_Rets + i) * c_io_Slot_গুনতি));
         }
 
         cont->state = cont_allocated;
-        cont->sp    = cont->valStack;
+        cont->sp    = cont->val_স্তূপ;
         cont->pc    = cont->entryFunction->compiled;
-    } else if (state == snapshot_contSuspended) {
-_       (GetLEB_u32(l, &boundArgsCount));
-        _throwif(m3Err_wasmMalformed, isRoot and boundArgsCount != 0);
-        cont->boundArgsCount = boundArgsCount;
+    } অন্যথা যদি (state == snapshot_contSuspended) {
+_       (GetLEB_u32(l, &bound_Args_গুনতি));
+        _throwif(m3Err_wasmMalformed, is_মূল and bound_Args_গুনতি != 0);
+        cont->bound_Args_গুনতি = bound_Args_গুনতি;
 
 _       (LoadSuspendedBody(l, cont, i_id));
 
         cont->state = cont_suspended;
-    } else if (state == snapshot_contFinished) {
-_       (GetLEB_u32(l, &boundArgsCount));
-        _throwif(m3Err_wasmMalformed, boundArgsCount != 0);
-        cont->boundArgsCount = 0;
+    } অন্যথা যদি (state == snapshot_contFinished) {
+_       (GetLEB_u32(l, &bound_Args_গুনতি));
+        _throwif(m3Err_wasmMalformed, bound_Args_গুনতি != 0);
+        cont->bound_Args_গুনতি = 0;
         cont->state          = cont_consumed;
-    } else {
+    } অন্যথা {
         _throw(m3Err_wasmMalformed);
     }
 
 _catch:
-    if (result) {
-        cont->numFrames = 0;
+    যদি (ফলাফল) {
+        cont->অঙ্ক_Frames = 0;
     }
 
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadContinuations (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadContinuations (M3SnapshotLoad* l)
 {
-    M3Result result = m3Err_none;
-    u32      count  = 0;
+    M3_ফলাফল ফলাফল = m3Err_none;
+    u32      গুনতি  = 0;
     l->loadedStacks = 0;
 
-_   (GetLEB_u32(l, &count));
-    _throwif(m3Err_wasmMalformed, count == 0 or count != l->numContinuations);
+_   (GetLEB_u32(l, &গুনতি));
+    _throwif(m3Err_wasmMalformed, গুনতি == 0 or গুনতি != l->অঙ্ক_Continuations);
 
-    for (u32 i = 0; i < count; ++i) {
+    জন্য (u32 i = 0; i < গুনতি; ++i) {
 _       (LoadContinuation(l, i));
     }
     _throwif(m3Err_wasmMalformed, l->loadedStacks != l->requiredStacks);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Cross-record constraints cannot be checked while reading a reference: both
 // its target and a nested suspension point may occur later in the stream.
-static
-M3Result CheckContinuationReferences (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল CheckContinuationReferences (M3SnapshotLoad* l)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
 
-    for (u32 id = 0; id < l->numContinuations; ++id) {
+    জন্য (u32 id = 0; id < l->অঙ্ক_Continuations; ++id) {
         IM3Continuation cont  = l->continuations[id];
         u32             leaf  = id;
         u32             depth = 0;
-#  if d_m3HasTypedRefs
+#  যদি d_m3HasTypedRefs
         m3type_t expectedType = l->suspendSites[id].expectedType;
         _throwif("a snapshot continuation reference has the wrong type", expectedType and
                                                                            (not cont->type or not IsSubTypeOf(RefTypeOfFuncType(cont->type, true), expectedType)));
 #  endif
-        if (l->suspendSites[id].target) {
+        যদি (l->suspendSites[id].target) {
             // The child may have switched to a different parameter signature
             // after this resume started. Its results must still fit this site.
             IM3FuncType     expected = Module_ContTypeOfRef(l->module, l->suspendSites[id].point->resumeType);
             IM3Continuation child    = l->continuations[l->suspendSites[id].target];
-            IM3FuncType     actual   = child->entryFunction ? child->entryFunction->funcType : NULL;
+            IM3FuncType     actual   = child->entryFunction ? child->entryFunction->funcType : ফাঁকা;
             _throwif(m3Err_wasmMalformed, not expected or not actual);
             expected = expected->contFuncType;
-            _throwif(m3Err_wasmMalformed, GetFuncTypeNumResults(actual) != GetFuncTypeNumResults(expected));
-            for (u16 i = 0; i < GetFuncTypeNumResults(expected); ++i) {
-                _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(actual, i) != GetFuncTypeResultType(expected, i));
+            _throwif(m3Err_wasmMalformed, Get_Func_Type_অঙ্ক_Results(actual) != Get_Func_Type_অঙ্ক_Results(expected));
+            জন্য (u16 i = 0; i < Get_Func_Type_অঙ্ক_Results(expected); ++i) {
+                _throwif(m3Err_wasmMalformed, Get_Func_Type_ফলাফল_Type(actual, i) != Get_Func_Type_ফলাফল_Type(expected, i));
             }
         }
-        while (l->suspendSites[leaf].target) {
+        যখন (l->suspendSites[leaf].target) {
             leaf = l->suspendSites[leaf].target;
-            _throwif(m3Err_wasmMalformed, ++depth >= l->numContinuations or
+            _throwif(m3Err_wasmMalformed, ++depth >= l->অঙ্ক_Continuations or
                                             l->continuations[leaf]->state != cont_suspended);
         }
-        if (cont->state != cont_suspended or id == 0) {
-            continue;
+        যদি (cont->state != cont_suspended or id == 0) {
+            চালু;
         }
 
         // A continuation currently executing under a saved resume already
         // received its arguments. Only an independently captured suspension
         // (possibly containing nested resumes) still expects the tag's results.
-        if (l->suspendSites[id].resumed) {
-            _throwif(m3Err_wasmMalformed, cont->boundArgsCount != 0);
-            continue;
+        যদি (l->suspendSites[id].resumed) {
+            _throwif(m3Err_wasmMalformed, cont->bound_Args_গুনতি != 0);
+            চালু;
         }
 
-        const M3SnapshotSuspendSite* site      = &l->suspendSites[leaf];
+        ধ্রুবক M3SnapshotSuspendSite* site      = &l->suspendSites[leaf];
         IM3Continuation              inner     = l->continuations[leaf];
         IM3FuncType                  remaining = cont->type->contFuncType;
         _throwif("a captured continuation has no suspension point", not site->point or not remaining);
-        _throwif("a captured continuation has the wrong binding count", cont->boundArgsCount > inner->numSuspendResults or
-                                                                          GetFuncTypeNumParams(remaining) != inner->numSuspendResults - cont->boundArgsCount);
+        _throwif("a captured continuation has the wrong binding count", cont->bound_Args_গুনতি > inner->অঙ্ক_Suspend_Results or
+                                                                          Get_Func_Type_অঙ্ক_Params(remaining) != inner->অঙ্ক_Suspend_Results - cont->bound_Args_গুনতি);
         _throwif(m3Err_wasmMalformed,
-                 GetFuncTypeNumResults(remaining) != GetFuncTypeNumResults(cont->entryFunction->funcType));
-        for (u16 i = 0; i < GetFuncTypeNumResults(remaining); ++i) {
-            _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(remaining, i) !=
-                                            GetFuncTypeResultType(cont->entryFunction->funcType, i));
+                 Get_Func_Type_অঙ্ক_Results(remaining) != Get_Func_Type_অঙ্ক_Results(cont->entryFunction->funcType));
+        জন্য (u16 i = 0; i < Get_Func_Type_অঙ্ক_Results(remaining); ++i) {
+            _throwif(m3Err_wasmMalformed, Get_Func_Type_ফলাফল_Type(remaining, i) !=
+                                            Get_Func_Type_ফলাফল_Type(cont->entryFunction->funcType, i));
         }
 
-        for (u32 i = 0; i < inner->numSuspendResults; ++i) {
-            const M3SlotValue* value = &site->map->values[site->point->firstValue +
-                                                          site->point->numValues - site->point->numResults + i];
-            if (i < cont->boundArgsCount) {
-                if (IsRefType(value->type) and not IsNullableRef(value->type)) {
-                    void* ref = NULL;
-                    memcpy(&ref, inner->sp + value->slot, sizeof(ref));
+        জন্য (u32 i = 0; i < inner->অঙ্ক_Suspend_Results; ++i) {
+            ধ্রুবক M3_Slot_মান* মান = &site->map->মানসমূহ[site->point->first_মান +
+                                                          site->point->অঙ্ক_মানসমূহ - site->point->অঙ্ক_Results + i];
+            যদি (i < cont->bound_Args_গুনতি) {
+                যদি (IsRefType(মান->type) and not IsNullableRef(মান->type)) {
+                    শূন্য* ref = ফাঁকা;
+                    memcpy(&ref, inner->sp + মান->slot, আকার(ref));
                     _throwif(m3Err_wasmMalformed, not ref);
                 }
-            } else {
-                _throwif("a captured continuation has the wrong parameter type", value->type !=
-                                                                                   GetFuncTypeParamType(remaining, (u16)(i - cont->boundArgsCount)));
+            } অন্যথা {
+                _throwif("a captured continuation has the wrong parameter type", মান->type !=
+                                                                                   GetFuncTypeParamType(remaining, (u16)(i - cont->bound_Args_গুনতি)));
             }
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
 
-static
-M3Result LoadExceptions (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadExceptions (M3SnapshotLoad* l)
 {
-    M3Result result        = m3Err_none;
-    u32      numExceptions = 0;
+    M3_ফলাফল ফলাফল        = m3Err_none;
+    u32      অঙ্ক_Exceptions = 0;
 
-_   (GetLEB_u32(l, &numExceptions));
-    _throwif(m3Err_wasmMalformed, numExceptions == 0 or numExceptions != l->numExceptions);
+_   (GetLEB_u32(l, &অঙ্ক_Exceptions));
+    _throwif(m3Err_wasmMalformed, অঙ্ক_Exceptions == 0 or অঙ্ক_Exceptions != l->অঙ্ক_Exceptions);
 
-    for (u32 i = 0; i < numExceptions; ++i) {
-        u32          exnId = 0, numArgs = 0;
+    জন্য (u32 i = 0; i < অঙ্ক_Exceptions; ++i) {
+        u32          exnId = 0, অঙ্ক_Args = 0;
         M3Exception* exn;
         IM3FuncType  type;
 
 _       (GetLEB_u32(l, &exnId));
-_       (GetLEB_u32(l, &numArgs));
+_       (GetLEB_u32(l, &অঙ্ক_Args));
 
         _throwif(m3Err_wasmMalformed, exnId != i);
 
         exn  = l->exceptions[i];
         type = exn->tag->type;
 
-        _throwif(m3Err_wasmMalformed, numArgs != exn->numArgs);
+        _throwif(m3Err_wasmMalformed, অঙ্ক_Args != exn->অঙ্ক_Args);
 
-        for (u32 a = 0; a < numArgs; ++a) {
+        জন্য (u32 a = 0; a < অঙ্ক_Args; ++a) {
             m3type_t argType = GetFuncTypeParamType(type, (u16)a);
             u64      bits    = 0;
-_           (GetValueBits(l, argType, &bits));
-            if (not l->checking) {
+_           (Get_মান_Bits(l, argType, &bits));
+            যদি (not l->checking) {
                 exn->args[a] = bits;
             }
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 #  endif
 
 // Reads the embedder's state through a reader that stops where it ends
-typedef struct M3BoundedReader {
+প্রকারলেখ কাঠামো M3BoundedReader {
     M3SnapshotLoad* load;
     u64             remaining;
-    M3Result        error;
+    M3_ফলাফল        error;
 } M3BoundedReader;
 
-static
-M3Result BoundedReader_Read (void* o_buffer, size_t i_size, void* i_userdata)
+স্থির
+M3_ফলাফল BoundedReader_Read (শূন্য* o_বাফার, size_t i_আকার, শূন্য* i_userdata)
 {
     M3BoundedReader* br = (M3BoundedReader*)i_userdata;
 
-    if (i_size > br->remaining) {
+    যদি (i_আকার > br->remaining) {
         br->error = "the host read past the end of its state";
-        return br->error;
+        ফেরত br->error;
     }
 
-    br->remaining -= i_size;
+    br->remaining -= i_আকার;
 
-    return Get(br->load, o_buffer, i_size);
+    ফেরত Get(br->load, o_বাফার, i_আকার);
 }
 
-static
-M3Result LoadHostState (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadHostState (M3SnapshotLoad* l)
 {
-    M3Result               result = m3Err_none;
-    const M3SnapshotHooks* hooks  = &l->runtime->snapshotHooks;
+    M3_ফলাফল               ফলাফল = m3Err_none;
+    ধ্রুবক M3SnapshotHooks* hooks  = &l->runtime->snapshotHooks;
     M3BoundedReader        reader;
-    size_t                 size = (size_t)(l->end - l->pos);     // the whole section, which is never empty
+    size_t                 আকার_2 = (size_t)(l->end - l->pos);     // the whole section, which is never empty
 
     _throwif("the snapshot carries host state, and nothing here restores it", not hooks->loadHostState);
 
-    if (l->checking) {
-        return SkipBytes(l, size);
+    যদি (l->checking) {
+        ফেরত SkipBytes(l, আকার_2);
     }
     reader.load      = l;
-    reader.remaining = size;
+    reader.remaining = আকার_2;
     reader.error     = m3Err_none;
 
-_   (hooks->loadHostState(hooks->userdata, BoundedReader_Read, &reader, size));
+_   (hooks->loadHostState(hooks->userdata, BoundedReader_Read, &reader, আকার_2));
 _   (reader.error);
     _throwif("the host did not read all of its state", reader.remaining != 0);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadHeader (M3SnapshotLoad* l)
+স্থির
+M3_ফলাফল LoadHeader (M3SnapshotLoad* l)
 {
-    M3Result result = m3Err_none;
-    u8       magic[sizeof(c_snapshotMagic)];
+    M3_ফলাফল ফলাফল = m3Err_none;
+    u8       magic[আকার(c_snapshotMagic)];
     u32      version = 0;
 
-_   (Get(l, magic, sizeof(magic)));
-    _throwif(m3Err_wasmMalformed, memcmp(magic, c_snapshotMagic, sizeof(magic)) != 0);
+_   (Get(l, magic, আকার(magic)));
+    _throwif(m3Err_wasmMalformed, memcmp(magic, c_snapshotMagic, আকার(magic)) != 0);
 
 _   (GetLE32(l, &version));
     _throwif(m3Err_wasmMalformed, version != c_snapshotVersion);
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadMeta (M3SnapshotLoad* l, u32* o_flags)
+স্থির
+M3_ফলাফল LoadMeta (M3SnapshotLoad* l, u32* o_flags)
 {
-    M3Result result      = m3Err_none;
+    M3_ফলাফল ফলাফল      = m3Err_none;
     u64      timestamp   = 0;
     u64      moduleHash  = 0;
     u64      ownHash     = 0;
@@ -3010,7 +3010,7 @@ _   (GetLEB_u32(l, o_flags));
 _   (GetLEB_u64(l, &timestamp));
 _   (GetLEB_u64(l, &moduleHash));
 
-    (void)timestamp;
+    (শূন্য)timestamp;
 
 _   (ModuleFingerprint(l->module, &ownHash));
     _throwif("the snapshot was saved from a different module", moduleHash != ownHash);
@@ -3018,8 +3018,8 @@ _   (ModuleFingerprint(l->module, &ownHash));
     // a flag this build does not know changes what the rest of the file means
     _throwif("the snapshot sets a flag this build does not know", *o_flags & ~(u32)d_m3SnapshotFlagPostmortem);
 
-_   (GetLEB_u32(l, &l->numContinuations));
-_   (GetLEB_u32(l, &l->numExceptions));
+_   (GetLEB_u32(l, &l->অঙ্ক_Continuations));
+_   (GetLEB_u32(l, &l->অঙ্ক_Exceptions));
 _   (GetLEB_u64(l, &memoryBytes));
 _   (GetLEB_u64(l, &tableElements));
 _   (GetLEB_u32(l, &activeStacks));
@@ -3027,17 +3027,17 @@ _   (GetLEB_u32(l, &activeStacks));
     l->requiredMemoryBytes   = memoryBytes;
     l->requiredTableElements = tableElements;
     _throwif(m3Err_wasmMalformed, memoryBytes < currentMemory or tableElements < currentTables);
-    _throwif(m3Err_wasmMalformed, not l->module->numMemories and memoryBytes != 0);
-    _throwif(m3Err_wasmMalformed, not l->module->numTables and tableElements != 0);
+    _throwif(m3Err_wasmMalformed, not l->module->অঙ্ক_Memories and memoryBytes != 0);
+    _throwif(m3Err_wasmMalformed, not l->module->অঙ্ক_Tables and tableElements != 0);
 
     // the rest of Meta means the same thing in a postmortem, so it is read
     // whole and the refusal to resume comes after the section, not inside it
-    if (*o_flags & d_m3SnapshotFlagPostmortem) {
-        for (u32 i = 0; i < l->numExceptions; ++i) {
-            u32 tagIndex = 0;
-_           (GetLEB_u32(l, &tagIndex));
+    যদি (*o_flags & d_m3SnapshotFlagPostmortem) {
+        জন্য (u32 i = 0; i < l->অঙ্ক_Exceptions; ++i) {
+            u32 tag_সূচক = 0;
+_           (GetLEB_u32(l, &tag_সূচক));
         }
-        return m3Err_none;
+        ফেরত m3Err_none;
     }
 
     _throwif(m3Err_memoryLimitExceeded, l->runtime->memoryBytesLimit and
@@ -3047,160 +3047,160 @@ _           (GetLEB_u32(l, &tagIndex));
     _throwif(m3Err_continuationLimitExceeded, l->runtime->continuationsLimit and
                                                 activeStacks > l->runtime->continuationsLimit - l->runtime->continuationsAllocated);
 
-    _throwif(m3Err_wasmMalformed, l->numContinuations == 0 or activeStacks >= l->numContinuations);
-#  if !d_m3HasExceptionHandling
-    _throwif("the snapshot holds exceptions, and this build has none", l->numExceptions != 0);
+    _throwif(m3Err_wasmMalformed, l->অঙ্ক_Continuations == 0 or activeStacks >= l->অঙ্ক_Continuations);
+#  যদি !d_m3HasExceptionHandling
+    _throwif("the snapshot holds exceptions, and this build has none", l->অঙ্ক_Exceptions != 0);
 #  endif
 
-    if (l->checking) {
-        for (u32 i = 0; i < l->numExceptions; ++i) {
-            u32 tagIndex = 0;
-_           (GetLEB_u32(l, &tagIndex));
-#  if d_m3HasExceptionHandling
-            _throwif(m3Err_wasmMalformed, tagIndex >= l->module->numTags);
+    যদি (l->checking) {
+        জন্য (u32 i = 0; i < l->অঙ্ক_Exceptions; ++i) {
+            u32 tag_সূচক = 0;
+_           (GetLEB_u32(l, &tag_সূচক));
+#  যদি d_m3HasExceptionHandling
+            _throwif(m3Err_wasmMalformed, tag_সূচক >= l->module->অঙ্ক_Tags);
 #  endif
         }
-        return m3Err_none;
+        ফেরত m3Err_none;
     }
 
-    l->checkStack = m3_AllocArray(m3slot_t, d_m3ContinuationStackSlots + 4);
-    _throwifnull(l->checkStack);
+    l->check_স্তূপ = m3_AllocArray(m3slot_t, d_m3_Continuation_স্তূপ_Slots + 4);
+    _throwifnull(l->check_স্তূপ);
     l->frames = m3_AllocArray(M3Frame, d_m3ContinuationMaxFrames);
     _throwifnull(l->frames);
 
-    l->continuations = m3_AllocArray(IM3Continuation, l->numContinuations);
+    l->continuations = m3_AllocArray(IM3Continuation, l->অঙ্ক_Continuations);
     _throwifnull(l->continuations);
-    l->suspendSites = m3_AllocArray(M3SnapshotSuspendSite, l->numContinuations);
+    l->suspendSites = m3_AllocArray(M3SnapshotSuspendSite, l->অঙ্ক_Continuations);
     _throwifnull(l->suspendSites);
 
-    if (not l->runtime->rootContinuation) {
-        IM3Continuation root = Continuation_New(l->runtime, NULL, NULL);
-        _throwifnull(root);
+    যদি (not l->runtime->মূল_Continuation) {
+        IM3Continuation মূল = Continuation_New(l->runtime, ফাঁকা, ফাঁকা);
+        _throwifnull(মূল);
 
         // the root borrows the runtime's stack, so it holds none of its own
-        root->numStackSlots          = l->runtime->numStackSlots;
-        l->runtime->rootContinuation = root;
+        মূল->অঙ্ক_স্তূপ_Slots          = l->runtime->অঙ্ক_স্তূপ_Slots;
+        l->runtime->মূল_Continuation = মূল;
     }
 
-    l->continuations[0] = l->runtime->rootContinuation;
+    l->continuations[0] = l->runtime->মূল_Continuation;
 
-    for (u32 i = 1; i < l->numContinuations; ++i) {
-        l->continuations[i] = Continuation_New(l->runtime, NULL, NULL);
+    জন্য (u32 i = 1; i < l->অঙ্ক_Continuations; ++i) {
+        l->continuations[i] = Continuation_New(l->runtime, ফাঁকা, ফাঁকা);
         _throwifnull(l->continuations[i]);
     }
 
-#  if d_m3HasExceptionHandling
-    if (l->numExceptions) {
-        l->exceptions = m3_AllocArray(M3Exception*, l->numExceptions);
+#  যদি d_m3HasExceptionHandling
+    যদি (l->অঙ্ক_Exceptions) {
+        l->exceptions = m3_AllocArray(M3Exception*, l->অঙ্ক_Exceptions);
         _throwifnull(l->exceptions);
     }
 
-    for (u32 i = 0; i < l->numExceptions; ++i) {
-        u32    tagIndex = 0;
+    জন্য (u32 i = 0; i < l->অঙ্ক_Exceptions; ++i) {
+        u32    tag_সূচক = 0;
         IM3Tag tag;
-        u32    numArgs;
+        u32    অঙ্ক_Args;
 
-_       (GetLEB_u32(l, &tagIndex));
-        _throwif(m3Err_wasmMalformed, tagIndex >= l->module->numTags);
+_       (GetLEB_u32(l, &tag_সূচক));
+        _throwif(m3Err_wasmMalformed, tag_সূচক >= l->module->অঙ্ক_Tags);
 
-        tag     = TagOfIndex(l->module, tagIndex);
-        numArgs = GetFuncTypeNumParams(tag->type);
+        tag     = Tag_Of_সূচক(l->module, tag_সূচক);
+        অঙ্ক_Args = Get_Func_Type_অঙ্ক_Params(tag->type);
 
-        l->exceptions[i] = NewException(l->runtime, tag, numArgs);
+        l->exceptions[i] = NewException(l->runtime, tag, অঙ্ক_Args);
         _throwifnull(l->exceptions[i]);
 
         l->exceptions[i]->reified = true;
     }
-#  else
-    for (u32 i = 0; i < l->numExceptions; ++i) {
-        u32 tagIndex = 0;
-_       (GetLEB_u32(l, &tagIndex));
+#  অন্যথা
+    জন্য (u32 i = 0; i < l->অঙ্ক_Exceptions; ++i) {
+        u32 tag_সূচক = 0;
+_       (GetLEB_u32(l, &tag_সূচক));
     }
 #  endif
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Each section is decoded once without changing guest state or calling the host,
 // then applied with the same decoder. This checks its complete structure before
 // any of its values or opaque host bytes are installed.
-static
-M3Result LoadSection (M3SnapshotLoad* l, u8 i_sectionId)
+স্থির
+M3_ফলাফল LoadSection (M3SnapshotLoad* l, u8 i_sectionId)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     u32      flags  = 0;
-    switch (i_sectionId) {
-    case d_m3SnapshotSection_Meta:
+    নির্বাচন (i_sectionId) {
+    ক্ষেত্র d_m3SnapshotSection_Meta:
 _       (LoadMeta(l, &flags));
         _throwif("postmortem snapshots cannot be resumed", flags & d_m3SnapshotFlagPostmortem);
         l->started = true;
-        break;
+        বিরতি;
 
-    case d_m3SnapshotSection_Memory:
+    ক্ষেত্র d_m3SnapshotSection_Memory:
 _       (LoadMemories(l));
-        break;
+        বিরতি;
 
-    case d_m3SnapshotSection_Table:
+    ক্ষেত্র d_m3SnapshotSection_Table:
 _       (LoadTables(l));
-        break;
+        বিরতি;
 
-    case d_m3SnapshotSection_Global:
+    ক্ষেত্র d_m3SnapshotSection_Global:
 _       (LoadGlobals(l));
-        break;
+        বিরতি;
 
-    case d_m3SnapshotSection_Segment:
+    ক্ষেত্র d_m3SnapshotSection_Segment:
 _       (LoadSegments(l));
-        break;
+        বিরতি;
 
-#  if d_m3HasExceptionHandling
-    case d_m3SnapshotSection_Exception:
+#  যদি d_m3HasExceptionHandling
+    ক্ষেত্র d_m3SnapshotSection_Exception:
 _       (LoadExceptions(l));
-        break;
+        বিরতি;
 #  endif
 
-    case d_m3SnapshotSection_Continuation:
+    ক্ষেত্র d_m3SnapshotSection_Continuation:
 _       (LoadContinuations(l));
-        break;
+        বিরতি;
 
-    case d_m3SnapshotSection_HostState:
+    ক্ষেত্র d_m3SnapshotSection_HostState:
 _       (LoadHostState(l));
-        break;
+        বিরতি;
 
-    default:
+    পূর্বনির্ধারিত:
 _       (SkipBytes(l, (size_t)(l->end - l->pos)));
-        break;
+        বিরতি;
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
-static
-M3Result LoadSections (M3SnapshotLoad* l, bool i_embedded)
+স্থির
+M3_ফলাফল LoadSections (M3SnapshotLoad* l, bool i_embedded)
 {
-    M3Result result  = m3Err_none;
-    u8*      payload = NULL;
+    M3_ফলাফল ফলাফল  = m3Err_none;
+    u8*      payload = ফাঁকা;
 
-    if (not i_embedded) {
+    যদি (not i_embedded) {
 _       (LoadHeader(l));
     }
 
-    while (true) {
+    যখন (true) {
         u8  sectionId   = 0;
-        u32 sectionSize = 0;
+        u32 section_আকার = 0;
 
         // the last section ends the file, so the reader running out here is
         // the end of the snapshot rather than a truncated one
-        if (GetU8(l, &sectionId)) {
-            break;
+        যদি (GetU8(l, &sectionId)) {
+            বিরতি;
         }
 
-_       (GetLEB_u32(l, &sectionSize));
+_       (GetLEB_u32(l, &section_আকার));
 
         _throwif("the snapshot holds a section twice", l->seenSections[sectionId]);
         l->seenSections[sectionId] = true;
-        _throwif("the snapshot holds an empty section", sectionSize == 0);
+        _throwif("the snapshot holds an empty section", section_আকার == 0);
 
         // the Meta section says what the runtime has to be made ready for, so
         // nothing may come before it
@@ -3208,11 +3208,11 @@ _       (GetLEB_u32(l, &sectionSize));
 
         // Read the entire payload before letting a loader or host callback
         // touch the instance. Every body decoder is then bounded by this buffer.
-        payload = (u8*)m3_Malloc("snapshot_section", sectionSize);
+        payload = (u8*)m3_Malloc("snapshot_section", section_আকার);
         _throwifnull(payload);
-_       (Get(l, payload, sectionSize));
+_       (Get(l, payload, section_আকার));
         l->pos       = payload;
-        l->end       = payload + sectionSize;
+        l->end       = payload + section_আকার;
         l->inSection = true;
 
         {
@@ -3236,25 +3236,25 @@ _       (LoadSection(l, sectionId));
     _throwif("the snapshot has no continuation section",
              not l->seenSections[d_m3SnapshotSection_Continuation]);
     _throwif("the snapshot names exceptions it does not hold",
-             l->numExceptions and not l->seenSections[d_m3SnapshotSection_Exception]);
+             l->অঙ্ক_Exceptions and not l->seenSections[d_m3SnapshotSection_Exception]);
 
     // a store section left out is not "unchanged": it would resume against
     // whatever instantiation happened to leave behind
     _throwif("the snapshot has no memory section",
-             l->module->numMemories and not l->seenSections[d_m3SnapshotSection_Memory]);
+             l->module->অঙ্ক_Memories and not l->seenSections[d_m3SnapshotSection_Memory]);
     _throwif("the snapshot has no table section",
-             l->module->numTables and not l->seenSections[d_m3SnapshotSection_Table]);
+             l->module->অঙ্ক_Tables and not l->seenSections[d_m3SnapshotSection_Table]);
     _throwif("the snapshot has no global section",
-             l->module->numGlobals and not l->seenSections[d_m3SnapshotSection_Global]);
+             l->module->অঙ্ক_Globals and not l->seenSections[d_m3SnapshotSection_Global]);
     _throwif("the snapshot has no segment section",
-             (l->module->numDataSegments or l->module->numElementSegments) and
+             (l->module->অঙ্ক_তথ্য_Segments or l->module->অঙ্ক_Element_Segments) and
                not l->seenSections[d_m3SnapshotSection_Segment]);
 
 _   (CheckContinuationReferences(l));
 
 _catch:
     m3_Free(payload);
-    return result;
+    ফেরত ফলাফল;
 }
 
 #endif // d_m3HasSnapshots
@@ -3264,18 +3264,18 @@ _catch:
 //  API
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
 
-static
-M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i_userdata,
+স্থির
+M3_ফলাফল SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, শূন্য* i_userdata,
                        IM3Module* o_module, bool i_embedded)
 {
-    M3Result       result = m3Err_none;
+    M3_ফলাফল       ফলাফল = m3Err_none;
     M3SnapshotSave save;
 
-    memset(&save, 0, sizeof(save));
+    memset(&save, 0, আকার(save));
 
-    IM3Continuation root = io_runtime->rootContinuation;
+    IM3Continuation মূল = io_runtime->মূল_Continuation;
 
     // Anything but a paused invocation is saved as a postmortem: the state of
     // the module the last call entered, which needs no continuation and so no
@@ -3284,12 +3284,12 @@ M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i
     save.writer     = i_writer;
     save.userdata   = i_userdata;
     save.embedded   = i_embedded;
-    save.postmortem = not root or root->state != cont_suspended;
+    save.postmortem = not মূল or মূল->state != cont_suspended;
 
-    IM3Function entry = save.postmortem ? io_runtime->entered : root->entryFunction;
+    IM3Function entry = save.postmortem ? io_runtime->entered : মূল->entryFunction;
 
-    if (o_module) {
-        *o_module = NULL;
+    যদি (o_module) {
+        *o_module = ফাঁকা;
     }
 
     // no call has entered anything, so there is no module to describe
@@ -3299,25 +3299,25 @@ M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i
 
     _throwif("a snapshot failed to restore into the module, so it cannot be saved", save.module->isUnusable);
 
-    if (o_module) {
+    যদি (o_module) {
         *o_module = save.module;
     }
 
-    for (IM3Continuation cont = io_runtime->continuations; cont; cont = cont->next) {
+    জন্য (IM3Continuation cont = io_runtime->continuations; cont; cont = cont->পরবর্তী) {
         u32 id;
 _       (PointerIds_Add(&save.liveContinuations, cont, &id));
     }
 
-#  if d_m3HasExceptionHandling
-    for (M3Exception* exception = io_runtime->exceptions; exception; exception = exception->next) {
+#  যদি d_m3HasExceptionHandling
+    জন্য (M3Exception* exception = io_runtime->exceptions; exception; exception = exception->পরবর্তী) {
         u32 id;
 _       (PointerIds_Add(&save.liveExceptions, exception, &id));
     }
 #  endif
 
-    if (not save.postmortem) {
+    যদি (not save.postmortem) {
         u32 id;
-_       (PointerIds_Add(&save.continuations, root, &id));
+_       (PointerIds_Add(&save.continuations, মূল, &id));
     }
 
 _   (SaveSections(&save));
@@ -3332,35 +3332,35 @@ _catch:
     PointerIds_Free(&save.continuations);
     PointerIds_Free(&save.exceptions);
 
-    return result;
+    ফেরত ফলাফল;
 }
 
 #endif
 
-M3Result m3_SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i_userdata)
+M3_ফলাফল m3_SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, শূন্য* i_userdata)
 {
-    if (not io_runtime or not i_writer) {
-        return m3Err_mallocFailed;
+    যদি (not io_runtime or not i_writer) {
+        ফেরত m3Err_mallocFailed;
     }
 
-#if d_m3HasSnapshots
-    return SaveSnapshot(io_runtime, i_writer, i_userdata, NULL, false);
-#else
-    (void)i_userdata;
-    return "snapshots are not available in this build of Wasm3";
+#যদি d_m3HasSnapshots
+    ফেরত SaveSnapshot(io_runtime, i_writer, i_userdata, ফাঁকা, false);
+#অন্যথা
+    (শূন্য)i_userdata;
+    ফেরত "snapshots are not available in this build of Wasm3";
 #endif
 }
 
 
-static
-M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotReader i_reader, void* i_userdata, bool i_embedded)
+স্থির
+M3_ফলাফল LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotReader i_reader, শূন্য* i_userdata, bool i_embedded)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     _throwifnull(io_runtime);
     _throwifnull(i_module);
     _throwifnull(i_reader);
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     // A snapshot is the whole of the module's state, and is checked against
     // what instantiation made: memories and tables no smaller than they were
     // declared, and nothing the module did since to account for
@@ -3369,7 +3369,7 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
 
     {
         M3SnapshotLoad load;
-        memset(&load, 0, sizeof(load));
+        memset(&load, 0, আকার(load));
 
         load.runtime  = io_runtime;
         load.module   = i_module;
@@ -3381,23 +3381,23 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
         // this is still false has neither the back edges nor the maps for it
         io_runtime->isSuspendable = true;
 
-        result = LoadSections(&load, i_embedded);
+        ফলাফল = LoadSections(&load, i_embedded);
 
-        IM3Continuation root = io_runtime->rootContinuation;
+        IM3Continuation মূল = io_runtime->মূল_Continuation;
 
-        if (result) {
-            if (load.changed) {
+        যদি (ফলাফল) {
+            যদি (load.changed) {
                 // Part of the snapshot is in the module and part is not: a
                 // state the program was never in. It is not resumed, run or
                 // saved again; the embedder has to throw it away.
                 i_module->isUnusable = true;
 
-                if (root) {
-                    root->state     = cont_returned;
-                    root->numFrames = 0;
+                যদি (মূল) {
+                    মূল->state     = cont_returned;
+                    মূল->অঙ্ক_Frames = 0;
                 }
             }
-        } else {
+        } অন্যথা {
             // A suspension is only ever reached with the start function run,
             // or under way in the invocation being restored, so the memories
             // and globals already hold what it did
@@ -3405,102 +3405,102 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
             i_module->hasRun        = true;
         }
 
-        Runtime_PlaceCallStack(io_runtime);
+        Runtime_Place_Call_স্তূপ(io_runtime);
 
-        m3_Free(load.checkStack);
+        m3_Free(load.check_স্তূপ);
         m3_Free(load.frames);
         m3_Free(load.suspendSites);
         m3_Free(load.continuations);
-#  if d_m3HasExceptionHandling
+#  যদি d_m3HasExceptionHandling
         m3_Free(load.exceptions);
 #  endif
     }
-#else
-    (void)i_userdata;
+#অন্যথা
+    (শূন্য)i_userdata;
     _throw("snapshots are not available in this build of Wasm3");
 #endif
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 
 
-M3Result m3_LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotReader i_reader, void* i_userdata)
+M3_ফলাফল m3_LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotReader i_reader, শূন্য* i_userdata)
 {
-    return LoadSnapshot(io_runtime, i_module, i_reader, i_userdata, false);
+    ফেরত LoadSnapshot(io_runtime, i_module, i_reader, i_userdata, false);
 }
 
 
-void m3_SetSnapshotHooks (IM3Runtime io_runtime, const M3SnapshotHooks* i_hooks)
+শূন্য m3_SetSnapshotHooks (IM3Runtime io_runtime, ধ্রুবক M3SnapshotHooks* i_hooks)
 {
-#if d_m3HasSnapshots
-    if (io_runtime) {
-        if (i_hooks) {
+#যদি d_m3HasSnapshots
+    যদি (io_runtime) {
+        যদি (i_hooks) {
             io_runtime->snapshotHooks = *i_hooks;
-        } else {
-            memset(&io_runtime->snapshotHooks, 0, sizeof(io_runtime->snapshotHooks));
+        } অন্যথা {
+            memset(&io_runtime->snapshotHooks, 0, আকার(io_runtime->snapshotHooks));
         }
     }
-#else
-    (void)io_runtime;
-    (void)i_hooks;
+#অন্যথা
+    (শূন্য)io_runtime;
+    (শূন্য)i_hooks;
 #endif
 }
 
 
-M3Result m3_SaveSnapshotToBuffer (IM3Runtime io_runtime, void** o_bytes, size_t* o_size)
+M3_ফলাফল m3_Save_Snapshot_To_বাফার (IM3Runtime io_runtime, শূন্য** o_bytes, size_t* o_আকার)
 {
-    if (!io_runtime || !o_bytes || !o_size) {
-        return m3Err_mallocFailed;
+    যদি (!io_runtime || !o_bytes || !o_আকার) {
+        ফেরত m3Err_mallocFailed;
     }
-#if d_m3HasSnapshots
-    M3BufferWriter bw     = { NULL, 0, 0 };
-    M3Result       result = m3_SaveSnapshot(io_runtime, BufferWriter_Write, &bw);
-    if (result) {
-        m3_Free(bw.buffer);
-        *o_bytes = NULL;
-        *o_size  = 0;
-        return result;
+#যদি d_m3HasSnapshots
+    M3_বাফার_Writer bw     = { ফাঁকা, 0, 0 };
+    M3_ফলাফল       ফলাফল = m3_SaveSnapshot(io_runtime, বাফার_Writer_Write, &bw);
+    যদি (ফলাফল) {
+        m3_Free(bw.বাফার);
+        *o_bytes = ফাঁকা;
+        *o_আকার  = 0;
+        ফেরত ফলাফল;
     }
-    *o_bytes = bw.buffer;
-    *o_size  = bw.size;
-    return m3Err_none;
-#else
-    *o_bytes = NULL;
-    *o_size  = 0;
-    return "snapshots are not available in this build of Wasm3";
+    *o_bytes = bw.বাফার;
+    *o_আকার  = bw.আকার_2;
+    ফেরত m3Err_none;
+#অন্যথা
+    *o_bytes = ফাঁকা;
+    *o_আকার  = 0;
+    ফেরত "snapshots are not available in this build of Wasm3";
 #endif
 }
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
 
 // Appends one LEB128-encoded u32 to a plain byte cursor
-static
-u8* EmitLEB_u32 (u8* o_where, u32 i_value)
+স্থির
+u8* EmitLEB_u32 (u8* o_where, u32 i_মান)
 {
-    do {
-        u8 byte = i_value & 0x7F;
-        i_value >>= 7;
-        if (i_value != 0) {
+    করো {
+        u8 byte = i_মান & 0x7F;
+        i_মান >>= 7;
+        যদি (i_মান != 0) {
             byte |= 0x80;
         }
         *o_where++ = byte;
-    } while (i_value != 0);
+    } যখন (i_মান != 0);
 
-    return o_where;
+    ফেরত o_where;
 }
 
-static
-u32 SizeOfLEB_u32 (u32 i_value)
+স্থির
+u32 আকার_Of_LEB_u32 (u32 i_মান)
 {
-    u32 size = 0;
+    u32 আকার_2 = 0;
 
-    do {
-        i_value >>= 7;
-        ++size;
-    } while (i_value != 0);
+    করো {
+        i_মান >>= 7;
+        ++আকার_2;
+    } যখন (i_মান != 0);
 
-    return size;
+    ফেরত আকার_2;
 }
 
 // Walks the custom sections of a Wasm binary and finds the one named
@@ -3508,57 +3508,57 @@ u32 SizeOfLEB_u32 (u32 i_value)
 // when a new one replaces it; o_data/o_size frame its snapshot payload. Any of
 // the four may be NULL. Not finding one is not an error: o_secStart and o_data
 // are left NULL.
-static
-M3Result FindEmbeddedSnapshot (const u8* i_start, const u8* i_end, cstr_t i_secName,
-                               const u8** o_secStart, const u8** o_secEnd,
-                               const u8** o_data, u32* o_size)
+স্থির
+M3_ফলাফল FindEmbeddedSnapshot (ধ্রুবক u8* i_start, ধ্রুবক u8* i_end, cstr_t i_secName,
+                               ধ্রুবক u8** o_secStart, ধ্রুবক u8** o_secEnd,
+                               ধ্রুবক u8** o_তথ্য, u32* o_আকার)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     bytes_t  pos    = i_start;
     bool     found  = false;
-    cstr_t   name   = NULL;
+    cstr_t   name   = ফাঁকা;
 
-    if (o_secStart) {
-        *o_secStart = NULL;
+    যদি (o_secStart) {
+        *o_secStart = ফাঁকা;
     }
-    if (o_secEnd) {
-        *o_secEnd = NULL;
+    যদি (o_secEnd) {
+        *o_secEnd = ফাঁকা;
     }
-    if (o_data) {
-        *o_data = NULL;
+    যদি (o_তথ্য) {
+        *o_তথ্য = ফাঁকা;
     }
-    if (o_size) {
-        *o_size = 0;
+    যদি (o_আকার) {
+        *o_আকার = 0;
     }
 
     _throwif(m3Err_wasmMalformed, i_end - pos < 8 or memcmp(pos, "\0asm\1\0\0\0", 8) != 0);
     pos += 8;
 
-    while (pos < i_end) {
+    যখন (pos < i_end) {
         bytes_t secStart  = pos;
         u8      sectionId = *pos++;
-        u32     size      = 0;
-_       (ReadLEB_u32(&size, &pos, i_end));
-        _throwif(m3Err_wasmUnderrun, size > (size_t)(i_end - pos));
+        u32     আকার_2      = 0;
+_       (ReadLEB_u32(&আকার_2, &pos, i_end));
+        _throwif(m3Err_wasmUnderrun, আকার_2 > (size_t)(i_end - pos));
         {
             bytes_t payload = pos;
-            pos += size;
-            if (sectionId == 0) {
+            pos += আকার_2;
+            যদি (sectionId == 0) {
 _               (Read_utf8(&name, &payload, pos));
-                if (strcmp(name, i_secName) == 0) {
+                যদি (strcmp(name, i_secName) == 0) {
                     _throwif("duplicate embedded snapshot name", found);
                     found = true;
-                    if (o_secStart) {
+                    যদি (o_secStart) {
                         *o_secStart = secStart;
                     }
-                    if (o_secEnd) {
+                    যদি (o_secEnd) {
                         *o_secEnd = pos;
                     }
-                    if (o_data) {
-                        *o_data = payload;
+                    যদি (o_তথ্য) {
+                        *o_তথ্য = payload;
                     }
-                    if (o_size) {
-                        *o_size = (u32)(pos - payload);
+                    যদি (o_আকার) {
+                        *o_আকার = (u32)(pos - payload);
                     }
                 }
                 m3_Free(name);
@@ -3567,225 +3567,225 @@ _               (Read_utf8(&name, &payload, pos));
     }
 _catch:
     m3_Free(name);
-    return result;
+    ফেরত ফলাফল;
 }
 
 // Builds the custom section name a snapshot of i_name lives under
-static
-M3Result SnapshotSectionName (cstr_t i_name, char* o_secName, size_t i_size)
+স্থির
+M3_ফলাফল SnapshotSectionName (cstr_t i_name, অক্ষর* o_secName, size_t i_আকার)
 {
-    if (i_name and *i_name) {
-        if (strlen(i_name) > d_m3MaxSnapshotNameLength) {
-            return "the snapshot name is too long";
+    যদি (i_name and *i_name) {
+        যদি (strlen(i_name) > d_m3_Max_Snapshot_Name_দৈর্ঘ্য) {
+            ফেরত "the snapshot name is too long";
         }
-        snprintf(o_secName, i_size, "snapshot.%s", i_name);
-    } else {
-        snprintf(o_secName, i_size, "snapshot");
+        snprintf(o_secName, i_আকার, "snapshot.%s", i_name);
+    } অন্যথা {
+        snprintf(o_secName, i_আকার, "snapshot");
     }
 
-    return m3Err_none;
+    ফেরত m3Err_none;
 }
 
 // The snapshot of this name the module was parsed with, or NULL. Parsing keeps
 // two of the same name, and selecting that name is where they are refused.
-static
-M3Result ModuleSnapshot (IM3Module i_module, cstr_t i_name, M3EmbeddedSnapshot** o_snapshot)
+স্থির
+M3_ফলাফল ModuleSnapshot (IM3Module i_module, cstr_t i_name, M3EmbeddedSnapshot** o_snapshot)
 {
-    M3Result result = m3Err_none;
+    M3_ফলাফল ফলাফল = m3Err_none;
     cstr_t   name   = i_name ? i_name : "";
 
-    *o_snapshot = NULL;
+    *o_snapshot = ফাঁকা;
 
-    for (M3EmbeddedSnapshot* snap = i_module->snapshots; snap; snap = snap->next) {
-        if (strcmp(snap->name, name) == 0) {
+    জন্য (M3EmbeddedSnapshot* snap = i_module->snapshots; snap; snap = snap->পরবর্তী) {
+        যদি (strcmp(snap->name, name) == 0) {
             _throwif("duplicate embedded snapshot name", *o_snapshot);
             *o_snapshot = snap;
         }
     }
 
 _catch:
-    return result;
+    ফেরত ফলাফল;
 }
 #endif
 
-M3Result m3_LoadSnapshotFromBuffer (IM3Runtime io_runtime, IM3Module i_module, const void* i_bytes, size_t i_size)
+M3_ফলাফল m3_Load_Snapshot_From_বাফার (IM3Runtime io_runtime, IM3Module i_module, ধ্রুবক শূন্য* i_bytes, size_t i_আকার)
 {
-    if (!io_runtime || !i_module || !i_bytes) {
-        return m3Err_mallocFailed;
+    যদি (!io_runtime || !i_module || !i_bytes) {
+        ফেরত m3Err_mallocFailed;
     }
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     // A Wasm binary carries its snapshot in a custom section. It is taken from
     // the buffer that was handed over, which need not be the one i_module was
     // parsed from - the snapshot still restores into i_module.
-    if (i_size >= 8 && memcmp(i_bytes, "\0asm", 4) == 0) {
-        const u8* data   = NULL;
-        u32       size   = 0;
-        M3Result  result = FindEmbeddedSnapshot((const u8*)i_bytes, (const u8*)i_bytes + i_size,
-                                                "snapshot", NULL, NULL, &data, &size);
-        if (result) {
-            return result;
+    যদি (i_আকার >= 8 && memcmp(i_bytes, "\0asm", 4) == 0) {
+        ধ্রুবক u8* তথ্য   = ফাঁকা;
+        u32       আকার_2   = 0;
+        M3_ফলাফল  ফলাফল = FindEmbeddedSnapshot((ধ্রুবক u8*)i_bytes, (ধ্রুবক u8*)i_bytes + i_আকার,
+                                                "snapshot", ফাঁকা, ফাঁকা, &তথ্য, &আকার_2);
+        যদি (ফলাফল) {
+            ফেরত ফলাফল;
         }
-        if (not data) {
-            return "the Wasm binary holds no embedded snapshot";
+        যদি (not তথ্য) {
+            ফেরত "the Wasm binary holds no embedded snapshot";
         }
 
         {
-            M3BufferReader br = { data, size, 0 };
-            return LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br, true);
+            M3_বাফার_Reader br = { তথ্য, আকার_2, 0 };
+            ফেরত LoadSnapshot(io_runtime, i_module, বাফার_Reader_Read, &br, true);
         }
     }
     {
-        M3BufferReader br = { (const u8*)i_bytes, i_size, 0 };
-        return LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br,
-                            i_size < 4 or memcmp(i_bytes, c_snapshotMagic, 4) != 0);
+        M3_বাফার_Reader br = { (ধ্রুবক u8*)i_bytes, i_আকার, 0 };
+        ফেরত LoadSnapshot(io_runtime, i_module, বাফার_Reader_Read, &br,
+                            i_আকার < 4 or memcmp(i_bytes, c_snapshotMagic, 4) != 0);
     }
-#else
-    (void)i_size;
-    return "snapshots are not available in this build of Wasm3";
+#অন্যথা
+    (শূন্য)i_আকার;
+    ফেরত "snapshots are not available in this build of Wasm3";
 #endif
 }
 
-bool m3_HasSnapshot (IM3Module i_module, const char* i_name)
+bool m3_HasSnapshot (IM3Module i_module, ধ্রুবক অক্ষর* i_name)
 {
-    if (not i_module) {
-        return false;
+    যদি (not i_module) {
+        ফেরত false;
     }
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     // two of that name are still one it carries: loading it is what fails
-    M3EmbeddedSnapshot* snap = NULL;
-    (void)ModuleSnapshot(i_module, i_name, &snap);
+    M3EmbeddedSnapshot* snap = ফাঁকা;
+    (শূন্য)ModuleSnapshot(i_module, i_name, &snap);
 
-    return snap != NULL;
-#else
-    (void)i_name;
-    return false;
+    ফেরত snap != ফাঁকা;
+#অন্যথা
+    (শূন্য)i_name;
+    ফেরত false;
 #endif
 }
 
-M3Result m3_GetEmbeddedSnapshot (IM3Module i_module, const char* i_name,
-                                 const void** o_bytes, size_t* o_size)
+M3_ফলাফল m3_GetEmbeddedSnapshot (IM3Module i_module, ধ্রুবক অক্ষর* i_name,
+                                 ধ্রুবক শূন্য** o_bytes, size_t* o_আকার)
 {
-    if (not i_module or not o_bytes or not o_size) {
-        return m3Err_mallocFailed;
+    যদি (not i_module or not o_bytes or not o_আকার) {
+        ফেরত m3Err_mallocFailed;
     }
 
-    *o_bytes = NULL;
-    *o_size  = 0;
+    *o_bytes = ফাঁকা;
+    *o_আকার  = 0;
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     {
-        M3EmbeddedSnapshot* snap   = NULL;
-        M3Result            result = ModuleSnapshot(i_module, i_name, &snap);
+        M3EmbeddedSnapshot* snap   = ফাঁকা;
+        M3_ফলাফল            ফলাফল = ModuleSnapshot(i_module, i_name, &snap);
 
-        if (result) {
-            return result;
+        যদি (ফলাফল) {
+            ফেরত ফলাফল;
         }
-        if (not snap) {
-            return "the module holds no embedded snapshot of that name";
+        যদি (not snap) {
+            ফেরত "the module holds no embedded snapshot of that name";
         }
 
-        *o_bytes = snap->data;
-        *o_size  = snap->size;
+        *o_bytes = snap->তথ্য;
+        *o_আকার  = snap->আকার_2;
 
-        return m3Err_none;
+        ফেরত m3Err_none;
     }
-#else
-    (void)i_name;
-    return "snapshots are not available in this build of Wasm3";
+#অন্যথা
+    (শূন্য)i_name;
+    ফেরত "snapshots are not available in this build of Wasm3";
 #endif
 }
 
-M3Result m3_LoadEmbeddedSnapshot (IM3Runtime io_runtime, IM3Module i_module, const char* i_name)
+M3_ফলাফল m3_LoadEmbeddedSnapshot (IM3Runtime io_runtime, IM3Module i_module, ধ্রুবক অক্ষর* i_name)
 {
-    if (not io_runtime or not i_module) {
-        return m3Err_mallocFailed;
+    যদি (not io_runtime or not i_module) {
+        ফেরত m3Err_mallocFailed;
     }
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
     {
-        M3EmbeddedSnapshot* snap   = NULL;
-        M3Result            result = ModuleSnapshot(i_module, i_name, &snap);
-        M3BufferReader      br;
+        M3EmbeddedSnapshot* snap   = ফাঁকা;
+        M3_ফলাফল            ফলাফল = ModuleSnapshot(i_module, i_name, &snap);
+        M3_বাফার_Reader      br;
 
-        if (result) {
-            return result;
+        যদি (ফলাফল) {
+            ফেরত ফলাফল;
         }
-        if (not snap) {
-            return "the module holds no embedded snapshot of that name";
+        যদি (not snap) {
+            ফেরত "the module holds no embedded snapshot of that name";
         }
 
-        br.buffer = snap->data;
-        br.size   = snap->size;
+        br.বাফার = snap->তথ্য;
+        br.আকার_2   = snap->আকার_2;
         br.cursor = 0;
 
-        return LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br, true);
+        ফেরত LoadSnapshot(io_runtime, i_module, বাফার_Reader_Read, &br, true);
     }
-#else
-    (void)i_name;
-    return "snapshots are not available in this build of Wasm3";
+#অন্যথা
+    (শূন্য)i_name;
+    ফেরত "snapshots are not available in this build of Wasm3";
 #endif
 }
 
 
-M3Result m3_SaveSnapshotToModule (IM3Runtime io_runtime, IM3Module i_module, const char* i_name,
-                                  void** o_bytes, size_t* o_size)
+M3_ফলাফল m3_SaveSnapshotToModule (IM3Runtime io_runtime, IM3Module i_module, ধ্রুবক অক্ষর* i_name,
+                                  শূন্য** o_bytes, size_t* o_আকার)
 {
-#if d_m3HasSnapshots
-    M3Result       result = m3Err_none;
-    M3BufferWriter bw     = { NULL, 0, 0 };
-    u8*            out    = NULL;
+#যদি d_m3HasSnapshots
+    M3_ফলাফল       ফলাফল = m3Err_none;
+    M3_বাফার_Writer bw     = { ফাঁকা, 0, 0 };
+    u8*            out    = ফাঁকা;
 
-    char      secName[d_m3MaxSnapshotNameLength + sizeof("snapshot.")];
-    u32       nameLen, nameLenLebSize, payloadSize, payloadSizeLebSize;
-    size_t    origSize, totalSize;
-    const u8* dropStart = NULL;
-    const u8* dropEnd   = NULL;
-    IM3Module saved     = NULL;
+    অক্ষর      secName[d_m3_Max_Snapshot_Name_দৈর্ঘ্য + আকার("snapshot.")];
+    u32       nameLen, name_Len_Leb_আকার, payload_আকার, payload_আকার_Leb_আকার;
+    size_t    orig_আকার, যোগ_আকার;
+    ধ্রুবক u8* dropStart = ফাঁকা;
+    ধ্রুবক u8* dropEnd   = ফাঁকা;
+    IM3Module saved     = ফাঁকা;
     u8*       p;
 
-    if (not io_runtime or not i_module or not o_bytes or not o_size) {
-        return m3Err_mallocFailed;
+    যদি (not io_runtime or not i_module or not o_bytes or not o_আকার) {
+        ফেরত m3Err_mallocFailed;
     }
 
-    *o_bytes = NULL;
-    *o_size  = 0;
+    *o_bytes = ফাঁকা;
+    *o_আকার  = 0;
 
     _throwif("the module carries no Wasm bytecode to embed a snapshot in",
              not i_module->wasmStart or i_module->wasmEnd <= i_module->wasmStart);
 
-_   (SnapshotSectionName(i_name, secName, sizeof(secName)));
+_   (SnapshotSectionName(i_name, secName, আকার(secName)));
 
     // An embedded snapshot is there to be resumed - the unnamed one is resumed
     // just by running the module - and a postmortem cannot be. With nothing
     // paused, a save is a postmortem.
     _throwif("a postmortem cannot be embedded in a module",
-             not io_runtime->rootContinuation or io_runtime->rootContinuation->state != cont_suspended);
+             not io_runtime->মূল_Continuation or io_runtime->মূল_Continuation->state != cont_suspended);
 
-_   (SaveSnapshot(io_runtime, BufferWriter_Write, &bw, &saved, true));
+_   (SaveSnapshot(io_runtime, বাফার_Writer_Write, &bw, &saved, true));
 
-    _throwif("there is nothing to snapshot", not bw.size);
+    _throwif("there is nothing to snapshot", not bw.আকার_2);
 
     // the snapshot is of the module the paused call is in: embedding it in any
     // other leaves a binary whose fingerprint can never match
     _throwif("the snapshot belongs to another module", saved != i_module);
 
-    _throwif("the snapshot is too large to embed in a Wasm module", bw.size > 0xF0000000u);
+    _throwif("the snapshot is too large to embed in a Wasm module", bw.আকার_2 > 0xF0000000u);
 
     // a snapshot of this name already in the module is replaced, not added to
-_   (FindEmbeddedSnapshot(i_module->wasmStart, i_module->wasmEnd, secName, &dropStart, &dropEnd, NULL, NULL));
+_   (FindEmbeddedSnapshot(i_module->wasmStart, i_module->wasmEnd, secName, &dropStart, &dropEnd, ফাঁকা, ফাঁকা));
 
-    origSize           = (size_t)(i_module->wasmEnd - i_module->wasmStart) - (dropStart ? (size_t)(dropEnd - dropStart) : 0);
+    orig_আকার           = (size_t)(i_module->wasmEnd - i_module->wasmStart) - (dropStart ? (size_t)(dropEnd - dropStart) : 0);
     nameLen            = (u32)strlen(secName);
-    nameLenLebSize     = SizeOfLEB_u32(nameLen);
-    payloadSize        = nameLenLebSize + nameLen + (u32)bw.size;
-    payloadSizeLebSize = SizeOfLEB_u32(payloadSize);
-    totalSize          = origSize + 1 + payloadSizeLebSize + payloadSize;
+    name_Len_Leb_আকার     = আকার_Of_LEB_u32(nameLen);
+    payload_আকার        = name_Len_Leb_আকার + nameLen + (u32)bw.আকার_2;
+    payload_আকার_Leb_আকার = আকার_Of_LEB_u32(payload_আকার);
+    যোগ_আকার          = orig_আকার + 1 + payload_আকার_Leb_আকার + payload_আকার;
 
-    out = (u8*)m3_Malloc("wasm_snapshot_module", totalSize);
+    out = (u8*)m3_Malloc("wasm_snapshot_module", যোগ_আকার);
     _throwifnull(out);
 
     p = out;
 
-    if (dropStart) {
+    যদি (dropStart) {
         size_t before = (size_t)(dropStart - i_module->wasmStart);
         size_t after  = (size_t)(i_module->wasmEnd - dropEnd);
 
@@ -3793,33 +3793,33 @@ _   (FindEmbeddedSnapshot(i_module->wasmStart, i_module->wasmEnd, secName, &drop
         p += before;
         memcpy(p, dropEnd, after);
         p += after;
-    } else {
-        memcpy(p, i_module->wasmStart, origSize);
-        p += origSize;
+    } অন্যথা {
+        memcpy(p, i_module->wasmStart, orig_আকার);
+        p += orig_আকার;
     }
 
     *p++ = 0x00; // custom section
-    p    = EmitLEB_u32(p, payloadSize);
+    p    = EmitLEB_u32(p, payload_আকার);
     p    = EmitLEB_u32(p, nameLen);
     memcpy(p, secName, nameLen);
     p += nameLen;
-    memcpy(p, bw.buffer, bw.size);
+    memcpy(p, bw.বাফার, bw.আকার_2);
 
     *o_bytes = out;
-    *o_size  = totalSize;
-    out      = NULL;
+    *o_আকার  = যোগ_আকার;
+    out      = ফাঁকা;
 
 _catch:
-    m3_Free(bw.buffer);
+    m3_Free(bw.বাফার);
     m3_Free(out);
 
-    return result;
-#else
-    (void)io_runtime;
-    (void)i_module;
-    (void)i_name;
-    (void)o_bytes;
-    (void)o_size;
-    return "snapshots are not available in this build of Wasm3";
+    ফেরত ফলাফল;
+#অন্যথা
+    (শূন্য)io_runtime;
+    (শূন্য)i_module;
+    (শূন্য)i_name;
+    (শূন্য)o_bytes;
+    (শূন্য)o_আকার;
+    ফেরত "snapshots are not available in this build of Wasm3";
 #endif
 }
