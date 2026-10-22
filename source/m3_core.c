@@ -7,182 +7,182 @@
 
 // pthread_getattr_np, which m3_host_posix.h asks glibc for. Has to be set before any
 // libc header is seen, which is why it is here and not in that file.
-#ifndef _GNU_SOURCE
+#यदि_अपरिभाषितम् _GNU_SOURCE
 #  define _GNU_SOURCE 1
-#endif
+#यदि_अन्तः
 
-#define M3_IMPLEMENT_ERROR_STRINGS
-#include "m3_config.h"
-#include "wasm3.h"
+#परिभाषय M3_IMPLEMENT_ERROR_वाक्यानि
+#अन्तर्भाव "m3_config.h"
+#अन्तर्भाव "wasm3.h"
 
-#include "m3_core.h"
-#include "m3_env.h"
+#अन्तर्भाव "m3_core.h"
+#अन्तर्भाव "m3_env.h"
 
 // The one place any of the m3_host.h implementations is built - see that header
-#include "m3_host.h"
+#अन्तर्भाव "m3_host.h"
 
-#if d_m3HasWin32Host
+#यदि d_m3HasWin32Host
 #  include "m3_host_win32.h"
-#elif d_m3HasPosixHost
+#नोचेद्यदि d_m3HasPosixHost
 #  include "m3_host_posix.h"
-#else
+#अन्यथा
 #  include "m3_host_none.h"
-#endif
+#यदि_अन्तः
 
-void m3_Abort (const char* message)
+शून्य m3_Abort (ध्रुव वर्ण* सन्देशः)
 {
-#ifdef DEBUG
-    fprintf(stderr, "Error: %s\n", message);
-#endif
+#यदि_परिभाषितम् DEBUG
+    fprintf(stderr, "Error: %s\n", सन्देशः);
+#यदि_अन्तः
     abort();
 }
 
 M3_WEAK
-M3Result m3_Yield ()
+M3_परिणाम m3_Yield ()
 {
-    return m3Err_none;
+    प्रत्यागम m3Err_none;
 }
 
-#if d_m3LogTimestamps
+#यदि d_m3LogTimestamps
 
 #  include <time.h>
 
-#  define SEC_TO_US(sec) ((sec)*1000000)
-#  define NS_TO_US(ns)    ((ns)/1000)
+#  define SEC_गन्तव्यम्_US(sec) ((sec)*1000000)
+#  define NS_गन्तव्यम्_US(ns)    ((ns)/1000)
 
-static uint64_t initial_ts = -1;
+स्थिर uint64_t initial_ts = -1;
 
 uint64_t m3_GetTimestamp ()
 {
-    if (initial_ts == -1) {
+    यदि (initial_ts == -1) {
         initial_ts = 0;
         initial_ts = m3_GetTimestamp();
     }
-    struct timespec ts;
+    संरचना timespec ts;
     timespec_get(&ts, TIME_UTC);
-    uint64_t us = SEC_TO_US((uint64_t)ts.tv_sec) + NS_TO_US((uint64_t)ts.tv_nsec);
-    return us - initial_ts;
+    uint64_t us = SEC_गन्तव्यम्_US((uint64_t)ts.tv_sec) + NS_गन्तव्यम्_US((uint64_t)ts.tv_nsec);
+    प्रत्यागम us - initial_ts;
 }
 
-#endif
+#यदि_अन्तः
 
-#if d_m3FixedHeap
+#यदि d_m3FixedHeap
 
-static u8        fixedHeap[d_m3FixedHeap];
-static u8*       fixedHeapPtr  = fixedHeap;
-static u8* const fixedHeapEnd  = fixedHeap + d_m3FixedHeap;
-static u8*       fixedHeapLast = NULL;
+स्थिर u8        fixedHeap[d_m3FixedHeap];
+स्थिर u8*       fixedHeapPtr  = fixedHeap;
+स्थिर u8* ध्रुव fixed_Heap_अन्तः  = fixedHeap + d_m3FixedHeap;
+स्थिर u8*       fixed_Heap_चरमः = रिक्त;
 
-#  if d_m3FixedHeapAlign > 1
+#  यदि d_m3FixedHeapAlign > 1
 #    define HEAP_ALIGN_PTR(P) P = (u8*)(((size_t)(P)+(d_m3FixedHeapAlign-1)) & ~ (d_m3FixedHeapAlign-1));
-#  else
+#  अन्यथा
 #    define HEAP_ALIGN_PTR(P)
 #  endif
 
-void* m3_Malloc_Impl (size_t i_size)
+शून्य* m3_Malloc_Impl (size_t i_आकार)
 {
     u8* ptr = fixedHeapPtr;
 
-    fixedHeapPtr += i_size;
+    fixedHeapPtr += i_आकार;
     HEAP_ALIGN_PTR(fixedHeapPtr);
 
-    if (fixedHeapPtr >= fixedHeapEnd) {
-        return NULL;
+    यदि (fixedHeapPtr >= fixed_Heap_अन्तः) {
+        प्रत्यागम रिक्त;
     }
 
-    memset(ptr, 0x0, i_size);
-    fixedHeapLast = ptr;
+    स्मृतिं_पूरय(ptr, 0x0, i_आकार);
+    fixed_Heap_चरमः = ptr;
 
-    return ptr;
+    प्रत्यागम ptr;
 }
 
-void m3_Free_Impl (void* i_ptr)
+शून्य m3_Free_Impl (शून्य* i_ptr)
 {
     // Handle the last chunk
-    if (i_ptr && i_ptr == fixedHeapLast) {
-        fixedHeapPtr  = fixedHeapLast;
-        fixedHeapLast = NULL;
-    } else {
+    यदि (i_ptr && i_ptr == fixed_Heap_चरमः) {
+        fixedHeapPtr  = fixed_Heap_चरमः;
+        fixed_Heap_चरमः = रिक्त;
+    } अन्यथा {
         //printf("== free %p [failed]\n", io_ptr);
     }
 }
 
-void* m3_Realloc_Impl (void* i_ptr, size_t i_newSize, size_t i_oldSize)
+शून्य* m3_Realloc_Impl (शून्य* i_ptr, size_t i_new_आकार, size_t i_old_आकार)
 {
-    if (M3_UNLIKELY(i_newSize == i_oldSize)) {
-        return i_ptr;
+    यदि (M3_UNLIKELY(i_new_आकार == i_old_आकार)) {
+        प्रत्यागम i_ptr;
     }
 
-    void* newPtr;
+    शून्य* newPtr;
 
     // Handle the last chunk
-    if (i_ptr && i_ptr == fixedHeapLast) {
-        fixedHeapPtr = fixedHeapLast + i_newSize;
+    यदि (i_ptr && i_ptr == fixed_Heap_चरमः) {
+        fixedHeapPtr = fixed_Heap_चरमः + i_new_आकार;
         HEAP_ALIGN_PTR(fixedHeapPtr);
-        if (fixedHeapPtr >= fixedHeapEnd) {
-            return NULL;
+        यदि (fixedHeapPtr >= fixed_Heap_अन्तः) {
+            प्रत्यागम रिक्त;
         }
         newPtr = i_ptr;
-    } else {
-        newPtr = m3_Malloc_Impl(i_newSize);
-        if (!newPtr) {
-            return NULL;
+    } अन्यथा {
+        newPtr = m3_Malloc_Impl(i_new_आकार);
+        यदि (!newPtr) {
+            प्रत्यागम रिक्त;
         }
-        if (i_ptr) {
-            memcpy(newPtr, i_ptr, i_oldSize);
+        यदि (i_ptr) {
+            स्मृतिं_प्रतिलिख(newPtr, i_ptr, i_old_आकार);
         }
     }
 
-    if (i_newSize > i_oldSize) {
-        memset((u8*)newPtr + i_oldSize, 0x0, i_newSize - i_oldSize);
+    यदि (i_new_आकार > i_old_आकार) {
+        स्मृतिं_पूरय((u8*)newPtr + i_old_आकार, 0x0, i_new_आकार - i_old_आकार);
     }
 
-    return newPtr;
+    प्रत्यागम newPtr;
 }
 
-#else
+#अन्यथा
 
-void* m3_Malloc_Impl (size_t i_size)
+शून्य* m3_Malloc_Impl (size_t i_आकार)
 {
-    return calloc(i_size, 1);
+    प्रत्यागम शून्यस्मृतिं_देहि(i_आकार, 1);
 }
 
-void m3_Free_Impl (void* io_ptr)
+शून्य m3_Free_Impl (शून्य* io_ptr)
 {
-    free(io_ptr);
+    मुक्त(io_ptr);
 }
 
-void* m3_Realloc_Impl (void* i_ptr, size_t i_newSize, size_t i_oldSize)
+शून्य* m3_Realloc_Impl (शून्य* i_ptr, size_t i_new_आकार, size_t i_old_आकार)
 {
-    if (M3_UNLIKELY(i_newSize == i_oldSize)) {
-        return i_ptr;
+    यदि (M3_UNLIKELY(i_new_आकार == i_old_आकार)) {
+        प्रत्यागम i_ptr;
     }
 
-    void* newPtr = realloc(i_ptr, i_newSize);
+    शून्य* newPtr = realloc(i_ptr, i_new_आकार);
 
-    if (M3_LIKELY(newPtr)) {
-        if (i_newSize > i_oldSize) {
-            memset((u8*)newPtr + i_oldSize, 0x0, i_newSize - i_oldSize);
+    यदि (M3_LIKELY(newPtr)) {
+        यदि (i_new_आकार > i_old_आकार) {
+            स्मृतिं_पूरय((u8*)newPtr + i_old_आकार, 0x0, i_new_आकार - i_old_आकार);
         }
-        return newPtr;
+        प्रत्यागम newPtr;
     }
-    return NULL;
+    प्रत्यागम रिक्त;
 }
 
-#endif
+#यदि_अन्तः
 
-void* m3_CopyMem (const void* i_from, size_t i_size)
+शून्य* m3_CopyMem (ध्रुव शून्य* i_from, size_t i_आकार)
 {
-    void* ptr = m3_Malloc("CopyMem", i_size);
-    if (ptr) {
-        memcpy(ptr, i_from, i_size);
+    शून्य* ptr = m3_Malloc("CopyMem", i_आकार);
+    यदि (ptr) {
+        स्मृतिं_प्रतिलिख(ptr, i_from, i_आकार);
     }
-    return ptr;
+    प्रत्यागम ptr;
 }
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3GuardedMemory
+#यदि d_m3_Guarded_स्मृतिः
 
 // One reservation, cut into equal slots, because a fault has to be recognized by its
 // address alone: a signal handler cannot walk a list of scattered reservations, but
@@ -191,117 +191,117 @@ void* m3_CopyMem (const void* i_from, size_t i_size)
 // The arena costs address space and nothing else - every page of it starts out
 // uncommitted - which is why it is reserved whole on first use rather than grown.
 // A system unwilling to hand over that much is met by halving the ask until it is.
-static u8*    g_guardArena;
-static size_t g_guardArenaBytes;
-static size_t g_guardSlotBytes;
-static size_t g_guardPageSize;
-static u32    g_guardSlotCount;
-static bool   g_guardSlotTaken[d_m3GuardedArenaSlots];
+स्थिर u8*    g_guardArena;
+स्थिर size_t g_guard_Arena_अष्टकानि;
+स्थिर size_t g_guard_Slot_अष्टकानि;
+स्थिर size_t g_guard_Page_आकार;
+स्थिर u32    g_guard_Slot_गणनम्;
+स्थिर bool   g_guard_Slot_गृहीतम्[d_m3GuardedArenaSlots];
 
 // slot: [ header page ][ data: d_m3GuardedDataBytes ][ a page of slack ]
 //
 // The slack is what makes the last address an access can name still land inside the
 // arena, so the handler recognizes it rather than letting it through as somebody
 // else's fault.
-static
-bool Guard_Reserve (void)
+स्थिर
+bool Guard_Reserve (शून्य)
 {
-    if (g_guardArena) {
-        return true;
+    यदि (g_guardArena) {
+        प्रत्यागम true;
     }
 
-    size_t pageSize = m3_HostPageSize();
+    size_t page_आकार = m3_Host_Page_आकार();
 
     // d_m3GuardedDataBytes is 8GiB, which only fits in a size_t on the 64-bit
     // systems this feature is limited to - see d_m3GuardedMemory
-    size_t slotBytes = 2 * pageSize + (size_t)d_m3GuardedDataBytes;
+    size_t slot_अष्टकानि = 2 * page_आकार + (size_t)d_m3_Guarded_दत्त_अष्टकानि;
 
-    for (u32 slots = d_m3GuardedArenaSlots; slots >= 1; slots /= 2) {
-        void* base = m3_HostReserve(slotBytes * slots);
+    प्रति (u32 slots = d_m3GuardedArenaSlots; slots >= 1; slots /= 2) {
+        शून्य* आधारः = m3_HostReserve(slot_अष्टकानि * slots);
 
-        if (base) {
-            g_guardArena      = (u8*)base;
-            g_guardArenaBytes = slotBytes * slots;
-            g_guardSlotBytes  = slotBytes;
-            g_guardPageSize   = pageSize;
-            g_guardSlotCount  = slots;
-            return true;
+        यदि (आधारः) {
+            g_guardArena      = (u8*)आधारः;
+            g_guard_Arena_अष्टकानि = slot_अष्टकानि * slots;
+            g_guard_Slot_अष्टकानि  = slot_अष्टकानि;
+            g_guard_Page_आकार   = page_आकार;
+            g_guard_Slot_गणनम्  = slots;
+            प्रत्यागम true;
         }
     }
 
-    return false;
+    प्रत्यागम false;
 }
 
-void* Guard_TakeSlot (void)
+शून्य* Guard_TakeSlot (शून्य)
 {
-    if (not Guard_Reserve()) {
-        return NULL;
+    यदि (not Guard_Reserve()) {
+        प्रत्यागम रिक्त;
     }
 
-    for (u32 i = 0; i < g_guardSlotCount; ++i) {
-        if (g_guardSlotTaken[i]) {
-            continue;
+    प्रति (u32 i = 0; i < g_guard_Slot_गणनम्; ++i) {
+        यदि (g_guard_Slot_गृहीतम्[i]) {
+            अनुवर्त;
         }
 
-        u8* slot = g_guardArena + (size_t)i * g_guardSlotBytes;
+        u8* slot = g_guardArena + (size_t)i * g_guard_Slot_अष्टकानि;
 
         // the header has to be reachable before anything writes it; the data pages
         // wait for Guard_CommitSlot
-        if (not m3_HostCommit(slot, g_guardPageSize)) {
-            return NULL;
+        यदि (not m3_HostCommit(slot, g_guard_Page_आकार)) {
+            प्रत्यागम रिक्त;
         }
 
-        g_guardSlotTaken[i] = true;
-        return slot;
+        g_guard_Slot_गृहीतम्[i] = true;
+        प्रत्यागम slot;
     }
 
-    return NULL;
+    प्रत्यागम रिक्त;
 }
 
-M3MemoryHeader* Guard_SlotHeader (void* i_slot)
+M3_स्मृतिः_शीर्षकम्* Guard_Slot_शीर्षकम् (शून्य* i_slot)
 {
     // the guest's bytes begin on the second page, and the header is what sits
     // immediately before them - see M3MemoryHeader
-    u8* data = (u8*)i_slot + g_guardPageSize;
+    u8* दत्त = (u8*)i_slot + g_guard_Page_आकार;
 
-    return (M3MemoryHeader*)(data - sizeof(M3MemoryHeader));
+    प्रत्यागम (M3_स्मृतिः_शीर्षकम्*)(दत्त - परिमाण(M3_स्मृतिः_शीर्षकम्));
 }
 
-bool Guard_CommitSlot (void* i_slot, size_t i_dataBytes)
+bool Guard_CommitSlot (शून्य* i_slot, size_t i_दत्त_अष्टकानि)
 {
-    size_t rounded = (i_dataBytes + g_guardPageSize - 1) / g_guardPageSize * g_guardPageSize;
+    size_t rounded = (i_दत्त_अष्टकानि + g_guard_Page_आकार - 1) / g_guard_Page_आकार * g_guard_Page_आकार;
 
-    return m3_HostCommit((u8*)i_slot + g_guardPageSize, rounded);
+    प्रत्यागम m3_HostCommit((u8*)i_slot + g_guard_Page_आकार, rounded);
 }
 
-void Guard_GiveSlot (void* i_slot)
+शून्य Guard_GiveSlot (शून्य* i_slot)
 {
-    if (i_slot == NULL) {
-        return;
+    यदि (i_slot == रिक्त) {
+        प्रत्यागम;
     }
 
-    size_t index = (size_t)((u8*)i_slot - g_guardArena) / g_guardSlotBytes;
+    size_t index = (size_t)((u8*)i_slot - g_guardArena) / g_guard_Slot_अष्टकानि;
 
     // Everything committed in the slot goes, which is what makes the next memory to
     // land here read as zero. A slot that would not give its pages back stays taken:
     // handing it on still holding the last module's bytes is worse than never
     // handing it on at all.
-    if (m3_HostDecommit(i_slot, g_guardSlotBytes) and index < g_guardSlotCount) {
-        g_guardSlotTaken[index] = false;
+    यदि (m3_HostDecommit(i_slot, g_guard_Slot_अष्टकानि) and index < g_guard_Slot_गणनम्) {
+        g_guard_Slot_गृहीतम्[index] = false;
     }
 }
 
-void Guard_ArenaRange (void** o_low, size_t* o_bytes)
+शून्य Guard_ArenaRange (शून्य** o_नीचः, size_t* o_अष्टकानि)
 {
-    *o_low   = g_guardArena;
-    *o_bytes = g_guardArenaBytes;
+    *o_नीचः   = g_guardArena;
+    *o_अष्टकानि = g_guard_Arena_अष्टकानि;
 }
 
-#endif // d_m3GuardedMemory
+#यदि_अन्तः // d_m3GuardedMemory
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3MaxNativeStack > 0
+#यदि d_m3_Max_Native_राशिः > 0
 
 // Where Wasm execution has to stop to keep the native stack intact, given the stack
 // pointer a top-level call came in on. d_m3MaxNativeStack is the budget asked for;
@@ -313,722 +313,722 @@ void Guard_ArenaRange (void** o_low, size_t* o_bytes)
 // below the mark is d_m3NativeStackMargin, or a quarter of the stack when the stack
 // is too small to spare that much - the point is to leave the trap path somewhere to
 // run, and on a small stack a fixed 64KiB would be most of it.
-void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget)
+शून्य* m3_Native_राशिः_सीमा (शून्य* i_राशिः_Ptr, size_t i_budget)
 {
-    u8* sp = (u8*)i_stackPtr;
+    u8* sp = (u8*)i_राशिः_Ptr;
 
-#  if M3_HAS_THREAD_LOCAL
-    static M3_THREAD_LOCAL u8* base = NULL;
-    if (base == NULL) {
-        base = (u8*)m3_HostStackBase();
+#  यदि M3_HAS_THREAD_LOCAL
+    स्थिर M3_THREAD_LOCAL u8* आधारः = रिक्त;
+    यदि (आधारः == रिक्त) {
+        आधारः = (u8*)m3_Host_राशिः_आधारः();
     }
-#  else
-    u8* base = (u8*)m3_HostStackBase();
+#  अन्यथा
+    u8* आधारः = (u8*)m3_Host_राशिः_आधारः();
 #  endif
 
     // A base at or above the stack pointer is not this thread's stack: an
     // unrecognized answer, not a stack with nothing left in it
-    if (base and base < sp) {
-        size_t available = (size_t)(sp - base);
-        size_t margin    = M3_MIN((size_t)(d_m3NativeStackMargin), available / 4);
+    यदि (आधारः and आधारः < sp) {
+        size_t उपलब्धम् = (size_t)(sp - आधारः);
+        size_t margin    = M3_MIN((size_t)(d_m3_Native_राशिः_Margin), उपलब्धम् / 4);
 
-        i_budget = M3_MIN(i_budget, available - margin);
+        i_budget = M3_MIN(i_budget, उपलब्धम् - margin);
     }
 
-    return sp - i_budget;
+    प्रत्यागम sp - i_budget;
 }
 
-#endif // d_m3MaxNativeStack > 0
+#यदि_अन्तः // d_m3MaxNativeStack > 0
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3LogNativeStack
+#यदि d_m3_Log_Native_राशिः
 
-static size_t stack_start;
-static size_t stack_end;
+स्थिर size_t राशिः_start;
+स्थिर size_t राशिः_अन्तः;
 
-void m3StackCheckInit ()
+शून्य m3_राशिः_Check_Init ()
 {
-    char stack;
-    stack_end = stack_start = (size_t)&stack;
+    वर्ण राशिः;
+    राशिः_अन्तः = राशिः_start = (size_t)&राशिः;
 }
 
-void m3StackCheck ()
+शून्य m3_राशिः_Check ()
 {
-    char   stack;
-    size_t addr = (size_t)&stack;
+    वर्ण   राशिः;
+    size_t addr = (size_t)&राशिः;
 
-    size_t stackEnd = stack_end;
+    size_t राशिः_अन्तः_2 = राशिः_अन्तः;
 
-    stack_end = M3_MIN(stack_end, addr);
+    राशिः_अन्तः = M3_MIN(राशिः_अन्तः, addr);
 
     //    if (stackEnd != stack_end)
     //        printf ("maxStack: %ld\n", m3StackGetMax ());
 }
 
-int m3StackGetMax ()
+पूर्णाङ्क m3_राशिः_Get_Max ()
 {
-    return stack_start - stack_end;
+    प्रत्यागम राशिः_start - राशिः_अन्तः;
 }
 
-#endif
+#यदि_अन्तः
 
 //--------------------------------------------------------------------------------------------
 
 // Value types arrive as signed 7-bit LEBs, so the encoding negates: 0x7f (i32)
 // reads as -1, 0x7b (v128) as -5, 0x70 (funcref) as -16, 0x6f (externref) as -17.
-M3Result NormalizeType (u8* o_type, i8 i_convolutedWasmType)
+M3_परिणाम NormalizeType (u8* o_type, i8 i_convolutedWasmType)
 {
-    M3Result result = m3Err_none;
+    M3_परिणाम परिणाम = m3Err_none;
 
     u8 type = -i_convolutedWasmType;
 
-    if (type == 0x40) {
+    यदि (type == 0x40) {
         type = c_m3Type_none;
     }
     // always recognised: funcref names the element type of an MVP table even
     // when the reference types proposal is compiled out
-    else if (type == d_waType_funcref) {
+    अन्यथा यदि (type == d_waType_funcref) {
         type = c_m3Type_funcref;
-    } else if (type == d_waType_externref) {
+    } अन्यथा यदि (type == d_waType_externref) {
         type = c_m3Type_externref;
     }
-#if d_m3HasExceptionHandling
-    else if (type == d_waType_exnref) {
+#यदि d_m3HasExceptionHandling
+    अन्यथा यदि (type == d_waType_exnref) {
         type = c_m3Type_exnref;
     }
-#endif
-#if d_m3HasStackSwitching
-    else if (type == d_waType_heap_cont or type == d_waType_heap_nocont) {
+#यदि_अन्तः
+#यदि d_m3_Has_राशिः_Switching
+    अन्यथा यदि (type == d_waType_heap_cont or type == d_waType_heap_nocont) {
         type = c_m3Type_contref;
     }
-#endif
+#यदि_अन्तः
     // Accept v128 (wasm-encoded as 0x7b → -i_convolutedWasmType == 5)
     // as an opaque slot so modules with v128 in signatures or local
     // declarations parse. Actual v128 opcodes still hit
     // m3Err_unknownOpcode at compile time - we just stop refusing
     // unused SIMD slots that auto-vectorization emits.
-    else if (type < c_m3Type_i32 or type > c_m3Type_v128) {
-        result = m3Err_invalidTypeId;
+    अन्यथा यदि (type < c_m3Type_i32 or type > c_m3Type_v128) {
+        परिणाम = m3Err_invalidTypeId;
     }
 
     *o_type = type;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
-#if d_m3HasTypedRefs
+#यदि d_m3HasTypedRefs
 
-u8 BaseTypeOf (m3type_t i_type)
+u8 आधारः_Type_सम्बन्धि (m3type_t i_type)
 {
-    if (IsSpelledRefType(i_type)) {
-        if (i_type & d_m3Type_refCont) {
-            return c_m3Type_contref;
+    यदि (IsSpelledRefType(i_type)) {
+        यदि (i_type & d_m3Type_refCont) {
+            प्रत्यागम c_m3Type_contref;
         }
-        return (i_type & d_m3Type_refExtern) ? c_m3Type_externref : c_m3Type_funcref;
+        प्रत्यागम (i_type & d_m3Type_refExtern) ? c_m3Type_externref : c_m3Type_funcref;
     }
 
-    return (u8)i_type;
+    प्रत्यागम (u8)i_type;
 }
 
 
-bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super)
+bool Is_Sub_Type_सम्बन्धि (m3type_t i_sub, m3type_t i_super)
 {
-    if (i_sub == i_super) {
-        return true;
+    यदि (i_sub == i_super) {
+        प्रत्यागम true;
     }
 
-    u8 base = BaseTypeOf(i_sub);
+    u8 आधारः = आधारः_Type_सम्बन्धि(i_sub);
 
     // only references have a subtype relation; every other type is invariant
-    if (base != BaseTypeOf(i_super) or not IsRefType(base)) {
-        return false;
+    यदि (आधारः != आधारः_Type_सम्बन्धि(i_super) or not IsRefType(आधारः)) {
+        प्रत्यागम false;
     }
 
     // (ref ht) <: (ref null ht), never the other way around
-    if (IsNullableRef(i_sub) and not IsNullableRef(i_super)) {
-        return false;
+    यदि (IsNullableRef(i_sub) and not IsNullableRef(i_super)) {
+        प्रत्यागम false;
     }
 
-#  if d_m3HasStackSwitching
+#  यदि d_m3_Has_राशिः_Switching
     // nocont sits under every continuation type
-    if (HeapTypeOf(i_sub) == d_m3Type_heapNone) {
-        return true;
+    यदि (Heap_Type_सम्बन्धि(i_sub) == d_m3Type_heapNone) {
+        प्रत्यागम true;
     }
 #  endif
 
     // $t <: func, and function types are invariant among themselves, so a
     // concrete heap type matches only itself or the abstract one. Indices are
     // canonical, so structurally equal types compare equal here.
-    return (HeapTypeOf(i_super) == d_m3Type_heapAbstract) or
-           (HeapTypeOf(i_sub) == HeapTypeOf(i_super));
+    प्रत्यागम (Heap_Type_सम्बन्धि(i_super) == d_m3Type_heapAbstract) or
+           (Heap_Type_सम्बन्धि(i_sub) == Heap_Type_सम्बन्धि(i_super));
 }
 
-#endif // d_m3HasTypedRefs
+#यदि_अन्तः // d_m3HasTypedRefs
 
 
 bool IsFpType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
-    return (i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_f64);
+    u8 i_m3Type = आधारः_Type_सम्बन्धि(i_type);
+    प्रत्यागम (i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_f64);
 }
 
 
 bool IsRefType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
-    return (i_m3Type == c_m3Type_funcref or i_m3Type == c_m3Type_externref
-#if d_m3HasExceptionHandling
+    u8 i_m3Type = आधारः_Type_सम्बन्धि(i_type);
+    प्रत्यागम (i_m3Type == c_m3Type_funcref or i_m3Type == c_m3Type_externref
+#यदि d_m3HasExceptionHandling
             or i_m3Type == c_m3Type_exnref
-#endif
-#if d_m3HasStackSwitching
+#यदि_अन्तः
+#यदि d_m3_Has_राशिः_Switching
             or i_m3Type == c_m3Type_contref
-#endif
+#यदि_अन्तः
     );
 }
 
 
 bool IsIntType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
-    return (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_i64);
+    u8 i_m3Type = आधारः_Type_सम्बन्धि(i_type);
+    प्रत्यागम (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_i64);
 }
 
 
 bool Is64BitType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
+    u8 i_m3Type = आधारः_Type_सम्बन्धि(i_type);
 
-    if (i_m3Type == c_m3Type_i64 or i_m3Type == c_m3Type_f64) {
-        return true;
-    } else if (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_none) {
-        return false;
-    } else {
-        return (sizeof(voidptr_t) == 8); // all other cases are pointers
+    यदि (i_m3Type == c_m3Type_i64 or i_m3Type == c_m3Type_f64) {
+        प्रत्यागम true;
+    } अन्यथा यदि (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_none) {
+        प्रत्यागम false;
+    } अन्यथा {
+        प्रत्यागम (परिमाण(voidptr_t) == 8); // all other cases are pointers
     }
 }
 
-u32 SizeOfType (m3type_t i_type)
+u32 आकार_सम्बन्धि_Type (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
+    u8 i_m3Type = आधारः_Type_सम्बन्धि(i_type);
 
-    if (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32) {
-        return sizeof(i32);
+    यदि (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32) {
+        प्रत्यागम परिमाण(i32);
     }
 
-    if (IsRefType(i_m3Type)) {
-        return sizeof(void*);
+    यदि (IsRefType(i_m3Type)) {
+        प्रत्यागम परिमाण(शून्य*);
     }
 
-    return sizeof(i64);
+    प्रत्यागम परिमाण(i64);
 }
 
 
 //-- Binary Wasm parsing utils  ------------------------------------------------------------------------------------------
 
 
-M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_u64 (u64* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(u64);
+    ध्रुव u8* ptr = *io_अष्टकानि;
+    ptr += परिमाण(u64);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(u64));
-        M3_BSWAP_u64(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    यदि (M3_LIKELY(ptr <= i_अन्तः)) {
+        स्मृतिं_प्रतिलिख(o_मानम्, *io_अष्टकानि, परिमाण(u64));
+        M3_BSWAP_u64(*o_मानम्);
+        *io_अष्टकानि = ptr;
+        प्रत्यागम m3Err_none;
+    } अन्यथा {
+        प्रत्यागम m3Err_wasmUnderrun;
     }
 }
 
 
-M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_u32 (u32* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(u32);
+    ध्रुव u8* ptr = *io_अष्टकानि;
+    ptr += परिमाण(u32);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(u32));
-        M3_BSWAP_u32(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    यदि (M3_LIKELY(ptr <= i_अन्तः)) {
+        स्मृतिं_प्रतिलिख(o_मानम्, *io_अष्टकानि, परिमाण(u32));
+        M3_BSWAP_u32(*o_मानम्);
+        *io_अष्टकानि = ptr;
+        प्रत्यागम m3Err_none;
+    } अन्यथा {
+        प्रत्यागम m3Err_wasmUnderrun;
     }
 }
 
-#if d_m3ImplementFloat
+#यदि d_m3ImplementFloat
 
-M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_f64 (f64* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(f64);
+    ध्रुव u8* ptr = *io_अष्टकानि;
+    ptr += परिमाण(f64);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(f64));
-        M3_BSWAP_f64(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    यदि (M3_LIKELY(ptr <= i_अन्तः)) {
+        स्मृतिं_प्रतिलिख(o_मानम्, *io_अष्टकानि, परिमाण(f64));
+        M3_BSWAP_f64(*o_मानम्);
+        *io_अष्टकानि = ptr;
+        प्रत्यागम m3Err_none;
+    } अन्यथा {
+        प्रत्यागम m3Err_wasmUnderrun;
     }
 }
 
 
-M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_f32 (f32* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(f32);
+    ध्रुव u8* ptr = *io_अष्टकानि;
+    ptr += परिमाण(f32);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(f32));
-        M3_BSWAP_f32(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    यदि (M3_LIKELY(ptr <= i_अन्तः)) {
+        स्मृतिं_प्रतिलिख(o_मानम्, *io_अष्टकानि, परिमाण(f32));
+        M3_BSWAP_f32(*o_मानम्);
+        *io_अष्टकानि = ptr;
+        प्रत्यागम m3Err_none;
+    } अन्यथा {
+        प्रत्यागम m3Err_wasmUnderrun;
     }
 }
 
-#endif
+#यदि_अन्तः
 
-M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_u8 (u8* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    const u8* ptr = *io_bytes;
+    ध्रुव u8* ptr = *io_अष्टकानि;
 
-    if (M3_LIKELY(ptr < i_end)) {
-        *o_value  = *ptr;
-        *io_bytes = ptr + 1;
+    यदि (M3_LIKELY(ptr < i_अन्तः)) {
+        *o_मानम्  = *ptr;
+        *io_अष्टकानि = ptr + 1;
 
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+        प्रत्यागम m3Err_none;
+    } अन्यथा {
+        प्रत्यागम m3Err_wasmUnderrun;
     }
 }
 
-M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_opcode (m3opcode_t* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    const u8* ptr = *io_bytes;
+    ध्रुव u8* ptr = *io_अष्टकानि;
 
-    if (M3_LIKELY(ptr < i_end)) {
+    यदि (M3_LIKELY(ptr < i_अन्तः)) {
         // 0xFC is returned as the bare prefix: its sub-opcode is a LEB128 u32, which
         // only the callers - Compile_ExtendedOpcode and the validator - can read.
         m3opcode_t opcode = *ptr++;
 
-        *o_value  = opcode;
-        *io_bytes = ptr;
+        *o_मानम्  = opcode;
+        *io_अष्टकानि = ptr;
 
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+        प्रत्यागम m3Err_none;
+    } अन्यथा {
+        प्रत्यागम m3Err_wasmUnderrun;
     }
 }
 
 
-M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLebUnsigned (u64* o_मानम्, u32 i_max_अङ्कः_द्वयङ्काः, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    M3Result result = m3Err_wasmUnderrun;
+    M3_परिणाम परिणाम = m3Err_wasmUnderrun;
 
-    u64 value = 0;
+    u64 मानम् = 0;
 
     u32       shift = 0;
-    const u8* ptr   = *io_bytes;
+    ध्रुव u8* ptr   = *io_अष्टकानि;
 
-    while (ptr < i_end) {
+    यावत् (ptr < i_अन्तः) {
         u64 byte = *(ptr++);
 
-        value |= ((byte & 0x7f) << shift);
+        मानम् |= ((byte & 0x7f) << shift);
         shift += 7;
 
-        if (M3_LIKELY((byte & 0x80) == 0)) {
-            result = m3Err_none;
+        यदि (M3_LIKELY((byte & 0x80) == 0)) {
+            परिणाम = m3Err_none;
 
             // The last byte must not carry bits past i_maxNumBits
-            if (M3_UNLIKELY(shift > i_maxNumBits)) {
-                u32 numUsedBits = i_maxNumBits + 7 - shift;
+            यदि (M3_UNLIKELY(shift > i_max_अङ्कः_द्वयङ्काः)) {
+                u32 अङ्कः_प्रयुक्तम्_द्वयङ्काः = i_max_अङ्कः_द्वयङ्काः + 7 - shift;
 
-                if (byte >> numUsedBits) {
-                    result = m3Err_lebOverflow;
+                यदि (byte >> अङ्कः_प्रयुक्तम्_द्वयङ्काः) {
+                    परिणाम = m3_Err_leb_अतिप्रवाहः;
                 }
             }
-            break;
+            भङ्ग;
         }
 
-        if (M3_UNLIKELY(shift >= i_maxNumBits)) {
-            result = m3Err_lebOverflow;
-            break;
+        यदि (M3_UNLIKELY(shift >= i_max_अङ्कः_द्वयङ्काः)) {
+            परिणाम = m3_Err_leb_अतिप्रवाहः;
+            भङ्ग;
         }
     }
 
-    *o_value  = value;
-    *io_bytes = ptr;
+    *o_मानम्  = मानम्;
+    *io_अष्टकानि = ptr;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
-M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLebSigned (i64* o_मानम्, u32 i_max_अङ्कः_द्वयङ्काः, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    M3Result result = m3Err_wasmUnderrun;
+    M3_परिणाम परिणाम = m3Err_wasmUnderrun;
 
-    i64 value = 0;
+    i64 मानम् = 0;
 
     u32       shift = 0;
-    const u8* ptr   = *io_bytes;
+    ध्रुव u8* ptr   = *io_अष्टकानि;
 
-    while (ptr < i_end) {
+    यावत् (ptr < i_अन्तः) {
         u64 byte = *(ptr++);
 
-        value |= ((byte & 0x7f) << shift);
+        मानम् |= ((byte & 0x7f) << shift);
         shift += 7;
 
-        if (M3_LIKELY((byte & 0x80) == 0)) {
-            result = m3Err_none;
+        यदि (M3_LIKELY((byte & 0x80) == 0)) {
+            परिणाम = m3Err_none;
 
             // The bits of the last byte past i_maxNumBits must all repeat the
             // sign bit, otherwise the value doesn't fit
-            if (M3_UNLIKELY(shift > i_maxNumBits)) {
-                u32 numUsedBits = i_maxNumBits + 7 - shift;
-                u8  signBits    = (u8)((0x7f << (numUsedBits - 1)) & 0x7f);
-                u8  bits        = (u8)(byte & signBits);
+            यदि (M3_UNLIKELY(shift > i_max_अङ्कः_द्वयङ्काः)) {
+                u32 अङ्कः_प्रयुक्तम्_द्वयङ्काः = i_max_अङ्कः_द्वयङ्काः + 7 - shift;
+                u8  sign_द्वयङ्काः    = (u8)((0x7f << (अङ्कः_प्रयुक्तम्_द्वयङ्काः - 1)) & 0x7f);
+                u8  द्वयङ्काः        = (u8)(byte & sign_द्वयङ्काः);
 
-                if (bits != 0 and bits != signBits) {
-                    result = m3Err_lebOverflow;
+                यदि (द्वयङ्काः != 0 and द्वयङ्काः != sign_द्वयङ्काः) {
+                    परिणाम = m3_Err_leb_अतिप्रवाहः;
                 }
             }
-            if ((byte & 0x40) and (shift < 64))    // do sign extension
+            यदि ((byte & 0x40) and (shift < 64))    // do sign extension
             {
                 u64 extend = 0;
-                value |= (~extend << shift);
+                मानम् |= (~extend << shift);
             }
 
-            break;
+            भङ्ग;
         }
 
-        if (M3_UNLIKELY(shift >= i_maxNumBits)) {
-            result = m3Err_lebOverflow;
-            break;
+        यदि (M3_UNLIKELY(shift >= i_max_अङ्कः_द्वयङ्काः)) {
+            परिणाम = m3_Err_leb_अतिप्रवाहः;
+            भङ्ग;
         }
     }
 
-    *o_value  = value;
-    *io_bytes = ptr;
+    *o_मानम्  = मानम्;
+    *io_अष्टकानि = ptr;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
-M3Result ReadLEB_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLEB_u32 (u32* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    u64      value;
-    M3Result result = ReadLebUnsigned(&value, 32, io_bytes, i_end);
+    u64      मानम्;
+    M3_परिणाम परिणाम = ReadLebUnsigned(&मानम्, 32, io_अष्टकानि, i_अन्तः);
 
-    *o_value = (u32)value;
+    *o_मानम् = (u32)मानम्;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
 // Bit 6 of the alignment is the flag; it is a bit of the first LEB byte, so
 // testing the decoded value for it is the same test.
-#define d_memArgHasMemoryIdx    0x40u
+#परिभाषय d_mem_Arg_Has_स्मृतिः_Idx    0x40u
 
-M3Result ReadMemoryArg (u32* o_align, u32* o_memoryIdx, u64* o_offset, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_स्मृतिः_Arg (u32* o_align, u32* o_स्मृतिः_Idx, u64* o_विस्थापनम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    M3Result result;
+    M3_परिणाम परिणाम;
 
     u32 align;
-    result = ReadLEB_u32(&align, io_bytes, i_end);
-    if (result) {
-        return result;
+    परिणाम = ReadLEB_u32(&align, io_अष्टकानि, i_अन्तः);
+    यदि (परिणाम) {
+        प्रत्यागम परिणाम;
     }
 
-    *o_memoryIdx = 0;
+    *o_स्मृतिः_Idx = 0;
 
-#if d_m3HasMultiMemory
-    if (align & d_memArgHasMemoryIdx) {
-        align &= ~d_memArgHasMemoryIdx;
+#यदि d_m3_Has_Multi_स्मृतिः
+    यदि (align & d_mem_Arg_Has_स्मृतिः_Idx) {
+        align &= ~d_mem_Arg_Has_स्मृतिः_Idx;
 
-        result = ReadLEB_u32(o_memoryIdx, io_bytes, i_end);
-        if (result) {
-            return result;
+        परिणाम = ReadLEB_u32(o_स्मृतिः_Idx, io_अष्टकानि, i_अन्तः);
+        यदि (परिणाम) {
+            प्रत्यागम परिणाम;
         }
     }
-#endif
+#यदि_अन्तः
 
     *o_align = align;
 
     // memory64 widens the offset to a u64. Whether it is in range is a
     // question about the memory it addresses, so the caller checks it.
-    return ReadLebUnsigned(o_offset, 64, io_bytes, i_end);
+    प्रत्यागम ReadLebUnsigned(o_विस्थापनम्, 64, io_अष्टकानि, i_अन्तः);
 }
 
 
-M3Result ReadLEB_u7 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLEB_u7 (u8* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    u64      value;
-    M3Result result = ReadLebUnsigned(&value, 7, io_bytes, i_end);
+    u64      मानम्;
+    M3_परिणाम परिणाम = ReadLebUnsigned(&मानम्, 7, io_अष्टकानि, i_अन्तः);
 
-    *o_value = (u8)value;
+    *o_मानम् = (u8)मानम्;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
-M3Result ReadLEB_i7 (i8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLEB_i7 (i8* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 7, io_bytes, i_end);
+    i64      मानम्;
+    M3_परिणाम परिणाम = ReadLebSigned(&मानम्, 7, io_अष्टकानि, i_अन्तः);
 
-    *o_value = (i8)value;
+    *o_मानम् = (i8)मानम्;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
-M3Result ReadLEB_i32 (i32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLEB_i32 (i32* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 32, io_bytes, i_end);
+    i64      मानम्;
+    M3_परिणाम परिणाम = ReadLebSigned(&मानम्, 32, io_अष्टकानि, i_अन्तः);
 
-    *o_value = (i32)value;
+    *o_मानम् = (i32)मानम्;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
 
-M3Result ReadLEB_i64 (i64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम ReadLEB_i64 (i64* o_मानम्, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 64, io_bytes, i_end);
+    i64      मानम्;
+    M3_परिणाम परिणाम = ReadLebSigned(&मानम्, 64, io_अष्टकानि, i_अन्तः);
 
-    *o_value = value;
+    *o_मानम् = मानम्;
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
-#if d_m3EnableValidation
+#यदि d_m3EnableValidation
 // Validate that a byte sequence is well-formed UTF-8 per the Unicode spec.
 // Returns true if valid, false otherwise.
-static
-bool IsValidUtf8 (const u8* i_data, u32 i_length)
+स्थिर
+bool IsValidUtf8 (ध्रुव u8* i_दत्त, u32 i_दीर्घता)
 {
-    const u8* ptr = i_data;
-    const u8* end = i_data + i_length;
+    ध्रुव u8* ptr = i_दत्त;
+    ध्रुव u8* अन्तः = i_दत्त + i_दीर्घता;
 
-    while (ptr < end) {
+    यावत् (ptr < अन्तः) {
         u8 b0 = *ptr++;
 
-        if (b0 < 0x80) {
+        यदि (b0 < 0x80) {
             // single-byte: 0xxxxxxx
-            continue;
-        } else if ((b0 & 0xE0) == 0xC0) {
+            अनुवर्त;
+        } अन्यथा यदि ((b0 & 0xE0) == 0xC0) {
             // two-byte: 110xxxxx 10xxxxxx
-            if (b0 < 0xC2) {
-                return false;       // overlong
+            यदि (b0 < 0xC2) {
+                प्रत्यागम false;       // overlong
             }
-            if (ptr >= end) {
-                return false;
+            यदि (ptr >= अन्तः) {
+                प्रत्यागम false;
             }
             u8 b1 = *ptr++;
-            if ((b1 & 0xC0) != 0x80) {
-                return false;
+            यदि ((b1 & 0xC0) != 0x80) {
+                प्रत्यागम false;
             }
-        } else if ((b0 & 0xF0) == 0xE0) {
+        } अन्यथा यदि ((b0 & 0xF0) == 0xE0) {
             // three-byte: 1110xxxx 10xxxxxx 10xxxxxx
-            if (ptr + 1 >= end) {
-                return false;
+            यदि (ptr + 1 >= अन्तः) {
+                प्रत्यागम false;
             }
             u8 b1 = *ptr++;
             u8 b2 = *ptr++;
-            if ((b1 & 0xC0) != 0x80) {
-                return false;
+            यदि ((b1 & 0xC0) != 0x80) {
+                प्रत्यागम false;
             }
-            if ((b2 & 0xC0) != 0x80) {
-                return false;
+            यदि ((b2 & 0xC0) != 0x80) {
+                प्रत्यागम false;
             }
             // reject overlong
-            if (b0 == 0xE0 && b1 < 0xA0) {
-                return false;
+            यदि (b0 == 0xE0 && b1 < 0xA0) {
+                प्रत्यागम false;
             }
             // reject surrogates U+D800..U+DFFF
-            if (b0 == 0xED && b1 >= 0xA0) {
-                return false;
+            यदि (b0 == 0xED && b1 >= 0xA0) {
+                प्रत्यागम false;
             }
-        } else if ((b0 & 0xF8) == 0xF0) {
+        } अन्यथा यदि ((b0 & 0xF8) == 0xF0) {
             // four-byte: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            if (b0 > 0xF4) {
-                return false;       // above U+10FFFF
+            यदि (b0 > 0xF4) {
+                प्रत्यागम false;       // above U+10FFFF
             }
-            if (ptr + 2 >= end) {
-                return false;
+            यदि (ptr + 2 >= अन्तः) {
+                प्रत्यागम false;
             }
             u8 b1 = *ptr++;
             u8 b2 = *ptr++;
             u8 b3 = *ptr++;
-            if ((b1 & 0xC0) != 0x80) {
-                return false;
+            यदि ((b1 & 0xC0) != 0x80) {
+                प्रत्यागम false;
             }
-            if ((b2 & 0xC0) != 0x80) {
-                return false;
+            यदि ((b2 & 0xC0) != 0x80) {
+                प्रत्यागम false;
             }
-            if ((b3 & 0xC0) != 0x80) {
-                return false;
+            यदि ((b3 & 0xC0) != 0x80) {
+                प्रत्यागम false;
             }
             // reject overlong
-            if (b0 == 0xF0 && b1 < 0x90) {
-                return false;
+            यदि (b0 == 0xF0 && b1 < 0x90) {
+                प्रत्यागम false;
             }
             // reject above U+10FFFF
-            if (b0 == 0xF4 && b1 > 0x8F) {
-                return false;
+            यदि (b0 == 0xF4 && b1 > 0x8F) {
+                प्रत्यागम false;
             }
-        } else {
+        } अन्यथा {
             // invalid leading byte (0x80..0xBF or 0xF5..0xFF)
-            return false;
+            प्रत्यागम false;
         }
     }
 
-    return true;
+    प्रत्यागम true;
 }
-#endif // d_m3EnableValidation
+#यदि_अन्तः // d_m3EnableValidation
 
 
-M3Result Read_utf8 (cstr_t* o_utf8, bytes_t* io_bytes, cbytes_t i_end)
+M3_परिणाम Read_utf8 (cstr_t* o_utf8, अष्टकानि_t* io_अष्टकानि, cbytes_t i_अन्तः)
 {
-    *o_utf8 = NULL;
+    *o_utf8 = रिक्त;
 
-    u32      utf8Length;
-    M3Result result = ReadLEB_u32(&utf8Length, io_bytes, i_end);
+    u32      utf8_दीर्घता;
+    M3_परिणाम परिणाम = ReadLEB_u32(&utf8_दीर्घता, io_अष्टकानि, i_अन्तः);
 
-    if (not result) {
-        if (utf8Length <= d_m3MaxSaneUtf8Length) {
-            const u8* ptr = *io_bytes;
-            if (utf8Length <= (size_t)(i_end - ptr)) {
-                const u8* end = ptr + utf8Length;
-#if d_m3EnableValidation
-                if (not IsValidUtf8(ptr, utf8Length)) {
-                    *io_bytes = end;
-                    return m3Err_wasmMalformed;
+    यदि (not परिणाम) {
+        यदि (utf8_दीर्घता <= d_m3_Max_Sane_Utf8_दीर्घता) {
+            ध्रुव u8* ptr = *io_अष्टकानि;
+            यदि (utf8_दीर्घता <= (size_t)(i_अन्तः - ptr)) {
+                ध्रुव u8* अन्तः = ptr + utf8_दीर्घता;
+#यदि d_m3EnableValidation
+                यदि (not IsValidUtf8(ptr, utf8_दीर्घता)) {
+                    *io_अष्टकानि = अन्तः;
+                    प्रत्यागम m3Err_wasmMalformed;
                 }
-#endif // d_m3EnableValidation
+#यदि_अन्तः // d_m3EnableValidation
 
-                char* utf8 = (char*)m3_Malloc("UTF8", utf8Length + 1);
+                वर्ण* utf8 = (वर्ण*)m3_Malloc("UTF8", utf8_दीर्घता + 1);
 
-                if (utf8) {
-                    memcpy(utf8, ptr, utf8Length);
-                    utf8[utf8Length] = 0;
+                यदि (utf8) {
+                    स्मृतिं_प्रतिलिख(utf8, ptr, utf8_दीर्घता);
+                    utf8[utf8_दीर्घता] = 0;
 
                     *o_utf8 = utf8;
-                } else {
-                    result = m3Err_mallocFailed;   // callers dereference the name; don't hand back NULL as success
+                } अन्यथा {
+                    परिणाम = m3Err_mallocFailed;   // callers dereference the name; don't hand back NULL as success
                 }
 
-                *io_bytes = end;
-            } else {
-                result = m3Err_wasmUnderrun;
+                *io_अष्टकानि = अन्तः;
+            } अन्यथा {
+                परिणाम = m3Err_wasmUnderrun;
             }
-        } else {
-            result = m3Err_missingUTF8;
+        } अन्यथा {
+            परिणाम = m3Err_missingUTF8;
         }
     }
 
-    return result;
+    प्रत्यागम परिणाम;
 }
 
-#if d_m3RecordBacktraces
-u32 FindModuleOffset (IM3Runtime i_runtime, pc_t i_pc)
+#यदि d_m3_लेखः_Backtraces
+u32 Find_Module_विस्थापनम् (IM3Runtime i_runtime, pc_t i_pc)
 {
     // walk the code pages
-    IM3CodePage curr = i_runtime->pagesOpen;
+    IM3_संहिता_Page curr = i_runtime->पृष्ठानि_Open;
 
-    bool pageFound = false;
+    bool page_प्राप्तम् = false;
 
-    while (curr) {
-        if (ContainsPC(curr, i_pc)) {
-            pageFound = true;
-            break;
+    यावत् (curr) {
+        यदि (अन्तर्भवति_PC(curr, i_pc)) {
+            page_प्राप्तम् = true;
+            भङ्ग;
         }
-        curr = curr->info.next;
+        curr = curr->info.अग्र;
     }
 
-    if (!pageFound) {
-        curr = i_runtime->pagesFull;
-        while (curr) {
-            if (ContainsPC(curr, i_pc)) {
-                pageFound = true;
-                break;
+    यदि (!page_प्राप्तम्) {
+        curr = i_runtime->पृष्ठानि_पूर्णम्;
+        यावत् (curr) {
+            यदि (अन्तर्भवति_PC(curr, i_pc)) {
+                page_प्राप्तम् = true;
+                भङ्ग;
             }
-            curr = curr->info.next;
+            curr = curr->info.अग्र;
         }
     }
 
-    if (pageFound) {
-        u32 result = 0;
+    यदि (page_प्राप्तम्) {
+        u32 परिणाम = 0;
 
-        bool pcFound = MapPCToOffset(curr, i_pc, &result);
-        (void)pcFound;                                                          d_m3Assert (pcFound);
+        bool pc_प्राप्तम् = Map_PCTo_विस्थापनम्(curr, i_pc, &परिणाम);
+        (शून्य)pc_प्राप्तम्;                                                          d_m3Assert (pc_प्राप्तम्);
 
-        return result;
-    } else {
-        return 0;
+        प्रत्यागम परिणाम;
+    } अन्यथा {
+        प्रत्यागम 0;
     }
 }
 
 
-void PushBacktraceFrame (IM3Runtime io_runtime, pc_t i_pc)
+शून्य प्रक्षिप_Backtrace_Frame (IM3Runtime io_runtime, pc_t i_pc)
 {
     // don't try to push any more frames if we've already had an alloc failure
-    if (M3_UNLIKELY(io_runtime->backtrace.lastFrame == M3_BACKTRACE_TRUNCATED)) {
-        return;
+    यदि (M3_UNLIKELY(io_runtime->backtrace.चरमः_Frame == M3_BACKTRACE_TRUNCATED)) {
+        प्रत्यागम;
     }
 
     M3BacktraceFrame* newFrame = m3_AllocStruct(M3BacktraceFrame);
 
-    if (!newFrame) {
-        io_runtime->backtrace.lastFrame = M3_BACKTRACE_TRUNCATED;
-        return;
+    यदि (!newFrame) {
+        io_runtime->backtrace.चरमः_Frame = M3_BACKTRACE_TRUNCATED;
+        प्रत्यागम;
     }
 
-    newFrame->moduleOffset = FindModuleOffset(io_runtime, i_pc);
+    newFrame->module_विस्थापनम् = Find_Module_विस्थापनम्(io_runtime, i_pc);
 
-    if (!io_runtime->backtrace.frames || !io_runtime->backtrace.lastFrame) {
-        io_runtime->backtrace.frames = newFrame;
-    } else {
-        io_runtime->backtrace.lastFrame->next = newFrame;
+    यदि (!io_runtime->backtrace.चौकटाः || !io_runtime->backtrace.चरमः_Frame) {
+        io_runtime->backtrace.चौकटाः = newFrame;
+    } अन्यथा {
+        io_runtime->backtrace.चरमः_Frame->अग्र = newFrame;
     }
-    io_runtime->backtrace.lastFrame = newFrame;
+    io_runtime->backtrace.चरमः_Frame = newFrame;
 }
 
 
-void FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function)
+शून्य FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function)
 {
     // If we've had an alloc failure then the last frame doesn't refer to the
     // frame we want to fill in the function info for.
-    if (M3_UNLIKELY(io_runtime->backtrace.lastFrame == M3_BACKTRACE_TRUNCATED)) {
-        return;
+    यदि (M3_UNLIKELY(io_runtime->backtrace.चरमः_Frame == M3_BACKTRACE_TRUNCATED)) {
+        प्रत्यागम;
     }
 
-    if (!io_runtime->backtrace.lastFrame) {
-        return;
+    यदि (!io_runtime->backtrace.चरमः_Frame) {
+        प्रत्यागम;
     }
 
-    io_runtime->backtrace.lastFrame->function = i_function;
+    io_runtime->backtrace.चरमः_Frame->function = i_function;
 }
 
 
-void ClearBacktrace (IM3Runtime io_runtime)
+शून्य ClearBacktrace (IM3Runtime io_runtime)
 {
-    M3BacktraceFrame* currentFrame = io_runtime->backtrace.frames;
-    while (currentFrame) {
-        M3BacktraceFrame* nextFrame = currentFrame->next;
+    M3BacktraceFrame* currentFrame = io_runtime->backtrace.चौकटाः;
+    यावत् (currentFrame) {
+        M3BacktraceFrame* अग्र_Frame = currentFrame->अग्र;
         m3_Free(currentFrame);
-        currentFrame = nextFrame;
+        currentFrame = अग्र_Frame;
     }
 
-    io_runtime->backtrace.frames    = NULL;
-    io_runtime->backtrace.lastFrame = NULL;
+    io_runtime->backtrace.चौकटाः    = रिक्त;
+    io_runtime->backtrace.चरमः_Frame = रिक्त;
 }
-#endif // d_m3RecordBacktraces
+#यदि_अन्तः // d_m3RecordBacktraces

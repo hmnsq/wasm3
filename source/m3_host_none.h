@@ -15,62 +15,62 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_none_h
-#define m3_host_none_h
+#यदि_अपरिभाषितम् m3_host_none_h
+#परिभाषय m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#अन्तर्भाव "m3_core.h"
+#अन्तर्भाव "m3_host.h"
 
-void* m3_HostStackBase (void)
+शून्य* m3_Host_राशिः_आधारः (शून्य)
 {
-    return NULL;
+    प्रत्यागम रिक्त;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+शून्य m3_Host_Install_व्यवधानम्_Handler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (शून्य)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+शून्य m3_Host_Remove_व्यवधानम्_Handler (शून्य)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_HostTimeMs (शून्य)
 {
-    return 0;
+    प्रत्यागम 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+शून्य m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (शून्य)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (ध्रुव वर्ण* i_मार्गः, size_t i_max_अष्टकानि, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    प्रत्यागम m3_HostReadFile(i_मार्गः, i_max_अष्टकानि, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+शून्य m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->दत्त);
 
-    io_file->size = 0;
+    io_file->आकार = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (ध्रुव वर्ण* i_from, ध्रुव वर्ण* i_गन्तव्यम्)
 {
-    remove(i_to);
-    return rename(i_from, i_to) == 0;
+    remove(i_गन्तव्यम्);
+    प्रत्यागम rename(i_from, i_गन्तव्यम्) == 0;
 }
 
-#if d_m3GuardedMemory
+#यदि d_m3_Guarded_स्मृतिः
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
-#endif
+#यदि_अन्तः
 
-#endif // m3_host_none_h
+#यदि_अन्तः // m3_host_none_h

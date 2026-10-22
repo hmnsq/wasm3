@@ -5,70 +5,70 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_code_h
-#define m3_code_h
+#यदि_अपरिभाषितम् m3_संहिता_h
+#परिभाषय m3_संहिता_h
 
-#include "m3_core.h"
+#अन्तर्भाव "m3_core.h"
 
 d_m3BeginExternC
 
-typedef struct M3CodePage {
-    M3CodePageHeader info;
-    code_t           code[1];
-} M3CodePage;
+प्रकारनिर्देश संरचना M3_संहिता_Page {
+    M3_संहिता_Page_शीर्षकम् info;
+    संहिता_t           संहिता[1];
+} M3_संहिता_Page;
 
-typedef M3CodePage* IM3CodePage;
+प्रकारनिर्देश M3_संहिता_Page* IM3_संहिता_Page;
 
 
-IM3CodePage         NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines);
+IM3_संहिता_Page         New_संहिता_Page (IM3Runtime i_runtime, u32 i_min_अङ्कः_पङ्क्तयः);
 
-void                FreeCodePages (IM3CodePage* io_list);
+शून्य                Free_संहिता_पृष्ठानि (IM3_संहिता_Page* io_list);
 
-u32                 NumFreeLines (IM3CodePage i_page);
-pc_t                GetPageStartPC (IM3CodePage i_page);
-pc_t                GetPagePC (IM3CodePage i_page);
-void                EmitWord_impl (IM3CodePage i_page, void* i_word);
-void                EmitWord32 (IM3CodePage i_page, u32 i_word);
-void                EmitWord64 (IM3CodePage i_page, u64 i_word);
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
-#endif // d_m3RecordBacktraces
+u32                 अङ्कः_Free_पङ्क्तयः (IM3_संहिता_Page i_page);
+pc_t                GetPageStartPC (IM3_संहिता_Page i_page);
+pc_t                GetPagePC (IM3_संहिता_Page i_page);
+शून्य                EmitWord_impl (IM3_संहिता_Page i_page, शून्य* i_word);
+शून्य                EmitWord32 (IM3_संहिता_Page i_page, u32 i_word);
+शून्य                EmitWord64 (IM3_संहिता_Page i_page, u64 i_word);
+#यदि d_m3_लेखः_Backtraces
+शून्य Emit_Mapping_प्रविष्टिः (IM3_संहिता_Page i_page, u32 i_module_विस्थापनम्);
+#यदि_अन्तः // d_m3RecordBacktraces
 
-void        PushCodePage (IM3CodePage* io_list, IM3CodePage i_codePage);
-IM3CodePage PopCodePage (IM3CodePage* io_list);
+शून्य        प्रक्षिप_संहिता_Page (IM3_संहिता_Page* io_list, IM3_संहिता_Page i_संहिता_Page);
+IM3_संहिता_Page निष्कासय_संहिता_Page (IM3_संहिता_Page* io_list);
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list); // i_list = NULL is valid
-u32         CountCodePages (IM3CodePage i_list); // i_list = NULL is valid
+IM3_संहिता_Page Get_अन्तः_संहिता_Page (IM3_संहिता_Page i_list); // i_list = NULL is valid
+u32         गणनम्_संहिता_पृष्ठानि (IM3_संहिता_Page i_list); // i_list = NULL is valid
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc);
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset);
-#endif // d_m3RecordBacktraces
+#यदि d_m3_लेखः_Backtraces
+bool अन्तर्भवति_PC (IM3_संहिता_Page i_page, pc_t i_pc);
+bool Map_PCTo_विस्थापनम् (IM3_संहिता_Page i_page, pc_t i_pc, u32* o_module_विस्थापनम्);
+#यदि_अन्तः // d_m3RecordBacktraces
 
-#ifdef DEBUG
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
-#endif
+#यदि_परिभाषितम् DEBUG
+शून्य dump_संहिता_page (IM3_संहिता_Page i_संहिता_Page, pc_t i_startPC);
+#यदि_अन्तः
 
-#define EmitWord(page, val) EmitWord_impl(page, (void*)(val))
+#परिभाषय EmitWord(page, val) EmitWord_impl(page, (शून्य*)(val))
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3RecordBacktraces
+#यदि d_m3_लेखः_Backtraces
 
-typedef struct M3CodeMapEntry {
-    u32 pcOffset;
-    u32 moduleOffset;
-} M3CodeMapEntry;
+प्रकारनिर्देश संरचना M3_संहिता_Map_प्रविष्टिः {
+    u32 pc_विस्थापनम्;
+    u32 module_विस्थापनम्;
+} M3_संहिता_Map_प्रविष्टिः;
 
-typedef struct M3CodeMappingPage {
-    pc_t           basePC;
-    u32            size;
-    u32            capacity;
-    M3CodeMapEntry entries[];
-} M3CodeMappingPage;
+प्रकारनिर्देश संरचना M3_संहिता_Mapping_Page {
+    pc_t           आधारः_PC;
+    u32            आकार;
+    u32            क्षमता;
+    M3_संहिता_Map_प्रविष्टिः entries[];
+} M3_संहिता_Mapping_Page;
 
-#endif // d_m3RecordBacktraces
+#यदि_अन्तः // d_m3RecordBacktraces
 
-d_m3EndExternC
+d_m3_अन्तः_Extern_C
 
-#endif // m3_code_h
+#यदि_अन्तः // m3_code_h

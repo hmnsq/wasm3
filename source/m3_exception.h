@@ -6,28 +6,28 @@
 //
 //  some macros to emulate try/catch
 
-#ifndef m3_exception_h
-#define m3_exception_h
+#यदि_अपरिभाषितम् m3_exception_h
+#परिभाषय m3_exception_h
 
-#include "m3_config.h"
+#अन्तर्भाव "m3_config.h"
 
-#if d_m3EnableExceptionBreakpoint
+#यदि d_m3EnableExceptionBreakpoint
 
 // declared in m3_info.c
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message);
+शून्य ExceptionBreakpoint (cstr_t i_exception, cstr_t i_सन्देशः);
 
 #  define EXCEPTION_PRINT(ERROR) ExceptionBreakpoint (ERROR, (__FILE__ ":" M3_STR(__LINE__)))
 
-#else
+#अन्यथा
 #  define EXCEPTION_PRINT(...)
-#endif
+#यदि_अन्तः
 
 
-#define _try                                M3Result result = m3Err_none;
-#define _(TRY)                              { result = TRY; if (M3_UNLIKELY(result)) { EXCEPTION_PRINT (result); goto _catch; } }
-#define _throw(ERROR)                       { result = ERROR; EXCEPTION_PRINT (result); goto _catch; }
-#define _throwif(ERROR, COND)               if (M3_UNLIKELY(COND)) { _throw(ERROR); }
+#परिभाषय _try                                M3_परिणाम परिणाम = m3Err_none;
+#परिभाषय _(TRY)                              { परिणाम = TRY; यदि (M3_UNLIKELY(परिणाम)) { EXCEPTION_PRINT (परिणाम); गच्छ _catch; } }
+#परिभाषय _throw(ERROR)                       { परिणाम = ERROR; EXCEPTION_PRINT (परिणाम); गच्छ _catch; }
+#परिभाषय _throwif(ERROR, COND)               यदि (M3_UNLIKELY(COND)) { _throw(ERROR); }
 
-#define _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
+#परिभाषय _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
 
-#endif // m3_exception_h
+#यदि_अन्तः // m3_exception_h

@@ -5,274 +5,274 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#include "m3_function.h"
-#include "m3_env.h"
+#अन्तर्भाव "m3_function.h"
+#अन्तर्भाव "m3_env.h"
 
 
-M3Result AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes)
+M3_परिणाम AllocFuncType (IM3FuncType* o_functionType, u32 i_अङ्कः_Types)
 {
-    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", sizeof(M3FuncType) + i_numTypes * sizeof(m3type_t));
-    if (*o_functionType) {
+    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", परिमाण(M3FuncType) + i_अङ्कः_Types * परिमाण(m3type_t));
+    यदि (*o_functionType) {
         (*o_functionType)->isContinuation = false;
-        (*o_functionType)->contFuncType   = NULL;
-        (*o_functionType)->inRecGroup     = false;
-        return m3Err_none;
+        (*o_functionType)->contFuncType   = रिक्त;
+        (*o_functionType)->अन्तर्_Rec_गणः     = false;
+        प्रत्यागम m3Err_none;
     }
-    return m3Err_mallocFailed;
+    प्रत्यागम m3Err_mallocFailed;
 }
 
 
-#if d_m3HasTypedRefs
+#यदि d_m3HasTypedRefs
 
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
-m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull)
+m3type_t Ref_Type_सम्बन्धि_Func_Type (ध्रुव IM3FuncType i_funcType, bool i_nonNull)
 {
-    m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonicalIndex : d_m3Type_heapAbstract);
+    m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonical_सूचकांक : d_m3Type_heapAbstract);
 
-    if (i_funcType and i_funcType->isContinuation) {
+    यदि (i_funcType and i_funcType->isContinuation) {
         type |= d_m3Type_refCont;
     }
 
-    if (i_nonNull) {
+    यदि (i_nonNull) {
         type |= d_m3Type_refNonNull;
     }
 
-    return type;
+    प्रत्यागम type;
 }
 
-#endif // d_m3HasTypedRefs
+#यदि_अन्तः // d_m3HasTypedRefs
 
 
-bool AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB)
+bool AreFuncTypesEqual (ध्रुव IM3FuncType i_typeA, ध्रुव IM3FuncType i_typeB)
 {
-    if (i_typeA->isContinuation != i_typeB->isContinuation) {
-        return false;
+    यदि (i_typeA->isContinuation != i_typeB->isContinuation) {
+        प्रत्यागम false;
     }
-    if (i_typeA->isContinuation) {
-        return (i_typeA->contFuncType == i_typeB->contFuncType) or
+    यदि (i_typeA->isContinuation) {
+        प्रत्यागम (i_typeA->contFuncType == i_typeB->contFuncType) or
                (i_typeA->contFuncType and i_typeB->contFuncType and
                 AreFuncTypesEqual(i_typeA->contFuncType, i_typeB->contFuncType));
     }
-    if (i_typeA->numRets == i_typeB->numRets and i_typeA->numArgs == i_typeB->numArgs) {
-        return (memcmp(i_typeA->types, i_typeB->types,
-                       (i_typeA->numRets + i_typeA->numArgs) * sizeof(m3type_t)) == 0);
+    यदि (i_typeA->अङ्कः_Rets == i_typeB->अङ्कः_Rets and i_typeA->अङ्कः_तर्काः == i_typeB->अङ्कः_तर्काः) {
+        प्रत्यागम (memcmp(i_typeA->types, i_typeB->types,
+                       (i_typeA->अङ्कः_Rets + i_typeA->अङ्कः_तर्काः) * परिमाण(m3type_t)) == 0);
     }
 
-    return false;
+    प्रत्यागम false;
 }
 
-u16 GetFuncTypeNumParams (const IM3FuncType i_funcType)
+u16 Get_Func_Type_अङ्कः_Params (ध्रुव IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numArgs : 0;
+    प्रत्यागम i_funcType ? i_funcType->अङ्कः_तर्काः : 0;
 }
 
 
-m3type_t GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index)
+m3type_t GetFuncTypeParamType (ध्रुव IM3FuncType i_funcType, u16 i_सूचकांक)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numArgs) {
-            type = i_funcType->types[i_funcType->numRets + i_index];
+    यदि (i_funcType) {
+        यदि (i_सूचकांक < i_funcType->अङ्कः_तर्काः) {
+            type = i_funcType->types[i_funcType->अङ्कः_Rets + i_सूचकांक];
         }
     }
 
-    return type;
+    प्रत्यागम type;
 }
 
 
-u16 GetFuncTypeNumResults (const IM3FuncType i_funcType)
+u16 Get_Func_Type_अङ्कः_Results (ध्रुव IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numRets : 0;
+    प्रत्यागम i_funcType ? i_funcType->अङ्कः_Rets : 0;
 }
 
 
-m3type_t GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index)
+m3type_t Get_Func_Type_परिणाम_Type (ध्रुव IM3FuncType i_funcType, u16 i_सूचकांक)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numRets) {
-            type = i_funcType->types[i_index];
+    यदि (i_funcType) {
+        यदि (i_सूचकांक < i_funcType->अङ्कः_Rets) {
+            type = i_funcType->types[i_सूचकांक];
         }
     }
 
-    return type;
+    प्रत्यागम type;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------
 
 
-void FreeImportInfo (M3ImportInfo* i_info)
+शून्य FreeImportInfo (M3ImportInfo* i_info)
 {
     m3_Free(i_info->moduleUtf8);
-    m3_Free(i_info->fieldUtf8);
+    m3_Free(i_info->क्षेत्रम्_Utf8);
 }
 
 
-#if d_m3HasSnapshots
+#यदि d_m3HasSnapshots
 
-void SnapshotMap_Free (M3SnapshotMap* i_map)
+शून्य SnapshotMap_Free (M3SnapshotMap* i_map)
 {
-    if (i_map) {
+    यदि (i_map) {
         m3_Free(i_map->locals);
         m3_Free(i_map->safePoints);
-        m3_Free(i_map->values);
-        m3_Free(i_map->blocks);
+        m3_Free(i_map->मानानि);
+        m3_Free(i_map->खण्डानि);
         m3_Free(i_map);
     }
 }
 
-#endif
+#यदि_अन्तः
 
-void Function_Release (IM3Function i_function)
+शून्य Function_Release (IM3Function i_function)
 {
     m3_Free(i_function->constants);
 
-#if d_m3HasSnapshots
+#यदि d_m3HasSnapshots
     SnapshotMap_Free(i_function->snapshotMap);
-    i_function->snapshotMap = NULL;
-#endif
+    i_function->snapshotMap = रिक्त;
+#यदि_अन्तः
 
-    for (int i = 0; i < i_function->numNames; i++) {
+    प्रति (पूर्णाङ्क i = 0; i < i_function->अङ्कः_नामानि; i++) {
         // name can be an alias of fieldUtf8
-        if (i_function->names[i] != i_function->import.fieldUtf8) {
-            m3_Free(i_function->names[i]);
+        यदि (i_function->नामानि[i] != i_function->import.क्षेत्रम्_Utf8) {
+            m3_Free(i_function->नामानि[i]);
         }
     }
 
     FreeImportInfo(&i_function->import);
 
-    if (i_function->ownsWasmCode) {
+    यदि (i_function->owns_Wasm_संहिता) {
         m3_Free(i_function->wasm);
     }
 
     // Function_FreeCompiledCode (func);
 
-#if (d_m3EnableCodePageRefCounting)
+#यदि (d_m3_Enable_संहिता_Page_Ref_Counting)
     {
-        m3_Free(i_function->codePageRefs);
-        i_function->numCodePageRefs = 0;
+        m3_Free(i_function->संहिता_Page_Refs);
+        i_function->अङ्कः_संहिता_Page_Refs = 0;
     }
-#endif
+#यदि_अन्तः
 }
 
 
-void Function_FreeCompiledCode (IM3Function i_function)
+शून्य Function_Free_Compiled_संहिता (IM3Function i_function)
 {
-#if (d_m3EnableCodePageRefCounting)
+#यदि (d_m3_Enable_संहिता_Page_Ref_Counting)
     {
-        i_function->compiled = NULL;
+        i_function->compiled = रिक्त;
 
-        while (i_function->numCodePageRefs--) {
-            IM3CodePage page = i_function->codePageRefs[i_function->numCodePageRefs];
+        यावत् (i_function->अङ्कः_संहिता_Page_Refs--) {
+            IM3_संहिता_Page page = i_function->संहिता_Page_Refs[i_function->अङ्कः_संहिता_Page_Refs];
 
-            if (--(page->info.usageCount) == 0) {
+            यदि (--(page->info.usage_गणनम्) == 0) {
                 //                printf ("free %p\n", page);
             }
         }
 
-        m3_Free(i_function->codePageRefs);
+        m3_Free(i_function->संहिता_Page_Refs);
 
-        Runtime_ReleaseCodePages(i_function->module->runtime);
+        Runtime_Release_संहिता_पृष्ठानि(i_function->module->runtime);
     }
-#endif
+#यदि_अन्तः
 }
 
 
 cstr_t m3_GetFunctionName (IM3Function i_function)
 {
-    u16     numNames = 0;
-    cstr_t* names    = GetFunctionNames(i_function, &numNames);
-    if (numNames > 0) {
-        return names[0];
-    } else {
-        return "<unnamed>";
+    u16     अङ्कः_नामानि = 0;
+    cstr_t* नामानि    = Get_Function_नामानि(i_function, &अङ्कः_नामानि);
+    यदि (अङ्कः_नामानि > 0) {
+        प्रत्यागम नामानि[0];
+    } अन्यथा {
+        प्रत्यागम "<unnamed>";
     }
 }
 
 
 IM3Module m3_GetFunctionModule (IM3Function i_function)
 {
-    return i_function ? i_function->module : NULL;
+    प्रत्यागम i_function ? i_function->module : रिक्त;
 }
 
 
-cstr_t* GetFunctionNames (IM3Function i_function, u16* o_numNames)
+cstr_t* Get_Function_नामानि (IM3Function i_function, u16* o_अङ्कः_नामानि)
 {
-    if (!i_function || !o_numNames) {
-        return NULL;
+    यदि (!i_function || !o_अङ्कः_नामानि) {
+        प्रत्यागम रिक्त;
     }
 
-    if (i_function->import.fieldUtf8) {
-        *o_numNames = 1;
-        return &i_function->import.fieldUtf8;
-    } else {
-        *o_numNames = i_function->numNames;
-        return i_function->names;
+    यदि (i_function->import.क्षेत्रम्_Utf8) {
+        *o_अङ्कः_नामानि = 1;
+        प्रत्यागम &i_function->import.क्षेत्रम्_Utf8;
+    } अन्यथा {
+        *o_अङ्कः_नामानि = i_function->अङ्कः_नामानि;
+        प्रत्यागम i_function->नामानि;
     }
 }
 
 
 cstr_t GetFunctionImportModuleName (IM3Function i_function)
 {
-    return (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
+    प्रत्यागम (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
 }
 
 
-u16 GetFunctionNumArgs (IM3Function i_function)
+u16 Get_Function_अङ्कः_तर्काः (IM3Function i_function)
 {
-    u16 numArgs = 0;
+    u16 अङ्कः_तर्काः = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
-            numArgs = i_function->funcType->numArgs;
+    यदि (i_function) {
+        यदि (i_function->funcType) {
+            अङ्कः_तर्काः = i_function->funcType->अङ्कः_तर्काः;
         }
     }
 
-    return numArgs;
+    प्रत्यागम अङ्कः_तर्काः;
 }
 
-m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index)
+m3type_t GetFunctionArgType (IM3Function i_function, u32 i_सूचकांक)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_index < GetFunctionNumArgs(i_function)) {
-        u32 numReturns = i_function->funcType->numRets;
+    यदि (i_सूचकांक < Get_Function_अङ्कः_तर्काः(i_function)) {
+        u32 अङ्कः_Returns = i_function->funcType->अङ्कः_Rets;
 
-        type = i_function->funcType->types[numReturns + i_index];
+        type = i_function->funcType->types[अङ्कः_Returns + i_सूचकांक];
     }
 
-    return type;
+    प्रत्यागम type;
 }
 
 
-u16 GetFunctionNumReturns (IM3Function i_function)
+u16 Get_Function_अङ्कः_Returns (IM3Function i_function)
 {
-    u16 numReturns = 0;
+    u16 अङ्कः_Returns = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
-            numReturns = i_function->funcType->numRets;
+    यदि (i_function) {
+        यदि (i_function->funcType) {
+            अङ्कः_Returns = i_function->funcType->अङ्कः_Rets;
         }
     }
 
-    return numReturns;
+    प्रत्यागम अङ्कः_Returns;
 }
 
 
-u8 GetFunctionReturnType (const IM3Function i_function, u16 i_index)
+u8 GetFunctionReturnType (ध्रुव IM3Function i_function, u16 i_सूचकांक)
 {
-    return i_function ? GetFuncTypeResultType(i_function->funcType, i_index) : c_m3Type_unknown;
+    प्रत्यागम i_function ? Get_Func_Type_परिणाम_Type(i_function->funcType, i_सूचकांक) : c_m3Type_unknown;
 }
 
 
-u32 GetFunctionNumArgsAndLocals (IM3Function i_function)
+u32 Get_Function_अङ्कः_तर्काः_And_Locals (IM3Function i_function)
 {
-    if (i_function) {
-        return i_function->numLocals + GetFunctionNumArgs(i_function);
-    } else {
-        return 0;
+    यदि (i_function) {
+        प्रत्यागम i_function->अङ्कः_Locals + Get_Function_अङ्कः_तर्काः(i_function);
+    } अन्यथा {
+        प्रत्यागम 0;
     }
 }

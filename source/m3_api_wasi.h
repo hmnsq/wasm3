@@ -5,15 +5,15 @@
 //  Copyright © 2019 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#ifndef m3_api_wasi_h
-#define m3_api_wasi_h
+#यदि_अपरिभाषितम् m3_api_wasi_h
+#परिभाषय m3_api_wasi_h
 
-#include "m3_core.h"
+#अन्तर्भाव "m3_core.h"
 
 // What every WASI backend hands the guest as its environment. A Wasm module gets
 // no host environment of its own, and a few programs want these set; WASM3 and
 // WASM3_ARCH are how a guest tells it is running under Wasm3 (see print_version).
-#if !defined(d_m3WasiDefaultEnvironment)
+#यदि !defined(d_m3WasiDefaultEnvironment)
 #  define d_m3WasiDefaultEnvironment          \
       "TERM=xterm-256color",                  \
       "COLORTERM=truecolor",                  \
@@ -23,52 +23,52 @@
       "PATH=/",                               \
       "WASM3=1",                              \
       "WASM3_ARCH=" M3_ARCH
-#endif
+#यदि_अन्तः
 
-#if defined(d_m3HasUVWASI)
+#यदि defined(d_m3HasUVWASI)
 #  include "uvwasi.h"
-#endif
+#यदि_अन्तः
 
 d_m3BeginExternC
 
-typedef struct m3_wasi_context_t {
-    i32      exit_code;
+प्रकारनिर्देश संरचना m3_wasi_context_t {
+    i32      exit_संहिता;
     u32      argc;
     ccstr_t* argv;
 
-#if defined(d_m3HasUVWASI)
+#यदि defined(d_m3HasUVWASI)
     uvwasi_t uvwasi;
-#endif
+#यदि_अन्तः
 } m3_wasi_context_t;
 
-#define M3WASI m3_wasi_context_t*
+#परिभाषय M3WASI m3_wasi_context_t*
 
 // ----------------------------------------------------------------------
 // Free-standing WASI
 // ----------------------------------------------------------------------
 
-M3Result m3_NewCustomWASI (M3WASI*);
-void     m3_FreeCustomWASI(M3WASI);
+M3_परिणाम m3_NewCustomWASI (M3WASI*);
+शून्य     m3_FreeCustomWASI(M3WASI);
 
-M3Result m3_LinkCustomWASI(IM3Module, M3WASI);
+M3_परिणाम m3_LinkCustomWASI(IM3Module, M3WASI);
 
-#if defined(d_m3HasUVWASI)
-M3Result m3_LinkCustomWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
-#endif
+#यदि defined(d_m3HasUVWASI)
+M3_परिणाम m3_LinkCustomWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
+#यदि_अन्तः
 
 
 // ----------------------------------------------------------------------
 // Global WASI
 // ----------------------------------------------------------------------
-M3Result m3_LinkWASI (IM3Module io_module);
+M3_परिणाम m3_LinkWASI (IM3Module io_module);
 
-#if defined(d_m3HasUVWASI)
-M3Result m3_LinkWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
-#endif
+#यदि defined(d_m3HasUVWASI)
+M3_परिणाम m3_LinkWASIWithOptions (IM3Module io_module, uvwasi_options_t uvwasiOptions);
+#यदि_अन्तः
 
-m3_wasi_context_t* m3_GetWasiContext (void);
+m3_wasi_context_t* m3_GetWasiContext (शून्य);
 
 
-d_m3EndExternC
+d_m3_अन्तः_Extern_C
 
-#endif // m3_api_wasi_h
+#यदि_अन्तः // m3_api_wasi_h

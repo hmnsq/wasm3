@@ -16,17 +16,17 @@
 //  plain reads and writes.
 //
 
-#ifndef m3_atomic_h
-#define m3_atomic_h
+#यदि_अपरिभाषितम् m3_atomic_h
+#परिभाषय m3_atomic_h
 
-#include "m3_core.h"
+#अन्तर्भाव "m3_core.h"
 
-#if d_m3HasAtomics
+#यदि d_m3HasAtomics
 
 d_m3BeginExternC
 
-enum {
-    c_atomicAdd,
+गणना {
+    c_atomic_सङ्कलय,
     c_atomicSub,
     c_atomicAnd,
     c_atomicOr,
@@ -35,18 +35,18 @@ enum {
 };
 
 #  define d_m3AtomicTyped(T)                                            \
-    static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
+    स्थिर अन्तःस्थ T m3_Atomic_आरोपय##T (ध्रुव u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T मानम्;                                                        \
+        स्मृतिं_प्रतिलिख (& मानम्, i_cell, परिमाण (मानम्));                       \
+        M3_BSWAP_##T (मानम्);                                           \
+        प्रत्यागम मानम्;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    स्थिर अन्तःस्थ शून्य m3_AtomicStore_##T (u8* o_cell, T i_मानम्)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_मानम्);                                         \
+        स्मृतिं_प्रतिलिख (o_cell, & i_मानम्, परिमाण (i_मानम्));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -54,61 +54,61 @@ d_m3AtomicTyped(u16);
 d_m3AtomicTyped(u32);
 d_m3AtomicTyped(u64);
 
-static inline
-u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
+स्थिर अन्तःस्थ
+u64 m3_Atomic_आरोपय_W (ध्रुव u8* i_cell, u32 i_log2_विस्तारः)
 {
-    switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    विकल्प (i_log2_विस्तारः) {
+    पक्ष 0: प्रत्यागम m3_Atomic_आरोपय_u8(i_cell);
+    पक्ष 1: प्रत्यागम m3_Atomic_आरोपय_u16(i_cell);
+    पक्ष 2: प्रत्यागम m3_Atomic_आरोपय_u32(i_cell);
+    स्वभाव: प्रत्यागम m3_Atomic_आरोपय_u64(i_cell);
     }
 }
 
-static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+स्थिर अन्तःस्थ
+शून्य m3_AtomicStoreW (u8* o_cell, u32 i_log2_विस्तारः, u64 i_मानम्)
 {
-    switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    विकल्प (i_log2_विस्तारः) {
+    पक्ष 0: m3_AtomicStore_u8(o_cell, (u8)i_मानम्); भङ्ग;
+    पक्ष 1: m3_AtomicStore_u16(o_cell, (u16)i_मानम्); भङ्ग;
+    पक्ष 2: m3_AtomicStore_u32(o_cell, (u32)i_मानम्); भङ्ग;
+    स्वभाव: m3_AtomicStore_u64(o_cell, i_मानम्); भङ्ग;
     }
 }
 
-static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+स्थिर अन्तःस्थ
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2_विस्तारः, u32 i_विधा, u64 i_मानम्)
 {
-    u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
+    u64 old = m3_Atomic_आरोपय_W(io_cell, i_log2_विस्तारः);
     u64 updated;
 
-    switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    विकल्प (i_विधा) {
+    पक्ष c_atomic_सङ्कलय: updated = old + i_मानम्; भङ्ग;
+    पक्ष c_atomicSub: updated = old - i_मानम्; भङ्ग;
+    पक्ष c_atomicAnd: updated = old & i_मानम्; भङ्ग;
+    पक्ष c_atomicOr: updated = old | i_मानम्; भङ्ग;
+    पक्ष c_atomicXor: updated = old ^ i_मानम्; भङ्ग;
+    स्वभाव: updated = i_मानम्; भङ्ग;
     }
 
-    m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    m3_AtomicStoreW(io_cell, i_log2_विस्तारः, updated);
+    प्रत्यागम old;
 }
 
-static inline
-u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_replacement)
+स्थिर अन्तःस्थ
+u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2_विस्तारः, u64 i_expected, u64 i_replacement)
 {
-    u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
-    u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
+    u64 old = m3_Atomic_आरोपय_W(io_cell, i_log2_विस्तारः);
+    u64 आवरणम् = (i_log2_विस्तारः == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2_विस्तारः)) - 1);
 
-    if (old == (i_expected & mask)) {
-        m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
+    यदि (old == (i_expected & आवरणम्)) {
+        m3_AtomicStoreW(io_cell, i_log2_विस्तारः, i_replacement);
     }
-    return old;
+    प्रत्यागम old;
 }
 
-d_m3EndExternC
+d_m3_अन्तः_Extern_C
 
-#endif // d_m3HasAtomics
+#यदि_अन्तः // d_m3HasAtomics
 
-#endif // m3_atomic_h
+#यदि_अन्तः // m3_atomic_h
