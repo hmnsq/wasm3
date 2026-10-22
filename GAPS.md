@@ -1,0 +1,550 @@
+# What is still missing
+
+76 languages. Each line says in how many languages it is missing.
+
+## Files in languages BURP cannot read yet
+
+
+## Keywords with no word in a language's table
+
+- guru:__FILE__: 75
+- guru:size_t: 71
+- guru:errno: 71
+- guru:offsetof: 71
+- guru:fprintf: 71
+- guru:times: 71
+- guru:stderr: 71
+- guru:time: 71
+- guru:va_arg: 71
+- guru:va_list: 71
+- guru:clock: 71
+- guru:memmove: 71
+- guru:FILE: 71
+- guru:memcmp: 71
+- guru:stdout: 71
+- guru:close: 71
+- guru:SEEK_SET: 71
+- guru:fstat: 71
+- guru:va_start: 71
+- guru:va_end: 71
+- guru:CHAR_BIT: 71
+- guru:SEEK_CUR: 71
+- guru:ERANGE: 71
+- guru:fclose: 71
+- guru:fwrite: 71
+- guru:fflush: 71
+- guru:fputc: 71
+- guru:fopen: 71
+- guru:SEEK_END: 71
+- guru:time_t: 71
+- guru:abort: 71
+- guru:DBL_MAX: 71
+- guru:fseek: 71
+- guru:rename: 71
+- guru:SIGINT: 71
+- guru:SIG_DFL: 71
+- guru:SIGSEGV: 71
+- guru:putc: 71
+- guru:fputs: 71
+- guru:clock_t: 71
+- guru:EDOM: 71
+- guru:stdin: 71
+- guru:UINT_MAX: 71
+- guru:realloc: 71
+- guru:strtod: 71
+- guru:fabs: 71
+- guru:ceil: 71
+- guru:floor: 71
+- guru:ftell: 71
+- guru:fread: 71
+- guru:remove: 71
+- guru:strrchr: 71
+- guru:strchr: 71
+- guru:SIG_IGN: 71
+- guru:INT_MIN: 71
+- guru:memset: 70
+- guru:strcmp: 70
+- guru:open: 70
+- guru:strcpy: 70
+- guru:puts: 70
+- guru:strcat: 70
+- guru:#endif: 66
+- guru:#define: 66
+- guru:#ifndef: 66
+- guru:#ifdef: 66
+- guru:#undef: 66
+- guru:memcpy: 62
+- guru:printf: 62
+- guru:unsigned: 62
+- guru:long: 62
+- guru:strlen: 62
+- guru:INT_MAX: 62
+- guru:short: 62
+- guru:calloc: 62
+- guru:isspace: 62
+- guru:strstr: 62
+- guru:sqrt: 62
+- guru:strncmp: 62
+- guru:static: 25
+- guru:void: 25
+- guru:const: 25
+- guru:NULL: 25
+- guru:typedef: 25
+- guru:continue: 25
+- guru:switch: 25
+- guru:default: 25
+- guru:#elif: 25
+- guru:do: 25
+- guru:extern: 25
+- guru:float: 25
+- guru:goto: 25
+- guru:read: 25
+- guru:free: 25
+- guru:assert: 25
+- guru:write: 25
+- guru:for: 9
+- guru:case: 9
+- guru:sizeof: 9
+- guru:char: 9
+- guru:break: 9
+- guru:struct: 9
+- guru:inline: 9
+- guru:union: 9
+- guru:enum: 9
+- guru:double: 9
+- guru:volatile: 9
+- guru:if: 1
+- guru:return: 1
+- guru:else: 1
+- guru:#if: 1
+- guru:#else: 1
+- guru:int: 1
+- guru:while: 1
+
+## Names with no dictionary entry (the most common first)
+
+- `o`: 76
+- `i`: 76
+- `u32`: 76
+- `_`: 76
+- `r`: 76
+- `v`: 76
+- `module`: 76
+- `define`: 76
+- `u64`: 76
+- `type`: 76
+- `_throwif`: 76
+- `u16`: 76
+- `l`: 76
+- `runtime`: 76
+- `s`: 76
+- `io_module`: 76
+- `u8`: 76
+- `i_module`: 76
+- `m3Err_none`: 76
+- `i32`: 76
+- `fd`: 76
+- `m3ApiGetArg`: 76
+- `defined`: 76
+- `m3type_t`: 76
+- `ret`: 76
+- `i_runtime`: 76
+- `TYPE`: 76
+- `d_cc`: 76
+- `io_runtime`: 76
+- `i_function`: 76
+- `_catch`: 76
+- `cont`: 76
+- `IM3Module`: 76
+- `endif`: 76
+- `IM3Runtime`: 76
+- `a`: 76
+- `IM3FuncType`: 76
+- `m3ApiReturn`: 76
+- `IM3Compilation`: 76
+- `function`: 76
+- `wasm`: 76
+- `m3Err_wasmMalformed`: 76
+- `IM3Function`: 76
+- `i64`: 76
+- `M3OP`: 76
+- `i_type`: 76
+- `x`: 76
+- `SuppressLookupFailure`: 76
+- `i_opcode`: 76
+- `m3ApiCheckMem`: 76
+- `ReadLEB_u32`: 76
+- `d_m3Op`: 76
+- `_mem`: 76
+- `m3ApiGetArgMem`: 76
+- `M3_UNLIKELY`: 76
+- `_r0`: 76
+- `pc_t`: 76
+- `wasi`: 76
+- `buf`: 76
+- `f64`: 76
+- `m3ApiRawFunction`: 76
+- `i_cont`: 76
+- `f32`: 76
+- `m3ApiReturnType`: 76
+- `ftype`: 76
+- `m3_Free`: 76
+- `f`: 76
+- `NAME`: 76
+- `info`: 76
+- `m3_LinkRawFunction`: 76
+- `pos`: 76
+- `c_m3Type_i32`: 76
+- `IM3Operation`: 76
+- `c_m3Type_i64`: 76
+- `ptr`: 76
+- `scope`: 76
+- `IM3Continuation`: 76
+- `opcode`: 76
+- `d_m3ErrorConst`: 76
+- `segment`: 76
+- `funcType`: 76
+- `ft`: 76
+- `sp`: 76
+- `m3opcode_t`: 76
+- `name`: 76
+- `i_fd`: 76
+- `pc`: 76
+- `m3Err_typeMismatch`: 76
+- `t`: 76
+- `A`: 76
+- `len`: 76
+- `_sp`: 76
+- `import`: 76
+- `d_m3HasExceptionHandling`: 76
+- `i_32`: 76
+- `M3OP_F`: 76
+- `flags`: 76
+- `op`: 76
+- `m3log`: 76
+- `WASI_TRACE`: 76
+- `EmitOp`: 76
+- `OP`: 76
+- `cbytes_t`: 76
+- `_fp0`: 76
+- `RES`: 76
+- `j`: 76
+- `id`: 76
+- `iovs_len`: 76
+- `d_m3HasFloat`: 76
+- `exception`: 76
+- `p`: 76
+- `types`: 76
+- `map`: 76
+- `state`: 76
+- `cstr_t`: 76
+- `M3_LIKELY`: 76
+- `u`: 76
+- `wasi_context`: 76
+- `sub`: 76
+- `buf_len`: 76
+- `iovs`: 76
+- `newTrap`: 76
+- `d_binOpList`: 76
+- `e`: 76
+- `global`: 76
+- `d_m3DebugOp`: 76
+- `mallocated`: 76
+- `resolved`: 76
+- `userdata`: 76
+- `m3ApiWriteMem64`: 76
+- `val`: 76
+- `c_m3Type_none`: 76
+- `funcTypes`: 76
+- `X`: 76
+- `b`: 76
+- `contFuncType`: 76
+- `i_sub`: 76
+- `_Alignof`: 76
+- `ccstr_t`: 76
+- `env`: 76
+- `_ctx`: 76
+- `_throw`: 76
+- `REG`: 76
+- `m3_LinkRawFunctionEx`: 76
+- `i_form`: 76
+- `d_unaryOpList`: 76
+- `_throwifnull`: 76
+- `c_m3Type_f64`: 76
+- `i_name`: 76
+- `context`: 76
+- `func`: 76
+- `c_m3Type_f32`: 76
+- `i_64`: 76
+- `d_m3Assert`: 76
+- `B`: 76
+- `i_sp`: 76
+- `M3Exception`: 76
+- `inner`: 76
+- `i_environment`: 76
+- `o_events`: 76
+- `handle`: 76
+- `_try`: 76
+- `i_pc`: 76
+- `m3stack_t`: 76
+- `g`: 76
+- `_pc`: 76
+- `m3_wasi_context_t`: 76
+- `none`: 76
+- `io_function`: 76
+- `i_info`: 76
+- `i_funcType`: 76
+- `exported`: 76
+- `n`: 76
+- `dirfd`: 76
+- `uvwasi_errno_t`: 76
+- `o_stat`: 76
+- `op_`: 76
+- `opInfo`: 76
+- `error`: 76
+- `wasi_iovs`: 76
+- `io_cont`: 76
+- `bw`: 76
+- `GetLEB_u32`: 76
+- `compiled`: 76
+- `_get_uvwasi_p`: 76
+- `PutLEB_u32`: 76
+- `d_m3HasSnapshots`: 76
+- `EmitConstant32`: 76
+- `o_type`: 76
+- `m3slot_t`: 76
+- `m3ret_t`: 76
+- `DEST_TYPE`: 76
+- `functions`: 76
+- `m3ApiWriteMem32`: 76
+- `now`: 76
+- `M3_ARCH`: 76
+- `continuations`: 76
+- `destination`: 76
+- `i_userdata`: 76
+- `tables`: 76
+- `i_map`: 76
+- `idx`: 76
+- `elif`: 76
+- `from`: 76
+- `uvwasi_fd_t`: 76
+- `snapshotMap`: 76
+- `memories`: 76
+- `r0`: 76
+- `elements`: 76
+- `snap`: 76
+- `d_m3HasTypedRefs`: 76
+- `GetFuncTypeParamType`: 76
+- `moduleUtf8`: 76
+- `m3Err_mallocFailed`: 76
+- `byte`: 76
+- `exceptions`: 76
+- `M3SnapshotSave`: 76
+- `typeIdx`: 76
+- `memidx`: 76
+- `environment`: 76
+- `i_dirfd`: 76
+- `FROM`: 76
+- `c`: 76
+- `c_m3Type_funcref`: 76
+- `i_global`: 76
+- `src`: 76
+- `Compile_Convert`: 76
+- `d_logOp`: 76
+- `fp0`: 76
+- `condition`: 76
+- `SRC_TYPE`: 76
+- `io_ids`: 76
+- `d_convertOpList`: 76
+- `ValCtx`: 76
+- `srcCont`: 76
+- `ct`: 76
+- `i_ptr`: 76
+- `i_iovs`: 76
+- `IsRefType`: 76
+- `M3OP_RESERVED`: 76
+- `m3MemRuntime`: 76
+- `outp`: 76
+- `dstCont`: 76
+- `m3_AllocArray`: 76
+- `d_commutativeBinOpList`: 76
+- `IM3Environment`: 76
+- `i_iovsLen`: 76
+- `any`: 76
+- `i8`: 76
+- `dst`: 76
+- `c_m3Type_exnref`: 76
+- `is64`: 76
+- `i_m3Type`: 76
+- `dest`: 76
+- `parse`: 76
+- `o_act`: 76
+- `argc`: 76
+- `i_moduleName`: 76
+- `reference`: 76
+- `isContinuation`: 76
+- `io_file`: 76
+- `mem_check`: 76
+- `c_m3Type_contref`: 76
+- `IM3CompilationScope`: 76
+- `checking`: 76
+- `M3_MIN`: 76
+- `f_32`: 76
+- `f_64`: 76
+- `compile`: 76
+- `isTable64`: 76
+- `ea`: 76
+- `o_file`: 76
+- `string`: 76
+- `save`: 76
+- `tgt`: 76
+- `M3Module`: 76
+- `nread`: 76
+- `nwritten`: 76
+- `whence`: 76
+- `FMT`: 76
+- `i_subs`: 76
+- `subs`: 76
+- `DEBUG`: 76
+- `m3Err_continuationSuspended`: 76
+- `newCont`: 76
+- `resume`: 76
+- `operand2`: 76
+- `operand1`: 76
+- `bt`: 76
+- `i_signature`: 76
+- `wasi_iovec_t`: 76
+- `o_buf`: 76
+- `mapping`: 76
+- `M3SnapshotMap`: 76
+- `d_m3MaxContinuationPayload`: 76
+- `br`: 76
+- `suspendSites`: 76
+- `v_cvtop`: 76
+- `i_hash`: 76
+- `argv`: 76
+
+## Comments with no translation
+
+- __import_module__("wasi_snapshot_preview1"),: 76
+- clang-format off: 76
+- clang-format on: 76
+- d_m3HasStackSwitching: 76
+- section size mismatch: 76
+- d_m3RecordBacktraces: 76
+- d_m3HasExceptionHandling: 76
+- *
+     * The length of the buffer pointed to by `path`.: 76
+- isImport: 76
+- Created by Volodymyr Shymanskyy on 11/20/19.: 76
+- isBranch:: 76
+- d_m3HasTypedRefs: 76
+- d_m3HasMemory64: 76
+- d_m3GuardedMemory: 76
+- alone: a new .c would have to be added to every source list that names them one by: 76
+- one, and most of those are in build scripts outside this repository.: 76
+- Created by Steven Massey on 4/19/19.: 76
+- d_m3HasSnapshots: 76
+- *
+ * Reserved.: 76
+- *
+     * The length of the array pointed to by `iovs`.: 76
+- *
+     * Flags determining the method of how the path is resolved.: 76
+- include the terminating `\0`: 76
+- wasi_filestat_t: 76
+- d_m3HasAtomics: 76
+- Created by Steven Massey on 4/17/19.: 76
+- the operands are read out of slots, so nothing may still be in a register: 76
+- d_m3HasExceptionHandling || d_m3HasStackSwitching: 76
+- *
+     * The length of the buffer pointed to by `old_path`.: 76
+- *
+     * The length of the buffer pointed to by `new_path`.: 76
+- *
+     * Message flags.: 76
+- * WASI API implementation: 76
+- _     (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "path_filestat_set_times",  "i(ii*iIIi: 76
+- _     (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "sock_recv",            "i(i*ii**)",  : 76
+- _     (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "sock_send",            "i(i*ii*)",   : 76
+- _     (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "sock_shutdown",        "i(ii)",      : 76
+- WASI addresses the memory the module exports as "memory", not whichever: 76
+- one the calling code happens to be running against. Resolve it once, here,: 76
+- rather than per call. A module that linked none of the above imports has: 76
+- no WASI to satisfy, so it is not asked for the export - link_all offers: 76
+- WASI to every module, and most have neither the imports nor a memory.: 76
+- d_m3FoldSetLocal: 76
+- d_m3FuseBranch: 76
+- dump_type_stack (o);: 76
+- table.fill: 76
+- d_m3EnableValidation: 76
+- a declared maximum of 0 is not the same as none: 76
+- A header rather than a translation unit of its own, and included by m3_core.c: 76
+- DEBUG: 76
+- dst: 76
+- Declared before the first throw below, which jumps past this point to: 76
+- _catch and so must not skip an initialization.: 76
+- Wasm3, high performance WebAssembly interpreter: 76
+- wasm3_h: 76
+- *
+     * File type.: 76
+- *
+     * When type is `eventtype::fd_read` or `eventtype::fd_write`:: 76
+- *
+ * Return command-line argument data sizes.: 76
+- *
+     * The number of arguments.: 76
+- *
+     * The size of the argument string data.: 76
+- *
+     * The buffer where the file's attributes are stored.: 76
+- *
+     * The desired values of the data access timestamp.: 76
+- *
+     * The desired values of the data modification timestamp.: 76
+- *
+     * A bitmask indicating which timestamps to adjust.: 76
+- *
+     * The number of bytes read.: 76
+- *
+ * Return a description of the given preopened file descriptor.: 76
+- *
+     * List of scatter/gather vectors from which to retrieve data.: 76
+- *
+     * The number of bytes written.: 76
+- *
+     * List of scatter/gather vectors to which to store data.: 76
+- *
+     * The working directory at which the resolution of the new path starts.: 76
+- _     (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "path_link",                "i(ii*ii*i: 76
+- Created by Volodymyr Shymanskyy on 02/18/20.: 76
+- The records the guest passes by address, sized as the ABI lays them out rather: 76
+- Writes one event back. This record is the same in both revisions: userdata 0,: 76
+- error 8, type 10, nbytes 16, flags 24. What the union does not cover is zeroed: 76
+- rather than left as whatever the guest had there - an event for a clock says: 76
+- nothing about nbytes, and the guest should not read its own stale bytes back as: 76
+- one.: 76
+- Waits on the subscriptions, once whichever reader above has decoded them, and: 76
+- writes the events back. Knows nothing about revisions: the event record is the: 76
+- all rights: 76
+- d_m3DeterministicProfile: 76
+- d_m3HasWASI: 76
+- .c would have to be added to every source list that names its sources one by one,: 76
+- A header rather than a translation unit of its own, and included by m3_api_wasi.c: 76
+- * Plumbing: 76
+- * Setup: 76
+- * Descriptors: 76
+- still a conforming implementation. Only the fd has to be valid.: 76
+- * Transfers: 76
+- * Paths: 76
+- no-op because O_RDONLY is 0: 76
+- * Clocks and entropy: 76
+- * Waiting: 76
+- How much longer a clock subscription has to wait, in nanoseconds, given that: 76
+- i_elapsedNs of this call have already gone by - so 0 means it is ready. A relative: 76
+- subscription counts down from the timeout it named; an absolute one is held: 76
+- Every deadline is asked again rather than just the soonest: waiting: 76
+- i_list = NULL is valid: 76
+- i64.load: 76
+- f64.load: 76
+- i32.eqz: 76
