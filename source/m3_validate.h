@@ -8,9 +8,9 @@
 #ifndef m3_validate_h
 #define m3_validate_h
 
-#include "m3_core.h"
-#include "m3_compile.h"
-#include "m3_env.h"
+#अन्तर्भाव "m3_core.h"
+#अन्तर्भाव "m3_compile.h"
+#अन्तर्भाव "m3_env.h"
 
 d_m3BeginExternC
 
