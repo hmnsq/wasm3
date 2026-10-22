@@ -32,12 +32,12 @@
 #ifndef m3_api_wasi_host_h
 #define m3_api_wasi_host_h
 
-#include "m3_core.h"
+#ضمن "m3_core.h"
 
-#if defined(d_m3HasWASI)
+#𐡄𐡍 defined(d_m3HasWASI)
 
 // Fixup wasi_core.h
-#  if defined(M3_COMPILER_MSVC)
+#  𐡄𐡍 defined(M3_COMPILER_MSVC)
 #    define _Static_assert(...)
 #    define __attribute__(...)
 #    define _Noreturn
@@ -59,14 +59,14 @@ d_m3BeginExternC
 // directory, Win32 cannot and keeps a placeholder.
 #  define d_m3WasiPreopenCount  5
 
-typedef struct m3_wasi_preopen_t {
-    int     fd;
+تعريفنوع بنية m3_wasi_preopen_t {
+    صحيح     fd;
     ccstr_t path;
     ccstr_t real_path;
 } m3_wasi_preopen_t;
 
 // Defined here rather than declared because this header has exactly one includer
-static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
+ساكن m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
     { 0,  "<stdin>",  ""  },
     { 1,  "<stdout>", ""  },
     { 2,  "<stderr>", ""  },
@@ -76,7 +76,7 @@ static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
 
 // A filestat as the host can fill one in, before it is written out in whichever
 // layout the calling WASI revision asks for
-typedef struct m3_wasi_filestat_t {
+تعريفنوع بنية m3_wasi_filestat_t {
     uint64_t           dev;
     uint64_t           ino;
     uint64_t           nlink;
@@ -97,8 +97,8 @@ typedef struct m3_wasi_filestat_t {
 // guest can observe - and one batch covers every list a C library actually writes.
 #  define d_m3WasiMaxIovs  8
 
-typedef struct m3_wasi_iovec_t {
-    void*  buf;
+تعريفنوع بنية m3_wasi_iovec_t {
+    فراغ*  buf;
     size_t len;
 } m3_wasi_iovec_t;
 
@@ -106,7 +106,7 @@ typedef struct m3_wasi_iovec_t {
 // decoded and the difference between the two WASI revisions' layouts already gone.
 // Which fields carry anything is decided by 'type': a clock subscription fills in
 // the three below it, a descriptor subscription fills in 'fd'.
-typedef struct m3_wasi_pollsub_t {
+تعريفنوع بنية m3_wasi_pollsub_t {
     __wasi_userdata_t  userdata;
     __wasi_eventtype_t type;
 
@@ -120,7 +120,7 @@ typedef struct m3_wasi_pollsub_t {
 // One thing that turned out to be ready. 'error' describes that subscription alone -
 // a descriptor that was never open is one event with EBADF, not a failed call - and
 // the fields below it are only filled in for a descriptor event.
-typedef struct m3_wasi_pollevent_t {
+تعريفنوع بنية m3_wasi_pollevent_t {
     __wasi_userdata_t     userdata;
     __wasi_errno_t        error;
     __wasi_eventtype_t    type;
