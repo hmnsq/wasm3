@@ -5,40 +5,40 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#include "wasm3_ext.h"
+#ضمن "wasm3_ext.h"
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_exception.h"
+#ضمن "m3_env.h"
+#ضمن "m3_bind.h"
+#ضمن "m3_exception.h"
 
 
 IM3Module m3_NewModule (IM3Environment i_environment)
 {
     IM3Module module = m3_AllocStruct(M3Module);
 
-    if (module) {
+    אם (module) {
         module->name          = ".unnamed";
         module->startFunction = -1;
         module->environment   = i_environment;
 
-        module->wasmStart = NULL;
-        module->wasmEnd   = NULL;
+        module->wasmStart = عدم;
+        module->wasmEnd   = عدم;
     }
 
-    return module;
+    החזר module;
 }
 
 
 M3Result m3_InjectFunction (IM3Module            i_module,
                             int32_t*             io_functionIndex,
-                            const char* const    i_signature,
-                            const uint8_t* const i_wasmBytes,
+                            ثابت حرف* ثابت    i_signature,
+                            ثابت uint8_t* ثابت i_wasmBytes,
                             bool                 i_doCompilation)
 {
     M3Result result = m3Err_none;                                       d_m3Assert (io_functionIndex);
 
-    IM3Function function = NULL;
-    IM3FuncType ftype    = NULL;
+    IM3Function function = عدم;
+    IM3FuncType ftype    = عدم;
 
     // Declared before the first throw below, which jumps past this point to
     // _catch and so must not skip an initialization.
@@ -55,16 +55,16 @@ _   (SignatureToFuncType(&ftype, i_signature));
 _   (ReadLEB_u32(&size, &bytes, end));
     end = bytes + size;
 
-    if (index >= 0) {
+    אם (index >= 0) {
         // index is known non-negative here, so the counts compare as unsigned
         _throwif("function index out of bounds", (u32)index >= i_module->numFunctions);
 
         function = &i_module->functions[index];
 
-        if (not AreFuncTypesEqual(ftype, function->funcType)) {
+        אם (not AreFuncTypesEqual(ftype, function->funcType)) {
             _throw("function type mismatch");
         }
-    } else {
+    } אחרת {
         // add slot to function type table in the module
         u32 funcTypeIndex   = i_module->numFuncTypes++;
         i_module->funcTypes = m3_ReallocArray(IM3FuncType, i_module->funcTypes, i_module->numFuncTypes, funcTypeIndex);
@@ -74,18 +74,18 @@ _   (ReadLEB_u32(&size, &bytes, end));
         Environment_AddFuncType(i_module->environment, &ftype);
         i_module->funcTypes[funcTypeIndex] = ftype;
 
-        ftype = NULL; // prevent freeing below
+        ftype = عدم; // prevent freeing below
 
         index = (i32)i_module->numFunctions;
-_       (Module_AddFunction(i_module, funcTypeIndex, NULL));
+_       (Module_AddFunction(i_module, funcTypeIndex, عدم));
         function = Module_GetFunction(i_module, index);
 
         *io_functionIndex = index;
     }
 
-    function->compiled = NULL;
+    function->compiled = عدم;
 
-    if (function->ownsWasmCode) {
+    אם (function->ownsWasmCode) {
         m3_Free(function->wasm);
     }
 
@@ -98,7 +98,7 @@ _       (Module_AddFunction(i_module, funcTypeIndex, NULL));
 
     function->module = i_module;
 
-    if (i_doCompilation and not i_module->runtime) {
+    אם (i_doCompilation and not i_module->runtime) {
         _throw("module must be loaded into runtime to compile function");
     }
 
@@ -107,11 +107,11 @@ _   (CompileFunction(function));
     _catch:
     m3_Free(ftype);
 
-    return result;
+    החזר result;
 }
 
 
 IM3Function m3_GetFunctionByIndex (IM3Module i_module, uint32_t i_index)
 {
-    return Module_GetFunction(i_module, i_index);
+    החזר Module_GetFunction(i_module, i_index);
 }

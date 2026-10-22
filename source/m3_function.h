@@ -8,14 +8,14 @@
 #ifndef m3_function_h
 #define m3_function_h
 
-#include "m3_core.h"
+#ضمن "m3_core.h"
 
 d_m3BeginExternC
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3FuncType {
-    struct M3FuncType* next;
+تعريفنوع بنية M3FuncType {
+    بنية M3FuncType* next;
 
     u16                numRets;
     u16                numArgs;
@@ -27,7 +27,7 @@ typedef struct M3FuncType {
     u16                canonicalIndex;
 
     bool               isContinuation;
-    struct M3FuncType* contFuncType;
+    بنية M3FuncType* contFuncType;
 
     // A member of a recursive group. The group is its identity, so it never
     // shares an entry with a type that merely matches it field for field -
@@ -37,21 +37,21 @@ typedef struct M3FuncType {
     m3type_t           types[];        // returns, then args
 } M3FuncType;
 
-typedef M3FuncType* IM3FuncType;
+تعريفنوع M3FuncType* IM3FuncType;
 
 
 M3Result            AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes);
-bool                AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB);
+bool                AreFuncTypesEqual (ثابت IM3FuncType i_typeA, ثابت IM3FuncType i_typeB);
 
-u16                 GetFuncTypeNumParams (const IM3FuncType i_funcType);
-m3type_t            GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index);
+u16                 GetFuncTypeNumParams (ثابت IM3FuncType i_funcType);
+m3type_t            GetFuncTypeParamType (ثابت IM3FuncType i_funcType, u16 i_index);
 
-u16                 GetFuncTypeNumResults (const IM3FuncType i_funcType);
-m3type_t            GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index);
+u16                 GetFuncTypeNumResults (ثابت IM3FuncType i_funcType);
+m3type_t            GetFuncTypeResultType (ثابت IM3FuncType i_funcType, u16 i_index);
 
-#if d_m3HasTypedRefs
+#אם d_m3HasTypedRefs
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
-m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull);
+m3type_t RefTypeOfFuncType (ثابت IM3FuncType i_funcType, bool i_nonNull);
 #endif
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull);
 // what the frame holds there, so a pc alone does not name one.
 //
 // A snapshot writes these down, so the numbering is part of the DMP format.
-typedef enum M3SafePointKind {
+تعريفنوع تعداد M3SafePointKind {
     safepoint_op,           // at a loop back edge, which suspends in place
     safepoint_suspend,      // just past a suspend or a switch
     safepoint_call,         // a call waiting on its callee
@@ -70,7 +70,7 @@ typedef enum M3SafePointKind {
     safepoint_entry,        // at the start of a function's body, its locals set
 } M3SafePointKind;
 
-#if d_m3HasSnapshots
+#אם d_m3HasSnapshots
 
 // What a snapshot needs to know about a function's compiled code, recorded by
 // the compiler when the runtime is suspendable and nowhere else.
@@ -83,7 +83,7 @@ typedef enum M3SafePointKind {
 // one build's frame and scattered into another's, whatever layout each chose.
 
 // A value the frame holds: where this build keeps it, and its type
-typedef struct M3SlotValue {
+تعريفنوع بنية M3SlotValue {
     u16      slot;            // relative to the frame, or a register alias (d_m3Reg0SlotAlias, d_m3Fp0SlotAlias)
     m3type_t type;       // full Wasm type, including reference heap type and nullability
 } M3SlotValue;
@@ -99,7 +99,7 @@ typedef struct M3SlotValue {
 // a back edge - since one br_table can branch back to several loops - the loop
 // it goes to. Safepoints are recorded in the order the body is read, so they
 // are sorted by that offset.
-typedef struct M3SafePoint {
+تعريفنوع بنية M3SafePoint {
     pc_t     pc;
     u32      wasmOffset;     // the instruction's, from the start of the function's body
     u32      firstValue;     // into M3SnapshotMap.values
@@ -121,7 +121,7 @@ typedef struct M3SafePoint {
 // excluded - so a catch clause, which records its safepoints at its try_table,
 // is outside that try_table. Recorded in the order they open, so enclosing
 // regions come outermost first.
-typedef struct M3BlockStart {
+تعريفنوع بنية M3BlockStart {
     pc_t pc;             // what the frame records: a loop's body, a try_table's clause table
     u32  wasmOffset;
     u32  wasmEnd;        // the offset of its end
@@ -129,7 +129,7 @@ typedef struct M3BlockStart {
     u8   opcode;         // c_waOp_loop or c_waOp_tryTable
 } M3BlockStart;
 
-typedef struct M3SnapshotMap {
+تعريفنوع بنية M3SnapshotMap {
     M3SlotValue*  locals;            // the arguments, then the declared locals
     u32           numLocals;
 
@@ -143,12 +143,12 @@ typedef struct M3SnapshotMap {
     u32           numBlocks;
 } M3SnapshotMap;
 
-void SnapshotMap_Free (M3SnapshotMap* i_map);
+فراغ SnapshotMap_Free (M3SnapshotMap* i_map);
 
 #endif // d_m3HasSnapshots
 
-typedef struct M3Function {
-    struct M3Module*   module;
+تعريفنوع بنية M3Function {
+    بنية M3Module*   module;
 
     M3ImportInfo       import;
 
@@ -159,7 +159,7 @@ typedef struct M3Function {
     // Holds the memory rather than its index: a slot can alias another module's
     // memory, and growing one reallocates behind it. NULL for anything that is
     // not an import bound to a host function.
-    struct M3Memory*   hostMemory;
+    بنية M3Memory*   hostMemory;
 
     // An import linked to another module's export: the function that actually
     // implements it. Everything that calls through an import resolves to this
@@ -167,7 +167,7 @@ typedef struct M3Function {
     // says whose linear memory the body runs against. NULL for a function with
     // a body of its own, and for an import bound to a host function (that one
     // runs against the importing module's memory).
-    struct M3Function* resolved;
+    بنية M3Function* resolved;
 
     bytes_t            wasm;
     bytes_t            wasmEnd;
@@ -183,12 +183,12 @@ typedef struct M3Function {
 
     pc_t               compiled;
 
-#if (d_m3EnableCodePageRefCounting)
+#אם (d_m3EnableCodePageRefCounting)
     IM3CodePage* codePageRefs;                           // array of all pages used
     u32          numCodePageRefs;
 #endif
 
-#if defined(DEBUG)
+#אם defined(DEBUG)
     u32 hits;
     u32 index;
 #endif
@@ -204,9 +204,9 @@ typedef struct M3Function {
     bool  ownsWasmCode;
 
     u16   numConstantBytes;
-    void* constants;
+    فراغ* constants;
 
-#if d_m3HasSnapshots
+#אם d_m3HasSnapshots
     M3SnapshotMap* snapshotMap;                   // NULL unless compiled suspendable
 #endif
 } M3Function;
@@ -214,14 +214,14 @@ typedef struct M3Function {
 
 // The function that actually runs when this one is called: an import linked to
 // another module resolves to that module's function, everything else to itself.
-static inline
+ساكن مضمن
 IM3Function Function_Implementation (IM3Function i_function)
 {
-    return i_function->resolved ? i_function->resolved : i_function;
+    החזר i_function->resolved ? i_function->resolved : i_function;
 }
 
-void     Function_Release (IM3Function i_function);
-void     Function_FreeCompiledCode (IM3Function i_function);
+فراغ     Function_Release (IM3Function i_function);
+فراغ     Function_FreeCompiledCode (IM3Function i_function);
 
 cstr_t   GetFunctionImportModuleName (IM3Function i_function);
 cstr_t*  GetFunctionNames (IM3Function i_function, u16* o_numNames);
@@ -229,7 +229,7 @@ u16      GetFunctionNumArgs (IM3Function i_function);
 m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index);
 
 u16      GetFunctionNumReturns (IM3Function i_function);
-u8       GetFunctionReturnType (const IM3Function i_function, u16 i_index);
+u8       GetFunctionReturnType (ثابت IM3Function i_function, u16 i_index);
 
 u32      GetFunctionNumArgsAndLocals (IM3Function i_function);
 
