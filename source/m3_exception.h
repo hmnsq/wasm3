@@ -6,28 +6,28 @@
 //
 //  some macros to emulate try/catch
 
-#ifndef m3_exception_h
-#define m3_exception_h
+#که_نه_تعریف_شوی m3_exception_h
+#تعریف_کړه m3_exception_h
 
-#include "m3_config.h"
+#ضمن "m3_config.h"
 
-#if d_m3EnableExceptionBreakpoint
+#إذا d_m3EnableExceptionBreakpoint
 
 // declared in m3_info.c
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message);
+فراغ ExceptionBreakpoint (cstr_t i_exception, cstr_t i_پیغام);
 
 #  define EXCEPTION_PRINT(ERROR) ExceptionBreakpoint (ERROR, (__FILE__ ":" M3_STR(__LINE__)))
 
-#else
+#وإلا
 #  define EXCEPTION_PRINT(...)
-#endif
+#د_که_پای
 
 
-#define _try                                M3Result result = m3Err_none;
-#define _(TRY)                              { result = TRY; if (M3_UNLIKELY(result)) { EXCEPTION_PRINT (result); goto _catch; } }
-#define _throw(ERROR)                       { result = ERROR; EXCEPTION_PRINT (result); goto _catch; }
-#define _throwif(ERROR, COND)               if (M3_UNLIKELY(COND)) { _throw(ERROR); }
+#تعریف_کړه _try                                M3_پایله پایله = m3Err_none;
+#تعریف_کړه _(TRY)                              { پایله = TRY; إذا (M3_UNLIKELY(پایله)) { EXCEPTION_PRINT (پایله); اذهب _catch; } }
+#تعریف_کړه _throw(ERROR)                       { پایله = ERROR; EXCEPTION_PRINT (پایله); اذهب _catch; }
+#تعریف_کړه _throwif(ERROR, COND)               إذا (M3_UNLIKELY(COND)) { _throw(ERROR); }
 
-#define _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
+#تعریف_کړه _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
 
-#endif // m3_exception_h
+#د_که_پای // m3_exception_h

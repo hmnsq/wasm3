@@ -5,228 +5,228 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <limits.h>
-#include "m3_code.h"
-#include "m3_env.h"
+#ضمن <limits.h>
+#ضمن "m3_code.h"
+#ضمن "m3_env.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
+IM3_کوډ_پاڼه New_کوډ_پاڼه (IM3Runtime i_runtime, u32 i_min_عدد_کرښې)
 {
-    IM3CodePage page;
+    IM3_کوډ_پاڼه پاڼه;
 
     // check multiplication overflow
-    if (i_minNumLines > UINT_MAX / sizeof(code_t)) {
-        return NULL;
+    إذا (i_min_عدد_کرښې > UINT_MAX / حجم(کوډ_t)) {
+        أرجع عدم;
     }
-    u32 pageSize = sizeof(M3CodePageHeader) + sizeof(code_t) * i_minNumLines;
+    u32 پاڼه_اندازه = حجم(M3_کوډ_پاڼه_سرلیک) + حجم(کوډ_t) * i_min_عدد_کرښې;
 
     // check addition overflow
-    if (pageSize < sizeof(M3CodePageHeader)) {
-        return NULL;
+    إذا (پاڼه_اندازه < حجم(M3_کوډ_پاڼه_سرلیک)) {
+        أرجع عدم;
     }
 
-    pageSize = (pageSize + (d_m3CodePageAlignSize - 1)) & ~(d_m3CodePageAlignSize - 1); // align
+    پاڼه_اندازه = (پاڼه_اندازه + (d_m3_کوډ_پاڼه_Align_اندازه - 1)) & ~(d_m3_کوډ_پاڼه_Align_اندازه - 1); // align
     // check alignment overflow
-    if (pageSize == 0) {
-        return NULL;
+    إذا (پاڼه_اندازه == 0) {
+        أرجع عدم;
     }
 
-    page = (IM3CodePage)m3_Malloc("M3CodePage", pageSize);
+    پاڼه = (IM3_کوډ_پاڼه)m3_Malloc("M3CodePage", پاڼه_اندازه);
 
-    if (page) {
-        page->info.sequence = ++i_runtime->newCodePageSequence;
-        page->info.numLines = (pageSize - sizeof(M3CodePageHeader)) / sizeof(code_t);
+    إذا (پاڼه) {
+        پاڼه->info.sequence = ++i_runtime->new_کوډ_پاڼه_Sequence;
+        پاڼه->info.عدد_کرښې = (پاڼه_اندازه - حجم(M3_کوډ_پاڼه_سرلیک)) / حجم(کوډ_t);
 
-#if d_m3RecordBacktraces
-        u32 pageSizeBt     = sizeof(M3CodeMappingPage) + sizeof(M3CodeMapEntry) * page->info.numLines;
-        page->info.mapping = (M3CodeMappingPage*)m3_Malloc("M3CodeMappingPage", pageSizeBt);
+#إذا d_m3_ریکارډ_Backtraces
+        u32 پاڼه_اندازه_Bt     = حجم(M3_کوډ_Mapping_پاڼه) + حجم(M3_کوډ_Map_ثبت) * پاڼه->info.عدد_کرښې;
+        پاڼه->info.mapping = (M3_کوډ_Mapping_پاڼه*)m3_Malloc("M3CodeMappingPage", پاڼه_اندازه_Bt);
 
-        if (page->info.mapping) {
-            page->info.mapping->size     = 0;
-            page->info.mapping->capacity = page->info.numLines;
-        } else {
-            m3_Free(page);
-            return NULL;
+        إذا (پاڼه->info.mapping) {
+            پاڼه->info.mapping->اندازه     = 0;
+            پاڼه->info.mapping->ظرفیت = پاڼه->info.عدد_کرښې;
+        } وإلا {
+            m3_Free(پاڼه);
+            أرجع عدم;
         }
-        page->info.mapping->basePC = GetPageStartPC(page);
-#endif // d_m3RecordBacktraces
+        پاڼه->info.mapping->بنسټ_PC = Get_پاڼه_پیل_PC(پاڼه);
+#د_که_پای // d_m3RecordBacktraces
 
-        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.numLines);
+        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", Get_پاڼه_PC(پاڼه), پاڼه->info.sequence, پاڼه_اندازه, پاڼه->info.عدد_کرښې);
     }
 
-    return page;
+    أرجع پاڼه;
 }
 
 
-void FreeCodePages (IM3CodePage* io_list)
+فراغ Free_کوډ_پاڼې (IM3_کوډ_پاڼه* io_list)
 {
-    IM3CodePage page = *io_list;
+    IM3_کوډ_پاڼه پاڼه = *io_list;
 
-    while (page) {
-        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.lineIndex / page->info.numLines);
+    طالما (پاڼه) {
+        m3log(کوډ, "free page: %d; %p; util: %3.1f%%", پاڼه->info.sequence, پاڼه, 100. * پاڼه->info.کرښه_شاخص / پاڼه->info.عدد_کرښې);
 
-        IM3CodePage next = page->info.next;
-#if d_m3RecordBacktraces
-        m3_Free(page->info.mapping);
-#endif // d_m3RecordBacktraces
-        m3_Free(page);
-        page = next;
+        IM3_کوډ_پاڼه بل = پاڼه->info.بل;
+#إذا d_m3_ریکارډ_Backtraces
+        m3_Free(پاڼه->info.mapping);
+#د_که_پای // d_m3RecordBacktraces
+        m3_Free(پاڼه);
+        پاڼه = بل;
     }
 
-    *io_list = NULL;
+    *io_list = عدم;
 }
 
 
-u32 NumFreeLines (IM3CodePage i_page)
+u32 عدد_Free_کرښې (IM3_کوډ_پاڼه i_پاڼه)
 {
-    d_m3Assert(i_page->info.lineIndex <= i_page->info.numLines);
+    d_m3Assert(i_پاڼه->info.کرښه_شاخص <= i_پاڼه->info.عدد_کرښې);
 
-    return i_page->info.numLines - i_page->info.lineIndex;
+    أرجع i_پاڼه->info.عدد_کرښې - i_پاڼه->info.کرښه_شاخص;
 }
 
 
-void EmitWord_impl (IM3CodePage i_page, void* i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    i_page->code[i_page->info.lineIndex++] = i_word;
+فراغ Emit_کلمه_impl (IM3_کوډ_پاڼه i_پاڼه, فراغ* i_کلمه)
+{                                                                       d_m3Assert (i_پاڼه->info.کرښه_شاخص+1 <= i_پاڼه->info.عدد_کرښې);
+    i_پاڼه->کوډ[i_پاڼه->info.کرښه_شاخص++] = i_کلمه;
 }
 
-void EmitWord32 (IM3CodePage i_page, const u32 i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex++], &i_word, sizeof(i_word));
+فراغ EmitWord32 (IM3_کوډ_پاڼه i_پاڼه, ثابت u32 i_کلمه)
+{                                                                       d_m3Assert (i_پاڼه->info.کرښه_شاخص+1 <= i_پاڼه->info.عدد_کرښې);
+    حافظه_نقل(&i_پاڼه->کوډ[i_پاڼه->info.کرښه_شاخص++], &i_کلمه, حجم(i_کلمه));
 }
 
-void EmitWord64 (IM3CodePage i_page, const u64 i_word)
+فراغ EmitWord64 (IM3_کوډ_پاڼه i_پاڼه, ثابت u64 i_کلمه)
 {
-#if M3_SIZEOF_PTR == 4
-                                                                        d_m3Assert (i_page->info.lineIndex+2 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 2;
-#else
-                                                                        d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 1;
-#endif
+#إذا M3_SIZEOF_PTR == 4
+                                                                        d_m3Assert (i_پاڼه->info.کرښه_شاخص+2 <= i_پاڼه->info.عدد_کرښې);
+    حافظه_نقل(&i_پاڼه->کوډ[i_پاڼه->info.کرښه_شاخص], &i_کلمه, حجم(i_کلمه));
+    i_پاڼه->info.کرښه_شاخص += 2;
+#وإلا
+                                                                        d_m3Assert (i_پاڼه->info.کرښه_شاخص+1 <= i_پاڼه->info.عدد_کرښې);
+    حافظه_نقل(&i_پاڼه->کوډ[i_پاڼه->info.کرښه_شاخص], &i_کلمه, حجم(i_کلمه));
+    i_پاڼه->info.کرښه_شاخص += 1;
+#د_که_پای
 }
 
 
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
+#إذا d_m3_ریکارډ_Backtraces
+فراغ Emit_Mapping_ثبت (IM3_کوډ_پاڼه i_پاڼه, u32 i_module_دننه_واټن)
 {
-    M3CodeMappingPage* page = i_page->info.mapping;
-                                                                        d_m3Assert (page->size < page->capacity);
+    M3_کوډ_Mapping_پاڼه* پاڼه = i_پاڼه->info.mapping;
+                                                                        d_m3Assert (پاڼه->اندازه < پاڼه->ظرفیت);
 
-    M3CodeMapEntry* entry = &page->entries[page->size++];
-    pc_t            pc    = GetPagePC(i_page);
+    M3_کوډ_Map_ثبت* ثبت = &پاڼه->entries[پاڼه->اندازه++];
+    pc_t            pc    = Get_پاڼه_PC(i_پاڼه);
 
-    entry->pcOffset     = (u32)(pc - page->basePC);
-    entry->moduleOffset = i_moduleOffset;
+    ثبت->pc_دننه_واټن     = (u32)(pc - پاڼه->بنسټ_PC);
+    ثبت->module_دننه_واټن = i_module_دننه_واټن;
 }
-#endif // d_m3RecordBacktraces
+#د_که_پای // d_m3RecordBacktraces
 
-pc_t GetPageStartPC (IM3CodePage i_page)
+pc_t Get_پاڼه_پیل_PC (IM3_کوډ_پاڼه i_پاڼه)
 {
-    return &i_page->code[0];
+    أرجع &i_پاڼه->کوډ[0];
 }
 
 
-pc_t GetPagePC (IM3CodePage i_page)
+pc_t Get_پاڼه_PC (IM3_کوډ_پاڼه i_پاڼه)
 {
-    if (i_page) {
-        return &i_page->code[i_page->info.lineIndex];
-    } else {
-        return NULL;
+    إذا (i_پاڼه) {
+        أرجع &i_پاڼه->کوډ[i_پاڼه->info.کرښه_شاخص];
+    } وإلا {
+        أرجع عدم;
     }
 }
 
 
-void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
+فراغ ټېل_کوډ_پاڼه (IM3_کوډ_پاڼه* i_list, IM3_کوډ_پاڼه i_کوډ_پاڼه)
 {
-    IM3CodePage next      = *i_list;
-    i_codePage->info.next = next;
-    *i_list               = i_codePage;
+    IM3_کوډ_پاڼه بل      = *i_list;
+    i_کوډ_پاڼه->info.بل = بل;
+    *i_list               = i_کوډ_پاڼه;
 }
 
 
-IM3CodePage PopCodePage (IM3CodePage* i_list)
+IM3_کوډ_پاڼه راوباسه_کوډ_پاڼه (IM3_کوډ_پاڼه* i_list)
 {
-    IM3CodePage page = *i_list;
-    *i_list          = page->info.next;
-    page->info.next  = NULL;
+    IM3_کوډ_پاڼه پاڼه = *i_list;
+    *i_list          = پاڼه->info.بل;
+    پاڼه->info.بل  = عدم;
 
-    return page;
+    أرجع پاڼه;
 }
 
 
-u32 FindCodePageEnd (IM3CodePage i_list, IM3CodePage* o_end)
+u32 پیدا_کړه_کوډ_پاڼه_پای_ټکی (IM3_کوډ_پاڼه i_list, IM3_کوډ_پاڼه* o_پای_ټکی)
 {
-    u32 numPages = 0;
-    *o_end       = NULL;
+    u32 عدد_پاڼې = 0;
+    *o_پای_ټکی       = عدم;
 
-    while (i_list) {
-        *o_end = i_list;
-        ++numPages;
-        i_list = i_list->info.next;
+    طالما (i_list) {
+        *o_پای_ټکی = i_list;
+        ++عدد_پاڼې;
+        i_list = i_list->info.بل;
     }
 
-    return numPages;
+    أرجع عدد_پاڼې;
 }
 
 
-u32 CountCodePages (IM3CodePage i_list)
+u32 شمېر_کوډ_پاڼې (IM3_کوډ_پاڼه i_list)
 {
-    IM3CodePage unused;
-    return FindCodePageEnd(i_list, &unused);
+    IM3_کوډ_پاڼه ناکارول_شوی;
+    أرجع پیدا_کړه_کوډ_پاڼه_پای_ټکی(i_list, &ناکارول_شوی);
 }
 
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list)
+IM3_کوډ_پاڼه Get_پای_ټکی_کوډ_پاڼه (IM3_کوډ_پاڼه i_list)
 {
-    IM3CodePage end;
-    FindCodePageEnd(i_list, &end);
+    IM3_کوډ_پاڼه پای_ټکی;
+    پیدا_کړه_کوډ_پاڼه_پای_ټکی(i_list, &پای_ټکی);
 
-    return end;
+    أرجع پای_ټکی;
 }
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc)
+#إذا d_m3_ریکارډ_Backtraces
+bool لري_PC (IM3_کوډ_پاڼه i_پاڼه, pc_t i_pc)
 {
-    return GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
+    أرجع Get_پاڼه_پیل_PC(i_پاڼه) <= i_pc && i_pc < Get_پاڼه_PC(i_پاڼه);
 }
 
 
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset)
+bool Map_PCTo_دننه_واټن (IM3_کوډ_پاڼه i_پاڼه, pc_t i_pc, u32* o_module_دننه_واټن)
 {
-    M3CodeMappingPage* mapping = i_page->info.mapping;
+    M3_کوډ_Mapping_پاڼه* mapping = i_پاڼه->info.mapping;
 
-    u32 pcOffset = (u32)(i_pc - mapping->basePC);
+    u32 pc_دننه_واټن = (u32)(i_pc - mapping->بنسټ_PC);
 
-    u32 left  = 0;
-    u32 right = mapping->size;
+    u32 کیڼ  = 0;
+    u32 ښی = mapping->اندازه;
 
-    while (left < right) {
-        u32 mid = left + (right - left) / 2;
+    طالما (کیڼ < ښی) {
+        u32 mid = کیڼ + (ښی - کیڼ) / 2;
 
-        if (mapping->entries[mid].pcOffset < pcOffset) {
-            left = mid + 1;
-        } else if (mapping->entries[mid].pcOffset > pcOffset) {
-            right = mid;
-        } else {
-            *o_moduleOffset = mapping->entries[mid].moduleOffset;
-            return true;
+        إذا (mapping->entries[mid].pc_دننه_واټن < pc_دننه_واټن) {
+            کیڼ = mid + 1;
+        } وإلا إذا (mapping->entries[mid].pc_دننه_واټن > pc_دننه_واټن) {
+            ښی = mid;
+        } وإلا {
+            *o_module_دننه_واټن = mapping->entries[mid].module_دننه_واټن;
+            أرجع true;
         }
     }
 
     // Getting here means left is now one more than the element we want.
-    if (left > 0) {
-        left--;
-        *o_moduleOffset = mapping->entries[left].moduleOffset;
-        return true;
-    } else {
-        return false;
+    إذا (کیڼ > 0) {
+        کیڼ--;
+        *o_module_دننه_واټن = mapping->entries[کیڼ].module_دننه_واټن;
+        أرجع true;
+    } وإلا {
+        أرجع false;
     }
 }
-#endif // d_m3RecordBacktraces
+#د_که_پای // d_m3RecordBacktraces
 
 //---------------------------------------------------------------------------------------------------------------------------------
