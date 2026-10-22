@@ -5,110 +5,110 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#ಅನ್ತರ್ಭಾವ "m3_env.h"
+#ಅನ್ತರ್ಭಾವ "m3_bind.h"
+#ಅನ್ತರ್ಭಾವ "m3_exception.h"
+#ಅನ್ತರ್ಭಾವ "m3_info.h"
 
 
-u8 ConvertTypeCharToTypeId (char i_code)
+u8 ConvertTypeCharToTypeId (ವರ್ಣ i_code)
 {
-    switch (i_code) {
-    case 'v': return c_m3Type_none;
-    case 'i': return c_m3Type_i32;
-    case 'I': return c_m3Type_i64;
-    case 'f': return c_m3Type_f32;
-    case 'F': return c_m3Type_f64;
-    case '*': return c_m3Type_i32;
+    ವಿಕಲ್ಪ (i_code) {
+    ಪಕ್ಷ 'v': ಪ್ರತ್ಯಾಗಮ c_m3Type_none;
+    ಪಕ್ಷ 'i': ಪ್ರತ್ಯಾಗಮ c_m3Type_i32;
+    ಪಕ್ಷ 'I': ಪ್ರತ್ಯಾಗಮ c_m3Type_i64;
+    ಪಕ್ಷ 'f': ಪ್ರತ್ಯಾಗಮ c_m3Type_f32;
+    ಪಕ್ಷ 'F': ಪ್ರತ್ಯಾಗಮ c_m3Type_f64;
+    ಪಕ್ಷ '*': ಪ್ರತ್ಯಾಗಮ c_m3Type_i32;
     // same letters c_waCompactTypes uses for the reference types
-    case 'r': return c_m3Type_funcref;
-    case 'R': return c_m3Type_externref;
-    case 'c': return c_m3Type_contref;
+    ಪಕ್ಷ 'r': ಪ್ರತ್ಯಾಗಮ c_m3Type_funcref;
+    ಪಕ್ಷ 'R': ಪ್ರತ್ಯಾಗಮ c_m3Type_externref;
+    ಪಕ್ಷ 'c': ಪ್ರತ್ಯಾಗಮ c_m3Type_contref;
     }
-    return c_m3Type_unknown;
+    ಪ್ರತ್ಯಾಗಮ c_m3Type_unknown;
 }
 
 
 M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature)
 {
-    IM3FuncType funcType = NULL;
+    IM3FuncType funcType = ರಿಕ್ತ;
 
 _try {
-    if (not o_functionType) {
+    ಯದಿ (not o_functionType) {
         _throw("null function type");
     }
 
-    if (not i_signature) {
+    ಯದಿ (not i_signature) {
         _throw("null function signature");
     }
 
     cstr_t sig = i_signature;
 
-    size_t maxNumTypes = strlen(i_signature);
+    size_t max_ಅಂಕೆ_Types = strlen(i_signature);
 
     // assume min signature is "()"
-    _throwif(m3Err_malformedFunctionSignature, maxNumTypes < 2);
-    maxNumTypes -= 2;
+    _throwif(m3Err_malformedFunctionSignature, max_ಅಂಕೆ_Types < 2);
+    max_ಅಂಕೆ_Types -= 2;
 
-    _throwif(m3Err_tooManyArgsRets, maxNumTypes > d_m3MaxSaneFunctionArgRetCount);
+    _throwif(m3Err_tooManyArgsRets, max_ಅಂಕೆ_Types > d_m3_Max_Sane_Function_Arg_Ret_ಎಣಿಕೆ);
 
-_   (AllocFuncType(&funcType, (u32)maxNumTypes));
+_   (AllocFuncType(&funcType, (u32)max_ಅಂಕೆ_Types));
 
     m3type_t* typelist = funcType->types;
 
     bool parsingRets = true;
-    while (*sig) {
-        char typeChar = *sig++;
+    ಯಾವತ್ (*sig) {
+        ವರ್ಣ typeChar = *sig++;
 
-        if (typeChar == '(') {
+        ಯದಿ (typeChar == '(') {
             parsingRets = false;
-            continue;
-        } else if (typeChar == ' ') {
-            continue;
-        } else if (typeChar == ')') {
-            break;
+            ಅನುವರ್ತ;
+        } ಅನ್ಯಥಾ ಯದಿ (typeChar == ' ') {
+            ಅನುವರ್ತ;
+        } ಅನ್ಯಥಾ ಯದಿ (typeChar == ')') {
+            ಭಙ್ಗ;
         }
 
         u8 type = ConvertTypeCharToTypeId(typeChar);
 
         _throwif("unknown argument type char", c_m3Type_unknown == type);
 
-        if (type == c_m3Type_none) {
-            continue;
+        ಯದಿ (type == c_m3Type_none) {
+            ಅನುವರ್ತ;
         }
 
-        if (parsingRets) {
-            _throwif("malformed signature; return count overflow", funcType->numRets >= maxNumTypes);
-            funcType->numRets++;
+        ಯದಿ (parsingRets) {
+            _throwif("malformed signature; return count overflow", funcType->ಅಂಕೆ_Rets >= max_ಅಂಕೆ_Types);
+            funcType->ಅಂಕೆ_Rets++;
             *typelist++ = type;
-        } else {
-            _throwif("malformed signature; arg count overflow", (u32)(funcType->numRets) + funcType->numArgs >= maxNumTypes);
-            funcType->numArgs++;
+        } ಅನ್ಯಥಾ {
+            _throwif("malformed signature; arg count overflow", (u32)(funcType->ಅಂಕೆ_Rets) + funcType->ಅಂಕೆ_Args >= max_ಅಂಕೆ_Types);
+            funcType->ಅಂಕೆ_Args++;
             *typelist++ = type;
         }
     }
 
 } _catch:
 
-    if (result) {
+    ಯದಿ (result) {
         m3_Free(funcType);
     }
 
     *o_functionType = funcType;
 
-    return result;
+    ಪ್ರತ್ಯಾಗಮ result;
 }
 
 
-static
+ಸ್ಥಿರ
 M3Result ValidateSignature (IM3Function i_function, ccstr_t i_linkingSignature)
 {
     M3Result result = m3Err_none;
 
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = ರಿಕ್ತ;
 _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
-    if (not AreFuncTypesEqual(ftype, i_function->funcType)) {
+    ಯದಿ (not AreFuncTypesEqual(ftype, i_function->funcType)) {
         m3log(module, "expected: %s", SPrintFuncTypeSignature(ftype));
         m3log(module, "   found: %s", SPrintFuncTypeSignature(i_function->funcType));
 
@@ -119,7 +119,7 @@ _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
     m3_Free(ftype);
 
-    return result;
+    ಪ್ರತ್ಯಾಗಮ result;
 }
 
 
@@ -133,17 +133,17 @@ M3Result FindAndLinkFunction (IM3Module io_module,
 _try {
     _throwif(m3Err_moduleNotLinked, !io_module->runtime);
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    ಧ್ರುವ bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
 
     result = m3Err_functionLookupFailed;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
-        const IM3Function f = &io_module->functions[i];
+    ಪ್ರತಿ (u32 i = 0; i < io_module->ಅಂಕೆ_Functions; ++i) {
+        ಧ್ರುವ IM3Function f = &io_module->functions[i];
 
-        if (f->import.moduleUtf8 and f->import.fieldUtf8) {
-            if (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
+        ಯದಿ (f->import.moduleUtf8 and f->import.fieldUtf8) {
+            ಯದಿ (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
                 (wildcardModule or strcmp(f->import.moduleUtf8, i_moduleName) == 0)) {
-                if (i_signature) {
+                ಯದಿ (i_signature) {
 _                   (ValidateSignature(f, i_signature));
                 }
 _               (CompileRawFunction(io_module, f, i_function, i_userdata));
@@ -151,24 +151,24 @@ _               (CompileRawFunction(io_module, f, i_function, i_userdata));
         }
     }
 } _catch:
-    return result;
+    ಪ್ರತ್ಯಾಗಮ result;
 }
 
 M3Result m3_LinkRawFunctionEx (IM3Module         io_module,
-                               const char* const i_moduleName,
-                               const char* const i_functionName,
-                               const char* const i_signature,
+                               ಧ್ರುವ ವರ್ಣ* ಧ್ರುವ i_moduleName,
+                               ಧ್ರುವ ವರ್ಣ* ಧ್ರುವ i_functionName,
+                               ಧ್ರುವ ವರ್ಣ* ಧ್ರುವ i_signature,
                                M3RawCall         i_function,
-                               const void*       i_userdata)
+                               ಧ್ರುವ ಶೂನ್ಯ*       i_userdata)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
+    ಪ್ರತ್ಯಾಗಮ FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
 }
 
 M3Result m3_LinkRawFunction (IM3Module         io_module,
-                             const char* const i_moduleName,
-                             const char* const i_functionName,
-                             const char* const i_signature,
+                             ಧ್ರುವ ವರ್ಣ* ಧ್ರುವ i_moduleName,
+                             ಧ್ರುವ ವರ್ಣ* ಧ್ರುವ i_functionName,
+                             ಧ್ರುವ ವರ್ಣ* ಧ್ರುವ i_signature,
                              M3RawCall         i_function)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
+    ಪ್ರತ್ಯಾಗಮ FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, ರಿಕ್ತ);
 }

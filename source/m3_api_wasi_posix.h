@@ -13,99 +13,99 @@
 #ifndef m3_api_wasi_posix_h
 #define m3_api_wasi_posix_h
 
-#include "m3_core.h"
+#ಅನ್ತರ್ಭಾವ "m3_core.h"
 
-#if defined(_WIN32)
+#ಯದಿ defined(_WIN32)
 #  error "This file is not for Windows"
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <poll.h>
-#include <string.h>
-#include <time.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <fcntl.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <poll.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <time.h>
 
 // FIONREAD, which poll_oneoff uses to tell the guest how much is waiting on a
 // descriptor. Nothing here needs it - a descriptor whose count cannot be taken is
 // reported as having something rather than nothing - so a system without the header
 // simply does without.
-#if !defined(__wasi__)
+#ಯದಿ !defined(__wasi__)
 #  include <sys/ioctl.h>
 #endif
 
-#if defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__CYGWIN__)
+#ಯದಿ defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__CYGWIN__)
 #  include <unistd.h>
 #  include <sys/uio.h>
-#  if defined(__APPLE__)
+#  ಯದಿ defined(__APPLE__)
 #    include <TargetConditionals.h>
-#    if TARGET_OS_OSX // TARGET_OS_MAC includes iOS
+#    ಯದಿ TARGET_OS_OSX // TARGET_OS_MAC includes iOS
 #      include <sys/random.h>
-#    else // iOS / Simulator
+#    ಅನ್ಯಥಾ // iOS / Simulator
 #      include <Security/Security.h>
 #    endif
-#  else
+#  ಅನ್ಯಥಾ
 #    include <sys/random.h>
 #  endif
 #  define d_m3WasiHasIovec
 #endif
 
-#include "m3_api_wasi_host.h"
+#ಅನ್ತರ್ಭಾವ "m3_api_wasi_host.h"
 
 
 /*
  * Plumbing
  */
 
-static
-__wasi_errno_t errno_to_wasi (int errnum)
+ಸ್ಥಿರ
+__wasi_errno_t errno_to_wasi (ಪೂರ್ಣಾಙ್ಕ errnum)
 {
     // clang-format off
-    switch (errnum) {
-    case EPERM:    return __WASI_ERRNO_PERM;
-    case ENOENT:   return __WASI_ERRNO_NOENT;
-    case ESRCH:    return __WASI_ERRNO_SRCH;
-    case EINTR:    return __WASI_ERRNO_INTR;
-    case EIO:      return __WASI_ERRNO_IO;
-    case ENXIO:    return __WASI_ERRNO_NXIO;
-    case E2BIG:    return __WASI_ERRNO_2BIG;
-    case ENOEXEC:  return __WASI_ERRNO_NOEXEC;
-    case EBADF:    return __WASI_ERRNO_BADF;
-    case ECHILD:   return __WASI_ERRNO_CHILD;
-    case EAGAIN:   return __WASI_ERRNO_AGAIN;
-    case ENOMEM:   return __WASI_ERRNO_NOMEM;
-    case EACCES:   return __WASI_ERRNO_ACCES;
-    case EFAULT:   return __WASI_ERRNO_FAULT;
-    case EBUSY:    return __WASI_ERRNO_BUSY;
-    case EEXIST:   return __WASI_ERRNO_EXIST;
-    case EXDEV:    return __WASI_ERRNO_XDEV;
-    case ENODEV:   return __WASI_ERRNO_NODEV;
-    case ENOTDIR:  return __WASI_ERRNO_NOTDIR;
-    case EISDIR:   return __WASI_ERRNO_ISDIR;
-    case EINVAL:   return __WASI_ERRNO_INVAL;
-    case ENFILE:   return __WASI_ERRNO_NFILE;
-    case EMFILE:   return __WASI_ERRNO_MFILE;
-    case ENOTTY:   return __WASI_ERRNO_NOTTY;
-    case ETXTBSY:  return __WASI_ERRNO_TXTBSY;
-    case EFBIG:    return __WASI_ERRNO_FBIG;
-    case ENOSPC:   return __WASI_ERRNO_NOSPC;
-    case ESPIPE:   return __WASI_ERRNO_SPIPE;
-    case EROFS:    return __WASI_ERRNO_ROFS;
-    case EMLINK:   return __WASI_ERRNO_MLINK;
-    case EPIPE:    return __WASI_ERRNO_PIPE;
-    case EDOM:     return __WASI_ERRNO_DOM;
-    case ERANGE:   return __WASI_ERRNO_RANGE;
+    ವಿಕಲ್ಪ (errnum) {
+    ಪಕ್ಷ EPERM:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_PERM;
+    ಪಕ್ಷ ENOENT:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOENT;
+    ಪಕ್ಷ ESRCH:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SRCH;
+    ಪಕ್ಷ EINTR:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INTR;
+    ಪಕ್ಷ EIO:      ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_IO;
+    ಪಕ್ಷ ENXIO:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NXIO;
+    ಪಕ್ಷ E2BIG:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_2BIG;
+    ಪಕ್ಷ ENOEXEC:  ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOEXEC;
+    ಪಕ್ಷ EBADF:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
+    ಪಕ್ಷ ECHILD:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_CHILD;
+    ಪಕ್ಷ EAGAIN:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_AGAIN;
+    ಪಕ್ಷ ENOMEM:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOMEM;
+    ಪಕ್ಷ EACCES:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_ACCES;
+    ಪಕ್ಷ EFAULT:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_FAULT;
+    ಪಕ್ಷ EBUSY:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BUSY;
+    ಪಕ್ಷ EEXIST:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_EXIST;
+    ಪಕ್ಷ EXDEV:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_XDEV;
+    ಪಕ್ಷ ENODEV:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NODEV;
+    ಪಕ್ಷ ENOTDIR:  ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOTDIR;
+    ಪಕ್ಷ EISDIR:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_ISDIR;
+    ಪಕ್ಷ EINVAL:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
+    ಪಕ್ಷ ENFILE:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NFILE;
+    ಪಕ್ಷ EMFILE:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_MFILE;
+    ಪಕ್ಷ ENOTTY:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOTTY;
+    ಪಕ್ಷ ETXTBSY:  ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_TXTBSY;
+    ಪಕ್ಷ EFBIG:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_FBIG;
+    ಪಕ್ಷ ENOSPC:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOSPC;
+    ಪಕ್ಷ ESPIPE:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SPIPE;
+    ಪಕ್ಷ EROFS:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_ROFS;
+    ಪಕ್ಷ EMLINK:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_MLINK;
+    ಪಕ್ಷ EPIPE:    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_PIPE;
+    ಪಕ್ಷ EDOM:     ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_DOM;
+    ಪಕ್ಷ ERANGE:   ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_RANGE;
     }
     // clang-format on
-    return __WASI_ERRNO_INVAL;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
 }
 
-static
-__wasi_filetype_t filetype_from_stat_mode (int mode)
+ಸ್ಥಿರ
+__wasi_filetype_t filetype_from_stat_mode (ಪೂರ್ಣಾಙ್ಕ mode)
 {
-    return (S_ISBLK(mode) ? __WASI_FILETYPE_BLOCK_DEVICE : 0) |
+    ಪ್ರತ್ಯಾಗಮ (S_ISBLK(mode) ? __WASI_FILETYPE_BLOCK_DEVICE : 0) |
            (S_ISCHR(mode) ? __WASI_FILETYPE_CHARACTER_DEVICE : 0) |
            (S_ISDIR(mode) ? __WASI_FILETYPE_DIRECTORY : 0) |
            (S_ISREG(mode) ? __WASI_FILETYPE_REGULAR_FILE : 0) |
@@ -113,8 +113,8 @@ __wasi_filetype_t filetype_from_stat_mode (int mode)
            (S_ISLNK(mode) ? __WASI_FILETYPE_SYMBOLIC_LINK : 0);
 }
 
-static
-void filestat_from_stat (const struct stat* i_stat, m3_wasi_filestat_t* o_stat)
+ಸ್ಥಿರ
+ಶೂನ್ಯ filestat_from_stat (ಧ್ರುವ ಸಂರಚನಾ stat* i_stat, m3_wasi_filestat_t* o_stat)
 {
     o_stat->dev = (uint64_t)i_stat->st_dev;
     o_stat->ino = (uint64_t)i_stat->st_ino;
@@ -127,49 +127,49 @@ void filestat_from_stat (const struct stat* i_stat, m3_wasi_filestat_t* o_stat)
 }
 
 // The descriptor a preopened directory holds, or -1 where i_fd names no preopen
-static
-int preopen_fd (__wasi_fd_t i_fd)
+ಸ್ಥಿರ
+ಪೂರ್ಣಾಙ್ಕ preopen_fd (__wasi_fd_t i_fd)
 {
-    if (i_fd >= d_m3WasiPreopenCount) {
-        return -1;
+    ಯದಿ (i_fd >= d_m3_Wasi_Preopen_ಎಣಿಕೆ) {
+        ಪ್ರತ್ಯಾಗಮ -1;
     }
-    return m3_wasi_preopen[i_fd].fd;
+    ಪ್ರತ್ಯಾಗಮ m3_wasi_preopen[i_fd].fd;
 }
 
 // wasi-libc (>= wasi-sdk 12) makes clockid_t an opaque pointer rather than an int,
 // so the "no such clock" sentinel has to be the null one
-#if defined(__wasi__)
-#  define d_m3ClockIdInvalid  ((clockid_t) NULL)
-#else
+#ಯದಿ defined(__wasi__)
+#  define d_m3ClockIdInvalid  ((clockid_t) ರಿಕ್ತ)
+#ಅನ್ಯಥಾ
 #  define d_m3ClockIdInvalid  ((clockid_t) -1)
 #endif
 
-static
+ಸ್ಥಿರ
 clockid_t convert_clockid (__wasi_clockid_t in)
 {
-    switch (in) {
-    case __WASI_CLOCKID_MONOTONIC: return CLOCK_MONOTONIC;
-    case __WASI_CLOCKID_REALTIME: return CLOCK_REALTIME;
-#if defined(CLOCK_PROCESS_CPUTIME_ID)
-    case __WASI_CLOCKID_PROCESS_CPUTIME_ID: return CLOCK_PROCESS_CPUTIME_ID;
+    ವಿಕಲ್ಪ (in) {
+    ಪಕ್ಷ __WASI_CLOCKID_MONOTONIC: ಪ್ರತ್ಯಾಗಮ CLOCK_MONOTONIC;
+    ಪಕ್ಷ __WASI_CLOCKID_REALTIME: ಪ್ರತ್ಯಾಗಮ CLOCK_REALTIME;
+#ಯದಿ defined(CLOCK_PROCESS_CPUTIME_ID)
+    ಪಕ್ಷ __WASI_CLOCKID_PROCESS_CPUTIME_ID: ಪ್ರತ್ಯಾಗಮ CLOCK_PROCESS_CPUTIME_ID;
 #endif
-#if defined(CLOCK_THREAD_CPUTIME_ID)
-    case __WASI_CLOCKID_THREAD_CPUTIME_ID: return CLOCK_THREAD_CPUTIME_ID;
+#ಯದಿ defined(CLOCK_THREAD_CPUTIME_ID)
+    ಪಕ್ಷ __WASI_CLOCKID_THREAD_CPUTIME_ID: ಪ್ರತ್ಯಾಗಮ CLOCK_THREAD_CPUTIME_ID;
 #endif
-    default: return d_m3ClockIdInvalid;
+    ಸ್ವಭಾವ: ಪ್ರತ್ಯಾಗಮ d_m3ClockIdInvalid;
     }
 }
 
-static
-__wasi_timestamp_t convert_timespec (const struct timespec* ts)
+ಸ್ಥಿರ
+__wasi_timestamp_t convert_timespec (ಧ್ರುವ ಸಂರಚನಾ timespec* ts)
 {
-    if (ts->tv_sec < 0) {
-        return 0;
+    ಯದಿ (ts->tv_sec < 0) {
+        ಪ್ರತ್ಯಾಗಮ 0;
     }
-    if ((__wasi_timestamp_t)ts->tv_sec >= UINT64_MAX / 1000000000) {
-        return UINT64_MAX;
+    ಯದಿ ((__wasi_timestamp_t)ts->tv_sec >= UINT64_MAX / 1000000000) {
+        ಪ್ರತ್ಯಾಗಮ UINT64_MAX;
     }
-    return (__wasi_timestamp_t)ts->tv_sec * 1000000000 + ts->tv_nsec;
+    ಪ್ರತ್ಯಾಗಮ (__wasi_timestamp_t)ts->tv_sec * 1000000000 + ts->tv_nsec;
 }
 
 
@@ -177,11 +177,11 @@ __wasi_timestamp_t convert_timespec (const struct timespec* ts)
  * Setup
  */
 
-static
-void m3_wasi_host_init ()
+ಸ್ಥಿರ
+ಶೂನ್ಯ m3_wasi_host_init ()
 {
-    for (int i = 3; i < d_m3WasiPreopenCount; i++) {
-        if (m3_wasi_preopen[i].fd < 0) {
+    ಪ್ರತಿ (ಪೂರ್ಣಾಙ್ಕ i = 3; i < d_m3_Wasi_Preopen_ಎಣಿಕೆ; i++) {
+        ಯದಿ (m3_wasi_preopen[i].fd < 0) {
             m3_wasi_preopen[i].fd = open(m3_wasi_preopen[i].real_path, O_RDONLY);
         }
     }
@@ -192,87 +192,87 @@ void m3_wasi_host_init ()
  * Descriptors
  */
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_close (__wasi_fd_t i_fd)
 {
-    if (close(i_fd) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (close(i_fd) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 // no fdatasync on Apple, where fsync is the stronger promise of the two, and neither
 // on a platform this does not name
-#if defined(__APPLE__)
+#ಯದಿ defined(__APPLE__)
 #  define d_m3WasiDatasync(FD)  fsync(FD)
-#elif defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__)
+#ನೋಚೇದ್ಯದಿ defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__linux__) || defined(__EMSCRIPTEN__)
 #  define d_m3WasiDatasync(FD)  fdatasync(FD)
 #endif
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_datasync (__wasi_fd_t i_fd)
 {
-#if defined(d_m3WasiDatasync)
-    if (d_m3WasiDatasync(i_fd) != 0) {
-        return errno_to_wasi(errno);
+#ಯದಿ defined(d_m3WasiDatasync)
+    ಯದಿ (d_m3WasiDatasync(i_fd) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
-#else
-    return __WASI_ERRNO_NOSYS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
+#ಅನ್ಯಥಾ
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOSYS;
 #endif
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_advise (__wasi_fd_t i_fd, __wasi_filesize_t i_offset,
                                        __wasi_filesize_t i_length, __wasi_advice_t i_advice)
 {
     // Purely advisory: passing it on is a best effort, and dropping it is
     // still a conforming implementation. Only the fd has to be valid.
-#if defined(POSIX_FADV_NORMAL)
-    int adv;
-    switch (i_advice) {
-    case __WASI_ADVICE_NORMAL: adv = POSIX_FADV_NORMAL; break;
-    case __WASI_ADVICE_SEQUENTIAL: adv = POSIX_FADV_SEQUENTIAL; break;
-    case __WASI_ADVICE_RANDOM: adv = POSIX_FADV_RANDOM; break;
-    case __WASI_ADVICE_WILLNEED: adv = POSIX_FADV_WILLNEED; break;
-    case __WASI_ADVICE_DONTNEED: adv = POSIX_FADV_DONTNEED; break;
-    case __WASI_ADVICE_NOREUSE: adv = POSIX_FADV_NOREUSE; break;
-    default: return __WASI_ERRNO_INVAL;
+#ಯದಿ defined(POSIX_FADV_NORMAL)
+    ಪೂರ್ಣಾಙ್ಕ adv;
+    ವಿಕಲ್ಪ (i_advice) {
+    ಪಕ್ಷ __WASI_ADVICE_NORMAL: adv = POSIX_FADV_NORMAL; ಭಙ್ಗ;
+    ಪಕ್ಷ __WASI_ADVICE_SEQUENTIAL: adv = POSIX_FADV_SEQUENTIAL; ಭಙ್ಗ;
+    ಪಕ್ಷ __WASI_ADVICE_RANDOM: adv = POSIX_FADV_RANDOM; ಭಙ್ಗ;
+    ಪಕ್ಷ __WASI_ADVICE_WILLNEED: adv = POSIX_FADV_WILLNEED; ಭಙ್ಗ;
+    ಪಕ್ಷ __WASI_ADVICE_DONTNEED: adv = POSIX_FADV_DONTNEED; ಭಙ್ಗ;
+    ಪಕ್ಷ __WASI_ADVICE_NOREUSE: adv = POSIX_FADV_NOREUSE; ಭಙ್ಗ;
+    ಸ್ವಭಾವ: ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
     }
 
-    int ret = posix_fadvise(i_fd, i_offset, i_length, adv);
-    if (ret != 0) {
-        return errno_to_wasi(ret);
+    ಪೂರ್ಣಾಙ್ಕ ret = posix_fadvise(i_fd, i_offset, i_length, adv);
+    ಯದಿ (ret != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(ret);
     }
-#else
-    if (i_advice > __WASI_ADVICE_NOREUSE) {
-        return __WASI_ERRNO_INVAL;
+#ಅನ್ಯಥಾ
+    ಯದಿ (i_advice > __WASI_ADVICE_NOREUSE) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
     }
 
-    struct stat fd_stat;
-    if (fstat(i_fd, &fd_stat) != 0) {
-        return errno_to_wasi(errno);
+    ಸಂರಚನಾ stat fd_stat;
+    ಯದಿ (fstat(i_fd, &fd_stat) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 #endif
 
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_fdstat (__wasi_fd_t i_fd, __wasi_filetype_t* o_filetype,
                                        __wasi_fdflags_t* o_flags)
 {
     *o_filetype = __WASI_FILETYPE_UNKNOWN;
     *o_flags = 0;
 
-    int fl = fcntl(i_fd, F_GETFL);
-    if (fl < 0) {
-        return errno_to_wasi(errno);
+    ಪೂರ್ಣಾಙ್ಕ fl = fcntl(i_fd, F_GETFL);
+    ಯದಿ (fl < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
-    struct stat fd_stat;
-    if (fstat(i_fd, &fd_stat) != 0) {
-        return errno_to_wasi(errno);
+    ಸಂರಚನಾ stat fd_stat;
+    ಯದಿ (fstat(i_fd, &fd_stat) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     *o_filetype = filetype_from_stat_mode(fd_stat.st_mode);
@@ -281,114 +281,114 @@ __wasi_errno_t m3_wasi_host_fd_fdstat (__wasi_fd_t i_fd, __wasi_filetype_t* o_fi
                ((fl & O_NONBLOCK) ? __WASI_FDFLAGS_NONBLOCK : 0) |
                //((fl & O_RSYNC)     ? __WASI_FDFLAGS_RSYNC     : 0) |
                ((fl & O_SYNC) ? __WASI_FDFLAGS_SYNC : 0);
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 // F_SETFL changes only a handful of the bits a file was opened with: the sync ones
 // are fixed at open time, so a request to turn one on is refused rather than
 // accepted and quietly dropped. Turning one off is refused the same way - the guest
 // asked for a state the descriptor cannot be put into either way.
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_fdstat_set_flags (__wasi_fd_t i_fd, __wasi_fdflags_t i_flags)
 {
-    int fl = fcntl(i_fd, F_GETFL);
-    if (fl < 0) {
-        return errno_to_wasi(errno);
+    ಪೂರ್ಣಾಙ್ಕ fl = fcntl(i_fd, F_GETFL);
+    ಯದಿ (fl < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
-    const __wasi_fdflags_t fixed = __WASI_FDFLAGS_DSYNC | __WASI_FDFLAGS_RSYNC | __WASI_FDFLAGS_SYNC;
+    ಧ್ರುವ __wasi_fdflags_t fixed = __WASI_FDFLAGS_DSYNC | __WASI_FDFLAGS_RSYNC | __WASI_FDFLAGS_SYNC;
 
     // RSYNC is left out of the readback for the same reason fd_fdstat does not
     // report it: it has no bit of its own everywhere this builds
     __wasi_fdflags_t       current = ((fl & O_DSYNC) ? __WASI_FDFLAGS_DSYNC : 0) |
                                      ((fl & O_SYNC) ? __WASI_FDFLAGS_SYNC : 0);
 
-    if ((i_flags & fixed) != (current & fixed)) {
-        return __WASI_ERRNO_NOTSUP;
+    ಯದಿ ((i_flags & fixed) != (current & fixed)) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOTSUP;
     }
 
     fl &= ~(O_APPEND | O_NONBLOCK);
     fl |= (i_flags & __WASI_FDFLAGS_APPEND) ? O_APPEND : 0;
     fl |= (i_flags & __WASI_FDFLAGS_NONBLOCK) ? O_NONBLOCK : 0;
 
-    if (fcntl(i_fd, F_SETFL, fl) < 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (fcntl(i_fd, F_SETFL, fl) < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_filestat (__wasi_fd_t i_fd, m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, ಪರಿಮಾಣ(*o_stat));
 
-    struct stat fd_stat;
-    if (fstat(i_fd, &fd_stat) != 0) {
-        return errno_to_wasi(errno);
+    ಸಂರಚನಾ stat fd_stat;
+    ಯದಿ (fstat(i_fd, &fd_stat) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     filestat_from_stat(&fd_stat, o_stat);
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_set_size (__wasi_fd_t i_fd, __wasi_filesize_t i_size)
 {
-    if (ftruncate(i_fd, (off_t)i_size) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (ftruncate(i_fd, (off_t)i_size) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_fd_set_times (__wasi_fd_t i_fd, __wasi_timestamp_t i_atim,
                                           __wasi_timestamp_t i_mtim, __wasi_fstflags_t i_flags)
 {
     // a time is either given, asked for as now, or left alone
-    struct timespec times[2];
+    ಸಂರಚನಾ timespec times[2];
 
-    if (i_flags & __WASI_FSTFLAGS_ATIM_NOW) {
+    ಯದಿ (i_flags & __WASI_FSTFLAGS_ATIM_NOW) {
         times[0].tv_sec = 0;
         times[0].tv_nsec = UTIME_NOW;
-    } else if (i_flags & __WASI_FSTFLAGS_ATIM) {
+    } ಅನ್ಯಥಾ ಯದಿ (i_flags & __WASI_FSTFLAGS_ATIM) {
         times[0].tv_sec = i_atim / 1000000000ULL;
         times[0].tv_nsec = i_atim % 1000000000ULL;
-    } else {
+    } ಅನ್ಯಥಾ {
         times[0].tv_sec = 0;
         times[0].tv_nsec = UTIME_OMIT;
     }
 
-    if (i_flags & __WASI_FSTFLAGS_MTIM_NOW) {
+    ಯದಿ (i_flags & __WASI_FSTFLAGS_MTIM_NOW) {
         times[1].tv_sec = 0;
         times[1].tv_nsec = UTIME_NOW;
-    } else if (i_flags & __WASI_FSTFLAGS_MTIM) {
+    } ಅನ್ಯಥಾ ಯದಿ (i_flags & __WASI_FSTFLAGS_MTIM) {
         times[1].tv_sec = i_mtim / 1000000000ULL;
         times[1].tv_nsec = i_mtim % 1000000000ULL;
-    } else {
+    } ಅನ್ಯಥಾ {
         times[1].tv_sec = 0;
         times[1].tv_nsec = UTIME_OMIT;
     }
 
-    if (futimens(i_fd, times) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (futimens(i_fd, times) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, int i_whence,
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, ಪೂರ್ಣಾಙ್ಕ i_whence,
                                      __wasi_filesize_t* o_pos)
 {
     *o_pos = 0;
 
     off_t ret = lseek(i_fd, (off_t)i_offset, i_whence);
-    if (ret < 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (ret < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     *o_pos = (__wasi_filesize_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -396,71 +396,71 @@ __wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, int i_w
  * Transfers
  */
 
-#if defined(d_m3WasiHasIovec)
+#ಯದಿ defined(d_m3WasiHasIovec)
 
 // m3_wasi_iovec_t is laid out as struct iovec is, but they are still two types, so
 // the list is copied across rather than cast.
-static
-__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                                   __wasi_size_t i_iovsLen, bool i_write, __wasi_size_t* o_done)
 {
     *o_done = 0;
 
-    struct iovec iovs[d_m3WasiMaxIovs];
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+    ಸಂರಚನಾ iovec iovs[d_m3WasiMaxIovs];
+    ಪ್ರತಿ (__wasi_size_t i = 0; i < i_iovsLen; i++) {
         iovs[i].iov_base = i_iovs[i].buf;
         iovs[i].iov_len = i_iovs[i].len;
     }
 
-    ssize_t ret = i_write ? writev(i_fd, iovs, (int)i_iovsLen) : readv(i_fd, iovs, (int)i_iovsLen);
-    if (ret < 0) {
-        return errno_to_wasi(errno);
+    ssize_t ret = i_write ? writev(i_fd, iovs, (ಪೂರ್ಣಾಙ್ಕ)i_iovsLen) : readv(i_fd, iovs, (ಪೂರ್ಣಾಙ್ಕ)i_iovsLen);
+    ಯದಿ (ret < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     *o_done = (__wasi_size_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-#else
+#ಅನ್ಯಥಾ
 
 // No readv/writev here, so the list is walked one buffer at a time and a short
 // transfer ends it, which is what readv would have done
-static
-__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t transfer_vectored (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                                   __wasi_size_t i_iovsLen, bool i_write, __wasi_size_t* o_done)
 {
     *o_done = 0;
 
     size_t done = 0;
 
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
-        void*  addr = i_iovs[i].buf;
+    ಪ್ರತಿ (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+        ಶೂನ್ಯ*  addr = i_iovs[i].buf;
         size_t len = i_iovs[i].len;
-        if (len == 0) {
-            continue;
+        ಯದಿ (len == 0) {
+            ಅನುವರ್ತ;
         }
 
-        ssize_t ret = i_write ? write(i_fd, addr, len) : read(i_fd, addr, len);
-        if (ret < 0) {
-            return errno_to_wasi(errno);
+        ssize_t ret = i_write ? ಲಿಖ(i_fd, addr, len) : ಪಠ(i_fd, addr, len);
+        ಯದಿ (ret < 0) {
+            ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
         }
 
         done += (size_t)ret;
-        if ((size_t)ret < len) {
-            break;
+        ಯದಿ ((size_t)ret < len) {
+            ಭಙ್ಗ;
         }
     }
 
     *o_done = (__wasi_size_t)done;
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 #endif // d_m3WasiHasIovec
 
 // pread/pwrite over the list. The offset walks with the data, so a short transfer
 // stops it rather than leaving a hole.
-static
-__wasi_errno_t transfer_at (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t transfer_at (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                             __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset, bool i_write,
                             __wasi_size_t* o_done)
 {
@@ -468,57 +468,57 @@ __wasi_errno_t transfer_at (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
 
     size_t done = 0;
 
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
-        void*  addr = i_iovs[i].buf;
+    ಪ್ರತಿ (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+        ಶೂನ್ಯ*  addr = i_iovs[i].buf;
         size_t len = i_iovs[i].len;
-        if (len == 0) {
-            continue;
+        ಯದಿ (len == 0) {
+            ಅನುವರ್ತ;
         }
 
         ssize_t ret = i_write ? pwrite(i_fd, addr, len, (off_t)(i_offset + done))
                               : pread(i_fd, addr, len, (off_t)(i_offset + done));
-        if (ret < 0) {
-            return errno_to_wasi(errno);
+        ಯದಿ (ret < 0) {
+            ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
         }
 
         done += (size_t)ret;
-        if ((size_t)ret < len) {
-            break;
+        ಯದಿ ((size_t)ret < len) {
+            ಭಙ್ಗ;
         }
     }
 
     *o_done = (__wasi_size_t)done;
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_read (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_fd_read (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                                      __wasi_size_t i_iovsLen, __wasi_size_t* o_done)
 {
-    return transfer_vectored(i_fd, i_iovs, i_iovsLen, false, o_done);
+    ಪ್ರತ್ಯಾಗಮ transfer_vectored(i_fd, i_iovs, i_iovsLen, false, o_done);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_write (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_fd_write (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                                       __wasi_size_t i_iovsLen, __wasi_size_t* o_done)
 {
-    return transfer_vectored(i_fd, i_iovs, i_iovsLen, true, o_done);
+    ಪ್ರತ್ಯಾಗಮ transfer_vectored(i_fd, i_iovs, i_iovsLen, true, o_done);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_pread (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_fd_pread (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                                       __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
                                       __wasi_size_t* o_done)
 {
-    return transfer_at(i_fd, i_iovs, i_iovsLen, i_offset, false, o_done);
+    ಪ್ರತ್ಯಾಗಮ transfer_at(i_fd, i_iovs, i_iovsLen, i_offset, false, o_done);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, ಧ್ರುವ m3_wasi_iovec_t* i_iovs,
                                        __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
                                        __wasi_size_t* o_done)
 {
-    return transfer_at(i_fd, i_iovs, i_iovsLen, i_offset, true, o_done);
+    ಪ್ರತ್ಯಾಗಮ transfer_at(i_fd, i_iovs, i_iovsLen, i_offset, true, o_done);
 }
 
 
@@ -526,20 +526,20 @@ __wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, const m3_wasi_iovec_t* 
  * Paths
  */
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_open (__wasi_fd_t i_dirfd, ccstr_t i_path,
                                        __wasi_oflags_t i_oflags, __wasi_rights_t i_rights,
                                        __wasi_fdflags_t i_fdFlags, __wasi_fd_t* o_fd)
 {
     *o_fd = 0;
 
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
     // translate o_flags and fs_flags into flags and mode
-    int flags = ((i_oflags & __WASI_OFLAGS_CREAT) ? O_CREAT : 0) |
+    ಪೂರ್ಣಾಙ್ಕ flags = ((i_oflags & __WASI_OFLAGS_CREAT) ? O_CREAT : 0) |
                 //((i_oflags & __WASI_OFLAGS_DIRECTORY)      ? O_DIRECTORY : 0) |
                 ((i_oflags & __WASI_OFLAGS_EXCL) ? O_EXCL : 0) |
                 ((i_oflags & __WASI_OFLAGS_TRUNC) ? O_TRUNC : 0) |
@@ -549,149 +549,149 @@ __wasi_errno_t m3_wasi_host_path_open (__wasi_fd_t i_dirfd, ccstr_t i_path,
                 //((i_fdFlags & __WASI_FDFLAGS_RSYNC)        ? O_RSYNC     : 0) |
                 ((i_fdFlags & __WASI_FDFLAGS_SYNC) ? O_SYNC : 0);
 
-    if ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
+    ಯದಿ ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= O_RDWR;
-    } else if ((i_rights & __WASI_RIGHTS_FD_WRITE)) {
+    } ಅನ್ಯಥಾ ಯದಿ ((i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= O_WRONLY;
-    } else if ((i_rights & __WASI_RIGHTS_FD_READ)) {
+    } ಅನ್ಯಥಾ ಯದಿ ((i_rights & __WASI_RIGHTS_FD_READ)) {
         flags |= O_RDONLY; // no-op because O_RDONLY is 0
     }
 
-    int host_fd = openat(dirfd, i_path, flags, 0644);
-    if (host_fd < 0) {
-        return errno_to_wasi(errno);
+    ಪೂರ್ಣಾಙ್ಕ host_fd = openat(dirfd, i_path, flags, 0644);
+    ಯದಿ (host_fd < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     *o_fd = (__wasi_fd_t)host_fd;
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_filestat (__wasi_fd_t i_dirfd, ccstr_t i_path, bool i_follow,
                                            m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, ಪರಿಮಾಣ(*o_stat));
 
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    struct stat path_stat;
-    if (fstatat(dirfd, i_path, &path_stat, i_follow ? 0 : AT_SYMLINK_NOFOLLOW) != 0) {
-        return errno_to_wasi(errno);
+    ಸಂರಚನಾ stat path_stat;
+    ಯದಿ (fstatat(dirfd, i_path, &path_stat, i_follow ? 0 : AT_SYMLINK_NOFOLLOW) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     filestat_from_stat(&path_stat, o_stat);
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_create_directory (__wasi_fd_t i_dirfd, ccstr_t i_path)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    if (mkdirat(dirfd, i_path, 0755) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (mkdirat(dirfd, i_path, 0755) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_remove_directory (__wasi_fd_t i_dirfd, ccstr_t i_path)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    if (unlinkat(dirfd, i_path, AT_REMOVEDIR) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (unlinkat(dirfd, i_path, AT_REMOVEDIR) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_unlink_file (__wasi_fd_t i_dirfd, ccstr_t i_path)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    if (unlinkat(dirfd, i_path, 0) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (unlinkat(dirfd, i_path, 0) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_rename (__wasi_fd_t i_oldDirfd, ccstr_t i_oldPath,
                                          __wasi_fd_t i_newDirfd, ccstr_t i_newPath)
 {
-    int oldDirfd = preopen_fd(i_oldDirfd);
-    int newDirfd = preopen_fd(i_newDirfd);
-    if (oldDirfd < 0 || newDirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ oldDirfd = preopen_fd(i_oldDirfd);
+    ಪೂರ್ಣಾಙ್ಕ newDirfd = preopen_fd(i_newDirfd);
+    ಯದಿ (oldDirfd < 0 || newDirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    if (renameat(oldDirfd, i_oldPath, newDirfd, i_newPath) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (renameat(oldDirfd, i_oldPath, newDirfd, i_newPath) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_link (__wasi_fd_t i_oldDirfd, ccstr_t i_oldPath, bool i_follow,
                                        __wasi_fd_t i_newDirfd, ccstr_t i_newPath)
 {
-    int oldDirfd = preopen_fd(i_oldDirfd);
-    int newDirfd = preopen_fd(i_newDirfd);
-    if (oldDirfd < 0 || newDirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ oldDirfd = preopen_fd(i_oldDirfd);
+    ಪೂರ್ಣಾಙ್ಕ newDirfd = preopen_fd(i_newDirfd);
+    ಯದಿ (oldDirfd < 0 || newDirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    if (linkat(oldDirfd, i_oldPath, newDirfd, i_newPath, i_follow ? AT_SYMLINK_FOLLOW : 0) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (linkat(oldDirfd, i_oldPath, newDirfd, i_newPath, i_follow ? AT_SYMLINK_FOLLOW : 0) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_path_symlink (ccstr_t i_target, __wasi_fd_t i_dirfd, ccstr_t i_path)
 {
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
-    if (symlinkat(i_target, dirfd, i_path) != 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (symlinkat(i_target, dirfd, i_path) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, char* o_buf,
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, ವರ್ಣ* o_buf,
                                            __wasi_size_t i_bufLen, __wasi_size_t* o_bufUsed)
 {
     *o_bufUsed = 0;
 
-    int dirfd = preopen_fd(i_dirfd);
-    if (dirfd < 0) {
-        return __WASI_ERRNO_BADF;
+    ಪೂರ್ಣಾಙ್ಕ dirfd = preopen_fd(i_dirfd);
+    ಯದಿ (dirfd < 0) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_BADF;
     }
 
     ssize_t ret = readlinkat(dirfd, i_path, o_buf, i_bufLen);
-    if (ret < 0) {
-        return errno_to_wasi(errno);
+    ಯದಿ (ret < 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     *o_bufUsed = (__wasi_size_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -699,77 +699,77 @@ __wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, 
  * Clocks and entropy
  */
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_clock_res_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_res)
 {
     *o_res = 0;
 
     clockid_t clk = convert_clockid(i_clockId);
-    if (clk == d_m3ClockIdInvalid) {
-        return __WASI_ERRNO_INVAL;
+    ಯದಿ (clk == d_m3ClockIdInvalid) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
     }
 
-    struct timespec tp;
-    if (clock_getres(clk, &tp) != 0) {
+    ಸಂರಚನಾ timespec tp;
+    ಯದಿ (clock_getres(clk, &tp) != 0) {
         *o_res = 1000000;
-    } else {
+    } ಅನ್ಯಥಾ {
         *o_res = convert_timespec(&tp);
     }
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
+ಸ್ಥಿರ
 __wasi_errno_t m3_wasi_host_clock_time_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_time)
 {
     *o_time = 0;
 
     clockid_t clk = convert_clockid(i_clockId);
-    if (clk == d_m3ClockIdInvalid) {
-        return __WASI_ERRNO_INVAL;
+    ಯದಿ (clk == d_m3ClockIdInvalid) {
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
     }
 
-    struct timespec tp;
-    if (clock_gettime(clk, &tp) != 0) {
-        return errno_to_wasi(errno);
+    ಸಂರಚನಾ timespec tp;
+    ಯದಿ (clock_gettime(clk, &tp) != 0) {
+        ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
     }
 
     *o_time = convert_timespec(&tp);
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_random_get (void* o_buf, __wasi_size_t i_len)
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_random_get (ಶೂನ್ಯ* o_buf, __wasi_size_t i_len)
 {
     uint8_t* buf = (uint8_t*)o_buf;
 
-    while (i_len) {
+    ಯಾವತ್ (i_len) {
         ssize_t retlen;
 
-#if defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__EMSCRIPTEN__)
+#ಯದಿ defined(__wasi__) || defined(__APPLE__) || defined(__ANDROID_API__) || defined(__OpenBSD__) || defined(__EMSCRIPTEN__)
         size_t reqlen = M3_MIN(i_len, 256);
-#  if defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#  ಯದಿ defined(__APPLE__) && (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
         retlen = SecRandomCopyBytes(kSecRandomDefault, reqlen, buf) < 0 ? -1 : (ssize_t)reqlen;
-#  else
+#  ಅನ್ಯಥಾ
         retlen = getentropy(buf, reqlen) < 0 ? -1 : (ssize_t)reqlen;
 #  endif
-#elif defined(__FreeBSD__) || defined(__linux__)
+#ನೋಚೇದ್ಯದಿ defined(__FreeBSD__) || defined(__linux__)
         retlen = getrandom(buf, i_len, 0);
-#else
-        return __WASI_ERRNO_NOSYS;
+#ಅನ್ಯಥಾ
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOSYS;
 #endif
 
-        if (retlen < 0) {
-            if (errno == EINTR || errno == EAGAIN) {
-                continue;
+        ಯದಿ (retlen < 0) {
+            ಯದಿ (errno == EINTR || errno == EAGAIN) {
+                ಅನುವರ್ತ;
             }
-            return errno_to_wasi(errno);
+            ಪ್ರತ್ಯಾಗಮ errno_to_wasi(errno);
         }
 
         buf += retlen;
         i_len -= (__wasi_size_t)retlen;
     }
 
-    return __WASI_ERRNO_SUCCESS;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -783,48 +783,48 @@ __wasi_errno_t m3_wasi_host_random_get (void* o_buf, __wasi_size_t i_len)
 // against the clock it names and ignores i_elapsedNs, that clock having moved on by
 // itself. A clock this system has not got answers UINT64_MAX so that it never
 // becomes the soonest deadline - the caller reports EINVAL for it separately.
-static
-uint64_t poll_remaining_ns (const m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs)
+ಸ್ಥಿರ
+uint64_t poll_remaining_ns (ಧ್ರುವ m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs)
 {
-    if (not i_sub->isAbsolute) {
-        return (i_sub->timeout > i_elapsedNs) ? i_sub->timeout - i_elapsedNs : 0;
+    ಯದಿ (not i_sub->isAbsolute) {
+        ಪ್ರತ್ಯಾಗಮ (i_sub->timeout > i_elapsedNs) ? i_sub->timeout - i_elapsedNs : 0;
     }
 
     clockid_t clk = convert_clockid(i_sub->clockId);
-    if (clk == d_m3ClockIdInvalid) {
-        return UINT64_MAX;
+    ಯದಿ (clk == d_m3ClockIdInvalid) {
+        ಪ್ರತ್ಯಾಗಮ UINT64_MAX;
     }
 
-    struct timespec tp;
-    if (clock_gettime(clk, &tp) != 0) {
-        return 0;
+    ಸಂರಚನಾ timespec tp;
+    ಯದಿ (clock_gettime(clk, &tp) != 0) {
+        ಪ್ರತ್ಯಾಗಮ 0;
     }
 
     __wasi_timestamp_t now = convert_timespec(&tp);
-    return (i_sub->timeout > now) ? i_sub->timeout - now : 0;
+    ಪ್ರತ್ಯಾಗಮ (i_sub->timeout > now) ? i_sub->timeout - now : 0;
 }
 
 // How much a descriptor ready for reading has waiting on it. The guest is told a
 // count so that it can size the read that follows, and a wrong one only costs it a
 // short read - so a descriptor that cannot answer says one byte rather than nothing,
 // which would read as end of file.
-static
-__wasi_filesize_t poll_readable_bytes (int i_fd)
+ಸ್ಥಿರ
+__wasi_filesize_t poll_readable_bytes (ಪೂರ್ಣಾಙ್ಕ i_fd)
 {
-#if defined(FIONREAD)
-    int available = 0;
-    if (ioctl(i_fd, FIONREAD, &available) == 0 and available > 0) {
-        return (__wasi_filesize_t)available;
+#ಯದಿ defined(FIONREAD)
+    ಪೂರ್ಣಾಙ್ಕ available = 0;
+    ಯದಿ (ioctl(i_fd, FIONREAD, &available) == 0 and available > 0) {
+        ಪ್ರತ್ಯಾಗಮ (__wasi_filesize_t)available;
     }
 #endif
-    return 1;
+    ಪ್ರತ್ಯಾಗಮ 1;
 }
 
-static
-__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_count,
-                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_eventCount)
+ಸ್ಥಿರ
+__wasi_errno_t m3_wasi_host_poll_oneoff (ಧ್ರುವ m3_wasi_pollsub_t* i_subs, __wasi_size_t i_ಎಣಿಕೆ,
+                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_event_ಎಣಿಕೆ)
 {
-    *o_eventCount = 0;
+    *o_event_ಎಣಿಕೆ = 0;
 
     // The soonest clock deadline is what bounds the wait; without one, poll() is
     // told to wait forever, which is what a subscription list of descriptors alone
@@ -834,36 +834,36 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     bool          hasDeadline = false;
     bool          hasClock = false;
 
-    __wasi_size_t numFds = 0;
+    __wasi_size_t ಅಂಕೆ_Fds = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
-        if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
+    ಪ್ರತಿ (__wasi_size_t i = 0; i < i_ಎಣಿಕೆ; i++) {
+        ಯದಿ (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
             hasClock = true;
 
             uint64_t delay = poll_remaining_ns(&i_subs[i], 0);
-            if (delay != UINT64_MAX) {
+            ಯದಿ (delay != UINT64_MAX) {
                 soonest = M3_MIN(soonest, delay);
                 hasDeadline = true;
             }
-        } else {
-            numFds++;
+        } ಅನ್ಯಥಾ {
+            ಅಂಕೆ_Fds++;
         }
     }
 
-    struct pollfd* pollfds = NULL;
+    ಸಂರಚನಾ pollfd* pollfds = ರಿಕ್ತ;
 
-    if (numFds) {
-        pollfds = (struct pollfd*)m3_Malloc("WASI poll_oneoff", numFds * sizeof(struct pollfd));
-        if (pollfds == NULL) {
-            return __WASI_ERRNO_NOMEM;
+    ಯದಿ (ಅಂಕೆ_Fds) {
+        pollfds = (ಸಂರಚನಾ pollfd*)m3_Malloc("WASI poll_oneoff", ಅಂಕೆ_Fds * ಪರಿಮಾಣ(ಸಂರಚನಾ pollfd));
+        ಯದಿ (pollfds == ರಿಕ್ತ) {
+            ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_NOMEM;
         }
 
         __wasi_size_t n = 0;
-        for (__wasi_size_t i = 0; i < i_count; i++) {
-            if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
-                continue;
+        ಪ್ರತಿ (__wasi_size_t i = 0; i < i_ಎಣಿಕೆ; i++) {
+            ಯದಿ (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
+                ಅನುವರ್ತ;
             }
-            pollfds[n].fd = (int)i_subs[i].fd;
+            pollfds[n].fd = (ಪೂರ್ಣಾಙ್ಕ)i_subs[i].fd;
             pollfds[n].events = (i_subs[i].type == __WASI_EVENTTYPE_FD_READ) ? POLLIN : POLLOUT;
             pollfds[n].revents = 0;
             n++;
@@ -873,40 +873,40 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     // poll() counts in milliseconds and cannot say "no wait at all" apart from a
     // wait that rounds down to nothing, which is the same thing here. Rounding up
     // is what keeps a sub-millisecond deadline from becoming a spin.
-    int timeoutMs = -1;
-    if (hasDeadline) {
+    ಪೂರ್ಣಾಙ್ಕ timeoutMs = -1;
+    ಯದಿ (hasDeadline) {
         uint64_t ms = (soonest + 999999) / 1000000;
-        timeoutMs = (ms > (uint64_t)INT_MAX) ? INT_MAX : (int)ms;
+        timeoutMs = (ms > (uint64_t)INT_MAX) ? INT_MAX : (ಪೂರ್ಣಾಙ್ಕ)ms;
     }
 
-    int ready;
-    if (numFds) {
-        do {
-            ready = poll(pollfds, (nfds_t)numFds, timeoutMs);
-        } while (ready < 0 and errno == EINTR);
-    } else if (hasDeadline) {
+    ಪೂರ್ಣಾಙ್ಕ ready;
+    ಯದಿ (ಅಂಕೆ_Fds) {
+        ಕುರು {
+            ready = poll(pollfds, (nfds_t)ಅಂಕೆ_Fds, timeoutMs);
+        } ಯಾವತ್ (ready < 0 and errno == EINTR);
+    } ಅನ್ಯಥಾ ಯದಿ (hasDeadline) {
         // nothing to watch, so the deadline is the whole of the wait
-        struct timespec req;
+        ಸಂರಚನಾ timespec req;
         req.tv_sec = (time_t)(soonest / 1000000000);
         req.tv_nsec = (long)(soonest % 1000000000);
 
-        while (nanosleep(&req, &req) != 0 and errno == EINTR) {
+        ಯಾವತ್ (nanosleep(&req, &req) != 0 and errno == EINTR) {
             // interrupted: req holds what is left of it
         }
         ready = 0;
-    } else if (hasClock) {
+    } ಅನ್ಯಥಾ ಯದಿ (hasClock) {
         // every clock named is one this system has not got, so there is nothing to
         // wait for and every one of them is about to be reported as a bad argument
         ready = 0;
-    } else {
+    } ಅನ್ಯಥಾ {
         // no clocks and no descriptors: nothing that could ever become ready
-        return __WASI_ERRNO_INVAL;
+        ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_INVAL;
     }
 
-    if (ready < 0) {
+    ಯದಿ (ready < 0) {
         __wasi_errno_t err = errno_to_wasi(errno);
         m3_Free(pollfds);
-        return err;
+        ಪ್ರತ್ಯಾಗಮ err;
     }
 
     // How much of the wait actually happened. poll() answers 0 only when it waited
@@ -919,21 +919,21 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     __wasi_size_t out = 0;
     __wasi_size_t n = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
-        const m3_wasi_pollsub_t* sub = &i_subs[i];
+    ಪ್ರತಿ (__wasi_size_t i = 0; i < i_ಎಣಿಕೆ; i++) {
+        ಧ್ರುವ m3_wasi_pollsub_t* sub = &i_subs[i];
 
-        if (sub->type == __WASI_EVENTTYPE_CLOCK) {
+        ಯದಿ (sub->type == __WASI_EVENTTYPE_CLOCK) {
             // Every deadline is asked again rather than just the soonest: waiting
             // that one out may have passed a later one too, and an absolute
             // deadline already in the past fires without any wait at all.
-            if (convert_clockid(sub->clockId) == d_m3ClockIdInvalid) {
+            ಯದಿ (convert_clockid(sub->clockId) == d_m3ClockIdInvalid) {
                 o_events[out].userdata = sub->userdata;
                 o_events[out].error = __WASI_ERRNO_INVAL;
                 o_events[out].type = __WASI_EVENTTYPE_CLOCK;
                 o_events[out].nbytes = 0;
                 o_events[out].flags = 0;
                 out++;
-            } else if (poll_remaining_ns(sub, elapsedNs) == 0) {
+            } ಅನ್ಯಥಾ ಯದಿ (poll_remaining_ns(sub, elapsedNs) == 0) {
                 o_events[out].userdata = sub->userdata;
                 o_events[out].error = __WASI_ERRNO_SUCCESS;
                 o_events[out].type = __WASI_EVENTTYPE_CLOCK;
@@ -941,14 +941,14 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
                 o_events[out].flags = 0;
                 out++;
             }
-            continue;
+            ಅನುವರ್ತ;
         }
 
         short revents = pollfds[n].revents;
         n++;
 
-        if (revents == 0) {
-            continue;
+        ಯದಿ (revents == 0) {
+            ಅನುವರ್ತ;
         }
 
         o_events[out].userdata = sub->userdata;
@@ -956,13 +956,13 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
         o_events[out].nbytes = 0;
         o_events[out].flags = (revents & POLLHUP) ? __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP : 0;
 
-        if (revents & POLLNVAL) {
+        ಯದಿ (revents & POLLNVAL) {
             o_events[out].error = __WASI_ERRNO_BADF;
-        } else if (revents & POLLERR) {
+        } ಅನ್ಯಥಾ ಯದಿ (revents & POLLERR) {
             o_events[out].error = __WASI_ERRNO_IO;
-        } else {
+        } ಅನ್ಯಥಾ {
             o_events[out].error = __WASI_ERRNO_SUCCESS;
-            if (sub->type == __WASI_EVENTTYPE_FD_READ and (revents & POLLIN)) {
+            ಯದಿ (sub->type == __WASI_EVENTTYPE_FD_READ and (revents & POLLIN)) {
                 o_events[out].nbytes = poll_readable_bytes(pollfds[n - 1].fd);
             }
         }
@@ -972,8 +972,8 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
 
     m3_Free(pollfds);
 
-    *o_eventCount = out;
-    return __WASI_ERRNO_SUCCESS;
+    *o_event_ಎಣಿಕೆ = out;
+    ಪ್ರತ್ಯಾಗಮ __WASI_ERRNO_SUCCESS;
 }
 
 #endif // m3_api_wasi_posix_h
