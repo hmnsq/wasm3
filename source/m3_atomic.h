@@ -19,13 +19,13 @@
 #ifndef m3_atomic_h
 #define m3_atomic_h
 
-#include "m3_core.h"
+#અન્તર્ભાવ "m3_core.h"
 
-#if d_m3HasAtomics
+#જો d_m3HasAtomics
 
 d_m3BeginExternC
 
-enum {
+ગણના {
     c_atomicAdd,
     c_atomicSub,
     c_atomicAnd,
@@ -35,18 +35,18 @@ enum {
 };
 
 #  define d_m3AtomicTyped(T)                                            \
-    static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
+    સ્થિર અંતઃરેખ T m3_AtomicLoad_##T (અચલ u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T કિંમત;                                                        \
+        memcpy (& કિંમત, i_cell, કદ (કિંમત));                       \
+        M3_BSWAP_##T (કિંમત);                                           \
+        પાછા કિંમત;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    સ્થિર અંતઃરેખ શૂન્ય m3_AtomicStore_##T (u8* o_cell, T i_કિંમત)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_કિંમત);                                         \
+        memcpy (o_cell, & i_કિંમત, કદ (i_કિંમત));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -54,57 +54,57 @@ d_m3AtomicTyped(u16);
 d_m3AtomicTyped(u32);
 d_m3AtomicTyped(u64);
 
-static inline
-u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
+સ્થિર અંતઃરેખ
+u64 m3_AtomicLoadW (અચલ u8* i_cell, u32 i_log2Width)
 {
-    switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    પસંદગી (i_log2Width) {
+    સ્થિતિ 0: પાછા m3_AtomicLoad_u8(i_cell);
+    સ્થિતિ 1: પાછા m3_AtomicLoad_u16(i_cell);
+    સ્થિતિ 2: પાછા m3_AtomicLoad_u32(i_cell);
+    મૂળભૂત: પાછા m3_AtomicLoad_u64(i_cell);
     }
 }
 
-static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+સ્થિર અંતઃરેખ
+શૂન્ય m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_કિંમત)
 {
-    switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    પસંદગી (i_log2Width) {
+    સ્થિતિ 0: m3_AtomicStore_u8(o_cell, (u8)i_કિંમત); તોડો;
+    સ્થિતિ 1: m3_AtomicStore_u16(o_cell, (u16)i_કિંમત); તોડો;
+    સ્થિતિ 2: m3_AtomicStore_u32(o_cell, (u32)i_કિંમત); તોડો;
+    મૂળભૂત: m3_AtomicStore_u64(o_cell, i_કિંમત); તોડો;
     }
 }
 
-static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+સ્થિર અંતઃરેખ
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_કિંમત)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 updated;
 
-    switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    પસંદગી (i_kind) {
+    સ્થિતિ c_atomicAdd: updated = old + i_કિંમત; તોડો;
+    સ્થિતિ c_atomicSub: updated = old - i_કિંમત; તોડો;
+    સ્થિતિ c_atomicAnd: updated = old & i_કિંમત; તોડો;
+    સ્થિતિ c_atomicOr: updated = old | i_કિંમત; તોડો;
+    સ્થિતિ c_atomicXor: updated = old ^ i_કિંમત; તોડો;
+    મૂળભૂત: updated = i_કિંમત; તોડો;
     }
 
     m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    પાછા old;
 }
 
-static inline
+સ્થિર અંતઃરેખ
 u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_replacement)
 {
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
 
-    if (old == (i_expected & mask)) {
+    જો (old == (i_expected & mask)) {
         m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
     }
-    return old;
+    પાછા old;
 }
 
 d_m3EndExternC

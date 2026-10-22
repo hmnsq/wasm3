@@ -8,7 +8,7 @@
 #ifndef m3_api_libc_h
 #define m3_api_libc_h
 
-#include "m3_core.h"
+#અન્તર્ભાવ "m3_core.h"
 
 d_m3BeginExternC
 

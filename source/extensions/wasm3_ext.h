@@ -10,11 +10,11 @@
 #ifndef wasm3_ext_h
 #define wasm3_ext_h
 
-#include "wasm3.h"
-#include <stdbool.h>
+#અન્તર્ભાવ "wasm3.h"
+#અન્તર્ભાવ <stdbool.h>
 
-#if defined(__cplusplus)
-extern "C" {
+#જો defined(__cplusplus)
+બાહ્ય "C" {
 #endif
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -36,15 +36,15 @@ IM3Module   m3_NewModule (IM3Environment i_environment);
 // ** InjectFunction invalidates any existing IM3Function pointers
 M3Result    m3_InjectFunction (IM3Module            i_module,
                                int32_t*             io_functionIndex,
-                               const char* const    i_signature,
-                               const uint8_t* const i_wasmBytes,            // i_wasmBytes is copied
+                               અચલ અક્ષર* અચલ    i_signature,
+                               અચલ uint8_t* અચલ i_wasmBytes,            // i_wasmBytes is copied
                                bool                 i_doCompilation);
 
 
 IM3Function m3_GetFunctionByIndex (IM3Module i_module,
                                    uint32_t  i_index);
 
-#if defined(__cplusplus)
+#જો defined(__cplusplus)
 }
 #endif
 
