@@ -32,12 +32,12 @@
 #ifndef m3_api_wasi_host_h
 #define m3_api_wasi_host_h
 
-#include "m3_core.h"
+#अन्तर्भाव "m3_core.h"
 
-#if defined(d_m3HasWASI)
+#यदि defined(d_m3HasWASI)
 
 // Fixup wasi_core.h
-#  if defined(M3_COMPILER_MSVC)
+#  यदि defined(M3_COMPILER_MSVC)
 #    define _Static_assert(...)
 #    define __attribute__(...)
 #    define _Noreturn
@@ -57,16 +57,16 @@ d_m3BeginExternC
 // the same wherever it runs; the descriptor each one holds is the host's to fill in,
 // and what sits behind that descriptor is the host's business - POSIX opens the
 // directory, Win32 cannot and keeps a placeholder.
-#  define d_m3WasiPreopenCount  5
+#  define d_m3_Wasi_Preopen_गिनती  5
 
-typedef struct m3_wasi_preopen_t {
-    int     fd;
+प्रकारनिर्देश संरचना m3_wasi_preopen_t {
+    पूर्णाङ्क     fd;
     ccstr_t path;
     ccstr_t real_path;
 } m3_wasi_preopen_t;
 
 // Defined here rather than declared because this header has exactly one includer
-static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
+स्थिर m3_wasi_preopen_t m3_wasi_preopen[d_m3_Wasi_Preopen_गिनती] = {
     { 0,  "<stdin>",  ""  },
     { 1,  "<stdout>", ""  },
     { 2,  "<stderr>", ""  },
@@ -76,7 +76,7 @@ static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
 
 // A filestat as the host can fill one in, before it is written out in whichever
 // layout the calling WASI revision asks for
-typedef struct m3_wasi_filestat_t {
+प्रकारनिर्देश संरचना m3_wasi_filestat_t {
     uint64_t           dev;
     uint64_t           ino;
     uint64_t           nlink;
@@ -97,16 +97,16 @@ typedef struct m3_wasi_filestat_t {
 // guest can observe - and one batch covers every list a C library actually writes.
 #  define d_m3WasiMaxIovs  8
 
-typedef struct m3_wasi_iovec_t {
-    void*  buf;
-    size_t len;
+प्रकारनिर्देश संरचना m3_wasi_iovec_t {
+    शून्य*  buf;
+    माप_प्रकार len;
 } m3_wasi_iovec_t;
 
 // One thing poll_oneoff is waiting for, with the guest's tagged union already
 // decoded and the difference between the two WASI revisions' layouts already gone.
 // Which fields carry anything is decided by 'type': a clock subscription fills in
 // the three below it, a descriptor subscription fills in 'fd'.
-typedef struct m3_wasi_pollsub_t {
+प्रकारनिर्देश संरचना m3_wasi_pollsub_t {
     __wasi_userdata_t  userdata;
     __wasi_eventtype_t type;
 
@@ -120,7 +120,7 @@ typedef struct m3_wasi_pollsub_t {
 // One thing that turned out to be ready. 'error' describes that subscription alone -
 // a descriptor that was never open is one event with EBADF, not a failed call - and
 // the fields below it are only filled in for a descriptor event.
-typedef struct m3_wasi_pollevent_t {
+प्रकारनिर्देश संरचना m3_wasi_pollevent_t {
     __wasi_userdata_t     userdata;
     __wasi_errno_t        error;
     __wasi_eventtype_t    type;

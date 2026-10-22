@@ -8,7 +8,7 @@
 #ifndef m3_api_tracer_h
 #define m3_api_tracer_h
 
-#include "m3_core.h"
+#अन्तर्भाव "m3_core.h"
 
 d_m3BeginExternC
 
