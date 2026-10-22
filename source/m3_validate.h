@@ -5,12 +5,12 @@
 //  Runs before compilation to catch type errors early.
 //
 
-#ifndef m3_validate_h
-#define m3_validate_h
+#جيڪڏهن_وصف_نه_ٿيل m3_validate_h
+#وصف_ڪريو m3_validate_h
 
-#include "m3_core.h"
-#include "m3_compile.h"
-#include "m3_env.h"
+#ضمن "m3_core.h"
+#ضمن "m3_compile.h"
+#ضمن "m3_env.h"
 
 d_m3BeginExternC
 
@@ -18,8 +18,8 @@ d_m3BeginExternC
 // Performs full type-checking per the WebAssembly spec algorithm:
 //   operand type stack + control stack with polymorphic handling.
 // Returns m3Err_none on success or a validation error.
-M3Result ValidateFunction (IM3Function i_function);
+M3_نتيجو ValidateFunction (IM3Function i_function);
 
-d_m3EndExternC
+d_m3_پڇاڙي_Extern_C
 
-#endif // m3_validate_h
+#جيڪڏهن_پورو // m3_validate_h

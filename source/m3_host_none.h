@@ -15,62 +15,62 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_none_h
-#define m3_host_none_h
+#جيڪڏهن_وصف_نه_ٿيل m3_host_none_h
+#وصف_ڪريو m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#ضمن "m3_core.h"
+#ضمن "m3_host.h"
 
-void* m3_HostStackBase (void)
+فراغ* m3_Host_ڍير_بنياد (فراغ)
 {
-    return NULL;
+    أرجع عدم;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+فراغ m3_Host_Install_مداخلت_Handler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (فراغ)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+فراغ m3_Host_Remove_مداخلت_Handler (فراغ)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_Host_وقت_Ms (فراغ)
 {
-    return 0;
+    أرجع 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+فراغ m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (فراغ)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (ثابت حرف* i_رستو, size_t i_max_بائيٽون, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    أرجع m3_HostReadFile(i_رستو, i_max_بائيٽون, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+فراغ m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->معلومات);
 
-    io_file->size = 0;
+    io_file->سائيز = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (ثابت حرف* i_from, ثابت حرف* i_منزل)
 {
-    remove(i_to);
-    return rename(i_from, i_to) == 0;
+    remove(i_منزل);
+    أرجع rename(i_from, i_منزل) == 0;
 }
 
-#if d_m3GuardedMemory
+#إذا d_m3_Guarded_يادگيري
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
-#endif
+#جيڪڏهن_پورو
 
-#endif // m3_host_none_h
+#جيڪڏهن_پورو // m3_host_none_h

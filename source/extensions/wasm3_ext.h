@@ -7,15 +7,15 @@
 //  All rights reserved.
 //
 
-#ifndef wasm3_ext_h
-#define wasm3_ext_h
+#جيڪڏهن_وصف_نه_ٿيل wasm3_ext_h
+#وصف_ڪريو wasm3_ext_h
 
-#include "wasm3.h"
-#include <stdbool.h>
+#ضمن "wasm3.h"
+#ضمن <stdbool.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#إذا defined(__cplusplus)
+خارجي "C" {
+#جيڪڏهن_پورو
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //  API extensions
@@ -34,18 +34,18 @@ IM3Module   m3_NewModule (IM3Environment i_environment);
 // To overwrite an existing function, set io_functionIndex to the desired element. i_signature must match the existing
 // function signature.
 // ** InjectFunction invalidates any existing IM3Function pointers
-M3Result    m3_InjectFunction (IM3Module            i_module,
-                               int32_t*             io_functionIndex,
-                               const char* const    i_signature,
-                               const uint8_t* const i_wasmBytes,            // i_wasmBytes is copied
+M3_نتيجو    m3_InjectFunction (IM3Module            i_module,
+                               int32_t*             io_function_اشاريو,
+                               ثابت حرف* ثابت    i_signature,
+                               ثابت uint8_t* ثابت i_wasm_بائيٽون,            // i_wasmBytes is copied
                                bool                 i_doCompilation);
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module,
-                                   uint32_t  i_index);
+IM3Function m3_Get_Function_By_اشاريو (IM3Module i_module,
+                                   uint32_t  i_اشاريو);
 
-#if defined(__cplusplus)
+#إذا defined(__cplusplus)
 }
-#endif
+#جيڪڏهن_پورو
 
-#endif // wasm3_h
+#جيڪڏهن_پورو // wasm3_h
