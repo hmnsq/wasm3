@@ -5,33 +5,33 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <stdarg.h>
-#include <limits.h>
-#include <errno.h>
-#include <float.h>
-#include <ctype.h>
+#ضمن <stdarg.h>
+#ضمن <limits.h>
+#ضمن <errno.h>
+#ضمن <float.h>
+#ضمن <ctype.h>
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_deterministic.h"
-#include "m3_compile.h"
-#include "m3_host.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#ضمن "m3_env.h"
+#ضمن "m3_bind.h"
+#ضمن "m3_deterministic.h"
+#ضمن "m3_compile.h"
+#ضمن "m3_host.h"
+#ضمن "m3_exception.h"
+#ضمن "m3_info.h"
 
 
 IM3Environment m3_NewEnvironment ()
 {
     IM3Environment env = m3_AllocStruct(M3Environment);
 
-    if (env) {
+    𐤀𐤌 (env) {
         _try
         {
             // create FuncTypes for all simple block return ValueTypes.
             // v128 is skipped: it parses as a slot but has no operations.
-            for (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
-                if (t == c_m3Type_v128) {
-                    continue;
+            لكل (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
+                𐤀𐤌 (t == c_m3Type_v128) {
+                    استمر;
                 }
 
                 IM3FuncType ftype;
@@ -48,21 +48,21 @@ _               (AllocFuncType(&ftype, 1));
         }
 
         _catch:
-        if (result) {
+        𐤀𐤌 (result) {
             m3_FreeEnvironment(env);
-            env = NULL;
+            env = عدم;
         }
     }
 
-    return env;
+    أرجع env;
 }
 
 
-void Environment_Release (IM3Environment i_environment)
+فراغ Environment_Release (IM3Environment i_environment)
 {
     IM3FuncType ftype = i_environment->funcTypes;
 
-    while (ftype) {
+    طالما (ftype) {
         IM3FuncType next = ftype->next;
         m3_Free(ftype);
         ftype = next;
@@ -73,18 +73,18 @@ void Environment_Release (IM3Environment i_environment)
 }
 
 
-void m3_FreeEnvironment (IM3Environment i_environment)
+فراغ m3_FreeEnvironment (IM3Environment i_environment)
 {
-    if (i_environment) {
+    𐤀𐤌 (i_environment) {
         Environment_Release(i_environment);
         m3_Free(i_environment);
     }
 }
 
 
-void m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
+فراغ m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
 {
-    if (i_environment) {
+    𐤀𐤌 (i_environment) {
         i_environment->customSectionHandler = i_handler;
     }
 }
@@ -96,21 +96,21 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
     IM3FuncType addType = *io_funcType;
     IM3FuncType newType = i_environment->funcTypes;
 
-    while (newType) {
-        if (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
+    طالما (newType) {
+        𐤀𐤌 (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
             m3_Free(addType);
-            break;
+            اكسر;
         }
 
         newType = newType->next;
     }
 
-    if (newType == NULL) {
+    𐤀𐤌 (newType == عدم) {
         // a type index has to fit in the heap type field of an m3type_t
-        if (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
+        𐤀𐤌 (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
             m3_Free(addType);
-            *io_funcType = NULL;
-            return "too many distinct function types";
+            *io_funcType = عدم;
+            أرجع "too many distinct function types";
         }
 
         newType                  = addType;
@@ -121,7 +121,7 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 
     *io_funcType = newType;
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 
@@ -135,18 +135,18 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 // also what lets the members refer to each other while they are being read.
 M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_count, u16* o_firstIndex)
 {
-    if ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
-        return "too many distinct function types";
+    𐤀𐤌 ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
+        أرجع "too many distinct function types";
     }
 
     *o_firstIndex = i_environment->numFuncTypes;
     i_environment->numFuncTypes += (u16)i_count;
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 
-void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
+فراغ Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
 {
     i_funcType->inRecGroup     = true;
     i_funcType->canonicalIndex = i_canonicalIndex;
@@ -157,54 +157,54 @@ void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_func
 
 IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimumLineCount)
 {
-    IM3CodePage prev = NULL;
+    IM3CodePage prev = عدم;
     IM3CodePage page = *io_list;
 
-    while (page) {
-        if (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
+    طالما (page) {
+        𐤀𐤌 (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
             IM3CodePage next = page->info.next;
-            if (prev) {
+            𐤀𐤌 (prev) {
                 prev->info.next = next; // mid-list
-            } else {
+            } وإلا {
                 *io_list = next;       // front of list
             }
 
-            break;
+            اكسر;
         }
 
         prev = page;
         page = page->info.next;
     }
 
-    return page;
+    أرجع page;
 }
 
 
 IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimumLineCount)
 {
-    return RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
+    أرجع RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
 }
 
 
-void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
+فراغ Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
 {
     IM3CodePage end = i_codePageList;
 
-    while (end) {
+    طالما (end) {
         end->info.lineIndex = 0; // reset page
-#if d_m3RecordBacktraces
+#𐤀𐤌 d_m3RecordBacktraces
         end->info.mapping->size = 0;
 #endif // d_m3RecordBacktraces
 
         IM3CodePage next = end->info.next;
-        if (not next) {
-            break;
+        𐤀𐤌 (not next) {
+            اكسر;
         }
 
         end = next;
     }
 
-    if (end) {
+    𐤀𐤌 (end) {
         // push list to front
         end->info.next               = i_environment->pagesReleased;
         i_environment->pagesReleased = i_codePageList;
@@ -212,11 +212,11 @@ void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_c
 }
 
 
-IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, void* i_userdata)
+IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, فراغ* i_userdata)
 {
     IM3Runtime runtime = m3_AllocStruct(M3Runtime);
 
-    if (runtime) {
+    𐤀𐤌 (runtime) {
         m3_ResetErrorInfo(runtime);
 
         runtime->environment = i_environment;
@@ -224,138 +224,138 @@ IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, 
 
         Deterministic_InitRuntime(runtime);
 
-        runtime->originStack = m3_Malloc("Wasm Stack", i_stackSizeInBytes + 4 * sizeof(m3slot_t)); // TODO: more precise stack checks
+        runtime->originStack = m3_Malloc("Wasm Stack", i_stackSizeInBytes + 4 * حجم(m3slot_t)); // TODO: more precise stack checks
 
-        if (runtime->originStack) {
+        𐤀𐤌 (runtime->originStack) {
             runtime->stack         = runtime->originStack;
-            runtime->numStackSlots = i_stackSizeInBytes / sizeof(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->originStack, runtime->numStackSlots);
-        } else {
+            runtime->numStackSlots = i_stackSizeInBytes / حجم(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->originStack, runtime->numStackSlots);
+        } وإلا {
             m3_Free(runtime);
         }
     }
 
-    return runtime;
+    أرجع runtime;
 }
 
-void m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
+فراغ m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
 {
-#if d_m3EnableValidation
-    if (i_runtime) {
+#𐤀𐤌 d_m3EnableValidation
+    𐤀𐤌 (i_runtime) {
         i_runtime->skipValidation = not i_enable;
     }
-#else
-    (void)i_runtime;
-    (void)i_enable;              // nothing to skip: the validator was compiled out
+#وإلا
+    (فراغ)i_runtime;
+    (فراغ)i_enable;              // nothing to skip: the validator was compiled out
 #endif
 }
 
 M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_value)
 {
-    if (not i_runtime) {
-        return m3Err_mallocFailed;
+    𐤀𐤌 (not i_runtime) {
+        أرجع m3Err_mallocFailed;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes:
-        if (i_value and i_value < i_runtime->memoryBytesUsed) {
-            return m3Err_resourceLimitBelowUsage;
+    بدل (i_limit) {
+    حالة c_m3Limit_MemoryBytes:
+        𐤀𐤌 (i_value and i_value < i_runtime->memoryBytesUsed) {
+            أرجع m3Err_resourceLimitBelowUsage;
         }
         i_runtime->memoryBytesLimit = i_value;
-        return m3Err_none;
-    case c_m3Limit_TableElements:
-        if (i_value and i_value < i_runtime->tableElementsUsed) {
-            return m3Err_resourceLimitBelowUsage;
+        أرجع m3Err_none;
+    حالة c_m3Limit_TableElements:
+        𐤀𐤌 (i_value and i_value < i_runtime->tableElementsUsed) {
+            أرجع m3Err_resourceLimitBelowUsage;
         }
         i_runtime->tableElementsLimit = i_value;
-        return m3Err_none;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations:
-        if (i_value and i_value < i_runtime->continuationsAllocated) {
-            return m3Err_resourceLimitBelowUsage;
+        أرجع m3Err_none;
+#𐤀𐤌 d_m3HasStackSwitching
+    حالة c_m3Limit_Continuations:
+        𐤀𐤌 (i_value and i_value < i_runtime->continuationsAllocated) {
+            أرجع m3Err_resourceLimitBelowUsage;
         }
         i_runtime->continuationsLimit = (u32)M3_MIN(i_value, (u64)UINT32_MAX);
-        while (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
+        طالما (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
             m3_Free(i_runtime->valStackPool[--i_runtime->valStackPoolCount]);
         }
-        return m3Err_none;
-#else
-    case c_m3Limit_Continuations: return m3Err_resourceLimitNotSupported;
+        أرجع m3Err_none;
+#وإلا
+    حالة c_m3Limit_Continuations: أرجع m3Err_resourceLimitNotSupported;
 #endif
-    case c_m3Limit_GasUnits:
-#if d_m3HasGasMetering
+    حالة c_m3Limit_GasUnits:
+#𐤀𐤌 d_m3HasGasMetering
         i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_value, (u64)INT64_MAX);
-        return m3Err_none;
-#else
-        return m3Err_resourceLimitNotSupported;
+        أرجع m3Err_none;
+#وإلا
+        أرجع m3Err_resourceLimitNotSupported;
 #endif
-    default: return m3Err_unknownResourceLimit;
+    افتراضي: أرجع m3Err_unknownResourceLimit;
     }
 }
 
 uint64_t m3_GetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    𐤀𐤌 (not i_runtime) {
+        أرجع 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesLimit;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsLimit;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsLimit;
+    بدل (i_limit) {
+    حالة c_m3Limit_MemoryBytes: أرجع i_runtime->memoryBytesLimit;
+    حالة c_m3Limit_TableElements: أرجع i_runtime->tableElementsLimit;
+#𐤀𐤌 d_m3HasStackSwitching
+    حالة c_m3Limit_Continuations: أرجع i_runtime->continuationsLimit;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit;
+#𐤀𐤌 d_m3HasGasMetering
+    حالة c_m3Limit_GasUnits: أرجع (u64)i_runtime->gasLimit;
 #endif
-    default: return 0;
+    افتراضي: أرجع 0;
     }
 }
 
 uint64_t m3_GetResourceUsage (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    𐤀𐤌 (not i_runtime) {
+        أرجع 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesUsed;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsUsed;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsAllocated;
+    بدل (i_limit) {
+    حالة c_m3Limit_MemoryBytes: أرجع i_runtime->memoryBytesUsed;
+    حالة c_m3Limit_TableElements: أرجع i_runtime->tableElementsUsed;
+#𐤀𐤌 d_m3HasStackSwitching
+    حالة c_m3Limit_Continuations: أرجع i_runtime->continuationsAllocated;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
+#𐤀𐤌 d_m3HasGasMetering
+    حالة c_m3Limit_GasUnits: أرجع (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
 #endif
-    default: return 0;
+    افتراضي: أرجع 0;
     }
 }
 
-void* m3_GetUserData (IM3Runtime i_runtime)
+فراغ* m3_GetUserData (IM3Runtime i_runtime)
 {
-    return i_runtime ? i_runtime->userdata : NULL;
+    أرجع i_runtime ? i_runtime->userdata : عدم;
 }
 
 
-void* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, void* i_info)
+فراغ* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, فراغ* i_info)
 {
-    void* r = NULL;
+    فراغ* r = عدم;
 
     IM3Module module = i_runtime->modules;
 
-    while (module) {
+    طالما (module) {
         IM3Module next = module->next;
-        if ((r = i_visitor(module, i_info))) {
-            break;
+        𐤀𐤌 ((r = i_visitor(module, i_info))) {
+            اكسر;
         }
 
         module = next;
     }
 
-    return r;
+    أرجع r;
 }
 
 
-void* _FreeModule (IM3Module i_module, void* i_info)
+فراغ* _FreeModule (IM3Module i_module, فراغ* i_info)
 {
     m3_FreeModule(i_module);
-    return NULL;
+    أرجع عدم;
 }
 
 
@@ -367,63 +367,63 @@ void* _FreeModule (IM3Module i_module, void* i_info)
 // the modules borrowing from it. So clear the borrowed slots first, in a pass
 // that frees nothing; the walk then skips them on the NULL check it already
 // does, instead of reading a memory some earlier module has freed.
-void* _ReleaseBorrowedSlots (IM3Module i_module, void* i_info)
+فراغ* _ReleaseBorrowedSlots (IM3Module i_module, فراغ* i_info)
 {
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    لكل (u32 i = 0; i < i_module->numMemories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
-        if (memory and memory->owner != i_module) {
-            i_module->memories[i] = NULL;
+        𐤀𐤌 (memory and memory->owner != i_module) {
+            i_module->memories[i] = عدم;
         }
     }
 
-    for (u32 i = 0; i < i_module->numTables; ++i) {
+    لكل (u32 i = 0; i < i_module->numTables; ++i) {
         IM3Table table = i_module->tables[i];
 
-        if (table and table->owner != i_module) {
-            i_module->tables[i] = NULL;
+        𐤀𐤌 (table and table->owner != i_module) {
+            i_module->tables[i] = عدم;
         }
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
-void Runtime_Release (IM3Runtime i_runtime)
+فراغ Runtime_Release (IM3Runtime i_runtime)
 {
-    ForEachModule(i_runtime, _ReleaseBorrowedSlots, NULL);
-    ForEachModule(i_runtime, _FreeModule, NULL);                    d_m3Assert (i_runtime->numActiveCodePages == 0);
+    ForEachModule(i_runtime, _ReleaseBorrowedSlots, عدم);
+    ForEachModule(i_runtime, _FreeModule, عدم);                    d_m3Assert (i_runtime->numActiveCodePages == 0);
 
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesOpen);
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesFull);
 
     m3_Free(i_runtime->originStack);
 
-#if d_m3EnableValidation
+#𐤀𐤌 d_m3EnableValidation
     m3_Free(i_runtime->validator);
 #endif
 
-#if d_m3HasExceptionHandling
+#𐤀𐤌 d_m3HasExceptionHandling
     // a runtime let go of while suspended still holds its exceptions
     FreeExceptions(i_runtime);
     m3_Free(i_runtime->uncaughtException);
 #endif
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    while (i_runtime->hostTags) {
+#𐤀𐤌 d_m3HasExceptionHandling || d_m3HasStackSwitching
+    طالما (i_runtime->hostTags) {
         M3HostTag* next = i_runtime->hostTags->next;
         m3_Free(i_runtime->hostTags);
         i_runtime->hostTags = next;
     }
 #endif
-#if d_m3HasStackSwitching
+#𐤀𐤌 d_m3HasStackSwitching
     Continuation_ReleaseAll(i_runtime);
 #endif
 }
 
 
-void m3_FreeRuntime (IM3Runtime i_runtime)
+فراغ m3_FreeRuntime (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    𐤀𐤌 (i_runtime) {
         m3_PrintProfilerInfo();
 
         Runtime_Release(i_runtime);
@@ -432,13 +432,13 @@ void m3_FreeRuntime (IM3Runtime i_runtime)
 }
 
 
-#if d_m3HasStackSwitching
+#𐤀𐤌 d_m3HasStackSwitching
 
 IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3Function i_function)
 {
     IM3Continuation cont = m3_AllocStruct(M3Continuation);
-    if (!cont) {
-        return NULL;
+    𐤀𐤌 (!cont) {
+        أرجع عدم;
     }
 
     cont->type          = i_type;
@@ -448,33 +448,33 @@ IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3F
     cont->numStackSlots = d_m3ContinuationStackSlots;
     // frames are recorded only when this continuation actually suspends, and
     // only as deep as it got, so the array starts out unallocated
-    cont->frames    = NULL;
+    cont->frames    = عدم;
     cont->framesCap = 0;
     cont->numFrames = 0;
 
     cont->sp = cont->valStack;
-    cont->pc = i_function ? i_function->compiled : NULL;
+    cont->pc = i_function ? i_function->compiled : عدم;
     cont->r0 = 0;
-#  if d_m3HasFloat
+#  𐤀𐤌 d_m3HasFloat
     cont->fp0 = 0;
 #  endif
     cont->boundArgsCount    = 0;
     cont->numSuspendResults = 0;
     cont->numHandlers       = 0;
-    cont->handlersPC        = NULL;
-    cont->parent            = NULL;
+    cont->handlersPC        = عدم;
+    cont->parent            = عدم;
 
     cont->next               = i_runtime->continuations;
     i_runtime->continuations = cont;
 
-    return cont;
+    أرجع cont;
 }
 
 IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
     IM3Continuation newCont = Continuation_New(i_runtime, i_cont->type, i_cont->entryFunction);
-    if (M3_UNLIKELY(not newCont)) {
-        return NULL;
+    𐤀𐤌 (M3_UNLIKELY(not newCont)) {
+        أرجع عدم;
     }
 
     newCont->valStack      = i_cont->valStack;
@@ -483,7 +483,7 @@ IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuatio
     newCont->pc            = i_cont->pc;
     newCont->suspendPoint  = i_cont->suspendPoint;
     newCont->r0            = i_cont->r0;
-#  if d_m3HasFloat
+#  𐤀𐤌 d_m3HasFloat
     newCont->fp0 = i_cont->fp0;
 #  endif
     newCont->frames    = i_cont->frames;
@@ -491,12 +491,12 @@ IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuatio
     newCont->numFrames = i_cont->numFrames;
 
     newCont->boundArgsCount = 0;
-#  if d_m3HasExceptionHandling
+#  𐤀𐤌 d_m3HasExceptionHandling
     newCont->resumeThrow = i_cont->resumeThrow;
-    i_cont->resumeThrow  = NULL;
+    i_cont->resumeThrow  = عدم;
 #  endif
     newCont->numSuspendResults = i_cont->numSuspendResults;
-    for (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
+    لكل (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
         newCont->suspendResultOffsets[i] = i_cont->suspendResultOffsets[i];
         newCont->suspendResultIs64[i]    = i_cont->suspendResultIs64[i];
     }
@@ -506,66 +506,66 @@ IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuatio
     newCont->parent      = i_cont->parent;
     newCont->state       = cont_suspended;
 
-    i_cont->valStack  = NULL;
-    i_cont->frames    = NULL;
+    i_cont->valStack  = عدم;
+    i_cont->frames    = عدم;
     i_cont->framesCap = 0;
     i_cont->numFrames = 0;
     i_cont->state     = cont_consumed;
 
-    return newCont;
+    أرجع newCont;
 }
 
 // Only cont.new and snapshot restoration acquire stacks. Binding and suspension
 // transfer them between records without changing the active count.
 M3Result Continuation_AcquireStack (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not Continuation_CanAcquireStack(runtime)) {
-        return m3Err_continuationLimitExceeded;
+    𐤀𐤌 (not Continuation_CanAcquireStack(runtime)) {
+        أرجع m3Err_continuationLimitExceeded;
     }
-    if (runtime->valStackPoolCount) {
+    𐤀𐤌 (runtime->valStackPoolCount) {
         cont->valStack = runtime->valStackPool[--runtime->valStackPoolCount];
-        memset(cont->valStack, 0, (cont->numStackSlots + 4) * sizeof(m3slot_t));
-    } else {
+        memset(cont->valStack, 0, (cont->numStackSlots + 4) * حجم(m3slot_t));
+    } وإلا {
         cont->valStack = m3_AllocArray(m3slot_t, cont->numStackSlots + 4);
     }
-    if (not cont->valStack) {
-        return m3Err_mallocFailed;
+    𐤀𐤌 (not cont->valStack) {
+        أرجع m3Err_mallocFailed;
     }
     cont->sp = cont->valStack;
     runtime->continuationsAllocated++;
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
-void Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont)
+فراغ Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not cont->valStack or cont == runtime->rootContinuation) {
-        return;
+    𐤀𐤌 (not cont->valStack or cont == runtime->rootContinuation) {
+        أرجع;
     }
-    if (not runtime->valStackPool) {
+    𐤀𐤌 (not runtime->valStackPool) {
         runtime->valStackPool = m3_AllocArray(m3slot_t*, 16);
-        if (runtime->valStackPool) {
+        𐤀𐤌 (runtime->valStackPool) {
             runtime->valStackPoolCap = 16;
         }
     }
-    if (runtime->valStackPoolCount < runtime->valStackPoolCap and
+    𐤀𐤌 (runtime->valStackPoolCount < runtime->valStackPoolCap and
         (not runtime->continuationsLimit or runtime->valStackPoolCount <
                                               runtime->continuationsLimit - runtime->continuationsAllocated + 1)) {
         runtime->valStackPool[runtime->valStackPoolCount++] = cont->valStack;
-        cont->valStack                                      = NULL;
-    } else {
+        cont->valStack                                      = عدم;
+    } وإلا {
         m3_Free(cont->valStack);
     }
-    cont->sp = NULL;
+    cont->sp = عدم;
     runtime->continuationsAllocated--;
 }
 
-void Continuation_ReleaseAll (IM3Runtime io_runtime)
+فراغ Continuation_ReleaseAll (IM3Runtime io_runtime)
 {
     // Records live until teardown: a consumed reference can still be in a table
     // or on a Wasm stack. Its value stack has already been recycled.
     IM3Continuation cont = io_runtime->continuations;
 
-    while (cont) {
+    طالما (cont) {
         IM3Continuation next = cont->next;
 
         m3_Free(cont->valStack);
@@ -575,19 +575,19 @@ void Continuation_ReleaseAll (IM3Runtime io_runtime)
         cont = next;
     }
 
-    for (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
+    لكل (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
         m3_Free(io_runtime->valStackPool[i]);
     }
     m3_Free(io_runtime->valStackPool);
     io_runtime->valStackPoolCount = io_runtime->valStackPoolCap = 0;
     io_runtime->continuationsAllocated                          = 0;
-    io_runtime->continuations                                   = NULL;
-    io_runtime->activeContinuation                              = NULL;
-    io_runtime->rootContinuation                                = NULL;
+    io_runtime->continuations                                   = عدم;
+    io_runtime->activeContinuation                              = عدم;
+    io_runtime->rootContinuation                                = عدم;
 }
 
 
-m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
+m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, ثابت M3Frame* i_frame)
 {
     IM3Continuation cont = i_runtime->activeContinuation;
 
@@ -595,21 +595,21 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
     // and that whole stretch has an active continuation
     d_m3Assert(cont);
 
-    if (cont->numFrames == cont->framesCap) {
+    𐤀𐤌 (cont->numFrames == cont->framesCap) {
         u32 newCap = cont->framesCap ? cont->framesCap * 2 : 8;
 
-        if (newCap > d_m3ContinuationMaxFrames) {
+        𐤀𐤌 (newCap > d_m3ContinuationMaxFrames) {
             newCap = d_m3ContinuationMaxFrames;
         }
 
-        if (newCap == cont->framesCap) {
-            return m3Err_trapStackOverflow;
+        𐤀𐤌 (newCap == cont->framesCap) {
+            أرجع m3Err_trapStackOverflow;
         }
 
         M3Frame* frames = m3_ReallocArray(M3Frame, cont->frames, newCap, cont->framesCap);
 
-        if (not frames) {
-            return m3Err_mallocFailed;
+        𐤀𐤌 (not frames) {
+            أرجع m3Err_mallocFailed;
         }
 
         cont->frames    = frames;
@@ -618,21 +618,21 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
 
     cont->frames[cont->numFrames++] = *i_frame;
 
-    return m3Err_continuationSuspended;
+    أرجع m3Err_continuationSuspended;
 }
 
 #endif // d_m3HasStackSwitching
 
-M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
+M3Result EvaluateExpression (IM3Module i_module, فراغ* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
 
     // OPTZ: use a simplified interpreter for expressions
 
     // create a temporary runtime context
-#if defined(d_m3PreferStaticAlloc)
-    static M3Runtime runtime;
-#else
+#𐤀𐤌 defined(d_m3PreferStaticAlloc)
+    ساكن M3Runtime runtime;
+#وإلا
     M3Runtime runtime;
 #endif
     M3_INIT(runtime);
@@ -658,23 +658,23 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
     // empty and the next expression reuses it rather than burning fresh lines.
     o->page = AcquireCodePage(&runtime);
 
-    if (o->page) {
-        IM3FuncType ftype = NULL;
+    𐤀𐤌 (o->page) {
+        IM3FuncType ftype = عدم;
 
-#if d_m3HasTypedRefs
+#𐤀𐤌 d_m3HasTypedRefs
         // A reference type has to be checked as the type it is: the shared
         // return types are one per storage class, so borrowing one of those
         // would let any reference at all satisfy a particular one.
-        if (IsSpelledRefType(i_type)) {
+        𐤀𐤌 (IsSpelledRefType(i_type)) {
             result = AllocFuncType(&ftype, 1);
 
-            if (not result) {
+            𐤀𐤌 (not result) {
                 ftype->numRets  = 1;
                 ftype->types[0] = i_type;
 
                 result = Environment_AddFuncType(runtime.environment, &ftype);
             }
-        } else
+        } وإلا
 #endif
         {
             ftype = runtime.environment->retFuncTypes[BaseTypeOf(i_type)];
@@ -682,42 +682,42 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 
         pc_t m3code = GetPagePC(o->page);
 
-        if (not result) {
+        𐤀𐤌 (not result) {
             result = CompileExpression(o, ftype);
         }
 
-        if (not result && o->maxStackSlots >= runtime.numStackSlots) {
+        𐤀𐤌 (not result && o->maxStackSlots >= runtime.numStackSlots) {
             result = m3Err_trapStackOverflow;
         }
 
-        if (not result) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs);
+        𐤀𐤌 (not result) {
+#𐤀𐤌 (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+            m3ret_t r = RunCode(m3code, stack, عدم, d_m3OpDefaultArgs, d_m3BaseCstr);
+#وإلا
+            m3ret_t r = RunCode(m3code, stack, عدم, d_m3OpDefaultArgs);
 #endif
 
-            if (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
-                if (SizeOfType(BaseTypeOf(i_type)) == sizeof(u32)) {
+            𐤀𐤌 (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
+                𐤀𐤌 (SizeOfType(BaseTypeOf(i_type)) == حجم(u32)) {
                     *(u32*)o_expressed = *((u32*)stack);
-                } else {
+                } وإلا {
                     *(u64*)o_expressed = *((u64*)stack);
                 }
             }
         }
 
         ReleaseCodePage(&runtime, o->page);
-    } else {
+    } وإلا {
         result = m3Err_mallocFailedCodePage;
     }
 
-    runtime.originStack = NULL;        // prevent free(stack) in ReleaseRuntime
+    runtime.originStack = عدم;        // prevent free(stack) in ReleaseRuntime
     Runtime_Release(&runtime);
     i_module->runtime = savedRuntime;
 
     *io_bytes = o->wasm;
 
-    return result;
+    أرجع result;
 }
 
 
@@ -735,92 +735,92 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 // Whether an exporting memory or table satisfies what an import asks for. The
 // exporter's *current* size is its minimum - one that has been grown satisfies
 // a larger import than its declaration would - and it may be no less bounded.
-static
+ساكن
 bool LimitsSatisfy (u64 i_exportedSize, bool i_exportedHasMax, u64 i_exportedMax,
                     u64 i_importMin, bool i_importHasMax, u64 i_importMax)
 {
-    if (i_exportedSize < i_importMin) {
-        return false;
+    𐤀𐤌 (i_exportedSize < i_importMin) {
+        أرجع false;
     }
 
-    if (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
-        return false;
+    𐤀𐤌 (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
+        أرجع false;
     }
 
-    return true;
+    أرجع true;
 }
 
 
 // The export of this kind under this name, or NULL. The index it carries is
 // resolved by the caller, against the module's index space as it stands then -
 // after linking, a re-exported import's slot holds the entity it was linked to.
-static
-const M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
+ساكن
+ثابت M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        const M3Export* e = &i_module->exports[i];
+    لكل (u32 i = 0; i < i_module->numExports; ++i) {
+        ثابت M3Export* e = &i_module->exports[i];
 
-        if (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
-            return e;
+        𐤀𐤌 (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
+            أرجع e;
         }
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
-static
+ساكن
 IM3Function Module_FindExportedFunction (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
+    ثابت M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
 
     // A module that re-exports an import names the placeholder here. Resolve to
     // the function that actually runs, or a host-side call would run it against
     // the importing module's memory.
-    return e ? Function_Implementation(&i_module->functions[e->index]) : NULL;
+    أرجع e ? Function_Implementation(&i_module->functions[e->index]) : عدم;
 }
 
 
-static
+ساكن
 IM3Memory Module_FindExportedMemory (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    ثابت M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    return e ? i_module->memories[e->index] : NULL;
+    أرجع e ? i_module->memories[e->index] : عدم;
 }
 
 
-static
+ساكن
 IM3Table Module_FindExportedTable (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
+    ثابت M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
 
-    return e ? i_module->tables[e->index] : NULL;
+    أرجع e ? i_module->tables[e->index] : عدم;
 }
 
 
-static
+ساكن
 IM3Global Module_FindExportedGlobal (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
+    ثابت M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
 
-    return e ? &i_module->globals[e->index] : NULL;
+    أرجع e ? &i_module->globals[e->index] : عدم;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-static
+#𐤀𐤌 d_m3HasExceptionHandling || d_m3HasStackSwitching
+ساكن
 IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
+    ثابت M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
 
-    if (not e) {
-        return NULL;
+    𐤀𐤌 (not e) {
+        أرجع عدم;
     }
 
     IM3Tag tag = &i_module->tags[e->index];
 
-    return tag->resolved ? tag->resolved : tag;
+    أرجع tag->resolved ? tag->resolved : tag;
 }
 #endif
 
@@ -829,16 +829,16 @@ IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 // unique within a module, so a name one of the lookups above missed but this
 // one finds is exported as something else - a kind the import cannot be
 // satisfied by, rather than a name the module never exported.
-static
+ساكن
 bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        if (strcmp(i_module->exports[i].name, i_name) == 0) {
-            return true;
+    لكل (u32 i = 0; i < i_module->numExports; ++i) {
+        𐤀𐤌 (strcmp(i_module->exports[i].name, i_name) == 0) {
+            أرجع true;
         }
     }
 
-    return false;
+    أرجع false;
 }
 
 
@@ -846,25 +846,25 @@ bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 // it. Runs before anything is allocated or initialized: a memory import has to
 // be resolved before InitMemory would give it pages of its own, and a global
 // import before InitGlobals runs an initializer that reads it.
-static
+ساكن
 M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < io_module->numFunctions; ++i) {
         IM3Function f = &io_module->functions[i];
 
-        if (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
-            continue;
+        𐤀𐤌 (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
+            استمر;
         }
 
         IM3Module from = m3_FindModule(io_runtime, f->import.moduleUtf8);
-        if (not from) {
-            continue;
+        𐤀𐤌 (not from) {
+            استمر;
         }
 
         IM3Function exported = Module_FindExportedFunction(from, f->import.fieldUtf8);
-        if (not exported) {
+        𐤀𐤌 (not exported) {
             // the import names a module that is loaded, so its exports settle the
             // question: a name it exports as something else is a type mismatch, and
             // one it does not export at all is an unknown import
@@ -879,20 +879,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         f->resolved = Function_Implementation(exported);
     }
 
-    for (u32 i = 0; i < io_module->numMemories; ++i) {
+    لكل (u32 i = 0; i < io_module->numMemories; ++i) {
         IM3Memory memory = io_module->memories[i];
 
-        if (not memory->imported or memory->owner != io_module) {
-            continue;
+        𐤀𐤌 (not memory->imported or memory->owner != io_module) {
+            استمر;
         }
 
         IM3Module from = m3_FindModule(io_runtime, memory->import.moduleUtf8);
-        if (not from) {
-            continue;
+        𐤀𐤌 (not from) {
+            استمر;
         }
 
         IM3Memory exported = Module_FindExportedMemory(from, memory->import.fieldUtf8);
-        if (not exported) {
+        𐤀𐤌 (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, memory->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -918,20 +918,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->memories[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    لكل (u32 i = 0; i < io_module->numTables; ++i) {
         IM3Table table = io_module->tables[i];
 
-        if (not table->imported or table->owner != io_module) {
-            continue;
+        𐤀𐤌 (not table->imported or table->owner != io_module) {
+            استمر;
         }
 
         IM3Module from = m3_FindModule(io_runtime, table->import.moduleUtf8);
-        if (not from) {
-            continue;
+        𐤀𐤌 (not from) {
+            استمر;
         }
 
         IM3Table exported = Module_FindExportedTable(from, table->import.fieldUtf8);
-        if (not exported) {
+        𐤀𐤌 (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, table->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -953,20 +953,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->tables[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    لكل (u32 i = 0; i < io_module->numGlobals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
-            continue;
+        𐤀𐤌 (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+            استمر;
         }
 
         IM3Module from = m3_FindModule(io_runtime, g->import.moduleUtf8);
-        if (not from) {
-            continue;
+        𐤀𐤌 (not from) {
+            استمر;
         }
 
         IM3Global exported = Module_FindExportedGlobal(from, g->import.fieldUtf8);
-        if (not exported) {
+        𐤀𐤌 (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, g->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -977,21 +977,21 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         g->resolved = exported->resolved ? exported->resolved : exported;
     }
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+#𐤀𐤌 d_m3HasExceptionHandling || d_m3HasStackSwitching
+    لكل (u32 i = 0; i < io_module->numTags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
-            continue;
+        𐤀𐤌 (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
+            استمر;
         }
 
         IM3Module from = m3_FindModule(io_runtime, tag->import.moduleUtf8);
-        if (not from) {
-            continue;
+        𐤀𐤌 (not from) {
+            استمر;
         }
 
         IM3Tag exported = Module_FindExportedTag(from, tag->import.fieldUtf8);
-        if (not exported) {
+        𐤀𐤌 (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, tag->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -1002,7 +1002,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
     }
 #endif
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
@@ -1019,7 +1019,7 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
     i_module->memory0 = i_module->numMemories ? i_module->memories[0]
                                               : &i_module->emptyMemory;
 
-    if (i_module->numMemories == 0) {
+    𐤀𐤌 (i_module->numMemories == 0) {
         // nothing addressable, but _mem still has to point somewhere
         i_module->emptyMemory.owner    = i_module;
         i_module->emptyMemory.pageSize = d_m3DefaultMemPageSize;
@@ -1027,13 +1027,13 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
     }
 
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    لكل (u32 i = 0; i < i_module->numMemories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
         // a slot that already points at another module's memory is that
         // module's to allocate
-        if (memory->owner != i_module or memory->mallocated) {
-            continue;
+        𐤀𐤌 (memory->owner != i_module or memory->mallocated) {
+            استمر;
         }
 
         u32 pageSize = Memory_PageSize(memory);
@@ -1049,7 +1049,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
         // 2^64/pagesize overflows a u64 only when a page is a single byte, and
         // a power-of-two page size divides the address space exactly, so the
         // 64-bit division below is 2^64/pagesize written so that it fits.
-        if (not memory->hasMax) {
+        𐤀𐤌 (not memory->hasMax) {
             memory->maxPages = memory->isMemory64
                                  ? (pageSize > 1 ? (UINT64_MAX / pageSize) + 1 : UINT64_MAX)
                                  : (0x100000000ull / pageSize);
@@ -1058,7 +1058,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
 _       (ResizeMemory(io_runtime, memory, memory->initPages));
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
@@ -1068,7 +1068,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
     u64 numPagesToAlloc = i_numPages;
 
-    if (numPagesToAlloc <= memory->maxPages) {
+    𐤀𐤌 (numPagesToAlloc <= memory->maxPages) {
         // A 64-bit memory may ask for up to 2^48 pages, which overflows a u64
         // of bytes. Nothing that large can be backed, so refuse it up front
         // rather than multiplying into a wrapped size.
@@ -1077,7 +1077,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
         u64 numPageBytes = numPagesToAlloc * memory->pageSize;
 
-#if d_m3MaxLinearMemoryPages > 0
+#𐤀𐤌 d_m3MaxLinearMemoryPages > 0
         // the limit is a memory size, counted in default-sized pages; comparing
         // it against a raw page count would make it 65536 times stricter for a
         // module whose pages are one byte
@@ -1086,7 +1086,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 #endif
 
         // Limit the amount of memory that gets actually allocated
-        if (io_runtime->memoryLimit) {
+        𐤀𐤌 (io_runtime->memoryLimit) {
             numPageBytes = M3_MIN(numPageBytes, (u64)io_runtime->memoryLimit);
         }
 
@@ -1096,9 +1096,9 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
                                               (numPageBytes > io_runtime->memoryBytesLimit or
                                                otherUsed > io_runtime->memoryBytesLimit - numPageBytes));
 
-        _throwif("linear memory limitation exceeded", numPageBytes > (u64)SIZE_MAX - sizeof(M3MemoryHeader));
+        _throwif("linear memory limitation exceeded", numPageBytes > (u64)SIZE_MAX - حجم(M3MemoryHeader));
 
-#if d_m3GuardedMemory
+#𐤀𐤌 d_m3GuardedMemory
 
         // A slot holds every address a Wasm access can name, and nothing beyond
         // that: a memory larger than the data part of one would put addresses past
@@ -1116,7 +1116,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         _throwif("guarded memory needs a page size the system's divides into",
                  (memory->pageSize % m3_HostPageSize()) != 0);
 
-        if (memory->guardSlot == NULL) {
+        𐤀𐤌 (memory->guardSlot == عدم) {
             memory->guardSlot = Guard_TakeSlot();
             _throwifnull(memory->guardSlot);
         }
@@ -1127,9 +1127,9 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
         memory->mallocated = Guard_SlotHeader(memory->guardSlot);
 
-#else
+#وإلا
 
-        size_t numBytes = (size_t)numPageBytes + sizeof(M3MemoryHeader);
+        size_t numBytes = (size_t)numPageBytes + حجم(M3MemoryHeader);
 
         // What is really there, which is not numPages * pageSize: the limit above
         // caps the bytes without capping the page count, so a memory can be short
@@ -1137,16 +1137,16 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         // MCU has. Measuring the old block by the page count would overstate it,
         // and then realloc never sees the size it already has and copies the
         // whole limit again on every grow past it.
-        size_t numPreviousBytes = memory->mallocated ? memory->mallocated->length + sizeof(M3MemoryHeader) : 0;
+        size_t numPreviousBytes = memory->mallocated ? memory->mallocated->length + حجم(M3MemoryHeader) : 0;
 
-        void* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, numBytes, numPreviousBytes);
+        فراغ* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, numBytes, numPreviousBytes);
         _throwifnull(newMem);
 
         memory->mallocated = (M3MemoryHeader*)newMem;
 
 #endif
 
-#if d_m3LogRuntime
+#𐤀𐤌 d_m3LogRuntime
         M3MemoryHeader* oldMallocated = memory->mallocated;
 #endif
 
@@ -1160,25 +1160,25 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         memory->mallocated->maxStack = (m3slot_t*)io_runtime->originStack + io_runtime->numStackSlots;
 
         m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->numPages);
-    } else {
+    } وإلا {
         result = m3Err_wasmMemoryOverflow;
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
-void FreeMemoryBlock (IM3Memory io_memory)
+فراغ FreeMemoryBlock (IM3Memory io_memory)
 {
-    if (io_memory->mallocated and io_memory->mallocated->runtime) {
+    𐤀𐤌 (io_memory->mallocated and io_memory->mallocated->runtime) {
         io_memory->mallocated->runtime->memoryBytesUsed -= io_memory->mallocated->length;
     }
-#if d_m3GuardedMemory
+#𐤀𐤌 d_m3GuardedMemory
     Guard_GiveSlot(io_memory->guardSlot);
-    io_memory->guardSlot = NULL;
+    io_memory->guardSlot = عدم;
 
-    io_memory->mallocated = NULL;
-#else
+    io_memory->mallocated = عدم;
+#وإلا
     m3_Free(io_memory->mallocated);
 #endif
 }
@@ -1188,7 +1188,7 @@ M3Result InitGlobals (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (io_module->numGlobals) {
+    𐤀𐤌 (io_module->numGlobals) {
         // placing the globals in their structs isn't good for cache locality, but i don't really know what the global
         // access patterns typically look like yet.
 
@@ -1196,27 +1196,27 @@ M3Result InitGlobals (IM3Module io_module)
 
         //          if (io_module->globalMemory)
         {
-            for (u32 i = 0; i < io_module->numGlobals; ++i) {
+            لكل (u32 i = 0; i < io_module->numGlobals; ++i) {
                 M3Global* g = &io_module->globals[i];                           m3log (runtime, "initializing global: %d", i);
 
-                if (g->initExpr) {
+                𐤀𐤌 (g->initExpr) {
                     bytes_t start = g->initExpr;
 
                     result = EvaluateExpression(io_module, &g->i64Value, g->type, &start, g->initExpr + g->initExprSize);
 
-                    if (not result) {
+                    𐤀𐤌 (not result) {
                         // io_module->globalMemory [i] = initValue;
-                    } else {
-                        break;
+                    } وإلا {
+                        اكسر;
                     }
-                } else {                                                        m3log (runtime, "importing global");
+                } وإلا {                                                        m3log (runtime, "importing global");
                 }
             }
         }
         //          else result = ErrorModule (m3Err_mallocFailed, io_module, "could allocate globals for module: '%s", io_module->name);
     }
 
-    return result;
+    أرجع result;
 }
 
 
@@ -1224,13 +1224,13 @@ M3Result InitDataSegments (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numDataSegments; ++i) {
+    لكل (u32 i = 0; i < io_module->numDataSegments; ++i) {
         M3DataSegment* segment = &io_module->dataSegments[i];
 
         // A passive segment stays available for memory.init until data.drop.
         // An active one is copied here and then counts as dropped.
-        if (segment->isPassive) {
-            continue;
+        𐤀𐤌 (segment->isPassive) {
+            استمر;
         }
 
         _throwif("data segment memory index out of range",
@@ -1246,9 +1246,9 @@ M3Result InitDataSegments (IM3Module io_module)
         u64     segmentOffset = 0;
         bytes_t start         = segment->initExpr;
 
-        if (io_memory->isMemory64) {
+        𐤀𐤌 (io_memory->isMemory64) {
 _           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->initExpr + segment->initExprSize));
-        } else {
+        } وإلا {
             u32 offset32;
 _           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->initExpr + segment->initExprSize));
             segmentOffset = offset32;
@@ -1256,51 +1256,51 @@ _           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segm
 
         m3log(runtime, "loading data segment: %d; size: %d; offset: %llu", i, segment->size, (unsigned long long)segmentOffset);
 
-        if (segmentOffset <= io_memory->mallocated->length &&
+        𐤀𐤌 (segmentOffset <= io_memory->mallocated->length &&
             (u64)segment->size <= io_memory->mallocated->length - segmentOffset) {
             u8* dest = m3MemData(io_memory->mallocated) + segmentOffset;
             memcpy(dest, segment->data, segment->size);
-        } else {
+        } وإلا {
             _throw("data segment out of bounds");
         }
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
 // Turns a segment's elements into references. Element expressions are constant
 // expressions restricted to ref.null/ref.func, so they're read directly rather
 // than run through the compiler.
-static
-M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, void** o_elements)
+ساكن
+M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, فراغ** o_elements)
 {
     M3Result result = m3Err_none;
 
     bytes_t  pos = i_segment->elements;
     cbytes_t end = io_module->elementSectionEnd;
 
-    for (u32 e = 0; e < i_segment->numElements; ++e) {
+    لكل (u32 e = 0; e < i_segment->numElements; ++e) {
         u32   funcIndex;
-        void* ref = NULL;
+        فراغ* ref = عدم;
 
-        if (i_segment->isExpr) {
+        𐤀𐤌 (i_segment->isExpr) {
             m3opcode_t opcode;
 _           (Read_opcode(&opcode, &pos, end));
 
-            if (opcode == c_waOp_refFunc) {
+            𐤀𐤌 (opcode == c_waOp_refFunc) {
 _               (ReadLEB_u32(&funcIndex, &pos, end));
                 _throwif("function index out of range", funcIndex >= io_module->numFunctions);
                 ref = Function_Implementation(&io_module->functions[funcIndex]);
-            } else if (opcode == c_waOp_refNull) {
+            } وإلا 𐤀𐤌 (opcode == c_waOp_refNull) {
                 i8 waType;
                 u8 nullType;
 _               (ReadLEB_i7(&waType, &pos, end));
 _               (NormalizeType(&nullType, waType));
                 _throwif(m3Err_typeMismatch, nullType != i_segment->type);
-            } else if (opcode == c_waOp_getGlobal) {
+            } وإلا 𐤀𐤌 (opcode == c_waOp_getGlobal) {
                 // wasm 2.0 lets an element expression read an imported
                 // immutable global, which is how one module seeds another's
                 // table with a reference it exported.
@@ -1315,18 +1315,18 @@ _               (ReadLEB_u32(&globalIndex, &pos, end));
                 _throwif(m3Err_typeMismatch, BaseTypeOf(global->type) != BaseTypeOf(i_segment->type));
 
                 // read the cell the import was linked to, not the placeholder
-                if (global->resolved) {
+                𐤀𐤌 (global->resolved) {
                     global = global->resolved;
                 }
 
                 ref = global->refValue;
-            } else {
+            } وإلا {
                 _throw("constant expression required");
             }
 
 _           (Read_opcode(&opcode, &pos, end));
             _throwif(m3Err_wasmMalformed, opcode != c_waOp_end);
-        } else {
+        } وإلا {
 _           (ReadLEB_u32(&funcIndex, &pos, end));
             _throwif("function index out of range", funcIndex >= io_module->numFunctions);
             ref = Function_Implementation(&io_module->functions[funcIndex]);
@@ -1335,7 +1335,7 @@ _           (ReadLEB_u32(&funcIndex, &pos, end));
         o_elements[e] = ref;
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
@@ -1346,52 +1346,52 @@ M3Result InitTableAndElements (IM3Module io_module)
     cbytes_t end = io_module->elementSectionEnd;
     M3Table* table;
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    لكل (u32 i = 0; i < io_module->numTables; ++i) {
         table = io_module->tables[i];
 
         // a slot pointing at another module's table is that module's to fill
-        if (table->owner != io_module) {
-            continue;
+        𐤀𐤌 (table->owner != io_module) {
+            استمر;
         }
 
-        if (table->size) {
+        𐤀𐤌 (table->size) {
             IM3Runtime runtime = io_module->runtime;
             _throwif(m3Err_tableLimitExceeded, runtime->tableElementsLimit and
                                                  table->size > runtime->tableElementsLimit - runtime->tableElementsUsed);
-            table->elements = m3_AllocArray(void*, table->size);
+            table->elements = m3_AllocArray(فراغ*, table->size);
             _throwifnull(table->elements);
             runtime->tableElementsUsed += table->size;
 
-            if (table->initExpr) {
-                void*   value = NULL;
+            𐤀𐤌 (table->initExpr) {
+                فراغ*   value = عدم;
                 bytes_t start = table->initExpr;
 _               (EvaluateExpression(io_module, &value, BaseTypeOf(table->type),
                                      &start, table->initExpr + table->initExprSize));
 
-                for (u32 e = 0; e < table->size; ++e) {
+                لكل (u32 e = 0; e < table->size; ++e) {
                     table->elements[e] = value;
                 }
             }
         }
     }
 
-    for (u32 i = 0; i < io_module->numElementSegments; ++i) {
+    لكل (u32 i = 0; i < io_module->numElementSegments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         // Declarative segments only make their functions referenceable, and
         // passive ones wait for table.init, so neither is written out here.
-        if (segment->mode == c_m3Elem_declarative) {
+        𐤀𐤌 (segment->mode == c_m3Elem_declarative) {
             segment->dropped = true;
-            continue;
+            استمر;
         }
 
-        if (segment->mode == c_m3Elem_passive) {
-            if (segment->numElements) {
-                segment->resolved = m3_AllocArray(void*, segment->numElements);
+        𐤀𐤌 (segment->mode == c_m3Elem_passive) {
+            𐤀𐤌 (segment->numElements) {
+                segment->resolved = m3_AllocArray(فراغ*, segment->numElements);
                 _throwifnull(segment->resolved);
 _               (ResolveElements(io_module, segment, segment->resolved));
             }
-            continue;
+            استمر;
         }
 
         table = io_module->tables[segment->tableIndex];
@@ -1401,9 +1401,9 @@ _               (ResolveElements(io_module, segment, segment->resolved));
         u64     offset = 0;
         bytes_t expr   = segment->initExpr;
 
-        if (table->isTable64) {
+        𐤀𐤌 (table->isTable64) {
 _           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &expr, end));
-        } else {
+        } وإلا {
             u32 offset32;
 _           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &expr, end));
             offset = offset32;
@@ -1417,64 +1417,64 @@ _       (ResolveElements(io_module, segment, table->elements + offset));
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 M3Result m3_CompileModule (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < io_module->numFunctions; ++i) {
         IM3Function f = &io_module->functions[i];
-        if (f->wasm and not f->compiled) {
+        𐤀𐤌 (f->wasm and not f->compiled) {
 _           (CompileFunction(f));
         }
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
-#if d_m3HasExceptionHandling
+#𐤀𐤌 d_m3HasExceptionHandling
 
 M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs)
 {
-    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", sizeof(M3Exception) + i_numArgs * sizeof(u64));
+    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", حجم(M3Exception) + i_numArgs * حجم(u64));
 
-    if (exception) {
+    𐤀𐤌 (exception) {
         exception->tag     = i_tag;
         exception->numArgs = i_numArgs;
         exception->reified = false;
-        exception->prev    = NULL;
+        exception->prev    = عدم;
         exception->next    = io_runtime->exceptions;
 
-        if (exception->next) {
+        𐤀𐤌 (exception->next) {
             exception->next->prev = exception;
         }
 
         io_runtime->exceptions = exception;
     }
 
-    return exception;
+    أرجع exception;
 }
 
 
 // Releases one exception ahead of the rest. The caller has to know nothing can
 // still name it: no exnref was ever taken of it, and its payload has already
 // been copied out.
-void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
+فراغ FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 {
-    if (i_exception->prev) {
+    𐤀𐤌 (i_exception->prev) {
         i_exception->prev->next = i_exception->next;
-    } else {
+    } وإلا {
         io_runtime->exceptions = i_exception->next;
     }
 
-    if (i_exception->next) {
+    𐤀𐤌 (i_exception->next) {
         i_exception->next->prev = i_exception->prev;
     }
 
-    if (io_runtime->pendingException == i_exception) {
-        io_runtime->pendingException = NULL;
+    𐤀𐤌 (io_runtime->pendingException == i_exception) {
+        io_runtime->pendingException = عدم;
     }
 
     m3_Free_Impl(i_exception);
@@ -1484,14 +1484,14 @@ void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 // Releases every exception the runtime still holds. Only safe once the Wasm
 // stack is empty, which is why the outermost RunCodeChecked() is the one that
 // calls it.
-void FreeExceptions (IM3Runtime io_runtime)
+فراغ FreeExceptions (IM3Runtime io_runtime)
 {
     M3Exception* exception = io_runtime->exceptions;
 
-    io_runtime->exceptions       = NULL;
-    io_runtime->pendingException = NULL;
+    io_runtime->exceptions       = عدم;
+    io_runtime->pendingException = عدم;
 
-    while (exception) {
+    طالما (exception) {
         M3Exception* next = exception->next;
         m3_Free_Impl(exception);
         exception = next;
@@ -1504,21 +1504,21 @@ void FreeExceptions (IM3Runtime io_runtime)
 // the original is freed with the rest before the outermost call returns - and
 // one a host function's nested call ended with may still be named by an
 // exnref further down the stack.
-static
-void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
+ساكن
+فراغ RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 {
-    if (io_runtime->uncaughtException) {
+    𐤀𐤌 (io_runtime->uncaughtException) {
         m3_Free(io_runtime->uncaughtException);
     }
 
     M3Exception* exception = io_runtime->pendingException;
 
-    if (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
-        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, sizeof(M3Exception) + exception->numArgs * sizeof(u64));
+    𐤀𐤌 (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
+        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, حجم(M3Exception) + exception->numArgs * حجم(u64));
 
-        if (copy) {
-            copy->next = NULL;
-            copy->prev = NULL;
+        𐤀𐤌 (copy) {
+            copy->next = عدم;
+            copy->prev = عدم;
         }
 
         io_runtime->uncaughtException = copy;
@@ -1528,26 +1528,26 @@ void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#𐤀𐤌 d_m3HasExceptionHandling || d_m3HasStackSwitching
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, ثابت حرف* ثابت i_tagName)
 {
-    if (not i_module or not i_tagName) {
-        return NULL;
+    𐤀𐤌 (not i_module or not i_tagName) {
+        أرجع عدم;
     }
 
-    return Module_FindExportedTag(i_module, i_tagName);
+    أرجع Module_FindExportedTag(i_module, i_tagName);
 }
 
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, ثابت حرف* ثابت i_signature)
 {
-    IM3FuncType type    = NULL;
-    M3HostTag*  hostTag = NULL;
+    IM3FuncType type    = عدم;
+    M3HostTag*  hostTag = عدم;
 
 _try {
     _throwif("null tag", not o_tag);
-    *o_tag = NULL;
+    *o_tag = عدم;
     _throwif(m3Err_mallocFailed, not io_runtime);
 
 _   (SignatureToFuncType(&type, i_signature));
@@ -1563,32 +1563,32 @@ _   (Environment_AddFuncType(io_runtime->environment, &type));
 
     *o_tag = &hostTag->tag;
 } _catch:
-    return result;
+    أرجع result;
 }
 
 
 M3Result m3_LinkTag (IM3Module         io_module,
-                     const char* const i_moduleName,
-                     const char* const i_tagName,
+                     ثابت حرف* ثابت i_moduleName,
+                     ثابت حرف* ثابت i_tagName,
                      IM3Tag            i_tag)
 {
-    if (not io_module or not i_moduleName or not i_tagName or not i_tag) {
-        return m3Err_tagLookupFailed;
+    𐤀𐤌 (not io_module or not i_moduleName or not i_tagName or not i_tag) {
+        أرجع m3Err_tagLookupFailed;
     }
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    ثابت bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
     IM3Tag     target         = i_tag->resolved ? i_tag->resolved : i_tag;
 
     M3Result result = m3Err_tagLookupFailed;
 
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+    لكل (u32 i = 0; i < io_module->numTags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
+        𐤀𐤌 (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
             strcmp(tag->import.fieldUtf8, i_tagName) == 0 and
             (wildcardModule or strcmp(tag->import.moduleUtf8, i_moduleName) == 0)) {
-            if (tag->type != target->type) {
-                return m3Err_incompatibleImportType;
+            𐤀𐤌 (tag->type != target->type) {
+                أرجع m3Err_incompatibleImportType;
             }
 
             tag->resolved = target;
@@ -1596,64 +1596,64 @@ M3Result m3_LinkTag (IM3Module         io_module,
         }
     }
 
-    return result;
+    أرجع result;
 }
 
 
 uint32_t m3_GetTagArgCount (IM3Tag i_tag)
 {
-    return i_tag ? i_tag->type->numArgs : 0;
+    أرجع i_tag ? i_tag->type->numArgs : 0;
 }
 
 
 M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    if (i_tag and i_index < i_tag->type->numArgs) {
-        return (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
+    𐤀𐤌 (i_tag and i_index < i_tag->type->numArgs) {
+        أرجع (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
     }
 
-    return c_m3Type_none;
+    أرجع c_m3Type_none;
 }
 
-#else
+#وإلا
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, ثابت حرف* ثابت i_tagName)
 {
-    return NULL;
+    أرجع عدم;
 }
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, ثابت حرف* ثابت i_signature)
 {
-    if (o_tag) {
-        *o_tag = NULL;
+    𐤀𐤌 (o_tag) {
+        *o_tag = عدم;
     }
-    return m3Err_tagLookupFailed;
+    أرجع m3Err_tagLookupFailed;
 }
 
-M3Result m3_LinkTag (IM3Module io_module, const char* const i_moduleName, const char* const i_tagName, IM3Tag i_tag)
+M3Result m3_LinkTag (IM3Module io_module, ثابت حرف* ثابت i_moduleName, ثابت حرف* ثابت i_tagName, IM3Tag i_tag)
 {
-    return m3Err_tagLookupFailed;
+    أرجع m3Err_tagLookupFailed;
 }
 
 uint32_t m3_GetTagArgCount (IM3Tag i_tag)
 {
-    return 0;
+    أرجع 0;
 }
 
 M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    return c_m3Type_none;
+    أرجع c_m3Type_none;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasExceptionHandling
+#𐤀𐤌 d_m3HasExceptionHandling
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, ثابت فراغ* i_argptrs[])
 {
-    if (not io_runtime or not i_tag) {
-        return m3Err_tagLookupFailed;
+    𐤀𐤌 (not io_runtime or not i_tag) {
+        أرجع m3Err_tagLookupFailed;
     }
 
     IM3Tag      tag  = i_tag->resolved ? i_tag->resolved : i_tag;
@@ -1661,149 +1661,149 @@ M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc
 
     // a tag with results is a stack switching control tag, which is suspended
     // with rather than thrown
-    if (type->numRets) {
-        return m3Err_typeMismatch;
+    𐤀𐤌 (type->numRets) {
+        أرجع m3Err_typeMismatch;
     }
-    if (i_argc != type->numArgs) {
-        return m3Err_argumentCountMismatch;
+    𐤀𐤌 (i_argc != type->numArgs) {
+        أرجع m3Err_argumentCountMismatch;
     }
     // with nothing on the stack there is nothing to unwind, and the exception
     // would sit on the runtime's list until some later call ended
-    if (io_runtime->callNesting == 0) {
-        return "m3_ThrowException called outside a host function";
+    𐤀𐤌 (io_runtime->callNesting == 0) {
+        أرجع "m3_ThrowException called outside a host function";
     }
 
     M3Exception* exception = NewException(io_runtime, tag, i_argc);
-    if (not exception) {
-        return m3Err_mallocFailed;
+    𐤀𐤌 (not exception) {
+        أرجع m3Err_mallocFailed;
     }
 
     // the layout op_Throw gives a payload: 32-bit values zero-extended, floats
     // as their bit pattern
-    for (u32 i = 0; i < i_argc; ++i) {
-        const void* value = i_argptrs[i];
+    لكل (u32 i = 0; i < i_argc; ++i) {
+        ثابت فراغ* value = i_argptrs[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
+        بدل (BaseTypeOf(d_FuncArgType(type, i))) {
+        حالة c_m3Type_i32:
+        حالة c_m3Type_f32: {
             u32 bits;
-            memcpy(&bits, value, sizeof(bits));
+            memcpy(&bits, value, حجم(bits));
             exception->args[i] = bits;
-            break;
+            اكسر;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(&exception->args[i], value, sizeof(u64));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            exception->args[i] = (u64)(*(const uintptr_t*)value);
-            break;
-        default:
+        حالة c_m3Type_i64:
+        حالة c_m3Type_f64:
+            memcpy(&exception->args[i], value, حجم(u64));
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
+        حالة c_m3Type_contref:
+            exception->args[i] = (u64)(*(ثابت uintptr_t*)value);
+            اكسر;
+        افتراضي:
             FreeException(io_runtime, exception);
-            return "unknown argument type";
+            أرجع "unknown argument type";
         }
     }
 
     io_runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    أرجع m3Err_pendingException;
 }
 
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    if (i_runtime and i_runtime->uncaughtException) {
-        return i_runtime->uncaughtException->tag;
+    𐤀𐤌 (i_runtime and i_runtime->uncaughtException) {
+        أرجع i_runtime->uncaughtException->tag;
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, ثابت فراغ* o_argptrs[])
 {
-    if (not i_runtime or not i_runtime->uncaughtException) {
-        return "no uncaught exception";
+    𐤀𐤌 (not i_runtime or not i_runtime->uncaughtException) {
+        أرجع "no uncaught exception";
     }
 
-    const M3Exception* exception = i_runtime->uncaughtException;
+    ثابت M3Exception* exception = i_runtime->uncaughtException;
     IM3FuncType        type      = exception->tag->type;
 
-    if (i_argc != exception->numArgs) {
-        return m3Err_argumentCountMismatch;
+    𐤀𐤌 (i_argc != exception->numArgs) {
+        أرجع m3Err_argumentCountMismatch;
     }
 
-    for (u32 i = 0; i < i_argc; ++i) {
-        void* value = (void*)o_argptrs[i];
+    لكل (u32 i = 0; i < i_argc; ++i) {
+        فراغ* value = (فراغ*)o_argptrs[i];
         u64   bits  = exception->args[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
+        بدل (BaseTypeOf(d_FuncArgType(type, i))) {
+        حالة c_m3Type_i32:
+        حالة c_m3Type_f32: {
             u32 low = (u32)bits;
-            memcpy(value, &low, sizeof(low));
-            break;
+            memcpy(value, &low, حجم(low));
+            اكسر;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(value, &bits, sizeof(bits));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
+        حالة c_m3Type_i64:
+        حالة c_m3Type_f64:
+            memcpy(value, &bits, حجم(bits));
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
+        حالة c_m3Type_contref:
             *(uintptr_t*)value = (uintptr_t)bits;
-            break;
-        default:
-            return "unknown argument type";
+            اكسر;
+        افتراضي:
+            أرجع "unknown argument type";
         }
     }
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
-#else
+#وإلا
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, ثابت فراغ* i_argptrs[])
 {
-    return m3Err_tagLookupFailed;
+    أرجع m3Err_tagLookupFailed;
 }
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    return NULL;
+    أرجع عدم;
 }
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, ثابت فراغ* o_argptrs[])
 {
-    return "no uncaught exception";
+    أرجع "no uncaught exception";
 }
 
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3GuardedMemory
+#𐤀𐤌 d_m3GuardedMemory
 
 // What RunCodeProtected hands to the platform layer to run, and what comes back
-typedef struct M3ProtectedRun {
+تعريفنوع بنية M3ProtectedRun {
     pc_t            pc;
     IM3Runtime      runtime;
     M3MemoryHeader* mem;
     M3Result        result;
 } M3ProtectedRun;
 
-static
-void RunCodeBody (void* io_context)
+ساكن
+فراغ RunCodeBody (فراغ* io_context)
 {
     M3ProtectedRun* run = (M3ProtectedRun*)io_context;
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#  𐤀𐤌 (d_m3EnableOpProfiling || d_m3EnableOpTracing)
     run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
                                     d_m3OpDefaultArgs, d_m3BaseCstr);
-#  else
+#  وإلا
     run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
                                     d_m3OpDefaultArgs);
 #  endif
@@ -1814,13 +1814,13 @@ void RunCodeBody (void* io_context)
 // of that memory's reservation, and the fault comes back as the trap the spec asks
 // for. Nothing is left half-done by it - the Wasm stack and the memories are heap,
 // and the caller unwinds the rest.
-static
+ساكن
 M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_mem)
 {
     // Memory operations in this build carry no bounds check, so code only runs where a
     // fault past the end of a memory can still be turned into a trap
-    if (M3_UNLIKELY(not m3_HostGuardsActive())) {
-        return ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
+    𐤀𐤌 (M3_UNLIKELY(not m3_HostGuardsActive())) {
+        أرجع ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
                             "another part of the process holds the fault signal");
     }
 
@@ -1830,35 +1830,35 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
     run.mem     = i_mem;
     run.result  = m3Err_none;
 
-    void*  arena;
+    فراغ*  arena;
     size_t arenaBytes;
     Guard_ArenaRange(&arena, &arenaBytes);
 
-    if (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
-        return m3Err_trapOutOfBoundsMemoryAccess;
+    𐤀𐤌 (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
+        أرجع m3Err_trapOutOfBoundsMemoryAccess;
     }
 
-    return run.result;
+    أرجع run.result;
 }
 
 #endif // d_m3GuardedMemory
 
 
-#if d_m3HasStackSwitching
+#𐤀𐤌 d_m3HasStackSwitching
 
 // The function a suspended continuation stopped in: the callee of its innermost
 // call frame, or the function it was entered with if it made no call. Frames are
 // recorded innermost first, so that is the lowest-numbered call frame.
-static
+ساكن
 IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 {
-    for (u32 i = 0; i < i_cont->numFrames; ++i) {
-        if (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
-            return i_cont->frames[i].call.function;
+    لكل (u32 i = 0; i < i_cont->numFrames; ++i) {
+        𐤀𐤌 (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
+            أرجع i_cont->frames[i].call.function;
         }
     }
 
-    return i_cont->entryFunction;
+    أرجع i_cont->entryFunction;
 }
 
 
@@ -1869,27 +1869,27 @@ IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 // function can use. That base is the root's own sp, unless it stopped inside a
 // resume: then the suspension point belongs to the resumed continuation, and the
 // root's innermost frame is that resume.
-void Runtime_PlaceCallStack (IM3Runtime io_runtime)
+فراغ Runtime_PlaceCallStack (IM3Runtime io_runtime)
 {
     IM3Continuation root = io_runtime->rootContinuation;
 
     io_runtime->stack = io_runtime->originStack;
 
-    if (not root or root->state != cont_suspended) {
-        return;
+    𐤀𐤌 (not root or root->state != cont_suspended) {
+        أرجع;
     }
 
     m3stack_t   sp       = root->sp;
     IM3Function function = Continuation_InnermostFunction(root);
 
-    if (root->numFrames and root->frames[0].kind == frame_resume) {
+    𐤀𐤌 (root->numFrames and root->frames[0].kind == frame_resume) {
         sp = root->frames[0].sp;
     }
 
     m3slot_t* base = (m3slot_t*)io_runtime->originStack;
     m3slot_t* top  = (m3slot_t*)sp + (function ? function->maxStackSlots : 0);
 
-    if (top > base + io_runtime->numStackSlots) {
+    𐤀𐤌 (top > base + io_runtime->numStackSlots) {
         top = base + io_runtime->numStackSlots;
     }
 
@@ -1902,7 +1902,7 @@ void Runtime_PlaceCallStack (IM3Runtime io_runtime)
 // Run compiled code on the runtime's stack, bounding native recursion for the
 // duration of the call. The outermost invocation establishes the stack limit;
 // nested ones (an imported function calling back into Wasm) inherit it.
-static inline
+ساكن مضمن
 M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
 {
     pc_t i_pc = i_function->compiled;
@@ -1911,9 +1911,9 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // to, not against some runtime-wide one
     M3MemoryHeader* _mem = Module_MemoryHeader(i_function->module);
 
-#if d_m3HasSnapshots
-    if (M3_UNLIKELY(i_function->module->isUnusable)) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+#𐤀𐤌 d_m3HasSnapshots
+    𐤀𐤌 (M3_UNLIKELY(i_function->module->isUnusable)) {
+        أرجع "a snapshot failed to restore into the module, so it cannot run";
     }
     i_function->module->hasRun = true;
 #endif
@@ -1922,16 +1922,16 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
 
     // a host function calling back into Wasm does not change which call a trap
     // ends: that is still the one the host made first
-    if (i_runtime->callNesting++ == 0) {
+    𐤀𐤌 (i_runtime->callNesting++ == 0) {
         i_runtime->entered = i_function;
     }
-#if d_m3HasExceptionHandling
+#𐤀𐤌 d_m3HasExceptionHandling
     // handler stacks don't nest across a call boundary: a host function calling
     // back into Wasm cannot be caught by a try_table its own caller entered
     u32 savedTryDepth   = i_runtime->tryDepth;
     i_runtime->tryDepth = 0;
 #endif
-#if d_m3HasStackSwitching
+#𐤀𐤌 d_m3HasStackSwitching
     // nor do continuations: the native frames on the far side of a host call
     // are not ours to record, so a suspend in here has no handler to reach and
     // no resume to unwind to
@@ -1945,35 +1945,35 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
                      not (i_runtime->rootContinuation and
                           i_runtime->rootContinuation->state == cont_suspended);
 
-    if (claimRoot and not i_runtime->rootContinuation) {
+    𐤀𐤌 (claimRoot and not i_runtime->rootContinuation) {
         i_runtime->rootContinuation = Continuation_New(i_runtime, i_function->funcType, i_function);
 
-        if (i_runtime->rootContinuation) {
+        𐤀𐤌 (i_runtime->rootContinuation) {
             // The root borrows the runtime's stack and is not charged as cont.new.
             i_runtime->rootContinuation->numStackSlots = i_runtime->numStackSlots;
-        } else {
+        } وإلا {
             claimRoot = false;
         }
     }
 
-    if (claimRoot) {
+    𐤀𐤌 (claimRoot) {
         i_runtime->activeContinuation              = i_runtime->rootContinuation;
         i_runtime->rootContinuation->entryFunction = i_function;
         i_runtime->rootContinuation->state         = cont_running;
         i_runtime->rootContinuation->numFrames     = 0;
-    } else {
-        i_runtime->activeContinuation = NULL;
+    } وإلا {
+        i_runtime->activeContinuation = عدم;
     }
 #endif
-#if d_m3GuardedMemory
+#𐤀𐤌 d_m3GuardedMemory
     M3Result result = RunCodeProtected(i_runtime, i_pc, _mem);
-#elif (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#وإلاإذا (d_m3EnableOpProfiling || d_m3EnableOpTracing)
     M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
+#وإلا
     M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs);
 #endif
-#if d_m3HasStackSwitching
-    if (claimRoot) {
+#𐤀𐤌 d_m3HasStackSwitching
+    𐤀𐤌 (claimRoot) {
         i_runtime->rootContinuation->state =
           (result == m3Err_continuationSuspended) ? cont_suspended : cont_returned;
 
@@ -1981,46 +1981,46 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     }
     i_runtime->activeContinuation = savedContinuation;
 #endif
-#if d_m3HasExceptionHandling
+#𐤀𐤌 d_m3HasExceptionHandling
     i_runtime->tryDepth = savedTryDepth;
 
     // an exception that reached the bottom of the call stack found no handler
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+    𐤀𐤌 (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(i_runtime, result);
 
     // a paused invocation can still reach the exceptions it holds, so they wait
     // for it to finish
-    if (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
+    𐤀𐤌 (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
         FreeExceptions(i_runtime);
     }
 #endif
     i_runtime->callNesting--;
     d_m3StackLimitLeave(i_runtime);
 
-    return result;
+    أرجع result;
 }
 
 M3Result m3_RunStart (IM3Module io_module)
 {
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // Execution disabled for fuzzing builds
-    return m3Err_none;
+    أرجع m3Err_none;
 #endif
 
     M3Result result           = m3Err_none;
     i32      startFunctionTmp = -1;
 
-    if (io_module and io_module->startFunction >= 0) {
+    𐤀𐤌 (io_module and io_module->startFunction >= 0) {
         IM3Function function = &io_module->functions[io_module->startFunction];
 
-        if (not function->compiled) {
+        𐤀𐤌 (not function->compiled) {
 _           (CompileFunction(function));
         }
 
         IM3FuncType ftype = function->funcType;
-        if (ftype->numArgs != 0 || ftype->numRets != 0) {
+        𐤀𐤌 (ftype->numArgs != 0 || ftype->numRets != 0) {
             _throw(m3Err_argumentCountMismatch);
         }
 
@@ -2035,14 +2035,14 @@ _           (CompileFunction(function));
 
         // a start function that suspended is not to be started again: resuming
         // is what finishes it
-        if (result and result != m3Err_continuationSuspended) {
+        𐤀𐤌 (result and result != m3Err_continuationSuspended) {
             io_module->startFunction = startFunctionTmp;
             EXCEPTION_PRINT(result);
-            goto _catch;
+            اذهب _catch;
         }
     }
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 // TODO: deal with main + side-modules loading efforcement
@@ -2050,8 +2050,8 @@ M3Result m3_LoadModule (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (M3_UNLIKELY(io_module->runtime)) {
-        return m3Err_moduleAlreadyLinked;
+    𐤀𐤌 (M3_UNLIKELY(io_module->runtime)) {
+        أرجع m3Err_moduleAlreadyLinked;
     }
 
     io_module->runtime = io_runtime;
@@ -2076,7 +2076,7 @@ _   (InitDataSegments(io_module));
 
     io_module->next     = io_runtime->modules;
     io_runtime->modules = io_module;
-    return result; // ok
+    أرجع result; // ok
 
 _catch:
     // The runtime owns the module either way. Instantiation may already have
@@ -2087,200 +2087,200 @@ _catch:
     // It goes on the tail of the list rather than the head: it is not a module
     // anyone should find by name, only one whose functions may still be
     // reachable through someone else's table.
-    io_module->next = NULL;
+    io_module->next = عدم;
 
     IM3Module* tail = &io_runtime->modules;
-    while (*tail) {
+    طالما (*tail) {
         tail = &(*tail)->next;
     }
     *tail = io_module;
 
-    return result;
+    أرجع result;
 }
 
 IM3Global m3_FindGlobal (IM3Module         io_module,
-                         const char* const i_globalName)
+                         ثابت حرف* ثابت i_globalName)
 {
     // Search exports
     IM3Global exported = Module_FindExportedGlobal(io_module, i_globalName);
-    if (exported) {
+    𐤀𐤌 (exported) {
         // a re-exported global is the one that was imported, so reads and
         // writes have to reach the cell that actually holds the value
-        return exported->resolved ? exported->resolved : exported;
+        أرجع exported->resolved ? exported->resolved : exported;
     }
 
     // Search imports
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    لكل (u32 i = 0; i < io_module->numGlobals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (g->import.moduleUtf8 and g->import.fieldUtf8) {
-            if (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
-                return g->resolved ? g->resolved : g;
+        𐤀𐤌 (g->import.moduleUtf8 and g->import.fieldUtf8) {
+            𐤀𐤌 (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
+                أرجع g->resolved ? g->resolved : g;
             }
         }
     }
-    return NULL;
+    أرجع عدم;
 }
 
 M3Result m3_GetGlobal (IM3Global      i_global,
                        IM3TaggedValue o_value)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    𐤀𐤌 (not i_global) {
+        أرجع m3Err_globalLookupFailed;
     }
 
-    switch (i_global->type) {
-    case c_m3Type_i32: o_value->value.i32 = i_global->i32Value; break;
-    case c_m3Type_i64: o_value->value.i64 = i_global->i64Value; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: o_value->value.f32 = i_global->f32Value; break;
-    case c_m3Type_f64: o_value->value.f64 = i_global->f64Value; break;
+    بدل (i_global->type) {
+    حالة c_m3Type_i32: o_value->value.i32 = i_global->i32Value; اكسر;
+    حالة c_m3Type_i64: o_value->value.i64 = i_global->i64Value; اكسر;
+#𐤀𐤌 d_m3HasFloat
+    حالة c_m3Type_f32: o_value->value.f32 = i_global->f32Value; اكسر;
+    حالة c_m3Type_f64: o_value->value.f64 = i_global->f64Value; اكسر;
 #endif
-    default: return m3Err_invalidTypeId;
+    افتراضي: أرجع m3Err_invalidTypeId;
     }
 
     o_value->type = (M3ValueType)(i_global->type);
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 M3Result m3_SetGlobal (IM3Global            i_global,
-                       const IM3TaggedValue i_value)
+                       ثابت IM3TaggedValue i_value)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    𐤀𐤌 (not i_global) {
+        أرجع m3Err_globalLookupFailed;
     }
-    if (not i_global->isMutable) {
-        return m3Err_globalNotMutable;
+    𐤀𐤌 (not i_global->isMutable) {
+        أرجع m3Err_globalNotMutable;
     }
-    if (i_global->type != i_value->type) {
-        return m3Err_globalTypeMismatch;
+    𐤀𐤌 (i_global->type != i_value->type) {
+        أرجع m3Err_globalTypeMismatch;
     }
 
-    switch (i_value->type) {
-    case c_m3Type_i32: i_global->i32Value = i_value->value.i32; break;
-    case c_m3Type_i64: i_global->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: i_global->f32Value = i_value->value.f32; break;
-    case c_m3Type_f64: i_global->f64Value = i_value->value.f64; break;
+    بدل (i_value->type) {
+    حالة c_m3Type_i32: i_global->i32Value = i_value->value.i32; اكسر;
+    حالة c_m3Type_i64: i_global->i64Value = i_value->value.i64; اكسر;
+#𐤀𐤌 d_m3HasFloat
+    حالة c_m3Type_f32: i_global->f32Value = i_value->value.f32; اكسر;
+    حالة c_m3Type_f64: i_global->f64Value = i_value->value.f64; اكسر;
 #endif
-    default: return m3Err_invalidTypeId;
+    افتراضي: أرجع m3Err_invalidTypeId;
     }
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 M3ValueType m3_GetGlobalType (IM3Global i_global)
 {
-    return (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
+    أرجع (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
 }
 
 
-void* v_FindFunction (IM3Module i_module, void* i_info)
+فراغ* v_FindFunction (IM3Module i_module, فراغ* i_info)
 {
-    const char* const i_name = (const char*)i_info;
+    ثابت حرف* ثابت i_name = (ثابت حرف*)i_info;
 
     // Prefer exported functions
     IM3Function exported = Module_FindExportedFunction(i_module, i_name);
-    if (exported) {
-        return exported;
+    𐤀𐤌 (exported) {
+        أرجع exported;
     }
 
     // Search internal functions
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         bool isImported = f->import.moduleUtf8 or f->import.fieldUtf8;
 
-        if (isImported) {
-            continue;
+        𐤀𐤌 (isImported) {
+            استمر;
         }
 
-        for (int j = 0; j < f->numNames; j++) {
-            if (f->names[j] and strcmp(f->names[j], i_name) == 0) {
-                return f;
+        لكل (صحيح j = 0; j < f->numNames; j++) {
+            𐤀𐤌 (f->names[j] and strcmp(f->names[j], i_name) == 0) {
+                أرجع f;
             }
         }
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
 // Shared tail of the two lookups: a function is only usable once it has code.
-static
+ساكن
 M3Result PrepareFoundFunction (IM3Function* o_function, IM3Function i_function)
 {
     M3Result result = m3Err_none;
 
-    if (not i_function->compiled) {
+    𐤀𐤌 (not i_function->compiled) {
 _       (CompileFunction(i_function))
     }
 
     _catch:
-    *o_function = result ? NULL : i_function;
+    *o_function = result ? عدم : i_function;
 
-    return result;
+    أرجع result;
 }
 
 
 // Searches every module in the runtime, most recently loaded first. That is a
 // guess once more than one module is loaded and two of them export the same
 // name - m3_FindFunctionIn says which module is meant.
-M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, const char* const i_functionName)
+M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, ثابت حرف* ثابت i_functionName)
 {
                                                                 d_m3Assert (o_function and i_runtime and i_functionName);
-    IM3Function function = NULL;
+    IM3Function function = عدم;
 
-    if (not i_runtime->modules) {
-        *o_function = NULL;
-        return "no modules loaded";
+    𐤀𐤌 (not i_runtime->modules) {
+        *o_function = عدم;
+        أرجع "no modules loaded";
     }
 
-    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (void*)i_functionName);
+    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (فراغ*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
+    𐤀𐤌 (not function) {
+        *o_function = عدم;
+        أرجع ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    أرجع PrepareFoundFunction(o_function, function);
 }
 
 
-IM3Module m3_FindModule (IM3Runtime i_runtime, const char* const i_moduleName)
+IM3Module m3_FindModule (IM3Runtime i_runtime, ثابت حرف* ثابت i_moduleName)
 {
-    if (not i_runtime or not i_moduleName) {
-        return NULL;
+    𐤀𐤌 (not i_runtime or not i_moduleName) {
+        أرجع عدم;
     }
 
     // the list is newest-first, so a name registered twice names the newer one
-    for (IM3Module m = i_runtime->modules; m; m = m->next) {
-        if (m->name and strcmp(m->name, i_moduleName) == 0) {
-            return m;
+    لكل (IM3Module m = i_runtime->modules; m; m = m->next) {
+        𐤀𐤌 (m->name and strcmp(m->name, i_moduleName) == 0) {
+            أرجع m;
         }
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 
 // Searches one module's exports, which is what naming a module means.
-M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, const char* const i_functionName)
+M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, ثابت حرف* ثابت i_functionName)
 {
                                                                 d_m3Assert (o_function and i_functionName);
-    if (not i_module) {
-        *o_function = NULL;
-        return m3Err_functionLookupFailed;      // ErrorModule would deref it
+    𐤀𐤌 (not i_module) {
+        *o_function = عدم;
+        أرجع m3Err_functionLookupFailed;      // ErrorModule would deref it
     }
 
-    IM3Function function = (IM3Function)v_FindFunction(i_module, (void*)i_functionName);
+    IM3Function function = (IM3Function)v_FindFunction(i_module, (فراغ*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
+    𐤀𐤌 (not function) {
+        *o_function = عدم;
+        أرجع ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    أرجع PrepareFoundFunction(o_function, function);
 }
 
 
@@ -2297,74 +2297,74 @@ _try {
 
     function = (IM3Function)table->elements[i_index];
 
-    if (function) {
-        if (not function->compiled) {
+    𐤀𐤌 (function) {
+        𐤀𐤌 (not function->compiled) {
 _           (CompileFunction(function))
         }
     }
 
     *o_function = function;
 } _catch:
-    return result;
+    أرجع result;
 }
 
 
-static
+ساكن
 M3Result checkStartFunction (IM3Module i_module)
 {
     M3Result result = m3Err_none;                               d_m3Assert(i_module);
 
     // Check if start function needs to be called
-    if (i_module->startFunction >= 0) {
+    𐤀𐤌 (i_module->startFunction >= 0) {
         result = m3_RunStart(i_module);
     }
 
-    return result;
+    أرجع result;
 }
 
 uint32_t m3_GetArgCount (IM3Function i_function)
 {
-    if (i_function) {
+    𐤀𐤌 (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numArgs;
+        𐤀𐤌 (ft) {
+            أرجع ft->numArgs;
         }
     }
-    return 0;
+    أرجع 0;
 }
 
 uint32_t m3_GetRetCount (IM3Function i_function)
 {
-    if (i_function) {
+    𐤀𐤌 (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numRets;
+        𐤀𐤌 (ft) {
+            أرجع ft->numRets;
         }
     }
-    return 0;
+    أرجع 0;
 }
 
 
 M3ValueType m3_GetArgType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    𐤀𐤌 (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numArgs) {
-            return (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
+        𐤀𐤌 (ft and index < ft->numArgs) {
+            أرجع (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
         }
     }
-    return c_m3Type_none;
+    أرجع c_m3Type_none;
 }
 
 M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    𐤀𐤌 (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numRets) {
-            return (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
+        𐤀𐤌 (ft and index < ft->numRets) {
+            أرجع (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
         }
     }
-    return c_m3Type_none;
+    أرجع c_m3Type_none;
 }
 
 
@@ -2375,7 +2375,7 @@ M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
 // here instead: results and arguments each take a u64 at this boundary, however
 // wide the slot is inside. Every caller goes through this, so none of them can
 // be the one that forgets.
-static
+ساكن
 M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
 {
     IM3Runtime  runtime = i_function->module->runtime;
@@ -2383,11 +2383,11 @@ M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
 
     // the stack a paused invocation holds is not available to this one
     size_t used      = (size_t)((u8*)runtime->stack - (u8*)runtime->originStack);
-    size_t needed    = ((size_t)ftype->numRets + ftype->numArgs) * sizeof(u64);
-    size_t available = (size_t)runtime->numStackSlots * sizeof(m3slot_t) - used;
+    size_t needed    = ((size_t)ftype->numRets + ftype->numArgs) * حجم(u64);
+    size_t available = (size_t)runtime->numStackSlots * حجم(m3slot_t) - used;
 
-    if (needed > available) {
-        return m3Err_trapStackOverflow;
+    𐤀𐤌 (needed > available) {
+        أرجع m3Err_trapStackOverflow;
     }
 
     u64* stack = (u64*)runtime->stack;
@@ -2396,7 +2396,7 @@ M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
 
     *o_stack = (u8*)stack;
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 
@@ -2406,14 +2406,14 @@ M3Result m3_CallV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_CallVL(i_function, ap);
     va_end(ap);
-    return r;
+    أرجع r;
 }
 
-static
-void ReportNativeStackUsage ()
+ساكن
+فراغ ReportNativeStackUsage ()
 {
-#if d_m3LogNativeStack
-    int stackUsed = m3StackGetMax();
+#𐤀𐤌 d_m3LogNativeStack
+    صحيح stackUsed = m3StackGetMax();
     fprintf(stderr, "Native stack used: %d\n", stackUsed);
 #endif
 }
@@ -2424,13 +2424,13 @@ M3Result m3_CallVL (IM3Function i_function, va_list i_args)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = عدم;
 
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    𐤀𐤌 (!i_function->compiled) {
+        أرجع m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#𐤀𐤌 d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
@@ -2440,59 +2440,59 @@ _   (checkStartFunction(i_function->module))
 
 _   (GetStackPointerForArgs(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    لكل (u32 i = 0; i < ftype->numArgs; ++i) {
+        بدل (d_FuncArgType(ftype, i)) {
+        حالة c_m3Type_i32:
             *(i32*)(s) = va_arg(i_args, i32);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            اكسر;
+        حالة c_m3Type_i64:
             *(i64*)(s) = va_arg(i_args, i64);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
             *(uintptr_t*)(s) = va_arg(i_args, uintptr_t);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            اكسر;
+#𐤀𐤌 d_m3HasFloat
+        حالة c_m3Type_f32:
             *(f32*)(s) = (f32)va_arg(i_args, f64);
             s += 8;
-            break; // f32 is passed as f64
-        case c_m3Type_f64:
+            اكسر; // f32 is passed as f64
+        حالة c_m3Type_f64:
             *(f64*)(s) = va_arg(i_args, f64);
             s += 8;
-            break;
+            اكسر;
 #endif
-        default: return "unknown argument type";
+        افتراضي: أرجع "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
     ReportNativeStackUsage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? عدم : i_function;
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
-M3Result m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_Call (IM3Function i_function, uint32_t i_argc, ثابت فراغ* i_argptrs[])
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = عدم;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    𐤀𐤌 (i_argc != ftype->numArgs) {
+        أرجع m3Err_argumentCountMismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    𐤀𐤌 (!i_function->compiled) {
+        أرجع m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#𐤀𐤌 d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
@@ -2502,33 +2502,33 @@ _   (checkStartFunction(i_function->module))
 
 _   (GetStackPointerForArgs(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    لكل (u32 i = 0; i < ftype->numArgs; ++i) {
+        بدل (d_FuncArgType(ftype, i)) {
+        حالة c_m3Type_i32:
             *(i32*)(s) = *(i32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_i64:
+            اكسر;
+        حالة c_m3Type_i64:
             *(i64*)(s) = *(i64*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
             *(uintptr_t*)(s) = *(uintptr_t*)i_argptrs[i];
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            اكسر;
+#𐤀𐤌 d_m3HasFloat
+        حالة c_m3Type_f32:
             *(f32*)(s) = *(f32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_f64:
+            اكسر;
+        حالة c_m3Type_f64:
             *(f64*)(s) = *(f64*)i_argptrs[i];
             s += 8;
-            break;
+            اكسر;
 #endif
-        default: return "unknown argument type";
+        افتراضي: أرجع "unknown argument type";
         }
     }
 
@@ -2536,129 +2536,129 @@ _   (GetStackPointerForArgs(i_function, &s))
 
     ReportNativeStackUsage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? عدم : i_function;
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 // Argument parsing for m3_CallArgv. Strict on purpose: the whole string has to
 // be consumed, so "12abc" is rejected rather than read as 12, and an empty or
 // unparsable argument is an error rather than the zero that strtoul with a
 // NULL end pointer used to hand back. See wasm3/wasm3#367.
-static
+ساكن
 M3Result ParseArgInteger (ccstr_t i_arg, u32 i_numBits, u64* o_value)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    𐤀𐤌 (not i_arg or not *i_arg) {
+        أرجع "empty argument";
     }
 
     // strtoull would skip leading space, but trailing space is rejected below;
     // accepting one and not the other would just be confusing
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    𐤀𐤌 (isspace((unsigned حرف)*i_arg)) {
+        أرجع "argument is not a number";
     }
 
-    char* end = NULL;
+    حرف* end = عدم;
     u64   value;
 
     errno = 0;
 
     // an argument may be spelled signed or unsigned: -1 and 4294967295 name the
     // same i32
-    if (*i_arg == '-') {
+    𐤀𐤌 (*i_arg == '-') {
         i64 signedValue = strtoll(i_arg, &end, 10);
 
-        if (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
-            return "argument out of range";
+        𐤀𐤌 (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
+            أرجع "argument out of range";
         }
 
         value = (u64)signedValue;
-    } else {
+    } وإلا {
         value = strtoull(i_arg, &end, 10);
 
-        if (i_numBits == 32 and value > UINT32_MAX) {
-            return "argument out of range";
+        𐤀𐤌 (i_numBits == 32 and value > UINT32_MAX) {
+            أرجع "argument out of range";
         }
     }
 
-    if (errno == ERANGE) {
-        return "argument out of range";
+    𐤀𐤌 (errno == ERANGE) {
+        أرجع "argument out of range";
     }
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    𐤀𐤌 (end == i_arg or *end) {
+        أرجع "argument is not a number";
     }
 
     *o_value = value;
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 
-#if d_m3HasFloat
-static
+#𐤀𐤌 d_m3HasFloat
+ساكن
 M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    𐤀𐤌 (not i_arg or not *i_arg) {
+        أرجع "empty argument";
     }
 
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    𐤀𐤌 (isspace((unsigned حرف)*i_arg)) {
+        أرجع "argument is not a number";
     }
 
-    char* end = NULL;
+    حرف* end = عدم;
 
     errno = 0;
 
     f64 value = strtod(i_arg, &end);
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    𐤀𐤌 (end == i_arg or *end) {
+        أرجع "argument is not a number";
     }
 
     // strtod reports underflow through ERANGE as well, and a denormal result is
     // perfectly usable, so only an overflow to infinity is out of range
-    if (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
-        return "argument out of range";
+    𐤀𐤌 (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
+        أرجع "argument out of range";
     }
 
     *o_value = value;
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 #endif
 
 
 // A reference argument is either the null reference or a host handle written as
 // an integer.
-static
+ساكن
 M3Result ParseArgReference (ccstr_t i_arg, u64* o_value)
 {
-    if (i_arg and strcmp(i_arg, "null") == 0) {
+    𐤀𐤌 (i_arg and strcmp(i_arg, "null") == 0) {
         *o_value = 0;
-        return m3Err_none;
+        أرجع m3Err_none;
     }
 
-    return ParseArgInteger(i_arg, 64, o_value);
+    أرجع ParseArgInteger(i_arg, 64, o_value);
 }
 
 
-M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_argv[])
+M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, ثابت حرف* i_argv[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = عدم;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    𐤀𐤌 (i_argc != ftype->numArgs) {
+        أرجع m3Err_argumentCountMismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    𐤀𐤌 (!i_function->compiled) {
+        أرجع m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#𐤀𐤌 d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
@@ -2668,38 +2668,38 @@ _   (checkStartFunction(i_function->module))
 
 _   (GetStackPointerForArgs(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
+    لكل (u32 i = 0; i < ftype->numArgs; ++i) {
         u64 value = 0;
-#if d_m3HasFloat
+#𐤀𐤌 d_m3HasFloat
         f64 fvalue = 0;
 #endif
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+        بدل (d_FuncArgType(ftype, i)) {
+        حالة c_m3Type_i32:
 _           (ParseArgInteger(i_argv[i], 32, &value)) * (i32*)(s) = (i32)value;
             s += 8;
-            break;
-        case c_m3Type_i64:
+            اكسر;
+        حالة c_m3Type_i64:
 _           (ParseArgInteger(i_argv[i], 64, &value)) * (i64*)(s) = (i64)value;
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
 _           (ParseArgReference(i_argv[i], &value)) * (uintptr_t*)(s) = (uintptr_t)value;
             s += 8;
-            break;
-#if d_m3HasFloat
+            اكسر;
+#𐤀𐤌 d_m3HasFloat
             // strtof would be less portable
-        case c_m3Type_f32:
+        حالة c_m3Type_f32:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f32*)(s) = (f32)fvalue;
             s += 8;
-            break;
-        case c_m3Type_f64:
+            اكسر;
+        حالة c_m3Type_f64:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
             s += 8;
-            break;
+            اكسر;
 #endif
-        default: _throw("unknown argument type");
+        افتراضي: _throw("unknown argument type");
         }
     }
 
@@ -2707,9 +2707,9 @@ _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
 
     ReportNativeStackUsage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? عدم : i_function;
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
@@ -2720,50 +2720,50 @@ _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
 //}
 
 
-M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_retptrs[])
+M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, ثابت فراغ* o_retptrs[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
 
-    if (i_retc != ftype->numRets) {
-        return m3Err_argumentCountMismatch;
+    𐤀𐤌 (i_retc != ftype->numRets) {
+        أرجع m3Err_argumentCountMismatch;
     }
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    𐤀𐤌 (i_function != runtime->lastCalled) {
+        أرجع "function not called";
     }
 
     u8* s = (u8*)runtime->stack;
 
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    لكل (u32 i = 0; i < ftype->numRets; ++i) {
+        بدل (d_FuncRetType(ftype, i)) {
+        حالة c_m3Type_i32:
             *(i32*)o_retptrs[i] = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            اكسر;
+        حالة c_m3Type_i64:
             *(i64*)o_retptrs[i] = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
             *(uintptr_t*)o_retptrs[i] = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            اكسر;
+#𐤀𐤌 d_m3HasFloat
+        حالة c_m3Type_f32:
             *(f32*)o_retptrs[i] = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            اكسر;
+        حالة c_m3Type_f64:
             *(f64*)o_retptrs[i] = *(f64*)(s);
             s += 8;
-            break;
+            اكسر;
 #endif
-        default: return "unknown return type";
+        افتراضي: أرجع "unknown return type";
         }
     }
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 M3Result m3_GetResultsV (IM3Function i_function, ...)
@@ -2772,7 +2772,7 @@ M3Result m3_GetResultsV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_GetResultsVL(i_function, ap);
     va_end(ap);
-    return r;
+    أرجع r;
 }
 
 M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
@@ -2780,52 +2780,52 @@ M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    𐤀𐤌 (i_function != runtime->lastCalled) {
+        أرجع "function not called";
     }
 
     u8* s = (u8*)runtime->stack;
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    لكل (u32 i = 0; i < ftype->numRets; ++i) {
+        بدل (d_FuncRetType(ftype, i)) {
+        حالة c_m3Type_i32:
             *va_arg(o_rets, i32*) = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            اكسر;
+        حالة c_m3Type_i64:
             *va_arg(o_rets, i64*) = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            اكسر;
+        حالة c_m3Type_funcref:
+        حالة c_m3Type_externref:
+        حالة c_m3Type_exnref:
             *va_arg(o_rets, uintptr_t*) = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            اكسر;
+#𐤀𐤌 d_m3HasFloat
+        حالة c_m3Type_f32:
             *va_arg(o_rets, f32*) = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            اكسر;
+        حالة c_m3Type_f64:
             *va_arg(o_rets, f64*) = *(f64*)(s);
             s += 8;
-            break;
+            اكسر;
 #endif
-        default: return "unknown argument type";
+        افتراضي: أرجع "unknown argument type";
         }
     }
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
-void ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
+فراغ ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    𐤀𐤌 (i_codePage) {
         IM3CodePage* list;
 
         bool pageFull = (NumFreeLines(i_codePage) < d_m3CodePageFreeLinesThreshold);
-        if (pageFull) {
+        𐤀𐤌 (pageFull) {
             list = &i_runtime->pagesFull;
-        } else {
+        } وإلا {
             list = &i_runtime->pagesOpen;
         }
 
@@ -2838,39 +2838,39 @@ IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_minLineCoun
 {
     IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_minLineCount);
 
-    if (not page) {
+    𐤀𐤌 (not page) {
         page = Environment_AcquireCodePage(i_runtime->environment, i_minLineCount);
 
-        if (not page) {
+        𐤀𐤌 (not page) {
             page = NewCodePage(i_runtime, i_minLineCount);
         }
 
-        if (page) {
+        𐤀𐤌 (page) {
             i_runtime->numCodePages++;
         }
     }
 
-    if (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
+    𐤀𐤌 (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
         i_runtime->numActiveCodePages++;
     }
 
-    return page;
+    أرجع page;
 }
 
 
 IM3CodePage AcquireCodePage (IM3Runtime i_runtime)
 {
-    return AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
+    أرجع AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
 }
 
 
-void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
+فراغ ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    𐤀𐤌 (i_codePage) {
         ReleaseCodePageNoTrack(i_runtime, i_codePage);
         i_runtime->numActiveCodePages--;
 
-#if defined(DEBUG)
+#𐤀𐤌 defined(DEBUG)
         u32 numOpen = CountCodePages(i_runtime->pagesOpen);
         u32 numFull = CountCodePages(i_runtime->pagesFull);
 
@@ -2878,45 +2878,45 @@ void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 
         d_m3Assert(numOpen + numFull + i_runtime->numActiveCodePages == i_runtime->numCodePages);
 
-#  if d_m3LogCodePages
-        dump_code_page(i_codePage, /* startPC: */ NULL);
+#  𐤀𐤌 d_m3LogCodePages
+        dump_code_page(i_codePage, /* startPC: */ عدم);
 #  endif
 #endif
     }
 }
 
 
-#if d_m3VerboseErrorMessages
+#𐤀𐤌 d_m3VerboseErrorMessages
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...)
+                  ثابت حرف* ثابت i_file, u32 i_lineNum, ثابت حرف* ثابت i_errorMessage, ...)
 {
-    if (i_runtime) {
+    𐤀𐤌 (i_runtime) {
         i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .line = i_lineNum };
         i_runtime->error.message = i_runtime->error_message;
 
         va_list args;
         va_start(args, i_errorMessage);
-        vsnprintf(i_runtime->error_message, sizeof(i_runtime->error_message), i_errorMessage, args);
+        vsnprintf(i_runtime->error_message, حجم(i_runtime->error_message), i_errorMessage, args);
         va_end(args);
     }
 
-    return i_result;
+    أرجع i_result;
 }
 #endif
 
 
-void m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
+فراغ m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
 {
-    if (i_runtime) {
+    𐤀𐤌 (i_runtime) {
         *o_info = i_runtime->error;
         m3_ResetErrorInfo(i_runtime);
     }
 }
 
 
-void m3_ResetErrorInfo (IM3Runtime i_runtime)
+فراغ m3_ResetErrorInfo (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    𐤀𐤌 (i_runtime) {
         M3_INIT(i_runtime->error);
         i_runtime->error.message = "";
     }
@@ -2924,132 +2924,132 @@ void m3_ResetErrorInfo (IM3Runtime i_runtime)
 
 uint8_t* m3_GetMemory (IM3Module i_module, size_t* o_memorySizeInBytes, uint32_t i_memoryIndex)
 {
-    uint8_t* memory = NULL;
+    uint8_t* memory = عدم;
     size_t   size   = 0;
 
-    if (i_module and i_memoryIndex < i_module->numMemories) {
+    𐤀𐤌 (i_module and i_memoryIndex < i_module->numMemories) {
         IM3Memory mem = i_module->memories[i_memoryIndex];
 
-        if (mem->mallocated) {
+        𐤀𐤌 (mem->mallocated) {
             size = mem->mallocated->length;
 
-            if (size) {
+            𐤀𐤌 (size) {
                 memory = m3MemData(mem->mallocated);
             }
         }
     }
 
-    if (o_memorySizeInBytes) {
+    𐤀𐤌 (o_memorySizeInBytes) {
         *o_memorySizeInBytes = size;
     }
 
-    return memory;
+    أرجع memory;
 }
 
 
 size_t m3_GetMemorySize (IM3Module i_module, uint32_t i_memoryIndex)
 {
-    if (not i_module or i_memoryIndex >= i_module->numMemories) {
-        return 0;
+    𐤀𐤌 (not i_module or i_memoryIndex >= i_module->numMemories) {
+        أرجع 0;
     }
 
     IM3Memory mem = i_module->memories[i_memoryIndex];
 
-    return mem->mallocated ? mem->mallocated->length : 0;
+    أرجع mem->mallocated ? mem->mallocated->length : 0;
 }
 
 
-size_t m3_GetMemorySizeAt (const void* i_memory)
+size_t m3_GetMemorySizeAt (ثابت فراغ* i_memory)
 {
-    if (not i_memory) {
-        return 0;
+    𐤀𐤌 (not i_memory) {
+        أرجع 0;
     }
 
     // the header sits immediately before the data it describes
-    const M3MemoryHeader* header = ((const M3MemoryHeader*)i_memory) - 1;
+    ثابت M3MemoryHeader* header = ((ثابت M3MemoryHeader*)i_memory) - 1;
 
-    return header->length;
+    أرجع header->length;
 }
 
 
 M3Result m3_FindExportedMemory (IM3Module i_module, cstr_t i_name, u32* o_memoryIndex)
 {
-    if (not i_module or not i_name or not o_memoryIndex) {
-        return m3Err_unknownMemory;
+    𐤀𐤌 (not i_module or not i_name or not o_memoryIndex) {
+        أرجع m3Err_unknownMemory;
     }
 
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    ثابت M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    if (not e) {
-        return m3Err_unknownMemory;
+    𐤀𐤌 (not e) {
+        أرجع m3Err_unknownMemory;
     }
 
     *o_memoryIndex = e->index;
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 
 bool Module_HasLinkedHostImport (IM3Module i_module, cstr_t i_importModule)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         // hostMemory is set when a host function is bound to the import, so it
         // is also the mark of one - see CompileRawFunction
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        𐤀𐤌 (not f->hostMemory or f->wasm or f->resolved) {
+            استمر;
         }
 
-        if (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
-            return true;
+        𐤀𐤌 (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
+            أرجع true;
         }
     }
 
-    return false;
+    أرجع false;
 }
 
 
 M3Result m3_BindImportMemory (IM3Module io_module, cstr_t i_importModule, u32 i_memoryIndex)
 {
-    if (not io_module or not i_importModule) {
-        return m3Err_moduleNotLinked;
+    𐤀𐤌 (not io_module or not i_importModule) {
+        أرجع m3Err_moduleNotLinked;
     }
 
-    if (i_memoryIndex >= io_module->numMemories) {
-        return m3Err_unknownMemory;
+    𐤀𐤌 (i_memoryIndex >= io_module->numMemories) {
+        أرجع m3Err_unknownMemory;
     }
 
     // the memory itself, not the index: linking may have pointed this slot at
     // another module's memory, and growing one reallocates behind it
     IM3Memory memory = io_module->memories[i_memoryIndex];
 
-    const bool wildcardModule = (strcmp(i_importModule, "*") == 0);
+    ثابت bool wildcardModule = (strcmp(i_importModule, "*") == 0);
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < io_module->numFunctions; ++i) {
         IM3Function f = &io_module->functions[i];
 
         // only an import that a host function was bound to has a memory to
         // pin: one with a body of its own reads memory through the interpreter,
         // and one resolved to another module's export runs that module's code
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        𐤀𐤌 (not f->hostMemory or f->wasm or f->resolved) {
+            استمر;
         }
 
-        if (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
+        𐤀𐤌 (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
             f->hostMemory = memory;
         }
     }
 
-    return m3Err_none;
+    أرجع m3Err_none;
 }
 
 
 M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 {
-#if d_m3RecordBacktraces
-    return &i_runtime->backtrace;
-#else
-    return NULL;
+#𐤀𐤌 d_m3RecordBacktraces
+    أرجع &i_runtime->backtrace;
+#وإلا
+    أرجع عدم;
 #endif
 }
 
@@ -3058,52 +3058,52 @@ M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 //  snapshots & suspendable execution
 //-------------------------------------------------------------------------------------------------------------------------------
 
-void m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
+فراغ m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
 {
-    if (io_runtime) {
+    𐤀𐤌 (io_runtime) {
         io_runtime->isSuspendable = i_suspendable;
     }
 }
 
-void m3_RequestSuspend (IM3Runtime io_runtime)
+فراغ m3_RequestSuspend (IM3Runtime io_runtime)
 {
-    if (io_runtime) {
+    𐤀𐤌 (io_runtime) {
         io_runtime->suspendRequested = true;
     }
 }
 
 bool m3_IsSuspended (IM3Runtime i_runtime)
 {
-    if (!i_runtime) {
-        return false;
+    𐤀𐤌 (!i_runtime) {
+        أرجع false;
     }
-#if d_m3HasStackSwitching
-    if (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
-        return true;
+#𐤀𐤌 d_m3HasStackSwitching
+    𐤀𐤌 (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
+        أرجع true;
     }
 #endif
-    return false;
+    أرجع false;
 }
 
 M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 {
-    if (!io_runtime) {
-        return m3Err_mallocFailed;
+    𐤀𐤌 (!io_runtime) {
+        أرجع m3Err_mallocFailed;
     }
-    if (!io_runtime->isSuspendable) {
-        return m3Err_none;
+    𐤀𐤌 (!io_runtime->isSuspendable) {
+        أرجع m3Err_none;
     }
-#if d_m3HasSnapshots
+#𐤀𐤌 d_m3HasSnapshots
     // a restore that failed leaves nothing to resume, and says so every time
     // rather than resuming nothing successfully
-    if (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
+    𐤀𐤌 (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
         io_runtime->rootContinuation->entryFunction->module->isUnusable) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+        أرجع "a snapshot failed to restore into the module, so it cannot run";
     }
 #endif
-#if d_m3HasStackSwitching
-    if (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
-        return m3Err_none;
+#𐤀𐤌 d_m3HasStackSwitching
+    𐤀𐤌 (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
+        أرجع m3Err_none;
     }
     // what finishes returns into the bottom of the stack, where it was entered
     io_runtime->stack = io_runtime->originStack;
@@ -3119,8 +3119,8 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
     io_runtime->resumePastCheck = false;
     d_m3StackLimitLeave(io_runtime);
 
-#  if d_m3HasExceptionHandling
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+#  𐤀𐤌 d_m3HasExceptionHandling
+    𐤀𐤌 (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(io_runtime, result);
@@ -3128,19 +3128,19 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 
     io_runtime->callNesting--;
 
-#  if d_m3HasExceptionHandling
-    if (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
+#  𐤀𐤌 d_m3HasExceptionHandling
+    𐤀𐤌 (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
         FreeExceptions(io_runtime);
     }
 #  endif
 
     // the results are where the paused call left room for them, so a finished
     // resume can be asked for them the way the call itself could have been
-    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->rootContinuation->entryFunction : NULL;
+    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->rootContinuation->entryFunction : عدم;
 
     Runtime_PlaceCallStack(io_runtime);
-    return result;
-#else
-    return m3Err_none;
+    أرجع result;
+#وإلا
+    أرجع m3Err_none;
 #endif
 }
