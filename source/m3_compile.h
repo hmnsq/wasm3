@@ -102,9 +102,9 @@ enum {
     // instructions. The tables run past these: with internal ops in DEBUG
     // builds, and with the designated 0xd0..0xd2 and 0xfc entries.
     c_waOp_lastCore           = 0xc4,     // i64.extend32_s
-#if d_m3HasWideArithmetic
+#如果 d_m3HasWideArithmetic
     c_waOp_lastExtended = 0x16,     // i64.mul_wide_u
-#else
+#否则
     c_waOp_lastExtended = 0x11,     // table.fill
 #endif
     c_waOp_lastAtomic = 0x4e      // i64.atomic.rmw32.cmpxchg_u
@@ -133,7 +133,7 @@ typedef struct M3CompilationScope {
 
 typedef M3CompilationScope* IM3CompilationScope;
 
-#if d_m3HasExceptionHandling
+#如果 d_m3HasExceptionHandling
 
 // One catch clause of a try_table, as Compile_TryTable reads it out of the
 // immediates. The stub that CompileBlock later emits for this clause writes its
@@ -198,7 +198,7 @@ typedef struct
 
     m3opcode_t previousOpcode;
 
-#if d_m3HasExceptionHandling
+#如果 d_m3HasExceptionHandling
     // handed from Compile_TryTable to the CompileBlock it is about to start.
     // The stubs are emitted from in there because a catch entry has to be
     // compiled against the try block's entry state, which is what CompileBlock
@@ -209,7 +209,7 @@ typedef struct
 
     bool isInitExpr;                 // walking a constant expression, not a function body
 
-#if d_m3HasGasMetering
+#如果 d_m3HasGasMetering
     // The metering segment being compiled, the cost accumulated so far, and
     // where its op_UseGas left an immediate for the cost to be written back
     // into once the segment's extent is known
@@ -218,7 +218,7 @@ typedef struct
     bool  isGasSegmentOpen;
 #endif
 
-#if d_m3HasSnapshots
+#如果 d_m3HasSnapshots
     // The function's snapshot map as it is being built, or NULL when this
     // compilation records none, and where the body the offsets in it count
     // from begins.
@@ -230,7 +230,7 @@ typedef struct
     bytes_t        bodyStart;
 #endif
 
-#if d_m3FoldSetLocal
+#如果 d_m3FoldSetLocal
     // the last emitted op, when it is a candidate for local.set destination folding.
     // foldPatchPC is NULL whenever anything was emitted (or a branch target captured) since.
     pc_t       foldPatchPC;                // address of the candidate's op word in the code stream
@@ -285,29 +285,29 @@ static const u16        c_slotUnused = 0xffff;
 static inline
 bool IsRegisterAllocated (IM3Compilation o, u32 i_register)
 {
-    return (o->regStackIndexPlusOne[i_register] != c_m3RegisterUnallocated);
+    返回 (o->regStackIndexPlusOne[i_register] != c_m3RegisterUnallocated);
 }
 
 static inline
 bool IsStackPolymorphic (IM3Compilation o)
 {
-    return o->block.isPolymorphic;
+    返回 o->block.isPolymorphic;
 }
 
 static inline
 bool IsRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot >= d_m3Reg0SlotAlias and i_slot != c_slotUnused);
+    返回 (i_slot >= d_m3Reg0SlotAlias and i_slot != c_slotUnused);
 }
 static inline
 bool IsFpRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot == d_m3Fp0SlotAlias);
+    返回 (i_slot == d_m3Fp0SlotAlias);
 }
 static inline
 bool IsIntRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot == d_m3Reg0SlotAlias);
+    返回 (i_slot == d_m3Reg0SlotAlias);
 }
 
 
@@ -317,17 +317,17 @@ bool IsIntRegisterSlotAlias (u16 i_slot)
 #ifdef DEBUG
 #  define M3OP(_name, _offset, _type, ...)  { .name = _name, .stackOffset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { .name = "reserved" }
-#else
+#否则
 // Strip-off name
 #  define M3OP(_name, _offset, _type, ...)  { .stackOffset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { 0 }
 #endif
 
-#if d_m3HasFloat
+#如果 d_m3HasFloat
 #  define M3OP_F          M3OP
 #elif d_m3NoFloatDynamic
 #  define M3OP_F(n,o,t,cc,...)        M3OP(n, o, t, cc, .operations = { op_Unsupported, op_Unsupported, op_Unsupported, op_Unsupported })
-#else
+#否则
 #  define M3OP_F(...)     { 0 }
 #endif
 
@@ -345,7 +345,7 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
 
 struct M3Continuation;
 
-#if d_m3HasStackSwitching
+#如果 d_m3HasStackSwitching
 m3ret_t ResumeContinuation (IM3Runtime i_runtime, struct M3Continuation* i_cont);
 #endif
 

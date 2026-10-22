@@ -14,18 +14,18 @@
 u8 ConvertTypeCharToTypeId (char i_code)
 {
     switch (i_code) {
-    case 'v': return c_m3Type_none;
-    case 'i': return c_m3Type_i32;
-    case 'I': return c_m3Type_i64;
-    case 'f': return c_m3Type_f32;
-    case 'F': return c_m3Type_f64;
-    case '*': return c_m3Type_i32;
+    case 'v': 返回 c_m3Type_none;
+    case 'i': 返回 c_m3Type_i32;
+    case 'I': 返回 c_m3Type_i64;
+    case 'f': 返回 c_m3Type_f32;
+    case 'F': 返回 c_m3Type_f64;
+    case '*': 返回 c_m3Type_i32;
     // same letters c_waCompactTypes uses for the reference types
-    case 'r': return c_m3Type_funcref;
-    case 'R': return c_m3Type_externref;
-    case 'c': return c_m3Type_contref;
+    case 'r': 返回 c_m3Type_funcref;
+    case 'R': 返回 c_m3Type_externref;
+    case 'c': 返回 c_m3Type_contref;
     }
-    return c_m3Type_unknown;
+    返回 c_m3Type_unknown;
 }
 
 
@@ -34,11 +34,11 @@ M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature)
     IM3FuncType funcType = NULL;
 
 _try {
-    if (not o_functionType) {
+    如果 (not o_functionType) {
         _throw("null function type");
     }
 
-    if (not i_signature) {
+    如果 (not i_signature) {
         _throw("null function signature");
     }
 
@@ -57,15 +57,15 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
     m3type_t* typelist = funcType->types;
 
     bool parsingRets = true;
-    while (*sig) {
+    当 (*sig) {
         char typeChar = *sig++;
 
-        if (typeChar == '(') {
+        如果 (typeChar == '(') {
             parsingRets = false;
             continue;
-        } else if (typeChar == ' ') {
+        } 否则 如果 (typeChar == ' ') {
             continue;
-        } else if (typeChar == ')') {
+        } 否则 如果 (typeChar == ')') {
             break;
         }
 
@@ -73,15 +73,15 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
 
         _throwif("unknown argument type char", c_m3Type_unknown == type);
 
-        if (type == c_m3Type_none) {
+        如果 (type == c_m3Type_none) {
             continue;
         }
 
-        if (parsingRets) {
+        如果 (parsingRets) {
             _throwif("malformed signature; return count overflow", funcType->numRets >= maxNumTypes);
             funcType->numRets++;
             *typelist++ = type;
-        } else {
+        } 否则 {
             _throwif("malformed signature; arg count overflow", (u32)(funcType->numRets) + funcType->numArgs >= maxNumTypes);
             funcType->numArgs++;
             *typelist++ = type;
@@ -90,13 +90,13 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
 
 } _catch:
 
-    if (result) {
+    如果 (result) {
         m3_Free(funcType);
     }
 
     *o_functionType = funcType;
 
-    return result;
+    返回 result;
 }
 
 
@@ -108,7 +108,7 @@ M3Result ValidateSignature (IM3Function i_function, ccstr_t i_linkingSignature)
     IM3FuncType ftype = NULL;
 _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
-    if (not AreFuncTypesEqual(ftype, i_function->funcType)) {
+    如果 (not AreFuncTypesEqual(ftype, i_function->funcType)) {
         m3log(module, "expected: %s", SPrintFuncTypeSignature(ftype));
         m3log(module, "   found: %s", SPrintFuncTypeSignature(i_function->funcType));
 
@@ -119,7 +119,7 @@ _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
     m3_Free(ftype);
 
-    return result;
+    返回 result;
 }
 
 
@@ -137,13 +137,13 @@ _try {
 
     result = m3Err_functionLookupFailed;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    为 (u32 i = 0; i < io_module->numFunctions; ++i) {
         const IM3Function f = &io_module->functions[i];
 
-        if (f->import.moduleUtf8 and f->import.fieldUtf8) {
-            if (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
+        如果 (f->import.moduleUtf8 and f->import.fieldUtf8) {
+            如果 (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
                 (wildcardModule or strcmp(f->import.moduleUtf8, i_moduleName) == 0)) {
-                if (i_signature) {
+                如果 (i_signature) {
 _                   (ValidateSignature(f, i_signature));
                 }
 _               (CompileRawFunction(io_module, f, i_function, i_userdata));
@@ -151,7 +151,7 @@ _               (CompileRawFunction(io_module, f, i_function, i_userdata));
         }
     }
 } _catch:
-    return result;
+    返回 result;
 }
 
 M3Result m3_LinkRawFunctionEx (IM3Module         io_module,
@@ -161,7 +161,7 @@ M3Result m3_LinkRawFunctionEx (IM3Module         io_module,
                                M3RawCall         i_function,
                                const void*       i_userdata)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
+    返回 FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
 }
 
 M3Result m3_LinkRawFunction (IM3Module         io_module,
@@ -170,5 +170,5 @@ M3Result m3_LinkRawFunction (IM3Module         io_module,
                              const char* const i_signature,
                              M3RawCall         i_function)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
+    返回 FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
 }

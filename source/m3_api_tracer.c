@@ -10,7 +10,7 @@
 #include "m3_env.h"
 #include "m3_exception.h"
 
-#if defined(d_m3HasTracer)
+#如果 defined(d_m3HasTracer)
 
 
 static FILE* trace = NULL;
@@ -115,15 +115,15 @@ d_m3TraceLocal(set_f64, "set f64", double,  "%" PRIf64)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_none) {
+    如果 (i_result == m3Err_none) {
         // If any trace function is found in the module, open the trace file
-        if (!trace) {
+        如果 (!trace) {
             trace = fopen("wasm3_trace.csv", "w");
         }
-    } else if (i_result == m3Err_functionLookupFailed) {
+    } 否则 如果 (i_result == m3Err_functionLookupFailed) {
         i_result = m3Err_none;
     }
-    return i_result;
+    返回 i_result;
 }
 
 
@@ -167,7 +167,7 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "set_f64",           
     // clang-format on
 
 _catch:
-    return result;
+    返回 result;
 }
 
 #endif // d_m3HasTracer

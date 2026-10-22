@@ -49,7 +49,7 @@ m3type_t            GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_in
 u16                 GetFuncTypeNumResults (const IM3FuncType i_funcType);
 m3type_t            GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index);
 
-#if d_m3HasTypedRefs
+#如果 d_m3HasTypedRefs
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
 m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull);
 #endif
@@ -70,7 +70,7 @@ typedef enum M3SafePointKind {
     safepoint_entry,        // at the start of a function's body, its locals set
 } M3SafePointKind;
 
-#if d_m3HasSnapshots
+#如果 d_m3HasSnapshots
 
 // What a snapshot needs to know about a function's compiled code, recorded by
 // the compiler when the runtime is suspendable and nowhere else.
@@ -183,12 +183,12 @@ typedef struct M3Function {
 
     pc_t               compiled;
 
-#if (d_m3EnableCodePageRefCounting)
+#如果 (d_m3EnableCodePageRefCounting)
     IM3CodePage* codePageRefs;                           // array of all pages used
     u32          numCodePageRefs;
 #endif
 
-#if defined(DEBUG)
+#如果 defined(DEBUG)
     u32 hits;
     u32 index;
 #endif
@@ -206,7 +206,7 @@ typedef struct M3Function {
     u16   numConstantBytes;
     void* constants;
 
-#if d_m3HasSnapshots
+#如果 d_m3HasSnapshots
     M3SnapshotMap* snapshotMap;                   // NULL unless compiled suspendable
 #endif
 } M3Function;
@@ -217,7 +217,7 @@ typedef struct M3Function {
 static inline
 IM3Function Function_Implementation (IM3Function i_function)
 {
-    return i_function->resolved ? i_function->resolved : i_function;
+    返回 i_function->resolved ? i_function->resolved : i_function;
 }
 
 void     Function_Release (IM3Function i_function);
