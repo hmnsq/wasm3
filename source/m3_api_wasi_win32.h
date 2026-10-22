@@ -11,70 +11,70 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_api_wasi_win32_h
-#define m3_api_wasi_win32_h
+#నిర్వచితం_కాకపోతే m3_api_wasi_win32_h
+#నిర్వచించు m3_api_wasi_win32_h
 
-#include "m3_core.h"
+#అన్తర్భావ "m3_core.h"
 
-#if !defined(_WIN32)
+#ఒకవేళ !defined(_WIN32)
 #  error "This file is for Windows only"
-#endif
+#అయితే_ముగింపు
 
-#include <Windows.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <wchar.h>
+#అన్తర్భావ <Windows.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <io.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <wchar.h>
 
 // See http://msdn.microsoft.com/en-us/library/windows/desktop/aa387694.aspx
-#define SystemFunction036 NTAPI SystemFunction036
-#include <NTSecAPI.h>
-#undef SystemFunction036
+#నిర్వచించు SystemFunction036 NTAPI SystemFunction036
+#అన్తర్భావ <NTSecAPI.h>
+#నిర్వచనం_రద్దు SystemFunction036
 
-#include "m3_api_wasi_host.h"
+#అన్తర్భావ "m3_api_wasi_host.h"
 
 // Room for a preopen's real path in front of the guest's
-#define d_m3WasiMaxHostPath  (d_m3WasiMaxPath + 16)
+#నిర్వచించు d_m3_Wasi_Max_Host_మార్గం  (d_m3_Wasi_Max_మార్గం + 16)
 
 // 1601-01-01, where a FILETIME counts its 100ns ticks from, in those same ticks
-#define d_m3WinEpochOffset   116444736000000000ULL
+#నిర్వచించు d_m3_Win_Epoch_స్థానభ్రంశం   116444736000000000ULL
 
 // Only the Windows 10 SDK and later declare it
-#if !defined(SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE)
+#ఒకవేళ !defined(SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE)
 #  define SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE  0x2
-#endif
+#అయితే_ముగింపు
 
 // A reparse point is read through an ioctl whose reply is described in ntifs.h,
 // which does not ship with the compiler, so the layout is spelled out below. The two
 // tags that name a path differ only in the symbolic link's extra Flags word.
-#if !defined(FSCTL_GET_REPARSE_POINT)
-#  define FSCTL_GET_REPARSE_POINT  0x000900A8
-#endif
-#if !defined(MAXIMUM_REPARSE_DATA_BUFFER_SIZE)
-#  define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  (16 * 1024)
-#endif
+#ఒకవేళ !defined(FSCTL_GET_REPARSE_బిందువు)
+#  define FSCTL_GET_REPARSE_బిందువు  0x000900A8
+#అయితే_ముగింపు
+#ఒకవేళ !defined(గరిష్ఠ_REPARSE_దత్తాంశం_బఫరు_కొలత)
+#  define గరిష్ఠ_REPARSE_దత్తాంశం_బఫరు_కొలత  (16 * 1024)
+#అయితే_ముగింపు
 
-typedef struct ReparseDataBuffer {
-    ULONG  ReparseTag;
-    USHORT ReparseDataLength;
+రకనిర్వచనం నిర్మాణం Reparse_దత్తాంశం_బఫరు {
+    ULONG  Reparse_ట్యాగ్;
+    USHORT Reparse_దత్తాంశం_నిడివి;
     USHORT Reserved;
-    USHORT SubstituteNameOffset;
-    USHORT SubstituteNameLength;
-    USHORT PrintNameOffset;
-    USHORT PrintNameLength;
-    union {
-        struct {
+    USHORT Substitute_Name_స్థానభ్రంశం;
+    USHORT Substitute_Name_నిడివి;
+    USHORT Print_Name_స్థానభ్రంశం;
+    USHORT Print_Name_నిడివి;
+    సంఘం {
+        నిర్మాణం {
             ULONG Flags;
-            WCHAR PathBuffer[1];
+            WCHAR మార్గం_బఫరు[1];
         } symlink;
-        struct {
-            WCHAR PathBuffer[1];
-        } mount_point;
+        నిర్మాణం {
+            WCHAR మార్గం_బఫరు[1];
+        } mount_బిందువు;
     } u;
-} ReparseDataBuffer;
+} Reparse_దత్తాంశం_బఫరు;
 
 
 /*
@@ -83,183 +83,183 @@ typedef struct ReparseDataBuffer {
 
 // What the CRT calls used here leave in errno. Everything the Win32 API reports goes
 // through errno_from_win32 instead.
-static
-__wasi_errno_t errno_from_crt (int err)
+స్థిర
+__wasi_errno_t errno_from_crt (పూర్ణాంకం err)
 {
     // clang-format off
-    switch (err) {
-    case 0:       return __WASI_ERRNO_SUCCESS;
-    case EACCES:  return __WASI_ERRNO_ACCES;
-    case EBADF:   return __WASI_ERRNO_BADF;
-    case EEXIST:  return __WASI_ERRNO_EXIST;
-    case EMFILE:  return __WASI_ERRNO_MFILE;
-    case ENOENT:  return __WASI_ERRNO_NOENT;
-    case ENOSPC:  return __WASI_ERRNO_NOSPC;
-    case EINVAL:  return __WASI_ERRNO_INVAL;
+    ఎంపిక (err) {
+    స్థితి 0:       తిరిగి __WASI_ERRNO_SUCCESS;
+    స్థితి EACCES:  తిరిగి __WASI_ERRNO_ACCES;
+    స్థితి EBADF:   తిరిగి __WASI_ERRNO_BADF;
+    స్థితి EEXIST:  తిరిగి __WASI_ERRNO_EXIST;
+    స్థితి EMFILE:  తిరిగి __WASI_ERRNO_MFILE;
+    స్థితి ENOENT:  తిరిగి __WASI_ERRNO_NOENT;
+    స్థితి ENOSPC:  తిరిగి __WASI_ERRNO_NOSPC;
+    స్థితి EINVAL:  తిరిగి __WASI_ERRNO_INVAL;
     }
     // clang-format on
-    return __WASI_ERRNO_IO;
+    తిరిగి __WASI_ERRNO_IO;
 }
 
-static
+స్థిర
 __wasi_errno_t errno_from_win32 (DWORD err)
 {
     // clang-format off
-    switch (err) {
-    case ERROR_SUCCESS:               return __WASI_ERRNO_SUCCESS;
-    case ERROR_INVALID_FUNCTION:      return __WASI_ERRNO_NOTSUP;
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_PATH_NOT_FOUND:
-    case ERROR_INVALID_DRIVE:
-    case ERROR_BAD_NETPATH:
-    case ERROR_BAD_PATHNAME:          return __WASI_ERRNO_NOENT;
-    case ERROR_TOO_MANY_OPEN_FILES:   return __WASI_ERRNO_MFILE;
-    case ERROR_ACCESS_DENIED:
-    case ERROR_WRITE_PROTECT:         return __WASI_ERRNO_ACCES;
-    case ERROR_INVALID_HANDLE:        return __WASI_ERRNO_BADF;
-    case ERROR_NOT_ENOUGH_MEMORY:
-    case ERROR_OUTOFMEMORY:           return __WASI_ERRNO_NOMEM;
-    case ERROR_NOT_SAME_DEVICE:       return __WASI_ERRNO_XDEV;
-    case ERROR_WRITE_FAULT:
-    case ERROR_READ_FAULT:            return __WASI_ERRNO_IO;
-    case ERROR_SHARING_VIOLATION:
-    case ERROR_LOCK_VIOLATION:        return __WASI_ERRNO_BUSY;
-    case ERROR_HANDLE_DISK_FULL:
-    case ERROR_DISK_FULL:             return __WASI_ERRNO_NOSPC;
-    case ERROR_FILE_EXISTS:
-    case ERROR_ALREADY_EXISTS:        return __WASI_ERRNO_EXIST;
-    case ERROR_BUFFER_OVERFLOW:
-    case ERROR_INSUFFICIENT_BUFFER:
-    case ERROR_FILENAME_EXCED_RANGE:  return __WASI_ERRNO_NAMETOOLONG;
-    case ERROR_DIR_NOT_EMPTY:         return __WASI_ERRNO_NOTEMPTY;
-    case ERROR_DIRECTORY:             return __WASI_ERRNO_NOTDIR;
-    case ERROR_PRIVILEGE_NOT_HELD:    return __WASI_ERRNO_PERM;
-    case ERROR_NOT_SUPPORTED:         return __WASI_ERRNO_NOTSUP;
-    case ERROR_CANT_RESOLVE_FILENAME: return __WASI_ERRNO_LOOP;
-    case ERROR_NEGATIVE_SEEK:
-    case ERROR_INVALID_NAME:
-    case ERROR_INVALID_PARAMETER:
-    case ERROR_NOT_A_REPARSE_POINT:   return __WASI_ERRNO_INVAL;
+    ఎంపిక (err) {
+    స్థితి ERROR_SUCCESS:               తిరిగి __WASI_ERRNO_SUCCESS;
+    స్థితి ERROR_INVALID_FUNCTION:      తిరిగి __WASI_ERRNO_NOTSUP;
+    స్థితి ERROR_FILE_NOT_దొరికింది:
+    స్థితి ERROR_మార్గం_NOT_దొరికింది:
+    స్థితి ERROR_INVALID_DRIVE:
+    స్థితి ERROR_BAD_NETPATH:
+    స్థితి ERROR_BAD_PATHNAME:          తిరిగి __WASI_ERRNO_NOENT;
+    స్థితి ERROR_TOO_MANY_OPEN_FILES:   తిరిగి __WASI_ERRNO_MFILE;
+    స్థితి ERROR_ACCESS_DENIED:
+    స్థితి ERROR_WRITE_PROTECT:         తిరిగి __WASI_ERRNO_ACCES;
+    స్థితి ERROR_INVALID_HANDLE:        తిరిగి __WASI_ERRNO_BADF;
+    స్థితి ERROR_NOT_ENOUGH_జ్ఞాపకం:
+    స్థితి ERROR_OUTOFMEMORY:           తిరిగి __WASI_ERRNO_NOMEM;
+    స్థితి ERROR_NOT_SAME_DEVICE:       తిరిగి __WASI_ERRNO_XDEV;
+    స్థితి ERROR_WRITE_FAULT:
+    స్థితి ERROR_READ_FAULT:            తిరిగి __WASI_ERRNO_IO;
+    స్థితి ERROR_SHARING_VIOLATION:
+    స్థితి ERROR_తాళం_VIOLATION:        తిరిగి __WASI_ERRNO_BUSY;
+    స్థితి ERROR_HANDLE_DISK_నిండిన:
+    స్థితి ERROR_DISK_నిండిన:             తిరిగి __WASI_ERRNO_NOSPC;
+    స్థితి ERROR_FILE_EXISTS:
+    స్థితి ERROR_ALREADY_EXISTS:        తిరిగి __WASI_ERRNO_EXIST;
+    స్థితి ERROR_బఫరు_అధికప్రవాహం:
+    స్థితి ERROR_INSUFFICIENT_బఫరు:
+    స్థితి ERROR_FILENAME_EXCED_RANGE:  తిరిగి __WASI_ERRNO_NAMETOOLONG;
+    స్థితి ERROR_DIR_NOT_ఖాళీలు:         తిరిగి __WASI_ERRNO_NOTEMPTY;
+    స్థితి ERROR_DIRECTORY:             తిరిగి __WASI_ERRNO_NOTDIR;
+    స్థితి ERROR_PRIVILEGE_NOT_HELD:    తిరిగి __WASI_ERRNO_PERM;
+    స్థితి ERROR_NOT_SUPPORTED:         తిరిగి __WASI_ERRNO_NOTSUP;
+    స్థితి ERROR_CANT_RESOLVE_FILENAME: తిరిగి __WASI_ERRNO_LOOP;
+    స్థితి ERROR_NEGATIVE_SEEK:
+    స్థితి ERROR_INVALID_NAME:
+    స్థితి ERROR_INVALID_PARAMETER:
+    స్థితి ERROR_NOT_A_REPARSE_బిందువు:   తిరిగి __WASI_ERRNO_INVAL;
     }
     // clang-format on
-    return __WASI_ERRNO_IO;
+    తిరిగి __WASI_ERRNO_IO;
 }
 
-static
-__wasi_timestamp_t convert_filetime (FILETIME i_time)
+స్థిర
+__wasi_timestamp_t convert_filetime (FILETIME i_సమయం)
 {
-    uint64_t ticks = ((uint64_t)i_time.dwHighDateTime << 32) | i_time.dwLowDateTime;
-    if (ticks < d_m3WinEpochOffset) {
-        return 0;
+    uint64_t ticks = ((uint64_t)i_సమయం.dw_ఎగువ_Date_సమయం << 32) | i_సమయం.dw_దిగువ_Date_సమయం;
+    ఒకవేళ (ticks < d_m3_Win_Epoch_స్థానభ్రంశం) {
+        తిరిగి 0;
     }
-    return (ticks - d_m3WinEpochOffset) * 100;
+    తిరిగి (ticks - d_m3_Win_Epoch_స్థానభ్రంశం) * 100;
 }
 
-static
-FILETIME convert_timestamp (__wasi_timestamp_t i_time)
+స్థిర
+FILETIME convert_timestamp (__wasi_timestamp_t i_సమయం)
 {
-    uint64_t ticks = i_time / 100 + d_m3WinEpochOffset;
-    FILETIME out;
-    out.dwLowDateTime = (DWORD)ticks;
-    out.dwHighDateTime = (DWORD)(ticks >> 32);
-    return out;
+    uint64_t ticks = i_సమయం / 100 + d_m3_Win_Epoch_స్థానభ్రంశం;
+    FILETIME బహిర్గతం;
+    బహిర్గతం.dw_దిగువ_Date_సమయం = (DWORD)ticks;
+    బహిర్గతం.dw_ఎగువ_Date_సమయం = (DWORD)(ticks >> 32);
+    తిరిగి బహిర్గతం;
 }
 
 // Whether i_fd is one of the preopened directories. A preopen holds a placeholder
 // descriptor rather than an open directory, so it has to answer for itself wherever
 // a stat is asked for, and it names a directory only while the placeholder opened
 // for it still holds that number.
-static
+స్థిర
 bool is_preopen (__wasi_fd_t i_fd)
 {
-    return i_fd >= 3 && i_fd < d_m3WasiPreopenCount && m3_wasi_preopen[i_fd].fd == (int)i_fd;
+    తిరిగి i_fd >= 3 && i_fd < d_m3_Wasi_Preopen_లెక్క && m3_wasi_preopen[i_fd].fd == (పూర్ణాంకం)i_fd;
 }
 
 // A preopened directory is resolved by prefixing its real path onto the guest's,
 // which is what openat() would have resolved the pair to.
-static
-__wasi_errno_t resolve_path (char* o_path, __wasi_fd_t i_dirfd, ccstr_t i_path)
+స్థిర
+__wasi_errno_t resolve_మార్గం (అక్షరం* o_మార్గం, __wasi_fd_t i_dirfd, ccstr_t i_మార్గం)
 {
-    if (!is_preopen(i_dirfd)) {
-        return __WASI_ERRNO_BADF;
+    ఒకవేళ (!is_preopen(i_dirfd)) {
+        తిరిగి __WASI_ERRNO_BADF;
     }
 
-    int len = snprintf(o_path, d_m3WasiMaxHostPath, "%s/%s", m3_wasi_preopen[i_dirfd].real_path,
-                       i_path);
-    if (len < 0 || len >= d_m3WasiMaxHostPath) {
-        return __WASI_ERRNO_NAMETOOLONG;
+    పూర్ణాంకం len = snprintf(o_మార్గం, d_m3_Wasi_Max_Host_మార్గం, "%s/%s", m3_wasi_preopen[i_dirfd].real_మార్గం,
+                       i_మార్గం);
+    ఒకవేళ (len < 0 || len >= d_m3_Wasi_Max_Host_మార్గం) {
+        తిరిగి __WASI_ERRNO_NAMETOOLONG;
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 // FILE_FLAG_BACKUP_SEMANTICS is what lets a directory be opened at all, and
 // FILE_READ_ATTRIBUTES is all the metadata calls need, so this opens whatever the
 // path names without asking for access that could be refused.
-static
-__wasi_errno_t open_path_handle (ccstr_t i_path, bool i_follow, HANDLE* o_handle)
+స్థిర
+__wasi_errno_t open_మార్గం_handle (ccstr_t i_మార్గం, bool i_follow, HANDLE* o_handle)
 {
     DWORD flags = FILE_FLAG_BACKUP_SEMANTICS;
-    if (!i_follow) {
-        flags |= FILE_FLAG_OPEN_REPARSE_POINT;
+    ఒకవేళ (!i_follow) {
+        flags |= FILE_FLAG_OPEN_REPARSE_బిందువు;
     }
 
-    HANDLE handle = CreateFileA(i_path, FILE_READ_ATTRIBUTES,
-                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
-                                OPEN_EXISTING, flags, NULL);
-    if (handle == INVALID_HANDLE_VALUE) {
-        return errno_from_win32(GetLastError());
+    HANDLE handle = CreateFileA(i_మార్గం, FILE_READ_లక్షణాలు,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, ఖాళీ,
+                                OPEN_EXISTING, flags, ఖాళీ);
+    ఒకవేళ (handle == INVALID_HANDLE_విలువ) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
 
     *o_handle = handle;
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
+స్థిర
 __wasi_errno_t handle_for_fd (__wasi_fd_t i_fd, HANDLE* o_handle)
 {
     HANDLE handle = (HANDLE)_get_osfhandle(i_fd);
-    if (handle == INVALID_HANDLE_VALUE) {
-        return __WASI_ERRNO_BADF;
+    ఒకవేళ (handle == INVALID_HANDLE_విలువ) {
+        తిరిగి __WASI_ERRNO_BADF;
     }
 
     *o_handle = handle;
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 // A handle that is not a file - a console, a pipe - carries none of this and answers
 // with its type alone. Windows records no change time, so ctim is the creation time,
 // the nearest thing it has.
-static
+స్థిర
 __wasi_errno_t filestat_from_handle (HANDLE i_handle, m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, పరిమాణం(*o_stat));
 
     BY_HANDLE_FILE_INFORMATION info;
-    if (!GetFileInformationByHandle(i_handle, &info)) {
-        switch (GetFileType(i_handle)) {
-        case FILE_TYPE_CHAR: o_stat->filetype = __WASI_FILETYPE_CHARACTER_DEVICE; break;
-        case FILE_TYPE_PIPE: o_stat->filetype = __WASI_FILETYPE_UNKNOWN; break;
-        default: return errno_from_win32(GetLastError());
+    ఒకవేళ (!GetFileInformationByHandle(i_handle, &info)) {
+        ఎంపిక (GetFileType(i_handle)) {
+        స్థితి FILE_TYPE_CHAR: o_stat->filetype = __WASI_FILETYPE_CHARACTER_DEVICE; ఆపు;
+        స్థితి FILE_TYPE_PIPE: o_stat->filetype = __WASI_FILETYPE_UNKNOWN; ఆపు;
+        అప్రమేయ: తిరిగి errno_from_win32(Get_చివరి_Error());
         }
-        return __WASI_ERRNO_SUCCESS;
+        తిరిగి __WASI_ERRNO_SUCCESS;
     }
 
-    o_stat->dev = info.dwVolumeSerialNumber;
-    o_stat->ino = ((uint64_t)info.nFileIndexHigh << 32) | info.nFileIndexLow;
-    o_stat->nlink = info.nNumberOfLinks;
-    o_stat->size = ((uint64_t)info.nFileSizeHigh << 32) | info.nFileSizeLow;
-    o_stat->atim = convert_filetime(info.ftLastAccessTime);
-    o_stat->mtim = convert_filetime(info.ftLastWriteTime);
-    o_stat->ctim = convert_filetime(info.ftCreationTime);
+    o_stat->dev = info.dw_Volume_Serial_సంఖ్య;
+    o_stat->ino = ((uint64_t)info.n_File_సూచీ_ఎగువ << 32) | info.n_File_సూచీ_దిగువ;
+    o_stat->nlink = info.n_సంఖ్య_యొక్క_Links;
+    o_stat->కొలత = ((uint64_t)info.n_File_కొలత_ఎగువ << 32) | info.n_File_కొలత_దిగువ;
+    o_stat->atim = convert_filetime(info.ft_చివరి_Access_సమయం);
+    o_stat->mtim = convert_filetime(info.ft_చివరి_Write_సమయం);
+    o_stat->ctim = convert_filetime(info.ft_Creation_సమయం);
 
-    if (info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+    ఒకవేళ (info.dw_File_లక్షణాలు & FILE_ATTRIBUTE_REPARSE_బిందువు) {
         o_stat->filetype = __WASI_FILETYPE_SYMBOLIC_LINK;
-    } else if (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+    } లేకపోతే ఒకవేళ (info.dw_File_లక్షణాలు & FILE_ATTRIBUTE_DIRECTORY) {
         o_stat->filetype = __WASI_FILETYPE_DIRECTORY;
-    } else {
+    } లేకపోతే {
         o_stat->filetype = __WASI_FILETYPE_REGULAR_FILE;
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -267,19 +267,19 @@ __wasi_errno_t filestat_from_handle (HANDLE i_handle, m3_wasi_filestat_t* o_stat
  * Setup
  */
 
-static
-void m3_wasi_host_init ()
+స్థిర
+శూన్య m3_wasi_host_init ()
 {
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-    _setmode(_fileno(stderr), _O_BINARY);
+    _setmode(_fileno(stdin), O_ద్విమాన);
+    _setmode(_fileno(stdout), O_ద్విమాన);
+    _setmode(_fileno(stderr), O_ద్విమాన);
 
     // Windows cannot open a directory as a descriptor, so a preopen is resolved by
     // path instead. It still has to hold a descriptor number: the guest is handed
     // one, and without something occupying it the next file opened would be given
     // the same number and the two would be indistinguishable.
-    for (int i = 3; i < d_m3WasiPreopenCount; i++) {
-        if (m3_wasi_preopen[i].fd < 0) {
+    కొరకు (పూర్ణాంకం i = 3; i < d_m3_Wasi_Preopen_లెక్క; i++) {
+        ఒకవేళ (m3_wasi_preopen[i].fd < 0) {
             m3_wasi_preopen[i].fd = _open("NUL", _O_RDONLY);
         }
     }
@@ -290,58 +290,58 @@ void m3_wasi_host_init ()
  * Descriptors
  */
 
-static
+స్థిర
 __wasi_errno_t m3_wasi_host_fd_close (__wasi_fd_t i_fd)
 {
-    if (_close(i_fd) != 0) {
-        return errno_from_crt(errno);
+    ఒకవేళ (_close(i_fd) != 0) {
+        తిరిగి errno_from_crt(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
+స్థిర
 __wasi_errno_t m3_wasi_host_fd_datasync (__wasi_fd_t i_fd)
 {
-    if (_commit(i_fd) != 0) {
-        return errno_from_crt(errno);
+    ఒకవేళ (_commit(i_fd) != 0) {
+        తిరిగి errno_from_crt(errno);
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_advise (__wasi_fd_t i_fd, __wasi_filesize_t i_offset,
-                                       __wasi_filesize_t i_length, __wasi_advice_t i_advice)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_advise (__wasi_fd_t i_fd, __wasi_filesize_t i_స్థానభ్రంశం,
+                                       __wasi_filesize_t i_నిడివి, __wasi_advice_t i_advice)
 {
     // Purely advisory, and Windows has nowhere to pass it on to, so dropping it is
     // still a conforming implementation. Only the fd has to be valid.
-    if (i_advice > __WASI_ADVICE_NOREUSE) {
-        return __WASI_ERRNO_INVAL;
+    ఒకవేళ (i_advice > __WASI_ADVICE_NOREUSE) {
+        తిరిగి __WASI_ERRNO_INVAL;
     }
 
     HANDLE handle;
-    return handle_for_fd(i_fd, &handle);
+    తిరిగి handle_for_fd(i_fd, &handle);
 }
 
-static
+స్థిర
 __wasi_errno_t m3_wasi_host_fd_filestat (__wasi_fd_t i_fd, m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, పరిమాణం(*o_stat));
 
-    if (is_preopen(i_fd)) {
+    ఒకవేళ (is_preopen(i_fd)) {
         o_stat->filetype = __WASI_FILETYPE_DIRECTORY;
-        return __WASI_ERRNO_SUCCESS;
+        తిరిగి __WASI_ERRNO_SUCCESS;
     }
 
     HANDLE         handle;
     __wasi_errno_t err = handle_for_fd(i_fd, &handle);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    return filestat_from_handle(handle, o_stat);
+    తిరిగి filestat_from_handle(handle, o_stat);
 }
 
-static
+స్థిర
 __wasi_errno_t m3_wasi_host_fd_fdstat (__wasi_fd_t i_fd, __wasi_filetype_t* o_filetype,
                                        __wasi_fdflags_t* o_flags)
 {
@@ -351,89 +351,89 @@ __wasi_errno_t m3_wasi_host_fd_fdstat (__wasi_fd_t i_fd, __wasi_filetype_t* o_fi
     m3_wasi_filestat_t fd_stat;
 
     __wasi_errno_t     err = m3_wasi_host_fd_filestat(i_fd, &fd_stat);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     *o_filetype = fd_stat.filetype;
     *o_flags = 0; // the CRT does not report back the flags a descriptor was opened with
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 // Nothing here can be changed after the fact: append and non-blocking are fixed when
 // CreateFile runs, and the CRT hands back no way to revisit either. fd_fdstat above
 // reports no flags at all for the same reason, so the only request that can be
 // honoured is the one asking for exactly that.
-static
-__wasi_errno_t m3_wasi_host_fd_fdstat_set_flags (__wasi_fd_t i_fd, __wasi_fdflags_t i_flags)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_fdstat_సమితి_flags (__wasi_fd_t i_fd, __wasi_fdflags_t i_flags)
 {
     HANDLE         handle;
     __wasi_errno_t err = handle_for_fd(i_fd, &handle);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    return (i_flags == 0) ? __WASI_ERRNO_SUCCESS : __WASI_ERRNO_NOTSUP;
+    తిరిగి (i_flags == 0) ? __WASI_ERRNO_SUCCESS : __WASI_ERRNO_NOTSUP;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_set_size (__wasi_fd_t i_fd, __wasi_filesize_t i_size)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_సమితి_కొలత (__wasi_fd_t i_fd, __wasi_filesize_t i_కొలత)
 {
     // _chsize_s hands the error back rather than only leaving it in errno
-    return errno_from_crt(_chsize_s(i_fd, (__int64)i_size));
+    తిరిగి errno_from_crt(_chsize_s(i_fd, (__int64)i_కొలత));
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_set_times (__wasi_fd_t i_fd, __wasi_timestamp_t i_atim,
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_సమితి_times (__wasi_fd_t i_fd, __wasi_timestamp_t i_atim,
                                           __wasi_timestamp_t i_mtim, __wasi_fstflags_t i_flags)
 {
     HANDLE         handle;
     __wasi_errno_t err = handle_for_fd(i_fd, &handle);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     // a time is either given, asked for as now, or left alone - and SetFileTime
     // leaves alone whatever it is handed no time for
     FILETIME now, times[2];
-    GetSystemTimeAsFileTime(&now);
+    Get_System_సమయం_As_File_సమయం(&now);
 
-    const FILETIME* atime = NULL;
-    const FILETIME* mtime = NULL;
+    స్థిరరాశి FILETIME* atime = ఖాళీ;
+    స్థిరరాశి FILETIME* mtime = ఖాళీ;
 
-    if (i_flags & __WASI_FSTFLAGS_ATIM_NOW) {
+    ఒకవేళ (i_flags & __WASI_FSTFLAGS_ATIM_NOW) {
         atime = &now;
-    } else if (i_flags & __WASI_FSTFLAGS_ATIM) {
+    } లేకపోతే ఒకవేళ (i_flags & __WASI_FSTFLAGS_ATIM) {
         times[0] = convert_timestamp(i_atim);
         atime = &times[0];
     }
 
-    if (i_flags & __WASI_FSTFLAGS_MTIM_NOW) {
+    ఒకవేళ (i_flags & __WASI_FSTFLAGS_MTIM_NOW) {
         mtime = &now;
-    } else if (i_flags & __WASI_FSTFLAGS_MTIM) {
+    } లేకపోతే ఒకవేళ (i_flags & __WASI_FSTFLAGS_MTIM) {
         times[1] = convert_timestamp(i_mtim);
         mtime = &times[1];
     }
 
-    if (!SetFileTime(handle, NULL, atime, mtime)) {
-        return errno_from_win32(GetLastError());
+    ఒకవేళ (!సమితి_File_సమయం(handle, ఖాళీ, atime, mtime)) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, int i_whence,
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_స్థానభ్రంశం, పూర్ణాంకం i_whence,
                                      __wasi_filesize_t* o_pos)
 {
     *o_pos = 0;
 
-    int64_t ret = _lseeki64(i_fd, i_offset, i_whence);
-    if (ret < 0) {
-        return errno_from_crt(errno);
+    int64_t ret = _lseeki64(i_fd, i_స్థానభ్రంశం, i_whence);
+    ఒకవేళ (ret < 0) {
+        తిరిగి errno_from_crt(errno);
     }
 
     *o_pos = (__wasi_filesize_t)ret;
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -444,84 +444,84 @@ __wasi_errno_t m3_wasi_host_fd_seek (__wasi_fd_t i_fd, int64_t i_offset, int i_w
 // Windows has neither a vectored nor a positional transfer, so the list is walked
 // one buffer at a time and a short transfer ends it, as it would for readv. A
 // positional one moves the file pointer and puts it back where it was.
-static
-__wasi_errno_t transfer_iovs (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                              __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
-                              bool i_positional, bool i_write, __wasi_size_t* o_done)
+స్థిర
+__wasi_errno_t transfer_iovs (__wasi_fd_t i_fd, స్థిరరాశి m3_wasi_iovec_t* i_iovs,
+                              __wasi_size_t i_iovsLen, __wasi_filesize_t i_స్థానభ్రంశం,
+                              bool i_positional, bool i_write, __wasi_size_t* o_పూర్తి)
 {
-    *o_done = 0;
+    *o_పూర్తి = 0;
 
     int64_t saved = 0;
 
-    if (i_positional) {
+    ఒకవేళ (i_positional) {
         saved = _lseeki64(i_fd, 0, SEEK_CUR);
-        if (saved < 0 || _lseeki64(i_fd, (__int64)i_offset, SEEK_SET) < 0) {
-            return errno_from_crt(errno);
+        ఒకవేళ (saved < 0 || _lseeki64(i_fd, (__int64)i_స్థానభ్రంశం, SEEK_SET) < 0) {
+            తిరిగి errno_from_crt(errno);
         }
     }
 
     __wasi_errno_t err = __WASI_ERRNO_SUCCESS;
-    size_t         done = 0;
+    size_t         పూర్తి = 0;
 
-    for (__wasi_size_t i = 0; i < i_iovsLen; i++) {
-        void*  addr = i_iovs[i].buf;
+    కొరకు (__wasi_size_t i = 0; i < i_iovsLen; i++) {
+        శూన్య*  addr = i_iovs[i].buf;
         size_t len = i_iovs[i].len;
-        if (len == 0) {
-            continue;
+        ఒకవేళ (len == 0) {
+            కొనసాగు;
         }
 
-        int ret = i_write ? _write(i_fd, addr, (unsigned)len) : _read(i_fd, addr, (unsigned)len);
-        if (ret < 0) {
+        పూర్ణాంకం ret = i_write ? _write(i_fd, addr, (గుర్తులేని)len) : _read(i_fd, addr, (గుర్తులేని)len);
+        ఒకవేళ (ret < 0) {
             err = errno_from_crt(errno);
-            break;
+            ఆపు;
         }
 
-        done += (size_t)ret;
-        if ((size_t)ret < len) {
-            break;
+        పూర్తి += (size_t)ret;
+        ఒకవేళ ((size_t)ret < len) {
+            ఆపు;
         }
     }
 
-    if (i_positional) {
+    ఒకవేళ (i_positional) {
         _lseeki64(i_fd, saved, SEEK_SET);
     }
 
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    *o_done = (__wasi_size_t)done;
-    return __WASI_ERRNO_SUCCESS;
+    *o_పూర్తి = (__wasi_size_t)పూర్తి;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_read (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                     __wasi_size_t i_iovsLen, __wasi_size_t* o_done)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_read (__wasi_fd_t i_fd, స్థిరరాశి m3_wasi_iovec_t* i_iovs,
+                                     __wasi_size_t i_iovsLen, __wasi_size_t* o_పూర్తి)
 {
-    return transfer_iovs(i_fd, i_iovs, i_iovsLen, 0, false, false, o_done);
+    తిరిగి transfer_iovs(i_fd, i_iovs, i_iovsLen, 0, false, false, o_పూర్తి);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_write (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                      __wasi_size_t i_iovsLen, __wasi_size_t* o_done)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_write (__wasi_fd_t i_fd, స్థిరరాశి m3_wasi_iovec_t* i_iovs,
+                                      __wasi_size_t i_iovsLen, __wasi_size_t* o_పూర్తి)
 {
-    return transfer_iovs(i_fd, i_iovs, i_iovsLen, 0, false, true, o_done);
+    తిరిగి transfer_iovs(i_fd, i_iovs, i_iovsLen, 0, false, true, o_పూర్తి);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_pread (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                      __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
-                                      __wasi_size_t* o_done)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_pread (__wasi_fd_t i_fd, స్థిరరాశి m3_wasi_iovec_t* i_iovs,
+                                      __wasi_size_t i_iovsLen, __wasi_filesize_t i_స్థానభ్రంశం,
+                                      __wasi_size_t* o_పూర్తి)
 {
-    return transfer_iovs(i_fd, i_iovs, i_iovsLen, i_offset, true, false, o_done);
+    తిరిగి transfer_iovs(i_fd, i_iovs, i_iovsLen, i_స్థానభ్రంశం, true, false, o_పూర్తి);
 }
 
-static
-__wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, const m3_wasi_iovec_t* i_iovs,
-                                       __wasi_size_t i_iovsLen, __wasi_filesize_t i_offset,
-                                       __wasi_size_t* o_done)
+స్థిర
+__wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, స్థిరరాశి m3_wasi_iovec_t* i_iovs,
+                                       __wasi_size_t i_iovsLen, __wasi_filesize_t i_స్థానభ్రంశం,
+                                       __wasi_size_t* o_పూర్తి)
 {
-    return transfer_iovs(i_fd, i_iovs, i_iovsLen, i_offset, true, true, o_done);
+    తిరిగి transfer_iovs(i_fd, i_iovs, i_iovsLen, i_స్థానభ్రంశం, true, true, o_పూర్తి);
 }
 
 
@@ -529,315 +529,315 @@ __wasi_errno_t m3_wasi_host_fd_pwrite (__wasi_fd_t i_fd, const m3_wasi_iovec_t* 
  * Paths
  */
 
-static
-__wasi_errno_t m3_wasi_host_path_open (__wasi_fd_t i_dirfd, ccstr_t i_path,
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_open (__wasi_fd_t i_dirfd, ccstr_t i_మార్గం,
                                        __wasi_oflags_t i_oflags, __wasi_rights_t i_rights,
                                        __wasi_fdflags_t i_fdFlags, __wasi_fd_t* o_fd)
 {
     *o_fd = 0;
 
-    char           full_path[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_path, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_మార్గం[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_మార్గం, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     // _open refuses a directory, so one is opened through the Win32 call that can
     // and handed to the CRT afterwards. The descriptor is good for what WASI does
     // with a directory - naming it in a later path call - and for nothing else.
-    if (i_oflags & __WASI_OFLAGS_DIRECTORY) {
+    ఒకవేళ (i_oflags & __WASI_OFLAGS_DIRECTORY) {
         HANDLE handle;
-        err = open_path_handle(full_path, true, &handle);
-        if (err != __WASI_ERRNO_SUCCESS) {
-            return err;
+        err = open_మార్గం_handle(నిండిన_మార్గం, true, &handle);
+        ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+            తిరిగి err;
         }
 
-        int dir_fd = _open_osfhandle((intptr_t)handle, _O_RDONLY);
-        if (dir_fd < 0) {
+        పూర్ణాంకం dir_fd = _open_osfhandle((intptr_t)handle, _O_RDONLY);
+        ఒకవేళ (dir_fd < 0) {
             CloseHandle(handle);
-            return __WASI_ERRNO_MFILE;
+            తిరిగి __WASI_ERRNO_MFILE;
         }
 
         *o_fd = (__wasi_fd_t)dir_fd;
-        return __WASI_ERRNO_SUCCESS;
+        తిరిగి __WASI_ERRNO_SUCCESS;
     }
 
     // Windows has no O_DSYNC/O_RSYNC/O_SYNC and no non-blocking file descriptor, so
     // those fs_flags are dropped rather than translated.
-    int flags = ((i_oflags & __WASI_OFLAGS_CREAT) ? _O_CREAT : 0) |
+    పూర్ణాంకం flags = ((i_oflags & __WASI_OFLAGS_CREAT) ? _O_CREAT : 0) |
                 ((i_oflags & __WASI_OFLAGS_EXCL) ? _O_EXCL : 0) |
                 ((i_oflags & __WASI_OFLAGS_TRUNC) ? _O_TRUNC : 0) |
                 ((i_fdFlags & __WASI_FDFLAGS_APPEND) ? _O_APPEND : 0) |
-                _O_BINARY;
+                O_ద్విమాన;
 
-    if ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
+    ఒకవేళ ((i_rights & __WASI_RIGHTS_FD_READ) && (i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= _O_RDWR;
-    } else if ((i_rights & __WASI_RIGHTS_FD_WRITE)) {
+    } లేకపోతే ఒకవేళ ((i_rights & __WASI_RIGHTS_FD_WRITE)) {
         flags |= _O_WRONLY;
-    } else if ((i_rights & __WASI_RIGHTS_FD_READ)) {
+    } లేకపోతే ఒకవేళ ((i_rights & __WASI_RIGHTS_FD_READ)) {
         flags |= _O_RDONLY; // no-op because O_RDONLY is 0
     }
 
-    int host_fd = _open(full_path, flags, _S_IREAD | _S_IWRITE);
-    if (host_fd < 0) {
-        return errno_from_crt(errno);
+    పూర్ణాంకం host_fd = _open(నిండిన_మార్గం, flags, _S_IREAD | _S_IWRITE);
+    ఒకవేళ (host_fd < 0) {
+        తిరిగి errno_from_crt(errno);
     }
 
     *o_fd = (__wasi_fd_t)host_fd;
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_filestat (__wasi_fd_t i_dirfd, ccstr_t i_path, bool i_follow,
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_filestat (__wasi_fd_t i_dirfd, ccstr_t i_మార్గం, bool i_follow,
                                            m3_wasi_filestat_t* o_stat)
 {
-    memset(o_stat, 0, sizeof(*o_stat));
+    memset(o_stat, 0, పరిమాణం(*o_stat));
 
-    char           full_path[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_path, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_మార్గం[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_మార్గం, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     HANDLE handle;
-    err = open_path_handle(full_path, i_follow, &handle);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    err = open_మార్గం_handle(నిండిన_మార్గం, i_follow, &handle);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     err = filestat_from_handle(handle, o_stat);
     CloseHandle(handle);
-    return err;
+    తిరిగి err;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_create_directory (__wasi_fd_t i_dirfd, ccstr_t i_path)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_create_directory (__wasi_fd_t i_dirfd, ccstr_t i_మార్గం)
 {
-    char           full_path[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_path, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_మార్గం[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_మార్గం, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    if (!CreateDirectoryA(full_path, NULL)) {
-        return errno_from_win32(GetLastError());
+    ఒకవేళ (!CreateDirectoryA(నిండిన_మార్గం, ఖాళీ)) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_remove_directory (__wasi_fd_t i_dirfd, ccstr_t i_path)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_remove_directory (__wasi_fd_t i_dirfd, ccstr_t i_మార్గం)
 {
-    char           full_path[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_path, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_మార్గం[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_మార్గం, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    if (!RemoveDirectoryA(full_path)) {
-        return errno_from_win32(GetLastError());
+    ఒకవేళ (!RemoveDirectoryA(నిండిన_మార్గం)) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_unlink_file (__wasi_fd_t i_dirfd, ccstr_t i_path)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_unlink_file (__wasi_fd_t i_dirfd, ccstr_t i_మార్గం)
 {
-    char           full_path[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_path, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_మార్గం[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_మార్గం, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     // A symbolic link to a directory is a directory entry as far as Windows is
     // concerned, so removing the link itself goes through RemoveDirectory. Every
     // other kind of directory is DeleteFile's to refuse.
-    DWORD attrs = GetFileAttributesA(full_path);
+    DWORD attrs = Get_File_లక్షణాలు_A(నిండిన_మార్గం);
     bool  isDirLink =
-      attrs != INVALID_FILE_ATTRIBUTES &&
-      (attrs & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT)) ==
-        (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT);
+      attrs != INVALID_FILE_లక్షణాలు &&
+      (attrs & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_బిందువు)) ==
+        (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_బిందువు);
 
-    if (!(isDirLink ? RemoveDirectoryA(full_path) : DeleteFileA(full_path))) {
-        return errno_from_win32(GetLastError());
+    ఒకవేళ (!(isDirLink ? RemoveDirectoryA(నిండిన_మార్గం) : DeleteFileA(నిండిన_మార్గం))) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_rename (__wasi_fd_t i_oldDirfd, ccstr_t i_oldPath,
-                                         __wasi_fd_t i_newDirfd, ccstr_t i_newPath)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_rename (__wasi_fd_t i_oldDirfd, ccstr_t i_old_మార్గం,
+                                         __wasi_fd_t i_newDirfd, ccstr_t i_new_మార్గం)
 {
-    char           full_old[d_m3WasiMaxHostPath];
-    char           full_new[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_old, i_oldDirfd, i_oldPath);
-    if (err == __WASI_ERRNO_SUCCESS) {
-        err = resolve_path(full_new, i_newDirfd, i_newPath);
+    అక్షరం           నిండిన_old[d_m3_Wasi_Max_Host_మార్గం];
+    అక్షరం           నిండిన_new[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_old, i_oldDirfd, i_old_మార్గం);
+    ఒకవేళ (err == __WASI_ERRNO_SUCCESS) {
+        err = resolve_మార్గం(నిండిన_new, i_newDirfd, i_new_మార్గం);
     }
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     // rename() would refuse an existing destination; renameat() replaces it
-    if (!MoveFileExA(full_old, full_new, MOVEFILE_REPLACE_EXISTING)) {
-        return errno_from_win32(GetLastError());
+    ఒకవేళ (!MoveFileExA(నిండిన_old, నిండిన_new, MOVEFILE_REPLACE_EXISTING)) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_link (__wasi_fd_t i_oldDirfd, ccstr_t i_oldPath, bool i_follow,
-                                       __wasi_fd_t i_newDirfd, ccstr_t i_newPath)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_link (__wasi_fd_t i_oldDirfd, ccstr_t i_old_మార్గం, bool i_follow,
+                                       __wasi_fd_t i_newDirfd, ccstr_t i_new_మార్గం)
 {
-    char           full_old[d_m3WasiMaxHostPath];
-    char           full_new[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_old, i_oldDirfd, i_oldPath);
-    if (err == __WASI_ERRNO_SUCCESS) {
-        err = resolve_path(full_new, i_newDirfd, i_newPath);
+    అక్షరం           నిండిన_old[d_m3_Wasi_Max_Host_మార్గం];
+    అక్షరం           నిండిన_new[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_old, i_oldDirfd, i_old_మార్గం);
+    ఒకవేళ (err == __WASI_ERRNO_SUCCESS) {
+        err = resolve_మార్గం(నిండిన_new, i_newDirfd, i_new_మార్గం);
     }
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     // CreateHardLink resolves the target the way AT_SYMLINK_FOLLOW asks for and has
     // no way of not doing so, so i_follow cannot be honoured here
-    if (!CreateHardLinkA(full_new, full_old, NULL)) {
-        return errno_from_win32(GetLastError());
+    ఒకవేళ (!CreateHardLinkA(నిండిన_new, నిండిన_old, ఖాళీ)) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_symlink (ccstr_t i_target, __wasi_fd_t i_dirfd, ccstr_t i_path)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_symlink (ccstr_t i_లక్ష్యం, __wasi_fd_t i_dirfd, ccstr_t i_మార్గం)
 {
-    char           full_new[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_new, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_new[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_new, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     // Windows settles at creation time whether a link names a file or a directory,
     // so the target has to be looked at first. It is stored as given, which puts it
     // beside the link rather than under the preopen.
-    char   target[d_m3WasiMaxHostPath];
+    అక్షరం   లక్ష్యం[d_m3_Wasi_Max_Host_మార్గం];
     size_t dir_len = 0;
-    for (size_t i = 0; full_new[i]; i++) {
-        if (full_new[i] == '/' || full_new[i] == '\\') {
+    కొరకు (size_t i = 0; నిండిన_new[i]; i++) {
+        ఒకవేళ (నిండిన_new[i] == '/' || నిండిన_new[i] == '\\') {
             dir_len = i + 1;
         }
     }
 
-    int target_len = snprintf(target, sizeof(target), "%.*s%s", (int)dir_len, full_new, i_target);
-    if (target_len < 0 || target_len >= (int)sizeof(target)) {
-        return __WASI_ERRNO_NAMETOOLONG;
+    పూర్ణాంకం లక్ష్యం_len = snprintf(లక్ష్యం, పరిమాణం(లక్ష్యం), "%.*s%s", (పూర్ణాంకం)dir_len, నిండిన_new, i_లక్ష్యం);
+    ఒకవేళ (లక్ష్యం_len < 0 || లక్ష్యం_len >= (పూర్ణాంకం)పరిమాణం(లక్ష్యం)) {
+        తిరిగి __WASI_ERRNO_NAMETOOLONG;
     }
 
     DWORD flags = 0;
-    DWORD attrs = GetFileAttributesA(target);
-    if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+    DWORD attrs = Get_File_లక్షణాలు_A(లక్ష్యం);
+    ఒకవేళ (attrs != INVALID_FILE_లక్షణాలు && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
         flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
     }
 
     // Creating a link is a privilege, waived only for a machine in Developer Mode
     // and only for callers that ask; Windows before 1703 rejects the asking.
-    if (!CreateSymbolicLinkA(full_new, i_target,
+    ఒకవేళ (!CreateSymbolicLinkA(నిండిన_new, i_లక్ష్యం,
                              flags | SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE)) {
-        if (GetLastError() != ERROR_INVALID_PARAMETER ||
-            !CreateSymbolicLinkA(full_new, i_target, flags)) {
-            return errno_from_win32(GetLastError());
+        ఒకవేళ (Get_చివరి_Error() != ERROR_INVALID_PARAMETER ||
+            !CreateSymbolicLinkA(నిండిన_new, i_లక్ష్యం, flags)) {
+            తిరిగి errno_from_win32(Get_చివరి_Error());
         }
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 // The link's own target, as UTF-8. The print name is the form the link was written
 // with; the substitute name is the resolved one, kept as the fallback for a link that
 // carries no print name, minus the object-namespace prefix Windows puts on it.
-static
-__wasi_errno_t read_link_target (ccstr_t i_path, char* o_target, int i_size, int* o_len)
+స్థిర
+__wasi_errno_t read_link_లక్ష్యం (ccstr_t i_మార్గం, అక్షరం* o_లక్ష్యం, పూర్ణాంకం i_కొలత, పూర్ణాంకం* o_len)
 {
-    HANDLE handle = CreateFileA(i_path, FILE_READ_ATTRIBUTES,
-                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
+    HANDLE handle = CreateFileA(i_మార్గం, FILE_READ_లక్షణాలు,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, ఖాళీ,
                                 OPEN_EXISTING,
-                                FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
-    if (handle == INVALID_HANDLE_VALUE) {
-        return errno_from_win32(GetLastError());
+                                FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_బిందువు, ఖాళీ);
+    ఒకవేళ (handle == INVALID_HANDLE_విలువ) {
+        తిరిగి errno_from_win32(Get_చివరి_Error());
     }
 
-    ReparseDataBuffer* reparse =
-      (ReparseDataBuffer*)m3_Malloc("ReparseDataBuffer", MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
-    if (!reparse) {
+    Reparse_దత్తాంశం_బఫరు* reparse =
+      (Reparse_దత్తాంశం_బఫరు*)m3_Malloc("ReparseDataBuffer", గరిష్ఠ_REPARSE_దత్తాంశం_బఫరు_కొలత);
+    ఒకవేళ (!reparse) {
         CloseHandle(handle);
-        return __WASI_ERRNO_NOMEM;
+        తిరిగి __WASI_ERRNO_NOMEM;
     }
 
     __wasi_errno_t err = __WASI_ERRNO_SUCCESS;
     DWORD          returned;
-    if (!DeviceIoControl(handle, FSCTL_GET_REPARSE_POINT, NULL, 0, reparse,
-                         MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &returned, NULL)) {
-        err = errno_from_win32(GetLastError());
+    ఒకవేళ (!DeviceIoControl(handle, FSCTL_GET_REPARSE_బిందువు, ఖాళీ, 0, reparse,
+                         గరిష్ఠ_REPARSE_దత్తాంశం_బఫరు_కొలత, &returned, ఖాళీ)) {
+        err = errno_from_win32(Get_చివరి_Error());
     }
     CloseHandle(handle);
 
-    if (err == __WASI_ERRNO_SUCCESS) {
-        const WCHAR* names;
-        if (reparse->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
-            names = reparse->u.symlink.PathBuffer;
-        } else if (reparse->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
-            names = reparse->u.mount_point.PathBuffer;
-        } else {
-            names = NULL;
+    ఒకవేళ (err == __WASI_ERRNO_SUCCESS) {
+        స్థిరరాశి WCHAR* పేర్లు;
+        ఒకవేళ (reparse->Reparse_ట్యాగ్ == IO_REPARSE_ట్యాగ్_SYMLINK) {
+            పేర్లు = reparse->u.symlink.మార్గం_బఫరు;
+        } లేకపోతే ఒకవేళ (reparse->Reparse_ట్యాగ్ == IO_REPARSE_ట్యాగ్_MOUNT_బిందువు) {
+            పేర్లు = reparse->u.mount_బిందువు.మార్గం_బఫరు;
+        } లేకపోతే {
+            పేర్లు = ఖాళీ;
             err = __WASI_ERRNO_INVAL;
         }
 
-        if (names) {
-            const WCHAR* name = names + reparse->PrintNameOffset / sizeof(WCHAR);
-            int          len = reparse->PrintNameLength / sizeof(WCHAR);
+        ఒకవేళ (పేర్లు) {
+            స్థిరరాశి WCHAR* name = పేర్లు + reparse->Print_Name_స్థానభ్రంశం / పరిమాణం(WCHAR);
+            పూర్ణాంకం          len = reparse->Print_Name_నిడివి / పరిమాణం(WCHAR);
 
-            if (len == 0) {
-                name = names + reparse->SubstituteNameOffset / sizeof(WCHAR);
-                len = reparse->SubstituteNameLength / sizeof(WCHAR);
-                if (len >= 4 && wcsncmp(name, L"\\??\\", 4) == 0) {
+            ఒకవేళ (len == 0) {
+                name = పేర్లు + reparse->Substitute_Name_స్థానభ్రంశం / పరిమాణం(WCHAR);
+                len = reparse->Substitute_Name_నిడివి / పరిమాణం(WCHAR);
+                ఒకవేళ (len >= 4 && wcsncmp(name, L"\\??\\", 4) == 0) {
                     name += 4;
                     len -= 4;
                 }
             }
 
-            *o_len = WideCharToMultiByte(CP_UTF8, 0, name, len, o_target, i_size, NULL, NULL);
-            if (*o_len <= 0 && len != 0) {
-                err = errno_from_win32(GetLastError());
+            *o_len = Wide_Char_గమ్యం_Multi_Byte(CP_UTF8, 0, name, len, o_లక్ష్యం, i_కొలత, ఖాళీ, ఖాళీ);
+            ఒకవేళ (*o_len <= 0 && len != 0) {
+                err = errno_from_win32(Get_చివరి_Error());
             }
         }
     }
 
     m3_Free(reparse);
-    return err;
+    తిరిగి err;
 }
 
-static
-__wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, char* o_buf,
-                                           __wasi_size_t i_bufLen, __wasi_size_t* o_bufUsed)
+స్థిర
+__wasi_errno_t m3_wasi_host_మార్గం_readlink (__wasi_fd_t i_dirfd, ccstr_t i_మార్గం, అక్షరం* o_buf,
+                                           __wasi_size_t i_bufLen, __wasi_size_t* o_buf_వాడిన)
 {
-    *o_bufUsed = 0;
+    *o_buf_వాడిన = 0;
 
-    char           full_path[d_m3WasiMaxHostPath];
-    __wasi_errno_t err = resolve_path(full_path, i_dirfd, i_path);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    అక్షరం           నిండిన_మార్గం[d_m3_Wasi_Max_Host_మార్గం];
+    __wasi_errno_t err = resolve_మార్గం(నిండిన_మార్గం, i_dirfd, i_మార్గం);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    char target[d_m3WasiMaxHostPath];
-    int  target_len = 0;
+    అక్షరం లక్ష్యం[d_m3_Wasi_Max_Host_మార్గం];
+    పూర్ణాంకం  లక్ష్యం_len = 0;
 
-    err = read_link_target(full_path, target, (int)sizeof(target), &target_len);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    err = read_link_లక్ష్యం(నిండిన_మార్గం, లక్ష్యం, (పూర్ణాంకం)పరిమాణం(లక్ష్యం), &లక్ష్యం_len);
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
-    __wasi_size_t copied = M3_MIN((__wasi_size_t)target_len, i_bufLen);
-    memcpy(o_buf, target, copied);
-    *o_bufUsed = copied;
-    return __WASI_ERRNO_SUCCESS;
+    __wasi_size_t copied = M3_MIN((__wasi_size_t)లక్ష్యం_len, i_bufLen);
+    జ్ఞాపకం_నకలు(o_buf, లక్ష్యం, copied);
+    *o_buf_వాడిన = copied;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -847,40 +847,40 @@ __wasi_errno_t m3_wasi_host_path_readlink (__wasi_fd_t i_dirfd, ccstr_t i_path, 
 
 // Windows offers the one clock, so every WASI clock maps onto it and none of them is
 // rejected
-static
+స్థిర
 __wasi_errno_t m3_wasi_host_clock_res_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_res)
 {
     // a FILETIME counts in 100ns, but the system clock behind it moves on the timer
     // tick, so this says a millisecond rather than what it can spell
     *o_res = 1000000;
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 // The one reading of the clock. Every WASI clock is this one here - Windows offers
 // no other - and poll_oneoff waits on it too, so that the time a guest is made to
 // wait and the time it can then measure are the same time.
-static
-__wasi_timestamp_t now_ns (void)
+స్థిర
+__wasi_timestamp_t now_ns (శూన్య)
 {
     FILETIME now;
-    GetSystemTimeAsFileTime(&now);
+    Get_System_సమయం_As_File_సమయం(&now);
 
-    return convert_filetime(now);
+    తిరిగి convert_filetime(now);
 }
 
-__wasi_errno_t m3_wasi_host_clock_time_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_time)
+__wasi_errno_t m3_wasi_host_clock_సమయం_get (__wasi_clockid_t i_clockId, __wasi_timestamp_t* o_సమయం)
 {
-    *o_time = now_ns();
-    return __WASI_ERRNO_SUCCESS;
+    *o_సమయం = now_ns();
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
-static
-__wasi_errno_t m3_wasi_host_random_get (void* o_buf, __wasi_size_t i_len)
+స్థిర
+__wasi_errno_t m3_wasi_host_random_get (శూన్య* o_buf, __wasi_size_t i_len)
 {
-    if (!RtlGenRandom(o_buf, i_len)) {
-        return __WASI_ERRNO_IO;
+    ఒకవేళ (!RtlGenRandom(o_buf, i_len)) {
+        తిరిగి __WASI_ERRNO_IO;
     }
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 
@@ -896,13 +896,13 @@ __wasi_errno_t m3_wasi_host_random_get (void* o_buf, __wasi_size_t i_len)
 // completion port would take the whole descriptor layer with it, which is more than
 // the simple WASI implementation is for - a build that needs to wait on many
 // descriptors at once wants BUILD_WASI=uvwasi.
-#define d_m3WasiPollIntervalMs  5
+#నిర్వచించు d_m3WasiPollIntervalMs  5
 
 // Whether a descriptor has what its subscription is waiting for. Everything that is
 // not a stream is ready by definition: the spec says a regular file always triggers
 // both read and write, and so does anything whose kind Windows will not describe.
-static
-__wasi_errno_t poll_fd_ready (const m3_wasi_pollsub_t* i_sub, bool* o_ready,
+స్థిర
+__wasi_errno_t poll_fd_ready (స్థిరరాశి m3_wasi_pollsub_t* i_sub, bool* o_ready,
                               __wasi_filesize_t* o_nbytes, __wasi_eventrwflags_t* o_flags)
 {
     *o_ready = false;
@@ -912,51 +912,51 @@ __wasi_errno_t poll_fd_ready (const m3_wasi_pollsub_t* i_sub, bool* o_ready,
     HANDLE         handle;
 
     __wasi_errno_t err = handle_for_fd(i_sub->fd, &handle);
-    if (err != __WASI_ERRNO_SUCCESS) {
-        return err;
+    ఒకవేళ (err != __WASI_ERRNO_SUCCESS) {
+        తిరిగి err;
     }
 
     DWORD type = GetFileType(handle);
 
     // A write is only ever waiting on the other end of a pipe, and Windows will not
     // say whether that has room, so writing is always reported as ready
-    if (i_sub->type != __WASI_EVENTTYPE_FD_READ or type == FILE_TYPE_DISK) {
+    ఒకవేళ (i_sub->type != __WASI_EVENTTYPE_FD_READ or type == FILE_TYPE_DISK) {
         *o_ready = true;
         *o_nbytes = 1;
-        return __WASI_ERRNO_SUCCESS;
+        తిరిగి __WASI_ERRNO_SUCCESS;
     }
 
-    if (type == FILE_TYPE_PIPE) {
-        DWORD waiting = 0;
+    ఒకవేళ (type == FILE_TYPE_PIPE) {
+        DWORD నిరీక్షణ = 0;
 
-        if (!PeekNamedPipe(handle, NULL, 0, NULL, &waiting, NULL)) {
-            DWORD last = GetLastError();
+        ఒకవేళ (!PeekNamedPipe(handle, ఖాళీ, 0, ఖాళీ, &నిరీక్షణ, ఖాళీ)) {
+            DWORD చివరి = Get_చివరి_Error();
 
             // the writer is gone: a read would return end of file, which counts as
             // ready and is what the hangup flag is for
-            if (last == ERROR_BROKEN_PIPE or last == ERROR_PIPE_NOT_CONNECTED) {
+            ఒకవేళ (చివరి == ERROR_BROKEN_PIPE or చివరి == ERROR_PIPE_NOT_CONNECTED) {
                 *o_ready = true;
                 *o_flags = __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP;
-                return __WASI_ERRNO_SUCCESS;
+                తిరిగి __WASI_ERRNO_SUCCESS;
             }
-            return errno_from_win32(last);
+            తిరిగి errno_from_win32(చివరి);
         }
 
-        *o_ready = (waiting != 0);
-        *o_nbytes = waiting;
-        return __WASI_ERRNO_SUCCESS;
+        *o_ready = (నిరీక్షణ != 0);
+        *o_nbytes = నిరీక్షణ;
+        తిరిగి __WASI_ERRNO_SUCCESS;
     }
 
-    if (type == FILE_TYPE_CHAR) {
+    ఒకవేళ (type == FILE_TYPE_CHAR) {
         // a console has input pending when waiting on it succeeds without a wait
         *o_ready = (WaitForSingleObject(handle, 0) == WAIT_OBJECT_0);
         *o_nbytes = *o_ready ? 1 : 0;
-        return __WASI_ERRNO_SUCCESS;
+        తిరిగి __WASI_ERRNO_SUCCESS;
     }
 
     *o_ready = true;
     *o_nbytes = 1;
-    return __WASI_ERRNO_SUCCESS;
+    తిరిగి __WASI_ERRNO_SUCCESS;
 }
 
 // How much longer a clock subscription has to wait, in nanoseconds, given that
@@ -965,38 +965,38 @@ __wasi_errno_t poll_fd_ready (const m3_wasi_pollsub_t* i_sub, bool* o_ready,
 // against the clock and ignores i_elapsedNs, the clock having moved on by itself.
 // Every WASI clock is the system clock here - see clock_time_get - so an absolute
 // deadline is held against that one whichever clock it names.
-static
-uint64_t poll_remaining_ns (const m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs)
+స్థిర
+uint64_t poll_మిగిలిన_ns (స్థిరరాశి m3_wasi_pollsub_t* i_sub, uint64_t i_elapsedNs)
 {
-    if (!i_sub->isAbsolute) {
-        return (i_sub->timeout > i_elapsedNs) ? i_sub->timeout - i_elapsedNs : 0;
+    ఒకవేళ (!i_sub->isAbsolute) {
+        తిరిగి (i_sub->timeout > i_elapsedNs) ? i_sub->timeout - i_elapsedNs : 0;
     }
 
     __wasi_timestamp_t now = now_ns();
-    return (i_sub->timeout > now) ? i_sub->timeout - now : 0;
+    తిరిగి (i_sub->timeout > now) ? i_sub->timeout - now : 0;
 }
 
-static
-__wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi_size_t i_count,
-                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_eventCount)
+స్థిర
+__wasi_errno_t m3_wasi_host_poll_oneoff (స్థిరరాశి m3_wasi_pollsub_t* i_subs, __wasi_size_t i_లెక్క,
+                                         m3_wasi_pollevent_t* o_events, __wasi_size_t* o_event_లెక్క)
 {
-    *o_eventCount = 0;
+    *o_event_లెక్క = 0;
 
     uint64_t soonestNs = UINT64_MAX;
     bool     hasClock = false;
     bool     hasFd = false;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
-        if (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
-            soonestNs = M3_MIN(soonestNs, poll_remaining_ns(&i_subs[i], 0));
+    కొరకు (__wasi_size_t i = 0; i < i_లెక్క; i++) {
+        ఒకవేళ (i_subs[i].type == __WASI_EVENTTYPE_CLOCK) {
+            soonestNs = M3_MIN(soonestNs, poll_మిగిలిన_ns(&i_subs[i], 0));
             hasClock = true;
-        } else {
+        } లేకపోతే {
             hasFd = true;
         }
     }
 
-    if (!hasClock and !hasFd) {
-        return __WASI_ERRNO_INVAL;
+    ఒకవేళ (!hasClock and !hasFd) {
+        తిరిగి __WASI_ERRNO_INVAL;
     }
 
     // The wait is measured on the very clock clock_time_get reports, so that a guest
@@ -1004,16 +1004,16 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     // GetTickCount64 is the obvious alternative and is wrong for exactly that
     // reason: it is a different clock quantized to the same coarse tick, so the two
     // can disagree by a whole one, and a 20ms sleep reads back as 15.
-    uint64_t startNs = now_ns();
+    uint64_t ప్రారంభం_Ns = now_ns();
 
-    for (;;) {
-        __wasi_size_t out = 0;
+    కొరకు (;;) {
+        __wasi_size_t బహిర్గతం = 0;
 
-        for (__wasi_size_t i = 0; i < i_count; i++) {
-            const m3_wasi_pollsub_t* sub = &i_subs[i];
+        కొరకు (__wasi_size_t i = 0; i < i_లెక్క; i++) {
+            స్థిరరాశి m3_wasi_pollsub_t* sub = &i_subs[i];
 
-            if (sub->type == __WASI_EVENTTYPE_CLOCK) {
-                continue;
+            ఒకవేళ (sub->type == __WASI_EVENTTYPE_CLOCK) {
+                కొనసాగు;
             }
 
             bool                  ready;
@@ -1024,51 +1024,51 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
 
             // a descriptor that cannot be asked is ready with an error on it, which
             // is what tells the guest to stop waiting for it
-            if (err == __WASI_ERRNO_SUCCESS and !ready) {
-                continue;
+            ఒకవేళ (err == __WASI_ERRNO_SUCCESS and !ready) {
+                కొనసాగు;
             }
 
-            o_events[out].userdata = sub->userdata;
-            o_events[out].error = err;
-            o_events[out].type = sub->type;
-            o_events[out].nbytes = nbytes;
-            o_events[out].flags = flags;
-            out++;
+            o_events[బహిర్గతం].userdata = sub->userdata;
+            o_events[బహిర్గతం].error = err;
+            o_events[బహిర్గతం].type = sub->type;
+            o_events[బహిర్గతం].nbytes = nbytes;
+            o_events[బహిర్గతం].flags = flags;
+            బహిర్గతం++;
         }
 
         // This is a wall clock and can be set backwards under us, which is not
         // elapsed time going negative but the measurement being no longer usable;
         // starting the count again from here is the honest reading of it.
-        const uint64_t t = now_ns();
-        const uint64_t elapsedNs = (t > startNs) ? t - startNs : 0;
+        స్థిరరాశి uint64_t t = now_ns();
+        స్థిరరాశి uint64_t elapsedNs = (t > ప్రారంభం_Ns) ? t - ప్రారంభం_Ns : 0;
 
-        if (t < startNs) {
-            startNs = t;
+        ఒకవేళ (t < ప్రారంభం_Ns) {
+            ప్రారంభం_Ns = t;
         }
 
         bool expired = hasClock and (elapsedNs >= soonestNs);
 
-        if (expired) {
+        ఒకవేళ (expired) {
             // Every deadline is asked again rather than just the soonest: waiting
             // that one out may have passed a later one too
-            for (__wasi_size_t i = 0; i < i_count; i++) {
-                const m3_wasi_pollsub_t* sub = &i_subs[i];
+            కొరకు (__wasi_size_t i = 0; i < i_లెక్క; i++) {
+                స్థిరరాశి m3_wasi_pollsub_t* sub = &i_subs[i];
 
-                if (sub->type == __WASI_EVENTTYPE_CLOCK and
-                    poll_remaining_ns(sub, elapsedNs) == 0) {
-                    o_events[out].userdata = sub->userdata;
-                    o_events[out].error = __WASI_ERRNO_SUCCESS;
-                    o_events[out].type = __WASI_EVENTTYPE_CLOCK;
-                    o_events[out].nbytes = 0;
-                    o_events[out].flags = 0;
-                    out++;
+                ఒకవేళ (sub->type == __WASI_EVENTTYPE_CLOCK and
+                    poll_మిగిలిన_ns(sub, elapsedNs) == 0) {
+                    o_events[బహిర్గతం].userdata = sub->userdata;
+                    o_events[బహిర్గతం].error = __WASI_ERRNO_SUCCESS;
+                    o_events[బహిర్గతం].type = __WASI_EVENTTYPE_CLOCK;
+                    o_events[బహిర్గతం].nbytes = 0;
+                    o_events[బహిర్గతం].flags = 0;
+                    బహిర్గతం++;
                 }
             }
         }
 
-        if (out) {
-            *o_eventCount = out;
-            return __WASI_ERRNO_SUCCESS;
+        ఒకవేళ (బహిర్గతం) {
+            *o_event_లెక్క = బహిర్గతం;
+            తిరిగి __WASI_ERRNO_SUCCESS;
         }
 
         // Nothing yet. With no descriptor to watch there is nothing to come back
@@ -1077,12 +1077,12 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
         // sub-millisecond remainder from becoming a spin.
         DWORD sleepMs = d_m3WasiPollIntervalMs;
 
-        if (hasClock) {
-            uint64_t remainingNs = soonestNs - elapsedNs;
-            uint64_t remainingMs = (remainingNs + 999999) / 1000000;
+        ఒకవేళ (hasClock) {
+            uint64_t మిగిలిన_Ns = soonestNs - elapsedNs;
+            uint64_t మిగిలిన_Ms = (మిగిలిన_Ns + 999999) / 1000000;
 
-            if (not hasFd or remainingMs < sleepMs) {
-                sleepMs = (remainingMs > MAXDWORD) ? MAXDWORD : (DWORD)remainingMs;
+            ఒకవేళ (not hasFd or మిగిలిన_Ms < sleepMs) {
+                sleepMs = (మిగిలిన_Ms > MAXDWORD) ? MAXDWORD : (DWORD)మిగిలిన_Ms;
             }
         }
 
@@ -1090,4 +1090,4 @@ __wasi_errno_t m3_wasi_host_poll_oneoff (const m3_wasi_pollsub_t* i_subs, __wasi
     }
 }
 
-#endif // m3_api_wasi_win32_h
+#అయితే_ముగింపు // m3_api_wasi_win32_h

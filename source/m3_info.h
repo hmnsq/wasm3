@@ -5,34 +5,34 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_info_h
-#define m3_info_h
+#నిర్వచితం_కాకపోతే m3_info_h
+#నిర్వచించు m3_info_h
 
-#include "m3_compile.h"
+#అన్తర్భావ "m3_compile.h"
 
 d_m3BeginExternC
 
-void ProfileHit (cstr_t i_operationName);
+శూన్య Profile_తగిలింది (cstr_t i_operationName);
 
-#ifdef DEBUG
+#నిర్వచితమైతే DEBUG
 
-void        dump_type_stack (IM3Compilation o);
-void        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
-const char* get_indention_string (IM3Compilation o);
-void        log_emit (IM3Compilation o, IM3Operation i_operation);
+శూన్య        dump_type_దొంతర (IM3Compilation o);
+శూన్య        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
+స్థిరరాశి అక్షరం* get_indention_string (IM3Compilation o);
+శూన్య        log_emit (IM3Compilation o, IM3Operation i_operation);
 
 cstr_t      SPrintFuncTypeSignature (IM3FuncType i_funcType);
 
-#else // DEBUG
+#లేకపోతే // DEBUG
 
-#  define   dump_type_stack(...)      {}
+#  define   dump_type_దొంతర(...)      {}
 #  define   log_opcode(...)           {}
 #  define   get_indention_string(...) ""
-#  define   emit_stack_dump(...)      {}
+#  define   emit_దొంతర_dump(...)      {}
 #  define   log_emit(...)             {}
 
-#endif // DEBUG
+#అయితే_ముగింపు // DEBUG
 
-d_m3EndExternC
+d_m3_చివర_Extern_C
 
-#endif // m3_info_h
+#అయితే_ముగింపు // m3_info_h

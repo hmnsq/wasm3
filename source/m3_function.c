@@ -5,274 +5,274 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#include "m3_function.h"
-#include "m3_env.h"
+#అన్తర్భావ "m3_function.h"
+#అన్తర్భావ "m3_env.h"
 
 
-M3Result AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes)
+M3_ఫలితం AllocFuncType (IM3FuncType* o_functionType, u32 i_అంకె_Types)
 {
-    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", sizeof(M3FuncType) + i_numTypes * sizeof(m3type_t));
-    if (*o_functionType) {
+    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", పరిమాణం(M3FuncType) + i_అంకె_Types * పరిమాణం(m3type_t));
+    ఒకవేళ (*o_functionType) {
         (*o_functionType)->isContinuation = false;
-        (*o_functionType)->contFuncType   = NULL;
-        (*o_functionType)->inRecGroup     = false;
-        return m3Err_none;
+        (*o_functionType)->contFuncType   = ఖాళీ;
+        (*o_functionType)->లోపల_Rec_సమూహం     = false;
+        తిరిగి m3Err_none;
     }
-    return m3Err_mallocFailed;
+    తిరిగి m3Err_mallocFailed;
 }
 
 
-#if d_m3HasTypedRefs
+#ఒకవేళ d_m3HasTypedRefs
 
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
-m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull)
+m3type_t Ref_Type_యొక్క_Func_Type (స్థిరరాశి IM3FuncType i_funcType, bool i_nonNull)
 {
-    m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonicalIndex : d_m3Type_heapAbstract);
+    m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonical_సూచీ : d_m3_Type_కుప్ప_Abstract);
 
-    if (i_funcType and i_funcType->isContinuation) {
+    ఒకవేళ (i_funcType and i_funcType->isContinuation) {
         type |= d_m3Type_refCont;
     }
 
-    if (i_nonNull) {
+    ఒకవేళ (i_nonNull) {
         type |= d_m3Type_refNonNull;
     }
 
-    return type;
+    తిరిగి type;
 }
 
-#endif // d_m3HasTypedRefs
+#అయితే_ముగింపు // d_m3HasTypedRefs
 
 
-bool AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB)
+bool AreFuncTypesEqual (స్థిరరాశి IM3FuncType i_typeA, స్థిరరాశి IM3FuncType i_typeB)
 {
-    if (i_typeA->isContinuation != i_typeB->isContinuation) {
-        return false;
+    ఒకవేళ (i_typeA->isContinuation != i_typeB->isContinuation) {
+        తిరిగి false;
     }
-    if (i_typeA->isContinuation) {
-        return (i_typeA->contFuncType == i_typeB->contFuncType) or
+    ఒకవేళ (i_typeA->isContinuation) {
+        తిరిగి (i_typeA->contFuncType == i_typeB->contFuncType) or
                (i_typeA->contFuncType and i_typeB->contFuncType and
                 AreFuncTypesEqual(i_typeA->contFuncType, i_typeB->contFuncType));
     }
-    if (i_typeA->numRets == i_typeB->numRets and i_typeA->numArgs == i_typeB->numArgs) {
-        return (memcmp(i_typeA->types, i_typeB->types,
-                       (i_typeA->numRets + i_typeA->numArgs) * sizeof(m3type_t)) == 0);
+    ఒకవేళ (i_typeA->అంకె_Rets == i_typeB->అంకె_Rets and i_typeA->అంకె_వాదనలు == i_typeB->అంకె_వాదనలు) {
+        తిరిగి (memcmp(i_typeA->types, i_typeB->types,
+                       (i_typeA->అంకె_Rets + i_typeA->అంకె_వాదనలు) * పరిమాణం(m3type_t)) == 0);
     }
 
-    return false;
+    తిరిగి false;
 }
 
-u16 GetFuncTypeNumParams (const IM3FuncType i_funcType)
+u16 Get_Func_Type_అంకె_Params (స్థిరరాశి IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numArgs : 0;
+    తిరిగి i_funcType ? i_funcType->అంకె_వాదనలు : 0;
 }
 
 
-m3type_t GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index)
+m3type_t GetFuncTypeParamType (స్థిరరాశి IM3FuncType i_funcType, u16 i_సూచీ)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numArgs) {
-            type = i_funcType->types[i_funcType->numRets + i_index];
+    ఒకవేళ (i_funcType) {
+        ఒకవేళ (i_సూచీ < i_funcType->అంకె_వాదనలు) {
+            type = i_funcType->types[i_funcType->అంకె_Rets + i_సూచీ];
         }
     }
 
-    return type;
+    తిరిగి type;
 }
 
 
-u16 GetFuncTypeNumResults (const IM3FuncType i_funcType)
+u16 Get_Func_Type_అంకె_Results (స్థిరరాశి IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numRets : 0;
+    తిరిగి i_funcType ? i_funcType->అంకె_Rets : 0;
 }
 
 
-m3type_t GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index)
+m3type_t Get_Func_Type_ఫలితం_Type (స్థిరరాశి IM3FuncType i_funcType, u16 i_సూచీ)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numRets) {
-            type = i_funcType->types[i_index];
+    ఒకవేళ (i_funcType) {
+        ఒకవేళ (i_సూచీ < i_funcType->అంకె_Rets) {
+            type = i_funcType->types[i_సూచీ];
         }
     }
 
-    return type;
+    తిరిగి type;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------
 
 
-void FreeImportInfo (M3ImportInfo* i_info)
+శూన్య FreeImportInfo (M3ImportInfo* i_info)
 {
     m3_Free(i_info->moduleUtf8);
-    m3_Free(i_info->fieldUtf8);
+    m3_Free(i_info->క్షేత్రం_Utf8);
 }
 
 
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
 
-void SnapshotMap_Free (M3SnapshotMap* i_map)
+శూన్య SnapshotMap_Free (M3SnapshotMap* i_map)
 {
-    if (i_map) {
+    ఒకవేళ (i_map) {
         m3_Free(i_map->locals);
-        m3_Free(i_map->safePoints);
-        m3_Free(i_map->values);
-        m3_Free(i_map->blocks);
+        m3_Free(i_map->సురక్షిత_Points);
+        m3_Free(i_map->విలువలు);
+        m3_Free(i_map->ఖండాలు);
         m3_Free(i_map);
     }
 }
 
-#endif
+#అయితే_ముగింపు
 
-void Function_Release (IM3Function i_function)
+శూన్య Function_Release (IM3Function i_function)
 {
     m3_Free(i_function->constants);
 
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
     SnapshotMap_Free(i_function->snapshotMap);
-    i_function->snapshotMap = NULL;
-#endif
+    i_function->snapshotMap = ఖాళీ;
+#అయితే_ముగింపు
 
-    for (int i = 0; i < i_function->numNames; i++) {
+    కొరకు (పూర్ణాంకం i = 0; i < i_function->అంకె_పేర్లు; i++) {
         // name can be an alias of fieldUtf8
-        if (i_function->names[i] != i_function->import.fieldUtf8) {
-            m3_Free(i_function->names[i]);
+        ఒకవేళ (i_function->పేర్లు[i] != i_function->import.క్షేత్రం_Utf8) {
+            m3_Free(i_function->పేర్లు[i]);
         }
     }
 
     FreeImportInfo(&i_function->import);
 
-    if (i_function->ownsWasmCode) {
+    ఒకవేళ (i_function->owns_Wasm_సంకేతం) {
         m3_Free(i_function->wasm);
     }
 
     // Function_FreeCompiledCode (func);
 
-#if (d_m3EnableCodePageRefCounting)
+#ఒకవేళ (d_m3_Enable_సంకేతం_పుట_Ref_Counting)
     {
-        m3_Free(i_function->codePageRefs);
-        i_function->numCodePageRefs = 0;
+        m3_Free(i_function->సంకేతం_పుట_Refs);
+        i_function->అంకె_సంకేతం_పుట_Refs = 0;
     }
-#endif
+#అయితే_ముగింపు
 }
 
 
-void Function_FreeCompiledCode (IM3Function i_function)
+శూన్య Function_Free_Compiled_సంకేతం (IM3Function i_function)
 {
-#if (d_m3EnableCodePageRefCounting)
+#ఒకవేళ (d_m3_Enable_సంకేతం_పుట_Ref_Counting)
     {
-        i_function->compiled = NULL;
+        i_function->compiled = ఖాళీ;
 
-        while (i_function->numCodePageRefs--) {
-            IM3CodePage page = i_function->codePageRefs[i_function->numCodePageRefs];
+        అయితే (i_function->అంకె_సంకేతం_పుట_Refs--) {
+            IM3_సంకేతం_పుట పుట = i_function->సంకేతం_పుట_Refs[i_function->అంకె_సంకేతం_పుట_Refs];
 
-            if (--(page->info.usageCount) == 0) {
+            ఒకవేళ (--(పుట->info.usage_లెక్క) == 0) {
                 //                printf ("free %p\n", page);
             }
         }
 
-        m3_Free(i_function->codePageRefs);
+        m3_Free(i_function->సంకేతం_పుట_Refs);
 
-        Runtime_ReleaseCodePages(i_function->module->runtime);
+        Runtime_Release_సంకేతం_పుటలు(i_function->module->runtime);
     }
-#endif
+#అయితే_ముగింపు
 }
 
 
 cstr_t m3_GetFunctionName (IM3Function i_function)
 {
-    u16     numNames = 0;
-    cstr_t* names    = GetFunctionNames(i_function, &numNames);
-    if (numNames > 0) {
-        return names[0];
-    } else {
-        return "<unnamed>";
+    u16     అంకె_పేర్లు = 0;
+    cstr_t* పేర్లు    = Get_Function_పేర్లు(i_function, &అంకె_పేర్లు);
+    ఒకవేళ (అంకె_పేర్లు > 0) {
+        తిరిగి పేర్లు[0];
+    } లేకపోతే {
+        తిరిగి "<unnamed>";
     }
 }
 
 
 IM3Module m3_GetFunctionModule (IM3Function i_function)
 {
-    return i_function ? i_function->module : NULL;
+    తిరిగి i_function ? i_function->module : ఖాళీ;
 }
 
 
-cstr_t* GetFunctionNames (IM3Function i_function, u16* o_numNames)
+cstr_t* Get_Function_పేర్లు (IM3Function i_function, u16* o_అంకె_పేర్లు)
 {
-    if (!i_function || !o_numNames) {
-        return NULL;
+    ఒకవేళ (!i_function || !o_అంకె_పేర్లు) {
+        తిరిగి ఖాళీ;
     }
 
-    if (i_function->import.fieldUtf8) {
-        *o_numNames = 1;
-        return &i_function->import.fieldUtf8;
-    } else {
-        *o_numNames = i_function->numNames;
-        return i_function->names;
+    ఒకవేళ (i_function->import.క్షేత్రం_Utf8) {
+        *o_అంకె_పేర్లు = 1;
+        తిరిగి &i_function->import.క్షేత్రం_Utf8;
+    } లేకపోతే {
+        *o_అంకె_పేర్లు = i_function->అంకె_పేర్లు;
+        తిరిగి i_function->పేర్లు;
     }
 }
 
 
 cstr_t GetFunctionImportModuleName (IM3Function i_function)
 {
-    return (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
+    తిరిగి (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
 }
 
 
-u16 GetFunctionNumArgs (IM3Function i_function)
+u16 Get_Function_అంకె_వాదనలు (IM3Function i_function)
 {
-    u16 numArgs = 0;
+    u16 అంకె_వాదనలు = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
-            numArgs = i_function->funcType->numArgs;
+    ఒకవేళ (i_function) {
+        ఒకవేళ (i_function->funcType) {
+            అంకె_వాదనలు = i_function->funcType->అంకె_వాదనలు;
         }
     }
 
-    return numArgs;
+    తిరిగి అంకె_వాదనలు;
 }
 
-m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index)
+m3type_t GetFunctionArgType (IM3Function i_function, u32 i_సూచీ)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_index < GetFunctionNumArgs(i_function)) {
-        u32 numReturns = i_function->funcType->numRets;
+    ఒకవేళ (i_సూచీ < Get_Function_అంకె_వాదనలు(i_function)) {
+        u32 అంకె_Returns = i_function->funcType->అంకె_Rets;
 
-        type = i_function->funcType->types[numReturns + i_index];
+        type = i_function->funcType->types[అంకె_Returns + i_సూచీ];
     }
 
-    return type;
+    తిరిగి type;
 }
 
 
-u16 GetFunctionNumReturns (IM3Function i_function)
+u16 Get_Function_అంకె_Returns (IM3Function i_function)
 {
-    u16 numReturns = 0;
+    u16 అంకె_Returns = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
-            numReturns = i_function->funcType->numRets;
+    ఒకవేళ (i_function) {
+        ఒకవేళ (i_function->funcType) {
+            అంకె_Returns = i_function->funcType->అంకె_Rets;
         }
     }
 
-    return numReturns;
+    తిరిగి అంకె_Returns;
 }
 
 
-u8 GetFunctionReturnType (const IM3Function i_function, u16 i_index)
+u8 GetFunctionReturnType (స్థిరరాశి IM3Function i_function, u16 i_సూచీ)
 {
-    return i_function ? GetFuncTypeResultType(i_function->funcType, i_index) : c_m3Type_unknown;
+    తిరిగి i_function ? Get_Func_Type_ఫలితం_Type(i_function->funcType, i_సూచీ) : c_m3Type_unknown;
 }
 
 
-u32 GetFunctionNumArgsAndLocals (IM3Function i_function)
+u32 Get_Function_అంకె_వాదనలు_And_Locals (IM3Function i_function)
 {
-    if (i_function) {
-        return i_function->numLocals + GetFunctionNumArgs(i_function);
-    } else {
-        return 0;
+    ఒకవేళ (i_function) {
+        తిరిగి i_function->అంకె_Locals + Get_Function_అంకె_వాదనలు(i_function);
+    } లేకపోతే {
+        తిరిగి 0;
     }
 }

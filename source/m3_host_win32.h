@@ -8,89 +8,89 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_win32_h
-#define m3_host_win32_h
+#నిర్వచితం_కాకపోతే m3_host_win32_h
+#నిర్వచించు m3_host_win32_h
 
-#include "m3_core.h"
+#అన్తర్భావ "m3_core.h"
 
-#if !defined(_WIN32)
+#ఒకవేళ !defined(_WIN32)
 #  error "This file is for Windows only"
-#endif
+#అయితే_ముగింపు
 
-#include "m3_host.h"
+#అన్తర్భావ "m3_host.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+#నిర్వచితం_కాకపోతే WIN32_LEAN_AND_సగటు
+#  define WIN32_LEAN_AND_సగటు
+#అయితే_ముగింపు
+#అన్తర్భావ <windows.h>
 
 // A thread's stack is one reservation, and any address inside it answers with the
 // base of the whole thing - guard page included. That is what makes VirtualQuery
 // enough here: no version check, no other library, and it describes a fibre's stack
 // as readily as a thread's. GetCurrentThreadStackLimits would say the same, and only
 // from Windows 8 on.
-void* m3_HostStackBase (void)
+శూన్య* m3_Host_దొంతర_పునాది (శూన్య)
 {
-    MEMORY_BASIC_INFORMATION mbi;
+    జ్ఞాపకం_BASIC_INFORMATION mbi;
 
     // any address on the stack being asked about will do, and this one is on it
-    volatile char            here = 0;
+    అస్థిర అక్షరం            ఇక్కడ = 0;
 
-    if (VirtualQuery((LPCVOID)&here, &mbi, sizeof(mbi)) == 0) {
-        return NULL;
+    ఒకవేళ (VirtualQuery((LPCVOID)&ఇక్కడ, &mbi, పరిమాణం(mbi)) == 0) {
+        తిరిగి ఖాళీ;
     }
 
-    return mbi.AllocationBase;
+    తిరిగి mbi.కేటాయింపు_పునాది;
 }
 
-static IM3Runtime s_win32SuspendRuntime = NULL;
+స్థిర IM3Runtime s_win32SuspendRuntime = ఖాళీ;
 
-static
+స్థిర
 BOOL WINAPI m3_ConsoleCtrlHandler (DWORD dwCtrlType)
 {
-    if (dwCtrlType == CTRL_C_EVENT || dwCtrlType == CTRL_BREAK_EVENT) {
-        if (s_win32SuspendRuntime && !s_win32SuspendRuntime->suspendRequested) {
+    ఒకవేళ (dwCtrlType == CTRL_C_EVENT || dwCtrlType == CTRL_BREAK_EVENT) {
+        ఒకవేళ (s_win32SuspendRuntime && !s_win32SuspendRuntime->suspendRequested) {
             s_win32SuspendRuntime->suspendRequested = true;
-            return TRUE;
+            తిరిగి TRUE;
         }
     }
-    return FALSE;
+    తిరిగి FALSE;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+శూన్య m3_Host_Install_అంతరాయం_Handler (IM3Runtime io_runtime)
 {
     s_win32SuspendRuntime = io_runtime;
-    SetConsoleCtrlHandler(m3_ConsoleCtrlHandler, TRUE);
+    సమితి_Console_Ctrl_Handler(m3_ConsoleCtrlHandler, TRUE);
 }
 
-void m3_HostRemoveInterruptHandler (void)
+శూన్య m3_Host_Remove_అంతరాయం_Handler (శూన్య)
 {
-    SetConsoleCtrlHandler(m3_ConsoleCtrlHandler, FALSE);
-    s_win32SuspendRuntime = NULL;
+    సమితి_Console_Ctrl_Handler(m3_ConsoleCtrlHandler, FALSE);
+    s_win32SuspendRuntime = ఖాళీ;
 }
 
 // FILETIME counts 100ns intervals from 1601
-u64 m3_HostTimeMs (void)
+u64 m3_Host_సమయం_Ms (శూన్య)
 {
-    static const u64 c_unixEpoch = 116444736000000000ULL;
+    స్థిర స్థిరరాశి u64 c_unixEpoch = 116444736000000000ULL;
 
     FILETIME         now;
-    GetSystemTimeAsFileTime(&now);
+    Get_System_సమయం_As_File_సమయం(&now);
 
-    u64 ticks = ((u64)now.dwHighDateTime << 32) | now.dwLowDateTime;
+    u64 ticks = ((u64)now.dw_ఎగువ_Date_సమయం << 32) | now.dw_దిగువ_Date_సమయం;
 
-    return (ticks > c_unixEpoch) ? (ticks - c_unixEpoch) / 10000 : 0;
+    తిరిగి (ticks > c_unixEpoch) ? (ticks - c_unixEpoch) / 10000 : 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+శూన్య m3_HostSleepNs (u64 i_ns)
 {
     // whole milliseconds, rounded up; the wait is never shorter than asked
     u64 ms = (i_ns + 999999u) / 1000000u;
 
-    while (ms > 0) {
-        DWORD step = (ms > 0x7FFFFFFFu) ? 0x7FFFFFFFu : (DWORD)ms;
-        Sleep(step);
-        ms -= step;
+    అయితే (ms > 0) {
+        DWORD అడుగు = (ms > 0x7FFFFFFFu) ? 0x7FFFFFFFu : (DWORD)ms;
+        Sleep(అడుగు);
+        ms -= అడుగు;
     }
 }
 
@@ -98,156 +98,156 @@ void m3_HostSleepNs (u64 i_ns)
 // trying to write or delete it is refused for as long as the mapping lives. The
 // kernel enforces that, so it is the real thing rather than the advisory lock POSIX
 // has to make do with - see m3_host.h.
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (స్థిరరాశి అక్షరం* i_మార్గం, size_t i_max_బైట్లు, M3HostFile* o_file)
 {
-    HANDLE file = CreateFileA(i_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                              FILE_ATTRIBUTE_NORMAL, NULL);
-    if (file == INVALID_HANDLE_VALUE) {
-        return false;
+    HANDLE file = CreateFileA(i_మార్గం, GENERIC_READ, FILE_SHARE_READ, ఖాళీ, OPEN_EXISTING,
+                              FILE_ATTRIBUTE_సాధారణ, ఖాళీ);
+    ఒకవేళ (file == INVALID_HANDLE_విలువ) {
+        తిరిగి false;
     }
 
-    LARGE_INTEGER size;
+    LARGE_INTEGER కొలత;
 
     // Anything with no size to map - a pipe, a console - is read instead, and so is
     // a file too large to address or larger than the caller wants
-    if (not GetFileSizeEx(file, &size) or size.QuadPart <= 0 or
-        (ULONGLONG) size.QuadPart > (ULONGLONG)SIZE_MAX or
-        (i_maxBytes and (ULONGLONG) size.QuadPart > (ULONGLONG)i_maxBytes)) {
+    ఒకవేళ (not Get_File_కొలత_Ex(file, &కొలత) or కొలత.QuadPart <= 0 or
+        (ULONGLONG) కొలత.QuadPart > (ULONGLONG)SIZE_MAX or
+        (i_max_బైట్లు and (ULONGLONG) కొలత.QuadPart > (ULONGLONG)i_max_బైట్లు)) {
         CloseHandle(file);
-        return m3_HostReadFile(i_path, i_maxBytes, o_file);
+        తిరిగి m3_HostReadFile(i_మార్గం, i_max_బైట్లు, o_file);
     }
 
-    HANDLE mapping = CreateFileMappingA(file, NULL, PAGE_READONLY, 0, 0, NULL);
+    HANDLE mapping = CreateFileMappingA(file, ఖాళీ, పుట_READONLY, 0, 0, ఖాళీ);
     CloseHandle(file);                   // the mapping holds the file open
 
-    if (mapping == NULL) {
-        return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    ఒకవేళ (mapping == ఖాళీ) {
+        తిరిగి m3_HostReadFile(i_మార్గం, i_max_బైట్లు, o_file);
     }
 
-    void* base = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
+    శూన్య* పునాది = Map_View_యొక్క_File(mapping, FILE_MAP_READ, 0, 0, 0);
     CloseHandle(mapping);                // and the view holds the mapping
 
-    if (base == NULL) {
-        return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    ఒకవేళ (పునాది == ఖాళీ) {
+        తిరిగి m3_HostReadFile(i_మార్గం, i_max_బైట్లు, o_file);
     }
 
     // Nothing left to keep: the view holds the mapping, which holds the file, and
     // the share mode with it
-    o_file->data = base;
-    o_file->size = (size_t)size.QuadPart;
+    o_file->దత్తాంశం = పునాది;
+    o_file->కొలత = (size_t)కొలత.QuadPart;
     o_file->handle = d_m3HostNoHandle;
     o_file->mapped = true;
-    return true;
+    తిరిగి true;
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+శూన్య m3_HostUnmapFile (M3HostFile* io_file)
 {
-    if (io_file->mapped) {
-        UnmapViewOfFile(io_file->data);  // the view knows how big it is
-    } else {
-        m3_Free(io_file->data);
+    ఒకవేళ (io_file->mapped) {
+        Unmap_View_యొక్క_File(io_file->దత్తాంశం);  // the view knows how big it is
+    } లేకపోతే {
+        m3_Free(io_file->దత్తాంశం);
     }
 
-    io_file->data = NULL;
-    io_file->size = 0;
+    io_file->దత్తాంశం = ఖాళీ;
+    io_file->కొలత = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // rename refuses a target that exists; MoveFileEx replaces it, and within a
 // volume does so by renaming, in one step
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (స్థిరరాశి అక్షరం* i_from, స్థిరరాశి అక్షరం* i_గమ్యం)
 {
-    return MoveFileExA(i_from, i_to, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
+    తిరిగి MoveFileExA(i_from, i_గమ్యం, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) != 0;
 }
 
 
-#if d_m3GuardedMemory
+#ఒకవేళ d_m3_Guarded_జ్ఞాపకం
 
-size_t m3_HostPageSize (void)
+size_t m3_Host_పుట_కొలత (శూన్య)
 {
     SYSTEM_INFO info;
     GetSystemInfo(&info);
 
     // dwAllocationGranularity, not dwPageSize: a reservation starts on the coarser
     // of the two, so that is the grain the whole scheme has to be cut in
-    return info.dwAllocationGranularity ? info.dwAllocationGranularity : 65536;
+    తిరిగి info.dw_కేటాయింపు_Granularity ? info.dw_కేటాయింపు_Granularity : 65536;
 }
 
-void* m3_HostReserve (size_t i_bytes)
+శూన్య* m3_HostReserve (size_t i_బైట్లు)
 {
-    return VirtualAlloc(NULL, i_bytes, MEM_RESERVE, PAGE_NOACCESS);
+    తిరిగి VirtualAlloc(ఖాళీ, i_బైట్లు, MEM_RESERVE, పుట_NOACCESS);
 }
 
-bool m3_HostCommit (void* i_address, size_t i_bytes)
+bool m3_HostCommit (శూన్య* i_చిరునామా, size_t i_బైట్లు)
 {
-    if (i_bytes == 0) {
-        return true;
+    ఒకవేళ (i_బైట్లు == 0) {
+        తిరిగి true;
     }
-    return VirtualAlloc(i_address, i_bytes, MEM_COMMIT, PAGE_READWRITE) != NULL;
+    తిరిగి VirtualAlloc(i_చిరునామా, i_బైట్లు, MEM_COMMIT, పుట_READWRITE) != ఖాళీ;
 }
 
-bool m3_HostDecommit (void* i_address, size_t i_bytes)
+bool m3_HostDecommit (శూన్య* i_చిరునామా, size_t i_బైట్లు)
 {
-    if (i_bytes == 0) {
-        return true;
+    ఒకవేళ (i_బైట్లు == 0) {
+        తిరిగి true;
     }
-    return VirtualFree(i_address, i_bytes, MEM_DECOMMIT) != 0;
+    తిరిగి VirtualFree(i_చిరునామా, i_బైట్లు, MEM_DECOMMIT) != 0;
 }
 
-void m3_HostRelease (void* i_address, size_t i_bytes)
+శూన్య m3_HostRelease (శూన్య* i_చిరునామా, size_t i_బైట్లు)
 {
-    (void)i_bytes;                       // MEM_RELEASE frees the whole reservation
-    VirtualFree(i_address, 0, MEM_RELEASE);
+    (శూన్య)i_బైట్లు;                       // MEM_RELEASE frees the whole reservation
+    VirtualFree(i_చిరునామా, 0, MEM_RELEASE);
 }
 
 // Which faults are ours, for the filter below. Read from the exception record
 // rather than from anything of ours, so nothing here depends on what the faulting
 // code was in the middle of.
-static
-bool guard_fault (EXCEPTION_POINTERS* i_info, void* i_low, size_t i_bytes)
+స్థిర
+bool guard_fault (EXCEPTION_సూచికలు* i_info, శూన్య* i_దిగువ, size_t i_బైట్లు)
 {
-    if (i_info == NULL or i_info->ExceptionRecord == NULL) {
-        return false;
+    ఒకవేళ (i_info == ఖాళీ or i_info->Exception_రికార్డు == ఖాళీ) {
+        తిరిగి false;
     }
 
-    const EXCEPTION_RECORD* record = i_info->ExceptionRecord;
+    స్థిరరాశి EXCEPTION_రికార్డు* రికార్డు = i_info->Exception_రికార్డు;
 
-    if (record->ExceptionCode != EXCEPTION_ACCESS_VIOLATION or
-        record->NumberParameters < 2) {
-        return false;
+    ఒకవేళ (రికార్డు->Exception_సంకేతం != EXCEPTION_ACCESS_VIOLATION or
+        రికార్డు->సంఖ్య_Parameters < 2) {
+        తిరిగి false;
     }
 
     // [0] says read or write, [1] is the address that could not be reached
-    const u8* address = (const u8*)record->ExceptionInformation[1];
+    స్థిరరాశి u8* చిరునామా = (స్థిరరాశి u8*)రికార్డు->ExceptionInformation[1];
 
-    return address >= (const u8*)i_low and address < (const u8*)i_low + i_bytes;
+    తిరిగి చిరునామా >= (స్థిరరాశి u8*)i_దిగువ and చిరునామా < (స్థిరరాశి u8*)i_దిగువ + i_బైట్లు;
 }
 
-bool m3_HostGuardsActive (void)
+bool m3_Host_Guards_చురుకైన (శూన్య)
 {
     // __try/__except is part of the frame m3_HostProtectedCall compiles to, so there is
     // nothing to install and nothing another part of the process can take away
-    return true;
+    తిరిగి true;
 }
 
 // Structured exception handling rather than a vectored handler: the unwind is the
 // system's to do, so the stack between here and the fault is given back properly
 // instead of being jumped over. It is also why this needs a compiler that speaks
 // __try - see d_m3GuardedMemory.
-bool m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
-                           void* i_guardLow, size_t i_guardBytes)
+bool m3_HostProtectedCall (శూన్య (*i_body)(శూన్య*), శూన్య* i_context,
+                           శూన్య* i_guard_దిగువ, size_t i_guard_బైట్లు)
 {
     __try {
         i_body(i_context);
-        return true;
-    } __except (guard_fault(GetExceptionInformation(), i_guardLow, i_guardBytes)
+        తిరిగి true;
+    } __except (guard_fault(GetExceptionInformation(), i_guard_దిగువ, i_guard_బైట్లు)
                   ? EXCEPTION_EXECUTE_HANDLER
-                  : EXCEPTION_CONTINUE_SEARCH) {
-        return false;
+                  : EXCEPTION_CONTINUE_శోధన) {
+        తిరిగి false;
     }
 }
 
-#endif // d_m3GuardedMemory
+#అయితే_ముగింపు // d_m3GuardedMemory
 
-#endif // m3_host_win32_h
+#అయితే_ముగింపు // m3_host_win32_h

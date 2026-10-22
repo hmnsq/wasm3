@@ -6,47 +6,47 @@
 //
 
 // Allow using opcodes for compilation process
-#define M3_COMPILE_OPCODES
+#నిర్వచించు M3_COMPILE_OPCODES
 
-#include "m3_env.h"
-#include "m3_compile.h"
-#include "m3_exec.h"
-#include "m3_exception.h"
-#include "m3_info.h"
-#include "m3_validate.h"
+#అన్తర్భావ "m3_env.h"
+#అన్తర్భావ "m3_compile.h"
+#అన్తర్భావ "m3_exec.h"
+#అన్తర్భావ "m3_exception.h"
+#అన్తర్భావ "m3_info.h"
+#అన్తర్భావ "m3_validate.h"
 
 // Resolves M3OpInfo.compiler, an index, to the function it names. Defined down
 // with c_compilers [], which has to follow every compiler it points at.
-static
+స్థిర
 M3Compiler GetCompiler (IM3OpInfo i_opInfo);
 
 //----- EMIT --------------------------------------------------------------------------------------------------------------
 
-static inline
+స్థిర అంతఃవరుస
 pc_t GetPC (IM3Compilation o)
 {
-    return GetPagePC(o->page);
+    తిరిగి Get_పుట_PC(o->పుట);
 }
 
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
 
-#  define d_m3GrowSnapshotArray(TYPE, ARRAY, COUNT, CAPACITY)                    \
-    if ((COUNT) == (CAPACITY)) {                                                 \
-        u32   newCapacity = (CAPACITY) ? (CAPACITY) * 2 : 8;                     \
-        TYPE* grown = m3_ReallocArray(TYPE, (ARRAY), newCapacity, (CAPACITY));   \
-        if (not grown) {                                                         \
-            return m3Err_mallocFailed;                                           \
+#  define d_m3GrowSnapshotArray(TYPE, ARRAY, లెక్క_2, సామర్థ్యం_2)                    \
+    ఒకవేళ ((లెక్క_2) == (సామర్థ్యం_2)) {                                                 \
+        u32   new_సామర్థ్యం = (సామర్థ్యం_2) ? (సామర్థ్యం_2) * 2 : 8;                     \
+        TYPE* grown = m3_ReallocArray(TYPE, (ARRAY), new_సామర్థ్యం, (సామర్థ్యం_2));   \
+        ఒకవేళ (not grown) {                                                         \
+            తిరిగి m3Err_mallocFailed;                                           \
         }                                                                        \
         (ARRAY)    = grown;                                                      \
-        (CAPACITY) = newCapacity;                                                \
+        (సామర్థ్యం_2) = new_సామర్థ్యం;                                                \
     }
 
 // Where the instruction being compiled starts, counted from the start of the
 // function's body: the one position every build of every revision agrees on
-static inline
-u32 GetWasmOffset (IM3Compilation o)
+స్థిర అంతఃవరుస
+u32 Get_Wasm_స్థానభ్రంశం (IM3Compilation o)
 {
-    return (u32)(o->lastOpcodeStart - o->bodyStart);
+    తిరిగి (u32)(o->చివరి_Opcode_ప్రారంభం - o->body_ప్రారంభం);
 }
 
 // Whether the operand stack entry at i_index is a value the frame holds. Every
@@ -55,31 +55,31 @@ u32 GetWasmOffset (IM3Compilation o)
 // CompileBlock). Those are landing pads rather than values: nothing need have
 // written them yet, and the slots they name may be in use for something else.
 // The function's own scope has none - that stretch is its arguments and locals.
-static
-bool IsLiveStackEntry (IM3Compilation o, u16 i_index)
+స్థిర
+bool Is_సజీవ_దొంతర_నమోదు (IM3Compilation o, u16 i_సూచీ)
 {
-    for (IM3CompilationScope scope = &o->block; scope->outer; scope = scope->outer) {
-        if (i_index >= scope->exitStackIndex and i_index < scope->blockStackIndex) {
-            return false;
+    కొరకు (IM3CompilationScope scope = &o->ఖండం; scope->outer; scope = scope->outer) {
+        ఒకవేళ (i_సూచీ >= scope->exit_దొంతర_సూచీ and i_సూచీ < scope->ఖండం_దొంతర_సూచీ) {
+            తిరిగి false;
         }
     }
 
-    return true;
+    తిరిగి true;
 }
 
-static
-M3Result AddSafePointValue (IM3Compilation o, M3SafePoint* io_point, u16 i_index)
+స్థిర
+M3_ఫలితం కూడు_సురక్షిత_బిందువు_విలువ (IM3Compilation o, M3_సురక్షిత_బిందువు* io_బిందువు, u16 i_సూచీ)
 {
     M3SnapshotMap* map = o->snapshotMap;
 
-    d_m3GrowSnapshotArray(M3SlotValue, map->values, map->numValues, o->valuesCapacity);
+    d_m3GrowSnapshotArray(M3_స్థానం_విలువ, map->విలువలు, map->అంకె_విలువలు, o->విలువలు_సామర్థ్యం);
 
-    map->values[map->numValues].slot = o->wasmStack[i_index];
-    map->values[map->numValues].type = o->typeStack[i_index];
-    map->numValues++;
-    io_point->numValues++;
+    map->విలువలు[map->అంకె_విలువలు].స్థానం = o->wasm_దొంతర[i_సూచీ];
+    map->విలువలు[map->అంకె_విలువలు].type = o->type_దొంతర[i_సూచీ];
+    map->అంకె_విలువలు++;
+    io_బిందువు->అంకె_విలువలు++;
 
-    return m3Err_none;
+    తిరిగి m3Err_none;
 }
 
 // Records the pc i_wordsBack words before the current one as a safepoint, with
@@ -94,96 +94,96 @@ M3Result AddSafePointValue (IM3Compilation o, M3SafePoint* io_point, u16 i_index
 // A back edge to i_loop leaves the rest of the loop's body behind: what the
 // frame holds is what was live before the loop, and the loop's parameters,
 // which the branch has just written into its landing pads for the next lap.
-static
-M3Result RecordSafePoint (IM3Compilation o, M3SafePointKind i_kind, u32 i_wordsBack, u16 i_numResults,
+స్థిర
+M3_ఫలితం రికార్డు_సురక్షిత_బిందువు (IM3Compilation o, M3_సురక్షిత_బిందువు_రకం i_రకం, u32 i_పదాలు_వెనుక, u16 i_అంకె_Results,
                           u16 i_aux, IM3CompilationScope i_loop)
 {
 _try {
     M3SnapshotMap* map = o->snapshotMap;
 
-    if (not map or not o->page) {
-        return m3Err_none;
+    ఒకవేళ (not map or not o->పుట) {
+        తిరిగి m3Err_none;
     }
 
-    d_m3GrowSnapshotArray(M3SafePoint, map->safePoints, map->numSafePoints, o->safePointsCapacity);
+    d_m3GrowSnapshotArray(M3_సురక్షిత_బిందువు, map->సురక్షిత_Points, map->అంకె_సురక్షిత_Points, o->సురక్షిత_Points_సామర్థ్యం);
 
     // grown before it is pointed at: adding values never moves the safepoints
-    M3SafePoint* point     = &map->safePoints[map->numSafePoints];
-    point->pc              = GetPC(o) - i_wordsBack;
-    point->wasmOffset      = GetWasmOffset(o);
-    point->firstValue      = map->numValues;
-    point->firstLocalValue = UINT32_MAX;
-    point->numValues       = 0;
-    point->numResults      = i_numResults;
-    point->aux             = i_aux;
-    point->resumeType      = c_m3Type_none;
-    point->kind            = (u8)i_kind;
-    point->flags           = 0;
+    M3_సురక్షిత_బిందువు* బిందువు     = &map->సురక్షిత_Points[map->అంకె_సురక్షిత_Points];
+    బిందువు->pc              = GetPC(o) - i_పదాలు_వెనుక;
+    బిందువు->wasm_స్థానభ్రంశం      = Get_Wasm_స్థానభ్రంశం(o);
+    బిందువు->మొదటి_విలువ      = map->అంకె_విలువలు;
+    బిందువు->మొదటి_Local_విలువ = UINT32_MAX;
+    బిందువు->అంకె_విలువలు       = 0;
+    బిందువు->అంకె_Results      = i_అంకె_Results;
+    బిందువు->aux             = i_aux;
+    బిందువు->resumeType      = c_m3Type_none;
+    బిందువు->రకం            = (u8)i_రకం;
+    బిందువు->flags           = 0;
 
     // Non-defaultable locals can still be uninitialized at a safepoint. Keep
     // their heap types, but allow the null placeholder until local.set makes
     // them definitely initialized. Branches to a loop use its entry context.
-    if (o->localInitDepth) {
-        point->firstLocalValue = map->numValues;
-        for (u32 i = 0; i < map->numLocals; ++i) {
-            d_m3GrowSnapshotArray(M3SlotValue, map->values, map->numValues, o->valuesCapacity);
-            M3SlotValue value = map->locals[i];
-            if (o->localInitDepth[i] == UINT32_MAX or
-                (i_loop and o->localInitDepth[i] >= (u32)i_loop->depth)) {
-                value.type &= ~d_m3Type_refNonNull;
+    ఒకవేళ (o->local_Init_లోతు) {
+        బిందువు->మొదటి_Local_విలువ = map->అంకె_విలువలు;
+        కొరకు (u32 i = 0; i < map->అంకె_Locals; ++i) {
+            d_m3GrowSnapshotArray(M3_స్థానం_విలువ, map->విలువలు, map->అంకె_విలువలు, o->విలువలు_సామర్థ్యం);
+            M3_స్థానం_విలువ విలువ = map->locals[i];
+            ఒకవేళ (o->local_Init_లోతు[i] == UINT32_MAX or
+                (i_loop and o->local_Init_లోతు[i] >= (u32)i_loop->లోతు)) {
+                విలువ.type &= ~d_m3Type_refNonNull;
             }
-            map->values[map->numValues++] = value;
+            map->విలువలు[map->అంకె_విలువలు++] = విలువ;
         }
-        point->firstValue = map->numValues;
+        బిందువు->మొదటి_విలువ = map->అంకె_విలువలు;
     }
 
-    u16 top = o->stackIndex;
+    u16 శిఖరం = o->దొంతర_సూచీ;
 
-    if (i_kind != safepoint_suspend) {
-        top = (top > i_numResults) ? (u16)(top - i_numResults) : 0;
+    ఒకవేళ (i_రకం != safepoint_suspend) {
+        శిఖరం = (శిఖరం > i_అంకె_Results) ? (u16)(శిఖరం - i_అంకె_Results) : 0;
     }
-    if (i_loop) {
-        top = M3_MIN(top, i_loop->exitStackIndex);
-    }
-
-    for (u16 i = o->stackFirstDynamicIndex; i < top; ++i) {
-        if (IsLiveStackEntry(o, i)) {
-_           (AddSafePointValue(o, point, i));
-        }
+    ఒకవేళ (i_loop) {
+        శిఖరం = M3_MIN(శిఖరం, i_loop->exit_దొంతర_సూచీ);
     }
 
-    if (i_loop) {
-        u16 numParams = GetFuncTypeNumParams(i_loop->type);
-
-        for (u16 i = 0; i < numParams; ++i) {
-_           (AddSafePointValue(o, point, (u16)(i_loop->exitStackIndex + i)));
+    కొరకు (u16 i = o->దొంతర_మొదటి_Dynamic_సూచీ; i < శిఖరం; ++i) {
+        ఒకవేళ (Is_సజీవ_దొంతర_నమోదు(o, i)) {
+_           (కూడు_సురక్షిత_బిందువు_విలువ(o, బిందువు, i));
         }
     }
 
-    map->numSafePoints++;
+    ఒకవేళ (i_loop) {
+        u16 అంకె_Params = Get_Func_Type_అంకె_Params(i_loop->type);
 
-} _catch: return result;
+        కొరకు (u16 i = 0; i < అంకె_Params; ++i) {
+_           (కూడు_సురక్షిత_బిందువు_విలువ(o, బిందువు, (u16)(i_loop->exit_దొంతర_సూచీ + i)));
+        }
+    }
+
+    map->అంకె_సురక్షిత_Points++;
+
+} _catch: తిరిగి ఫలితం;
 }
 
 // A back edge: op_ContinueLoop, or op_ContinueLoopIf when i_isConditional, and
 // the loop it goes back to. The conditional one suspends before it has taken
 // the branch, so it has to be resumed with the condition that took it.
-static
-M3Result RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
+స్థిర
+M3_ఫలితం రికార్డు_వెనుక_అంచు (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // the loop is named by its record in the map, which has to fit the field
     _throwif("a function has too many loops for its snapshot map",
-             o->snapshotMap and o->page and (i_loop->snapshotBlock == 0 or i_loop->snapshotBlock > UINT16_MAX + 1u));
+             o->snapshotMap and o->పుట and (i_loop->snapshot_ఖండం == 0 or i_loop->snapshot_ఖండం > UINT16_MAX + 1u));
 
-_   (RecordSafePoint(o, safepoint_op, 2, 0, (u16)(i_loop->snapshotBlock - 1), i_loop));
+_   (రికార్డు_సురక్షిత_బిందువు(o, safepoint_op, 2, 0, (u16)(i_loop->snapshot_ఖండం - 1), i_loop));
 
-    if (i_isConditional and o->snapshotMap and o->page) {
-        o->snapshotMap->safePoints[o->snapshotMap->numSafePoints - 1].flags |= d_m3SafePointTakenBranch;
+    ఒకవేళ (i_isConditional and o->snapshotMap and o->పుట) {
+        o->snapshotMap->సురక్షిత_Points[o->snapshotMap->అంకె_సురక్షిత_Points - 1].flags |= d_m3_సురక్షిత_బిందువు_తీసుకున్న_Branch;
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 // A call, waiting on its callee with i_numResults not yet written; the
@@ -191,440 +191,440 @@ _   (RecordSafePoint(o, safepoint_op, 2, 0, (u16)(i_loop->snapshotBlock - 1), i_
 // is compiled as a call is one too, since its frame stands while the callee
 // runs, but it is marked: in Wasm the callee has replaced it, so a snapshot
 // walks past it rather than writing it.
-static
-M3Result RecordCall (IM3Compilation o, u16 i_numResults, u16 i_calleeSlot, bool i_isReturnCall)
+స్థిర
+M3_ఫలితం రికార్డు_Call (IM3Compilation o, u16 i_అంకె_Results, u16 i_callee_స్థానం, bool i_isReturnCall)
 {
-    M3Result result = RecordSafePoint(o, safepoint_call, 0, i_numResults, i_calleeSlot, NULL);
+    M3_ఫలితం ఫలితం = రికార్డు_సురక్షిత_బిందువు(o, safepoint_call, 0, i_అంకె_Results, i_callee_స్థానం, ఖాళీ);
 
-    if (not result and i_isReturnCall and o->snapshotMap and o->page) {
-        o->snapshotMap->safePoints[o->snapshotMap->numSafePoints - 1].flags |= d_m3SafePointTailCall;
+    ఒకవేళ (not ఫలితం and i_isReturnCall and o->snapshotMap and o->పుట) {
+        o->snapshotMap->సురక్షిత_Points[o->snapshotMap->అంకె_సురక్షిత_Points - 1].flags |= d_m3_సురక్షిత_బిందువు_తోక_Call;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 // Where the function's arguments and locals are kept. Unlike the operand
 // stack, that never changes, so it is recorded once rather than at every
 // safepoint.
-static
-M3Result RecordLocals (IM3Compilation o)
+స్థిర
+M3_ఫలితం రికార్డు_Locals (IM3Compilation o)
 {
     M3SnapshotMap* map = o->snapshotMap;
 
-    if (map and o->stackIndex) {
-        map->locals = m3_AllocArray(M3SlotValue, o->stackIndex);
+    ఒకవేళ (map and o->దొంతర_సూచీ) {
+        map->locals = m3_AllocArray(M3_స్థానం_విలువ, o->దొంతర_సూచీ);
 
-        if (not map->locals) {
-            return m3Err_mallocFailed;
+        ఒకవేళ (not map->locals) {
+            తిరిగి m3Err_mallocFailed;
         }
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            map->locals[i].slot = o->wasmStack[i];
-            map->locals[i].type = o->typeStack[i];
+        కొరకు (u16 i = 0; i < o->దొంతర_సూచీ; ++i) {
+            map->locals[i].స్థానం = o->wasm_దొంతర[i];
+            map->locals[i].type = o->type_దొంతర[i];
         }
 
-        map->numLocals = o->stackIndex;
-        for (u32 i = GetFunctionNumArgs(o->function); i < map->numLocals; ++i) {
-            if (IsRefType(map->locals[i].type) and not IsNullableRef(map->locals[i].type)) {
-                o->localInitDepth = m3_AllocArray(u32, map->numLocals);
-                if (not o->localInitDepth) {
-                    return m3Err_mallocFailed;
+        map->అంకె_Locals = o->దొంతర_సూచీ;
+        కొరకు (u32 i = Get_Function_అంకె_వాదనలు(o->function); i < map->అంకె_Locals; ++i) {
+            ఒకవేళ (IsRefType(map->locals[i].type) and not IsNullableRef(map->locals[i].type)) {
+                o->local_Init_లోతు = m3_AllocArray(u32, map->అంకె_Locals);
+                ఒకవేళ (not o->local_Init_లోతు) {
+                    తిరిగి m3Err_mallocFailed;
                 }
-                for (u32 j = i; j < map->numLocals; ++j) {
-                    if (IsRefType(map->locals[j].type) and not IsNullableRef(map->locals[j].type)) {
-                        o->localInitDepth[j] = UINT32_MAX;
+                కొరకు (u32 j = i; j < map->అంకె_Locals; ++j) {
+                    ఒకవేళ (IsRefType(map->locals[j].type) and not IsNullableRef(map->locals[j].type)) {
+                        o->local_Init_లోతు[j] = UINT32_MAX;
                     }
                 }
-                break;
+                ఆపు;
             }
         }
     }
 
-    return m3Err_none;
+    తిరిగి m3Err_none;
 }
 
 // A loop or a try_table, whose native frame a snapshot names by the
 // instruction's offset. i_pc is what that frame records. The scope being
 // compiled keeps the record, so that RecordBlockEnd can close it.
-static
-M3Result RecordBlockStart (IM3Compilation o, m3opcode_t i_opcode, pc_t i_pc, u32 i_numClauses)
+స్థిర
+M3_ఫలితం రికార్డు_ఖండం_ప్రారంభం (IM3Compilation o, m3opcode_t i_opcode, pc_t i_pc, u32 i_అంకె_Clauses)
 {
     M3SnapshotMap* map = o->snapshotMap;
 
-    if (map and o->page) {
-        d_m3GrowSnapshotArray(M3BlockStart, map->blocks, map->numBlocks, o->blocksCapacity);
+    ఒకవేళ (map and o->పుట) {
+        d_m3GrowSnapshotArray(M3_ఖండం_ప్రారంభం, map->ఖండాలు, map->అంకె_ఖండాలు, o->ఖండాలు_సామర్థ్యం);
 
-        M3BlockStart* block = &map->blocks[map->numBlocks++];
-        block->pc           = i_pc;
-        block->wasmOffset   = GetWasmOffset(o);
-        block->wasmEnd      = UINT32_MAX;
-        block->numClauses   = (u16)i_numClauses;
-        block->opcode       = (u8)i_opcode;
+        M3_ఖండం_ప్రారంభం* ఖండం = &map->ఖండాలు[map->అంకె_ఖండాలు++];
+        ఖండం->pc           = i_pc;
+        ఖండం->wasm_స్థానభ్రంశం   = Get_Wasm_స్థానభ్రంశం(o);
+        ఖండం->wasm_చివర      = UINT32_MAX;
+        ఖండం->అంకె_Clauses   = (u16)i_అంకె_Clauses;
+        ఖండం->opcode       = (u8)i_opcode;
 
-        o->block.snapshotBlock = map->numBlocks;
+        o->ఖండం.snapshot_ఖండం = map->అంకె_ఖండాలు;
     }
 
-    return m3Err_none;
+    తిరిగి m3Err_none;
 }
 
 // Closes the scope's region, while the instruction just read is its end
-static
-void RecordBlockEnd (IM3Compilation o)
+స్థిర
+శూన్య రికార్డు_ఖండం_చివర (IM3Compilation o)
 {
-    if (o->snapshotMap and o->block.snapshotBlock) {
-        o->snapshotMap->blocks[o->block.snapshotBlock - 1].wasmEnd = GetWasmOffset(o);
+    ఒకవేళ (o->snapshotMap and o->ఖండం.snapshot_ఖండం) {
+        o->snapshotMap->ఖండాలు[o->ఖండం.snapshot_ఖండం - 1].wasm_చివర = Get_Wasm_స్థానభ్రంశం(o);
     }
 }
 
 #  undef d_m3GrowSnapshotArray
 
-#else
+#లేకపోతే
 
-static inline
-M3Result RecordSafePoint (IM3Compilation o, M3SafePointKind i_kind, u32 i_wordsBack, u16 i_numResults,
+స్థిర అంతఃవరుస
+M3_ఫలితం రికార్డు_సురక్షిత_బిందువు (IM3Compilation o, M3_సురక్షిత_బిందువు_రకం i_రకం, u32 i_పదాలు_వెనుక, u16 i_అంకె_Results,
                           u16 i_aux, IM3CompilationScope i_loop)
 {
-    (void)o;
-    (void)i_kind;
-    (void)i_wordsBack;
-    (void)i_numResults;
-    (void)i_aux;
-    (void)i_loop;
-    return m3Err_none;
+    (శూన్య)o;
+    (శూన్య)i_రకం;
+    (శూన్య)i_పదాలు_వెనుక;
+    (శూన్య)i_అంకె_Results;
+    (శూన్య)i_aux;
+    (శూన్య)i_loop;
+    తిరిగి m3Err_none;
 }
 
-static inline
-M3Result RecordBackEdge (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
+స్థిర అంతఃవరుస
+M3_ఫలితం రికార్డు_వెనుక_అంచు (IM3Compilation o, IM3CompilationScope i_loop, bool i_isConditional)
 {
-    (void)o;
-    (void)i_loop;
-    (void)i_isConditional;
-    return m3Err_none;
+    (శూన్య)o;
+    (శూన్య)i_loop;
+    (శూన్య)i_isConditional;
+    తిరిగి m3Err_none;
 }
 
-static inline
-M3Result RecordCall (IM3Compilation o, u16 i_numResults, u16 i_calleeSlot, bool i_isReturnCall)
+స్థిర అంతఃవరుస
+M3_ఫలితం రికార్డు_Call (IM3Compilation o, u16 i_అంకె_Results, u16 i_callee_స్థానం, bool i_isReturnCall)
 {
-    (void)o;
-    (void)i_numResults;
-    (void)i_calleeSlot;
-    (void)i_isReturnCall;
-    return m3Err_none;
+    (శూన్య)o;
+    (శూన్య)i_అంకె_Results;
+    (శూన్య)i_callee_స్థానం;
+    (శూన్య)i_isReturnCall;
+    తిరిగి m3Err_none;
 }
 
-#endif // d_m3HasSnapshots
+#అయితే_ముగింపు // d_m3HasSnapshots
 
-static M3_NOINLINE
-M3Result EnsureCodePageNumLines (IM3Compilation o, u32 i_numLines)
+స్థిర M3_NOINLINE
+M3_ఫలితం Ensure_సంకేతం_పుట_అంకె_పంక్తులు (IM3Compilation o, u32 i_అంకె_పంక్తులు)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    i_numLines += 2; // room for Bridge
+    i_అంకె_పంక్తులు += 2; // room for Bridge
 
-    if (M3_UNLIKELY(NumFreeLines(o->page) < i_numLines)) {
-        IM3CodePage page = AcquireCodePageWithCapacity(o->runtime, i_numLines);
+    ఒకవేళ (M3_UNLIKELY(అంకె_Free_పంక్తులు(o->పుట) < i_అంకె_పంక్తులు)) {
+        IM3_సంకేతం_పుట పుట = Acquire_సంకేతం_పుట_With_సామర్థ్యం(o->runtime, i_అంకె_పంక్తులు);
 
-        if (page) {
-            m3log(emit, "bridging new code page from: %d %p (free slots: %d) to: %d", o->page->info.sequence, GetPC(o), NumFreeLines(o->page), page->info.sequence);
-            d_m3Assert(NumFreeLines(o->page) >= 2);
+        ఒకవేళ (పుట) {
+            m3log(emit, "bridging new code page from: %d %p (free slots: %d) to: %d", o->పుట->info.sequence, GetPC(o), అంకె_Free_పంక్తులు(o->పుట), పుట->info.sequence);
+            d_m3Assert(అంకె_Free_పంక్తులు(o->పుట) >= 2);
 
-            EmitWord(o->page, op_Branch);
-            EmitWord(o->page, GetPagePC(page));
+            Emit_మాట(o->పుట, op_Branch);
+            Emit_మాట(o->పుట, Get_పుట_PC(పుట));
 
-            ReleaseCodePage(o->runtime, o->page);
+            Release_సంకేతం_పుట(o->runtime, o->పుట);
 
-            o->page = page;
-        } else {
-            result = m3Err_mallocFailedCodePage;
+            o->పుట = పుట;
+        } లేకపోతే {
+            ఫలితం = m3_Err_malloc_Failed_సంకేతం_పుట;
         }
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 // invalidate the pending local.set fold candidate; called wherever code is emitted or a
 // branch target captures the current pc (a fold appends an immediate, moving that position)
-static inline
-void InvalidateFold (IM3Compilation o)
+స్థిర అంతఃవరుస
+శూన్య InvalidateFold (IM3Compilation o)
 {
-#if d_m3FoldSetLocal
-    o->foldPatchPC = NULL;
-#else
-    (void)o;
-#endif
+#ఒకవేళ d_m3_Fold_సమితి_Local
+    o->foldPatchPC = ఖాళీ;
+#లేకపోతే
+    (శూన్య)o;
+#అయితే_ముగింపు
 }
 
-static M3_NOINLINE
-M3Result EmitOp (IM3Compilation o, IM3Operation i_operation)
+స్థిర M3_NOINLINE
+M3_ఫలితం EmitOp (IM3Compilation o, IM3Operation i_operation)
 {
-    M3Result result = m3Err_none;                                 d_m3Assert (i_operation or IsStackPolymorphic (o));
+    M3_ఫలితం ఫలితం = m3Err_none;                                 d_m3Assert (i_operation or Is_దొంతర_Polymorphic (o));
 
     InvalidateFold(o);
 
     // it's OK for page to be null; when compile-walking the bytecode without emitting
-    if (o->page) {
-#if d_m3EnableOpTracing
-        if (i_operation != op_DumpStack) {
-            o->numEmits++;
+    ఒకవేళ (o->పుట) {
+#ఒకవేళ d_m3EnableOpTracing
+        ఒకవేళ (i_operation != op_Dump_దొంతర) {
+            o->అంకె_Emits++;
         }
-#endif
+#అయితే_ముగింపు
 
         // have execution jump to a new page if slots are critically low
-        result = EnsureCodePageNumLines(o, d_m3CodePageFreeLinesThreshold);
+        ఫలితం = Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి);
 
-        if (M3_LIKELY(not result)) {
-            if (d_m3LogEmit) {
+        ఒకవేళ (M3_LIKELY(not ఫలితం)) {
+            ఒకవేళ (d_m3LogEmit) {
                 log_emit(o, i_operation);
             }
-#if d_m3RecordBacktraces
-            EmitMappingEntry(o->page, (u32)(o->lastOpcodeStart - o->module->wasmStart));
-#endif // d_m3RecordBacktraces
-            EmitWord(o->page, i_operation);
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+            Emit_Mapping_నమోదు(o->పుట, (u32)(o->చివరి_Opcode_ప్రారంభం - o->module->wasm_ప్రారంభం));
+#అయితే_ముగింపు // d_m3RecordBacktraces
+            Emit_మాట(o->పుట, i_operation);
         }
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 // Push an immediate constant into the M3 codestream
-static M3_NOINLINE
-void EmitConstant32 (IM3Compilation o, const u32 i_immediate)
+స్థిర M3_NOINLINE
+శూన్య EmitConstant32 (IM3Compilation o, స్థిరరాశి u32 i_తక్షణ)
 {
-    if (o->page) {                                                          m3log (emit, "const32: %ud", i_immediate);
-        EmitWord32(o->page, i_immediate);
+    ఒకవేళ (o->పుట) {                                                          m3log (emit, "const32: %ud", i_తక్షణ);
+        EmitWord32(o->పుట, i_తక్షణ);
     }
 }
 
-#if d_m3HasMemory64
+#ఒకవేళ d_m3HasMemory64
 // Takes two lines of the code page where a pointer is 32 bits, so whatever
 // reads it back has to step _pc by the same amount - see op_Const64.
-static M3_NOINLINE
-void EmitConstant64 (IM3Compilation o, const u64 i_immediate)
+స్థిర M3_NOINLINE
+శూన్య EmitConstant64 (IM3Compilation o, స్థిరరాశి u64 i_తక్షణ)
 {
-    if (o->page) {
-        EmitWord64(o->page, i_immediate);
+    ఒకవేళ (o->పుట) {
+        EmitWord64(o->పుట, i_తక్షణ);
     }
 }
-#endif
+#అయితే_ముగింపు
 
-static M3_NOINLINE
-void EmitSlotOffset (IM3Compilation o, const i32 i_offset)
+స్థిర M3_NOINLINE
+శూన్య Emit_స్థానం_స్థానభ్రంశం (IM3Compilation o, స్థిరరాశి i32 i_స్థానభ్రంశం)
 {
-    if (o->page) {                                                          m3log (emit, "slot: [%d]", i_offset);
-        EmitWord32(o->page, i_offset);
+    ఒకవేళ (o->పుట) {                                                          m3log (emit, "slot: [%d]", i_స్థానభ్రంశం);
+        EmitWord32(o->పుట, i_స్థానభ్రంశం);
     }
 }
 
-static M3_NOINLINE
-pc_t EmitPointer (IM3Compilation o, const void* const i_pointer)
+స్థిర M3_NOINLINE
+pc_t Emit_సూచిక (IM3Compilation o, స్థిరరాశి శూన్య* స్థిరరాశి i_సూచిక)
 {
-    pc_t ptr = GetPagePC(o->page);
+    pc_t ptr = Get_పుట_PC(o->పుట);
 
-    if (o->page) {                                                          m3log (emit, "ptr: %p", i_pointer);
-        EmitWord(o->page, i_pointer);
+    ఒకవేళ (o->పుట) {                                                          m3log (emit, "ptr: %p", i_సూచిక);
+        Emit_మాట(o->పుట, i_సూచిక);
     }
 
-    return ptr;
+    తిరిగి ptr;
 }
 
-static M3_NOINLINE
-void* ReservePointer (IM3Compilation o)
+స్థిర M3_NOINLINE
+శూన్య* Reserve_సూచిక (IM3Compilation o)
 {
-    pc_t ptr = GetPagePC(o->page);
-    EmitPointer(o, NULL);
-    return (void*)ptr;
+    pc_t ptr = Get_పుట_PC(o->పుట);
+    Emit_సూచిక(o, ఖాళీ);
+    తిరిగి (శూన్య*)ptr;
 }
 
 
 //-------------------------------------------------------------------------------------------------------------------------
 
-#define d_indent "     | %s"
+#నిర్వచించు d_indent "     | %s"
 
 // just want less letters and numbers to stare at down the way in the compiler table
-#define i_32    c_m3Type_i32
-#define i_64    c_m3Type_i64
-#define f_32    c_m3Type_f32
-#define f_64    c_m3Type_f64
-#define none    c_m3Type_none
-#define any     (u8)-1
+#నిర్వచించు i_32    c_m3Type_i32
+#నిర్వచించు i_64    c_m3Type_i64
+#నిర్వచించు f_32    c_m3Type_f32
+#నిర్వచించు f_64    c_m3Type_f64
+#నిర్వచించు none    c_m3Type_none
+#నిర్వచించు any     (u8)-1
 
-#if d_m3HasFloat
+#ఒకవేళ d_m3HasFloat
 #  define FPOP(x) x
-#else
-#  define FPOP(x) NULL
-#endif
+#లేకపోతే
+#  define FPOP(x) ఖాళీ
+#అయితే_ముగింపు
 
 // These are indexed by M3ValueType, so every type up to c_m3Type_externref needs
 // an entry. A reference is one pointer-sized word, so it moves with the integer
 // operation of that width; v128 has no operations at all.
-#if M3_SIZEOF_PTR == 8
+#ఒకవేళ M3_SIZEOF_PTR == 8
 #  define REFOP(NAME)  op_##NAME##_i64
-#else
+#లేకపోతే
 #  define REFOP(NAME)  op_##NAME##_i32
-#endif
+#అయితే_ముగింపు
 
 // clang-format off
 
-static const IM3Operation c_preserveSetSlot[] = { NULL, op_PreserveSetSlot_i32,       op_PreserveSetSlot_i64,
-                                                    FPOP(op_PreserveSetSlot_f32), FPOP(op_PreserveSetSlot_f64),
-                                                    NULL, REFOP(PreserveSetSlot),  REFOP(PreserveSetSlot),
-                                                    REFOP(PreserveSetSlot),       REFOP(PreserveSetSlot) };
-static const IM3Operation c_setSetOps[] =       { NULL, op_SetSlot_i32,               op_SetSlot_i64,
-                                                    FPOP(op_SetSlot_f32),         FPOP(op_SetSlot_f64),
-                                                    NULL, REFOP(SetSlot),         REFOP(SetSlot),
-                                                    REFOP(SetSlot),               REFOP(SetSlot) };
-static const IM3Operation c_setGlobalOps[] =    { NULL, op_SetGlobal_i32,             op_SetGlobal_i64,
-                                                    FPOP(op_SetGlobal_f32),       FPOP(op_SetGlobal_f64),
-                                                    NULL, REFOP(SetGlobal),       REFOP(SetGlobal),
-                                                    REFOP(SetGlobal),             REFOP(SetGlobal) };
-static const IM3Operation c_setRegisterOps[] =  { NULL, op_SetRegister_i32,           op_SetRegister_i64,
-                                                    FPOP(op_SetRegister_f32),     FPOP(op_SetRegister_f64),
-                                                    NULL, REFOP(SetRegister),     REFOP(SetRegister),
-                                                    REFOP(SetRegister),           REFOP(SetRegister) };
+స్థిర స్థిరరాశి IM3Operation c_preserve_సమితి_స్థానం[] = { ఖాళీ, op_Preserve_సమితి_స్థానం_i32,       op_Preserve_సమితి_స్థానం_i64,
+                                                    FPOP(op_Preserve_సమితి_స్థానం_f32), FPOP(op_Preserve_సమితి_స్థానం_f64),
+                                                    ఖాళీ, REFOP(Preserve_సమితి_స్థానం),  REFOP(Preserve_సమితి_స్థానం),
+                                                    REFOP(Preserve_సమితి_స్థానం),       REFOP(Preserve_సమితి_స్థానం) };
+స్థిర స్థిరరాశి IM3Operation c_సమితి_సమితి_Ops[] =       { ఖాళీ, op_సమితి_స్థానం_i32,               op_సమితి_స్థానం_i64,
+                                                    FPOP(op_సమితి_స్థానం_f32),         FPOP(op_సమితి_స్థానం_f64),
+                                                    ఖాళీ, REFOP(సమితి_స్థానం),         REFOP(సమితి_స్థానం),
+                                                    REFOP(సమితి_స్థానం),               REFOP(సమితి_స్థానం) };
+స్థిర స్థిరరాశి IM3Operation c_సమితి_Global_Ops[] =    { ఖాళీ, op_సమితి_Global_i32,             op_సమితి_Global_i64,
+                                                    FPOP(op_సమితి_Global_f32),       FPOP(op_సమితి_Global_f64),
+                                                    ఖాళీ, REFOP(సమితి_Global),       REFOP(సమితి_Global),
+                                                    REFOP(సమితి_Global),             REFOP(సమితి_Global) };
+స్థిర స్థిరరాశి IM3Operation c_సమితి_రిజిస్టరు_Ops[] =  { ఖాళీ, op_సమితి_రిజిస్టరు_i32,           op_సమితి_రిజిస్టరు_i64,
+                                                    FPOP(op_సమితి_రిజిస్టరు_f32),     FPOP(op_సమితి_రిజిస్టరు_f64),
+                                                    ఖాళీ, REFOP(సమితి_రిజిస్టరు),     REFOP(సమితి_రిజిస్టరు),
+                                                    REFOP(సమితి_రిజిస్టరు),           REFOP(సమితి_రిజిస్టరు) };
 
 // A table shorter than the enum reads out of bounds, so tie the two together at
 // build time: adding a value type must not silently outgrow these.
-#define d_m3CheckTypeTable(TABLE) \
-    M3_STATIC_ASSERT (sizeof (TABLE) / sizeof (*(TABLE)) == c_m3Type_count, TABLE##_needs_one_entry_per_type)
+#నిర్వచించు d_m3_Check_Type_పట్టిక(పట్టిక) \
+    M3_STATIC_ASSERT (పరిమాణం (పట్టిక) / పరిమాణం (*(పట్టిక)) == c_m3_Type_లెక్క, పట్టిక##_needs_one_entry_per_type)
 
-d_m3CheckTypeTable(c_preserveSetSlot);
-d_m3CheckTypeTable(c_setSetOps);
-d_m3CheckTypeTable(c_setGlobalOps);
-d_m3CheckTypeTable(c_setRegisterOps);
+d_m3_Check_Type_పట్టిక(c_preserve_సమితి_స్థానం);
+d_m3_Check_Type_పట్టిక(c_సమితి_సమితి_Ops);
+d_m3_Check_Type_పట్టిక(c_సమితి_Global_Ops);
+d_m3_Check_Type_పట్టిక(c_సమితి_రిజిస్టరు_Ops);
 
-#if d_m3FoldSetLocal
+#ఒకవేళ d_m3_Fold_సమితి_Local
 
 // destination-folded variants of the hot binops, indexed by the operand-form index
 // recorded at emission: [0]=_rs [1]=_sr [2]=_ss [3]=(fp _rr, never folded)
-#define d_foldOpList(TYPE, NAME)            { op_##TYPE##_##NAME##_rs_f, op_##TYPE##_##NAME##_sr_f, op_##TYPE##_##NAME##_ss_f, NULL }
-#define d_foldCommutativeOpList(TYPE, NAME) { op_##TYPE##_##NAME##_rs_f, NULL,                      op_##TYPE##_##NAME##_ss_f, NULL }
+#నిర్వచించు d_foldOpList(TYPE, NAME)            { op_##TYPE##_##NAME##_rs_f, op_##TYPE##_##NAME##_sr_f, op_##TYPE##_##NAME##_ss_f, ఖాళీ }
+#నిర్వచించు d_foldCommutativeOpList(TYPE, NAME) { op_##TYPE##_##NAME##_rs_f, ఖాళీ,                      op_##TYPE##_##NAME##_ss_f, ఖాళీ }
 
-static const IM3Operation c_fold_i32_Add[]         = d_foldCommutativeOpList (i32, Add);
-static const IM3Operation c_fold_i32_Subtract[]    = d_foldOpList (i32, Subtract);
-static const IM3Operation c_fold_i32_Multiply[]    = d_foldCommutativeOpList (i32, Multiply);
-static const IM3Operation c_fold_u32_And[]         = d_foldCommutativeOpList (u32, And);
-static const IM3Operation c_fold_u32_Or[]          = d_foldCommutativeOpList (u32, Or);
-static const IM3Operation c_fold_u32_Xor[]         = d_foldCommutativeOpList (u32, Xor);
-static const IM3Operation c_fold_u32_ShiftLeft[]   = d_foldOpList (u32, ShiftLeft);
-static const IM3Operation c_fold_i32_ShiftRight[]  = d_foldOpList (i32, ShiftRight);
-static const IM3Operation c_fold_u32_ShiftRight[]  = d_foldOpList (u32, ShiftRight);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_కూడు[]         = d_foldCommutativeOpList (i32, కూడు);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_వ్యవకలనం[]    = d_foldOpList (i32, వ్యవకలనం);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_Multiply[]    = d_foldCommutativeOpList (i32, Multiply);
+స్థిర స్థిరరాశి IM3Operation c_fold_u32_And[]         = d_foldCommutativeOpList (u32, And);
+స్థిర స్థిరరాశి IM3Operation c_fold_u32_Or[]          = d_foldCommutativeOpList (u32, Or);
+స్థిర స్థిరరాశి IM3Operation c_fold_u32_Xor[]         = d_foldCommutativeOpList (u32, Xor);
+స్థిర స్థిరరాశి IM3Operation c_fold_u32_జరుపు_ఎడమ[]   = d_foldOpList (u32, జరుపు_ఎడమ);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_జరుపు_కుడి[]  = d_foldOpList (i32, జరుపు_కుడి);
+స్థిర స్థిరరాశి IM3Operation c_fold_u32_జరుపు_కుడి[]  = d_foldOpList (u32, జరుపు_కుడి);
 
-static const IM3Operation c_fold_i64_Add[]         = d_foldCommutativeOpList (i64, Add);
-static const IM3Operation c_fold_i64_Subtract[]    = d_foldOpList (i64, Subtract);
-static const IM3Operation c_fold_i64_Multiply[]    = d_foldCommutativeOpList (i64, Multiply);
-static const IM3Operation c_fold_u64_And[]         = d_foldCommutativeOpList (u64, And);
-static const IM3Operation c_fold_u64_Or[]          = d_foldCommutativeOpList (u64, Or);
-static const IM3Operation c_fold_u64_Xor[]         = d_foldCommutativeOpList (u64, Xor);
-static const IM3Operation c_fold_u64_ShiftLeft[]   = d_foldOpList (u64, ShiftLeft);
-static const IM3Operation c_fold_i64_ShiftRight[]  = d_foldOpList (i64, ShiftRight);
-static const IM3Operation c_fold_u64_ShiftRight[]  = d_foldOpList (u64, ShiftRight);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_కూడు[]         = d_foldCommutativeOpList (i64, కూడు);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_వ్యవకలనం[]    = d_foldOpList (i64, వ్యవకలనం);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_Multiply[]    = d_foldCommutativeOpList (i64, Multiply);
+స్థిర స్థిరరాశి IM3Operation c_fold_u64_And[]         = d_foldCommutativeOpList (u64, And);
+స్థిర స్థిరరాశి IM3Operation c_fold_u64_Or[]          = d_foldCommutativeOpList (u64, Or);
+స్థిర స్థిరరాశి IM3Operation c_fold_u64_Xor[]         = d_foldCommutativeOpList (u64, Xor);
+స్థిర స్థిరరాశి IM3Operation c_fold_u64_జరుపు_ఎడమ[]   = d_foldOpList (u64, జరుపు_ఎడమ);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_జరుపు_కుడి[]  = d_foldOpList (i64, జరుపు_కుడి);
+స్థిర స్థిరరాశి IM3Operation c_fold_u64_జరుపు_కుడి[]  = d_foldOpList (u64, జరుపు_కుడి);
 
-#  if d_m3HasFloat
-static const IM3Operation c_fold_f32_Add[]         = d_foldCommutativeOpList (f32, Add);
-static const IM3Operation c_fold_f32_Subtract[]    = d_foldOpList (f32, Subtract);
-static const IM3Operation c_fold_f32_Multiply[]    = d_foldCommutativeOpList (f32, Multiply);
-static const IM3Operation c_fold_f32_Divide[]      = d_foldOpList (f32, Divide);
-static const IM3Operation c_fold_f64_Add[]         = d_foldCommutativeOpList (f64, Add);
-static const IM3Operation c_fold_f64_Subtract[]    = d_foldOpList (f64, Subtract);
-static const IM3Operation c_fold_f64_Multiply[]    = d_foldCommutativeOpList (f64, Multiply);
-static const IM3Operation c_fold_f64_Divide[]      = d_foldOpList (f64, Divide);
+#  ఒకవేళ d_m3HasFloat
+స్థిర స్థిరరాశి IM3Operation c_fold_f32_కూడు[]         = d_foldCommutativeOpList (f32, కూడు);
+స్థిర స్థిరరాశి IM3Operation c_fold_f32_వ్యవకలనం[]    = d_foldOpList (f32, వ్యవకలనం);
+స్థిర స్థిరరాశి IM3Operation c_fold_f32_Multiply[]    = d_foldCommutativeOpList (f32, Multiply);
+స్థిర స్థిరరాశి IM3Operation c_fold_f32_Divide[]      = d_foldOpList (f32, Divide);
+స్థిర స్థిరరాశి IM3Operation c_fold_f64_కూడు[]         = d_foldCommutativeOpList (f64, కూడు);
+స్థిర స్థిరరాశి IM3Operation c_fold_f64_వ్యవకలనం[]    = d_foldOpList (f64, వ్యవకలనం);
+స్థిర స్థిరరాశి IM3Operation c_fold_f64_Multiply[]    = d_foldCommutativeOpList (f64, Multiply);
+స్థిర స్థిరరాశి IM3Operation c_fold_f64_Divide[]      = d_foldOpList (f64, Divide);
 #  endif
 
 // loads are unary: [0]= address in _r0, [1]= address in a slot
-#define d_foldLoadList(DEST, SRC)       { op_##DEST##_Load_##SRC##_r_f, op_##DEST##_Load_##SRC##_s_f, NULL, NULL }
+#నిర్వచించు d_fold_ఎక్కించు_List(DEST, SRC)       { op_##DEST##_Load_##SRC##_r_f, op_##DEST##_Load_##SRC##_s_f, ఖాళీ, ఖాళీ }
 
-static const IM3Operation c_fold_i32_Load_i32[] = d_foldLoadList(i32, i32);
-static const IM3Operation c_fold_i32_Load_i8[] = d_foldLoadList(i32, i8);
-static const IM3Operation c_fold_i32_Load_u8[] = d_foldLoadList(i32, u8);
-static const IM3Operation c_fold_i32_Load_i16[] = d_foldLoadList(i32, i16);
-static const IM3Operation c_fold_i32_Load_u16[] = d_foldLoadList(i32, u16);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_ఎక్కించు_i32[] = d_fold_ఎక్కించు_List(i32, i32);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_ఎక్కించు_i8[] = d_fold_ఎక్కించు_List(i32, i8);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_ఎక్కించు_u8[] = d_fold_ఎక్కించు_List(i32, u8);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_ఎక్కించు_i16[] = d_fold_ఎక్కించు_List(i32, i16);
+స్థిర స్థిరరాశి IM3Operation c_fold_i32_ఎక్కించు_u16[] = d_fold_ఎక్కించు_List(i32, u16);
 
-static const IM3Operation c_fold_i64_Load_i64[] = d_foldLoadList(i64, i64);
-static const IM3Operation c_fold_i64_Load_i8[] = d_foldLoadList(i64, i8);
-static const IM3Operation c_fold_i64_Load_u8[] = d_foldLoadList(i64, u8);
-static const IM3Operation c_fold_i64_Load_i16[] = d_foldLoadList(i64, i16);
-static const IM3Operation c_fold_i64_Load_u16[] = d_foldLoadList(i64, u16);
-static const IM3Operation c_fold_i64_Load_i32[] = d_foldLoadList(i64, i32);
-static const IM3Operation c_fold_i64_Load_u32[] = d_foldLoadList(i64, u32);
-#  if d_m3HasFloat
-static const IM3Operation c_fold_f32_Load_f32[] = d_foldLoadList(f32, f32);
-static const IM3Operation c_fold_f64_Load_f64[] = d_foldLoadList(f64, f64);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_i64[] = d_fold_ఎక్కించు_List(i64, i64);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_i8[] = d_fold_ఎక్కించు_List(i64, i8);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_u8[] = d_fold_ఎక్కించు_List(i64, u8);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_i16[] = d_fold_ఎక్కించు_List(i64, i16);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_u16[] = d_fold_ఎక్కించు_List(i64, u16);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_i32[] = d_fold_ఎక్కించు_List(i64, i32);
+స్థిర స్థిరరాశి IM3Operation c_fold_i64_ఎక్కించు_u32[] = d_fold_ఎక్కించు_List(i64, u32);
+#  ఒకవేళ d_m3HasFloat
+స్థిర స్థిరరాశి IM3Operation c_fold_f32_ఎక్కించు_f32[] = d_fold_ఎక్కించు_List(f32, f32);
+స్థిర స్థిరరాశి IM3Operation c_fold_f64_ఎక్కించు_f64[] = d_fold_ఎక్కించు_List(f64, f64);
 #  endif
 
-static
+స్థిర
 IM3Operation GetFoldOp (m3opcode_t i_opcode, u8 i_form)
 {
-    if (i_form >= 4) {
-        return NULL;
+    ఒకవేళ (i_form >= 4) {
+        తిరిగి ఖాళీ;
     }
 
-    switch (i_opcode) {
-    case 0x6a:  return c_fold_i32_Add        [i_form];      // i32.add
-    case 0x6b:  return c_fold_i32_Subtract   [i_form];      // i32.sub
-    case 0x6c:  return c_fold_i32_Multiply   [i_form];      // i32.mul
-    case 0x71:  return c_fold_u32_And        [i_form];      // i32.and
-    case 0x72:  return c_fold_u32_Or         [i_form];      // i32.or
-    case 0x73:  return c_fold_u32_Xor        [i_form];      // i32.xor
-    case 0x74:  return c_fold_u32_ShiftLeft  [i_form];      // i32.shl
-    case 0x75:  return c_fold_i32_ShiftRight [i_form];      // i32.shr_s
-    case 0x76:  return c_fold_u32_ShiftRight [i_form];      // i32.shr_u
+    ఎంపిక (i_opcode) {
+    స్థితి 0x6a:  తిరిగి c_fold_i32_కూడు        [i_form];      // i32.add
+    స్థితి 0x6b:  తిరిగి c_fold_i32_వ్యవకలనం   [i_form];      // i32.sub
+    స్థితి 0x6c:  తిరిగి c_fold_i32_Multiply   [i_form];      // i32.mul
+    స్థితి 0x71:  తిరిగి c_fold_u32_And        [i_form];      // i32.and
+    స్థితి 0x72:  తిరిగి c_fold_u32_Or         [i_form];      // i32.or
+    స్థితి 0x73:  తిరిగి c_fold_u32_Xor        [i_form];      // i32.xor
+    స్థితి 0x74:  తిరిగి c_fold_u32_జరుపు_ఎడమ  [i_form];      // i32.shl
+    స్థితి 0x75:  తిరిగి c_fold_i32_జరుపు_కుడి [i_form];      // i32.shr_s
+    స్థితి 0x76:  తిరిగి c_fold_u32_జరుపు_కుడి [i_form];      // i32.shr_u
 
-    case 0x7c:  return c_fold_i64_Add        [i_form];      // i64.add
-    case 0x7d:  return c_fold_i64_Subtract   [i_form];      // i64.sub
-    case 0x7e:  return c_fold_i64_Multiply   [i_form];      // i64.mul
-    case 0x83:  return c_fold_u64_And        [i_form];      // i64.and
-    case 0x84:  return c_fold_u64_Or         [i_form];      // i64.or
-    case 0x85:  return c_fold_u64_Xor        [i_form];      // i64.xor
-    case 0x86:  return c_fold_u64_ShiftLeft  [i_form];      // i64.shl
-    case 0x87:  return c_fold_i64_ShiftRight [i_form];      // i64.shr_s
-    case 0x88:  return c_fold_u64_ShiftRight [i_form];      // i64.shr_u
+    స్థితి 0x7c:  తిరిగి c_fold_i64_కూడు        [i_form];      // i64.add
+    స్థితి 0x7d:  తిరిగి c_fold_i64_వ్యవకలనం   [i_form];      // i64.sub
+    స్థితి 0x7e:  తిరిగి c_fold_i64_Multiply   [i_form];      // i64.mul
+    స్థితి 0x83:  తిరిగి c_fold_u64_And        [i_form];      // i64.and
+    స్థితి 0x84:  తిరిగి c_fold_u64_Or         [i_form];      // i64.or
+    స్థితి 0x85:  తిరిగి c_fold_u64_Xor        [i_form];      // i64.xor
+    స్థితి 0x86:  తిరిగి c_fold_u64_జరుపు_ఎడమ  [i_form];      // i64.shl
+    స్థితి 0x87:  తిరిగి c_fold_i64_జరుపు_కుడి [i_form];      // i64.shr_s
+    స్థితి 0x88:  తిరిగి c_fold_u64_జరుపు_కుడి [i_form];      // i64.shr_u
 
-#  if d_m3HasFloat
-    case 0x92:  return c_fold_f32_Add        [i_form];      // f32.add
-    case 0x93:  return c_fold_f32_Subtract   [i_form];      // f32.sub
-    case 0x94:  return c_fold_f32_Multiply   [i_form];      // f32.mul
-    case 0x95:  return c_fold_f32_Divide     [i_form];      // f32.div
-    case 0xa0:  return c_fold_f64_Add        [i_form];      // f64.add
-    case 0xa1:  return c_fold_f64_Subtract   [i_form];      // f64.sub
-    case 0xa2:  return c_fold_f64_Multiply   [i_form];      // f64.mul
-    case 0xa3:  return c_fold_f64_Divide     [i_form];      // f64.div
+#  ఒకవేళ d_m3HasFloat
+    స్థితి 0x92:  తిరిగి c_fold_f32_కూడు        [i_form];      // f32.add
+    స్థితి 0x93:  తిరిగి c_fold_f32_వ్యవకలనం   [i_form];      // f32.sub
+    స్థితి 0x94:  తిరిగి c_fold_f32_Multiply   [i_form];      // f32.mul
+    స్థితి 0x95:  తిరిగి c_fold_f32_Divide     [i_form];      // f32.div
+    స్థితి 0xa0:  తిరిగి c_fold_f64_కూడు        [i_form];      // f64.add
+    స్థితి 0xa1:  తిరిగి c_fold_f64_వ్యవకలనం   [i_form];      // f64.sub
+    స్థితి 0xa2:  తిరిగి c_fold_f64_Multiply   [i_form];      // f64.mul
+    స్థితి 0xa3:  తిరిగి c_fold_f64_Divide     [i_form];      // f64.div
 #  endif
 
-    case 0x28:  return c_fold_i32_Load_i32   [i_form];      // i32.load
-    case 0x2c:  return c_fold_i32_Load_i8    [i_form];      // i32.load8_s
-    case 0x2d:  return c_fold_i32_Load_u8    [i_form];      // i32.load8_u
-    case 0x2e:  return c_fold_i32_Load_i16   [i_form];      // i32.load16_s
-    case 0x2f:  return c_fold_i32_Load_u16   [i_form];      // i32.load16_u
+    స్థితి 0x28:  తిరిగి c_fold_i32_ఎక్కించు_i32   [i_form];      // i32.load
+    స్థితి 0x2c:  తిరిగి c_fold_i32_ఎక్కించు_i8    [i_form];      // i32.load8_s
+    స్థితి 0x2d:  తిరిగి c_fold_i32_ఎక్కించు_u8    [i_form];      // i32.load8_u
+    స్థితి 0x2e:  తిరిగి c_fold_i32_ఎక్కించు_i16   [i_form];      // i32.load16_s
+    స్థితి 0x2f:  తిరిగి c_fold_i32_ఎక్కించు_u16   [i_form];      // i32.load16_u
 
-    case 0x29:  return c_fold_i64_Load_i64   [i_form];      // i64.load
-    case 0x30:  return c_fold_i64_Load_i8    [i_form];      // i64.load8_s
-    case 0x31:  return c_fold_i64_Load_u8    [i_form];      // i64.load8_u
-    case 0x32:  return c_fold_i64_Load_i16   [i_form];      // i64.load16_s
-    case 0x33:  return c_fold_i64_Load_u16   [i_form];      // i64.load16_u
-    case 0x34:  return c_fold_i64_Load_i32   [i_form];      // i64.load32_s
-    case 0x35:  return c_fold_i64_Load_u32   [i_form];      // i64.load32_u
+    స్థితి 0x29:  తిరిగి c_fold_i64_ఎక్కించు_i64   [i_form];      // i64.load
+    స్థితి 0x30:  తిరిగి c_fold_i64_ఎక్కించు_i8    [i_form];      // i64.load8_s
+    స్థితి 0x31:  తిరిగి c_fold_i64_ఎక్కించు_u8    [i_form];      // i64.load8_u
+    స్థితి 0x32:  తిరిగి c_fold_i64_ఎక్కించు_i16   [i_form];      // i64.load16_s
+    స్థితి 0x33:  తిరిగి c_fold_i64_ఎక్కించు_u16   [i_form];      // i64.load16_u
+    స్థితి 0x34:  తిరిగి c_fold_i64_ఎక్కించు_i32   [i_form];      // i64.load32_s
+    స్థితి 0x35:  తిరిగి c_fold_i64_ఎక్కించు_u32   [i_form];      // i64.load32_u
 
-#  if d_m3HasFloat
-    case 0x2a:  return c_fold_f32_Load_f32   [i_form];      // f32.load
-    case 0x2b:  return c_fold_f64_Load_f64   [i_form];      // f64.load
+#  ఒకవేళ d_m3HasFloat
+    స్థితి 0x2a:  తిరిగి c_fold_f32_ఎక్కించు_f32   [i_form];      // f32.load
+    స్థితి 0x2b:  తిరిగి c_fold_f64_ఎక్కించు_f64   [i_form];      // f64.load
 #  endif
 
-    default: return NULL;
+    అప్రమేయ: తిరిగి ఖాళీ;
     }
 }
 
-#endif // d_m3FoldSetLocal
+#అయితే_ముగింపు // d_m3FoldSetLocal
 
 // clang-format on
 
-#if d_m3FuseBranch
+#ఒకవేళ d_m3FuseBranch
 
 // fused compare+branch/if variants, indexed like the fold lists: [0]=_rs [1]=_sr [2]=_ss [3]=unused.
 // the [1] entries are NULL for commutative compares: the compiler never records the _sr form for them
-#  define d_fuseCmpList(TYPE, NAME, KIND)             { op_##TYPE##_##KIND##_##NAME##_rs, op_##TYPE##_##KIND##_##NAME##_sr, op_##TYPE##_##KIND##_##NAME##_ss, NULL }
-#  define d_fuseCommutativeCmpList(TYPE, NAME, KIND)  { op_##TYPE##_##KIND##_##NAME##_rs, NULL,                             op_##TYPE##_##KIND##_##NAME##_ss, NULL }
+#  define d_fuseCmpList(TYPE, NAME, రకం_2)             { op_##TYPE##_##KIND##_##NAME##_rs, op_##TYPE##_##KIND##_##NAME##_sr, op_##TYPE##_##KIND##_##NAME##_ss, ఖాళీ }
+#  define d_fuseCommutativeCmpList(TYPE, NAME, రకం_2)  { op_##TYPE##_##KIND##_##NAME##_rs, ఖాళీ,                             op_##TYPE##_##KIND##_##NAME##_ss, ఖాళీ }
 
-typedef struct M3FusedCmpOps {
+రకనిర్వచనం నిర్మాణం M3FusedCmpOps {
     IM3Operation branchIf[4];
     IM3Operation ifOp[4];
 } M3FusedCmpOps;
@@ -633,143 +633,143 @@ typedef struct M3FusedCmpOps {
 #  define d_fuseCommutativeCmp(TYPE, NAME)    { d_fuseCommutativeCmpList (TYPE, NAME, BranchIf), d_fuseCommutativeCmpList (TYPE, NAME, If) }
 
 // clang-format off
-static const M3FusedCmpOps c_fuse_i32_Equal              = d_fuseCommutativeCmp (i32, Equal);
-static const M3FusedCmpOps c_fuse_i32_NotEqual           = d_fuseCommutativeCmp (i32, NotEqual);
-static const M3FusedCmpOps c_fuse_i32_LessThan           = d_fuseCmp (i32, LessThan);
-static const M3FusedCmpOps c_fuse_u32_LessThan           = d_fuseCmp (u32, LessThan);
-static const M3FusedCmpOps c_fuse_i32_GreaterThan        = d_fuseCmp (i32, GreaterThan);
-static const M3FusedCmpOps c_fuse_u32_GreaterThan        = d_fuseCmp (u32, GreaterThan);
-static const M3FusedCmpOps c_fuse_i32_LessThanOrEqual    = d_fuseCmp (i32, LessThanOrEqual);
-static const M3FusedCmpOps c_fuse_u32_LessThanOrEqual    = d_fuseCmp (u32, LessThanOrEqual);
-static const M3FusedCmpOps c_fuse_i32_GreaterThanOrEqual = d_fuseCmp (i32, GreaterThanOrEqual);
-static const M3FusedCmpOps c_fuse_u32_GreaterThanOrEqual = d_fuseCmp (u32, GreaterThanOrEqual);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_Equal              = d_fuseCommutativeCmp (i32, Equal);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_NotEqual           = d_fuseCommutativeCmp (i32, NotEqual);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_LessThan           = d_fuseCmp (i32, LessThan);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_u32_LessThan           = d_fuseCmp (u32, LessThan);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_GreaterThan        = d_fuseCmp (i32, GreaterThan);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_u32_GreaterThan        = d_fuseCmp (u32, GreaterThan);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_LessThanOrEqual    = d_fuseCmp (i32, LessThanOrEqual);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_u32_LessThanOrEqual    = d_fuseCmp (u32, LessThanOrEqual);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_GreaterThanOrEqual = d_fuseCmp (i32, GreaterThanOrEqual);
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_u32_GreaterThanOrEqual = d_fuseCmp (u32, GreaterThanOrEqual);
 // clang-format on
 
 // i32.eqz is unary: [0]= operand in _r0, [1]= operand in a slot
-static const M3FusedCmpOps c_fuse_i32_Eqz = {
-    { op_i32_BranchIfEqz_r, op_i32_BranchIfEqz_s, NULL, NULL },
-    { op_i32_IfEqz_r,       op_i32_IfEqz_s,       NULL, NULL }
+స్థిర స్థిరరాశి M3FusedCmpOps c_fuse_i32_Eqz = {
+    { op_i32_BranchIfEqz_r, op_i32_BranchIfEqz_s, ఖాళీ, ఖాళీ },
+    { op_i32_IfEqz_r,       op_i32_IfEqz_s,       ఖాళీ, ఖాళీ }
 };
 
-static
-const M3FusedCmpOps* GetFusedCmpOps (m3opcode_t i_opcode)
+స్థిర
+స్థిరరాశి M3FusedCmpOps* GetFusedCmpOps (m3opcode_t i_opcode)
 {
-    switch (i_opcode) {
-    case 0x45: return &c_fuse_i32_Eqz;                    // i32.eqz
-    case 0x46: return &c_fuse_i32_Equal;                  // i32.eq
-    case 0x47: return &c_fuse_i32_NotEqual;               // i32.ne
-    case 0x48: return &c_fuse_i32_LessThan;               // i32.lt_s
-    case 0x49: return &c_fuse_u32_LessThan;               // i32.lt_u
-    case 0x4a: return &c_fuse_i32_GreaterThan;            // i32.gt_s
-    case 0x4b: return &c_fuse_u32_GreaterThan;            // i32.gt_u
-    case 0x4c: return &c_fuse_i32_LessThanOrEqual;        // i32.le_s
-    case 0x4d: return &c_fuse_u32_LessThanOrEqual;        // i32.le_u
-    case 0x4e: return &c_fuse_i32_GreaterThanOrEqual;     // i32.ge_s
-    case 0x4f: return &c_fuse_u32_GreaterThanOrEqual;     // i32.ge_u
-    default: return NULL;
+    ఎంపిక (i_opcode) {
+    స్థితి 0x45: తిరిగి &c_fuse_i32_Eqz;                    // i32.eqz
+    స్థితి 0x46: తిరిగి &c_fuse_i32_Equal;                  // i32.eq
+    స్థితి 0x47: తిరిగి &c_fuse_i32_NotEqual;               // i32.ne
+    స్థితి 0x48: తిరిగి &c_fuse_i32_LessThan;               // i32.lt_s
+    స్థితి 0x49: తిరిగి &c_fuse_u32_LessThan;               // i32.lt_u
+    స్థితి 0x4a: తిరిగి &c_fuse_i32_GreaterThan;            // i32.gt_s
+    స్థితి 0x4b: తిరిగి &c_fuse_u32_GreaterThan;            // i32.gt_u
+    స్థితి 0x4c: తిరిగి &c_fuse_i32_LessThanOrEqual;        // i32.le_s
+    స్థితి 0x4d: తిరిగి &c_fuse_u32_LessThanOrEqual;        // i32.le_u
+    స్థితి 0x4e: తిరిగి &c_fuse_i32_GreaterThanOrEqual;     // i32.ge_s
+    స్థితి 0x4f: తిరిగి &c_fuse_u32_GreaterThanOrEqual;     // i32.ge_u
+    అప్రమేయ: తిరిగి ఖాళీ;
     }
 }
 
-#endif // d_m3FuseBranch
+#అయితే_ముగింపు // d_m3FuseBranch
 
-static const IM3Operation c_intSelectOps[2][4] = {
+స్థిర స్థిరరాశి IM3Operation c_intSelectOps[2][4] = {
     { op_Select_i32_rss, op_Select_i32_srs, op_Select_i32_ssr, op_Select_i32_sss },
     { op_Select_i64_rss, op_Select_i64_srs, op_Select_i64_ssr, op_Select_i64_sss }
 };
-#if d_m3HasFloat
-static const IM3Operation c_fpSelectOps[2][2][3] = {
+#ఒకవేళ d_m3HasFloat
+స్థిర స్థిరరాశి IM3Operation c_fpSelectOps[2][2][3] = {
     { { op_Select_f32_sss, op_Select_f32_srs, op_Select_f32_ssr }, // selector in slot
       { op_Select_f32_rss, op_Select_f32_rrs, op_Select_f32_rsr } }, // selector in reg
     { { op_Select_f64_sss, op_Select_f64_srs, op_Select_f64_ssr }, // selector in slot
       { op_Select_f64_rss, op_Select_f64_rrs, op_Select_f64_rsr } }
 };    // selector in reg
-#endif
+#అయితే_ముగింపు
 
 // all args & returns are 64-bit aligned, so use 2 slots for a d_m3Use32BitSlots=1 build
 
-static
-M3Result AcquireCompilationCodePage (IM3Compilation o, IM3CodePage* o_codePage)
+స్థిర
+M3_ఫలితం Acquire_Compilation_సంకేతం_పుట (IM3Compilation o, IM3_సంకేతం_పుట* o_సంకేతం_పుట)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    IM3CodePage page = AcquireCodePage(o->runtime);
+    IM3_సంకేతం_పుట పుట = Acquire_సంకేతం_పుట(o->runtime);
 
-    if (page) {
-#if (d_m3EnableCodePageRefCounting)
+    ఒకవేళ (పుట) {
+#ఒకవేళ (d_m3_Enable_సంకేతం_పుట_Ref_Counting)
         {
-            if (o->function) {
+            ఒకవేళ (o->function) {
                 IM3Function func = o->function;
-                page->info.usageCount++;
+                పుట->info.usage_లెక్క++;
 
-                u32 index = func->numCodePageRefs++;
-_               (m3ReallocArray(&func->codePageRefs, IM3CodePage, func->numCodePageRefs, index));
-                func->codePageRefs[index] = page;
+                u32 index = func->అంకె_సంకేతం_పుట_Refs++;
+_               (m3ReallocArray(&func->సంకేతం_పుట_Refs, IM3_సంకేతం_పుట, func->అంకె_సంకేతం_పుట_Refs, index));
+                func->సంకేతం_పుట_Refs[index] = పుట;
             }
         }
-#endif
-    } else {
-        _throw(m3Err_mallocFailedCodePage);
+#అయితే_ముగింపు
+    } లేకపోతే {
+        _throw(m3_Err_malloc_Failed_సంకేతం_పుట);
     }
 
     _catch:
 
-    *o_codePage = page;
+    *o_సంకేతం_పుట = పుట;
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static inline
-void ReleaseCompilationCodePage (IM3Compilation o)
+స్థిర అంతఃవరుస
+శూన్య Release_Compilation_సంకేతం_పుట (IM3Compilation o)
 {
-    ReleaseCodePage(o->runtime, o->page);
+    Release_సంకేతం_పుట(o->runtime, o->పుట);
 }
 
-static inline
-u16 GetTypeNumSlots (m3type_t i_type)
+స్థిర అంతఃవరుస
+u16 Get_Type_అంకె_Slots (m3type_t i_type)
 {
-    i_type = BaseTypeOf(i_type);
+    i_type = పునాది_Type_యొక్క(i_type);
 
     // v128 is 16 bytes - 4 slots in 32-bit-slot mode, 2 in 64-bit.
     // (Slot-allocator only; no v128 ops execute.)
-    if (i_type == c_m3Type_v128)
-#if d_m3Use32BitSlots
-        return 4;
-#else
-        return 2;
-#endif
-#if d_m3Use32BitSlots
-    return Is64BitType(i_type) ? 2 : 1;
-#else
-    return 1;
-#endif
+    ఒకవేళ (i_type == c_m3Type_v128)
+#ఒకవేళ d_m3_Use32_బిట్టు_Slots
+        తిరిగి 4;
+#లేకపోతే
+        తిరిగి 2;
+#అయితే_ముగింపు
+#ఒకవేళ d_m3_Use32_బిట్టు_Slots
+    తిరిగి Is64_బిట్టు_Type(i_type) ? 2 : 1;
+#లేకపోతే
+    తిరిగి 1;
+#అయితే_ముగింపు
 }
 
-static inline
-void AlignSlotToType (u16* io_slot, m3type_t i_type)
+స్థిర అంతఃవరుస
+శూన్య Align_స్థానం_గమ్యం_Type (u16* io_స్థానం, m3type_t i_type)
 {
     // align 64-bit words to even slots (if d_m3Use32BitSlots)
-    u16 numSlots = GetTypeNumSlots(i_type);
+    u16 అంకె_Slots = Get_Type_అంకె_Slots(i_type);
 
-    u16 mask = numSlots - 1;
-    *io_slot = (*io_slot + mask) & ~mask;
+    u16 ముసుగు = అంకె_Slots - 1;
+    *io_స్థానం = (*io_స్థానం + ముసుగు) & ~ముసుగు;
 }
 
 // Deliberately unchecked. Validation rejects an empty operand stack before compilation.
-static inline
-i16 GetStackTopIndex (IM3Compilation o)
+స్థిర అంతఃవరుస
+i16 Get_దొంతర_శిఖరం_సూచీ (IM3Compilation o)
 {
-    return o->stackIndex - 1;
+    తిరిగి o->దొంతర_సూచీ - 1;
 }
 
-static inline
-M3Result GetStackTopIndexThrows (IM3Compilation o, i16* o_stackIndex)
+స్థిర అంతఃవరుస
+M3_ఫలితం Get_దొంతర_శిఖరం_సూచీ_Throws (IM3Compilation o, i16* o_దొంతర_సూచీ)
 {
-    *o_stackIndex = o->stackIndex - 1;
+    *o_దొంతర_సూచీ = o->దొంతర_సూచీ - 1;
 
-    if (M3_LIKELY(o->stackIndex > o->stackFirstDynamicIndex or IsStackPolymorphic(o))) {
-        return m3Err_none;
-    } else {
-        return m3Err_functionStackUnderrun;
+    ఒకవేళ (M3_LIKELY(o->దొంతర_సూచీ > o->దొంతర_మొదటి_Dynamic_సూచీ or Is_దొంతర_Polymorphic(o))) {
+        తిరిగి m3Err_none;
+    } లేకపోతే {
+        తిరిగి m3_Err_function_దొంతర_Underrun;
     }
 }
 
@@ -777,685 +777,685 @@ M3Result GetStackTopIndexThrows (IM3Compilation o, i16* o_stackIndex)
 // Items in the static portion of the stack (args/locals) are hidden from GetStackTypeFromTop ()
 // In other words, only "real" Wasm stack items can be inspected.  This is important when
 // returning values, etc. and you need an accurate wasm-view of the stack.
-static
-m3type_t GetStackTypeFromTop (IM3Compilation o, u16 i_offset)
+స్థిర
+m3type_t Get_దొంతర_Type_From_శిఖరం (IM3Compilation o, u16 i_స్థానభ్రంశం)
 {
     m3type_t type = c_m3Type_none;
 
-    ++i_offset;
-    if (o->stackIndex >= i_offset) {
-        u16 index = o->stackIndex - i_offset;
+    ++i_స్థానభ్రంశం;
+    ఒకవేళ (o->దొంతర_సూచీ >= i_స్థానభ్రంశం) {
+        u16 index = o->దొంతర_సూచీ - i_స్థానభ్రంశం;
 
-        if (index >= o->stackFirstDynamicIndex) {
-            type = o->typeStack[index];
+        ఒకవేళ (index >= o->దొంతర_మొదటి_Dynamic_సూచీ) {
+            type = o->type_దొంతర[index];
         }
     }
 
-    return type;
+    తిరిగి type;
 }
 
-static inline
-m3type_t GetStackTopType (IM3Compilation o)
+స్థిర అంతఃవరుస
+m3type_t Get_దొంతర_శిఖరం_Type (IM3Compilation o)
 {
-    return GetStackTypeFromTop(o, 0);
+    తిరిగి Get_దొంతర_Type_From_శిఖరం(o, 0);
 }
 
-static inline
-m3type_t GetStackTypeFromBottom (IM3Compilation o, u16 i_offset)
+స్థిర అంతఃవరుస
+m3type_t Get_దొంతర_Type_From_Bottom (IM3Compilation o, u16 i_స్థానభ్రంశం)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_offset < o->stackIndex) {
-        type = o->typeStack[i_offset];
+    ఒకవేళ (i_స్థానభ్రంశం < o->దొంతర_సూచీ) {
+        type = o->type_దొంతర[i_స్థానభ్రంశం];
     }
 
-    return type;
+    తిరిగి type;
 }
 
 
-static inline
-bool IsConstantSlot (IM3Compilation o, u16 i_slot)
+స్థిర అంతఃవరుస
+bool Is_Constant_స్థానం (IM3Compilation o, u16 i_స్థానం)
 {
-    return (i_slot >= o->slotFirstConstIndex and i_slot < o->slotMaxConstIndex);
+    తిరిగి (i_స్థానం >= o->స్థానం_మొదటి_Const_సూచీ and i_స్థానం < o->స్థానం_Max_Const_సూచీ);
 }
-static inline
-bool IsSlotAllocated (IM3Compilation o, u16 i_slot)
+స్థిర అంతఃవరుస
+bool Is_స్థానం_Allocated (IM3Compilation o, u16 i_స్థానం)
 {
-    return o->m3Slots[i_slot];
+    తిరిగి o->m3Slots[i_స్థానం];
 }
 
-static inline
-bool IsStackIndexInRegister (IM3Compilation o, i32 i_stackIndex)
-{                                                                           d_m3Assert (i_stackIndex < o->stackIndex or IsStackPolymorphic (o));
-    if (i_stackIndex >= 0 and i_stackIndex < o->stackIndex) {
-        return (o->wasmStack[i_stackIndex] >= d_m3Reg0SlotAlias);
-    } else {
-        return false;
+స్థిర అంతఃవరుస
+bool Is_దొంతర_సూచీ_లోపల_రిజిస్టరు (IM3Compilation o, i32 i_దొంతర_సూచీ)
+{                                                                           d_m3Assert (i_దొంతర_సూచీ < o->దొంతర_సూచీ or Is_దొంతర_Polymorphic (o));
+    ఒకవేళ (i_దొంతర_సూచీ >= 0 and i_దొంతర_సూచీ < o->దొంతర_సూచీ) {
+        తిరిగి (o->wasm_దొంతర[i_దొంతర_సూచీ] >= d_m3_Reg0_స్థానం_Alias);
+    } లేకపోతే {
+        తిరిగి false;
     }
 }
 
-static inline
-u16 GetNumBlockValuesOnStack (IM3Compilation o)
+స్థిర అంతఃవరుస
+u16 Get_అంకె_ఖండం_విలువలు_On_దొంతర (IM3Compilation o)
 {
-    return o->stackIndex - o->block.blockStackIndex;
+    తిరిగి o->దొంతర_సూచీ - o->ఖండం.ఖండం_దొంతర_సూచీ;
 }
 
-static inline
-bool IsStackTopInRegister (IM3Compilation o)
+స్థిర అంతఃవరుస
+bool Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు (IM3Compilation o)
 {
-    return IsStackIndexInRegister(o, (i32)GetStackTopIndex(o));
+    తిరిగి Is_దొంతర_సూచీ_లోపల_రిజిస్టరు(o, (i32)Get_దొంతర_శిఖరం_సూచీ(o));
 }
-static inline
-bool IsStackTopMinus1InRegister (IM3Compilation o)
+స్థిర అంతఃవరుస
+bool Is_దొంతర_శిఖరం_Minus1_లోపల_రిజిస్టరు (IM3Compilation o)
 {
-    return IsStackIndexInRegister(o, (i32)GetStackTopIndex(o) - 1);
+    తిరిగి Is_దొంతర_సూచీ_లోపల_రిజిస్టరు(o, (i32)Get_దొంతర_శిఖరం_సూచీ(o) - 1);
 }
-static inline
-bool IsStackTopMinus2InRegister (IM3Compilation o)
+స్థిర అంతఃవరుస
+bool Is_దొంతర_శిఖరం_Minus2_లోపల_రిజిస్టరు (IM3Compilation o)
 {
-    return IsStackIndexInRegister(o, (i32)GetStackTopIndex(o) - 2);
-}
-
-static inline
-bool IsStackTopInSlot (IM3Compilation o)
-{
-    return not IsStackTopInRegister(o);
+    తిరిగి Is_దొంతర_సూచీ_లోపల_రిజిస్టరు(o, (i32)Get_దొంతర_శిఖరం_సూచీ(o) - 2);
 }
 
-static inline
-bool IsValidSlot (u16 i_slot)
+స్థిర అంతఃవరుస
+bool Is_దొంతర_శిఖరం_లోపల_స్థానం (IM3Compilation o)
 {
-    return (i_slot < d_m3MaxFunctionSlots);
+    తిరిగి not Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o);
 }
 
-static inline
-u16 GetStackTopSlotNumber (IM3Compilation o)
+స్థిర అంతఃవరుస
+bool Is_Valid_స్థానం (u16 i_స్థానం)
 {
-    i16 i = GetStackTopIndex(o);
+    తిరిగి (i_స్థానం < d_m3MaxFunctionSlots);
+}
 
-    u16 slot = c_slotUnused;
+స్థిర అంతఃవరుస
+u16 Get_దొంతర_శిఖరం_స్థానం_సంఖ్య (IM3Compilation o)
+{
+    i16 i = Get_దొంతర_శిఖరం_సూచీ(o);
 
-    if (i >= 0) {
-        slot = o->wasmStack[i];
+    u16 స్థానం = c_స్థానం_వాడని;
+
+    ఒకవేళ (i >= 0) {
+        స్థానం = o->wasm_దొంతర[i];
     }
 
-    return slot;
+    తిరిగి స్థానం;
 }
 
 
 // from bottom
-static inline
-u16 GetSlotForStackIndex (IM3Compilation o, u16 i_stackIndex)
-{                                                                   d_m3Assert (i_stackIndex < o->stackIndex or IsStackPolymorphic (o));
-    u16 slot = c_slotUnused;
+స్థిర అంతఃవరుస
+u16 Get_స్థానం_For_దొంతర_సూచీ (IM3Compilation o, u16 i_దొంతర_సూచీ)
+{                                                                   d_m3Assert (i_దొంతర_సూచీ < o->దొంతర_సూచీ or Is_దొంతర_Polymorphic (o));
+    u16 స్థానం = c_స్థానం_వాడని;
 
-    if (i_stackIndex < o->stackIndex) {
-        slot = o->wasmStack[i_stackIndex];
+    ఒకవేళ (i_దొంతర_సూచీ < o->దొంతర_సూచీ) {
+        స్థానం = o->wasm_దొంతర[i_దొంతర_సూచీ];
     }
 
-    return slot;
+    తిరిగి స్థానం;
 }
 
-static inline
-u16 GetExtraSlotForStackIndex (IM3Compilation o, u16 i_stackIndex)
+స్థిర అంతఃవరుస
+u16 Get_Extra_స్థానం_For_దొంతర_సూచీ (IM3Compilation o, u16 i_దొంతర_సూచీ)
 {
-    u16 baseSlot = GetSlotForStackIndex(o, i_stackIndex);
+    u16 పునాది_స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, i_దొంతర_సూచీ);
 
-    if (baseSlot != c_slotUnused) {
-        u16 extraSlot = GetTypeNumSlots(GetStackTypeFromBottom(o, i_stackIndex)) - 1;
-        baseSlot += extraSlot;
+    ఒకవేళ (పునాది_స్థానం != c_స్థానం_వాడని) {
+        u16 extra_స్థానం = Get_Type_అంకె_Slots(Get_దొంతర_Type_From_Bottom(o, i_దొంతర_సూచీ)) - 1;
+        పునాది_స్థానం += extra_స్థానం;
     }
 
-    return baseSlot;
+    తిరిగి పునాది_స్థానం;
 }
 
 
-static inline
-void TouchSlot (IM3Compilation o, u16 i_slot)
+స్థిర అంతఃవరుస
+శూన్య Touch_స్థానం (IM3Compilation o, u16 i_స్థానం)
 {
     // op_Entry uses this value to track and detect stack overflow
-    o->maxStackSlots = M3_MAX(o->maxStackSlots, i_slot + 1);
+    o->max_దొంతర_Slots = M3_MAX(o->max_దొంతర_Slots, i_స్థానం + 1);
 }
 
-static inline
-void MarkSlotAllocated (IM3Compilation o, u16 i_slot)
-{                                                                   d_m3Assert (o->m3Slots [i_slot] == 0); // shouldn't be already allocated
-    o->m3Slots[i_slot] = 1;
+స్థిర అంతఃవరుస
+శూన్య Mark_స్థానం_Allocated (IM3Compilation o, u16 i_స్థానం)
+{                                                                   d_m3Assert (o->m3Slots [i_స్థానం] == 0); // shouldn't be already allocated
+    o->m3Slots[i_స్థానం] = 1;
 
-    o->slotMaxAllocatedIndexPlusOne = M3_MAX(o->slotMaxAllocatedIndexPlusOne, i_slot + 1);
+    o->స్థానం_Max_Allocated_సూచీ_Plus_One = M3_MAX(o->స్థానం_Max_Allocated_సూచీ_Plus_One, i_స్థానం + 1);
 
-    TouchSlot(o, i_slot);
+    Touch_స్థానం(o, i_స్థానం);
 }
 
-static inline
-M3Result MarkSlotsAllocated (IM3Compilation o, u16 i_slot, u16 i_numSlots)
+స్థిర అంతఃవరుస
+M3_ఫలితం MarkSlotsAllocated (IM3Compilation o, u16 i_స్థానం, u16 i_అంకె_Slots)
 {
-    if (M3_UNLIKELY(i_slot + i_numSlots > d_m3MaxFunctionSlots)) {
-        return m3Err_functionStackOverflow;
+    ఒకవేళ (M3_UNLIKELY(i_స్థానం + i_అంకె_Slots > d_m3MaxFunctionSlots)) {
+        తిరిగి m3_Err_function_దొంతర_అధికప్రవాహం;
     }
 
-    while (i_numSlots--) {
-        MarkSlotAllocated(o, i_slot++);
+    అయితే (i_అంకె_Slots--) {
+        Mark_స్థానం_Allocated(o, i_స్థానం++);
     }
 
-    return m3Err_none;
+    తిరిగి m3Err_none;
 }
 
-static inline
-M3Result MarkSlotsAllocatedByType (IM3Compilation o, u16 i_slot, m3type_t i_type)
+స్థిర అంతఃవరుస
+M3_ఫలితం MarkSlotsAllocatedByType (IM3Compilation o, u16 i_స్థానం, m3type_t i_type)
 {
-    u16 numSlots = GetTypeNumSlots(i_type);
-    return MarkSlotsAllocated(o, i_slot, numSlots);
+    u16 అంకె_Slots = Get_Type_అంకె_Slots(i_type);
+    తిరిగి MarkSlotsAllocated(o, i_స్థానం, అంకె_Slots);
 }
 
 
-static
-M3Result AllocateSlotsWithinRange (IM3Compilation o, u16* o_slot, m3type_t i_type, u16 i_startSlot, u16 i_endSlot)
+స్థిర
+M3_ఫలితం AllocateSlotsWithinRange (IM3Compilation o, u16* o_స్థానం, m3type_t i_type, u16 i_ప్రారంభం_స్థానం, u16 i_చివర_స్థానం)
 {
-    M3Result result = m3Err_functionStackOverflow;
+    M3_ఫలితం ఫలితం = m3_Err_function_దొంతర_అధికప్రవాహం;
 
-    u16 numSlots     = GetTypeNumSlots(i_type);
-    u16 searchOffset = numSlots - 1;
+    u16 అంకె_Slots     = Get_Type_అంకె_Slots(i_type);
+    u16 శోధన_స్థానభ్రంశం = అంకె_Slots - 1;
 
-    AlignSlotToType(&i_startSlot, i_type);
+    Align_స్థానం_గమ్యం_Type(&i_ప్రారంభం_స్థానం, i_type);
 
     // search for 1 or 2 consecutive slots in the execution stack
-    u16 i = i_startSlot;
-    while (i + searchOffset < i_endSlot) {
-        if (i + searchOffset < d_m3MaxFunctionSlots and o->m3Slots[i] == 0 and o->m3Slots[i + searchOffset] == 0) {
-            MarkSlotsAllocated(o, i, numSlots);
+    u16 i = i_ప్రారంభం_స్థానం;
+    అయితే (i + శోధన_స్థానభ్రంశం < i_చివర_స్థానం) {
+        ఒకవేళ (i + శోధన_స్థానభ్రంశం < d_m3MaxFunctionSlots and o->m3Slots[i] == 0 and o->m3Slots[i + శోధన_స్థానభ్రంశం] == 0) {
+            MarkSlotsAllocated(o, i, అంకె_Slots);
 
-            *o_slot = i;
-            result  = m3Err_none;
-            break;
+            *o_స్థానం = i;
+            ఫలితం  = m3Err_none;
+            ఆపు;
         }
 
         // keep 2-slot allocations even-aligned
-        i += numSlots;
+        i += అంకె_Slots;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static inline
-M3Result AllocateSlots (IM3Compilation o, u16* o_slot, m3type_t i_type)
+స్థిర అంతఃవరుస
+M3_ఫలితం AllocateSlots (IM3Compilation o, u16* o_స్థానం, m3type_t i_type)
 {
-    return AllocateSlotsWithinRange(o, o_slot, i_type, o->slotFirstDynamicIndex, d_m3MaxFunctionSlots);
+    తిరిగి AllocateSlotsWithinRange(o, o_స్థానం, i_type, o->స్థానం_మొదటి_Dynamic_సూచీ, d_m3MaxFunctionSlots);
 }
 
-static inline
-M3Result AllocateConstantSlots (IM3Compilation o, u16* o_slot, m3type_t i_type)
+స్థిర అంతఃవరుస
+M3_ఫలితం AllocateConstantSlots (IM3Compilation o, u16* o_స్థానం, m3type_t i_type)
 {
-    u16 maxTableIndex = o->slotFirstConstIndex + d_m3MaxConstantTableSize;
-    return AllocateSlotsWithinRange(o, o_slot, i_type, o->slotFirstConstIndex, M3_MIN(o->slotFirstDynamicIndex, maxTableIndex));
+    u16 max_పట్టిక_సూచీ = o->స్థానం_మొదటి_Const_సూచీ + d_m3_Max_Constant_పట్టిక_కొలత;
+    తిరిగి AllocateSlotsWithinRange(o, o_స్థానం, i_type, o->స్థానం_మొదటి_Const_సూచీ, M3_MIN(o->స్థానం_మొదటి_Dynamic_సూచీ, max_పట్టిక_సూచీ));
 }
 
 
 // TOQUE: this usage count system could be eliminated. real world code doesn't frequently trigger it.  just copy to multiple
 // unique slots.
-static inline
-M3Result IncrementSlotUsageCount (IM3Compilation o, u16 i_slot)
-{                                                                                       d_m3Assert (i_slot < d_m3MaxFunctionSlots);
-    M3Result result = m3Err_none;                                                       d_m3Assert (o->m3Slots [i_slot] > 0);
+స్థిర అంతఃవరుస
+M3_ఫలితం Increment_స్థానం_Usage_లెక్క (IM3Compilation o, u16 i_స్థానం)
+{                                                                                       d_m3Assert (i_స్థానం < d_m3MaxFunctionSlots);
+    M3_ఫలితం ఫలితం = m3Err_none;                                                       d_m3Assert (o->m3Slots [i_స్థానం] > 0);
 
     // OPTZ (memory): 'm3Slots' could still be fused with 'typeStack' if 4 bits were used to indicate: [0,1,2,many]. The many-case
     // would scan 'wasmStack' to determine the actual usage count
-    if (M3_LIKELY(o->m3Slots[i_slot] < 0xFF)) {
-        o->m3Slots[i_slot]++;
-    } else {
-        result = "slot usage count overflow";
+    ఒకవేళ (M3_LIKELY(o->m3Slots[i_స్థానం] < 0xFF)) {
+        o->m3Slots[i_స్థానం]++;
+    } లేకపోతే {
+        ఫలితం = "slot usage count overflow";
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static inline
-void DeallocateSlot (IM3Compilation o, i16 i_slot, m3type_t i_type)
-{                                                                                       d_m3Assert (i_slot >= o->slotFirstDynamicIndex);
-                                                                                        d_m3Assert (i_slot < o->slotMaxAllocatedIndexPlusOne);
-    for (u16 i = 0; i < GetTypeNumSlots(i_type); ++i, ++i_slot) {                       d_m3Assert (o->m3Slots [i_slot]);
-        --o->m3Slots[i_slot];
+స్థిర అంతఃవరుస
+శూన్య Deallocate_స్థానం (IM3Compilation o, i16 i_స్థానం, m3type_t i_type)
+{                                                                                       d_m3Assert (i_స్థానం >= o->స్థానం_మొదటి_Dynamic_సూచీ);
+                                                                                        d_m3Assert (i_స్థానం < o->స్థానం_Max_Allocated_సూచీ_Plus_One);
+    కొరకు (u16 i = 0; i < Get_Type_అంకె_Slots(i_type); ++i, ++i_స్థానం) {                       d_m3Assert (o->m3Slots [i_స్థానం]);
+        --o->m3Slots[i_స్థానం];
     }
 }
 
 
-static inline
-bool IsRegisterTypeAllocated (IM3Compilation o, u8 i_type)
+స్థిర అంతఃవరుస
+bool Is_రిజిస్టరు_Type_Allocated (IM3Compilation o, u8 i_type)
 {
-    return IsRegisterAllocated(o, IsFpType(i_type));
+    తిరిగి Is_రిజిస్టరు_Allocated(o, IsFpType(i_type));
 }
 
-static inline
-void AllocateRegister (IM3Compilation o, u32 i_register, u16 i_stackIndex)
-{                                                                                       d_m3Assert (not IsRegisterAllocated (o, i_register));
-    o->regStackIndexPlusOne[i_register] = i_stackIndex + 1;
+స్థిర అంతఃవరుస
+శూన్య Allocate_రిజిస్టరు (IM3Compilation o, u32 i_రిజిస్టరు, u16 i_దొంతర_సూచీ)
+{                                                                                       d_m3Assert (not Is_రిజిస్టరు_Allocated (o, i_రిజిస్టరు));
+    o->reg_దొంతర_సూచీ_Plus_One[i_రిజిస్టరు] = i_దొంతర_సూచీ + 1;
 }
 
-static inline
-void DeallocateRegister (IM3Compilation o, u32 i_register)
-{                                                                                       d_m3Assert (IsRegisterAllocated (o, i_register));
-    o->regStackIndexPlusOne[i_register] = c_m3RegisterUnallocated;
+స్థిర అంతఃవరుస
+శూన్య Deallocate_రిజిస్టరు (IM3Compilation o, u32 i_రిజిస్టరు)
+{                                                                                       d_m3Assert (Is_రిజిస్టరు_Allocated (o, i_రిజిస్టరు));
+    o->reg_దొంతర_సూచీ_Plus_One[i_రిజిస్టరు] = c_m3_రిజిస్టరు_Unallocated;
 }
 
-static inline
-u16 GetRegisterStackIndex (IM3Compilation o, u32 i_register)
-{                                                                                       d_m3Assert (IsRegisterAllocated (o, i_register));
-    return o->regStackIndexPlusOne[i_register] - 1;
+స్థిర అంతఃవరుస
+u16 Get_రిజిస్టరు_దొంతర_సూచీ (IM3Compilation o, u32 i_రిజిస్టరు)
+{                                                                                       d_m3Assert (Is_రిజిస్టరు_Allocated (o, i_రిజిస్టరు));
+    తిరిగి o->reg_దొంతర_సూచీ_Plus_One[i_రిజిస్టరు] - 1;
 }
 
-u16 GetMaxUsedSlotPlusOne (IM3Compilation o)
+u16 Get_Max_వాడిన_స్థానం_Plus_One (IM3Compilation o)
 {
-    while (o->slotMaxAllocatedIndexPlusOne > o->slotFirstDynamicIndex) {
-        if (IsSlotAllocated(o, o->slotMaxAllocatedIndexPlusOne - 1)) {
-            break;
+    అయితే (o->స్థానం_Max_Allocated_సూచీ_Plus_One > o->స్థానం_మొదటి_Dynamic_సూచీ) {
+        ఒకవేళ (Is_స్థానం_Allocated(o, o->స్థానం_Max_Allocated_సూచీ_Plus_One - 1)) {
+            ఆపు;
         }
 
-        o->slotMaxAllocatedIndexPlusOne--;
+        o->స్థానం_Max_Allocated_సూచీ_Plus_One--;
     }
 
-#ifdef DEBUG
-    u16 maxSlot = o->slotMaxAllocatedIndexPlusOne;
-    while (maxSlot < d_m3MaxFunctionSlots) {
-        d_m3Assert(o->m3Slots[maxSlot] == 0);
-        maxSlot++;
+#నిర్వచితమైతే DEBUG
+    u16 max_స్థానం = o->స్థానం_Max_Allocated_సూచీ_Plus_One;
+    అయితే (max_స్థానం < d_m3MaxFunctionSlots) {
+        d_m3Assert(o->m3Slots[max_స్థానం] == 0);
+        max_స్థానం++;
     }
-#endif
+#అయితే_ముగింపు
 
-    return o->slotMaxAllocatedIndexPlusOne;
+    తిరిగి o->స్థానం_Max_Allocated_సూచీ_Plus_One;
 }
 
-static
-M3Result PreserveRegisterIfOccupied (IM3Compilation o, m3type_t i_registerType)
+స్థిర
+M3_ఫలితం Preserve_రిజిస్టరు_If_Occupied (IM3Compilation o, m3type_t i_రిజిస్టరు_Type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 regSelect = IsFpType(i_registerType);
+    u32 regSelect = IsFpType(i_రిజిస్టరు_Type);
 
-    if (IsRegisterAllocated(o, regSelect)) {
-        u16 stackIndex = GetRegisterStackIndex(o, regSelect);
-        DeallocateRegister(o, regSelect);
+    ఒకవేళ (Is_రిజిస్టరు_Allocated(o, regSelect)) {
+        u16 దొంతర_సూచీ = Get_రిజిస్టరు_దొంతర_సూచీ(o, regSelect);
+        Deallocate_రిజిస్టరు(o, regSelect);
 
-        m3type_t type = GetStackTypeFromBottom(o, stackIndex);
+        m3type_t type = Get_దొంతర_Type_From_Bottom(o, దొంతర_సూచీ);
 
         // and point to a exec slot
-        u16 slot = c_slotUnused;
-_       (AllocateSlots(o, &slot, type));
-        o->wasmStack[stackIndex] = slot;
+        u16 స్థానం = c_స్థానం_వాడని;
+_       (AllocateSlots(o, &స్థానం, type));
+        o->wasm_దొంతర[దొంతర_సూచీ] = స్థానం;
 
         // Ensure type is within the valid range
-        if (M3_LIKELY(BaseTypeOf(type) < c_m3Type_count)) {
-_           (EmitOp(o, c_setSetOps[BaseTypeOf(type)]));
-        } else {
+        ఒకవేళ (M3_LIKELY(పునాది_Type_యొక్క(type) < c_m3_Type_లెక్క)) {
+_           (EmitOp(o, c_సమితి_సమితి_Ops[పునాది_Type_యొక్క(type)]));
+        } లేకపోతే {
             _throw(m3Err_unknownType);
         }
 
-        EmitSlotOffset(o, slot);
+        Emit_స్థానం_స్థానభ్రంశం(o, స్థానం);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // all values must be in slots before entering loop, if, and else blocks
 // otherwise they'd end up preserve-copied in the block to probably different locations (if/else)
-static inline
-M3Result PreserveRegisters (IM3Compilation o)
+స్థిర అంతఃవరుస
+M3_ఫలితం PreserveRegisters (IM3Compilation o)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-_   (PreserveRegisterIfOccupied(o, c_m3Type_f64));
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_f64));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result PreserveNonTopRegisters (IM3Compilation o)
+స్థిర
+M3_ఫలితం Preserve_Non_శిఖరం_Registers (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    i16 stackTop = GetStackTopIndex(o);
+    i16 దొంతర_శిఖరం = Get_దొంతర_శిఖరం_సూచీ(o);
 
-    if (stackTop >= 0) {
-        if (IsRegisterAllocated(o, 0))     // r0
+    ఒకవేళ (దొంతర_శిఖరం >= 0) {
+        ఒకవేళ (Is_రిజిస్టరు_Allocated(o, 0))     // r0
         {
-            if (GetRegisterStackIndex(o, 0) != stackTop) {
-_               (PreserveRegisterIfOccupied(o, c_m3Type_i64));
+            ఒకవేళ (Get_రిజిస్టరు_దొంతర_సూచీ(o, 0) != దొంతర_శిఖరం) {
+_               (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
             }
         }
 
-        if (IsRegisterAllocated(o, 1))     // fp0
+        ఒకవేళ (Is_రిజిస్టరు_Allocated(o, 1))     // fp0
         {
-            if (GetRegisterStackIndex(o, 1) != stackTop) {
-_               (PreserveRegisterIfOccupied(o, c_m3Type_f64));
+            ఒకవేళ (Get_రిజిస్టరు_దొంతర_సూచీ(o, 1) != దొంతర_శిఖరం) {
+_               (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_f64));
             }
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
-static
-M3Result Push (IM3Compilation o, m3type_t i_type, u16 i_slot)
+స్థిర
+M3_ఫలితం నెట్టు (IM3Compilation o, m3type_t i_type, u16 i_స్థానం)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-#if !d_m3HasFloat
-    if (i_type == c_m3Type_f32 || i_type == c_m3Type_f64) {
-        return m3Err_unknownOpcode;
+#ఒకవేళ !d_m3HasFloat
+    ఒకవేళ (i_type == c_m3Type_f32 || i_type == c_m3Type_f64) {
+        తిరిగి m3Err_unknownOpcode;
     }
-#endif
+#అయితే_ముగింపు
 
-    if (M3_UNLIKELY(o->stackIndex >= d_m3MaxFunctionStackHeight)) {
-        return m3Err_functionStackOverflow;
-    }
-
-    u16 stackIndex = o->stackIndex++;                                       // printf ("push: %d\n", (i32) i);
-
-    o->wasmStack[stackIndex] = i_slot;
-    o->typeStack[stackIndex] = i_type;
-
-    if (IsRegisterSlotAlias(i_slot)) {
-        u32 regSelect = IsFpRegisterSlotAlias(i_slot);
-        AllocateRegister(o, regSelect, stackIndex);
+    ఒకవేళ (M3_UNLIKELY(o->దొంతర_సూచీ >= d_m3_Max_Function_దొంతర_ఎత్తు)) {
+        తిరిగి m3_Err_function_దొంతర_అధికప్రవాహం;
     }
 
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    u16 దొంతర_సూచీ = o->దొంతర_సూచీ++;                                       // printf ("push: %d\n", (i32) i);
+
+    o->wasm_దొంతర[దొంతర_సూచీ] = i_స్థానం;
+    o->type_దొంతర[దొంతర_సూచీ] = i_type;
+
+    ఒకవేళ (Is_రిజిస్టరు_స్థానం_Alias(i_స్థానం)) {
+        u32 regSelect = Is_Fp_రిజిస్టరు_స్థానం_Alias(i_స్థానం);
+        Allocate_రిజిస్టరు(o, regSelect, దొంతర_సూచీ);
     }
 
-    return result;
+    ఒకవేళ (d_m3_Log_Wasm_దొంతర) {
+        dump_type_దొంతర(o);
+    }
+
+    తిరిగి ఫలితం;
 }
 
-static inline
-M3Result PushRegister (IM3Compilation o, m3type_t i_type)
+స్థిర అంతఃవరుస
+M3_ఫలితం నెట్టు_రిజిస్టరు (IM3Compilation o, m3type_t i_type)
 {
-    M3Result result = m3Err_none;                                                       d_m3Assert ((u16) d_m3Reg0SlotAlias > (u16) d_m3MaxFunctionSlots);
-    u16      slot   = IsFpType(i_type) ? d_m3Fp0SlotAlias : d_m3Reg0SlotAlias;          d_m3Assert (i_type or IsStackPolymorphic (o));
+    M3_ఫలితం ఫలితం = m3Err_none;                                                       d_m3Assert ((u16) d_m3_Reg0_స్థానం_Alias > (u16) d_m3MaxFunctionSlots);
+    u16      స్థానం   = IsFpType(i_type) ? d_m3_Fp0_స్థానం_Alias : d_m3_Reg0_స్థానం_Alias;          d_m3Assert (i_type or Is_దొంతర_Polymorphic (o));
 
-_   (Push(o, i_type, slot));
+_   (నెట్టు(o, i_type, స్థానం));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Pop (IM3Compilation o)
+స్థిర
+M3_ఫలితం తీయి (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (M3_LIKELY(o->stackIndex > o->block.blockStackIndex)) {
-        o->stackIndex--;                                                //  printf ("pop: %d\n", (i32) o->stackIndex);
+    ఒకవేళ (M3_LIKELY(o->దొంతర_సూచీ > o->ఖండం.ఖండం_దొంతర_సూచీ)) {
+        o->దొంతర_సూచీ--;                                                //  printf ("pop: %d\n", (i32) o->stackIndex);
 
-        u16      slot = o->wasmStack[o->stackIndex];
-        m3type_t type = o->typeStack[o->stackIndex];
+        u16      స్థానం = o->wasm_దొంతర[o->దొంతర_సూచీ];
+        m3type_t type = o->type_దొంతర[o->దొంతర_సూచీ];
 
-        if (IsRegisterSlotAlias(slot)) {
-            u32 regSelect = IsFpRegisterSlotAlias(slot);
-            DeallocateRegister(o, regSelect);
-        } else if (M3_UNLIKELY(slot >= o->slotMaxAllocatedIndexPlusOne)) {
-            return m3Err_functionStackUnderrun; // Return error for invalid slot indices
-        } else if (slot >= o->slotFirstDynamicIndex) {
-            DeallocateSlot(o, slot, type);
+        ఒకవేళ (Is_రిజిస్టరు_స్థానం_Alias(స్థానం)) {
+            u32 regSelect = Is_Fp_రిజిస్టరు_స్థానం_Alias(స్థానం);
+            Deallocate_రిజిస్టరు(o, regSelect);
+        } లేకపోతే ఒకవేళ (M3_UNLIKELY(స్థానం >= o->స్థానం_Max_Allocated_సూచీ_Plus_One)) {
+            తిరిగి m3_Err_function_దొంతర_Underrun; // Return error for invalid slot indices
+        } లేకపోతే ఒకవేళ (స్థానం >= o->స్థానం_మొదటి_Dynamic_సూచీ) {
+            Deallocate_స్థానం(o, స్థానం, type);
         }
-    } else if (not IsStackPolymorphic(o)) {
-        result = m3Err_functionStackUnderrun;
+    } లేకపోతే ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        ఫలితం = m3_Err_function_దొంతర_Underrun;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result PopType (IM3Compilation o, m3type_t i_type)
+స్థిర
+M3_ఫలితం తీయి_Type (IM3Compilation o, m3type_t i_type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    m3type_t topType = GetStackTopType(o);
+    m3type_t శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
 
-    if (M3_LIKELY(IsSubTypeOf(topType, i_type) or o->block.isPolymorphic)) {
-_       (Pop(o));
-    } else {
+    ఒకవేళ (M3_LIKELY(Is_Sub_Type_యొక్క(శిఖరం_Type, i_type) or o->ఖండం.isPolymorphic)) {
+_       (తీయి(o));
+    } లేకపోతే {
         _throw(m3Err_typeMismatch);
     }
 
     _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result _PushAllocatedSlotAndEmit (IM3Compilation o, m3type_t i_type, bool i_doEmit)
+స్థిర
+M3_ఫలితం నెట్టు_Allocated_స్థానం_And_Emit (IM3Compilation o, m3type_t i_type, bool i_doEmit)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u16 slot = c_slotUnused;
+    u16 స్థానం = c_స్థానం_వాడని;
 
-_   (AllocateSlots(o, &slot, i_type));
-_   (Push(o, i_type, slot));
+_   (AllocateSlots(o, &స్థానం, i_type));
+_   (నెట్టు(o, i_type, స్థానం));
 
-    if (i_doEmit) {
-        EmitSlotOffset(o, slot);
+    ఒకవేళ (i_doEmit) {
+        Emit_స్థానం_స్థానభ్రంశం(o, స్థానం);
     }
 
     //    printf ("push: %d\n", (u32) slot);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static inline
-M3Result PushAllocatedSlotAndEmit (IM3Compilation o, m3type_t i_type)
+స్థిర అంతఃవరుస
+M3_ఫలితం నెట్టు_Allocated_స్థానం_And_Emit_2 (IM3Compilation o, m3type_t i_type)
 {
-    return _PushAllocatedSlotAndEmit(o, i_type, true);
+    తిరిగి నెట్టు_Allocated_స్థానం_And_Emit(o, i_type, true);
 }
 
-static inline
-M3Result PushAllocatedSlot (IM3Compilation o, m3type_t i_type)
+స్థిర అంతఃవరుస
+M3_ఫలితం నెట్టు_Allocated_స్థానం (IM3Compilation o, m3type_t i_type)
 {
-    return _PushAllocatedSlotAndEmit(o, i_type, false);
+    తిరిగి నెట్టు_Allocated_స్థానం_And_Emit(o, i_type, false);
 }
 
-static
-M3Result PushConst (IM3Compilation o, u64 i_word, m3type_t i_type)
+స్థిర
+M3_ఫలితం నెట్టు_Const (IM3Compilation o, u64 i_మాట, m3type_t i_type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // When compile-walking a constant expression without emitting there is no
     // constant table to place the value in, but the type still has to land on
     // the stack: extended-const arithmetic downstream consumes it.
-    if (M3_UNLIKELY(!o->page)) {
-        return PushAllocatedSlot(o, i_type);
+    ఒకవేళ (M3_UNLIKELY(!o->పుట)) {
+        తిరిగి నెట్టు_Allocated_స్థానం(o, i_type);
     }
 
-    bool matchFound  = false;
-    bool is64BitType = Is64BitType(i_type);
+    bool సరిపోలిక_దొరికింది  = false;
+    bool is64_బిట్టు_Type = Is64_బిట్టు_Type(i_type);
 
-    u16 numRequiredSlots  = GetTypeNumSlots(i_type);
-    u16 numUsedConstSlots = o->slotMaxConstIndex - o->slotFirstConstIndex;
+    u16 అంకె_Required_Slots  = Get_Type_అంకె_Slots(i_type);
+    u16 అంకె_వాడిన_Const_Slots = o->స్థానం_Max_Const_సూచీ - o->స్థానం_మొదటి_Const_సూచీ;
 
     // search for duplicate matching constant slot to reuse
-    if (numRequiredSlots == 2 and numUsedConstSlots >= 2) {
-        u16 firstConstSlot = o->slotFirstConstIndex;
-        AlignSlotToType(&firstConstSlot, c_m3Type_i64);
+    ఒకవేళ (అంకె_Required_Slots == 2 and అంకె_వాడిన_Const_Slots >= 2) {
+        u16 మొదటి_Const_స్థానం = o->స్థానం_మొదటి_Const_సూచీ;
+        Align_స్థానం_గమ్యం_Type(&మొదటి_Const_స్థానం, c_m3Type_i64);
 
-        for (u16 slot = firstConstSlot; slot < o->slotMaxConstIndex - 1; slot += 2) {
-            if (IsSlotAllocated(o, slot) and IsSlotAllocated(o, slot + 1)) {
+        కొరకు (u16 స్థానం = మొదటి_Const_స్థానం; స్థానం < o->స్థానం_Max_Const_సూచీ - 1; స్థానం += 2) {
+            ఒకవేళ (Is_స్థానం_Allocated(o, స్థానం) and Is_స్థానం_Allocated(o, స్థానం + 1)) {
                 u64 constant;
-                memcpy(&constant, &o->constants[slot - o->slotFirstConstIndex], sizeof(constant));
+                జ్ఞాపకం_నకలు(&constant, &o->constants[స్థానం - o->స్థానం_మొదటి_Const_సూచీ], పరిమాణం(constant));
 
-                if (constant == i_word) {
-                    matchFound = true;
-_                   (Push(o, i_type, slot));
-                    break;
+                ఒకవేళ (constant == i_మాట) {
+                    సరిపోలిక_దొరికింది = true;
+_                   (నెట్టు(o, i_type, స్థానం));
+                    ఆపు;
                 }
             }
         }
-    } else if (numRequiredSlots == 1) {
-        for (u16 i = 0; i < numUsedConstSlots; ++i) {
-            u16 slot = o->slotFirstConstIndex + i;
+    } లేకపోతే ఒకవేళ (అంకె_Required_Slots == 1) {
+        కొరకు (u16 i = 0; i < అంకె_వాడిన_Const_Slots; ++i) {
+            u16 స్థానం = o->స్థానం_మొదటి_Const_సూచీ + i;
 
-            if (IsSlotAllocated(o, slot)) {
+            ఒకవేళ (Is_స్థానం_Allocated(o, స్థానం)) {
                 bool matches;
-                if (is64BitType) {
+                ఒకవేళ (is64_బిట్టు_Type) {
                     u64 constant;
-                    memcpy(&constant, &o->constants[i], sizeof(constant));
-                    matches = (constant == i_word);
-                } else {
+                    జ్ఞాపకం_నకలు(&constant, &o->constants[i], పరిమాణం(constant));
+                    matches = (constant == i_మాట);
+                } లేకపోతే {
                     u32 constant;
-                    memcpy(&constant, &o->constants[i], sizeof(constant));
-                    matches = (constant == i_word);
+                    జ్ఞాపకం_నకలు(&constant, &o->constants[i], పరిమాణం(constant));
+                    matches = (constant == i_మాట);
                 }
-                if (matches) {
-                    matchFound = true;
-_                   (Push(o, i_type, slot));
-                    break;
+                ఒకవేళ (matches) {
+                    సరిపోలిక_దొరికింది = true;
+_                   (నెట్టు(o, i_type, స్థానం));
+                    ఆపు;
                 }
             }
         }
     }
 
-    if (not matchFound) {
-        u16 slot = c_slotUnused;
-        result   = AllocateConstantSlots(o, &slot, i_type);
+    ఒకవేళ (not సరిపోలిక_దొరికింది) {
+        u16 స్థానం = c_స్థానం_వాడని;
+        ఫలితం   = AllocateConstantSlots(o, &స్థానం, i_type);
 
-        if (result || slot == c_slotUnused) // no more constant table space; use inline constants
+        ఒకవేళ (ఫలితం || స్థానం == c_స్థానం_వాడని) // no more constant table space; use inline constants
         {
-            result = m3Err_none;
+            ఫలితం = m3Err_none;
 
-            if (is64BitType) {
+            ఒకవేళ (is64_బిట్టు_Type) {
 _               (EmitOp(o, op_Const64));
-                EmitWord64(o->page, i_word);
-            } else {
+                EmitWord64(o->పుట, i_మాట);
+            } లేకపోతే {
 _               (EmitOp(o, op_Const32));
-                EmitWord32(o->page, (u32)i_word);
+                EmitWord32(o->పుట, (u32)i_మాట);
             }
 
-_           (PushAllocatedSlotAndEmit(o, i_type));
-        } else {
-            u16 constTableIndex = slot - o->slotFirstConstIndex;
+_           (నెట్టు_Allocated_స్థానం_And_Emit_2(o, i_type));
+        } లేకపోతే {
+            u16 const_పట్టిక_సూచీ = స్థానం - o->స్థానం_మొదటి_Const_సూచీ;
 
-            d_m3Assert(constTableIndex < d_m3MaxConstantTableSize);
+            d_m3Assert(const_పట్టిక_సూచీ < d_m3_Max_Constant_పట్టిక_కొలత);
 
-            if (is64BitType) {
-                memcpy(&o->constants[constTableIndex], &i_word, sizeof(i_word));
-            } else {
-                u32 word32 = (u32)i_word;
-                memcpy(&o->constants[constTableIndex], &word32, sizeof(word32));
+            ఒకవేళ (is64_బిట్టు_Type) {
+                జ్ఞాపకం_నకలు(&o->constants[const_పట్టిక_సూచీ], &i_మాట, పరిమాణం(i_మాట));
+            } లేకపోతే {
+                u32 word32 = (u32)i_మాట;
+                జ్ఞాపకం_నకలు(&o->constants[const_పట్టిక_సూచీ], &word32, పరిమాణం(word32));
             }
 
-_           (Push(o, i_type, slot));
+_           (నెట్టు(o, i_type, స్థానం));
 
-            o->slotMaxConstIndex = M3_MAX(slot + numRequiredSlots, o->slotMaxConstIndex);
+            o->స్థానం_Max_Const_సూచీ = M3_MAX(స్థానం + అంకె_Required_Slots, o->స్థానం_Max_Const_సూచీ);
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static inline
-M3Result EmitSlotNumOfStackTopAndPop (IM3Compilation o)
+స్థిర అంతఃవరుస
+M3_ఫలితం Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి (IM3Compilation o)
 {
     // no emit if value is in register
-    if (IsStackTopInSlot(o)) {
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_స్థానం(o)) {
+        Emit_స్థానం_స్థానభ్రంశం(o, Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o));
     }
 
-    return Pop(o);
+    తిరిగి తీయి(o);
 }
 
 
 // Or, maybe: EmitTrappingOp
-M3Result AddTrapRecord (IM3Compilation o)
+M3_ఫలితం కూడు_Trap_రికార్డు (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (o->function) {
+    ఒకవేళ (o->function) {
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result UnwindBlockStack (IM3Compilation o)
+స్థిర
+M3_ఫలితం Unwind_ఖండం_దొంతర (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 popCount = 0;
-    while (o->stackIndex > o->block.blockStackIndex) {
-_       (Pop(o));
-        ++popCount;
+    u32 తీయి_లెక్క = 0;
+    అయితే (o->దొంతర_సూచీ > o->ఖండం.ఖండం_దొంతర_సూచీ) {
+_       (తీయి(o));
+        ++తీయి_లెక్క;
     }
 
-    if (popCount) {
-        m3log(compile, "unwound stack top: %d", popCount);
+    ఒకవేళ (తీయి_లెక్క) {
+        m3log(compile, "unwound stack top: %d", తీయి_లెక్క);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static inline
-M3Result SetStackPolymorphic (IM3Compilation o)
+స్థిర అంతఃవరుస
+M3_ఫలితం సమితి_దొంతర_Polymorphic (IM3Compilation o)
 {
-    o->block.isPolymorphic = true;                              m3log (compile, "stack set polymorphic");
-    return UnwindBlockStack(o);
+    o->ఖండం.isPolymorphic = true;                              m3log (compile, "stack set polymorphic");
+    తిరిగి Unwind_ఖండం_దొంతర(o);
 }
 
-static
-void PatchBranches (IM3Compilation o)
+స్థిర
+శూన్య PatchBranches (IM3Compilation o)
 {
     InvalidateFold(o);         // patched branches land at the current pc
 
     pc_t pc = GetPC(o);
 
-    pc_t patches     = o->block.patches;
-    o->block.patches = NULL;
+    pc_t patches     = o->ఖండం.patches;
+    o->ఖండం.patches = ఖాళీ;
 
-    while (patches) {                                           m3log (compile, "patching location: %p to pc: %p", patches, pc);
-        pc_t next       = *(pc_t*)patches;
+    అయితే (patches) {                                           m3log (compile, "patching location: %p to pc: %p", patches, pc);
+        pc_t తదుపరి       = *(pc_t*)patches;
         *(pc_t*)patches = pc;
-        patches         = next;
+        patches         = తదుపరి;
     }
 }
 
 //-------------------------------------------------------------------------------------------------------------------------
 
-static
-M3Result CopyStackIndexToSlot (IM3Compilation o, u16 i_destSlot, u16 i_stackIndex)  // NoPushPop
+స్థిర
+M3_ఫలితం Copy_దొంతర_సూచీ_గమ్యం_స్థానం (IM3Compilation o, u16 i_dest_స్థానం, u16 i_దొంతర_సూచీ)  // NoPushPop
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     IM3Operation op;
 
-    m3type_t type       = GetStackTypeFromBottom(o, i_stackIndex);
-    bool     inRegister = IsStackIndexInRegister(o, i_stackIndex);
+    m3type_t type       = Get_దొంతర_Type_From_Bottom(o, i_దొంతర_సూచీ);
+    bool     లోపల_రిజిస్టరు = Is_దొంతర_సూచీ_లోపల_రిజిస్టరు(o, i_దొంతర_సూచీ);
 
-    if (inRegister) {
-        op = c_setSetOps[BaseTypeOf(type)];
-    } else {
-        op = Is64BitType(type) ? op_CopySlot_64 : op_CopySlot_32;
+    ఒకవేళ (లోపల_రిజిస్టరు) {
+        op = c_సమితి_సమితి_Ops[పునాది_Type_యొక్క(type)];
+    } లేకపోతే {
+        op = Is64_బిట్టు_Type(type) ? op_Copy_స్థానం_64 : op_Copy_స్థానం_32;
     }
 
 _   (EmitOp(o, op));
-    EmitSlotOffset(o, i_destSlot);
+    Emit_స్థానం_స్థానభ్రంశం(o, i_dest_స్థానం);
 
-    if (not inRegister) {
-        u16 srcSlot = GetSlotForStackIndex(o, i_stackIndex);
-        EmitSlotOffset(o, srcSlot);
+    ఒకవేళ (not లోపల_రిజిస్టరు) {
+        u16 src_స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, i_దొంతర_సూచీ);
+        Emit_స్థానం_స్థానభ్రంశం(o, src_స్థానం);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result CopyStackTopToSlot (IM3Compilation o, u16 i_destSlot)  // NoPushPop
+స్థిర
+M3_ఫలితం Copy_దొంతర_శిఖరం_గమ్యం_స్థానం (IM3Compilation o, u16 i_dest_స్థానం)  // NoPushPop
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    i16 stackTop;
-_   (GetStackTopIndexThrows(o, &stackTop));
-_   (CopyStackIndexToSlot(o, i_destSlot, (u16)stackTop));
+    i16 దొంతర_శిఖరం;
+_   (Get_దొంతర_శిఖరం_సూచీ_Throws(o, &దొంతర_శిఖరం));
+_   (Copy_దొంతర_సూచీ_గమ్యం_స్థానం(o, i_dest_స్థానం, (u16)దొంతర_శిఖరం));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
@@ -1466,108 +1466,108 @@ _   (CopyStackIndexToSlot(o, i_destSlot, (u16)stackTop));
 // TODO: consider getting rid of these specialized operations: PreserveSetSlot & PreserveCopySlot.
 // They likely just take up space (which seems to reduce performance) without improving performance.
 // => unconfirmed in preliminary testing.
-static
-M3Result PreservedCopyTopSlot (IM3Compilation o, u16 i_destSlot, u16 i_preserveSlot)
+స్థిర
+M3_ఫలితం Preserved_Copy_శిఖరం_స్థానం (IM3Compilation o, u16 i_dest_స్థానం, u16 i_preserve_స్థానం)
 {
-    M3Result result = m3Err_none;             d_m3Assert (i_destSlot != i_preserveSlot);
+    M3_ఫలితం ఫలితం = m3Err_none;             d_m3Assert (i_dest_స్థానం != i_preserve_స్థానం);
 
     IM3Operation op;
 
-    m3type_t type = GetStackTopType(o);
+    m3type_t type = Get_దొంతర_శిఖరం_Type(o);
 
-    if (IsStackTopInRegister(o)) {
-        op = c_preserveSetSlot[BaseTypeOf(type)];
-    } else {
-        op = Is64BitType(type) ? op_PreserveCopySlot_64 : op_PreserveCopySlot_32;
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+        op = c_preserve_సమితి_స్థానం[పునాది_Type_యొక్క(type)];
+    } లేకపోతే {
+        op = Is64_బిట్టు_Type(type) ? op_Preserve_Copy_స్థానం_64 : op_Preserve_Copy_స్థానం_32;
     }
 
 _   (EmitOp(o, op));
-    EmitSlotOffset(o, i_destSlot);
+    Emit_స్థానం_స్థానభ్రంశం(o, i_dest_స్థానం);
 
-    if (IsStackTopInSlot(o)) {
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_స్థానం(o)) {
+        Emit_స్థానం_స్థానభ్రంశం(o, Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o));
     }
 
-    EmitSlotOffset(o, i_preserveSlot);
+    Emit_స్థానం_స్థానభ్రంశం(o, i_preserve_స్థానం);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result CopyStackTopToRegister (IM3Compilation o, bool i_updateStack)
+స్థిర
+M3_ఫలితం Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు (IM3Compilation o, bool i_update_దొంతర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (IsStackTopInSlot(o)) {
-        m3type_t type = GetStackTopType(o);
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_స్థానం(o)) {
+        m3type_t type = Get_దొంతర_శిఖరం_Type(o);
 
-_       (PreserveRegisterIfOccupied(o, type));
+_       (Preserve_రిజిస్టరు_If_Occupied(o, type));
 
-        IM3Operation op = c_setRegisterOps[BaseTypeOf(type)];
+        IM3Operation op = c_సమితి_రిజిస్టరు_Ops[పునాది_Type_యొక్క(type)];
 
 _       (EmitOp(o, op));
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+        Emit_స్థానం_స్థానభ్రంశం(o, Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o));
 
-        if (i_updateStack) {
-_           (PopType(o, type));
-_           (PushRegister(o, type));
+        ఒకవేళ (i_update_దొంతర) {
+_           (తీయి_Type(o, type));
+_           (నెట్టు_రిజిస్టరు(o, type));
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // if local is unreferenced, o_preservedSlotNumber will be equal to localIndex on return
-static
-M3Result FindReferencedLocalWithinCurrentBlock (IM3Compilation o, u16* o_preservedSlotNumber, u32 i_localSlot)
+స్థిర
+M3_ఫలితం కనుగొను_Referenced_Local_Within_Current_ఖండం (IM3Compilation o, u16* o_preserved_స్థానం_సంఖ్య, u32 i_local_స్థానం)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    IM3CompilationScope scope = &o->block;
+    IM3CompilationScope scope = &o->ఖండం;
 
-    u16 startIndex = scope->blockStackIndex;
+    u16 ప్రారంభం_సూచీ = scope->ఖండం_దొంతర_సూచీ;
 
-    while (scope->opcode == c_waOp_block) {
+    అయితే (scope->opcode == c_wa_Op_ఖండం) {
         scope = scope->outer;
-        if (not scope) {
-            break;
+        ఒకవేళ (not scope) {
+            ఆపు;
         }
 
-        startIndex = scope->blockStackIndex;
+        ప్రారంభం_సూచీ = scope->ఖండం_దొంతర_సూచీ;
     }
 
-    *o_preservedSlotNumber = (u16)i_localSlot;
+    *o_preserved_స్థానం_సంఖ్య = (u16)i_local_స్థానం;
 
-    for (u32 i = startIndex; i < o->stackIndex; ++i) {
-        if (o->wasmStack[i] == i_localSlot) {
-            m3type_t type = GetStackTypeFromBottom(o, i);                         d_m3Assert (type != c_m3Type_none)
+    కొరకు (u32 i = ప్రారంభం_సూచీ; i < o->దొంతర_సూచీ; ++i) {
+        ఒకవేళ (o->wasm_దొంతర[i] == i_local_స్థానం) {
+            m3type_t type = Get_దొంతర_Type_From_Bottom(o, i);                         d_m3Assert (type != c_m3Type_none)
 
-            if (*o_preservedSlotNumber == i_localSlot) {
-_               (AllocateSlots(o, o_preservedSlotNumber, type));
-            } else {
+            ఒకవేళ (*o_preserved_స్థానం_సంఖ్య == i_local_స్థానం) {
+_               (AllocateSlots(o, o_preserved_స్థానం_సంఖ్య, type));
+            } లేకపోతే {
                 // A 64-bit value spans two slots, and allocating or releasing it
                 // counts both, so a second reference has to count both as well.
-                for (u16 s = 0; s < GetTypeNumSlots(type); ++s) {
-_                   (IncrementSlotUsageCount(o, (u16)(*o_preservedSlotNumber + s)));
+                కొరకు (u16 s = 0; s < Get_Type_అంకె_Slots(type); ++s) {
+_                   (Increment_స్థానం_Usage_లెక్క(o, (u16)(*o_preserved_స్థానం_సంఖ్య + s)));
                 }
             }
 
-            o->wasmStack[i] = *o_preservedSlotNumber;
+            o->wasm_దొంతర[i] = *o_preserved_స్థానం_సంఖ్య;
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result GetBlockScope (IM3Compilation o, IM3CompilationScope* o_scope, u32 i_depth)
+స్థిర
+M3_ఫలితం Get_ఖండం_Scope (IM3Compilation o, IM3CompilationScope* o_scope, u32 i_లోతు)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    IM3CompilationScope scope = &o->block;
+    IM3CompilationScope scope = &o->ఖండం;
 
-    while (i_depth--) {
+    అయితే (i_లోతు--) {
         scope = scope->outer;
         _throwif("invalid block depth", not scope);
     }
@@ -1575,240 +1575,240 @@ M3Result GetBlockScope (IM3Compilation o, IM3CompilationScope* o_scope, u32 i_de
     *o_scope = scope;
 
     _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result CopyStackSlotsR (IM3Compilation o, u16 i_targetSlotStackIndex, u16 i_stackIndex, u16 i_endStackIndex, u16 i_tempSlot)
+స్థిర
+M3_ఫలితం Copy_దొంతర_Slots_R (IM3Compilation o, u16 i_లక్ష్యం_స్థానం_దొంతర_సూచీ, u16 i_దొంతర_సూచీ, u16 i_చివర_దొంతర_సూచీ, u16 i_తాత్కాలిక_స్థానం)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (i_stackIndex < i_endStackIndex) {
-        u16 srcSlot = GetSlotForStackIndex(o, i_stackIndex);
+    ఒకవేళ (i_దొంతర_సూచీ < i_చివర_దొంతర_సూచీ) {
+        u16 src_స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, i_దొంతర_సూచీ);
 
-        m3type_t type      = GetStackTypeFromBottom(o, i_stackIndex);
-        u16      numSlots  = GetTypeNumSlots(type);
-        u16      extraSlot = numSlots - 1;
+        m3type_t type      = Get_దొంతర_Type_From_Bottom(o, i_దొంతర_సూచీ);
+        u16      అంకె_Slots  = Get_Type_అంకె_Slots(type);
+        u16      extra_స్థానం = అంకె_Slots - 1;
 
-        u16 targetSlot = GetSlotForStackIndex(o, i_targetSlotStackIndex);
+        u16 లక్ష్యం_స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, i_లక్ష్యం_స్థానం_దొంతర_సూచీ);
 
-        u16 preserveIndex = i_stackIndex;
-        u16 collisionSlot = srcSlot;
+        u16 preserve_సూచీ = i_దొంతర_సూచీ;
+        u16 collision_స్థానం = src_స్థానం;
 
-        if (targetSlot != srcSlot) {
+        ఒకవేళ (లక్ష్యం_స్థానం != src_స్థానం) {
             // search for collisions
-            u16 checkIndex = i_stackIndex + 1;
-            while (checkIndex < i_endStackIndex) {
-                u16 otherSlot1 = GetSlotForStackIndex(o, checkIndex);
-                u16 otherSlot2 = GetExtraSlotForStackIndex(o, checkIndex);
+            u16 check_సూచీ = i_దొంతర_సూచీ + 1;
+            అయితే (check_సూచీ < i_చివర_దొంతర_సూచీ) {
+                u16 otherSlot1 = Get_స్థానం_For_దొంతర_సూచీ(o, check_సూచీ);
+                u16 otherSlot2 = Get_Extra_స్థానం_For_దొంతర_సూచీ(o, check_సూచీ);
 
-                if (targetSlot == otherSlot1 or
-                    targetSlot == otherSlot2 or
-                    targetSlot + extraSlot == otherSlot1) {
-                    _throwif(m3Err_functionStackOverflow, i_tempSlot >= d_m3MaxFunctionSlots);
+                ఒకవేళ (లక్ష్యం_స్థానం == otherSlot1 or
+                    లక్ష్యం_స్థానం == otherSlot2 or
+                    లక్ష్యం_స్థానం + extra_స్థానం == otherSlot1) {
+                    _throwif(m3_Err_function_దొంతర_అధికప్రవాహం, i_తాత్కాలిక_స్థానం >= d_m3MaxFunctionSlots);
 
-_                   (CopyStackIndexToSlot(o, i_tempSlot, checkIndex));
-                    o->wasmStack[checkIndex] = i_tempSlot;
-                    i_tempSlot += GetTypeNumSlots(c_m3Type_i64);
-                    TouchSlot(o, i_tempSlot - 1);
+_                   (Copy_దొంతర_సూచీ_గమ్యం_స్థానం(o, i_తాత్కాలిక_స్థానం, check_సూచీ));
+                    o->wasm_దొంతర[check_సూచీ] = i_తాత్కాలిక_స్థానం;
+                    i_తాత్కాలిక_స్థానం += Get_Type_అంకె_Slots(c_m3Type_i64);
+                    Touch_స్థానం(o, i_తాత్కాలిక_స్థానం - 1);
 
                     // restore this on the way back down
-                    preserveIndex = checkIndex;
-                    collisionSlot = otherSlot1;
+                    preserve_సూచీ = check_సూచీ;
+                    collision_స్థానం = otherSlot1;
 
-                    break;
+                    ఆపు;
                 }
 
-                ++checkIndex;
+                ++check_సూచీ;
             }
 
-_           (CopyStackIndexToSlot(o, targetSlot, i_stackIndex));                                                m3log (compile, " copying slot: %d to slot: %d", srcSlot, targetSlot);
-            o->wasmStack[i_stackIndex] = targetSlot;
+_           (Copy_దొంతర_సూచీ_గమ్యం_స్థానం(o, లక్ష్యం_స్థానం, i_దొంతర_సూచీ));                                                m3log (compile, " copying slot: %d to slot: %d", src_స్థానం, లక్ష్యం_స్థానం);
+            o->wasm_దొంతర[i_దొంతర_సూచీ] = లక్ష్యం_స్థానం;
         }
 
-_       (CopyStackSlotsR(o, i_targetSlotStackIndex + 1, i_stackIndex + 1, i_endStackIndex, i_tempSlot));
+_       (Copy_దొంతర_Slots_R(o, i_లక్ష్యం_స్థానం_దొంతర_సూచీ + 1, i_దొంతర_సూచీ + 1, i_చివర_దొంతర_సూచీ, i_తాత్కాలిక_స్థానం));
 
         // restore the stack state
-        o->wasmStack[i_stackIndex]  = srcSlot;
-        o->wasmStack[preserveIndex] = collisionSlot;
+        o->wasm_దొంతర[i_దొంతర_సూచీ]  = src_స్థానం;
+        o->wasm_దొంతర[preserve_సూచీ] = collision_స్థానం;
     }
 
     _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result ResolveBlockResults (IM3Compilation o, IM3CompilationScope i_targetBlock, bool i_isBranch)
+స్థిర
+M3_ఫలితం Resolve_ఖండం_Results (IM3Compilation o, IM3CompilationScope i_లక్ష్యం_ఖండం, bool i_isBranch)
 {
-    M3Result result = m3Err_none;
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    M3_ఫలితం ఫలితం = m3Err_none;
+    ఒకవేళ (d_m3_Log_Wasm_దొంతర) {
+        dump_type_దొంతర(o);
     }
 
-    bool isLoop = (i_targetBlock->opcode == c_waOp_loop and i_isBranch);
+    bool isLoop = (i_లక్ష్యం_ఖండం->opcode == c_waOp_loop and i_isBranch);
 
-    u16 numParams  = GetFuncTypeNumParams(i_targetBlock->type);
-    u16 numResults = GetFuncTypeNumResults(i_targetBlock->type);
+    u16 అంకె_Params  = Get_Func_Type_అంకె_Params(i_లక్ష్యం_ఖండం->type);
+    u16 అంకె_Results = Get_Func_Type_అంకె_Results(i_లక్ష్యం_ఖండం->type);
 
-    u16 slotRecords = i_targetBlock->exitStackIndex;
+    u16 స్థానం_రికార్డులు = i_లక్ష్యం_ఖండం->exit_దొంతర_సూచీ;
 
-    u16 numValues;
+    u16 అంకె_విలువలు;
 
-    if (not isLoop) {
-        numValues = numResults;
-        slotRecords += numParams;
-    } else {
-        numValues = numParams;
+    ఒకవేళ (not isLoop) {
+        అంకె_విలువలు = అంకె_Results;
+        స్థానం_రికార్డులు += అంకె_Params;
+    } లేకపోతే {
+        అంకె_విలువలు = అంకె_Params;
     }
 
-    u16 blockHeight = GetNumBlockValuesOnStack(o);
+    u16 ఖండం_ఎత్తు = Get_అంకె_ఖండం_విలువలు_On_దొంతర(o);
 
-    _throwif(m3Err_typeCountMismatch, i_isBranch ? (blockHeight < numValues) : (blockHeight != numValues));
+    _throwif(m3_Err_type_లెక్క_Mismatch, i_isBranch ? (ఖండం_ఎత్తు < అంకె_విలువలు) : (ఖండం_ఎత్తు != అంకె_విలువలు));
 
-    if (numValues) {
-        u16 endIndex     = GetStackTopIndex(o) + 1;
-        u16 numRemValues = numValues;
+    ఒకవేళ (అంకె_విలువలు) {
+        u16 చివర_సూచీ     = Get_దొంతర_శిఖరం_సూచీ(o) + 1;
+        u16 అంకె_Rem_విలువలు = అంకె_విలువలు;
 
         // The last result is taken from _fp0. See PushBlockResults.
-        if (not isLoop and IsFpType(GetStackTopType(o))) {
-_           (CopyStackTopToRegister(o, false));
-            --endIndex;
-            --numRemValues;
+        ఒకవేళ (not isLoop and IsFpType(Get_దొంతర_శిఖరం_Type(o))) {
+_           (Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు(o, false));
+            --చివర_సూచీ;
+            --అంకె_Rem_విలువలు;
         }
 
         // tempslot affects maxStackSlots, so can grow unnecess each time.
         // in practice, this is hardly ever hit.
-        u16 tempSlot = o->maxStackSlots;// GetMaxUsedSlotPlusOne (o); doesn't work cause can collide with slotRecords
-        AlignSlotToType(&tempSlot, c_m3Type_i64);
+        u16 తాత్కాలిక_స్థానం = o->max_దొంతర_Slots;// GetMaxUsedSlotPlusOne (o); doesn't work cause can collide with slotRecords
+        Align_స్థానం_గమ్యం_Type(&తాత్కాలిక_స్థానం, c_m3Type_i64);
 
-_       (CopyStackSlotsR(o, slotRecords, endIndex - numRemValues, endIndex, tempSlot));
+_       (Copy_దొంతర_Slots_R(o, స్థానం_రికార్డులు, చివర_సూచీ - అంకె_Rem_విలువలు, చివర_సూచీ, తాత్కాలిక_స్థానం));
 
-        if (d_m3LogWasmStack) {
-            dump_type_stack(o);
+        ఒకవేళ (d_m3_Log_Wasm_దొంతర) {
+            dump_type_దొంతర(o);
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-static
-M3Result ReturnValues (IM3Compilation o, IM3CompilationScope i_functionBlock, bool i_isBranch)
+స్థిర
+M3_ఫలితం Return_విలువలు (IM3Compilation o, IM3CompilationScope i_function_ఖండం, bool i_isBranch)
 {
-    M3Result result = m3Err_none;
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    M3_ఫలితం ఫలితం = m3Err_none;
+    ఒకవేళ (d_m3_Log_Wasm_దొంతర) {
+        dump_type_దొంతర(o);
     }
 
-    u16 numReturns  = GetFuncTypeNumResults(i_functionBlock->type);     // could just o->function too...
-    u16 blockHeight = GetNumBlockValuesOnStack(o);
+    u16 అంకె_Returns  = Get_Func_Type_అంకె_Results(i_function_ఖండం->type);     // could just o->function too...
+    u16 ఖండం_ఎత్తు = Get_అంకె_ఖండం_విలువలు_On_దొంతర(o);
 
-    if (not IsStackPolymorphic(o)) {
-        _throwif(m3Err_typeCountMismatch, i_isBranch ? (blockHeight < numReturns) : (blockHeight != numReturns));
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        _throwif(m3_Err_type_లెక్క_Mismatch, i_isBranch ? (ఖండం_ఎత్తు < అంకె_Returns) : (ఖండం_ఎత్తు != అంకె_Returns));
     }
 
-    if (numReturns) {
+    ఒకవేళ (అంకె_Returns) {
         // return slots like args are 64-bit aligned
-        u16 returnSlot = numReturns * c_ioSlotCount;
-        u16 stackTop   = GetStackTopIndex(o);
+        u16 return_స్థానం = అంకె_Returns * c_io_స్థానం_లెక్క;
+        u16 దొంతర_శిఖరం   = Get_దొంతర_శిఖరం_సూచీ(o);
 
-        for (u16 i = 0; i < numReturns; ++i) {
-            m3type_t returnType = GetFuncTypeResultType(i_functionBlock->type, numReturns - 1 - i);
+        కొరకు (u16 i = 0; i < అంకె_Returns; ++i) {
+            m3type_t returnType = Get_Func_Type_ఫలితం_Type(i_function_ఖండం->type, అంకె_Returns - 1 - i);
 
-            m3type_t stackType = GetStackTypeFromTop(o, i);  // using FromTop so that only dynamic items are checked
+            m3type_t దొంతర_Type = Get_దొంతర_Type_From_శిఖరం(o, i);  // using FromTop so that only dynamic items are checked
 
-            if (IsStackPolymorphic(o) and stackType == c_m3Type_none) {
-                stackType = returnType;
+            ఒకవేళ (Is_దొంతర_Polymorphic(o) and దొంతర_Type == c_m3Type_none) {
+                దొంతర_Type = returnType;
             }
 
-            _throwif(m3Err_typeMismatch, not IsSubTypeOf(stackType, returnType));
+            _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(దొంతర_Type, returnType));
 
-            if (not IsStackPolymorphic(o)) {
-                returnSlot -= c_ioSlotCount;
-_               (CopyStackIndexToSlot(o, returnSlot, stackTop--));
+            ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+                return_స్థానం -= c_io_స్థానం_లెక్క;
+_               (Copy_దొంతర_సూచీ_గమ్యం_స్థానం(o, return_స్థానం, దొంతర_శిఖరం--));
             }
         }
 
-        if (not i_isBranch) {
-            while (numReturns--) {
-_               (Pop(o));
+        ఒకవేళ (not i_isBranch) {
+            అయితే (అంకె_Returns--) {
+_               (తీయి(o));
             }
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 //-------------------------------------------------------------------------------------------------------------------------
 
-static
-M3Result Compile_Const_i32 (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Const_i32 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    i32 value;
-_   (ReadLEB_i32(&value, &o->wasm, o->wasmEnd));
-_   (PushConst(o, value, c_m3Type_i32));                        m3log (compile, d_indent " (const i32 = %" PRIi32 ")", get_indention_string (o), value);
-    _catch: return result;
+    i32 విలువ;
+_   (ReadLEB_i32(&విలువ, &o->wasm, o->wasm_చివర));
+_   (నెట్టు_Const(o, విలువ, c_m3Type_i32));                        m3log (compile, d_indent " (const i32 = %" PRIi32 ")", get_indention_string (o), విలువ);
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Const_i64 (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Const_i64 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    i64 value;
-_   (ReadLEB_i64(&value, &o->wasm, o->wasmEnd));
-_   (PushConst(o, value, c_m3Type_i64));                        m3log (compile, d_indent " (const i64 = %" PRIi64 ")", get_indention_string (o), value);
-    _catch: return result;
+    i64 విలువ;
+_   (ReadLEB_i64(&విలువ, &o->wasm, o->wasm_చివర));
+_   (నెట్టు_Const(o, విలువ, c_m3Type_i64));                        m3log (compile, d_indent " (const i64 = %" PRIi64 ")", get_indention_string (o), విలువ);
+    _catch: తిరిగి ఫలితం;
 }
 
 
-#if d_m3ImplementFloat
-static
-M3Result Compile_Const_f32 (IM3Compilation o, m3opcode_t i_opcode)
+#ఒకవేళ d_m3ImplementFloat
+స్థిర
+M3_ఫలితం Compile_Const_f32 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    union {
+    సంఘం {
         u32 u;
         f32 f;
-    } value = { 0 };
+    } విలువ = { 0 };
 
-_   (Read_f32(&value.f, &o->wasm, o->wasmEnd));                 m3log (compile, d_indent " (const f32 = %" PRIf32 ")", get_indention_string (o), value.f);
-_   (PushConst(o, value.u, c_m3Type_f32));
+_   (Read_f32(&విలువ.f, &o->wasm, o->wasm_చివర));                 m3log (compile, d_indent " (const f32 = %" PRIf32 ")", get_indention_string (o), విలువ.f);
+_   (నెట్టు_Const(o, విలువ.u, c_m3Type_f32));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Const_f64 (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Const_f64 (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    union {
+    సంఘం {
         u64 u;
         f64 f;
-    } value = { 0 };
+    } విలువ = { 0 };
 
-_   (Read_f64(&value.f, &o->wasm, o->wasmEnd));                 m3log (compile, d_indent " (const f64 = %" PRIf64 ")", get_indention_string (o), value.f);
-_   (PushConst(o, value.u, c_m3Type_f64));
+_   (Read_f64(&విలువ.f, &o->wasm, o->wasm_చివర));                 m3log (compile, d_indent " (const f64 = %" PRIf64 ")", get_indention_string (o), విలువ.f);
+_   (నెట్టు_Const(o, విలువ.u, c_m3Type_f64));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
-#endif
+#అయితే_ముగింపు
 
-static
-M3Result Compile_ExtendedOpcode (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_ExtendedOpcode (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     u32 opcode;
-_   (ReadLEB_u32(&opcode, &o->wasm, o->wasmEnd));               m3log (compile, d_indent " (%s: %" PRIu32 ")", get_indention_string (o), (i_opcode == c_waOp_atomic) ? "FE" : "FC", opcode);
+_   (ReadLEB_u32(&opcode, &o->wasm, o->wasm_చివర));               m3log (compile, d_indent " (%s: %" PRIu32 ")", get_indention_string (o), (i_opcode == c_waOp_atomic) ? "FE" : "FC", opcode);
 
     // m3opcode_t carries only the low byte, so a wider sub-opcode is unknown
     // here rather than something to truncate into range
-    _throwif(m3Err_unknownOpcode, opcode > (u32)((i_opcode == c_waOp_atomic) ? c_waOp_lastAtomic : c_waOp_lastExtended));
+    _throwif(m3Err_unknownOpcode, opcode > (u32)((i_opcode == c_waOp_atomic) ? c_wa_Op_చివరి_Atomic : c_wa_Op_చివరి_Extended));
 
     i_opcode = (m3opcode_t)((i_opcode << 8) | opcode);
 
@@ -1822,61 +1822,61 @@ _   (ReadLEB_u32(&opcode, &o->wasm, o->wasmEnd));               m3log (compile, 
 
 _   ((*compiler)(o, i_opcode));
 
-    o->previousOpcode = i_opcode;
+    o->మునుపటి_Opcode = i_opcode;
 
-    } _catch: return result;
+    } _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Return (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Return (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (not IsStackPolymorphic(o)) {
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
         IM3CompilationScope functionScope;
-_       (GetBlockScope(o, &functionScope, o->block.depth));
+_       (Get_ఖండం_Scope(o, &functionScope, o->ఖండం.లోతు));
 
-_       (ReturnValues(o, functionScope, true));
+_       (Return_విలువలు(o, functionScope, true));
 
 _       (EmitOp(o, op_Return));
 
-_       (SetStackPolymorphic(o));
+_       (సమితి_దొంతర_Polymorphic(o));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result ValidateBlockEnd (IM3Compilation o)
+స్థిర
+M3_ఫలితం Validate_ఖండం_చివర (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u16 numResults  = GetFuncTypeNumResults(o->block.type);
-    u16 blockHeight = GetNumBlockValuesOnStack(o);
+    u16 అంకె_Results  = Get_Func_Type_అంకె_Results(o->ఖండం.type);
+    u16 ఖండం_ఎత్తు = Get_అంకె_ఖండం_విలువలు_On_దొంతర(o);
 
-    if (not IsStackPolymorphic(o)) {
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
         // Spec: at block end, stack height must match the number of results
-        _throwif(m3Err_typeCountMismatch, blockHeight != numResults);
+        _throwif(m3_Err_type_లెక్క_Mismatch, ఖండం_ఎత్తు != అంకె_Results);
 
         // Spec: result types must match expected types
-        for (u16 i = 0; i < numResults; ++i) {
-            m3type_t expectedType = GetFuncTypeResultType(o->block.type, numResults - 1 - i);
-            m3type_t actualType   = GetStackTypeFromTop(o, i);
-            _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
+        కొరకు (u16 i = 0; i < అంకె_Results; ++i) {
+            m3type_t expectedType = Get_Func_Type_ఫలితం_Type(o->ఖండం.type, అంకె_Results - 1 - i);
+            m3type_t actualType   = Get_దొంతర_Type_From_శిఖరం(o, i);
+            _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(actualType, expectedType));
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_End (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_చివర (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;                   //dump_type_stack (o);
+    M3_ఫలితం ఫలితం = m3Err_none;                   //dump_type_stack (o);
 
     // function end:
-    if (o->block.depth == 0) {
-        ValidateBlockEnd(o);
+    ఒకవేళ (o->ఖండం.లోతు == 0) {
+        Validate_ఖండం_చివర(o);
 
         //      if (not IsStackPolymorphic (o))
         {
@@ -1884,217 +1884,217 @@ M3Result Compile_End (IM3Compilation o, m3opcode_t i_opcode)
             // has to be copied down to slot 0, where EvaluateExpression reads it
             // back. The non-emitting init-expr walk is skipped: it has no block
             // type to return against.
-            if (o->function or o->page) {
-_               (ReturnValues(o, &o->block, false));
+            ఒకవేళ (o->function or o->పుట) {
+_               (Return_విలువలు(o, &o->ఖండం, false));
             }
 
 _           (EmitOp(o, op_Return));
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-static
-M3Result Compile_SetLocal (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_సమితి_Local (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    u32 localIndex;
-_   (ReadLEB_u32(&localIndex, &o->wasm, o->wasmEnd));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), localIndex);
+    u32 local_సూచీ;
+_   (ReadLEB_u32(&local_సూచీ, &o->wasm, o->wasm_చివర));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), local_సూచీ);
 
-    if (localIndex < GetFunctionNumArgsAndLocals(o->function)) {
+    ఒకవేళ (local_సూచీ < Get_Function_అంకె_వాదనలు_And_Locals(o->function)) {
         // Spec: value type must match local type
-        if (not IsStackPolymorphic(o)) {
-            m3type_t localType    = GetStackTypeFromBottom(o, localIndex);
-            m3type_t stackTopType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, stackTopType != c_m3Type_none and localType != c_m3Type_none and
-                                           not IsSubTypeOf(stackTopType, localType));
-#if d_m3HasSnapshots
-            if (o->localInitDepth and o->localInitDepth[localIndex] == UINT32_MAX) {
-                o->localInitDepth[localIndex] = (u32)o->block.depth;
+        ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+            m3type_t localType    = Get_దొంతర_Type_From_Bottom(o, local_సూచీ);
+            m3type_t దొంతర_శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
+            _throwif(m3Err_typeMismatch, దొంతర_శిఖరం_Type != c_m3Type_none and localType != c_m3Type_none and
+                                           not Is_Sub_Type_యొక్క(దొంతర_శిఖరం_Type, localType));
+#ఒకవేళ d_m3HasSnapshots
+            ఒకవేళ (o->local_Init_లోతు and o->local_Init_లోతు[local_సూచీ] == UINT32_MAX) {
+                o->local_Init_లోతు[local_సూచీ] = (u32)o->ఖండం.లోతు;
             }
-#endif
+#అయితే_ముగింపు
         }
 
-        u16 localSlot = GetSlotForStackIndex(o, localIndex);
+        u16 local_స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, local_సూచీ);
 
-        u16 preserveSlot;
-_       (FindReferencedLocalWithinCurrentBlock(o, &preserveSlot, localSlot));  // preserve will be different than local, if referenced
+        u16 preserve_స్థానం;
+_       (కనుగొను_Referenced_Local_Within_Current_ఖండం(o, &preserve_స్థానం, local_స్థానం));  // preserve will be different than local, if referenced
 
         bool folded = false;
 
-#if d_m3FoldSetLocal
+#ఒకవేళ d_m3_Fold_సమితి_Local
         // destination folding: when the value was produced by the immediately preceding op (nothing
         // emitted since, result on top in _r0, no copy-on-write preservation needed), retro-patch the
         // producer to a variant that writes straight to the local's slot and skip the SetSlot op
-        if (o->foldPatchPC and preserveSlot == localSlot and IsStackTopInRegister(o) and GetStackTopIndex(o) == (i16)o->foldStackIndex) {
+        ఒకవేళ (o->foldPatchPC and preserve_స్థానం == local_స్థానం and Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) and Get_దొంతర_శిఖరం_సూచీ(o) == (i16)o->fold_దొంతర_సూచీ) {
             IM3Operation foldOp = GetFoldOp(o->foldOpcode, o->foldForm);
 
-            if (foldOp) {
+            ఒకవేళ (foldOp) {
                 *(IM3Operation*)o->foldPatchPC = foldOp;     // retro-patch the producer
-                EmitSlotOffset(o, localSlot);                  // append its destination
+                Emit_స్థానం_స్థానభ్రంశం(o, local_స్థానం);                  // append its destination
                 InvalidateFold(o);
                 folded = true;
             }
         }
-#endif
+#అయితే_ముగింపు
 
-        if (folded) {
-            m3type_t type = GetStackTopType(o);
-_           (Pop(o));                              // the value now lives in the local's slot
+        ఒకవేళ (folded) {
+            m3type_t type = Get_దొంతర_శిఖరం_Type(o);
+_           (తీయి(o));                              // the value now lives in the local's slot
 
             // A folded op writes its result through to the register as well, so a tee
             // can keep it there. Pushing the slot instead would make the next use that
             // wants a register reload the slot this op just stored to.
-            if (i_opcode == c_waOp_teeLocal) {
-_               (PushRegister(o, type));
+            ఒకవేళ (i_opcode == c_waOp_teeLocal) {
+_               (నెట్టు_రిజిస్టరు(o, type));
             }
-        } else {
-            if (preserveSlot == localSlot) {
-_               (CopyStackTopToSlot(o, localSlot))
-            } else {
-_               (PreservedCopyTopSlot(o, localSlot, preserveSlot))
+        } లేకపోతే {
+            ఒకవేళ (preserve_స్థానం == local_స్థానం) {
+_               (Copy_దొంతర_శిఖరం_గమ్యం_స్థానం(o, local_స్థానం))
+            } లేకపోతే {
+_               (Preserved_Copy_శిఖరం_స్థానం(o, local_స్థానం, preserve_స్థానం))
             }
 
-            if (i_opcode != c_waOp_teeLocal) {
-_               (Pop(o));
+            ఒకవేళ (i_opcode != c_waOp_teeLocal) {
+_               (తీయి(o));
             }
         }
-    } else {
+    } లేకపోతే {
         _throw("local index out of bounds");
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_GetLocal (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_GetLocal (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
 
-    u32 localIndex;
-_   (ReadLEB_u32(&localIndex, &o->wasm, o->wasmEnd));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), localIndex);
+    u32 local_సూచీ;
+_   (ReadLEB_u32(&local_సూచీ, &o->wasm, o->wasm_చివర));                           m3log (compile, d_indent " (index = %u)", get_indention_string (o), local_సూచీ);
 
-    if (localIndex >= GetFunctionNumArgsAndLocals(o->function)) {
+    ఒకవేళ (local_సూచీ >= Get_Function_అంకె_వాదనలు_And_Locals(o->function)) {
         _throw("local index out of bounds");
     }
 
-    m3type_t type = GetStackTypeFromBottom(o, localIndex);
-    u16      slot = GetSlotForStackIndex(o, localIndex);
+    m3type_t type = Get_దొంతర_Type_From_Bottom(o, local_సూచీ);
+    u16      స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, local_సూచీ);
 
-_   (Push(o, type, slot));
+_   (నెట్టు(o, type, స్థానం));
 
-    } _catch: return result;
+    } _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_GetGlobal (IM3Compilation o, M3Global* i_global)
+స్థిర
+M3_ఫలితం Compile_GetGlobal (IM3Compilation o, M3Global* i_global)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    IM3Operation op = Is64BitType(i_global->type) ? op_GetGlobal_s64 : op_GetGlobal_s32;
+    IM3Operation op = Is64_బిట్టు_Type(i_global->type) ? op_GetGlobal_s64 : op_GetGlobal_s32;
 _   (EmitOp(o, op));
-    EmitPointer(o, &i_global->i64Value);
-_   (PushAllocatedSlotAndEmit(o, i_global->type));
+    Emit_సూచిక(o, &i_global->i64_విలువ);
+_   (నెట్టు_Allocated_స్థానం_And_Emit_2(o, i_global->type));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_SetGlobal (IM3Compilation o, M3Global* i_global)
+స్థిర
+M3_ఫలితం Compile_సమితి_Global (IM3Compilation o, M3Global* i_global)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (i_global->isMutable) {
+    ఒకవేళ (i_global->isMutable) {
         // Spec: value type must match global type
-        if (not IsStackPolymorphic(o)) {
-            m3type_t stackTopType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, stackTopType != c_m3Type_none and
-                                           not IsSubTypeOf(stackTopType, i_global->type));
+        ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+            m3type_t దొంతర_శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
+            _throwif(m3Err_typeMismatch, దొంతర_శిఖరం_Type != c_m3Type_none and
+                                           not Is_Sub_Type_యొక్క(దొంతర_శిఖరం_Type, i_global->type));
         }
 
         IM3Operation op;
-        m3type_t     type = GetStackTopType(o);
+        m3type_t     type = Get_దొంతర_శిఖరం_Type(o);
 
-        if (IsStackTopInRegister(o)) {
-            op = c_setGlobalOps[BaseTypeOf(type)];
-        } else {
-            op = Is64BitType(type) ? op_SetGlobal_s64 : op_SetGlobal_s32;
+        ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+            op = c_సమితి_Global_Ops[పునాది_Type_యొక్క(type)];
+        } లేకపోతే {
+            op = Is64_బిట్టు_Type(type) ? op_సమితి_Global_s64 : op_సమితి_Global_s32;
         }
 
 _       (EmitOp(o, op));
-        EmitPointer(o, &i_global->i64Value);
+        Emit_సూచిక(o, &i_global->i64_విలువ);
 
-        if (IsStackTopInSlot(o)) {
-            EmitSlotOffset(o, GetStackTopSlotNumber(o));
+        ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_స్థానం(o)) {
+            Emit_స్థానం_స్థానభ్రంశం(o, Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o));
         }
 
-_       (Pop(o));
-    } else {
+_       (తీయి(o));
+    } లేకపోతే {
         _throw(m3Err_settingImmutableGlobal);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_GetSetGlobal (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Get_సమితి_Global (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 globalIndex;
-_   (ReadLEB_u32(&globalIndex, &o->wasm, o->wasmEnd));
+    u32 global_సూచీ;
+_   (ReadLEB_u32(&global_సూచీ, &o->wasm, o->wasm_చివర));
 
-    if (globalIndex < o->module->numGlobals) {
-        if (o->module->globals) {
-            M3Global* global = &o->module->globals[globalIndex];
+    ఒకవేళ (global_సూచీ < o->module->అంకె_Globals) {
+        ఒకవేళ (o->module->globals) {
+            M3Global* global = &o->module->globals[global_సూచీ];
 
             // Spec: a constant expression may only read an imported immutable
             // global. The module's own globals are counted before their
             // initializer is walked, so a bare index check would let one
             // reference itself. These describe how the module declared the
             // global, so they are checked before following any link.
-            _throwif(m3Err_globaIndexOutOfBounds, o->isInitExpr and not global->imported);
-            _throwif(m3Err_wasmMalformed, o->isInitExpr and global->isMutable);
+            _throwif(m3_Err_globa_సూచీ_బహిర్గతం_యొక్క_Bounds, o->is_Init_సమాసం and not global->imported);
+            _throwif(m3Err_wasmMalformed, o->is_Init_సమాసం and global->isMutable);
 
             // an import linked to another module reads and writes that module's
             // cell, not the placeholder standing in for it here
-            if (global->resolved) {
+            ఒకవేళ (global->resolved) {
                 global = global->resolved;
             }
 
-_           ((i_opcode == c_waOp_getGlobal) ? Compile_GetGlobal(o, global) : Compile_SetGlobal(o, global));
-        } else {
-            _throw(ErrorCompile(m3Err_globalMemoryNotAllocated, o, "module '%s' is missing global memory", o->module->name));
+_           ((i_opcode == c_waOp_getGlobal) ? Compile_GetGlobal(o, global) : Compile_సమితి_Global(o, global));
+        } లేకపోతే {
+            _throw(ErrorCompile(m3_Err_global_జ్ఞాపకం_Not_Allocated, o, "module '%s' is missing global memory", o->module->name));
         }
-    } else {
-        _throw(m3Err_globaIndexOutOfBounds);
+    } లేకపోతే {
+        _throw(m3_Err_globa_సూచీ_బహిర్గతం_యొక్క_Bounds);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-void EmitPatchingBranchPointer (IM3Compilation o, IM3CompilationScope i_scope)
+స్థిర
+శూన్య Emit_Patching_Branch_సూచిక (IM3Compilation o, IM3CompilationScope i_scope)
 {
-    pc_t patch       = EmitPointer(o, i_scope->patches);                m3log (compile, "branch patch required at: %p", patch);
+    pc_t patch       = Emit_సూచిక(o, i_scope->patches);                m3log (compile, "branch patch required at: %p", patch);
     i_scope->patches = patch;
 }
 
-static
-M3Result EmitPatchingBranch (IM3Compilation o, IM3CompilationScope i_scope)
+స్థిర
+M3_ఫలితం EmitPatchingBranch (IM3Compilation o, IM3CompilationScope i_scope)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
 _   (EmitOp(o, op_Branch));
-    EmitPatchingBranchPointer(o, i_scope);
+    Emit_Patching_Branch_సూచిక(o, i_scope);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#if d_m3HasExceptionHandling
+#ఒకవేళ d_m3HasExceptionHandling
 
 // How many try_table handler records an exit from i_from out to i_target takes
 // down with it. Walking outward from the block the branch sits in, every
@@ -2103,22 +2103,22 @@ _   (EmitOp(o, op_Branch));
 //
 // A loop label is the exception, but a loop is never a try_table, so the count
 // is the same either way: the loop itself is not on the list.
-static
-u32 CountTryFramesToExit (IM3CompilationScope i_from, IM3CompilationScope i_target)
+స్థిర
+u32 లెక్క_Try_చట్రాలు_గమ్యం_Exit (IM3CompilationScope i_from, IM3CompilationScope i_లక్ష్యం)
 {
-    u32 count = 0;
+    u32 లెక్క = 0;
 
-    for (IM3CompilationScope scope = i_from; scope; scope = scope->outer) {
-        if (scope->opcode == c_waOp_tryTable) {
-            ++count;
+    కొరకు (IM3CompilationScope scope = i_from; scope; scope = scope->outer) {
+        ఒకవేళ (scope->opcode == c_wa_Op_try_పట్టిక) {
+            ++లెక్క;
         }
 
-        if (scope == i_target) {
-            break;
+        ఒకవేళ (scope == i_లక్ష్యం) {
+            ఆపు;
         }
     }
 
-    return count;
+    తిరిగి లెక్క;
 }
 
 
@@ -2131,34 +2131,34 @@ u32 CountTryFramesToExit (IM3CompilationScope i_from, IM3CompilationScope i_targ
 // i_from is where the walk starts, which is not always the block the branch is
 // written in: a catch stub passes the scope outside its try, because
 // op_TryTable takes its own record off before jumping to the stub.
-static
-u32 NumTryFramesToPop (IM3CompilationScope i_from, IM3CompilationScope i_target)
+స్థిర
+u32 అంకె_Try_చట్రాలు_గమ్యం_తీయి (IM3CompilationScope i_from, IM3CompilationScope i_లక్ష్యం)
 {
-    if (i_target->depth == 0) {
-        return 0;
+    ఒకవేళ (i_లక్ష్యం->లోతు == 0) {
+        తిరిగి 0;
     }
 
     // the walk only ever runs inward-to-outward; a target that is already
     // outside i_from has nothing between them
-    if (not i_from or i_from->depth < i_target->depth) {
-        return 0;
+    ఒకవేళ (not i_from or i_from->లోతు < i_లక్ష్యం->లోతు) {
+        తిరిగి 0;
     }
 
-    return CountTryFramesToExit(i_from, i_target);
+    తిరిగి లెక్క_Try_చట్రాలు_గమ్యం_Exit(i_from, i_లక్ష్యం);
 }
 
 
-static
-M3Result EmitPopTryFrames (IM3Compilation o, u32 i_numFrames)
+స్థిర
+M3_ఫలితం Emit_తీయి_Try_చట్రాలు (IM3Compilation o, u32 i_అంకె_చట్రాలు)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (i_numFrames) {
-_       (EmitOp(o, op_PopHandlers));
-        EmitConstant32(o, i_numFrames);
+    ఒకవేళ (i_అంకె_చట్రాలు) {
+_       (EmitOp(o, op_తీయి_Handlers));
+        EmitConstant32(o, i_అంకె_చట్రాలు);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
@@ -2168,244 +2168,244 @@ _       (EmitOp(o, op_PopHandlers));
 // op_ReturnCall tail-jumps with op_TryTable's frames still standing, and the
 // fallback shape is an ordinary call sitting inside them. Either way the
 // handler records have to come off first.
-static
-M3Result EmitPopTryFramesForReturnCall (IM3Compilation o)
+స్థిర
+M3_ఫలితం Emit_తీయి_Try_చట్రాలు_For_Return_Call (IM3Compilation o)
 {
-    u32 count = 0;
+    u32 లెక్క = 0;
 
-    for (IM3CompilationScope scope = &o->block; scope; scope = scope->outer) {
-        if (scope->opcode == c_waOp_tryTable) {
-            ++count;
+    కొరకు (IM3CompilationScope scope = &o->ఖండం; scope; scope = scope->outer) {
+        ఒకవేళ (scope->opcode == c_wa_Op_try_పట్టిక) {
+            ++లెక్క;
         }
     }
 
-    return EmitPopTryFrames(o, count);
+    తిరిగి Emit_తీయి_Try_చట్రాలు(o, లెక్క);
 }
 
-#else
+#లేకపోతే
 
-static
-M3Result EmitPopTryFrames (IM3Compilation o, u32 i_numFrames)
+స్థిర
+M3_ఫలితం Emit_తీయి_Try_చట్రాలు (IM3Compilation o, u32 i_అంకె_చట్రాలు)
 {
-    (void)o;
-    (void)i_numFrames;
-    return m3Err_none;
+    (శూన్య)o;
+    (శూన్య)i_అంకె_చట్రాలు;
+    తిరిగి m3Err_none;
 }
 
-#endif // d_m3HasExceptionHandling
+#అయితే_ముగింపు // d_m3HasExceptionHandling
 
-#if d_m3FuseBranch
+#ఒకవేళ d_m3FuseBranch
 // when the pending fold candidate is a compare whose result sits on top in _r0, return the fused
 // variant that absorbs an immediately following br_if (i_isIf false) or if (i_isIf true)
-static
+స్థిర
 IM3Operation GetBranchFusionOp (IM3Compilation o, bool i_isIf)
 {
-    if (o->foldPatchPC and o->foldForm < 4 and IsStackTopInRegister(o) and GetStackTopIndex(o) == (i16)o->foldStackIndex) {
-        const M3FusedCmpOps* ops = GetFusedCmpOps(o->foldOpcode);
+    ఒకవేళ (o->foldPatchPC and o->foldForm < 4 and Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) and Get_దొంతర_శిఖరం_సూచీ(o) == (i16)o->fold_దొంతర_సూచీ) {
+        స్థిరరాశి M3FusedCmpOps* ops = GetFusedCmpOps(o->foldOpcode);
 
-        if (ops) {
-            return i_isIf ? ops->ifOp[o->foldForm] : ops->branchIf[o->foldForm];
+        ఒకవేళ (ops) {
+            తిరిగి i_isIf ? ops->ifOp[o->foldForm] : ops->branchIf[o->foldForm];
         }
     }
 
-    return NULL;
+    తిరిగి ఖాళీ;
 }
-#endif // d_m3FuseBranch
+#అయితే_ముగింపు // d_m3FuseBranch
 
-static inline
+స్థిర అంతఃవరుస
 IM3Operation Op_ContinueLoop (IM3Compilation o)
 {
-#if d_m3HasStackSwitching
-    if (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
-        return op_ContinueLoop_Suspendable;
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+    ఒకవేళ (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
+        తిరిగి op_ContinueLoop_Suspendable;
     }
-#endif
-    return op_ContinueLoop;
+#అయితే_ముగింపు
+    తిరిగి op_ContinueLoop;
 }
 
-static inline
+స్థిర అంతఃవరుస
 IM3Operation Op_ContinueLoopIf (IM3Compilation o)
 {
-#if d_m3HasStackSwitching
-    if (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
-        return op_ContinueLoopIf_Suspendable;
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+    ఒకవేళ (M3_UNLIKELY(o->module->runtime and o->module->runtime->isSuspendable)) {
+        తిరిగి op_ContinueLoopIf_Suspendable;
     }
-#endif
-    return op_ContinueLoopIf;
+#అయితే_ముగింపు
+    తిరిగి op_ContinueLoopIf;
 }
 
 
-static
-M3Result Compile_Branch (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Branch (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
-    u32      numTryFrames = 0;
+    M3_ఫలితం ఫలితం;
+    u32      అంకె_Try_చట్రాలు = 0;
 
-    u32 depth;
-_   (ReadLEB_u32(&depth, &o->wasm, o->wasmEnd));
+    u32 లోతు;
+_   (ReadLEB_u32(&లోతు, &o->wasm, o->wasm_చివర));
 
     // Spec: br_if condition must be i32
-    if (i_opcode == c_waOp_branchIf and not IsStackPolymorphic(o)) {
-        m3type_t condType = GetStackTopType(o);
+    ఒకవేళ (i_opcode == c_waOp_branchIf and not Is_దొంతర_Polymorphic(o)) {
+        m3type_t condType = Get_దొంతర_శిఖరం_Type(o);
         _throwif(m3Err_typeMismatch, condType != c_m3Type_none and condType != c_m3Type_i32);
     }
 
     IM3CompilationScope scope;
-_   (GetBlockScope(o, &scope, depth));
+_   (Get_ఖండం_Scope(o, &scope, లోతు));
 
-#if d_m3HasExceptionHandling
-    numTryFrames = NumTryFramesToPop(&o->block, scope);
-#endif
+#ఒకవేళ d_m3HasExceptionHandling
+    అంకె_Try_చట్రాలు = అంకె_Try_చట్రాలు_గమ్యం_తీయి(&o->ఖండం, scope);
+#అయితే_ముగింపు
 
     // branch target is a loop (continue)
-    if (scope->opcode == c_waOp_loop) {
-        if (i_opcode == c_waOp_branchIf) {
+    ఒకవేళ (scope->opcode == c_waOp_loop) {
+        ఒకవేళ (i_opcode == c_waOp_branchIf) {
             // a handler pop belongs on the taken path only, so it forces the
             // jump-over form even where the target takes no parameters
-            if (GetFuncTypeNumParams(scope->type) or numTryFrames) {
-                IM3Operation op = IsStackTopInRegister(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
+            ఒకవేళ (Get_Func_Type_అంకె_Params(scope->type) or అంకె_Try_చట్రాలు) {
+                IM3Operation op = Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
 
 _               (EmitOp(o, op));
-_               (EmitSlotNumOfStackTopAndPop(o));
+_               (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
 
-                pc_t* jumpTo = (pc_t*)ReservePointer(o);
+                pc_t* jump_గమ్యం = (pc_t*)Reserve_సూచిక(o);
 
-_               (EmitPopTryFrames(o, numTryFrames));
+_               (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు));
 
-                if (not IsStackPolymorphic(o)) {
-_                   (ResolveBlockResults(o, scope, /* isBranch: */ true));
+                ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+_                   (Resolve_ఖండం_Results(o, scope, /* isBranch: */ true));
                 }
 
 _               (EmitOp(o, Op_ContinueLoop(o)));
-                EmitPointer(o, scope->pc);
-_               (RecordBackEdge(o, scope, false));
+                Emit_సూచిక(o, scope->pc);
+_               (రికార్డు_వెనుక_అంచు(o, scope, false));
 
-                *jumpTo = GetPC(o);
-            } else {
+                *jump_గమ్యం = GetPC(o);
+            } లేకపోతే {
                 // move the condition to a register
-_               (CopyStackTopToRegister(o, false));
-_               (PopType(o, c_m3Type_i32));
+_               (Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు(o, false));
+_               (తీయి_Type(o, c_m3Type_i32));
 
 _               (EmitOp(o, Op_ContinueLoopIf(o)));
-                EmitPointer(o, scope->pc);
-_               (RecordBackEdge(o, scope, true));
+                Emit_సూచిక(o, scope->pc);
+_               (రికార్డు_వెనుక_అంచు(o, scope, true));
             }
 
             //          dump_type_stack(o);
-        } else // is c_waOp_branch
+        } లేకపోతే // is c_waOp_branch
         {
-_           (EmitPopTryFrames(o, numTryFrames));
+_           (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు));
 
             // the branch operands become the loop's parameters on the next iteration
-            if (not IsStackPolymorphic(o)) {
-_               (ResolveBlockResults(o, scope, /* isBranch: */ true));
+            ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+_               (Resolve_ఖండం_Results(o, scope, /* isBranch: */ true));
             }
 
 _           (EmitOp(o, Op_ContinueLoop(o)));
-            EmitPointer(o, scope->pc);
-_           (RecordBackEdge(o, scope, false));
-            o->block.isPolymorphic = true;
+            Emit_సూచిక(o, scope->pc);
+_           (రికార్డు_వెనుక_అంచు(o, scope, false));
+            o->ఖండం.isPolymorphic = true;
         }
-    } else // forward branch
+    } లేకపోతే // forward branch
     {
-        pc_t* jumpTo = NULL;
+        pc_t* jump_గమ్యం = ఖాళీ;
 
-        bool isReturn         = (scope->depth == 0);
-        bool targetHasResults = GetFuncTypeNumResults(scope->type);
+        bool isReturn         = (scope->లోతు == 0);
+        bool లక్ష్యం_Has_Results = Get_Func_Type_అంకె_Results(scope->type);
 
-        if (i_opcode == c_waOp_branchIf) {
-            if (targetHasResults or isReturn or numTryFrames) {
-                IM3Operation op = IsStackTopInRegister(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
+        ఒకవేళ (i_opcode == c_waOp_branchIf) {
+            ఒకవేళ (లక్ష్యం_Has_Results or isReturn or అంకె_Try_చట్రాలు) {
+                IM3Operation op = Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) ? op_BranchIfPrologue_r : op_BranchIfPrologue_s;
 
 _               (EmitOp(o, op));
-_               (EmitSlotNumOfStackTopAndPop(o)); // condition
+_               (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o)); // condition
 
                 // this is continuation point, if the branch isn't taken
-                jumpTo = (pc_t*)ReservePointer(o);
-            } else {
-#if d_m3FuseBranch
+                jump_గమ్యం = (pc_t*)Reserve_సూచిక(o);
+            } లేకపోతే {
+#ఒకవేళ d_m3FuseBranch
                 IM3Operation fuseOp = GetBranchFusionOp(o, false);
 
-                if (fuseOp) {
+                ఒకవేళ (fuseOp) {
                     // absorb the branch into the compare that produced the condition
                     *(IM3Operation*)o->foldPatchPC = fuseOp;
                     InvalidateFold(o);
 
-_                   (Pop(o));                      // the condition is consumed inside the fused op
+_                   (తీయి(o));                      // the condition is consumed inside the fused op
 
-                    EmitPatchingBranchPointer(o, scope);
-                    goto _catch;
+                    Emit_Patching_Branch_సూచిక(o, scope);
+                    వెళ్ళు _catch;
                 }
-#endif
-                IM3Operation op = IsStackTopInRegister(o) ? op_BranchIf_r : op_BranchIf_s;
+#అయితే_ముగింపు
+                IM3Operation op = Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) ? op_BranchIf_r : op_BranchIf_s;
 
 _               (EmitOp(o, op));
-_               (EmitSlotNumOfStackTopAndPop(o)); // condition
+_               (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o)); // condition
 
-                EmitPatchingBranchPointer(o, scope);
-                goto _catch;
+                Emit_Patching_Branch_సూచిక(o, scope);
+                వెళ్ళు _catch;
             }
         }
 
-        if (not IsStackPolymorphic(o)) {
-            if (isReturn) {
-_               (ReturnValues(o, scope, true));
+        ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+            ఒకవేళ (isReturn) {
+_               (Return_విలువలు(o, scope, true));
 _               (EmitOp(o, op_Return));
-            } else {
-_               (EmitPopTryFrames(o, numTryFrames));
+            } లేకపోతే {
+_               (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు));
 
-_               (ResolveBlockResults(o, scope, true));
+_               (Resolve_ఖండం_Results(o, scope, true));
 _               (EmitPatchingBranch(o, scope));
             }
         }
 
-        if (jumpTo) {
-            *jumpTo = GetPC(o);
+        ఒకవేళ (jump_గమ్యం) {
+            *jump_గమ్యం = GetPC(o);
         }
 
-        if (i_opcode == c_waOp_branch) {
-_           (SetStackPolymorphic(o));
+        ఒకవేళ (i_opcode == c_waOp_branch) {
+_           (సమితి_దొంతర_Polymorphic(o));
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_BranchTable (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Branch_పట్టిక (IM3Compilation o, m3opcode_t i_opcode)
 {
     // the page a continue-op page is standing in for; non-NULL only while that
     // page is installed in o->page, so the catch below knows to put it back
-    IM3CodePage displacedPage = NULL;
+    IM3_సంకేతం_పుట displaced_పుట = ఖాళీ;
     // indexed by label depth: the continuation stub already emitted for that target
     // within this table, or NULL if this table has not reached it yet
-    pc_t* targetStubs = NULL;
+    pc_t* లక్ష్యం_Stubs = ఖాళీ;
 _try {
-    u32 targetCount;
-_   (ReadLEB_u32(&targetCount, &o->wasm, o->wasmEnd));
+    u32 లక్ష్యం_లెక్క;
+_   (ReadLEB_u32(&లక్ష్యం_లెక్క, &o->wasm, o->wasm_చివర));
 
     // Spec: validate that the branch index operand is i32
-    if (not IsStackPolymorphic(o)) {
-        m3type_t indexType = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, indexType != c_m3Type_none and indexType != c_m3Type_i32);
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        m3type_t సూచీ_Type = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, సూచీ_Type != c_m3Type_none and సూచీ_Type != c_m3Type_i32);
     }
 
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));         // move branch operand to a slot
-    u16 slot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));         // move branch operand to a slot
+    u16 స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_   (తీయి(o));
 
     // OPTZ: according to spec: "forward branches that target a control instruction with a non-empty
     // result type consume matching operands first and push them back on the operand stack after unwinding"
     // So, this move-to-reg is only necessary if the target scopes have a type.
 
-    u32 numCodeLines = targetCount + 4; // 3 => IM3Operation + slot + target_count + default_target
-_   (EnsureCodePageNumLines(o, numCodeLines));
+    u32 అంకె_సంకేతం_పంక్తులు = లక్ష్యం_లెక్క + 4; // 3 => IM3Operation + slot + target_count + default_target
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, అంకె_సంకేతం_పంక్తులు));
 
-_   (EmitOp(o, op_BranchTable));
-    EmitSlotOffset(o, slot);
-    EmitConstant32(o, targetCount);
+_   (EmitOp(o, op_Branch_పట్టిక));
+    Emit_స్థానం_స్థానభ్రంశం(o, స్థానం);
+    EmitConstant32(o, లక్ష్యం_లెక్క);
 
-    IM3CodePage continueOpPage = NULL;
+    IM3_సంకేతం_పుట continue_Op_పుట = ఖాళీ;
 
     // The label types are checked by ValidateFunction, which runs under the same
     // d_m3EnableValidation guard just before this compilation pass. Comparing each
@@ -2413,32 +2413,32 @@ _   (EmitOp(o, op_BranchTable));
     // target against the operand stack, so in unreachable code the operands are the
     // bottom type and the targets may legitimately differ (unreached-valid.wast).
 
-    ++targetCount; // include default
+    ++లక్ష్యం_లెక్క; // include default
 
     // Every entry of one br_table is resolved from the same compilation state - each
     // stub restores whatever it touched - so two entries naming the same label emit
     // byte-identical epilogues. Emit one and point both table entries at it. A label
     // deeper than the current block is rejected by GetBlockScope below, which is what
     // bounds this array.
-    targetStubs = m3_AllocArray(pc_t, (size_t)o->block.depth + 1);
-    _throwifnull(targetStubs);
+    లక్ష్యం_Stubs = m3_AllocArray(pc_t, (size_t)o->ఖండం.లోతు + 1);
+    _throwifnull(లక్ష్యం_Stubs);
 
-    for (u32 i = 0; i < targetCount; ++i) {
-        u32 target;
-_       (ReadLEB_u32(&target, &o->wasm, o->wasmEnd));
+    కొరకు (u32 i = 0; i < లక్ష్యం_లెక్క; ++i) {
+        u32 లక్ష్యం;
+_       (ReadLEB_u32(&లక్ష్యం, &o->wasm, o->wasm_చివర));
 
         IM3CompilationScope scope;
-_       (GetBlockScope(o, &scope, target));
+_       (Get_ఖండం_Scope(o, &scope, లక్ష్యం));
 
-        if (targetStubs[target]) {
-            EmitPointer(o, targetStubs[target]);
-            continue;
+        ఒకవేళ (లక్ష్యం_Stubs[లక్ష్యం]) {
+            Emit_సూచిక(o, లక్ష్యం_Stubs[లక్ష్యం]);
+            కొనసాగు;
         }
 
-        u32 numTryFrames = 0;
-#if d_m3HasExceptionHandling
-        numTryFrames = NumTryFramesToPop(&o->block, scope);
-#endif
+        u32 అంకె_Try_చట్రాలు = 0;
+#ఒకవేళ d_m3HasExceptionHandling
+        అంకె_Try_చట్రాలు = అంకె_Try_చట్రాలు_గమ్యం_తీయి(&o->ఖండం, scope);
+#అయితే_ముగింపు
 
         // A forward branch to a block that carries no results and leaves no try
         // frames behind has nothing to do on the way out but arrive. There is no
@@ -2449,114 +2449,114 @@ _       (GetBlockScope(o, &scope, target));
         //
         // Each such entry is patched on its own, so none is recorded in targetStubs:
         // there is no shared stub for a later entry naming this label to point at.
-        if (scope->opcode != c_waOp_loop and scope->depth > 0 and numTryFrames == 0 and
-            (IsStackPolymorphic(o) or GetFuncTypeNumResults(scope->type) == 0)) {
-            EmitPatchingBranchPointer(o, scope);
-            continue;
+        ఒకవేళ (scope->opcode != c_waOp_loop and scope->లోతు > 0 and అంకె_Try_చట్రాలు == 0 and
+            (Is_దొంతర_Polymorphic(o) or Get_Func_Type_అంకె_Results(scope->type) == 0)) {
+            Emit_Patching_Branch_సూచిక(o, scope);
+            కొనసాగు;
         }
 
-_       (AcquireCompilationCodePage(o, &continueOpPage));
+_       (Acquire_Compilation_సంకేతం_పుట(o, &continue_Op_పుట));
 
-        pc_t startPC  = GetPagePC(continueOpPage);
-        displacedPage = o->page;
-        o->page       = continueOpPage;
+        pc_t ప్రారంభం_PC  = Get_పుట_PC(continue_Op_పుట);
+        displaced_పుట = o->పుట;
+        o->పుట       = continue_Op_పుట;
 
-        if (scope->opcode == c_waOp_loop) {
-_           (EmitPopTryFrames(o, numTryFrames));
+        ఒకవేళ (scope->opcode == c_waOp_loop) {
+_           (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు));
 
-            if (not IsStackPolymorphic(o)) {
-_               (ResolveBlockResults(o, scope, true));
+            ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+_               (Resolve_ఖండం_Results(o, scope, true));
             }
 
 _           (EmitOp(o, Op_ContinueLoop(o)));
-            EmitPointer(o, scope->pc);
-_           (RecordBackEdge(o, scope, false));
-        } else {
-            if (not IsStackPolymorphic(o)) {
-                if (scope->depth == 0) {
-_                   (ReturnValues(o, scope, true));
+            Emit_సూచిక(o, scope->pc);
+_           (రికార్డు_వెనుక_అంచు(o, scope, false));
+        } లేకపోతే {
+            ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+                ఒకవేళ (scope->లోతు == 0) {
+_                   (Return_విలువలు(o, scope, true));
 _                   (EmitOp(o, op_Return));
-                } else {
-_                   (EmitPopTryFrames(o, numTryFrames));
+                } లేకపోతే {
+_                   (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు));
 
-_                   (ResolveBlockResults(o, scope, true));
+_                   (Resolve_ఖండం_Results(o, scope, true));
 
 _                   (EmitPatchingBranch(o, scope));
                 }
             }
         }
 
-        IM3CodePage returnTo = displacedPage;
-        displacedPage        = NULL;
+        IM3_సంకేతం_పుట return_గమ్యం = displaced_పుట;
+        displaced_పుట        = ఖాళీ;
 
-        ReleaseCompilationCodePage(o);
-        o->page = returnTo;
+        Release_Compilation_సంకేతం_పుట(o);
+        o->పుట = return_గమ్యం;
 
-        EmitPointer(o, startPC);
-        targetStubs[target] = startPC;
+        Emit_సూచిక(o, ప్రారంభం_PC);
+        లక్ష్యం_Stubs[లక్ష్యం] = ప్రారంభం_PC;
     }
 
-_   (SetStackPolymorphic(o));
+_   (సమితి_దొంతర_Polymorphic(o));
 } _catch:
 
     // thrown out of the loop above with a continue-op page installed: release it
     // and restore the one it displaced, which the caller's catch then releases.
     // Otherwise the displaced page is on no list and simply leaks.
-    if (displacedPage) {
-        ReleaseCompilationCodePage(o);
-        o->page = displacedPage;
+    ఒకవేళ (displaced_పుట) {
+        Release_Compilation_సంకేతం_పుట(o);
+        o->పుట = displaced_పుట;
     }
 
-    m3_Free(targetStubs);
+    m3_Free(లక్ష్యం_Stubs);
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result CompileCallArgsAndReturn (IM3Compilation o, u16* o_stackOffset, IM3FuncType i_type, bool i_isIndirect)
+స్థిర
+M3_ఫలితం Compile_Call_వాదనలు_And_Return (IM3Compilation o, u16* o_దొంతర_స్థానభ్రంశం, IM3FuncType i_type, bool i_is_పరోక్ష)
 {
 _try {
 
-    u16 topSlot = GetMaxUsedSlotPlusOne(o);
+    u16 శిఖరం_స్థానం = Get_Max_వాడిన_స్థానం_Plus_One(o);
 
     // force use of at least one stack slot; this is to help ensure
     // the m3 stack overflows (and traps) before the native stack can overflow.
     // e.g. see Wasm spec test 'runaway' in call.wast
-    topSlot = M3_MAX(1, topSlot);
+    శిఖరం_స్థానం = M3_MAX(1, శిఖరం_స్థానం);
 
     // stack frame is 64-bit aligned
-    AlignSlotToType(&topSlot, c_m3Type_i64);
+    Align_స్థానం_గమ్యం_Type(&శిఖరం_స్థానం, c_m3Type_i64);
 
-    *o_stackOffset = topSlot;
+    *o_దొంతర_స్థానభ్రంశం = శిఖరం_స్థానం;
 
     // wait to pop this here so that topSlot search is correct
-    if (i_isIndirect) {
-_       (Pop(o));
+    ఒకవేళ (i_is_పరోక్ష) {
+_       (తీయి(o));
     }
 
-    u16 numArgs = GetFuncTypeNumParams(i_type);
-    u16 numRets = GetFuncTypeNumResults(i_type);
+    u16 అంకె_వాదనలు = Get_Func_Type_అంకె_Params(i_type);
+    u16 అంకె_Rets = Get_Func_Type_అంకె_Results(i_type);
 
-    u16 argTop = topSlot + (numArgs + numRets) * c_ioSlotCount;
+    u16 arg_శిఖరం = శిఖరం_స్థానం + (అంకె_వాదనలు + అంకె_Rets) * c_io_స్థానం_లెక్క;
 
-    TouchSlot(o, argTop - 1);
+    Touch_స్థానం(o, arg_శిఖరం - 1);
 
-    while (numArgs--) {
-_       (CopyStackTopToSlot(o, argTop -= c_ioSlotCount));
-_       (Pop(o));
+    అయితే (అంకె_వాదనలు--) {
+_       (Copy_దొంతర_శిఖరం_గమ్యం_స్థానం(o, arg_శిఖరం -= c_io_స్థానం_లెక్క));
+_       (తీయి(o));
     }
 
     u16 i = 0;
-    while (numRets--) {
-        m3type_t type = GetFuncTypeResultType(i_type, i++);
+    అయితే (అంకె_Rets--) {
+        m3type_t type = Get_Func_Type_ఫలితం_Type(i_type, i++);
 
-_       (Push(o, type, topSlot));
-_       (MarkSlotsAllocatedByType(o, topSlot, type));
+_       (నెట్టు(o, type, శిఖరం_స్థానం));
+_       (MarkSlotsAllocatedByType(o, శిఖరం_స్థానం, type));
 
-        topSlot += c_ioSlotCount;
+        శిఖరం_స్థానం += c_io_స్థానం_లెక్క;
     }
 
-    } _catch: return result;
+    } _catch: తిరిగి ఫలితం;
 }
 
 // A tail call hands the current frame over to the callee instead of stacking a new one.
@@ -2564,158 +2564,158 @@ _       (MarkSlotsAllocatedByType(o, topSlot, type));
 // return slots and only the arguments move: they're staged above the caller's stack here
 // (the argument expressions can still be reading the args/locals they're about to land on)
 // and slid down onto the frame base at runtime, by op_ReturnCall[Indirect].
-static
-M3Result CompileTailCallArgs (IM3Compilation o, u16* o_stackOffset, u16* o_numArgSlots, IM3FuncType i_type, bool i_isIndirect)
+స్థిర
+M3_ఫలితం Compile_తోక_Call_వాదనలు (IM3Compilation o, u16* o_దొంతర_స్థానభ్రంశం, u16* o_అంకె_Arg_Slots, IM3FuncType i_type, bool i_is_పరోక్ష)
 {
 _try {
     IM3FuncType funcType = o->function->funcType;
 
-    u16 numRets = GetFuncTypeNumResults(i_type);
-    _throwif(m3Err_typeMismatch, numRets != GetFuncTypeNumResults(funcType));
+    u16 అంకె_Rets = Get_Func_Type_అంకె_Results(i_type);
+    _throwif(m3Err_typeMismatch, అంకె_Rets != Get_Func_Type_అంకె_Results(funcType));
 
-    for (u16 i = 0; i < numRets; ++i) {
-        _throwif(m3Err_typeMismatch, GetFuncTypeResultType(i_type, i) != GetFuncTypeResultType(funcType, i));
+    కొరకు (u16 i = 0; i < అంకె_Rets; ++i) {
+        _throwif(m3Err_typeMismatch, Get_Func_Type_ఫలితం_Type(i_type, i) != Get_Func_Type_ఫలితం_Type(funcType, i));
     }
 
-    u16 topSlot = GetMaxUsedSlotPlusOne(o);
+    u16 శిఖరం_స్థానం = Get_Max_వాడిన_స్థానం_Plus_One(o);
 
-    topSlot = M3_MAX(1, topSlot);
+    శిఖరం_స్థానం = M3_MAX(1, శిఖరం_స్థానం);
 
     // stack frame is 64-bit aligned
-    AlignSlotToType(&topSlot, c_m3Type_i64);
+    Align_స్థానం_గమ్యం_Type(&శిఖరం_స్థానం, c_m3Type_i64);
 
-    *o_stackOffset = topSlot;
+    *o_దొంతర_స్థానభ్రంశం = శిఖరం_స్థానం;
 
     // wait to pop this here so that topSlot search is correct
-    if (i_isIndirect) {
-_       (Pop(o));
+    ఒకవేళ (i_is_పరోక్ష) {
+_       (తీయి(o));
     }
 
-    u16 numArgs     = GetFuncTypeNumParams(i_type);
-    u16 numArgSlots = numArgs * c_ioSlotCount;
+    u16 అంకె_వాదనలు     = Get_Func_Type_అంకె_Params(i_type);
+    u16 అంకె_Arg_Slots = అంకె_వాదనలు * c_io_స్థానం_లెక్క;
 
-    *o_numArgSlots = numArgSlots;
+    *o_అంకె_Arg_Slots = అంకె_Arg_Slots;
 
-    u16 argTop = topSlot + numArgSlots;
-    _throwif(m3Err_functionStackOverflow, argTop > d_m3MaxFunctionSlots);
+    u16 arg_శిఖరం = శిఖరం_స్థానం + అంకె_Arg_Slots;
+    _throwif(m3_Err_function_దొంతర_అధికప్రవాహం, arg_శిఖరం > d_m3MaxFunctionSlots);
 
     // the staging area is written by the caller, so op_Entry has to account for it
-    TouchSlot(o, argTop - 1);
+    Touch_స్థానం(o, arg_శిఖరం - 1);
 
-    while (numArgs--) {
-_       (CopyStackTopToSlot(o, argTop -= c_ioSlotCount));
-_       (Pop(o));
+    అయితే (అంకె_వాదనలు--) {
+_       (Copy_దొంతర_శిఖరం_గమ్యం_స్థానం(o, arg_శిఖరం -= c_io_స్థానం_లెక్క));
+_       (తీయి(o));
     }
 
-    } _catch: return result;
+    } _catch: తిరిగి ఫలితం;
 }
 
 
-#if d_m3HasTypedRefs
+#ఒకవేళ d_m3HasTypedRefs
 
 // call_ref $t: the callee is the reference on top of the stack, so the operand
 // order is the same as call_indirect's, minus the table.
-static
-M3Result Compile_CallRef (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_CallRef (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
+    u32 type_సూచీ;
+_   (ReadLEB_u32(&type_సూచీ, &o->wasm, o->wasm_చివర));
 
-    _throwif("function call type index out of range", typeIndex >= o->module->numFuncTypes);
+    _throwif("function call type index out of range", type_సూచీ >= o->module->అంకె_Func_Types);
 
-    IM3FuncType type = o->module->funcTypes[typeIndex];
+    IM3FuncType type = o->module->funcTypes[type_సూచీ];
 
-    if (not IsStackPolymorphic(o)) {
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
         // whatever shape the reference has, it must be a function of this type
-        m3type_t refType = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, not IsSubTypeOf(refType, RefTypeOfFuncType(type, false)));
+        m3type_t refType = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(refType, Ref_Type_యొక్క_Func_Type(type, false)));
     }
 
-    if (IsStackTopInRegister(o)) {
-_       (PreserveRegisterIfOccupied(o, c_m3Type_funcref));
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+_       (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_funcref));
     }
 
-    u16 functionSlot = GetStackTopSlotNumber(o);
+    u16 function_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
 
     bool isReturnCall = (i_opcode == c_waOp_returnCallRef);
-    bool useTailCall  = isReturnCall and d_m3CanTailCall;
+    bool use_తోక_Call  = isReturnCall and d_m3_Can_తోక_Call;
 
-    u16 execTop, numArgSlots = 0;
+    u16 exec_శిఖరం, అంకె_Arg_Slots = 0;
 
-    if (useTailCall) {
-_       (CompileTailCallArgs(o, &execTop, &numArgSlots, type, true));
-    } else {
-_       (CompileCallArgsAndReturn(o, &execTop, type, true));
+    ఒకవేళ (use_తోక_Call) {
+_       (Compile_తోక_Call_వాదనలు(o, &exec_శిఖరం, &అంకె_Arg_Slots, type, true));
+    } లేకపోతే {
+_       (Compile_Call_వాదనలు_And_Return(o, &exec_శిఖరం, type, true));
     }
 
-#  if d_m3HasExceptionHandling
-    if (isReturnCall) {
-_       (EmitPopTryFramesForReturnCall(o));
+#  ఒకవేళ d_m3HasExceptionHandling
+    ఒకవేళ (isReturnCall) {
+_       (Emit_తీయి_Try_చట్రాలు_For_Return_Call(o));
     }
 #  endif
 
-_   (EmitOp(o, useTailCall ? op_ReturnCallRef : op_CallRef));
-    EmitSlotOffset(o, functionSlot);
-    EmitPointer(o, type);
-    EmitSlotOffset(o, execTop);
+_   (EmitOp(o, use_తోక_Call ? op_ReturnCallRef : op_CallRef));
+    Emit_స్థానం_స్థానభ్రంశం(o, function_స్థానం);
+    Emit_సూచిక(o, type);
+    Emit_స్థానం_స్థానభ్రంశం(o, exec_శిఖరం);
 
-    if (not useTailCall) {
-_       (RecordCall(o, GetFuncTypeNumResults(type), execTop, isReturnCall));
+    ఒకవేళ (not use_తోక_Call) {
+_       (రికార్డు_Call(o, Get_Func_Type_అంకె_Results(type), exec_శిఖరం, isReturnCall));
     }
 
-    if (useTailCall) {
-        EmitSlotOffset(o, o->function->numRetSlots);
-        EmitConstant32(o, numArgSlots);
+    ఒకవేళ (use_తోక_Call) {
+        Emit_స్థానం_స్థానభ్రంశం(o, o->function->అంకె_Ret_Slots);
+        EmitConstant32(o, అంకె_Arg_Slots);
 
-_       (SetStackPolymorphic(o));
-    } else if (isReturnCall) {
+_       (సమితి_దొంతర_Polymorphic(o));
+    } లేకపోతే ఒకవేళ (isReturnCall) {
 _       (Compile_Return(o, i_opcode));
     }
 
 } _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
 // ref.as_non_null only sharpens the type; the value is unchanged, so the stack
 // entry is re-pushed with the null stripped out of its type.
-static
-M3Result Compile_Ref_AsNonNull (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Ref_AsNonNull (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (not IsStackPolymorphic(o)) {
-        m3type_t type = GetStackTopType(o);
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        m3type_t type = Get_దొంతర_శిఖరం_Type(o);
         _throwif(m3Err_typeMismatch, not IsRefType(type));
 
         // op_RefAsNonNull only knows how to read its operand out of a slot; a
         // value still sitting in the register has to be spilled first, the way
         // every other single-op reader of the stack top does
-        if (IsStackTopInRegister(o)) {
-_           (PreserveRegisterIfOccupied(o, type));
+        ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+_           (Preserve_రిజిస్టరు_If_Occupied(o, type));
         }
 
-        u16 slot = GetStackTopSlotNumber(o);
+        u16 స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
 
 _       (EmitOp(o, op_RefAsNonNull));
-        EmitSlotOffset(o, slot);
+        Emit_స్థానం_స్థానభ్రంశం(o, స్థానం);
 
         m3type_t nonNull = IsSpelledRefType(type)
                              ? (m3type_t)(type | d_m3Type_refNonNull)
-                             : (m3type_t)(d_m3Type_ref | d_m3Type_refNonNull | d_m3Type_heapAbstract |
-                                          ((BaseTypeOf(type) == c_m3Type_externref) ? d_m3Type_refExtern : 0));
+                             : (m3type_t)(d_m3Type_ref | d_m3Type_refNonNull | d_m3_Type_కుప్ప_Abstract |
+                                          ((పునాది_Type_యొక్క(type) == c_m3Type_externref) ? d_m3Type_refExtern : 0));
 
         // the slot keeps the one reference it already had; a Pop()/Push() of
         // the same slot would drop that reference's count without anything
         // to put it back, so the type above it is corrected in place instead
-        o->typeStack[GetStackTopIndex(o)] = nonNull;
+        o->type_దొంతర[Get_దొంతర_శిఖరం_సూచీ(o)] = nonNull;
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasTypedRefs
+#అయితే_ముగింపు // d_m3HasTypedRefs
 
 
 // How wide a table operand is read at comes from the table it names, so a slot
@@ -2723,347 +2723,347 @@ _       (EmitOp(o, op_RefAsNonNull));
 // validator refuses that already; this keeps a build without one from reaching
 // the interpreter with it. c_m3Type_none means the operand is not on the
 // dynamic stack to inspect, which is not this check's business.
-static
-M3Result CheckOperandType (IM3Compilation o, u16 i_depthFromTop, m3type_t i_type)
+స్థిర
+M3_ఫలితం Check_నిర్వాహ్యం_Type (IM3Compilation o, u16 i_లోతు_From_శిఖరం, m3type_t i_type)
 {
     m3type_t actual;
 
-    if (IsStackPolymorphic(o)) {
-        return m3Err_none;
+    ఒకవేళ (Is_దొంతర_Polymorphic(o)) {
+        తిరిగి m3Err_none;
     }
 
-    actual = GetStackTypeFromTop(o, i_depthFromTop);
+    actual = Get_దొంతర_Type_From_శిఖరం(o, i_లోతు_From_శిఖరం);
 
-    return (actual == c_m3Type_none or BaseTypeOf(actual) == i_type) ? m3Err_none
+    తిరిగి (actual == c_m3Type_none or పునాది_Type_యొక్క(actual) == i_type) ? m3Err_none
                                                                      : m3Err_typeMismatch;
 }
 
 
 // Swaps the _mem register onto a given memory. Only ever emitted in pairs --
 // see op_SetMemory.
-static
-M3Result EmitSetMemoryPtr (IM3Compilation o, IM3Memory i_memory)
+స్థిర
+M3_ఫలితం Emit_సమితి_జ్ఞాపకం_Ptr (IM3Compilation o, IM3_జ్ఞాపకం i_జ్ఞాపకం)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-_   (EmitOp(o, op_SetMemory));
-    EmitPointer(o, i_memory);
+_   (EmitOp(o, op_సమితి_జ్ఞాపకం));
+    Emit_సూచిక(o, i_జ్ఞాపకం);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // ...onto one of the compiling module's own memories, by index. Only reached
 // with a non-zero index under multi-memory, but the index has already been
 // bounds-checked by ReadMemoryIndex either way.
-static inline
-M3Result EmitSetMemory (IM3Compilation o, u32 i_memoryIdx)
+స్థిర అంతఃవరుస
+M3_ఫలితం Emit_సమితి_జ్ఞాపకం (IM3Compilation o, u32 i_జ్ఞాపకం_Idx)
 {
-#if d_m3HasMultiMemory
-    return EmitSetMemoryPtr(o, o->module->memories[i_memoryIdx]);
-#else
-    (void)o;
-    (void)i_memoryIdx;
-    return m3Err_unknownMemory;
-#endif
+#ఒకవేళ d_m3_Has_Multi_జ్ఞాపకం
+    తిరిగి Emit_సమితి_జ్ఞాపకం_Ptr(o, o->module->memories[i_జ్ఞాపకం_Idx]);
+#లేకపోతే
+    (శూన్య)o;
+    (శూన్య)i_జ్ఞాపకం_Idx;
+    తిరిగి m3_Err_unknown_జ్ఞాపకం;
+#అయితే_ముగింపు
 }
 
-static
-M3Result Compile_Call (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Call (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 functionIndex;
-_   (ReadLEB_u32(&functionIndex, &o->wasm, o->wasmEnd));
+    u32 function_సూచీ;
+_   (ReadLEB_u32(&function_సూచీ, &o->wasm, o->wasm_చివర));
 
-    IM3Function function = Module_GetFunction(o->module, functionIndex);
+    IM3Function function = Module_GetFunction(o->module, function_సూచీ);
 
-    if (function) {                                                     m3log (compile, d_indent " (func= [%d] '%s'; args= %d)",
-                                                                                get_indention_string (o), functionIndex, m3_GetFunctionName (function), function->funcType->numArgs);
+    ఒకవేళ (function) {                                                     m3log (compile, d_indent " (func= [%d] '%s'; args= %d)",
+                                                                                get_indention_string (o), function_సూచీ, m3_GetFunctionName (function), function->funcType->అంకె_వాదనలు);
         // an import linked to another module's export runs that module's body
-        IM3Function target = Function_Implementation(function);
+        IM3Function లక్ష్యం = Function_Implementation(function);
 
-        if (target->module) {
+        ఒకవేళ (లక్ష్యం->module) {
             bool isReturnCall = (i_opcode == c_waOp_returnCall);
 
             // The callee's body runs against its own module's memory, so a call
             // that crosses modules is bracketed by a pair of op_SetMemory. A
             // tail call never returns to run the second one, so those compile
             // as a plain call followed by a return instead.
-            bool crossModule = (target->module != o->module);
-            bool useTailCall = isReturnCall and d_m3CanTailCall and not crossModule;
+            bool crossModule = (లక్ష్యం->module != o->module);
+            bool use_తోక_Call = isReturnCall and d_m3_Can_తోక_Call and not crossModule;
 
-            u16 slotTop, numArgSlots = 0;
+            u16 స్థానం_శిఖరం, అంకె_Arg_Slots = 0;
 
-            if (useTailCall) {
-_               (CompileTailCallArgs(o, &slotTop, &numArgSlots, target->funcType, false));
-            } else {
-_               (CompileCallArgsAndReturn(o, &slotTop, target->funcType, false));
+            ఒకవేళ (use_తోక_Call) {
+_               (Compile_తోక_Call_వాదనలు(o, &స్థానం_శిఖరం, &అంకె_Arg_Slots, లక్ష్యం->funcType, false));
+            } లేకపోతే {
+_               (Compile_Call_వాదనలు_And_Return(o, &స్థానం_శిఖరం, లక్ష్యం->funcType, false));
             }
 
             IM3Operation op;
-            const void*  operand;
+            స్థిరరాశి శూన్య*  నిర్వాహ్యం;
 
-            if (target->compiled) {
-                op      = useTailCall ? op_ReturnCall : op_Call;
-                operand = target->compiled;
-            } else {
-                op      = useTailCall ? op_CompileReturnCall : op_Compile;
-                operand = target;
+            ఒకవేళ (లక్ష్యం->compiled) {
+                op      = use_తోక_Call ? op_ReturnCall : op_Call;
+                నిర్వాహ్యం = లక్ష్యం->compiled;
+            } లేకపోతే {
+                op      = use_తోక_Call ? op_CompileReturnCall : op_Compile;
+                నిర్వాహ్యం = లక్ష్యం;
             }
 
-#if d_m3HasExceptionHandling
-            if (isReturnCall) {
-_               (EmitPopTryFramesForReturnCall(o));
+#ఒకవేళ d_m3HasExceptionHandling
+            ఒకవేళ (isReturnCall) {
+_               (Emit_తీయి_Try_చట్రాలు_For_Return_Call(o));
             }
-#endif
+#అయితే_ముగింపు
 
-            if (crossModule) {
-_               (EmitSetMemoryPtr(o, Module_Memory0(target->module)));
+            ఒకవేళ (crossModule) {
+_               (Emit_సమితి_జ్ఞాపకం_Ptr(o, Module_Memory0(లక్ష్యం->module)));
             }
 
 _           (EmitOp(o, op));
-            EmitPointer(o, operand);
-            EmitSlotOffset(o, slotTop);
+            Emit_సూచిక(o, నిర్వాహ్యం);
+            Emit_స్థానం_స్థానభ్రంశం(o, స్థానం_శిఖరం);
 
-            if (not useTailCall) {
+            ఒకవేళ (not use_తోక_Call) {
                 // a suspend inside the callee leaves this frame waiting here, its
                 // results not yet written
-_               (RecordCall(o, GetFuncTypeNumResults(target->funcType), slotTop, isReturnCall));
+_               (రికార్డు_Call(o, Get_Func_Type_అంకె_Results(లక్ష్యం->funcType), స్థానం_శిఖరం, isReturnCall));
             }
 
-            if (useTailCall) {
-                EmitSlotOffset(o, o->function->numRetSlots);
-                EmitConstant32(o, numArgSlots);
+            ఒకవేళ (use_తోక_Call) {
+                Emit_స్థానం_స్థానభ్రంశం(o, o->function->అంకె_Ret_Slots);
+                EmitConstant32(o, అంకె_Arg_Slots);
 
-_               (SetStackPolymorphic(o));
-            } else {
-                if (crossModule) {
-_                   (EmitSetMemoryPtr(o, Module_Memory0(o->module)));
+_               (సమితి_దొంతర_Polymorphic(o));
+            } లేకపోతే {
+                ఒకవేళ (crossModule) {
+_                   (Emit_సమితి_జ్ఞాపకం_Ptr(o, Module_Memory0(o->module)));
                 }
 
-                if (isReturnCall) {
+                ఒకవేళ (isReturnCall) {
 _                   (Compile_Return(o, i_opcode));
                 }
             }
-        } else {
+        } లేకపోతే {
             _throw(ErrorCompile(m3Err_functionImportMissing, o, "'%s.%s'", GetFunctionImportModuleName(function), m3_GetFunctionName(function)));
         }
-    } else {
-        _throw(ErrorCompile(m3Err_functionLookupFailed, o, "index: %d", functionIndex));
+    } లేకపోతే {
+        _throw(ErrorCompile(m3Err_functionLookupFailed, o, "index: %d", function_సూచీ));
     }
 
-    } _catch: return result;
+    } _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_CallIndirect (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Call_పరోక్ష (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
+    u32 type_సూచీ;
+_   (ReadLEB_u32(&type_సూచీ, &o->wasm, o->wasm_చివర));
 
-    u32 tableIndex;
-_   (ReadLEB_u32(&tableIndex, &o->wasm, o->wasmEnd));
+    u32 పట్టిక_సూచీ;
+_   (ReadLEB_u32(&పట్టిక_సూచీ, &o->wasm, o->wasm_చివర));
 
-    _throwif("function call type index out of range", typeIndex >= o->module->numFuncTypes);
-    _throwif("table index out of range", tableIndex >= o->module->numTables);
-    _throwif(m3Err_typeMismatch, BaseTypeOf(o->module->tables[tableIndex]->type) != c_m3Type_funcref);
+    _throwif("function call type index out of range", type_సూచీ >= o->module->అంకె_Func_Types);
+    _throwif("table index out of range", పట్టిక_సూచీ >= o->module->అంకె_Tables);
+    _throwif(m3Err_typeMismatch, పునాది_Type_యొక్క(o->module->tables[పట్టిక_సూచీ]->type) != c_m3Type_funcref);
 
-_   (CheckOperandType(o, 0, Table_AddrType(o->module->tables[tableIndex])));
+_   (Check_నిర్వాహ్యం_Type(o, 0, పట్టిక_Addr_Type(o->module->tables[పట్టిక_సూచీ])));
 
-    if (IsStackTopInRegister(o)) {
-_       (PreserveRegisterIfOccupied(o, c_m3Type_i32));
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+_       (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i32));
     }
 
-    u16 tableIndexSlot = GetStackTopSlotNumber(o);
+    u16 పట్టిక_సూచీ_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
 
-    bool isReturnCall = (i_opcode == c_waOp_returnCallIndirect);
-    bool useTailCall  = isReturnCall and d_m3CanTailCall;
+    bool isReturnCall = (i_opcode == c_wa_Op_return_Call_పరోక్ష);
+    bool use_తోక_Call  = isReturnCall and d_m3_Can_తోక_Call;
 
-    u16         execTop, numArgSlots = 0;
-    IM3FuncType type = o->module->funcTypes[typeIndex];
+    u16         exec_శిఖరం, అంకె_Arg_Slots = 0;
+    IM3FuncType type = o->module->funcTypes[type_సూచీ];
 
-    if (useTailCall) {
-_       (CompileTailCallArgs(o, &execTop, &numArgSlots, type, true));
-    } else {
-_       (CompileCallArgsAndReturn(o, &execTop, type, true));
+    ఒకవేళ (use_తోక_Call) {
+_       (Compile_తోక_Call_వాదనలు(o, &exec_శిఖరం, &అంకె_Arg_Slots, type, true));
+    } లేకపోతే {
+_       (Compile_Call_వాదనలు_And_Return(o, &exec_శిఖరం, type, true));
     }
 
-#if d_m3HasExceptionHandling
-    if (isReturnCall) {
-_       (EmitPopTryFramesForReturnCall(o));
+#ఒకవేళ d_m3HasExceptionHandling
+    ఒకవేళ (isReturnCall) {
+_       (Emit_తీయి_Try_చట్రాలు_For_Return_Call(o));
     }
-#endif
+#అయితే_ముగింపు
 
     // the table comes first: how wide its indexes are is what says how much of
     // the slot below holds one
-_   (EmitOp(o, useTailCall ? op_ReturnCallIndirect : op_CallIndirect));
-    EmitPointer(o, o->module->tables[tableIndex]);
-    EmitSlotOffset(o, tableIndexSlot);
-    EmitPointer(o, type);
-    EmitSlotOffset(o, execTop);
+_   (EmitOp(o, use_తోక_Call ? op_Return_Call_పరోక్ష : op_Call_పరోక్ష));
+    Emit_సూచిక(o, o->module->tables[పట్టిక_సూచీ]);
+    Emit_స్థానం_స్థానభ్రంశం(o, పట్టిక_సూచీ_స్థానం);
+    Emit_సూచిక(o, type);
+    Emit_స్థానం_స్థానభ్రంశం(o, exec_శిఖరం);
 
-    if (not useTailCall) {
-_       (RecordCall(o, GetFuncTypeNumResults(type), execTop, isReturnCall));
+    ఒకవేళ (not use_తోక_Call) {
+_       (రికార్డు_Call(o, Get_Func_Type_అంకె_Results(type), exec_శిఖరం, isReturnCall));
     }
 
-    if (useTailCall) {
-        EmitSlotOffset(o, o->function->numRetSlots);
-        EmitConstant32(o, numArgSlots);
+    ఒకవేళ (use_తోక_Call) {
+        Emit_స్థానం_స్థానభ్రంశం(o, o->function->అంకె_Ret_Slots);
+        EmitConstant32(o, అంకె_Arg_Slots);
 
-_       (SetStackPolymorphic(o));
-    } else if (isReturnCall) {
+_       (సమితి_దొంతర_Polymorphic(o));
+    } లేకపోతే ఒకవేళ (isReturnCall) {
 _       (Compile_Return(o, i_opcode));
     }
 
 } _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
 // Reads the memory index a memory instruction names, and checks it against the
 // module's index space. Without multi-memory the immediate is a reserved byte
 // that has to be zero, which is the same check.
-static
-M3Result ReadMemoryIndex (IM3Compilation o, u32* o_memoryIdx)
+స్థిర
+M3_ఫలితం Read_జ్ఞాపకం_సూచీ (IM3Compilation o, u32* o_జ్ఞాపకం_Idx)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-_   (ReadLEB_u32(o_memoryIdx, &o->wasm, o->wasmEnd));
+_   (ReadLEB_u32(o_జ్ఞాపకం_Idx, &o->wasm, o->wasm_చివర));
 
-    _throwif(m3Err_unknownMemory, *o_memoryIdx >= o->module->numMemories);
+    _throwif(m3_Err_unknown_జ్ఞాపకం, *o_జ్ఞాపకం_Idx >= o->module->అంకె_Memories);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Memory_Size (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_జ్ఞాపకం_కొలత (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    u32 memoryIdx;
+    u32 జ్ఞాపకం_Idx;
 
     // A page count is given in the memory's own address type. Declared up here
     // so the throws below don't jump over its initialization.
     m3type_t addrType = c_m3Type_i32;
 
-_   (ReadMemoryIndex(o, &memoryIdx));
+_   (Read_జ్ఞాపకం_సూచీ(o, &జ్ఞాపకం_Idx));
 
-    addrType = Memory_AddrType(o->module->memories[memoryIdx]);
+    addrType = జ్ఞాపకం_Addr_Type(o->module->memories[జ్ఞాపకం_Idx]);
 
-_   (PreserveRegisterIfOccupied(o, addrType));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, addrType));
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, memoryIdx));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, జ్ఞాపకం_Idx));
     }
 
     // op_MemSize writes the whole register either way; the slot it is pushed
     // to is what decides how much of it the module gets to see
-_   (EmitOp(o, op_MemSize));
+_   (EmitOp(o, op_Mem_కొలత));
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, 0));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, 0));
     }
 
-_   (PushRegister(o, addrType));
+_   (నెట్టు_రిజిస్టరు(o, addrType));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Memory_Grow (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_జ్ఞాపకం_Grow (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    u32 memoryIdx;
+    u32 జ్ఞాపకం_Idx;
 
     // see Compile_Memory_Size
     m3type_t addrType = c_m3Type_i32;
 
-_   (ReadMemoryIndex(o, &memoryIdx));
+_   (Read_జ్ఞాపకం_సూచీ(o, &జ్ఞాపకం_Idx));
 
-    addrType = Memory_AddrType(o->module->memories[memoryIdx]);
+    addrType = జ్ఞాపకం_Addr_Type(o->module->memories[జ్ఞాపకం_Idx]);
 
-_   (CopyStackTopToRegister(o, false));
-_   (PopType(o, addrType));
+_   (Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు(o, false));
+_   (తీయి_Type(o, addrType));
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, memoryIdx));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, జ్ఞాపకం_Idx));
     }
 
-#if d_m3HasMemory64
+#ఒకవేళ d_m3HasMemory64
 _   (EmitOp(o, (addrType == c_m3Type_i64) ? op_MemGrow64 : op_MemGrow));
-#else
+#లేకపోతే
 _   (EmitOp(o, op_MemGrow));
-#endif
+#అయితే_ముగింపు
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, 0));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, 0));
     }
 
-_   (PushRegister(o, addrType));
+_   (నెట్టు_రిజిస్టరు(o, addrType));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Memory_CopyFill (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_జ్ఞాపకం_Copy_Fill (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // memory.copy names the destination first and then the source; memory.fill
     // names only the one it writes.
-    u32  sourceMemoryIdx = 0, targetMemoryIdx = 0;
-    bool isCopy = (i_opcode == c_waOp_memoryCopy);
+    u32  ఆధారం_జ్ఞాపకం_Idx = 0, లక్ష్యం_జ్ఞాపకం_Idx = 0;
+    bool isCopy = (i_opcode == c_wa_Op_జ్ఞాపకం_Copy);
 
     // Each address is typed by the memory it belongs to. The length follows
     // the narrower of the two, so it is 64-bit only when both are - which for
     // memory.fill, naming one memory twice over, means whenever that one is.
     // Declared up here so the throws below don't jump over them.
-    m3type_t targetType = c_m3Type_i32;
-    m3type_t sourceType = c_m3Type_i32;
-    m3type_t lengthType = c_m3Type_i32;
+    m3type_t లక్ష్యం_Type = c_m3Type_i32;
+    m3type_t ఆధారం_Type = c_m3Type_i32;
+    m3type_t నిడివి_Type = c_m3Type_i32;
 
-    _throwif(m3Err_wasmMalformed, o->module->numMemories == 0);
+    _throwif(m3Err_wasmMalformed, o->module->అంకె_Memories == 0);
 
-_   (ReadMemoryIndex(o, &targetMemoryIdx));
+_   (Read_జ్ఞాపకం_సూచీ(o, &లక్ష్యం_జ్ఞాపకం_Idx));
 
-    if (isCopy) {
-_       (ReadMemoryIndex(o, &sourceMemoryIdx));
+    ఒకవేళ (isCopy) {
+_       (Read_జ్ఞాపకం_సూచీ(o, &ఆధారం_జ్ఞాపకం_Idx));
     }
 
-    targetType = Memory_AddrType(o->module->memories[targetMemoryIdx]);
-    sourceType = isCopy ? Memory_AddrType(o->module->memories[sourceMemoryIdx])
-                        : targetType;
-    lengthType = (targetType == c_m3Type_i64 and sourceType == c_m3Type_i64)
+    లక్ష్యం_Type = జ్ఞాపకం_Addr_Type(o->module->memories[లక్ష్యం_జ్ఞాపకం_Idx]);
+    ఆధారం_Type = isCopy ? జ్ఞాపకం_Addr_Type(o->module->memories[ఆధారం_జ్ఞాపకం_Idx])
+                        : లక్ష్యం_Type;
+    నిడివి_Type = (లక్ష్యం_Type == c_m3Type_i64 and ఆధారం_Type == c_m3Type_i64)
                    ? c_m3Type_i64
                    : c_m3Type_i32;
 
-_   (CopyStackTopToRegister(o, false));
+_   (Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు(o, false));
 
-#if d_m3HasMultiMemory
-    if (isCopy and sourceMemoryIdx != targetMemoryIdx) {
+#ఒకవేళ d_m3_Has_Multi_జ్ఞాపకం
+    ఒకవేళ (isCopy and ఆధారం_జ్ఞాపకం_Idx != లక్ష్యం_జ్ఞాపకం_Idx) {
         // two memories at once: _mem can only name one, so the op takes both
 _       (EmitOp(o, op_MemCopy_x));
-        EmitPointer(o, o->module->memories[targetMemoryIdx]);
-        EmitPointer(o, o->module->memories[sourceMemoryIdx]);
+        Emit_సూచిక(o, o->module->memories[లక్ష్యం_జ్ఞాపకం_Idx]);
+        Emit_సూచిక(o, o->module->memories[ఆధారం_జ్ఞాపకం_Idx]);
 
         // ...and, since they need not be addressed alike, how wide to read
         // each of the operands: bit 0 the destination, bit 1 the source
-        EmitConstant32(o, ((targetType == c_m3Type_i64) ? 0x1u : 0u) |
-                            ((sourceType == c_m3Type_i64) ? 0x2u : 0u));
-    } else
-#endif
+        EmitConstant32(o, ((లక్ష్యం_Type == c_m3Type_i64) ? 0x1u : 0u) |
+                            ((ఆధారం_Type == c_m3Type_i64) ? 0x2u : 0u));
+    } లేకపోతే
+#అయితే_ముగింపు
     {
         IM3Operation op = isCopy ? op_MemCopy : op_MemFill;
 
-#if d_m3HasMemory64
-        if (targetType == c_m3Type_i64) {
+#ఒకవేళ d_m3HasMemory64
+        ఒకవేళ (లక్ష్యం_Type == c_m3Type_i64) {
             op = isCopy ? op_MemCopy64 : op_MemFill64;
         }
-#endif
+#అయితే_ముగింపు
 
-        if (targetMemoryIdx) {
-_           (EmitSetMemory(o, targetMemoryIdx));
+        ఒకవేళ (లక్ష్యం_జ్ఞాపకం_Idx) {
+_           (Emit_సమితి_జ్ఞాపకం(o, లక్ష్యం_జ్ఞాపకం_Idx));
         }
 
 _       (EmitOp(o, op));
@@ -3071,222 +3071,222 @@ _       (EmitOp(o, op));
 
     // the length is in the register; the other two are named by slot, at
     // whatever width their stack entries were pushed with
-_   (PopType(o, lengthType));
-_   (EmitSlotNumOfStackTopAndPop(o));      // the source, or the byte to fill with
-_   (EmitSlotNumOfStackTopAndPop(o));      // the destination
+_   (తీయి_Type(o, నిడివి_Type));
+_   (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));      // the source, or the byte to fill with
+_   (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));      // the destination
 
-    if (targetMemoryIdx and not (isCopy and sourceMemoryIdx != targetMemoryIdx)) {
-_       (EmitSetMemory(o, 0));
+    ఒకవేళ (లక్ష్యం_జ్ఞాపకం_Idx and not (isCopy and ఆధారం_జ్ఞాపకం_Idx != లక్ష్యం_జ్ఞాపకం_Idx)) {
+_       (Emit_సమితి_జ్ఞాపకం(o, 0));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // memory.init and data.drop address a data segment by index. Both are only valid
 // when a data count section declared the segments up front.
-static
-M3Result ReadDataSegment (IM3Compilation o, M3DataSegment** o_segment)
+స్థిర
+M3_ఫలితం Read_దత్తాంశం_Segment (IM3Compilation o, M3_దత్తాంశం_Segment** o_segment)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     u32 index;
-_   (ReadLEB_u32(&index, &o->wasm, o->wasmEnd));
+_   (ReadLEB_u32(&index, &o->wasm, o->wasm_చివర));
 
-    _throwif("data count section required", not o->module->hasDataCount);
-    _throwif(m3Err_wasmMalformed, index >= o->module->numDataSegments);
+    _throwif("data count section required", not o->module->has_దత్తాంశం_లెక్క);
+    _throwif(m3Err_wasmMalformed, index >= o->module->అంకె_దత్తాంశం_Segments);
 
-    *o_segment = &o->module->dataSegments[index];
+    *o_segment = &o->module->దత్తాంశం_Segments[index];
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Memory_Init (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_జ్ఞాపకం_Init (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3DataSegment* segment = NULL;
-    u32            memoryIdx;
+    M3_దత్తాంశం_Segment* segment = ఖాళీ;
+    u32            జ్ఞాపకం_Idx;
 
-    _throwif(m3Err_wasmMalformed, o->module->numMemories == 0);
+    _throwif(m3Err_wasmMalformed, o->module->అంకె_Memories == 0);
 
-_   (ReadDataSegment(o, &segment));
-_   (ReadMemoryIndex(o, &memoryIdx));
+_   (Read_దత్తాంశం_Segment(o, &segment));
+_   (Read_జ్ఞాపకం_సూచీ(o, &జ్ఞాపకం_Idx));
 
-_   (CopyStackTopToRegister(o, false));
+_   (Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు(o, false));
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, memoryIdx));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, జ్ఞాపకం_Idx));
     }
 
-#if d_m3HasMemory64
+#ఒకవేళ d_m3HasMemory64
     // only the destination follows the memory's address type: a data segment
     // is indexed as an i32 however the memory it is copied into is addressed
-_   (EmitOp(o, o->module->memories[memoryIdx]->isMemory64 ? op_MemInit64 : op_MemInit));
-#else
+_   (EmitOp(o, o->module->memories[జ్ఞాపకం_Idx]->isMemory64 ? op_MemInit64 : op_MemInit));
+#లేకపోతే
 _   (EmitOp(o, op_MemInit));
-#endif
-    EmitPointer(o, segment);
-_   (PopType(o, c_m3Type_i32));
-_   (EmitSlotNumOfStackTopAndPop(o));
-_   (EmitSlotNumOfStackTopAndPop(o));
+#అయితే_ముగింపు
+    Emit_సూచిక(o, segment);
+_   (తీయి_Type(o, c_m3Type_i32));
+_   (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
+_   (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, 0));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, 0));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-#if d_m3HasRefTypes
+#ఒకవేళ d_m3HasRefTypes
 
-static
-M3Result Compile_Select (IM3Compilation o, m3opcode_t i_opcode);
+స్థిర
+M3_ఫలితం Compile_Select (IM3Compilation o, m3opcode_t i_opcode);
 
 // select with an explicit result type vector. The types only matter to the
 // validator; the operands are laid out exactly as for the untyped select.
-M3Result Compile_Select_Typed (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_Select_Typed (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numTypes;
-_   (ReadLEB_u32(&numTypes, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_wasmMalformed, numTypes != 1);
+    u32 అంకె_Types;
+_   (ReadLEB_u32(&అంకె_Types, &o->wasm, o->wasm_చివర));
+    _throwif(m3Err_wasmMalformed, అంకె_Types != 1);
 
     i8 waType;
     u8 type;
-_   (ReadLEB_i7(&waType, &o->wasm, o->wasmEnd));
+_   (ReadLEB_i7(&waType, &o->wasm, o->wasm_చివర));
 _   (NormalizeType(&type, waType));
 
 _   (Compile_Select(o, i_opcode));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // A reference is one pointer-sized word and null is 0, so null-testing it is
 // just an integer eqz of the matching width.
-#  if M3_SIZEOF_PTR == 8
-#    define d_m3RefIsNull_r   op_i64_EqualToZero_r
-#    define d_m3RefIsNull_s   op_i64_EqualToZero_s
-#  else
-#    define d_m3RefIsNull_r   op_i32_EqualToZero_r
-#    define d_m3RefIsNull_s   op_i32_EqualToZero_s
+#  ఒకవేళ M3_SIZEOF_PTR == 8
+#    define d_m3RefIsNull_r   op_i64_Equal_గమ్యం_Zero_r
+#    define d_m3RefIsNull_s   op_i64_Equal_గమ్యం_Zero_s
+#  లేకపోతే
+#    define d_m3RefIsNull_r   op_i32_Equal_గమ్యం_Zero_r
+#    define d_m3RefIsNull_s   op_i32_Equal_గమ్యం_Zero_s
 #  endif
 
-static
-M3Result ReadRefType (IM3Compilation o, m3type_t* o_type)
+స్థిర
+M3_ఫలితం ReadRefType (IM3Compilation o, m3type_t* o_type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-#  if d_m3HasTypedRefs
+#  ఒకవేళ d_m3HasTypedRefs
     // ref.null names a heap type: func, extern, or a function type index
-    m3type_t heapBits;
-_   (ParseHeapType(o->module, &heapBits, &o->wasm, o->wasmEnd));
+    m3type_t కుప్ప_బిట్లు;
+_   (Parse_కుప్ప_Type(o->module, &కుప్ప_బిట్లు, &o->wasm, o->wasm_చివర));
 
-    *o_type = d_m3Type_ref | heapBits;
-#  else
+    *o_type = d_m3Type_ref | కుప్ప_బిట్లు;
+#  లేకపోతే
     i8 waType;
     u8 plainType;
-_   (ReadLEB_i7(&waType, &o->wasm, o->wasmEnd));
+_   (ReadLEB_i7(&waType, &o->wasm, o->wasm_చివర));
 _   (NormalizeType(&plainType, waType));
     *o_type = plainType;
     _throwif(m3Err_wasmMalformed, not IsRefType(*o_type));
 #  endif
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Ref_Null (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_Ref_Null (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     m3type_t type;
 _   (ReadRefType(o, &type));
-_   (PushConst(o, 0, type));
+_   (నెట్టు_Const(o, 0, type));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Ref_IsNull (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_Ref_IsNull (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     IM3Operation op;
 
-    if (not IsStackPolymorphic(o)) {
-        _throwif(m3Err_typeMismatch, not IsRefType(GetStackTopType(o)));
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        _throwif(m3Err_typeMismatch, not IsRefType(Get_దొంతర_శిఖరం_Type(o)));
     }
 
-    if (IsStackTopInRegister(o)) {
+    ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
         op = d_m3RefIsNull_r;
-    } else {
-_       (PreserveRegisterIfOccupied(o, c_m3Type_i32));
+    } లేకపోతే {
+_       (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i32));
         op = d_m3RefIsNull_s;
     }
 
 _   (EmitOp(o, op));
-_   (EmitSlotNumOfStackTopAndPop(o));
-_   (PushRegister(o, c_m3Type_i32));
+_   (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
+_   (నెట్టు_రిజిస్టరు(o, c_m3Type_i32));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Ref_Func (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_Ref_Func (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 funcIndex;
+    u32 func_సూచీ;
 
     // declared before the throws below, which jump past this point to _catch
     m3type_t    refType   = c_m3Type_funcref;
-    IM3Function reference = NULL;
+    IM3Function reference = ఖాళీ;
 
-_   (ReadLEB_u32(&funcIndex, &o->wasm, o->wasmEnd));
-    _throwif("function index out of range", funcIndex >= o->module->numFunctions);
+_   (ReadLEB_u32(&func_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif("function index out of range", func_సూచీ >= o->module->అంకె_Functions);
 
     // Inside a constant expression ref.func is itself a declaration; inside a
     // function body the function must already have been declared elsewhere.
-    if (o->function) {
-        _throwif("undeclared function reference", not Module_IsFunctionDeclared(o->module, funcIndex));
-    } else {
-_       (Module_DeclareFunction(o->module, funcIndex));
+    ఒకవేళ (o->function) {
+        _throwif("undeclared function reference", not Module_IsFunctionDeclared(o->module, func_సూచీ));
+    } లేకపోతే {
+_       (Module_DeclareFunction(o->module, func_సూచీ));
     }
 
-#  if d_m3HasTypedRefs
-    refType = RefTypeOfFuncType(o->module->functions[funcIndex].funcType, true);
+#  ఒకవేళ d_m3HasTypedRefs
+    refType = Ref_Type_యొక్క_Func_Type(o->module->functions[func_సూచీ].funcType, true);
 #  endif
 
     // A reference denotes the function that actually runs, so a ref.func naming
     // an import linked to another module is the same reference that module's
     // own ref.func would produce - and carries the defining module with it.
-    reference = Function_Implementation(&o->module->functions[funcIndex]);
+    reference = Function_Implementation(&o->module->functions[func_సూచీ]);
 
-_   (PushConst(o, (u64)(uintptr_t)reference, refType));
+_   (నెట్టు_Const(o, (u64)(uintptr_t)reference, refType));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // table.get/set/size/grow/fill all name a table by index; the table struct goes
 // into the codestream so the operation doesn't have to walk the module.
-static
-M3Result ReadTable (IM3Compilation o, M3Table** o_table)
+స్థిర
+M3_ఫలితం Read_పట్టిక (IM3Compilation o, M3_పట్టిక** o_పట్టిక)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     u32 index;
-_   (ReadLEB_u32(&index, &o->wasm, o->wasmEnd));
-    _throwif("table index out of range", index >= o->module->numTables);
+_   (ReadLEB_u32(&index, &o->wasm, o->wasm_చివర));
+    _throwif("table index out of range", index >= o->module->అంకె_Tables);
 
-    *o_table = o->module->tables[index];
+    *o_పట్టిక = o->module->tables[index];
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
@@ -3294,276 +3294,276 @@ _   (ReadLEB_u32(&index, &o->wasm, o->wasmEnd));
 // register first: after this each EmitSlotNumOfStackTopAndPop () emits a real
 // slot offset, and the register is free for the result. Operands are emitted
 // from the top of the stack downwards, which is the order the ops read them.
-static
-M3Result Compile_Table_Op (IM3Compilation o, IM3Operation i_op, M3Table* i_table, u32 i_numOperands, m3type_t i_retType)
+స్థిర
+M3_ఫలితం Compile_పట్టిక_Op (IM3Compilation o, IM3Operation i_op, M3_పట్టిక* i_పట్టిక, u32 i_అంకె_Operands, m3type_t i_retType)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
 
 _   (EmitOp(o, i_op));
-    EmitPointer(o, i_table);
+    Emit_సూచిక(o, i_పట్టిక);
 
-    for (u32 i = 0; i < i_numOperands; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    కొరకు (u32 i = 0; i < i_అంకె_Operands; ++i) {
+_       (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
     }
 
-    if (i_retType != c_m3Type_none) {
-_       (PushRegister(o, i_retType));
+    ఒకవేళ (i_retType != c_m3Type_none) {
+_       (నెట్టు_రిజిస్టరు(o, i_retType));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Table_GetSet (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_పట్టిక_Get_సమితి (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3Table* table;
-_   (ReadTable(o, &table));
+    M3_పట్టిక* పట్టిక_2;
+_   (Read_పట్టిక(o, &పట్టిక_2));
 
-    if (i_opcode == c_waOp_tableGet) {
-_       (CheckOperandType(o, 0, Table_AddrType(table)));
-_       (Compile_Table_Op(o, op_TableGet, table, 1, table->type));
-    } else {
-_       (CheckOperandType(o, 1, Table_AddrType(table)));
-_       (Compile_Table_Op(o, op_TableSet, table, 2, c_m3Type_none));
+    ఒకవేళ (i_opcode == c_wa_Op_పట్టిక_Get) {
+_       (Check_నిర్వాహ్యం_Type(o, 0, పట్టిక_Addr_Type(పట్టిక_2)));
+_       (Compile_పట్టిక_Op(o, op_పట్టిక_Get, పట్టిక_2, 1, పట్టిక_2->type));
+    } లేకపోతే {
+_       (Check_నిర్వాహ్యం_Type(o, 1, పట్టిక_Addr_Type(పట్టిక_2)));
+_       (Compile_పట్టిక_Op(o, op_పట్టిక_సమితి, పట్టిక_2, 2, c_m3Type_none));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Table_Init (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_పట్టిక_Init (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32      elemIndex;
-    M3Table* table;
+    u32      elem_సూచీ;
+    M3_పట్టిక* పట్టిక_2;
 
-_   (ReadLEB_u32(&elemIndex, &o->wasm, o->wasmEnd));
-    _throwif("element segment index out of range", elemIndex >= o->module->numElementSegments);
-_   (ReadTable(o, &table));
+_   (ReadLEB_u32(&elem_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif("element segment index out of range", elem_సూచీ >= o->module->అంకె_Element_Segments);
+_   (Read_పట్టిక(o, &పట్టిక_2));
 
-_   (CheckOperandType(o, 2, Table_AddrType(table)));
+_   (Check_నిర్వాహ్యం_Type(o, 2, పట్టిక_Addr_Type(పట్టిక_2)));
 
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
-_   (EmitOp(o, op_TableInit));
-    EmitPointer(o, table);
-    EmitPointer(o, &o->module->elementSegments[elemIndex]);
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
+_   (EmitOp(o, op_పట్టిక_Init));
+    Emit_సూచిక(o, పట్టిక_2);
+    Emit_సూచిక(o, &o->module->elementSegments[elem_సూచీ]);
 
-    for (u32 i = 0; i < 3; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    కొరకు (u32 i = 0; i < 3; ++i) {
+_       (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Elem_Drop (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_Elem_Drop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 elemIndex;
-_   (ReadLEB_u32(&elemIndex, &o->wasm, o->wasmEnd));
-    _throwif("element segment index out of range", elemIndex >= o->module->numElementSegments);
+    u32 elem_సూచీ;
+_   (ReadLEB_u32(&elem_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif("element segment index out of range", elem_సూచీ >= o->module->అంకె_Element_Segments);
 
 _   (EmitOp(o, op_ElemDrop));
-    EmitPointer(o, &o->module->elementSegments[elemIndex]);
+    Emit_సూచిక(o, &o->module->elementSegments[elem_సూచీ]);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Table_Copy (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_పట్టిక_Copy (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3Table* dst;
-    M3Table* src;
+    M3_పట్టిక* dst;
+    M3_పట్టిక* src;
 
-_   (ReadTable(o, &dst));
-_   (ReadTable(o, &src));
-    _throwif(m3Err_typeMismatch, not IsSubTypeOf(src->type, dst->type));
+_   (Read_పట్టిక(o, &dst));
+_   (Read_పట్టిక(o, &src));
+    _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(src->type, dst->type));
 
-_   (CheckOperandType(o, 2, Table_AddrType(dst)));
-_   (CheckOperandType(o, 1, Table_AddrType(src)));
-_   (CheckOperandType(o, 0, (dst->isTable64 and src->isTable64) ? c_m3Type_i64 : c_m3Type_i32));
+_   (Check_నిర్వాహ్యం_Type(o, 2, పట్టిక_Addr_Type(dst)));
+_   (Check_నిర్వాహ్యం_Type(o, 1, పట్టిక_Addr_Type(src)));
+_   (Check_నిర్వాహ్యం_Type(o, 0, (dst->isTable64 and src->isTable64) ? c_m3Type_i64 : c_m3Type_i32));
 
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
-_   (EmitOp(o, op_TableCopy));
-    EmitPointer(o, dst);
-    EmitPointer(o, src);
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
+_   (EmitOp(o, op_పట్టిక_Copy));
+    Emit_సూచిక(o, dst);
+    Emit_సూచిక(o, src);
 
-    for (u32 i = 0; i < 3; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    కొరకు (u32 i = 0; i < 3; ++i) {
+_       (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Table_Size (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_పట్టిక_కొలత (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3Table* table;
-_   (ReadTable(o, &table));
+    M3_పట్టిక* పట్టిక_2;
+_   (Read_పట్టిక(o, &పట్టిక_2));
 
     // a table size is given in the table's own index type
-_   (Compile_Table_Op(o, op_TableSize, table, 0, Table_AddrType(table)));
+_   (Compile_పట్టిక_Op(o, op_పట్టిక_కొలత, పట్టిక_2, 0, పట్టిక_Addr_Type(పట్టిక_2)));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Compile_Table_GrowFill (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_పట్టిక_Grow_Fill (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3Table* table;
-_   (ReadTable(o, &table));
+    M3_పట్టిక* పట్టిక_2;
+_   (Read_పట్టిక(o, &పట్టిక_2));
 
-    if (i_opcode == c_waOp_tableGrow) {
-_       (CheckOperandType(o, 0, Table_AddrType(table)));
-_       (Compile_Table_Op(o, op_TableGrow, table, 2, Table_AddrType(table)));
-    } else {
-_       (CheckOperandType(o, 0, Table_AddrType(table)));
-_       (CheckOperandType(o, 2, Table_AddrType(table)));
-_       (Compile_Table_Op(o, op_TableFill, table, 3, c_m3Type_none));
+    ఒకవేళ (i_opcode == c_wa_Op_పట్టిక_Grow) {
+_       (Check_నిర్వాహ్యం_Type(o, 0, పట్టిక_Addr_Type(పట్టిక_2)));
+_       (Compile_పట్టిక_Op(o, op_పట్టిక_Grow, పట్టిక_2, 2, పట్టిక_Addr_Type(పట్టిక_2)));
+    } లేకపోతే {
+_       (Check_నిర్వాహ్యం_Type(o, 0, పట్టిక_Addr_Type(పట్టిక_2)));
+_       (Check_నిర్వాహ్యం_Type(o, 2, పట్టిక_Addr_Type(పట్టిక_2)));
+_       (Compile_పట్టిక_Op(o, op_పట్టిక_Fill, పట్టిక_2, 3, c_m3Type_none));
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasRefTypes
+#అయితే_ముగింపు // d_m3HasRefTypes
 
 
-M3Result Compile_Data_Drop (IM3Compilation o, m3opcode_t i_opcode)
+M3_ఫలితం Compile_దత్తాంశం_Drop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3DataSegment* segment = NULL;
-_   (ReadDataSegment(o, &segment));
+    M3_దత్తాంశం_Segment* segment = ఖాళీ;
+_   (Read_దత్తాంశం_Segment(o, &segment));
 
-_   (EmitOp(o, op_DataDrop));
-    EmitPointer(o, segment);
+_   (EmitOp(o, op_దత్తాంశం_Drop));
+    Emit_సూచిక(o, segment);
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-static
-M3Result ReadBlockType (IM3Compilation o, IM3FuncType* o_blockType)
+స్థిర
+M3_ఫలితం Read_ఖండం_Type (IM3Compilation o, IM3FuncType* o_ఖండం_Type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-#if d_m3HasTypedRefs
+#ఒకవేళ d_m3HasTypedRefs
     // a spelled-out reference type is two bytes, so it cannot be told apart
     // from a type index by the s33 that block types otherwise use
-    if (o->wasm < o->wasmEnd and (*o->wasm == d_waEncode_ref or *o->wasm == d_waEncode_refNull)) {
+    ఒకవేళ (o->wasm < o->wasm_చివర and (*o->wasm == d_waEncode_ref or *o->wasm == d_waEncode_refNull)) {
         m3type_t refType;
-_       (ParseValueType(o->module, &refType, &o->wasm, o->wasmEnd));
-        IM3FuncType ftype = NULL;
+_       (Parse_విలువ_Type(o->module, &refType, &o->wasm, o->wasm_చివర));
+        IM3FuncType ftype = ఖాళీ;
 _       (AllocFuncType(&ftype, 1));
-        ftype->numRets  = 1;
+        ftype->అంకె_Rets  = 1;
         ftype->types[0] = refType;
-_       (Environment_AddFuncType(o->module->environment, &ftype));
-        *o_blockType = ftype;
-        return result;
+_       (Environment_కూడు_Func_Type(o->module->environment, &ftype));
+        *o_ఖండం_Type = ftype;
+        తిరిగి ఫలితం;
     }
-#endif
+#అయితే_ముగింపు
 
     i64 type;
-_   (ReadLebSigned(&type, 33, &o->wasm, o->wasmEnd));
+_   (ReadLebSigned(&type, 33, &o->wasm, o->wasm_చివర));
 
-    if (type < 0) {
+    ఒకవేళ (type < 0) {
         _throwif(m3Err_invalidTypeId, type < -64);
-        u8 valueType;
-_       (NormalizeType(&valueType, (i8)type));                                 m3log (compile, d_indent " (type: %s)", get_indention_string (o), c_waTypes [valueType]);
-        *o_blockType = o->module->environment->retFuncTypes[valueType];
-    } else {
-        _throwif("func type out of bounds", type >= o->module->numFuncTypes);
-        *o_blockType = o->module->funcTypes[type];                         m3log (compile, d_indent " (type: %s)", get_indention_string (o), SPrintFuncTypeSignature (*o_blockType));
+        u8 విలువ_Type;
+_       (NormalizeType(&విలువ_Type, (i8)type));                                 m3log (compile, d_indent " (type: %s)", get_indention_string (o), c_waTypes [విలువ_Type]);
+        *o_ఖండం_Type = o->module->environment->retFuncTypes[విలువ_Type];
+    } లేకపోతే {
+        _throwif("func type out of bounds", type >= o->module->అంకె_Func_Types);
+        *o_ఖండం_Type = o->module->funcTypes[type];                         m3log (compile, d_indent " (type: %s)", get_indention_string (o), SPrintFuncTypeSignature (*o_ఖండం_Type));
     }
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result PreserveArgsAndLocals (IM3Compilation o)
+స్థిర
+M3_ఫలితం Preserve_వాదనలు_And_Locals (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    if (o->stackIndex > o->stackFirstDynamicIndex) {
-        u32 numArgsAndLocals = GetFunctionNumArgsAndLocals(o->function);
+    ఒకవేళ (o->దొంతర_సూచీ > o->దొంతర_మొదటి_Dynamic_సూచీ) {
+        u32 అంకె_వాదనలు_And_Locals = Get_Function_అంకె_వాదనలు_And_Locals(o->function);
 
-        for (u32 i = 0; i < numArgsAndLocals; ++i) {
-            u16 slot = GetSlotForStackIndex(o, i);
+        కొరకు (u32 i = 0; i < అంకె_వాదనలు_And_Locals; ++i) {
+            u16 స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, i);
 
-            u16 preservedSlotNumber;
-_           (FindReferencedLocalWithinCurrentBlock(o, &preservedSlotNumber, slot));
+            u16 preserved_స్థానం_సంఖ్య;
+_           (కనుగొను_Referenced_Local_Within_Current_ఖండం(o, &preserved_స్థానం_సంఖ్య, స్థానం));
 
-            if (preservedSlotNumber != slot) {
-                m3type_t     type = GetStackTypeFromBottom(o, i);                 d_m3Assert (type != c_m3Type_none)
-                IM3Operation op   = Is64BitType(type) ? op_CopySlot_64 : op_CopySlot_32;
+            ఒకవేళ (preserved_స్థానం_సంఖ్య != స్థానం) {
+                m3type_t     type = Get_దొంతర_Type_From_Bottom(o, i);                 d_m3Assert (type != c_m3Type_none)
+                IM3Operation op   = Is64_బిట్టు_Type(type) ? op_Copy_స్థానం_64 : op_Copy_స్థానం_32;
 
                 EmitOp(o, op);
-                EmitSlotOffset(o, preservedSlotNumber);
-                EmitSlotOffset(o, slot);
+                Emit_స్థానం_స్థానభ్రంశం(o, preserved_స్థానం_సంఖ్య);
+                Emit_స్థానం_స్థానభ్రంశం(o, స్థానం);
             }
         }
     }
 
     _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_LoopOrBlock (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Loop_Or_ఖండం (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    IM3FuncType blockType = NULL;
+    IM3FuncType ఖండం_Type = ఖాళీ;
 
 _   (PreserveRegisters(o));
-_   (PreserveArgsAndLocals(o));
+_   (Preserve_వాదనలు_And_Locals(o));
 
-_   (ReadBlockType(o, &blockType));
+_   (Read_ఖండం_Type(o, &ఖండం_Type));
 
-    if (i_opcode == c_waOp_loop) {
-        u16 numParams = GetFuncTypeNumParams(blockType);
-        if (numParams) {
+    ఒకవేళ (i_opcode == c_waOp_loop) {
+        u16 అంకె_Params = Get_Func_Type_అంకె_Params(ఖండం_Type);
+        ఒకవేళ (అంకె_Params) {
             // instantiate constants
-            u16 numValues = GetNumBlockValuesOnStack(o);
+            u16 అంకె_విలువలు = Get_అంకె_ఖండం_విలువలు_On_దొంతర(o);
 
-            if (numValues >= numParams) {
-                u16 stackTop = GetStackTopIndex(o) + 1;
+            ఒకవేళ (అంకె_విలువలు >= అంకె_Params) {
+                u16 దొంతర_శిఖరం = Get_దొంతర_శిఖరం_సూచీ(o) + 1;
 
-                for (u16 i = stackTop - numParams; i < stackTop; ++i) {
-                    u16      slot = GetSlotForStackIndex(o, i);
-                    m3type_t type = GetStackTypeFromBottom(o, i);
+                కొరకు (u16 i = దొంతర_శిఖరం - అంకె_Params; i < దొంతర_శిఖరం; ++i) {
+                    u16      స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, i);
+                    m3type_t type = Get_దొంతర_Type_From_Bottom(o, i);
 
-                    if (IsConstantSlot(o, slot)) {
-                        u16 newSlot = c_slotUnused;
-_                       (AllocateSlots(o, &newSlot, type));
-_                       (CopyStackIndexToSlot(o, newSlot, i));
-                        o->wasmStack[i] = newSlot;
+                    ఒకవేళ (Is_Constant_స్థానం(o, స్థానం)) {
+                        u16 new_స్థానం = c_స్థానం_వాడని;
+_                       (AllocateSlots(o, &new_స్థానం, type));
+_                       (Copy_దొంతర_సూచీ_గమ్యం_స్థానం(o, new_స్థానం, i));
+                        o->wasm_దొంతర[i] = new_స్థానం;
                     }
                 }
             }
         }
 
 _       (EmitOp(o, op_Loop));
-    } else {
+    } లేకపోతే {
     }
 
-_   (CompileBlock(o, blockType, i_opcode));
+_   (Compile_ఖండం(o, ఖండం_Type, i_opcode));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#if d_m3HasExceptionHandling
+#ఒకవేళ d_m3HasExceptionHandling
 
 // Emits one out-of-line stub per catch clause, and writes each stub's address
 // into the slot op_TryTable reserved for it.
@@ -3575,26 +3575,26 @@ _   (CompileBlock(o, blockType, i_opcode));
 // ResolveBlockResults copies the topmost values into the label's landing pads.
 // Popping them again afterwards puts the compiler's stack back where the body
 // expects to find it.
-static
-M3Result EmitCatchStubs (IM3Compilation o)
+స్థిర
+M3_ఫలితం EmitCatchStubs (IM3Compilation o)
 {
-    IM3CodePage displacedPage = NULL;
+    IM3_సంకేతం_పుట displaced_పుట = ఖాళీ;
 _try {
     M3CatchClause* clauses    = o->tryClauses;
-    u32            numClauses = o->numTryClauses;
+    u32            అంకె_Clauses = o->అంకె_Try_Clauses;
 
     // the body must not see these: a nested try_table sets up its own
-    o->tryClauses    = NULL;
-    o->numTryClauses = 0;
+    o->tryClauses    = ఖాళీ;
+    o->అంకె_Try_Clauses = 0;
 
-    for (u32 i = 0; i < numClauses; ++i) {
+    కొరకు (u32 i = 0; i < అంకె_Clauses; ++i) {
         M3CatchClause* clause = &clauses[i];
 
         IM3CompilationScope scope;
-_       (GetBlockScope(o, &scope, clause->labelDepth + 1));
+_       (Get_ఖండం_Scope(o, &scope, clause->label_లోతు + 1));
 
-        IM3FuncType payload = clause->tag ? clause->tag->type : NULL;
-        u16         numArgs = GetFuncTypeNumParams(payload);
+        IM3FuncType payload = clause->ట్యాగ్ ? clause->ట్యాగ్->type : ఖాళీ;
+        u16         అంకె_వాదనలు = Get_Func_Type_అంకె_Params(payload);
 
         // What the stub hands the label - the payload, then the exnref for a
         // _ref clause - has to be what the label takes. ResolveBlockResults
@@ -3603,79 +3603,79 @@ _       (GetBlockScope(o, &scope, clause->labelDepth + 1));
         // that takes (ref $t) has to be rejected.
         {
             bool isLoop         = (scope->opcode == c_waOp_loop);
-            u16  numLabelValues = isLoop ? GetFuncTypeNumParams(scope->type)
-                                         : GetFuncTypeNumResults(scope->type);
+            u16  అంకె_Label_విలువలు = isLoop ? Get_Func_Type_అంకె_Params(scope->type)
+                                         : Get_Func_Type_అంకె_Results(scope->type);
 
-            _throwif(m3Err_typeCountMismatch, numLabelValues != numArgs + (clause->hasRef ? 1 : 0));
+            _throwif(m3_Err_type_లెక్క_Mismatch, అంకె_Label_విలువలు != అంకె_వాదనలు + (clause->hasRef ? 1 : 0));
 
-            for (u16 a = 0; a < numLabelValues; ++a) {
-                m3type_t given  = (a < numArgs) ? GetFuncTypeParamType(payload, a)
+            కొరకు (u16 a = 0; a < అంకె_Label_విలువలు; ++a) {
+                m3type_t given  = (a < అంకె_వాదనలు) ? GetFuncTypeParamType(payload, a)
                                                 : (m3type_t)c_m3Type_exnref;
                 m3type_t wanted = isLoop ? GetFuncTypeParamType(scope->type, a)
-                                         : GetFuncTypeResultType(scope->type, a);
+                                         : Get_Func_Type_ఫలితం_Type(scope->type, a);
 
-                _throwif(m3Err_typeMismatch, not IsSubTypeOf(given, wanted));
+                _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(given, wanted));
             }
         }
 
-        IM3CodePage stubPage;
-_       (AcquireCompilationCodePage(o, &stubPage));
+        IM3_సంకేతం_పుట stub_పుట;
+_       (Acquire_Compilation_సంకేతం_పుట(o, &stub_పుట));
 
-        pc_t startPC  = GetPagePC(stubPage);
-        displacedPage = o->page;
-        o->page       = stubPage;
+        pc_t ప్రారంభం_PC  = Get_పుట_PC(stub_పుట);
+        displaced_పుట = o->పుట;
+        o->పుట       = stub_పుట;
 
-        u16 firstIndex = o->stackIndex;
+        u16 మొదటి_సూచీ = o->దొంతర_సూచీ;
 
-        for (u16 a = 0; a < numArgs; ++a) {
-_           (PushAllocatedSlot(o, GetFuncTypeParamType(payload, a)));
+        కొరకు (u16 a = 0; a < అంకె_వాదనలు; ++a) {
+_           (నెట్టు_Allocated_స్థానం(o, GetFuncTypeParamType(payload, a)));
         }
 
-        if (clause->hasRef) {
-_           (PushAllocatedSlot(o, c_m3Type_exnref));
+        ఒకవేళ (clause->hasRef) {
+_           (నెట్టు_Allocated_స్థానం(o, c_m3Type_exnref));
         }
 
         // emitted even with nothing to move: this is also where an exception
         // no clause will reify gets released
-_       (EnsureCodePageNumLines(o, 2 * numArgs + 3 + d_m3CodePageFreeLinesThreshold));
+_       (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 2 * అంకె_వాదనలు + 3 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 
 _       (EmitOp(o, op_CatchPayload));
-        EmitConstant32(o, numArgs);
+        EmitConstant32(o, అంకె_వాదనలు);
 
-        for (u16 a = 0; a < numArgs; ++a) {
-            u16 index = firstIndex + a;
-            EmitSlotOffset(o, GetSlotForStackIndex(o, index));
-            EmitConstant32(o, Is64BitType(GetStackTypeFromBottom(o, index)));
+        కొరకు (u16 a = 0; a < అంకె_వాదనలు; ++a) {
+            u16 index = మొదటి_సూచీ + a;
+            Emit_స్థానం_స్థానభ్రంశం(o, Get_స్థానం_For_దొంతర_సూచీ(o, index));
+            EmitConstant32(o, Is64_బిట్టు_Type(Get_దొంతర_Type_From_Bottom(o, index)));
         }
 
-        EmitSlotOffset(o, clause->hasRef ? (i32)GetSlotForStackIndex(o, firstIndex + numArgs) : -1);
+        Emit_స్థానం_స్థానభ్రంశం(o, clause->hasRef ? (i32)Get_స్థానం_For_దొంతర_సూచీ(o, మొదటి_సూచీ + అంకె_వాదనలు) : -1);
 
-_       (EmitPopTryFrames(o, NumTryFramesToPop(o->block.outer, scope)));
+_       (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు_గమ్యం_తీయి(o->ఖండం.outer, scope)));
 
-        if (scope->opcode == c_waOp_loop) {
-_           (ResolveBlockResults(o, scope, /* isBranch: */ true));
+        ఒకవేళ (scope->opcode == c_waOp_loop) {
+_           (Resolve_ఖండం_Results(o, scope, /* isBranch: */ true));
 
 _           (EmitOp(o, Op_ContinueLoop(o)));
-            EmitPointer(o, scope->pc);
-_           (RecordBackEdge(o, scope, false));
-        } else if (scope->depth == 0) {
-_           (ReturnValues(o, scope, /* isBranch: */ true));
+            Emit_సూచిక(o, scope->pc);
+_           (రికార్డు_వెనుక_అంచు(o, scope, false));
+        } లేకపోతే ఒకవేళ (scope->లోతు == 0) {
+_           (Return_విలువలు(o, scope, /* isBranch: */ true));
 _           (EmitOp(o, op_Return));
-        } else {
-_           (ResolveBlockResults(o, scope, /* isBranch: */ true));
+        } లేకపోతే {
+_           (Resolve_ఖండం_Results(o, scope, /* isBranch: */ true));
 _           (EmitPatchingBranch(o, scope));
         }
 
-        IM3CodePage returnTo = displacedPage;
-        displacedPage        = NULL;
+        IM3_సంకేతం_పుట return_గమ్యం = displaced_పుట;
+        displaced_పుట        = ఖాళీ;
 
-        ReleaseCompilationCodePage(o);
-        o->page = returnTo;
+        Release_Compilation_సంకేతం_పుట(o);
+        o->పుట = return_గమ్యం;
 
-        *(pc_t*)clause->stubSlot = startPC;
+        *(pc_t*)clause->stub_స్థానం = ప్రారంభం_PC;
 
-        while (o->stackIndex > firstIndex) {
-_           (Pop(o));
+        అయితే (o->దొంతర_సూచీ > మొదటి_సూచీ) {
+_           (తీయి(o));
         }
     }
 
@@ -3683,181 +3683,181 @@ _           (Pop(o));
 
     // thrown with a stub page installed: release it and put back the one it
     // displaced, which the caller's catch then releases
-    if (displacedPage) {
-        ReleaseCompilationCodePage(o);
-        o->page = displacedPage;
+    ఒకవేళ (displaced_పుట) {
+        Release_Compilation_సంకేతం_పుట(o);
+        o->పుట = displaced_పుట;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-static
-M3Result Compile_TryTable (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Try_పట్టిక (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3CatchClause* clauses = NULL;
+    M3CatchClause* clauses = ఖాళీ;
 _try {
     // a catch entry has to be able to assume the operand stack is entirely in
     // slots: an unwind leaves nothing in the registers
 _   (PreserveRegisters(o));
-_   (PreserveArgsAndLocals(o));
+_   (Preserve_వాదనలు_And_Locals(o));
 
-    IM3FuncType blockType = NULL;
-_   (ReadBlockType(o, &blockType));
+    IM3FuncType ఖండం_Type = ఖాళీ;
+_   (Read_ఖండం_Type(o, &ఖండం_Type));
 
-    u32 numClauses;
-_   (ReadLEB_u32(&numClauses, &o->wasm, o->wasmEnd));
+    u32 అంకె_Clauses;
+_   (ReadLEB_u32(&అంకె_Clauses, &o->wasm, o->wasm_చివర));
 
-    _throwif("too many catch clauses", numClauses > d_m3MaxSaneTagsCount);
+    _throwif("too many catch clauses", అంకె_Clauses > d_m3_Max_Sane_ట్యాగులు_లెక్క);
 
-    if (numClauses) {
-        clauses = m3_AllocArray(M3CatchClause, numClauses);
+    ఒకవేళ (అంకె_Clauses) {
+        clauses = m3_AllocArray(M3CatchClause, అంకె_Clauses);
         _throwifnull(clauses);
     }
 
-    for (u32 i = 0; i < numClauses; ++i) {
-        u8 kind;
-_       (Read_u8(&kind, &o->wasm, o->wasmEnd));
-        _throwif(m3Err_wasmMalformed, kind > 0x03);
+    కొరకు (u32 i = 0; i < అంకె_Clauses; ++i) {
+        u8 రకం;
+_       (Read_u8(&రకం, &o->wasm, o->wasm_చివర));
+        _throwif(m3Err_wasmMalformed, రకం > 0x03);
 
-        clauses[i].tag    = NULL;
-        clauses[i].hasRef = (kind == 0x01 or kind == 0x03);
+        clauses[i].ట్యాగ్    = ఖాళీ;
+        clauses[i].hasRef = (రకం == 0x01 or రకం == 0x03);
 
-        if (kind == 0x00 or kind == 0x01) {
-            u32 tagIndex;
-_           (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-            _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+        ఒకవేళ (రకం == 0x00 or రకం == 0x01) {
+            u32 ట్యాగ్_సూచీ;
+_           (ReadLEB_u32(&ట్యాగ్_సూచీ, &o->wasm, o->wasm_చివర));
+            _throwif(m3_Err_unknown_ట్యాగ్, ట్యాగ్_సూచీ >= o->module->అంకె_ట్యాగులు);
 
-            IM3Tag tag     = &o->module->tags[tagIndex];
-            clauses[i].tag = tag->resolved ? tag->resolved : tag;
+            IM3_ట్యాగ్ ట్యాగ్     = &o->module->ట్యాగులు[ట్యాగ్_సూచీ];
+            clauses[i].ట్యాగ్ = ట్యాగ్->resolved ? ట్యాగ్->resolved : ట్యాగ్;
         }
 
-_       (ReadLEB_u32(&clauses[i].labelDepth, &o->wasm, o->wasmEnd));
+_       (ReadLEB_u32(&clauses[i].label_లోతు, &o->wasm, o->wasm_చివర));
     }
 
     // op_TryTable, the clause count, and two words per clause, all of which have
     // to land on one page: the op reads the table by offset from its own pc
-_   (EnsureCodePageNumLines(o, 2 * numClauses + 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 2 * అంకె_Clauses + 2 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 
-_   (EmitOp(o, op_TryTable));
-    EmitConstant32(o, numClauses);
+_   (EmitOp(o, op_Try_పట్టిక));
+    EmitConstant32(o, అంకె_Clauses);
 
-    for (u32 i = 0; i < numClauses; ++i) {
-        EmitPointer(o, clauses[i].tag);
-        clauses[i].stubSlot = ReservePointer(o);
+    కొరకు (u32 i = 0; i < అంకె_Clauses; ++i) {
+        Emit_సూచిక(o, clauses[i].ట్యాగ్);
+        clauses[i].stub_స్థానం = Reserve_సూచిక(o);
     }
 
     o->tryClauses    = clauses;
-    o->numTryClauses = numClauses;
+    o->అంకె_Try_Clauses = అంకె_Clauses;
 
-_   (CompileBlock(o, blockType, c_waOp_tryTable));
+_   (Compile_ఖండం(o, ఖండం_Type, c_wa_Op_try_పట్టిక));
 
 } _catch:
 
-    o->tryClauses    = NULL;
-    o->numTryClauses = 0;
+    o->tryClauses    = ఖాళీ;
+    o->అంకె_Try_Clauses = 0;
 
     m3_Free(clauses);
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-static
-M3Result Compile_Throw (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Throw (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 tagIndex;
-_   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    u32 ట్యాగ్_సూచీ;
+_   (ReadLEB_u32(&ట్యాగ్_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif(m3_Err_unknown_ట్యాగ్, ట్యాగ్_సూచీ >= o->module->అంకె_ట్యాగులు);
 
-    IM3Tag tag = &o->module->tags[tagIndex];
-    if (tag->resolved) {
-        tag = tag->resolved;
+    IM3_ట్యాగ్ ట్యాగ్ = &o->module->ట్యాగులు[ట్యాగ్_సూచీ];
+    ఒకవేళ (ట్యాగ్->resolved) {
+        ట్యాగ్ = ట్యాగ్->resolved;
     }
 
-    u16 numArgs = GetFuncTypeNumParams(tag->type);
+    u16 అంకె_వాదనలు = Get_Func_Type_అంకె_Params(ట్యాగ్->type);
 
     // the payload is read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
     // check the payload before emitting anything, so a mistyped throw does not
     // leave half an operation behind
-    bool isPolymorphic = IsStackPolymorphic(o);
+    bool isPolymorphic = Is_దొంతర_Polymorphic(o);
 
-    if (not isPolymorphic) {
-        _throwif(m3Err_typeCountMismatch, GetNumBlockValuesOnStack(o) < numArgs);
+    ఒకవేళ (not isPolymorphic) {
+        _throwif(m3_Err_type_లెక్క_Mismatch, Get_అంకె_ఖండం_విలువలు_On_దొంతర(o) < అంకె_వాదనలు);
 
-        for (u16 i = 0; i < numArgs; ++i) {
-            u16 index = (u16)(o->stackIndex - numArgs + i);
+        కొరకు (u16 i = 0; i < అంకె_వాదనలు; ++i) {
+            u16 index = (u16)(o->దొంతర_సూచీ - అంకె_వాదనలు + i);
 
-            _throwif(m3Err_typeMismatch, not IsSubTypeOf(GetStackTypeFromBottom(o, index),
-                                                         GetFuncTypeParamType(tag->type, i)));
+            _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(Get_దొంతర_Type_From_Bottom(o, index),
+                                                         GetFuncTypeParamType(ట్యాగ్->type, i)));
         }
     }
 
-_   (EnsureCodePageNumLines(o, 2 * numArgs + 3 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 2 * అంకె_వాదనలు + 3 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 
 _   (EmitOp(o, op_Throw));
-    EmitPointer(o, tag);
-    EmitConstant32(o, numArgs);
+    Emit_సూచిక(o, ట్యాగ్);
+    EmitConstant32(o, అంకె_వాదనలు);
 
     // the payload is named in the order the tag declares it, so the deepest of
     // the arguments on the stack comes first. In unreachable code there is
     // nothing on the stack to name and nothing will run this, so slot 0 stands
     // in for an operand that isn't there.
-    for (u16 i = 0; i < numArgs; ++i) {
-        m3type_t type = GetFuncTypeParamType(tag->type, i);
+    కొరకు (u16 i = 0; i < అంకె_వాదనలు; ++i) {
+        m3type_t type = GetFuncTypeParamType(ట్యాగ్->type, i);
 
-        EmitSlotOffset(o, isPolymorphic ? 0 : GetSlotForStackIndex(o, (u16)(o->stackIndex - numArgs + i)));
-        EmitConstant32(o, Is64BitType(type));
+        Emit_స్థానం_స్థానభ్రంశం(o, isPolymorphic ? 0 : Get_స్థానం_For_దొంతర_సూచీ(o, (u16)(o->దొంతర_సూచీ - అంకె_వాదనలు + i)));
+        EmitConstant32(o, Is64_బిట్టు_Type(type));
     }
 
-    if (not isPolymorphic) {
-        for (u16 i = 0; i < numArgs; ++i) {
-_           (Pop(o));
+    ఒకవేళ (not isPolymorphic) {
+        కొరకు (u16 i = 0; i < అంకె_వాదనలు; ++i) {
+_           (తీయి(o));
         }
     }
 
-_   (SetStackPolymorphic(o));
+_   (సమితి_దొంతర_Polymorphic(o));
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
 
-static
-M3Result Compile_ThrowRef (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_ThrowRef (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    if (not IsStackPolymorphic(o)) {
-_       (PreserveRegisterIfOccupied(o, c_m3Type_i64));
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+_       (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
 
-        _throwif(m3Err_typeMismatch, BaseTypeOf(GetStackTopType(o)) != c_m3Type_exnref);
+        _throwif(m3Err_typeMismatch, పునాది_Type_యొక్క(Get_దొంతర_శిఖరం_Type(o)) != c_m3Type_exnref);
 
 _       (EmitOp(o, op_ThrowRef));
-        EmitSlotOffset(o, GetStackTopSlotNumber(o));
+        Emit_స్థానం_స్థానభ్రంశం(o, Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o));
 
-_       (Pop(o));
+_       (తీయి(o));
     }
 
-_   (SetStackPolymorphic(o));
+_   (సమితి_దొంతర_Polymorphic(o));
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasExceptionHandling
+#అయితే_ముగింపు // d_m3HasExceptionHandling
 
-#if d_m3HasStackSwitching
+#ఒకవేళ d_m3_Has_దొంతర_Switching
 
-static
-M3Result Compile_ContNew (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_ContNew (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex >= o->module->numFuncTypes);
+    u32 type_సూచీ;
+_   (ReadLEB_u32(&type_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif(m3_Err_type_లెక్క_Mismatch, type_సూచీ >= o->module->అంకె_Func_Types);
 
-    IM3FuncType funcType = o->module->funcTypes[typeIndex];
+    IM3FuncType funcType = o->module->funcTypes[type_సూచీ];
     _throwif("type is not a continuation", not funcType->isContinuation);
 
     // the operands are read out of slots, so nothing may still be in a register
@@ -3865,35 +3865,35 @@ _   (PreserveRegisters(o));
 
     // cont.new $ct : [(ref null $ft)] -> [(ref $ct)], where $ct ~~ cont $ft:
     // the function has to be one this continuation type can run
-    m3type_t topType = GetStackTopType(o);
+    m3type_t శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
     _throwif(m3Err_typeMismatch,
-             not IsSubTypeOf(topType, RefTypeOfFuncType(funcType->contFuncType, false)));
+             not Is_Sub_Type_యొక్క(శిఖరం_Type, Ref_Type_యొక్క_Func_Type(funcType->contFuncType, false)));
 
-    u16 funcSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    u16 func_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_   (తీయి(o));
 
-    u16 dstSlot;
-_   (PushAllocatedSlot(o, RefTypeOfFuncType(funcType, true)));
-    dstSlot = GetStackTopSlotNumber(o);
+    u16 dst_స్థానం;
+_   (నెట్టు_Allocated_స్థానం(o, Ref_Type_యొక్క_Func_Type(funcType, true)));
+    dst_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
 
-_   (EnsureCodePageNumLines(o, 4 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 4 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 _   (EmitOp(o, op_ContNew));
-    EmitPointer(o, funcType);
-    EmitSlotOffset(o, dstSlot);
-    EmitSlotOffset(o, funcSlot);
+    Emit_సూచిక(o, funcType);
+    Emit_స్థానం_స్థానభ్రంశం(o, dst_స్థానం);
+    Emit_స్థానం_స్థానభ్రంశం(o, func_స్థానం);
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_ContBind (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_ContBind (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     u32 typeIndex1, typeIndex2;
-_   (ReadLEB_u32(&typeIndex1, &o->wasm, o->wasmEnd));
-_   (ReadLEB_u32(&typeIndex2, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex1 >= o->module->numFuncTypes);
-    _throwif(m3Err_typeCountMismatch, typeIndex2 >= o->module->numFuncTypes);
+_   (ReadLEB_u32(&typeIndex1, &o->wasm, o->wasm_చివర));
+_   (ReadLEB_u32(&typeIndex2, &o->wasm, o->wasm_చివర));
+    _throwif(m3_Err_type_లెక్క_Mismatch, typeIndex1 >= o->module->అంకె_Func_Types);
+    _throwif(m3_Err_type_లెక్క_Mismatch, typeIndex2 >= o->module->అంకె_Func_Types);
 
     IM3FuncType ct1 = o->module->funcTypes[typeIndex1];
     IM3FuncType ct2 = o->module->funcTypes[typeIndex2];
@@ -3902,115 +3902,115 @@ _   (ReadLEB_u32(&typeIndex2, &o->wasm, o->wasmEnd));
     // the operands are read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
-    m3type_t contType = GetStackTopType(o);
-    _throwif(m3Err_typeMismatch, not IsSubTypeOf(contType, RefTypeOfFuncType(ct1, false)));
-    u16 contSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    m3type_t contType = Get_దొంతర_శిఖరం_Type(o);
+    _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(contType, Ref_Type_యొక్క_Func_Type(ct1, false)));
+    u16 cont_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_   (తీయి(o));
 
     IM3FuncType ft1 = ct1->contFuncType ? ct1->contFuncType : ct1;
     IM3FuncType ft2 = ct2->contFuncType ? ct2->contFuncType : ct2;
 
-    u16 numParams1 = GetFuncTypeNumParams(ft1);
-    u16 numParams2 = GetFuncTypeNumParams(ft2);
-    _throwif(m3Err_typeMismatch, numParams1 < numParams2);
-    u32 numBound = numParams1 - numParams2;
+    u16 అంకె_Params1 = Get_Func_Type_అంకె_Params(ft1);
+    u16 అంకె_Params2 = Get_Func_Type_అంకె_Params(ft2);
+    _throwif(m3Err_typeMismatch, అంకె_Params1 < అంకె_Params2);
+    u32 అంకె_Bound = అంకె_Params1 - అంకె_Params2;
 
-    u16 numResults1 = GetFuncTypeNumResults(ft1);
-    u16 numResults2 = GetFuncTypeNumResults(ft2);
-    _throwif(m3Err_typeMismatch, numResults1 != numResults2);
-    for (u16 i = 0; i < numResults1; ++i) {
-        _throwif(m3Err_typeMismatch, GetFuncTypeResultType(ft1, i) != GetFuncTypeResultType(ft2, i));
+    u16 అంకె_Results1 = Get_Func_Type_అంకె_Results(ft1);
+    u16 అంకె_Results2 = Get_Func_Type_అంకె_Results(ft2);
+    _throwif(m3Err_typeMismatch, అంకె_Results1 != అంకె_Results2);
+    కొరకు (u16 i = 0; i < అంకె_Results1; ++i) {
+        _throwif(m3Err_typeMismatch, Get_Func_Type_ఫలితం_Type(ft1, i) != Get_Func_Type_ఫలితం_Type(ft2, i));
     }
-    for (u16 i = 0; i < numParams2; ++i) {
-        _throwif(m3Err_typeMismatch, GetFuncTypeParamType(ft1, numBound + i) != GetFuncTypeParamType(ft2, i));
+    కొరకు (u16 i = 0; i < అంకె_Params2; ++i) {
+        _throwif(m3Err_typeMismatch, GetFuncTypeParamType(ft1, అంకె_Bound + i) != GetFuncTypeParamType(ft2, i));
     }
 
     u16 argSlots[d_m3MaxContinuationPayload];
-    _throwif("too many bound args", numBound > d_m3MaxContinuationPayload);
+    _throwif("too many bound args", అంకె_Bound > d_m3MaxContinuationPayload);
 
-    for (u32 i = 0; i < numBound; ++i) {
-        u32      paramIdx     = numBound - 1 - i;
+    కొరకు (u32 i = 0; i < అంకె_Bound; ++i) {
+        u32      paramIdx     = అంకె_Bound - 1 - i;
         m3type_t expectedType = GetFuncTypeParamType(ft1, paramIdx);
-        m3type_t actualType   = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        argSlots[paramIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        m3type_t actualType   = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(actualType, expectedType));
+        argSlots[paramIdx] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_       (తీయి(o));
     }
 
-    u16 dstSlot;
-_   (PushAllocatedSlot(o, RefTypeOfFuncType(ct2, true)));
-    dstSlot = GetStackTopSlotNumber(o);
+    u16 dst_స్థానం;
+_   (నెట్టు_Allocated_స్థానం(o, Ref_Type_యొక్క_Func_Type(ct2, true)));
+    dst_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
 
-_   (EnsureCodePageNumLines(o, 6 + numBound * 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 6 + అంకె_Bound * 2 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 _   (EmitOp(o, op_ContBind));
-    EmitPointer(o, ct1);
-    EmitPointer(o, ct2);
-    EmitSlotOffset(o, dstSlot);
-    EmitSlotOffset(o, contSlot);
-    EmitConstant32(o, numBound);
-    for (u32 i = 0; i < numBound; ++i) {
-        EmitSlotOffset(o, argSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeParamType(ft1, i)));
+    Emit_సూచిక(o, ct1);
+    Emit_సూచిక(o, ct2);
+    Emit_స్థానం_స్థానభ్రంశం(o, dst_స్థానం);
+    Emit_స్థానం_స్థానభ్రంశం(o, cont_స్థానం);
+    EmitConstant32(o, అంకె_Bound);
+    కొరకు (u32 i = 0; i < అంకె_Bound; ++i) {
+        Emit_స్థానం_స్థానభ్రంశం(o, argSlots[i]);
+        EmitConstant32(o, Is64_బిట్టు_Type(GetFuncTypeParamType(ft1, i)));
     }
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Suspend (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Suspend (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 tagIndex;
-_   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    u32 ట్యాగ్_సూచీ;
+_   (ReadLEB_u32(&ట్యాగ్_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif(m3_Err_unknown_ట్యాగ్, ట్యాగ్_సూచీ >= o->module->అంకె_ట్యాగులు);
 
-    IM3Tag tag = &o->module->tags[tagIndex];
-    if (tag->resolved) {
-        tag = tag->resolved;
+    IM3_ట్యాగ్ ట్యాగ్ = &o->module->ట్యాగులు[ట్యాగ్_సూచీ];
+    ఒకవేళ (ట్యాగ్->resolved) {
+        ట్యాగ్ = ట్యాగ్->resolved;
     }
-    u16 numParams  = GetFuncTypeNumParams(tag->type);
-    u16 numResults = GetFuncTypeNumResults(tag->type);
+    u16 అంకె_Params  = Get_Func_Type_అంకె_Params(ట్యాగ్->type);
+    u16 అంకె_Results = Get_Func_Type_అంకె_Results(ట్యాగ్->type);
 
 _   (PreserveRegisters(o));
 
     u16 paramSlots[d_m3MaxContinuationPayload];
-    _throwif("too many tag params", numParams > d_m3MaxContinuationPayload);
-    for (u16 i = 0; i < numParams; ++i) {
-        u16      pIdx         = numParams - 1 - i;
-        m3type_t expectedType = GetFuncTypeParamType(tag->type, pIdx);
-        m3type_t actualType   = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        paramSlots[pIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+    _throwif("too many tag params", అంకె_Params > d_m3MaxContinuationPayload);
+    కొరకు (u16 i = 0; i < అంకె_Params; ++i) {
+        u16      pIdx         = అంకె_Params - 1 - i;
+        m3type_t expectedType = GetFuncTypeParamType(ట్యాగ్->type, pIdx);
+        m3type_t actualType   = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(actualType, expectedType));
+        paramSlots[pIdx] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_       (తీయి(o));
     }
 
-    u16 resultSlots[d_m3MaxContinuationPayload];
-    _throwif("too many tag results", numResults > d_m3MaxContinuationPayload);
-    for (u16 i = 0; i < numResults; ++i) {
-        m3type_t rtype = GetFuncTypeResultType(tag->type, i);
-_       (PushAllocatedSlot(o, rtype));
-        resultSlots[i] = GetStackTopSlotNumber(o);
+    u16 ఫలితం_Slots[d_m3MaxContinuationPayload];
+    _throwif("too many tag results", అంకె_Results > d_m3MaxContinuationPayload);
+    కొరకు (u16 i = 0; i < అంకె_Results; ++i) {
+        m3type_t rtype = Get_Func_Type_ఫలితం_Type(ట్యాగ్->type, i);
+_       (నెట్టు_Allocated_స్థానం(o, rtype));
+        ఫలితం_Slots[i] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
     }
 
-_   (EnsureCodePageNumLines(o, 4 + numParams * 2 + numResults * 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 4 + అంకె_Params * 2 + అంకె_Results * 2 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 _   (EmitOp(o, op_Suspend));
-    EmitPointer(o, tag);
-    EmitConstant32(o, numParams);
-    for (u16 i = 0; i < numParams; ++i) {
-        EmitSlotOffset(o, paramSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeParamType(tag->type, i)));
+    Emit_సూచిక(o, ట్యాగ్);
+    EmitConstant32(o, అంకె_Params);
+    కొరకు (u16 i = 0; i < అంకె_Params; ++i) {
+        Emit_స్థానం_స్థానభ్రంశం(o, paramSlots[i]);
+        EmitConstant32(o, Is64_బిట్టు_Type(GetFuncTypeParamType(ట్యాగ్->type, i)));
     }
-    EmitConstant32(o, numResults);
-    for (u16 i = 0; i < numResults; ++i) {
-        EmitSlotOffset(o, resultSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeResultType(tag->type, i)));
+    EmitConstant32(o, అంకె_Results);
+    కొరకు (u16 i = 0; i < అంకె_Results; ++i) {
+        Emit_స్థానం_స్థానభ్రంశం(o, ఫలితం_Slots[i]);
+        EmitConstant32(o, Is64_బిట్టు_Type(Get_Func_Type_ఫలితం_Type(ట్యాగ్->type, i)));
     }
 
     // the results are part of the frame here: op_Suspend clears them, and
     // whatever resumes this writes them before anything reads them
-_   (RecordSafePoint(o, safepoint_suspend, 0, numResults, 0, NULL));
+_   (రికార్డు_సురక్షిత_బిందువు(o, safepoint_suspend, 0, అంకె_Results, 0, ఖాళీ));
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
 // resume, resume_throw and resume_throw_ref. All three run a continuation
@@ -4020,78 +4020,78 @@ _   (RecordSafePoint(o, safepoint_suspend, 0, numResults, 0, NULL));
 // Emitted as: the continuation type, the slot holding it, the operands that
 // belong to this form, the handler table, then the result slots. Keeping the
 // tail identical is what lets one runtime path finish all three.
-static
-M3Result Compile_Resume (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Resume (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3ResumeHandler* handlers      = NULL;
-    IM3CodePage      displacedPage = NULL;
+    M3ResumeHandler* handlers      = ఖాళీ;
+    IM3_సంకేతం_పుట      displaced_పుట = ఖాళీ;
 _try {
     bool isThrow    = (i_opcode == c_waOp_resumeThrow);
     bool isThrowRef = (i_opcode == c_waOp_resumeThrowRef);
 
-    u32 typeIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex >= o->module->numFuncTypes);
+    u32 type_సూచీ;
+_   (ReadLEB_u32(&type_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif(m3_Err_type_లెక్క_Mismatch, type_సూచీ >= o->module->అంకె_Func_Types);
 
-    IM3FuncType contFuncType = o->module->funcTypes[typeIndex];
+    IM3FuncType contFuncType = o->module->funcTypes[type_సూచీ];
     _throwif("type is not a continuation", not contFuncType->isContinuation);
 
     IM3FuncType innerType      = contFuncType->contFuncType;
-    u16         numContResults = GetFuncTypeNumResults(innerType);
+    u16         అంకె_Cont_Results = Get_Func_Type_అంకె_Results(innerType);
 
-    IM3Tag exnTag      = NULL;
-    u16    numOperands = 0;
+    IM3_ట్యాగ్ exn_ట్యాగ్      = ఖాళీ;
+    u16    అంకె_Operands = 0;
 
-    if (isThrow) {
-        u32 tagIndex;
-_       (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-        _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    ఒకవేళ (isThrow) {
+        u32 ట్యాగ్_సూచీ;
+_       (ReadLEB_u32(&ట్యాగ్_సూచీ, &o->wasm, o->wasm_చివర));
+        _throwif(m3_Err_unknown_ట్యాగ్, ట్యాగ్_సూచీ >= o->module->అంకె_ట్యాగులు);
 
-        exnTag = &o->module->tags[tagIndex];
+        exn_ట్యాగ్ = &o->module->ట్యాగులు[ట్యాగ్_సూచీ];
 
         // it is an exception that gets raised, so the tag must be one throw
         // could have raised: no results
-        _throwif(m3Err_typeMismatch, GetFuncTypeNumResults(exnTag->type) != 0);
+        _throwif(m3Err_typeMismatch, Get_Func_Type_అంకె_Results(exn_ట్యాగ్->type) != 0);
 
-        numOperands = GetFuncTypeNumParams(exnTag->type);
-    } else if (not isThrowRef) {
+        అంకె_Operands = Get_Func_Type_అంకె_Params(exn_ట్యాగ్->type);
+    } లేకపోతే ఒకవేళ (not isThrowRef) {
         // a plain resume hands over the continuation's own parameters. An
         // aborted one never receives them, so they are unconstrained there.
-        numOperands = GetFuncTypeNumParams(innerType);
+        అంకె_Operands = Get_Func_Type_అంకె_Params(innerType);
     }
 
-    u32 numClauses;
-_   (ReadLEB_u32(&numClauses, &o->wasm, o->wasmEnd));
+    u32 అంకె_Clauses;
+_   (ReadLEB_u32(&అంకె_Clauses, &o->wasm, o->wasm_చివర));
 
     u32 clauseLabelDepths[16];
-    _throwif("too many resume clauses", numClauses > 16);
+    _throwif("too many resume clauses", అంకె_Clauses > 16);
 
-    if (numClauses) {
-        handlers = m3_AllocArray(M3ResumeHandler, numClauses);
+    ఒకవేళ (అంకె_Clauses) {
+        handlers = m3_AllocArray(M3ResumeHandler, అంకె_Clauses);
         _throwifnull(handlers);
     }
 
-    for (u32 i = 0; i < numClauses; ++i) {
-        u8 kind;
-_       (Read_u8(&kind, &o->wasm, o->wasmEnd));
-        _throwif(m3Err_wasmMalformed, kind > 0x01);
+    కొరకు (u32 i = 0; i < అంకె_Clauses; ++i) {
+        u8 రకం;
+_       (Read_u8(&రకం, &o->wasm, o->wasm_చివర));
+        _throwif(m3Err_wasmMalformed, రకం > 0x01);
 
-        handlers[i].kind = kind;
+        handlers[i].రకం = రకం;
 
-        u32 tagIndex;
-_       (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-        _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+        u32 ట్యాగ్_సూచీ;
+_       (ReadLEB_u32(&ట్యాగ్_సూచీ, &o->wasm, o->wasm_చివర));
+        _throwif(m3_Err_unknown_ట్యాగ్, ట్యాగ్_సూచీ >= o->module->అంకె_ట్యాగులు);
 
-        IM3Tag tag         = &o->module->tags[tagIndex];
-        handlers[i].tag    = tag->resolved ? tag->resolved : tag;
-        handlers[i].stubPC = NULL;
+        IM3_ట్యాగ్ ట్యాగ్         = &o->module->ట్యాగులు[ట్యాగ్_సూచీ];
+        handlers[i].ట్యాగ్    = ట్యాగ్->resolved ? ట్యాగ్->resolved : ట్యాగ్;
+        handlers[i].stubPC = ఖాళీ;
 
-        if (kind == 0x00) {
-_           (ReadLEB_u32(&clauseLabelDepths[i], &o->wasm, o->wasmEnd));
-        } else {
+        ఒకవేళ (రకం == 0x00) {
+_           (ReadLEB_u32(&clauseLabelDepths[i], &o->wasm, o->wasm_చివర));
+        } లేకపోతే {
             // (on $e switch): the tag carries no payload, and what the switch
             // site yields is what this resume yields
-            _throwif(m3Err_typeMismatch, GetFuncTypeNumParams(handlers[i].tag->type) != 0);
+            _throwif(m3Err_typeMismatch, Get_Func_Type_అంకె_Params(handlers[i].ట్యాగ్->type) != 0);
             clauseLabelDepths[i] = 0;
         }
     }
@@ -4099,189 +4099,189 @@ _           (ReadLEB_u32(&clauseLabelDepths[i], &o->wasm, o->wasmEnd));
     // the operands are read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
-    m3type_t contTopType = GetStackTopType(o);
-    _throwif(m3Err_typeMismatch, not IsSubTypeOf(contTopType, RefTypeOfFuncType(contFuncType, false)));
-    u16 contSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    m3type_t cont_శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
+    _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(cont_శిఖరం_Type, Ref_Type_యొక్క_Func_Type(contFuncType, false)));
+    u16 cont_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_   (తీయి(o));
 
-    u16 exnSlot = 0;
+    u16 exn_స్థానం = 0;
 
-    if (isThrowRef) {
-        m3type_t exnType = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, BaseTypeOf(exnType) != c_m3Type_exnref);
-        exnSlot = GetStackTopSlotNumber(o);
-_       (Pop(o));
+    ఒకవేళ (isThrowRef) {
+        m3type_t exnType = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, పునాది_Type_యొక్క(exnType) != c_m3Type_exnref);
+        exn_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_       (తీయి(o));
     }
 
-    u16 operandSlots[d_m3MaxContinuationPayload];
-    _throwif("too many resume operands", numOperands > d_m3MaxContinuationPayload);
+    u16 నిర్వాహ్యం_Slots[d_m3MaxContinuationPayload];
+    _throwif("too many resume operands", అంకె_Operands > d_m3MaxContinuationPayload);
 
-    IM3FuncType operandType = isThrow ? exnTag->type : innerType;
+    IM3FuncType నిర్వాహ్యం_Type = isThrow ? exn_ట్యాగ్->type : innerType;
 
-    for (u16 i = 0; i < numOperands; ++i) {
-        u16      pIdx         = (u16)(numOperands - 1 - i);
-        m3type_t expectedType = GetFuncTypeParamType(operandType, pIdx);
-        m3type_t actualType   = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        operandSlots[pIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+    కొరకు (u16 i = 0; i < అంకె_Operands; ++i) {
+        u16      pIdx         = (u16)(అంకె_Operands - 1 - i);
+        m3type_t expectedType = GetFuncTypeParamType(నిర్వాహ్యం_Type, pIdx);
+        m3type_t actualType   = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(actualType, expectedType));
+        నిర్వాహ్యం_Slots[pIdx] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_       (తీయి(o));
     }
 
-    for (u32 i = 0; i < numClauses; ++i) {
-        if (handlers[i].kind != 0x00) {
-            continue;
+    కొరకు (u32 i = 0; i < అంకె_Clauses; ++i) {
+        ఒకవేళ (handlers[i].రకం != 0x00) {
+            కొనసాగు;
         }
 
         IM3CompilationScope scope;
-_       (GetBlockScope(o, &scope, clauseLabelDepths[i]));
+_       (Get_ఖండం_Scope(o, &scope, clauseLabelDepths[i]));
 
-        IM3Tag tag        = handlers[i].tag;
-        u16    numPayload = GetFuncTypeNumParams(tag->type);
+        IM3_ట్యాగ్ ట్యాగ్        = handlers[i].ట్యాగ్;
+        u16    అంకె_Payload = Get_Func_Type_అంకె_Params(ట్యాగ్->type);
 
         m3type_t labelContType = (scope->opcode == c_waOp_loop)
-                                   ? GetFuncTypeParamType(scope->type, numPayload)
-                                   : GetFuncTypeResultType(scope->type, numPayload);
+                                   ? GetFuncTypeParamType(scope->type, అంకె_Payload)
+                                   : Get_Func_Type_ఫలితం_Type(scope->type, అంకె_Payload);
 
-        IM3CodePage stubPage;
-_       (AcquireCompilationCodePage(o, &stubPage));
-        pc_t startPC  = GetPagePC(stubPage);
-        displacedPage = o->page;
-        o->page       = stubPage;
+        IM3_సంకేతం_పుట stub_పుట;
+_       (Acquire_Compilation_సంకేతం_పుట(o, &stub_పుట));
+        pc_t ప్రారంభం_PC  = Get_పుట_PC(stub_పుట);
+        displaced_పుట = o->పుట;
+        o->పుట       = stub_పుట;
 
-        u16 firstIndex = o->stackIndex;
-        for (u16 a = 0; a < numPayload; ++a) {
-_           (PushAllocatedSlot(o, GetFuncTypeParamType(tag->type, a)));
+        u16 మొదటి_సూచీ = o->దొంతర_సూచీ;
+        కొరకు (u16 a = 0; a < అంకె_Payload; ++a) {
+_           (నెట్టు_Allocated_స్థానం(o, GetFuncTypeParamType(ట్యాగ్->type, a)));
         }
 
         // The handler is handed the suspended continuation.
-_       (PushAllocatedSlot(o, labelContType));
+_       (నెట్టు_Allocated_స్థానం(o, labelContType));
 
-_       (EnsureCodePageNumLines(o, 2 * numPayload + 5 + d_m3CodePageFreeLinesThreshold));
+_       (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 2 * అంకె_Payload + 5 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 _       (EmitOp(o, op_ResumePayload));
-        EmitPointer(o, Module_ContTypeOfRef(o->module, labelContType));
-        EmitConstant32(o, numPayload);
-        for (u16 a = 0; a < numPayload; ++a) {
-            u16 index = firstIndex + a;
-            EmitSlotOffset(o, GetSlotForStackIndex(o, index));
-            EmitConstant32(o, Is64BitType(GetStackTypeFromBottom(o, index)));
+        Emit_సూచిక(o, Module_Cont_Type_యొక్క_Ref(o->module, labelContType));
+        EmitConstant32(o, అంకె_Payload);
+        కొరకు (u16 a = 0; a < అంకె_Payload; ++a) {
+            u16 index = మొదటి_సూచీ + a;
+            Emit_స్థానం_స్థానభ్రంశం(o, Get_స్థానం_For_దొంతర_సూచీ(o, index));
+            EmitConstant32(o, Is64_బిట్టు_Type(Get_దొంతర_Type_From_Bottom(o, index)));
         }
-        EmitSlotOffset(o, GetSlotForStackIndex(o, firstIndex + numPayload));
+        Emit_స్థానం_స్థానభ్రంశం(o, Get_స్థానం_For_దొంతర_సూచీ(o, మొదటి_సూచీ + అంకె_Payload));
 
-#  if d_m3HasExceptionHandling
+#  ఒకవేళ d_m3HasExceptionHandling
         // the clause leaves every try region between the resume and its label,
         // and leaving one retires its handlers, the way a branch does
-_       (EmitPopTryFrames(o, NumTryFramesToPop(&o->block, scope)));
+_       (Emit_తీయి_Try_చట్రాలు(o, అంకె_Try_చట్రాలు_గమ్యం_తీయి(&o->ఖండం, scope)));
 #  endif
 
-        if (scope->opcode == c_waOp_loop) {
-_           (ResolveBlockResults(o, scope, true));
+        ఒకవేళ (scope->opcode == c_waOp_loop) {
+_           (Resolve_ఖండం_Results(o, scope, true));
 _           (EmitOp(o, Op_ContinueLoop(o)));
-            EmitPointer(o, scope->pc);
-_           (RecordBackEdge(o, scope, false));
-        } else if (scope->depth == 0) {
-_           (ReturnValues(o, scope, true));
+            Emit_సూచిక(o, scope->pc);
+_           (రికార్డు_వెనుక_అంచు(o, scope, false));
+        } లేకపోతే ఒకవేళ (scope->లోతు == 0) {
+_           (Return_విలువలు(o, scope, true));
 _           (EmitOp(o, op_Return));
-        } else {
-_           (ResolveBlockResults(o, scope, true));
+        } లేకపోతే {
+_           (Resolve_ఖండం_Results(o, scope, true));
 _           (EmitPatchingBranch(o, scope));
         }
 
-        IM3CodePage returnTo = displacedPage;
-        displacedPage        = NULL;
+        IM3_సంకేతం_పుట return_గమ్యం = displaced_పుట;
+        displaced_పుట        = ఖాళీ;
 
-        ReleaseCompilationCodePage(o);
-        o->page = returnTo;
+        Release_Compilation_సంకేతం_పుట(o);
+        o->పుట = return_గమ్యం;
 
-        handlers[i].stubPC = startPC;
+        handlers[i].stubPC = ప్రారంభం_PC;
 
-        while (o->stackIndex > firstIndex) {
-_           (Pop(o));
+        అయితే (o->దొంతర_సూచీ > మొదటి_సూచీ) {
+_           (తీయి(o));
         }
     }
 
     u16 resSlots[d_m3MaxContinuationPayload];
-    _throwif("too many cont results", numContResults > d_m3MaxContinuationPayload);
-    for (u16 i = 0; i < numContResults; ++i) {
-        m3type_t rtype = GetFuncTypeResultType(innerType, i);
-_       (PushAllocatedSlot(o, rtype));
-        resSlots[i] = GetStackTopSlotNumber(o);
+    _throwif("too many cont results", అంకె_Cont_Results > d_m3MaxContinuationPayload);
+    కొరకు (u16 i = 0; i < అంకె_Cont_Results; ++i) {
+        m3type_t rtype = Get_Func_Type_ఫలితం_Type(innerType, i);
+_       (నెట్టు_Allocated_స్థానం(o, rtype));
+        resSlots[i] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
     }
 
-_   (EnsureCodePageNumLines(o, 8 + numOperands * 2 + numClauses * 3 + numContResults * 2 +
-                                  d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 8 + అంకె_Operands * 2 + అంకె_Clauses * 3 + అంకె_Cont_Results * 2 +
+                                  d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 
 _   (EmitOp(o, op_Resume));
-    EmitPointer(o, contFuncType);
-    EmitSlotOffset(o, contSlot);
-    EmitConstant32(o, isThrow ? d_m3ResumeThrow : (isThrowRef ? d_m3ResumeThrowRef : d_m3ResumeNormal));
+    Emit_సూచిక(o, contFuncType);
+    Emit_స్థానం_స్థానభ్రంశం(o, cont_స్థానం);
+    EmitConstant32(o, isThrow ? d_m3ResumeThrow : (isThrowRef ? d_m3ResumeThrowRef : d_m3_Resume_సాధారణ));
 
-    if (isThrowRef) {
-        EmitSlotOffset(o, exnSlot);
-    } else {
-        if (isThrow) {
-            EmitPointer(o, exnTag);
+    ఒకవేళ (isThrowRef) {
+        Emit_స్థానం_స్థానభ్రంశం(o, exn_స్థానం);
+    } లేకపోతే {
+        ఒకవేళ (isThrow) {
+            Emit_సూచిక(o, exn_ట్యాగ్);
         }
 
-        EmitConstant32(o, numOperands);
-        for (u16 i = 0; i < numOperands; ++i) {
-            EmitSlotOffset(o, operandSlots[i]);
-            EmitConstant32(o, Is64BitType(GetFuncTypeParamType(operandType, i)));
+        EmitConstant32(o, అంకె_Operands);
+        కొరకు (u16 i = 0; i < అంకె_Operands; ++i) {
+            Emit_స్థానం_స్థానభ్రంశం(o, నిర్వాహ్యం_Slots[i]);
+            EmitConstant32(o, Is64_బిట్టు_Type(GetFuncTypeParamType(నిర్వాహ్యం_Type, i)));
         }
     }
 
-    EmitConstant32(o, numClauses);
-    for (u32 i = 0; i < numClauses; ++i) {
-        EmitConstant32(o, handlers[i].kind);
-        EmitPointer(o, handlers[i].tag);
-        EmitPointer(o, handlers[i].stubPC);
+    EmitConstant32(o, అంకె_Clauses);
+    కొరకు (u32 i = 0; i < అంకె_Clauses; ++i) {
+        EmitConstant32(o, handlers[i].రకం);
+        Emit_సూచిక(o, handlers[i].ట్యాగ్);
+        Emit_సూచిక(o, handlers[i].stubPC);
     }
 
-    EmitConstant32(o, numContResults);
-    for (u16 i = 0; i < numContResults; ++i) {
-        EmitSlotOffset(o, resSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeResultType(innerType, i)));
+    EmitConstant32(o, అంకె_Cont_Results);
+    కొరకు (u16 i = 0; i < అంకె_Cont_Results; ++i) {
+        Emit_స్థానం_స్థానభ్రంశం(o, resSlots[i]);
+        EmitConstant32(o, Is64_బిట్టు_Type(Get_Func_Type_ఫలితం_Type(innerType, i)));
     }
 
     // a suspend passing through the resumed continuation leaves this frame
     // waiting here, with the continuation's results not yet taken
-_   (RecordSafePoint(o, safepoint_resume, 0, numContResults, (u16)numClauses, NULL));
-#  if d_m3HasSnapshots
-    if (o->snapshotMap and o->page) {
-        o->snapshotMap->safePoints[o->snapshotMap->numSafePoints - 1].resumeType = RefTypeOfFuncType(contFuncType, true);
+_   (రికార్డు_సురక్షిత_బిందువు(o, safepoint_resume, 0, అంకె_Cont_Results, (u16)అంకె_Clauses, ఖాళీ));
+#  ఒకవేళ d_m3HasSnapshots
+    ఒకవేళ (o->snapshotMap and o->పుట) {
+        o->snapshotMap->సురక్షిత_Points[o->snapshotMap->అంకె_సురక్షిత_Points - 1].resumeType = Ref_Type_యొక్క_Func_Type(contFuncType, true);
     }
 #  endif
 
 } _catch:
-    if (displacedPage) {
-        ReleaseCompilationCodePage(o);
-        o->page = displacedPage;
+    ఒకవేళ (displaced_పుట) {
+        Release_Compilation_సంకేతం_పుట(o);
+        o->పుట = displaced_పుట;
     }
     m3_Free(handlers);
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-static
-M3Result Compile_Switch (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Switch (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 typeIndex, tagIndex;
-_   (ReadLEB_u32(&typeIndex, &o->wasm, o->wasmEnd));
-_   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
-    _throwif(m3Err_typeCountMismatch, typeIndex >= o->module->numFuncTypes);
-    _throwif(m3Err_unknownTag, tagIndex >= o->module->numTags);
+    u32 type_సూచీ, ట్యాగ్_సూచీ;
+_   (ReadLEB_u32(&type_సూచీ, &o->wasm, o->wasm_చివర));
+_   (ReadLEB_u32(&ట్యాగ్_సూచీ, &o->wasm, o->wasm_చివర));
+    _throwif(m3_Err_type_లెక్క_Mismatch, type_సూచీ >= o->module->అంకె_Func_Types);
+    _throwif(m3_Err_unknown_ట్యాగ్, ట్యాగ్_సూచీ >= o->module->అంకె_ట్యాగులు);
 
-    IM3FuncType targetContType = o->module->funcTypes[typeIndex];
-    IM3Tag      tag            = &o->module->tags[tagIndex];
-    if (tag->resolved) {
-        tag = tag->resolved;
+    IM3FuncType లక్ష్యం_Cont_Type = o->module->funcTypes[type_సూచీ];
+    IM3_ట్యాగ్      ట్యాగ్            = &o->module->ట్యాగులు[ట్యాగ్_సూచీ];
+    ఒకవేళ (ట్యాగ్->resolved) {
+        ట్యాగ్ = ట్యాగ్->resolved;
     }
 
-    _throwif("type is not a continuation", not targetContType->isContinuation);
+    _throwif("type is not a continuation", not లక్ష్యం_Cont_Type->isContinuation);
 
     // a switch tag carries no payload of its own: the values travel as the
     // peer's arguments, and the tag's results are what the switch site yields
-    _throwif(m3Err_typeMismatch, GetFuncTypeNumParams(tag->type) != 0);
+    _throwif(m3Err_typeMismatch, Get_Func_Type_అంకె_Params(ట్యాగ్->type) != 0);
 
     // switch $ct1 : [t1* (ref null $ct1)] -> [t2*]
     //   where $ct1 = cont [t1* (ref null? $ct2)] -> [..]
@@ -4291,103 +4291,103 @@ _   (ReadLEB_u32(&tagIndex, &o->wasm, o->wasmEnd));
     // continuation this instruction suspends. And what this instruction yields
     // is not $ct1's results but $ct2's parameters - the values whoever comes
     // back this way will hand over.
-    IM3FuncType targetType = targetContType->contFuncType;
-    u16         numParams  = GetFuncTypeNumParams(targetType);
+    IM3FuncType లక్ష్యం_Type = లక్ష్యం_Cont_Type->contFuncType;
+    u16         అంకె_Params  = Get_Func_Type_అంకె_Params(లక్ష్యం_Type);
 
-    _throwif("switch target takes no continuation", numParams == 0);
+    _throwif("switch target takes no continuation", అంకె_Params == 0);
 
-    m3type_t    peerRefType  = GetFuncTypeParamType(targetType, (u16)(numParams - 1));
-    IM3FuncType selfContType = Module_ContTypeOfRef(o->module, peerRefType);
+    m3type_t    peerRefType  = GetFuncTypeParamType(లక్ష్యం_Type, (u16)(అంకె_Params - 1));
+    IM3FuncType selfContType = Module_Cont_Type_యొక్క_Ref(o->module, peerRefType);
 
     _throwif(m3Err_typeMismatch, not selfContType);
 
     IM3FuncType selfType   = selfContType->contFuncType;
-    u16         numArgs    = (u16)(numParams - 1);
-    u16         numResults = GetFuncTypeNumParams(selfType);
+    u16         అంకె_వాదనలు    = (u16)(అంకె_Params - 1);
+    u16         అంకె_Results = Get_Func_Type_అంకె_Params(selfType);
 
     // the operands are read out of slots, so nothing may still be in a register
 _   (PreserveRegisters(o));
 
-    m3type_t contTopType = GetStackTopType(o);
-    _throwif(m3Err_typeMismatch, not IsSubTypeOf(contTopType, RefTypeOfFuncType(targetContType, false)));
-    u16 targetContSlot = GetStackTopSlotNumber(o);
-_   (Pop(o));
+    m3type_t cont_శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
+    _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(cont_శిఖరం_Type, Ref_Type_యొక్క_Func_Type(లక్ష్యం_Cont_Type, false)));
+    u16 లక్ష్యం_Cont_స్థానం = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_   (తీయి(o));
 
     u16 argSlots[d_m3MaxContinuationPayload];
-    _throwif("too many switch params", numArgs > d_m3MaxContinuationPayload);
+    _throwif("too many switch params", అంకె_వాదనలు > d_m3MaxContinuationPayload);
 
-    for (u16 i = 0; i < numArgs; ++i) {
-        u16      pIdx         = (u16)(numArgs - 1 - i);
-        m3type_t expectedType = GetFuncTypeParamType(targetType, pIdx);
-        m3type_t actualType   = GetStackTopType(o);
-        _throwif(m3Err_typeMismatch, not IsSubTypeOf(actualType, expectedType));
-        argSlots[pIdx] = GetStackTopSlotNumber(o);
-_       (Pop(o));
+    కొరకు (u16 i = 0; i < అంకె_వాదనలు; ++i) {
+        u16      pIdx         = (u16)(అంకె_వాదనలు - 1 - i);
+        m3type_t expectedType = GetFuncTypeParamType(లక్ష్యం_Type, pIdx);
+        m3type_t actualType   = Get_దొంతర_శిఖరం_Type(o);
+        _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(actualType, expectedType));
+        argSlots[pIdx] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_       (తీయి(o));
     }
 
-    u16 resultSlots[d_m3MaxContinuationPayload];
-    _throwif("too many switch results", numResults > d_m3MaxContinuationPayload);
+    u16 ఫలితం_Slots[d_m3MaxContinuationPayload];
+    _throwif("too many switch results", అంకె_Results > d_m3MaxContinuationPayload);
 
-    for (u16 i = 0; i < numResults; ++i) {
-_       (PushAllocatedSlot(o, GetFuncTypeParamType(selfType, i)));
-        resultSlots[i] = GetStackTopSlotNumber(o);
+    కొరకు (u16 i = 0; i < అంకె_Results; ++i) {
+_       (నెట్టు_Allocated_స్థానం(o, GetFuncTypeParamType(selfType, i)));
+        ఫలితం_Slots[i] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
     }
 
-_   (EnsureCodePageNumLines(o, 6 + numArgs * 2 + numResults * 2 + d_m3CodePageFreeLinesThreshold));
+_   (Ensure_సంకేతం_పుట_అంకె_పంక్తులు(o, 6 + అంకె_వాదనలు * 2 + అంకె_Results * 2 + d_m3_సంకేతం_పుట_Free_పంక్తులు_పరిమితి));
 _   (EmitOp(o, op_Switch));
-    EmitPointer(o, targetContType);
-    EmitPointer(o, tag);
-    EmitSlotOffset(o, targetContSlot);
-    EmitConstant32(o, numArgs);
-    for (u16 i = 0; i < numArgs; ++i) {
-        EmitSlotOffset(o, argSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeParamType(targetType, i)));
+    Emit_సూచిక(o, లక్ష్యం_Cont_Type);
+    Emit_సూచిక(o, ట్యాగ్);
+    Emit_స్థానం_స్థానభ్రంశం(o, లక్ష్యం_Cont_స్థానం);
+    EmitConstant32(o, అంకె_వాదనలు);
+    కొరకు (u16 i = 0; i < అంకె_వాదనలు; ++i) {
+        Emit_స్థానం_స్థానభ్రంశం(o, argSlots[i]);
+        EmitConstant32(o, Is64_బిట్టు_Type(GetFuncTypeParamType(లక్ష్యం_Type, i)));
     }
-    EmitConstant32(o, numResults);
-    for (u16 i = 0; i < numResults; ++i) {
-        EmitSlotOffset(o, resultSlots[i]);
-        EmitConstant32(o, Is64BitType(GetFuncTypeParamType(selfType, i)));
+    EmitConstant32(o, అంకె_Results);
+    కొరకు (u16 i = 0; i < అంకె_Results; ++i) {
+        Emit_స్థానం_స్థానభ్రంశం(o, ఫలితం_Slots[i]);
+        EmitConstant32(o, Is64_బిట్టు_Type(GetFuncTypeParamType(selfType, i)));
     }
 
     // as with suspend: op_Switch clears the results before it leaves
-_   (RecordSafePoint(o, safepoint_suspend, 0, numResults, 0, NULL));
+_   (రికార్డు_సురక్షిత_బిందువు(o, safepoint_suspend, 0, అంకె_Results, 0, ఖాళీ));
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasStackSwitching
+#అయితే_ముగింపు // d_m3HasStackSwitching
 
 
-static
-M3Result CompileElseBlock (IM3Compilation o, pc_t* o_startPC, IM3FuncType i_blockType)
+స్థిర
+M3_ఫలితం Compile_Else_ఖండం (IM3Compilation o, pc_t* o_ప్రారంభం_PC, IM3FuncType i_ఖండం_Type)
 {
-    IM3CodePage savedPage = o->page;
+    IM3_సంకేతం_పుట saved_పుట = o->పుట;
 _try {
 
-    IM3CodePage elsePage;
-_   (AcquireCompilationCodePage(o, &elsePage));
+    IM3_సంకేతం_పుట else_పుట;
+_   (Acquire_Compilation_సంకేతం_పుట(o, &else_పుట));
 
-    *o_startPC = GetPagePC(elsePage);
+    *o_ప్రారంభం_PC = Get_పుట_PC(else_పుట);
 
-    o->page = elsePage;
+    o->పుట = else_పుట;
 
-_   (CompileBlock(o, i_blockType, c_waOp_else));
+_   (Compile_ఖండం(o, i_ఖండం_Type, c_waOp_else));
 
 _   (EmitOp(o, op_Branch));
-    EmitPointer(o, GetPagePC(savedPage));
+    Emit_సూచిక(o, Get_పుట_PC(saved_పుట));
 } _catch:
 
-    if (o->page != savedPage) {
-        ReleaseCompilationCodePage(o);
+    ఒకవేళ (o->పుట != saved_పుట) {
+        Release_Compilation_సంకేతం_పుట(o);
     }
 
-    o->page = savedPage;
+    o->పుట = saved_పుట;
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_If (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_If (IM3Compilation o, m3opcode_t i_opcode)
 {
     /*      [   op_If   ]
             [ <else-pc> ]   ---->   [ ..else..  ]
@@ -4398,208 +4398,208 @@ M3Result Compile_If (IM3Compilation o, m3opcode_t i_opcode)
 _try {
 
     // Spec: if condition must be i32
-    if (not IsStackPolymorphic(o)) {
-        m3type_t condType = GetStackTopType(o);
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        m3type_t condType = Get_దొంతర_శిఖరం_Type(o);
         _throwif(m3Err_typeMismatch, condType != c_m3Type_none and condType != c_m3Type_i32);
     }
 
-_   (PreserveNonTopRegisters(o));
-_   (PreserveArgsAndLocals(o));
+_   (Preserve_Non_శిఖరం_Registers(o));
+_   (Preserve_వాదనలు_And_Locals(o));
 
-#if d_m3FuseBranch
+#ఒకవేళ d_m3FuseBranch
     IM3Operation fuseOp = GetBranchFusionOp(o, true);
 
-    if (fuseOp) {
+    ఒకవేళ (fuseOp) {
         // absorb the if into the compare that produced the condition
         *(IM3Operation*)o->foldPatchPC = fuseOp;
         InvalidateFold(o);
 
-_       (Pop(o));                          // the condition is consumed inside the fused op
-    } else
-#endif
+_       (తీయి(o));                          // the condition is consumed inside the fused op
+    } లేకపోతే
+#అయితే_ముగింపు
     {
-        IM3Operation op = IsStackTopInRegister(o) ? op_If_r : op_If_s;
+        IM3Operation op = Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) ? op_If_r : op_If_s;
 
 _       (EmitOp(o, op));
-_       (EmitSlotNumOfStackTopAndPop(o));
+_       (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
     }
 
-    pc_t* pc = (pc_t*)ReservePointer(o);
+    pc_t* pc = (pc_t*)Reserve_సూచిక(o);
 
-    IM3FuncType blockType = NULL;
-_   (ReadBlockType(o, &blockType));     //  dump_type_stack (o);
+    IM3FuncType ఖండం_Type = ఖాళీ;
+_   (Read_ఖండం_Type(o, &ఖండం_Type));     //  dump_type_stack (o);
 
-    u16 stackIndex = o->stackIndex;
+    u16 దొంతర_సూచీ = o->దొంతర_సూచీ;
 
-_   (CompileBlock(o, blockType, i_opcode));
+_   (Compile_ఖండం(o, ఖండం_Type, i_opcode));
 
-    if (o->previousOpcode == c_waOp_else) {
-        o->stackIndex = stackIndex;
-_       (CompileElseBlock(o, pc, blockType));
-    } else {
+    ఒకవేళ (o->మునుపటి_Opcode == c_waOp_else) {
+        o->దొంతర_సూచీ = దొంతర_సూచీ;
+_       (Compile_Else_ఖండం(o, pc, ఖండం_Type));
+    } లేకపోతే {
         // if block produces values and there isn't a defined else
         // case, then we need to make one up so that the pass-through
         // results end up in the right place
-        if (GetFuncTypeNumResults(blockType)) {
+        ఒకవేళ (Get_Func_Type_అంకె_Results(ఖండం_Type)) {
             // rewind to the if's end to create a fake else block
             o->wasm--;
-            o->stackIndex = stackIndex;     // dump_type_stack (o);
+            o->దొంతర_సూచీ = దొంతర_సూచీ;     // dump_type_stack (o);
 
-_           (CompileElseBlock(o, pc, blockType));
-        } else {
+_           (Compile_Else_ఖండం(o, pc, ఖండం_Type));
+        } లేకపోతే {
             *pc = GetPC(o);
         }
     }
 
-    } _catch: return result;
+    } _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Select (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Select (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u16 slots[3] = { c_slotUnused, c_slotUnused, c_slotUnused };
+    u16 slots[3] = { c_స్థానం_వాడని, c_స్థానం_వాడని, c_స్థానం_వాడని };
 
-    IM3Operation op = NULL;
+    IM3Operation op = ఖాళీ;
 
-    m3type_t type = GetStackTypeFromTop(o, 1); // get type of selection
+    m3type_t type = Get_దొంతర_Type_From_శిఖరం(o, 1); // get type of selection
 
-    if (not IsStackPolymorphic(o)) {
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
         // Spec: the condition operand (top) must be i32
-        m3type_t condType = GetStackTypeFromTop(o, 0);
+        m3type_t condType = Get_దొంతర_Type_From_శిఖరం(o, 0);
         _throwif(m3Err_typeMismatch, condType != c_m3Type_none and condType != c_m3Type_i32);
 
         // Spec: the two value operands (below condition) must have matching types
-        m3type_t type2 = GetStackTypeFromTop(o, 2);
+        m3type_t type2 = Get_దొంతర_Type_From_శిఖరం(o, 2);
         _throwif(m3Err_typeMismatch, type != c_m3Type_none and type2 != c_m3Type_none and
-                                       not (IsSubTypeOf(type, type2) or IsSubTypeOf(type2, type)));
+                                       not (Is_Sub_Type_యొక్క(type, type2) or Is_Sub_Type_యొక్క(type2, type)));
     }
 
-    if (IsFpType(type)) {
-#if d_m3HasFloat
+    ఒకవేళ (IsFpType(type)) {
+#ఒకవేళ d_m3HasFloat
         // not consuming a fp reg, so preserve
-        if (not IsStackTopMinus1InRegister(o) and
-            not IsStackTopMinus2InRegister(o)) {
-_           (PreserveRegisterIfOccupied(o, type));
+        ఒకవేళ (not Is_దొంతర_శిఖరం_Minus1_లోపల_రిజిస్టరు(o) and
+            not Is_దొంతర_శిఖరం_Minus2_లోపల_రిజిస్టరు(o)) {
+_           (Preserve_రిజిస్టరు_If_Occupied(o, type));
         }
 
-        bool selectorInReg = IsStackTopInRegister(o);
-        slots[0]           = GetStackTopSlotNumber(o);
-_       (Pop(o));
+        bool selector_లోపల_Reg = Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o);
+        slots[0]           = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
+_       (తీయి(o));
 
-        u32 opIndex = 0;
+        u32 op_సూచీ = 0;
 
-        for (u32 i = 1; i <= 2; ++i) {
-            if (IsStackTopInRegister(o)) {
-                opIndex = i;
-            } else {
-                slots[i] = GetStackTopSlotNumber(o);
+        కొరకు (u32 i = 1; i <= 2; ++i) {
+            ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+                op_సూచీ = i;
+            } లేకపోతే {
+                slots[i] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
             }
 
-_           (Pop(o));
+_           (తీయి(o));
         }
 
-        op = c_fpSelectOps[type - c_m3Type_f32][selectorInReg][opIndex];
-#else
+        op = c_fpSelectOps[type - c_m3Type_f32][selector_లోపల_Reg][op_సూచీ];
+#లేకపోతే
         _throw(m3Err_unknownOpcode);
-#endif
-    } else if (IsIntType(type) or IsRefType(type)) {
+#అయితే_ముగింపు
+    } లేకపోతే ఒకవేళ (IsIntType(type) or IsRefType(type)) {
         // 'sss' operation doesn't consume a register, so might have to protected its contents
-        if (not IsStackTopInRegister(o) and
-            not IsStackTopMinus1InRegister(o) and
-            not IsStackTopMinus2InRegister(o)) {
-_           (PreserveRegisterIfOccupied(o, type));
+        ఒకవేళ (not Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o) and
+            not Is_దొంతర_శిఖరం_Minus1_లోపల_రిజిస్టరు(o) and
+            not Is_దొంతర_శిఖరం_Minus2_లోపల_రిజిస్టరు(o)) {
+_           (Preserve_రిజిస్టరు_If_Occupied(o, type));
         }
 
-        u32 opIndex = 3;  // op_Select_*_sss
+        u32 op_సూచీ = 3;  // op_Select_*_sss
 
-        for (u32 i = 0; i < 3; ++i) {
-            if (IsStackTopInRegister(o)) {
-                opIndex = i;
-            } else {
-                slots[i] = GetStackTopSlotNumber(o);
+        కొరకు (u32 i = 0; i < 3; ++i) {
+            ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
+                op_సూచీ = i;
+            } లేకపోతే {
+                slots[i] = Get_దొంతర_శిఖరం_స్థానం_సంఖ్య(o);
             }
 
-_           (Pop(o));
+_           (తీయి(o));
         }
 
         // a reference is a pointer-sized integer as far as select is concerned
-        u32 typeIndex = IsRefType(type) ? ((M3_SIZEOF_PTR == 8) ? 1 : 0)
+        u32 type_సూచీ = IsRefType(type) ? ((M3_SIZEOF_PTR == 8) ? 1 : 0)
                                         : (u32)(type - c_m3Type_i32);
 
-        op = c_intSelectOps[typeIndex][opIndex];
-    } else if (not IsStackPolymorphic(o)) {
-        _throw(m3Err_functionStackUnderrun);
+        op = c_intSelectOps[type_సూచీ][op_సూచీ];
+    } లేకపోతే ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        _throw(m3_Err_function_దొంతర_Underrun);
     }
 
     EmitOp(o, op);
-    for (u32 i = 0; i < 3; i++) {
-        if (IsValidSlot(slots[i])) {
-            EmitSlotOffset(o, slots[i]);
+    కొరకు (u32 i = 0; i < 3; i++) {
+        ఒకవేళ (Is_Valid_స్థానం(slots[i])) {
+            Emit_స్థానం_స్థానభ్రంశం(o, slots[i]);
         }
     }
-_   (PushRegister(o, type));
+_   (నెట్టు_రిజిస్టరు(o, type));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Drop (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Drop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = Pop(o);
-    if (d_m3LogWasmStack) {
-        dump_type_stack(o);
+    M3_ఫలితం ఫలితం = తీయి(o);
+    ఒకవేళ (d_m3_Log_Wasm_దొంతర) {
+        dump_type_దొంతర(o);
     }
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Nop (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Nop (IM3Compilation o, m3opcode_t i_opcode)
 {
-    return m3Err_none;
+    తిరిగి m3Err_none;
 }
 
-static
-M3Result Compile_Unreachable (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Unreachable (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-_   (AddTrapRecord(o));
+_   (కూడు_Trap_రికార్డు(o));
 
 _   (EmitOp(o, op_Unreachable));
-_   (SetStackPolymorphic(o));
+_   (సమితి_దొంతర_Polymorphic(o));
 
     _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
 // OPTZ: currently all stack slot indices take up a full word, but
 // dual stack source operands could be packed together
-static
-M3Result Compile_Operator (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Operator (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
     // Declared before the first throw below, which jumps past this point to
     // _catch and so must not skip an initialization.
-    IM3Operation op = NULL;
+    IM3Operation op = ఖాళీ;
 
     IM3OpInfo opInfo = GetOpInfo(i_opcode);
     _throwif(m3Err_unknownOpcode, not opInfo);
 
     // Spec: validate operand types for load/store operations
-    if (not IsStackPolymorphic(o)) {
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
         // For load ops (stackOffset == 0, unary), the operand is always i32 (address)
-        if (i_opcode >= 0x28 and i_opcode <= 0x35) {
-            m3type_t topType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, topType != c_m3Type_none and topType != c_m3Type_i32);
+        ఒకవేళ (i_opcode >= 0x28 and i_opcode <= 0x35) {
+            m3type_t శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
+            _throwif(m3Err_typeMismatch, శిఖరం_Type != c_m3Type_none and శిఖరం_Type != c_m3Type_i32);
         }
 
         // For store ops (stackOffset == -2), the address operand must be i32
-        if (i_opcode >= 0x36 and i_opcode <= 0x3e) {
-            m3type_t addrType = GetStackTypeFromTop(o, 1);
+        ఒకవేళ (i_opcode >= 0x36 and i_opcode <= 0x3e) {
+            m3type_t addrType = Get_దొంతర_Type_From_శిఖరం(o, 1);
             _throwif(m3Err_typeMismatch, addrType != c_m3Type_none and addrType != c_m3Type_i32);
         }
     }
@@ -4610,143 +4610,143 @@ M3Result Compile_Operator (IM3Compilation o, m3opcode_t i_opcode)
     // moving out the way might be the optimal solution most often?
     // otherwise, the _r0 reg can get buried down in the stack
     // and be idle & wasted for a moment.
-    if (M3_UNLIKELY(IsFpType(GetStackTopType(o)) and IsIntType(opInfo->type))) {
-_       (PreserveRegisterIfOccupied(o, opInfo->type));
+    ఒకవేళ (M3_UNLIKELY(IsFpType(Get_దొంతర_శిఖరం_Type(o)) and IsIntType(opInfo->type))) {
+_       (Preserve_రిజిస్టరు_If_Occupied(o, opInfo->type));
     }
 
-    if (opInfo->stackOffset == 0) {
-        if (IsStackTopInRegister(o)) {
+    ఒకవేళ (opInfo->దొంతర_స్థానభ్రంశం == 0) {
+        ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
             op = opInfo->operations[0]; // _s
-        } else {
-_           (PreserveRegisterIfOccupied(o, opInfo->type));
+        } లేకపోతే {
+_           (Preserve_రిజిస్టరు_If_Occupied(o, opInfo->type));
             op = opInfo->operations[1]; // _r
         }
-    } else {
-        if (IsStackTopInRegister(o)) {
+    } లేకపోతే {
+        ఒకవేళ (Is_దొంతర_శిఖరం_లోపల_రిజిస్టరు(o)) {
             op = opInfo->operations[0];  // _rs
 
-            if (IsStackTopMinus1InRegister(o)) {    d_m3Assert (i_opcode == c_waOp_store_f32 or i_opcode == c_waOp_store_f64);
+            ఒకవేళ (Is_దొంతర_శిఖరం_Minus1_లోపల_రిజిస్టరు(o)) {    d_m3Assert (i_opcode == c_waOp_store_f32 or i_opcode == c_waOp_store_f64);
                 op = opInfo->operations[3]; // _rr for fp.store
             }
-        } else if (IsStackTopMinus1InRegister(o)) {
+        } లేకపోతే ఒకవేళ (Is_దొంతర_శిఖరం_Minus1_లోపల_రిజిస్టరు(o)) {
             op = opInfo->operations[1]; // _sr
 
-            if (not op) {  // must be commutative, then
+            ఒకవేళ (not op) {  // must be commutative, then
                 op = opInfo->operations[0];
             }
-        } else {
-_           (PreserveRegisterIfOccupied(o, opInfo->type));     // _ss
+        } లేకపోతే {
+_           (Preserve_రిజిస్టరు_If_Occupied(o, opInfo->type));     // _ss
             op = opInfo->operations[2];
         }
     }
 
-    if (M3_LIKELY(op)) {
+    ఒకవేళ (M3_LIKELY(op)) {
 _       (EmitOp(o, op));
 
-#if d_m3FoldSetLocal
+#ఒకవేళ d_m3_Fold_సమితి_Local
         // the op word just written (EmitOp may have bridged pages); NULL in the page-less compile-walk mode
-        pc_t patchPC = o->page ? GetPC(o) - 1 : NULL;
-#endif
+        pc_t patchPC = o->పుట ? GetPC(o) - 1 : ఖాళీ;
+#అయితే_ముగింపు
 
-_       (EmitSlotNumOfStackTopAndPop(o));
+_       (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
 
-        if (opInfo->stackOffset < 0) {
-_           (EmitSlotNumOfStackTopAndPop(o));
+        ఒకవేళ (opInfo->దొంతర_స్థానభ్రంశం < 0) {
+_           (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
         }
 
-        if (opInfo->type != c_m3Type_none) {
-_           (PushRegister(o, opInfo->type));
+        ఒకవేళ (opInfo->type != c_m3Type_none) {
+_           (నెట్టు_రిజిస్టరు(o, opInfo->type));
 
-#if d_m3FoldSetLocal
+#ఒకవేళ d_m3_Fold_సమితి_Local
             // record this op as a fold candidate for an immediately following local.set;
             // the operand-form index is recovered by matching against the variant table
-            if (patchPC) {
-                for (u8 form = 0; form < 4; ++form) {
-                    if (opInfo->operations[form] == op) {
+            ఒకవేళ (patchPC) {
+                కొరకు (u8 form = 0; form < 4; ++form) {
+                    ఒకవేళ (opInfo->operations[form] == op) {
                         o->foldPatchPC    = patchPC;
                         o->foldOpcode     = i_opcode;
                         o->foldForm       = form;
-                        o->foldStackIndex = (u16)GetStackTopIndex(o);
-                        break;
+                        o->fold_దొంతర_సూచీ = (u16)Get_దొంతర_శిఖరం_సూచీ(o);
+                        ఆపు;
                     }
                 }
             }
-#endif
+#అయితే_ముగింపు
         }
-    } else {
-#ifdef DEBUG
-        result = ErrorCompile("no operation found for opcode", o, "'%s'", opInfo->name);
-#else
-        result = ErrorCompile("no operation found for opcode", o, "%x", i_opcode);
-#endif
-        _throw(result);
+    } లేకపోతే {
+#నిర్వచితమైతే DEBUG
+        ఫలితం = ErrorCompile("no operation found for opcode", o, "'%s'", opInfo->name);
+#లేకపోతే
+        ఫలితం = ErrorCompile("no operation found for opcode", o, "%x", i_opcode);
+#అయితే_ముగింపు
+        _throw(ఫలితం);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result Compile_Convert (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Convert (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
     IM3OpInfo opInfo = GetOpInfo(i_opcode);
     _throwif(m3Err_unknownOpcode, not opInfo);
 
     // Spec: validate source operand type for conversion instructions
-    if (not IsStackPolymorphic(o)) {
-        u8 sourceType = c_m3Type_none;
-        switch (i_opcode)
+    ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+        u8 ఆధారం_Type = c_m3Type_none;
+        ఎంపిక (i_opcode)
         // clang-format off
         {
-        case 0xa7:              // i32.wrap/i64
-            sourceType = c_m3Type_i64; break;
-        case 0xa8: case 0xa9:   // i32.trunc_s/f32, i32.trunc_u/f32
-        case 0xae: case 0xaf:   // i64.trunc_s/f32, i64.trunc_u/f32
-        case 0xbb:              // f64.promote/f32
-        case 0xbc:              // i32.reinterpret/f32
-            sourceType = c_m3Type_f32; break;
-        case 0xaa: case 0xab:   // i32.trunc_s/f64, i32.trunc_u/f64
-        case 0xb0: case 0xb1:   // i64.trunc_s/f64, i64.trunc_u/f64
-        case 0xb6:              // f32.demote/f64
-        case 0xbd:              // i64.reinterpret/f64
-            sourceType = c_m3Type_f64; break;
-        case 0xac: case 0xad:   // i64.extend_s/i32, i64.extend_u/i32
-        case 0xb2: case 0xb3:   // f32.convert_s/i32, f32.convert_u/i32
-        case 0xb7: case 0xb8:   // f64.convert_s/i32, f64.convert_u/i32
-        case 0xbe:              // f32.reinterpret/i32
-            sourceType = c_m3Type_i32; break;
-        case 0xb4: case 0xb5:   // f32.convert_s/i64, f32.convert_u/i64
-        case 0xb9: case 0xba:   // f64.convert_s/i64, f64.convert_u/i64
-        case 0xbf:              // f64.reinterpret/i64
-            sourceType = c_m3Type_i64; break;
-        default: break;
+        స్థితి 0xa7:              // i32.wrap/i64
+            ఆధారం_Type = c_m3Type_i64; ఆపు;
+        స్థితి 0xa8: స్థితి 0xa9:   // i32.trunc_s/f32, i32.trunc_u/f32
+        స్థితి 0xae: స్థితి 0xaf:   // i64.trunc_s/f32, i64.trunc_u/f32
+        స్థితి 0xbb:              // f64.promote/f32
+        స్థితి 0xbc:              // i32.reinterpret/f32
+            ఆధారం_Type = c_m3Type_f32; ఆపు;
+        స్థితి 0xaa: స్థితి 0xab:   // i32.trunc_s/f64, i32.trunc_u/f64
+        స్థితి 0xb0: స్థితి 0xb1:   // i64.trunc_s/f64, i64.trunc_u/f64
+        స్థితి 0xb6:              // f32.demote/f64
+        స్థితి 0xbd:              // i64.reinterpret/f64
+            ఆధారం_Type = c_m3Type_f64; ఆపు;
+        స్థితి 0xac: స్థితి 0xad:   // i64.extend_s/i32, i64.extend_u/i32
+        స్థితి 0xb2: స్థితి 0xb3:   // f32.convert_s/i32, f32.convert_u/i32
+        స్థితి 0xb7: స్థితి 0xb8:   // f64.convert_s/i32, f64.convert_u/i32
+        స్థితి 0xbe:              // f32.reinterpret/i32
+            ఆధారం_Type = c_m3Type_i32; ఆపు;
+        స్థితి 0xb4: స్థితి 0xb5:   // f32.convert_s/i64, f32.convert_u/i64
+        స్థితి 0xb9: స్థితి 0xba:   // f64.convert_s/i64, f64.convert_u/i64
+        స్థితి 0xbf:              // f64.reinterpret/i64
+            ఆధారం_Type = c_m3Type_i64; ఆపు;
+        అప్రమేయ: ఆపు;
         }
         // clang-format on
 
-        if (sourceType != c_m3Type_none) {
-            m3type_t topType = GetStackTopType(o);
-            _throwif(m3Err_typeMismatch, topType != c_m3Type_none and not IsSubTypeOf(topType, sourceType));
+        ఒకవేళ (ఆధారం_Type != c_m3Type_none) {
+            m3type_t శిఖరం_Type = Get_దొంతర_శిఖరం_Type(o);
+            _throwif(m3Err_typeMismatch, శిఖరం_Type != c_m3Type_none and not Is_Sub_Type_యొక్క(శిఖరం_Type, ఆధారం_Type));
         }
     }
 
-    bool destInSlot   = IsRegisterTypeAllocated(o, opInfo->type);
-    bool sourceInSlot = IsStackTopInSlot(o);
+    bool dest_లోపల_స్థానం   = Is_రిజిస్టరు_Type_Allocated(o, opInfo->type);
+    bool ఆధారం_లోపల_స్థానం = Is_దొంతర_శిఖరం_లోపల_స్థానం(o);
 
-    IM3Operation op = opInfo->operations[destInSlot * 2 + sourceInSlot];
+    IM3Operation op = opInfo->operations[dest_లోపల_స్థానం * 2 + ఆధారం_లోపల_స్థానం];
 
 _   (EmitOp(o, op));
-_   (EmitSlotNumOfStackTopAndPop(o));
+_   (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
 
-    if (destInSlot) {
-_       (PushAllocatedSlotAndEmit(o, opInfo->type))
-    } else {
-_       (PushRegister(o, opInfo->type))
+    ఒకవేళ (dest_లోపల_స్థానం) {
+_       (నెట్టు_Allocated_స్థానం_And_Emit_2(o, opInfo->type))
+    } లేకపోతే {
+_       (నెట్టు_రిజిస్టరు(o, opInfo->type))
     }
 }
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#if d_m3HasWideArithmetic
+#ఒకవేళ d_m3HasWideArithmetic
 
 // The wide arithmetic proposal: i64.add128 and i64.sub128 over two 128-bit values
 // given as i64 halves, and i64.mul_wide_s/u giving the full product of two i64s.
@@ -4754,43 +4754,43 @@ _       (PushRegister(o, opInfo->type))
 // all read from slots, and of the two results the high half, which ends up on top,
 // goes to _r0 and the low half to a newly allocated slot - so every operation has
 // the one form, whatever shape the stack was in.
-static
-M3Result Compile_WideArithmetic (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_WideArithmetic (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     IM3Operation op          = op_i64_Add128;
-    u32          numOperands = 4;
+    u32          అంకె_Operands = 4;
 
-    switch (i_opcode)
+    ఎంపిక (i_opcode)
     // clang-format off
     {
-    case c_waOp_i64Sub128:   op = op_i64_Sub128;                          break;
-    case c_waOp_i64MulWideS: op = op_i64_MultiplyWide; numOperands = 2;   break;
-    case c_waOp_i64MulWideU: op = op_u64_MultiplyWide; numOperands = 2;   break;
-    default: break;
+    స్థితి c_waOp_i64Sub128:   op = op_i64_Sub128;                          ఆపు;
+    స్థితి c_waOp_i64MulWideS: op = op_i64_MultiplyWide; అంకె_Operands = 2;   ఆపు;
+    స్థితి c_waOp_i64MulWideU: op = op_u64_MultiplyWide; అంకె_Operands = 2;   ఆపు;
+    అప్రమేయ: ఆపు;
     }
     // clang-format on
 
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
 
 _   (EmitOp(o, op));
 
     // the top of the stack first: the high half of the second operand, for the
     // 128-bit ones
-    for (u32 i = 0; i < numOperands; ++i) {
-_       (EmitSlotNumOfStackTopAndPop(o));
+    కొరకు (u32 i = 0; i < అంకె_Operands; ++i) {
+_       (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
     }
 
-_   (PushAllocatedSlotAndEmit(o, c_m3Type_i64));      // the low half
-_   (PushRegister(o, c_m3Type_i64));                  // the high half
+_   (నెట్టు_Allocated_స్థానం_And_Emit_2(o, c_m3Type_i64));      // the low half
+_   (నెట్టు_రిజిస్టరు(o, c_m3Type_i64));                  // the high half
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasWideArithmetic
+#అయితే_ముగింపు // d_m3HasWideArithmetic
 
-#if d_m3HasMemory64
+#ఒకవేళ d_m3HasMemory64
 
 // Replaces the 64-bit address operand of a load or store with the checked
 // 32-bit effective address op_CheckAddr64 leaves behind, so that the access
@@ -4801,122 +4801,122 @@ _   (PushRegister(o, c_m3Type_i64));                  // the high half
 // operands of an atomic - it is rewritten where it stands rather than popped:
 // its stack entry is repointed at the scratch slot and retyped, and the slot it
 // used to occupy released. i_numOperands counts the address and all above it.
-static
-M3Result EmitCheckAddr64 (IM3Compilation o, u64 i_offset, u16 i_numOperands)
+స్థిర
+M3_ఫలితం EmitCheckAddr64 (IM3Compilation o, u64 i_స్థానభ్రంశం, u16 i_అంకె_Operands)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // The address has to be in a slot for op_CheckAddr64 to read it. Spilling
     // r0 wholesale also keeps the value of a store out of it, which is what
     // leaves the address as the one operand still in a register to worry about.
-_   (PreserveRegisterIfOccupied(o, c_m3Type_i64));
+_   (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_i64));
 
     // unreachable code: the operands the instruction names may not be there
-    if (o->stackIndex < o->block.blockStackIndex + i_numOperands) {
-        return result;
+    ఒకవేళ (o->దొంతర_సూచీ < o->ఖండం.ఖండం_దొంతర_సూచీ + i_అంకె_Operands) {
+        తిరిగి ఫలితం;
     }
 
     {
-        u16      stackIndex = (u16)(o->stackIndex - i_numOperands);
-        u16      srcSlot    = o->wasmStack[stackIndex];
-        m3type_t srcType    = o->typeStack[stackIndex];
+        u16      దొంతర_సూచీ = (u16)(o->దొంతర_సూచీ - i_అంకె_Operands);
+        u16      src_స్థానం    = o->wasm_దొంతర[దొంతర_సూచీ];
+        m3type_t srcType    = o->type_దొంతర[దొంతర_సూచీ];
 
-        u16 dstSlot = c_slotUnused;
+        u16 dst_స్థానం = c_స్థానం_వాడని;
 
         // Checked here rather than left to the validator, which a build may
         // have switched off: reading a slot as an i64 that only holds an i32
         // would reach past what was allocated for it.
-        _throwif(m3Err_typeMismatch, BaseTypeOf(srcType) != c_m3Type_i64);
+        _throwif(m3Err_typeMismatch, పునాది_Type_యొక్క(srcType) != c_m3Type_i64);
 
         // an address is an integer, so nothing should be left in a register
         // once r0 has been preserved
-        _throwif(m3Err_typeMismatch, IsRegisterSlotAlias(srcSlot));
-        _throwif(m3Err_functionStackUnderrun, srcSlot >= o->slotMaxAllocatedIndexPlusOne);
+        _throwif(m3Err_typeMismatch, Is_రిజిస్టరు_స్థానం_Alias(src_స్థానం));
+        _throwif(m3_Err_function_దొంతర_Underrun, src_స్థానం >= o->స్థానం_Max_Allocated_సూచీ_Plus_One);
 
         // allocated before the source is released, so the two cannot be the
         // same slot - op_CheckAddr64 reads one and writes the other
-_       (AllocateSlots(o, &dstSlot, c_m3Type_i32));
+_       (AllocateSlots(o, &dst_స్థానం, c_m3Type_i32));
 
 _       (EmitOp(o, op_CheckAddr64));
-        EmitSlotOffset(o, srcSlot);
-        EmitSlotOffset(o, dstSlot);
-        EmitConstant64(o, i_offset);
+        Emit_స్థానం_స్థానభ్రంశం(o, src_స్థానం);
+        Emit_స్థానం_స్థానభ్రంశం(o, dst_స్థానం);
+        EmitConstant64(o, i_స్థానభ్రంశం);
 
-        o->wasmStack[stackIndex] = dstSlot;
-        o->typeStack[stackIndex] = c_m3Type_i32;
+        o->wasm_దొంతర[దొంతర_సూచీ] = dst_స్థానం;
+        o->type_దొంతర[దొంతర_సూచీ] = c_m3Type_i32;
 
         // locals and the constant table outlive the instruction; a dynamic
         // slot the address was computed into does not
-        if (srcSlot >= o->slotFirstDynamicIndex) {
-            DeallocateSlot(o, srcSlot, srcType);
+        ఒకవేళ (src_స్థానం >= o->స్థానం_మొదటి_Dynamic_సూచీ) {
+            Deallocate_స్థానం(o, src_స్థానం, srcType);
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasMemory64
+#అయితే_ముగింపు // d_m3HasMemory64
 
 
-static
-M3Result Compile_Load_Store (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_ఎక్కించు_Store (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 alignHint, memoryIdx;
-    u64 memoryOffset;
+    u32 alignHint, జ్ఞాపకం_Idx;
+    u64 జ్ఞాపకం_స్థానభ్రంశం;
 
     // alignHint is checked by the validator
-_   (ReadMemoryArg(&alignHint, &memoryIdx, &memoryOffset, &o->wasm, o->wasmEnd));
-                                                                        m3log (compile, d_indent " (memory = %d; offset = %llu)", get_indention_string (o), memoryIdx, (unsigned long long) memoryOffset);
-    _throwif(m3Err_unknownMemory, memoryIdx >= o->module->numMemories);
+_   (Read_జ్ఞాపకం_Arg(&alignHint, &జ్ఞాపకం_Idx, &జ్ఞాపకం_స్థానభ్రంశం, &o->wasm, o->wasm_చివర));
+                                                                        m3log (compile, d_indent " (memory = %d; offset = %llu)", get_indention_string (o), జ్ఞాపకం_Idx, (గుర్తులేని దీర్ఘ దీర్ఘ) జ్ఞాపకం_స్థానభ్రంశం);
+    _throwif(m3_Err_unknown_జ్ఞాపకం, జ్ఞాపకం_Idx >= o->module->అంకె_Memories);
 
     IM3OpInfo opInfo = GetOpInfo(i_opcode);
     _throwif(m3Err_unknownOpcode, not opInfo);
 
-    bool isMemory64 = o->module->memories[memoryIdx]->isMemory64;
+    bool isMemory64 = o->module->memories[జ్ఞాపకం_Idx]->isMemory64;
 
     // Spec: the static offset has to be in range of the address type. Checked
     // here as well as in the validator, so that a build without one still
     // refuses the module rather than silently truncating the offset.
-    _throwif(m3Err_wasmMalformed, not isMemory64 and memoryOffset > 0xFFFFFFFFull);
+    _throwif(m3Err_wasmMalformed, not isMemory64 and జ్ఞాపకం_స్థానభ్రంశం > 0xFFFFFFFFull);
 
-    if (IsFpType(opInfo->type)) {
-_       (PreserveRegisterIfOccupied(o, c_m3Type_f64));
+    ఒకవేళ (IsFpType(opInfo->type)) {
+_       (Preserve_రిజిస్టరు_If_Occupied(o, c_m3Type_f64));
     }
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, memoryIdx));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, జ్ఞాపకం_Idx));
     }
 
-#if d_m3HasMemory64
-    if (isMemory64) {
+#ఒకవేళ d_m3HasMemory64
+    ఒకవేళ (isMemory64) {
         // An offset this far out puts every address out of bounds, so rather
         // than carrying it, clamp it to the limit: op_CheckAddr64 then traps
         // on whatever address it is given, which is the outcome either way.
-        if (memoryOffset > d_m3AddressLimit) {
-            memoryOffset = d_m3AddressLimit;
+        ఒకవేళ (జ్ఞాపకం_స్థానభ్రంశం > d_m3_చిరునామా_హద్దు) {
+            జ్ఞాపకం_స్థానభ్రంశం = d_m3_చిరునామా_హద్దు;
         }
 
-_       (EmitCheckAddr64(o, memoryOffset, opInfo->stackOffset < 0 ? 2 : 1));
+_       (EmitCheckAddr64(o, జ్ఞాపకం_స్థానభ్రంశం, opInfo->దొంతర_స్థానభ్రంశం < 0 ? 2 : 1));
 
         // op_CheckAddr64 has folded the offset in already
-        memoryOffset = 0;
+        జ్ఞాపకం_స్థానభ్రంశం = 0;
     }
-#endif
+#అయితే_ముగింపు
 
 _   (Compile_Operator(o, i_opcode));
 
-    EmitConstant32(o, (u32)memoryOffset);
+    EmitConstant32(o, (u32)జ్ఞాపకం_స్థానభ్రంశం);
 
-    if (memoryIdx) {
-_       (EmitSetMemory(o, 0));
+    ఒకవేళ (జ్ఞాపకం_Idx) {
+_       (Emit_సమితి_జ్ఞాపకం(o, 0));
     }
 }
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-#if d_m3HasAtomics
+#ఒకవేళ d_m3HasAtomics
 
 // What an atomic instruction takes and gives back, from its sub-opcode. The
 // accesses come in runs of seven, one per combination of value type and cell width:
@@ -4926,69 +4926,69 @@ _       (EmitSetMemory(o, 0));
 // The operand count includes the address. The top operand is the one that ends up
 // in a register, so its type is the one to check on the way out; a store has no
 // result, which is c_m3Type_none.
-static
-void GetAtomicShape (u32 i_sub, u16* o_numOperands, m3type_t* o_topType, m3type_t* o_resultType)
+స్థిర
+శూన్య GetAtomicShape (u32 i_sub, u16* o_అంకె_Operands, m3type_t* o_శిఖరం_Type, m3type_t* o_ఫలితం_Type)
 {
     // clang-format off
-    static const m3type_t c_valueTypes [7] = {
+    స్థిర స్థిరరాశి m3type_t c_విలువ_Types [7] = {
         c_m3Type_i32, c_m3Type_i64,
         c_m3Type_i32, c_m3Type_i32,
         c_m3Type_i64, c_m3Type_i64, c_m3Type_i64
     };
     // clang-format on
 
-    if (i_sub == 0x00) {                    // memory.atomic.notify: address, count
-        *o_numOperands = 2;
-        *o_topType     = c_m3Type_i32;
-        *o_resultType  = c_m3Type_i32;
-    } else if (i_sub <= 0x02) {             // memory.atomic.wait32/64: address, expected, timeout
-        *o_numOperands = 3;
-        *o_topType     = c_m3Type_i64;
-        *o_resultType  = c_m3Type_i32;
-    } else if (i_sub <= 0x16) {             // loads: address
-        *o_numOperands = 1;
-        *o_topType     = c_m3Type_i32;
-        *o_resultType  = c_valueTypes[i_sub - 0x10];
-    } else if (i_sub <= 0x1d) {             // stores: address, value
-        *o_numOperands = 2;
-        *o_topType     = c_valueTypes[i_sub - 0x17];
-        *o_resultType  = c_m3Type_none;
-    } else if (i_sub <= 0x47) {             // read-modify-write: address, value
-        *o_numOperands = 2;
-        *o_topType     = c_valueTypes[(i_sub - 0x1e) % 7];
-        *o_resultType  = *o_topType;
-    } else {                                // cmpxchg: address, expected, replacement
-        *o_numOperands = 3;
-        *o_topType     = c_valueTypes[i_sub - 0x48];
-        *o_resultType  = *o_topType;
+    ఒకవేళ (i_sub == 0x00) {                    // memory.atomic.notify: address, count
+        *o_అంకె_Operands = 2;
+        *o_శిఖరం_Type     = c_m3Type_i32;
+        *o_ఫలితం_Type  = c_m3Type_i32;
+    } లేకపోతే ఒకవేళ (i_sub <= 0x02) {             // memory.atomic.wait32/64: address, expected, timeout
+        *o_అంకె_Operands = 3;
+        *o_శిఖరం_Type     = c_m3Type_i64;
+        *o_ఫలితం_Type  = c_m3Type_i32;
+    } లేకపోతే ఒకవేళ (i_sub <= 0x16) {             // loads: address
+        *o_అంకె_Operands = 1;
+        *o_శిఖరం_Type     = c_m3Type_i32;
+        *o_ఫలితం_Type  = c_విలువ_Types[i_sub - 0x10];
+    } లేకపోతే ఒకవేళ (i_sub <= 0x1d) {             // stores: address, value
+        *o_అంకె_Operands = 2;
+        *o_శిఖరం_Type     = c_విలువ_Types[i_sub - 0x17];
+        *o_ఫలితం_Type  = c_m3Type_none;
+    } లేకపోతే ఒకవేళ (i_sub <= 0x47) {             // read-modify-write: address, value
+        *o_అంకె_Operands = 2;
+        *o_శిఖరం_Type     = c_విలువ_Types[(i_sub - 0x1e) % 7];
+        *o_ఫలితం_Type  = *o_శిఖరం_Type;
+    } లేకపోతే {                                // cmpxchg: address, expected, replacement
+        *o_అంకె_Operands = 3;
+        *o_శిఖరం_Type     = c_విలువ_Types[i_sub - 0x48];
+        *o_ఫలితం_Type  = *o_శిఖరం_Type;
     }
 }
 
 
 // The description an access takes as its last immediate: see m3_exec_atomic.h
-static
+స్థిర
 u32 GetAtomicDesc (u32 i_sub)
 {
     // per variant, the log2 of the width of the cell
-    static const u8 c_log2Widths[7] = { 2, 3, 0, 1, 0, 1, 2 };
+    స్థిర స్థిరరాశి u8 c_log2Widths[7] = { 2, 3, 0, 1, 0, 1, 2 };
 
-    u32 variant, kind = 0;
+    u32 variant, రకం = 0;
 
-    if (i_sub <= 0x16) {
+    ఒకవేళ (i_sub <= 0x16) {
         variant = i_sub - 0x10;
-    } else if (i_sub <= 0x1d) {
+    } లేకపోతే ఒకవేళ (i_sub <= 0x1d) {
         variant = i_sub - 0x17;
-    } else if (i_sub <= 0x47) {
+    } లేకపోతే ఒకవేళ (i_sub <= 0x47) {
         variant = (i_sub - 0x1e) % 7;
-        kind    = (i_sub - 0x1e) / 7;         // add, sub, and, or, xor, xchg
-    } else {
+        రకం    = (i_sub - 0x1e) / 7;         // add, sub, and, or, xor, xchg
+    } లేకపోతే {
         variant = i_sub - 0x48;
     }
 
     // variants 1 and 4..6 are the i64 ones
     u32 is64 = (variant == 1 or variant >= 4) ? 1u : 0u;
 
-    return c_log2Widths[variant] | (is64 << 2) | (kind << 3);
+    తిరిగి c_log2Widths[variant] | (is64 << 2) | (రకం << 3);
 }
 
 
@@ -4997,105 +4997,105 @@ u32 GetAtomicDesc (u32 i_sub)
 // (or, for a load, the register), followed by the memarg offset. The ops check the
 // address themselves: for an atomic that includes its alignment, which only the
 // effective address can be asked.
-static
-M3Result Compile_Atomic (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం Compile_Atomic (IM3Compilation o, m3opcode_t i_opcode)
 {
 _try {
-    u32 alignHint, memoryIdx;
-    u64 memoryOffset;
+    u32 alignHint, జ్ఞాపకం_Idx;
+    u64 జ్ఞాపకం_స్థానభ్రంశం;
 
-    u16      numOperands = 0;
-    m3type_t topType     = c_m3Type_none;
-    m3type_t resultType  = c_m3Type_none;
+    u16      అంకె_Operands = 0;
+    m3type_t శిఖరం_Type     = c_m3Type_none;
+    m3type_t ఫలితం_Type  = c_m3Type_none;
 
-    if (i_opcode == c_waOp_atomicFence) {
+    ఒకవేళ (i_opcode == c_waOp_atomicFence) {
         // the reserved byte, which the validator has checked to be zero. There
         // is nothing to order between accesses that one thread makes in sequence.
         u8 reserved;
-_       (Read_u8(&reserved, &o->wasm, o->wasmEnd));
-    } else {
+_       (Read_u8(&reserved, &o->wasm, o->wasm_చివర));
+    } లేకపోతే {
         // alignHint is checked by the validator
-_       (ReadMemoryArg(&alignHint, &memoryIdx, &memoryOffset, &o->wasm, o->wasmEnd));
-                                                                        m3log (compile, d_indent " (memory = %d; offset = %llu)", get_indention_string (o), memoryIdx, (unsigned long long) memoryOffset);
-        _throwif(m3Err_unknownMemory, memoryIdx >= o->module->numMemories);
+_       (Read_జ్ఞాపకం_Arg(&alignHint, &జ్ఞాపకం_Idx, &జ్ఞాపకం_స్థానభ్రంశం, &o->wasm, o->wasm_చివర));
+                                                                        m3log (compile, d_indent " (memory = %d; offset = %llu)", get_indention_string (o), జ్ఞాపకం_Idx, (గుర్తులేని దీర్ఘ దీర్ఘ) జ్ఞాపకం_స్థానభ్రంశం);
+        _throwif(m3_Err_unknown_జ్ఞాపకం, జ్ఞాపకం_Idx >= o->module->అంకె_Memories);
 
         IM3OpInfo opInfo = GetOpInfo(i_opcode);
         _throwif(m3Err_unknownOpcode, not opInfo);
 
-        bool isMemory64 = o->module->memories[memoryIdx]->isMemory64;
+        bool isMemory64 = o->module->memories[జ్ఞాపకం_Idx]->isMemory64;
 
         // see Compile_Load_Store
-        _throwif(m3Err_wasmMalformed, not isMemory64 and memoryOffset > 0xFFFFFFFFull);
+        _throwif(m3Err_wasmMalformed, not isMemory64 and జ్ఞాపకం_స్థానభ్రంశం > 0xFFFFFFFFull);
 
-        GetAtomicShape(i_opcode & 0xFF, &numOperands, &topType, &resultType);
+        GetAtomicShape(i_opcode & 0xFF, &అంకె_Operands, &శిఖరం_Type, &ఫలితం_Type);
 
-        if (memoryIdx) {
-_           (EmitSetMemory(o, memoryIdx));
+        ఒకవేళ (జ్ఞాపకం_Idx) {
+_           (Emit_సమితి_జ్ఞాపకం(o, జ్ఞాపకం_Idx));
         }
 
-#  if d_m3HasMemory64
-        if (isMemory64) {
+#  ఒకవేళ d_m3HasMemory64
+        ఒకవేళ (isMemory64) {
             // see Compile_Load_Store
-            if (memoryOffset > d_m3AddressLimit) {
-                memoryOffset = d_m3AddressLimit;
+            ఒకవేళ (జ్ఞాపకం_స్థానభ్రంశం > d_m3_చిరునామా_హద్దు) {
+                జ్ఞాపకం_స్థానభ్రంశం = d_m3_చిరునామా_హద్దు;
             }
 
-_           (EmitCheckAddr64(o, memoryOffset, numOperands));
-            memoryOffset = 0;
+_           (EmitCheckAddr64(o, జ్ఞాపకం_స్థానభ్రంశం, అంకె_Operands));
+            జ్ఞాపకం_స్థానభ్రంశం = 0;
         }
 #  endif
 
-_       (CopyStackTopToRegister(o, false));
+_       (Copy_దొంతర_శిఖరం_గమ్యం_రిజిస్టరు(o, false));
 _       (EmitOp(o, opInfo->operations[0]));
-_       (PopType(o, topType));
+_       (తీయి_Type(o, శిఖరం_Type));
 
-        for (u16 i = 1; i < numOperands; ++i) {
-_           (EmitSlotNumOfStackTopAndPop(o));
+        కొరకు (u16 i = 1; i < అంకె_Operands; ++i) {
+_           (Emit_స్థానం_అంకె_యొక్క_దొంతర_శిఖరం_And_తీయి(o));
         }
 
-        EmitConstant32(o, (u32)memoryOffset);
-        if (i_opcode >= c_waOp_atomicFirstAccess) {
+        EmitConstant32(o, (u32)జ్ఞాపకం_స్థానభ్రంశం);
+        ఒకవేళ (i_opcode >= c_wa_Op_atomic_మొదటి_Access) {
             EmitConstant32(o, GetAtomicDesc(i_opcode & 0xFF));
         }
 
-        if (memoryIdx) {
-_           (EmitSetMemory(o, 0));
+        ఒకవేళ (జ్ఞాపకం_Idx) {
+_           (Emit_సమితి_జ్ఞాపకం(o, 0));
         }
 
-        if (resultType != c_m3Type_none) {
-_           (PushRegister(o, resultType));
+        ఒకవేళ (ఫలితం_Type != c_m3Type_none) {
+_           (నెట్టు_రిజిస్టరు(o, ఫలితం_Type));
         }
     }
 }
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasAtomics
+#అయితే_ముగింపు // d_m3HasAtomics
 
 
-M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const void* i_function, const void* i_userdata)
+M3_ఫలితం CompileRawFunction (IM3Module io_module, IM3Function io_function, స్థిరరాశి శూన్య* i_function, స్థిరరాశి శూన్య* i_userdata)
 {
     d_m3Assert(io_module->runtime);
 
-    IM3CodePage page = AcquireCodePageWithCapacity(io_module->runtime, 4);
+    IM3_సంకేతం_పుట పుట = Acquire_సంకేతం_పుట_With_సామర్థ్యం(io_module->runtime, 4);
 
-    if (page) {
-        io_function->compiled = GetPagePC(page);
+    ఒకవేళ (పుట) {
+        io_function->compiled = Get_పుట_PC(పుట);
         io_function->module   = io_module;
 
         // Unless a host module's ABI names a memory (m3_BindImportMemory), a
         // host function addresses memory 0 - what a bare i32 guest pointer means
-        io_function->hostMemory = io_module->memory0;
+        io_function->host_జ్ఞాపకం = io_module->memory0;
 
-        EmitWord(page, op_CallRawFunction);
-        EmitWord(page, i_function);
-        EmitWord(page, io_function);
-        EmitWord(page, i_userdata);
+        Emit_మాట(పుట, op_CallRawFunction);
+        Emit_మాట(పుట, i_function);
+        Emit_మాట(పుట, io_function);
+        Emit_మాట(పుట, i_userdata);
 
-        ReleaseCodePage(io_module->runtime, page);
-        return m3Err_none;
-    } else {
-        return m3Err_mallocFailedCodePage;
+        Release_సంకేతం_పుట(io_module->runtime, పుట);
+        తిరిగి m3Err_none;
+    } లేకపోతే {
+        తిరిగి m3_Err_malloc_Failed_సంకేతం_పుట;
     }
 }
 
@@ -5104,45 +5104,45 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
 // packing; the columns follow that order, since M3OP names them positionally.
 //
 // d_logOp, d_logOp2 macros aren't actually used by the compiler, just codepage decoding (d_m3LogCodePages = 1)
-#define d_ops(...)                          .operations = { __VA_ARGS__ }
+#నిర్వచించు d_ops(...)                          .operations = { __VA_ARGS__ }
 
-#define d_logOp(OP)                         d_ops( op_##OP,                 NULL,                       NULL,                       NULL )
-#define d_logOp2(OP1,OP2)                   d_ops( op_##OP1,                op_##OP2,                   NULL,                       NULL )
+#నిర్వచించు d_logOp(OP)                         d_ops( op_##OP,                 ఖాళీ,                       ఖాళీ,                       ఖాళీ )
+#నిర్వచించు d_logOp2(OP1,OP2)                   d_ops( op_##OP1,                op_##OP2,                   ఖాళీ,                       ఖాళీ )
 
-#define d_emptyOpList                       d_ops( NULL,                    NULL,                       NULL,                       NULL )
-#define d_unaryOpList(TYPE, NAME)           d_ops( op_##TYPE##_##NAME##_r,  op_##TYPE##_##NAME##_s,     NULL,                       NULL )
-#define d_binOpList(TYPE, NAME)             d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    NULL )
-#define d_storeFpOpList(TYPE, NAME)         d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    op_##TYPE##_##NAME##_rr )
-#define d_commutativeBinOpList(TYPE, NAME)  d_ops( op_##TYPE##_##NAME##_rs, NULL,                       op_##TYPE##_##NAME##_ss,    NULL )
+#నిర్వచించు d_ఖాళీలు_Op_List                       d_ops( ఖాళీ,                    ఖాళీ,                       ఖాళీ,                       ఖాళీ )
+#నిర్వచించు d_unaryOpList(TYPE, NAME)           d_ops( op_##TYPE##_##NAME##_r,  op_##TYPE##_##NAME##_s,     ఖాళీ,                       ఖాళీ )
+#నిర్వచించు d_binOpList(TYPE, NAME)             d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    ఖాళీ )
+#నిర్వచించు d_storeFpOpList(TYPE, NAME)         d_ops( op_##TYPE##_##NAME##_rs, op_##TYPE##_##NAME##_sr,    op_##TYPE##_##NAME##_ss,    op_##TYPE##_##NAME##_rr )
+#నిర్వచించు d_commutativeBinOpList(TYPE, NAME)  d_ops( op_##TYPE##_##NAME##_rs, ఖాళీ,                       op_##TYPE##_##NAME##_ss,    ఖాళీ )
 
-#define d_convertOpList(OP)                 d_ops( op_##OP##_r_r,           op_##OP##_r_s,              op_##OP##_s_r,              op_##OP##_s_s )
+#నిర్వచించు d_convertOpList(OP)                 d_ops( op_##OP##_r_r,           op_##OP##_r_s,              op_##OP##_s_r,              op_##OP##_s_s )
 
 
 // Every M3Compiler the tables below name, as one list, so that the index enum and
 // the array of pointers can never drift apart. Each entry must carry the same
 // config guard as the function's definition.
-#define d_m3CompilerList(_)             \
+#నిర్వచించు d_m3CompilerList(_)             \
     _( Compile_Unreachable )            \
     _( Compile_Nop )                    \
-    _( Compile_LoopOrBlock )            \
+    _( Compile_Loop_Or_ఖండం )            \
     _( Compile_If )                     \
-    _( Compile_End )                    \
+    _( Compile_చివర )                    \
     _( Compile_Branch )                 \
-    _( Compile_BranchTable )            \
+    _( Compile_Branch_పట్టిక )            \
     _( Compile_Return )                 \
     _( Compile_Call )                   \
-    _( Compile_CallIndirect )           \
+    _( Compile_Call_పరోక్ష )           \
     _( Compile_Drop )                   \
     _( Compile_Select )                 \
     _( Compile_GetLocal )               \
-    _( Compile_SetLocal )               \
-    _( Compile_GetSetGlobal )           \
-    _( Compile_Load_Store )             \
-    _( Compile_Memory_Size )            \
-    _( Compile_Memory_Grow )            \
-    _( Compile_Memory_Init )            \
-    _( Compile_Memory_CopyFill )        \
-    _( Compile_Data_Drop )              \
+    _( Compile_సమితి_Local )               \
+    _( Compile_Get_సమితి_Global )           \
+    _( Compile_ఎక్కించు_Store )             \
+    _( Compile_జ్ఞాపకం_కొలత )            \
+    _( Compile_జ్ఞాపకం_Grow )            \
+    _( Compile_జ్ఞాపకం_Init )            \
+    _( Compile_జ్ఞాపకం_Copy_Fill )        \
+    _( Compile_దత్తాంశం_Drop )              \
     _( Compile_Const_i32 )              \
     _( Compile_Const_i64 )              \
     _( Compile_Convert )                \
@@ -5153,323 +5153,323 @@ M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const
     d_m3CompilerList_typedRefs( _ )     \
     d_m3CompilerList_eh( _ )            \
     d_m3CompilerList_wide( _ )          \
-    d_m3CompilerList_stackSwitching( _ )
+    d_m3_Compiler_List_దొంతర_Switching( _ )
 
-#if d_m3ImplementFloat
+#ఒకవేళ d_m3ImplementFloat
 #  define d_m3CompilerList_f(_)         \
     _( Compile_Const_f32 )              \
     _( Compile_Const_f64 )
-#else
+#లేకపోతే
 #  define d_m3CompilerList_f(_)
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasRefTypes
+#ఒకవేళ d_m3HasRefTypes
 #  define d_m3CompilerList_refTypes(_)  \
     _( Compile_Select_Typed )           \
     _( Compile_Ref_Null )               \
     _( Compile_Ref_IsNull )             \
     _( Compile_Ref_Func )               \
-    _( Compile_Table_GetSet )           \
-    _( Compile_Table_Init )             \
-    _( Compile_Table_Copy )             \
-    _( Compile_Table_Size )             \
-    _( Compile_Table_GrowFill )         \
+    _( Compile_పట్టిక_Get_సమితి )           \
+    _( Compile_పట్టిక_Init )             \
+    _( Compile_పట్టిక_Copy )             \
+    _( Compile_పట్టిక_కొలత )             \
+    _( Compile_పట్టిక_Grow_Fill )         \
     _( Compile_Elem_Drop )
-#else
+#లేకపోతే
 #  define d_m3CompilerList_refTypes(_)
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasTypedRefs
+#ఒకవేళ d_m3HasTypedRefs
 #  define d_m3CompilerList_typedRefs(_) \
     _( Compile_CallRef )                \
     _( Compile_Ref_AsNonNull )
-#else
+#లేకపోతే
 #  define d_m3CompilerList_typedRefs(_)
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasExceptionHandling
+#ఒకవేళ d_m3HasExceptionHandling
 #  define d_m3CompilerList_eh(_)        \
     _( Compile_Throw )                  \
     _( Compile_ThrowRef )               \
-    _( Compile_TryTable )
-#else
+    _( Compile_Try_పట్టిక )
+#లేకపోతే
 #  define d_m3CompilerList_eh(_)
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasAtomics
+#ఒకవేళ d_m3HasAtomics
 #  define d_m3CompilerList_atomics(_)   \
     _( Compile_Atomic )
-#else
+#లేకపోతే
 #  define d_m3CompilerList_atomics(_)
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasWideArithmetic
+#ఒకవేళ d_m3HasWideArithmetic
 #  define d_m3CompilerList_wide(_)      \
     _( Compile_WideArithmetic )
-#else
+#లేకపోతే
 #  define d_m3CompilerList_wide(_)
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasStackSwitching
-#  define d_m3CompilerList_stackSwitching(_) \
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+#  define d_m3_Compiler_List_దొంతర_Switching(_) \
     _( Compile_ContNew )                     \
     _( Compile_ContBind )                    \
     _( Compile_Suspend )                     \
     _( Compile_Resume )                      \
     _( Compile_Switch )
-#else
-#  define d_m3CompilerList_stackSwitching(_)
-#endif
+#లేకపోతే
+#  define d_m3_Compiler_List_దొంతర_Switching(_)
+#అయితే_ముగింపు
 
 // Index 0 is "this opcode has no compiler", so that a zeroed entry - which is
 // what M3OP_RESERVED and the reserved holes in the tables are - reads as one.
-enum {
+గణన {
     c_cc_NULL = 0,
-#define d_m3CompilerEnum(NAME)  c_cc_##NAME,
+#నిర్వచించు d_m3CompilerEnum(NAME)  c_cc_##NAME,
     d_m3CompilerList(d_m3CompilerEnum)
-#undef d_m3CompilerEnum
+#నిర్వచనం_రద్దు d_m3CompilerEnum
 };
 
-static const M3Compiler c_compilers[] = {
-    NULL,
-#define d_m3CompilerPtr(NAME)   NAME,
+స్థిర స్థిరరాశి M3Compiler c_compilers[] = {
+    ఖాళీ,
+#నిర్వచించు d_m3CompilerPtr(NAME)   NAME,
     d_m3CompilerList(d_m3CompilerPtr)
-#undef d_m3CompilerPtr
+#నిర్వచనం_రద్దు d_m3CompilerPtr
 };
 
 // Names a table entry's compiler by index. d_cc (NULL) is the no-compiler entry.
-#define d_cc(NAME)                          .compiler = c_cc_##NAME
+#నిర్వచించు d_cc(NAME)                          .compiler = c_cc_##NAME
 
-static
+స్థిర
 M3Compiler GetCompiler (IM3OpInfo i_opInfo)
 {
-    d_m3Assert(i_opInfo->compiler < M3_COUNT_OF(c_compilers));
-    return c_compilers[i_opInfo->compiler];
+    d_m3Assert(i_opInfo->compiler < M3_లెక్క_యొక్క(c_compilers));
+    తిరిగి c_compilers[i_opInfo->compiler];
 }
 
 // clang-format off
-const M3OpInfo c_operations[] =
+స్థిరరాశి M3OpInfo c_operations[] =
 {
     M3OP( "unreachable",           0,  none,   d_cc(Compile_Unreachable),  d_logOp (Unreachable) ),                   // 0x00
-    M3OP( "nop",                   0,  none,   d_cc(Compile_Nop),          d_emptyOpList ),                           // 0x01 .
-    M3OP( "block",                 0,  none,   d_cc(Compile_LoopOrBlock),  d_emptyOpList ),                           // 0x02
-    M3OP( "loop",                  0,  none,   d_cc(Compile_LoopOrBlock),  d_logOp (Loop) ),                          // 0x03
-    M3OP( "if",                    -1, none,   d_cc(Compile_If),           d_emptyOpList ),                           // 0x04
-    M3OP( "else",                  0,  none,   d_cc(Compile_Nop),          d_emptyOpList ),                           // 0x05
+    M3OP( "nop",                   0,  none,   d_cc(Compile_Nop),          d_ఖాళీలు_Op_List ),                           // 0x01 .
+    M3OP( "block",                 0,  none,   d_cc(Compile_Loop_Or_ఖండం),  d_ఖాళీలు_Op_List ),                           // 0x02
+    M3OP( "loop",                  0,  none,   d_cc(Compile_Loop_Or_ఖండం),  d_logOp (Loop) ),                          // 0x03
+    M3OP( "if",                    -1, none,   d_cc(Compile_If),           d_ఖాళీలు_Op_List ),                           // 0x04
+    M3OP( "else",                  0,  none,   d_cc(Compile_Nop),          d_ఖాళీలు_Op_List ),                           // 0x05
 
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x06...0x07
 
-#if d_m3HasExceptionHandling
+#ఒకవేళ d_m3HasExceptionHandling
     M3OP( "throw",                 0,  none,   d_cc(Compile_Throw),        d_logOp (Throw) ),                         // 0x08
     M3OP_RESERVED,                                                                                                    // 0x09
     M3OP( "throw_ref",             0,  none,   d_cc(Compile_ThrowRef),     d_logOp (ThrowRef) ),                      // 0x0a
-#else
+#లేకపోతే
     M3OP_RESERVED,  M3OP_RESERVED, M3OP_RESERVED,                                                                     // 0x08...0x0a
-#endif
+#అయితే_ముగింపు
 
-    M3OP( "end",                   0,  none,   d_cc(Compile_End),          d_emptyOpList ),                           // 0x0b
+    M3OP( "end",                   0,  none,   d_cc(Compile_చివర),          d_ఖాళీలు_Op_List ),                           // 0x0b
     M3OP( "br",                    0,  none,   d_cc(Compile_Branch),       d_logOp (Branch) ),                        // 0x0c
     M3OP( "br_if",                 -1, none,   d_cc(Compile_Branch),       d_logOp2 (BranchIf_r, BranchIf_s) ),       // 0x0d
-    M3OP( "br_table",              -1, none,   d_cc(Compile_BranchTable),  d_logOp (BranchTable) ),                   // 0x0e
+    M3OP( "br_table",              -1, none,   d_cc(Compile_Branch_పట్టిక),  d_logOp (Branch_పట్టిక) ),                   // 0x0e
     M3OP( "return",                0,  any,    d_cc(Compile_Return),       d_logOp (Return) ),                        // 0x0f
     M3OP( "call",                  0,  any,    d_cc(Compile_Call),         d_logOp (Call) ),                          // 0x10
-    M3OP( "call_indirect",         0,  any,    d_cc(Compile_CallIndirect), d_logOp (CallIndirect) ),                  // 0x11
+    M3OP( "call_indirect",         0,  any,    d_cc(Compile_Call_పరోక్ష), d_logOp (Call_పరోక్ష) ),                  // 0x11
     M3OP( "return_call",           0,  any,    d_cc(Compile_Call),         d_logOp (ReturnCall) ),                    // 0x12
-    M3OP( "return_call_indirect",  0,  any,    d_cc(Compile_CallIndirect), d_logOp (ReturnCallIndirect) ),            // 0x13
+    M3OP( "return_call_indirect",  0,  any,    d_cc(Compile_Call_పరోక్ష), d_logOp (Return_Call_పరోక్ష) ),            // 0x13
 
-#if d_m3HasTypedRefs
+#ఒకవేళ d_m3HasTypedRefs
     M3OP( "call_ref",              0,  any,    d_cc(Compile_CallRef),      d_logOp (CallRef) ),                       // 0x14
     M3OP( "return_call_ref",       0,  any,    d_cc(Compile_CallRef),      d_logOp (ReturnCallRef) ),                 // 0x15
-#else
+#లేకపోతే
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x14...
-#endif
+#అయితే_ముగింపు
     M3OP_RESERVED,  M3OP_RESERVED, M3OP_RESERVED, M3OP_RESERVED,                                                      // ...0x19
 
-    M3OP( "drop",                  -1, none,   d_cc(Compile_Drop),         d_emptyOpList ),                           // 0x1a
-    M3OP( "select",                -2, any,    d_cc(Compile_Select),       d_emptyOpList ),                           // 0x1b
+    M3OP( "drop",                  -1, none,   d_cc(Compile_Drop),         d_ఖాళీలు_Op_List ),                           // 0x1a
+    M3OP( "select",                -2, any,    d_cc(Compile_Select),       d_ఖాళీలు_Op_List ),                           // 0x1b
 
-#if d_m3HasRefTypes
-    M3OP( "select.t",              -2, any,    d_cc(Compile_Select_Typed), d_emptyOpList ),                           // 0x1c
-#else
+#ఒకవేళ d_m3HasRefTypes
+    M3OP( "select.t",              -2, any,    d_cc(Compile_Select_Typed), d_ఖాళీలు_Op_List ),                           // 0x1c
+#లేకపోతే
     M3OP_RESERVED,                                                                                                    // 0x1c
-#endif
+#అయితే_ముగింపు
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x1d...0x1e
 
-#if d_m3HasExceptionHandling
-    M3OP( "try_table",             0,  none,   d_cc(Compile_TryTable),     d_logOp (TryTable) ),                      // 0x1f
-#else
+#ఒకవేళ d_m3HasExceptionHandling
+    M3OP( "try_table",             0,  none,   d_cc(Compile_Try_పట్టిక),     d_logOp (Try_పట్టిక) ),                      // 0x1f
+#లేకపోతే
     M3OP_RESERVED,                                                                                                    // 0x1f
-#endif
+#అయితే_ముగింపు
 
-    M3OP( "local.get",             1,  any,    d_cc(Compile_GetLocal),     d_emptyOpList ),                           // 0x20
-    M3OP( "local.set",             1,  none,   d_cc(Compile_SetLocal),     d_emptyOpList ),                           // 0x21
-    M3OP( "local.tee",             0,  any,    d_cc(Compile_SetLocal),     d_emptyOpList ),                           // 0x22
-    M3OP( "global.get",            1,  none,   d_cc(Compile_GetSetGlobal), d_emptyOpList ),                           // 0x23
-    M3OP( "global.set",            1,  none,   d_cc(Compile_GetSetGlobal), d_emptyOpList ),                           // 0x24
+    M3OP( "local.get",             1,  any,    d_cc(Compile_GetLocal),     d_ఖాళీలు_Op_List ),                           // 0x20
+    M3OP( "local.set",             1,  none,   d_cc(Compile_సమితి_Local),     d_ఖాళీలు_Op_List ),                           // 0x21
+    M3OP( "local.tee",             0,  any,    d_cc(Compile_సమితి_Local),     d_ఖాళీలు_Op_List ),                           // 0x22
+    M3OP( "global.get",            1,  none,   d_cc(Compile_Get_సమితి_Global), d_ఖాళీలు_Op_List ),                           // 0x23
+    M3OP( "global.set",            1,  none,   d_cc(Compile_Get_సమితి_Global), d_ఖాళీలు_Op_List ),                           // 0x24
 
-#if d_m3HasRefTypes
-    M3OP( "table.get",             0,  any,    d_cc(Compile_Table_GetSet), d_emptyOpList ),                           // 0x25
-    M3OP( "table.set",             -2, none,   d_cc(Compile_Table_GetSet), d_emptyOpList ),                           // 0x26
-#else
+#ఒకవేళ d_m3HasRefTypes
+    M3OP( "table.get",             0,  any,    d_cc(Compile_పట్టిక_Get_సమితి), d_ఖాళీలు_Op_List ),                           // 0x25
+    M3OP( "table.set",             -2, none,   d_cc(Compile_పట్టిక_Get_సమితి), d_ఖాళీలు_Op_List ),                           // 0x26
+#లేకపోతే
     M3OP_RESERVED,  M3OP_RESERVED,                                                                                    // 0x25...0x26
-#endif
+#అయితే_ముగింపు
     M3OP_RESERVED,                                                                                                    // 0x27
 
-    M3OP( "i32.load",              0,  i_32,   d_cc(Compile_Load_Store),   d_unaryOpList (i32, Load_i32) ),           // 0x28
-    M3OP( "i64.load",              0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_i64) ),           // 0x29
-    M3OP_F( "f32.load",            0,  f_32,   d_cc(Compile_Load_Store),   d_unaryOpList (f32, Load_f32) ),           // 0x2a
-    M3OP_F( "f64.load",            0,  f_64,   d_cc(Compile_Load_Store),   d_unaryOpList (f64, Load_f64) ),           // 0x2b
+    M3OP( "i32.load",              0,  i_32,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i32, ఎక్కించు_i32) ),           // 0x28
+    M3OP( "i64.load",              0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_i64) ),           // 0x29
+    M3OP_F( "f32.load",            0,  f_32,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (f32, ఎక్కించు_f32) ),           // 0x2a
+    M3OP_F( "f64.load",            0,  f_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (f64, ఎక్కించు_f64) ),           // 0x2b
 
-    M3OP( "i32.load8_s",           0,  i_32,   d_cc(Compile_Load_Store),   d_unaryOpList (i32, Load_i8) ),            // 0x2c
-    M3OP( "i32.load8_u",           0,  i_32,   d_cc(Compile_Load_Store),   d_unaryOpList (i32, Load_u8) ),            // 0x2d
-    M3OP( "i32.load16_s",          0,  i_32,   d_cc(Compile_Load_Store),   d_unaryOpList (i32, Load_i16) ),           // 0x2e
-    M3OP( "i32.load16_u",          0,  i_32,   d_cc(Compile_Load_Store),   d_unaryOpList (i32, Load_u16) ),           // 0x2f
+    M3OP( "i32.load8_s",           0,  i_32,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i32, ఎక్కించు_i8) ),            // 0x2c
+    M3OP( "i32.load8_u",           0,  i_32,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i32, ఎక్కించు_u8) ),            // 0x2d
+    M3OP( "i32.load16_s",          0,  i_32,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i32, ఎక్కించు_i16) ),           // 0x2e
+    M3OP( "i32.load16_u",          0,  i_32,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i32, ఎక్కించు_u16) ),           // 0x2f
 
-    M3OP( "i64.load8_s",           0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_i8) ),            // 0x30
-    M3OP( "i64.load8_u",           0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_u8) ),            // 0x31
-    M3OP( "i64.load16_s",          0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_i16) ),           // 0x32
-    M3OP( "i64.load16_u",          0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_u16) ),           // 0x33
-    M3OP( "i64.load32_s",          0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_i32) ),           // 0x34
-    M3OP( "i64.load32_u",          0,  i_64,   d_cc(Compile_Load_Store),   d_unaryOpList (i64, Load_u32) ),           // 0x35
+    M3OP( "i64.load8_s",           0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_i8) ),            // 0x30
+    M3OP( "i64.load8_u",           0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_u8) ),            // 0x31
+    M3OP( "i64.load16_s",          0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_i16) ),           // 0x32
+    M3OP( "i64.load16_u",          0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_u16) ),           // 0x33
+    M3OP( "i64.load32_s",          0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_i32) ),           // 0x34
+    M3OP( "i64.load32_u",          0,  i_64,   d_cc(Compile_ఎక్కించు_Store),   d_unaryOpList (i64, ఎక్కించు_u32) ),           // 0x35
 
-    M3OP( "i32.store",             -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i32, Store_i32) ),            // 0x36
-    M3OP( "i64.store",             -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i64, Store_i64) ),            // 0x37
-    M3OP_F( "f32.store",           -2, none,   d_cc(Compile_Load_Store),   d_storeFpOpList (f32, Store_f32) ),        // 0x38
-    M3OP_F( "f64.store",           -2, none,   d_cc(Compile_Load_Store),   d_storeFpOpList (f64, Store_f64) ),        // 0x39
+    M3OP( "i32.store",             -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i32, Store_i32) ),            // 0x36
+    M3OP( "i64.store",             -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i64, Store_i64) ),            // 0x37
+    M3OP_F( "f32.store",           -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_storeFpOpList (f32, Store_f32) ),        // 0x38
+    M3OP_F( "f64.store",           -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_storeFpOpList (f64, Store_f64) ),        // 0x39
 
-    M3OP( "i32.store8",            -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i32, Store_u8) ),             // 0x3a
-    M3OP( "i32.store16",           -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i32, Store_i16) ),            // 0x3b
+    M3OP( "i32.store8",            -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i32, Store_u8) ),             // 0x3a
+    M3OP( "i32.store16",           -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i32, Store_i16) ),            // 0x3b
 
-    M3OP( "i64.store8",            -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i64, Store_u8) ),             // 0x3c
-    M3OP( "i64.store16",           -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i64, Store_i16) ),            // 0x3d
-    M3OP( "i64.store32",           -2, none,   d_cc(Compile_Load_Store),   d_binOpList (i64, Store_i32) ),            // 0x3e
+    M3OP( "i64.store8",            -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i64, Store_u8) ),             // 0x3c
+    M3OP( "i64.store16",           -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i64, Store_i16) ),            // 0x3d
+    M3OP( "i64.store32",           -2, none,   d_cc(Compile_ఎక్కించు_Store),   d_binOpList (i64, Store_i32) ),            // 0x3e
 
-    M3OP( "memory.size",           1,  i_32,   d_cc(Compile_Memory_Size),  d_logOp (MemSize) ),                       // 0x3f
-    M3OP( "memory.grow",           1,  i_32,   d_cc(Compile_Memory_Grow),  d_logOp (MemGrow) ),                       // 0x40
+    M3OP( "memory.size",           1,  i_32,   d_cc(Compile_జ్ఞాపకం_కొలత),  d_logOp (Mem_కొలత) ),                       // 0x3f
+    M3OP( "memory.grow",           1,  i_32,   d_cc(Compile_జ్ఞాపకం_Grow),  d_logOp (MemGrow) ),                       // 0x40
 
     M3OP( "i32.const",             1,  i_32,   d_cc(Compile_Const_i32),    d_logOp (Const32) ),                       // 0x41
     M3OP( "i64.const",             1,  i_64,   d_cc(Compile_Const_i64),    d_logOp (Const64) ),                       // 0x42
-    M3OP_F( "f32.const",           1,  f_32,   d_cc(Compile_Const_f32),    d_emptyOpList ),                           // 0x43
-    M3OP_F( "f64.const",           1,  f_64,   d_cc(Compile_Const_f64),    d_emptyOpList ),                           // 0x44
+    M3OP_F( "f32.const",           1,  f_32,   d_cc(Compile_Const_f32),    d_ఖాళీలు_Op_List ),                           // 0x43
+    M3OP_F( "f64.const",           1,  f_64,   d_cc(Compile_Const_f64),    d_ఖాళీలు_Op_List ),                           // 0x44
 
-    M3OP( "i32.eqz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, EqualToZero) ),        // 0x45
-    M3OP( "i32.eq",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, Equal) ),     // 0x46
-    M3OP( "i32.ne",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, NotEqual) ),  // 0x47
-    M3OP( "i32.lt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, LessThan) ),             // 0x48
-    M3OP( "i32.lt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, LessThan) ),             // 0x49
-    M3OP( "i32.gt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, GreaterThan) ),          // 0x4a
-    M3OP( "i32.gt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, GreaterThan) ),          // 0x4b
-    M3OP( "i32.le_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, LessThanOrEqual) ),      // 0x4c
-    M3OP( "i32.le_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, LessThanOrEqual) ),      // 0x4d
-    M3OP( "i32.ge_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i32, GreaterThanOrEqual) ),   // 0x4e
-    M3OP( "i32.ge_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, GreaterThanOrEqual) ),   // 0x4f
+    M3OP( "i32.eqz",               0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (i32, Equal_గమ్యం_Zero) ),        // 0x45
+    M3OP( "i32.eq",                -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i32, Equal) ),     // 0x46
+    M3OP( "i32.ne",                -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i32, NotEqual) ),  // 0x47
+    M3OP( "i32.lt_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, LessThan) ),             // 0x48
+    M3OP( "i32.lt_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, LessThan) ),             // 0x49
+    M3OP( "i32.gt_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, GreaterThan) ),          // 0x4a
+    M3OP( "i32.gt_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, GreaterThan) ),          // 0x4b
+    M3OP( "i32.le_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, LessThanOrEqual) ),      // 0x4c
+    M3OP( "i32.le_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, LessThanOrEqual) ),      // 0x4d
+    M3OP( "i32.ge_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, GreaterThanOrEqual) ),   // 0x4e
+    M3OP( "i32.ge_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, GreaterThanOrEqual) ),   // 0x4f
 
-    M3OP( "i64.eqz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (i64, EqualToZero) ),        // 0x50
-    M3OP( "i64.eq",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i64, Equal) ),     // 0x51
-    M3OP( "i64.ne",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i64, NotEqual) ),  // 0x52
-    M3OP( "i64.lt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, LessThan) ),             // 0x53
-    M3OP( "i64.lt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, LessThan) ),             // 0x54
-    M3OP( "i64.gt_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, GreaterThan) ),          // 0x55
-    M3OP( "i64.gt_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, GreaterThan) ),          // 0x56
-    M3OP( "i64.le_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, LessThanOrEqual) ),      // 0x57
-    M3OP( "i64.le_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, LessThanOrEqual) ),      // 0x58
-    M3OP( "i64.ge_s",              -1, i_32,   d_cc(NULL),                 d_binOpList (i64, GreaterThanOrEqual) ),   // 0x59
-    M3OP( "i64.ge_u",              -1, i_32,   d_cc(NULL),                 d_binOpList (u64, GreaterThanOrEqual) ),   // 0x5a
+    M3OP( "i64.eqz",               0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (i64, Equal_గమ్యం_Zero) ),        // 0x50
+    M3OP( "i64.eq",                -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i64, Equal) ),     // 0x51
+    M3OP( "i64.ne",                -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i64, NotEqual) ),  // 0x52
+    M3OP( "i64.lt_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i64, LessThan) ),             // 0x53
+    M3OP( "i64.lt_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u64, LessThan) ),             // 0x54
+    M3OP( "i64.gt_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i64, GreaterThan) ),          // 0x55
+    M3OP( "i64.gt_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u64, GreaterThan) ),          // 0x56
+    M3OP( "i64.le_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i64, LessThanOrEqual) ),      // 0x57
+    M3OP( "i64.le_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u64, LessThanOrEqual) ),      // 0x58
+    M3OP( "i64.ge_s",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i64, GreaterThanOrEqual) ),   // 0x59
+    M3OP( "i64.ge_u",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u64, GreaterThanOrEqual) ),   // 0x5a
 
-    M3OP_F( "f32.eq",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Equal) ),     // 0x5b
-    M3OP_F( "f32.ne",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, NotEqual) ),  // 0x5c
-    M3OP_F( "f32.lt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, LessThan) ),             // 0x5d
-    M3OP_F( "f32.gt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, GreaterThan) ),          // 0x5e
-    M3OP_F( "f32.le",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, LessThanOrEqual) ),      // 0x5f
-    M3OP_F( "f32.ge",              -1, i_32,   d_cc(NULL),                 d_binOpList (f32, GreaterThanOrEqual) ),   // 0x60
+    M3OP_F( "f32.eq",              -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f32, Equal) ),     // 0x5b
+    M3OP_F( "f32.ne",              -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f32, NotEqual) ),  // 0x5c
+    M3OP_F( "f32.lt",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f32, LessThan) ),             // 0x5d
+    M3OP_F( "f32.gt",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f32, GreaterThan) ),          // 0x5e
+    M3OP_F( "f32.le",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f32, LessThanOrEqual) ),      // 0x5f
+    M3OP_F( "f32.ge",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f32, GreaterThanOrEqual) ),   // 0x60
 
-    M3OP_F( "f64.eq",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f64, Equal) ),     // 0x61
-    M3OP_F( "f64.ne",              -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (f64, NotEqual) ),  // 0x62
-    M3OP_F( "f64.lt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, LessThan) ),             // 0x63
-    M3OP_F( "f64.gt",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, GreaterThan) ),          // 0x64
-    M3OP_F( "f64.le",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, LessThanOrEqual) ),      // 0x65
-    M3OP_F( "f64.ge",              -1, i_32,   d_cc(NULL),                 d_binOpList (f64, GreaterThanOrEqual) ),   // 0x66
+    M3OP_F( "f64.eq",              -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f64, Equal) ),     // 0x61
+    M3OP_F( "f64.ne",              -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f64, NotEqual) ),  // 0x62
+    M3OP_F( "f64.lt",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f64, LessThan) ),             // 0x63
+    M3OP_F( "f64.gt",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f64, GreaterThan) ),          // 0x64
+    M3OP_F( "f64.le",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f64, LessThanOrEqual) ),      // 0x65
+    M3OP_F( "f64.ge",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (f64, GreaterThanOrEqual) ),   // 0x66
 
-    M3OP( "i32.clz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (u32, Clz) ),                // 0x67
-    M3OP( "i32.ctz",               0,  i_32,   d_cc(NULL),                 d_unaryOpList (u32, Ctz) ),                // 0x68
-    M3OP( "i32.popcnt",            0,  i_32,   d_cc(NULL),                 d_unaryOpList (u32, Popcnt) ),             // 0x69
+    M3OP( "i32.clz",               0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (u32, Clz) ),                // 0x67
+    M3OP( "i32.ctz",               0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (u32, Ctz) ),                // 0x68
+    M3OP( "i32.popcnt",            0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (u32, Popcnt) ),             // 0x69
 
-    M3OP( "i32.add",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, Add) ),       // 0x6a
-    M3OP( "i32.sub",               -1, i_32,   d_cc(NULL),                 d_binOpList (i32, Subtract) ),             // 0x6b
-    M3OP( "i32.mul",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (i32, Multiply) ),  // 0x6c
-    M3OP( "i32.div_s",             -1, i_32,   d_cc(NULL),                 d_binOpList (i32, Divide) ),               // 0x6d
-    M3OP( "i32.div_u",             -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Divide) ),               // 0x6e
-    M3OP( "i32.rem_s",             -1, i_32,   d_cc(NULL),                 d_binOpList (i32, Remainder) ),            // 0x6f
-    M3OP( "i32.rem_u",             -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Remainder) ),            // 0x70
-    M3OP( "i32.and",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (u32, And) ),       // 0x71
-    M3OP( "i32.or",                -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (u32, Or) ),        // 0x72
-    M3OP( "i32.xor",               -1, i_32,   d_cc(NULL),                 d_commutativeBinOpList (u32, Xor) ),       // 0x73
-    M3OP( "i32.shl",               -1, i_32,   d_cc(NULL),                 d_binOpList (u32, ShiftLeft) ),            // 0x74
-    M3OP( "i32.shr_s",             -1, i_32,   d_cc(NULL),                 d_binOpList (i32, ShiftRight) ),           // 0x75
-    M3OP( "i32.shr_u",             -1, i_32,   d_cc(NULL),                 d_binOpList (u32, ShiftRight) ),           // 0x76
-    M3OP( "i32.rotl",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Rotl) ),                 // 0x77
-    M3OP( "i32.rotr",              -1, i_32,   d_cc(NULL),                 d_binOpList (u32, Rotr) ),                 // 0x78
+    M3OP( "i32.add",               -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i32, కూడు) ),       // 0x6a
+    M3OP( "i32.sub",               -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, వ్యవకలనం) ),             // 0x6b
+    M3OP( "i32.mul",               -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i32, Multiply) ),  // 0x6c
+    M3OP( "i32.div_s",             -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, Divide) ),               // 0x6d
+    M3OP( "i32.div_u",             -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, Divide) ),               // 0x6e
+    M3OP( "i32.rem_s",             -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, Remainder) ),            // 0x6f
+    M3OP( "i32.rem_u",             -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, Remainder) ),            // 0x70
+    M3OP( "i32.and",               -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (u32, And) ),       // 0x71
+    M3OP( "i32.or",                -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (u32, Or) ),        // 0x72
+    M3OP( "i32.xor",               -1, i_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (u32, Xor) ),       // 0x73
+    M3OP( "i32.shl",               -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, జరుపు_ఎడమ) ),            // 0x74
+    M3OP( "i32.shr_s",             -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (i32, జరుపు_కుడి) ),           // 0x75
+    M3OP( "i32.shr_u",             -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, జరుపు_కుడి) ),           // 0x76
+    M3OP( "i32.rotl",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, Rotl) ),                 // 0x77
+    M3OP( "i32.rotr",              -1, i_32,   d_cc(ఖాళీ),                 d_binOpList (u32, Rotr) ),                 // 0x78
 
-    M3OP( "i64.clz",               0,  i_64,   d_cc(NULL),                 d_unaryOpList (u64, Clz) ),                // 0x79
-    M3OP( "i64.ctz",               0,  i_64,   d_cc(NULL),                 d_unaryOpList (u64, Ctz) ),                // 0x7a
-    M3OP( "i64.popcnt",            0,  i_64,   d_cc(NULL),                 d_unaryOpList (u64, Popcnt) ),             // 0x7b
+    M3OP( "i64.clz",               0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (u64, Clz) ),                // 0x79
+    M3OP( "i64.ctz",               0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (u64, Ctz) ),                // 0x7a
+    M3OP( "i64.popcnt",            0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (u64, Popcnt) ),             // 0x7b
 
-    M3OP( "i64.add",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (i64, Add) ),       // 0x7c
-    M3OP( "i64.sub",               -1, i_64,   d_cc(NULL),                 d_binOpList (i64, Subtract) ),             // 0x7d
-    M3OP( "i64.mul",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (i64, Multiply) ),  // 0x7e
-    M3OP( "i64.div_s",             -1, i_64,   d_cc(NULL),                 d_binOpList (i64, Divide) ),               // 0x7f
-    M3OP( "i64.div_u",             -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Divide) ),               // 0x80
-    M3OP( "i64.rem_s",             -1, i_64,   d_cc(NULL),                 d_binOpList (i64, Remainder) ),            // 0x81
-    M3OP( "i64.rem_u",             -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Remainder) ),            // 0x82
-    M3OP( "i64.and",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (u64, And) ),       // 0x83
-    M3OP( "i64.or",                -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (u64, Or) ),        // 0x84
-    M3OP( "i64.xor",               -1, i_64,   d_cc(NULL),                 d_commutativeBinOpList (u64, Xor) ),       // 0x85
-    M3OP( "i64.shl",               -1, i_64,   d_cc(NULL),                 d_binOpList (u64, ShiftLeft) ),            // 0x86
-    M3OP( "i64.shr_s",             -1, i_64,   d_cc(NULL),                 d_binOpList (i64, ShiftRight) ),           // 0x87
-    M3OP( "i64.shr_u",             -1, i_64,   d_cc(NULL),                 d_binOpList (u64, ShiftRight) ),           // 0x88
-    M3OP( "i64.rotl",              -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Rotl) ),                 // 0x89
-    M3OP( "i64.rotr",              -1, i_64,   d_cc(NULL),                 d_binOpList (u64, Rotr) ),                 // 0x8a
+    M3OP( "i64.add",               -1, i_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i64, కూడు) ),       // 0x7c
+    M3OP( "i64.sub",               -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (i64, వ్యవకలనం) ),             // 0x7d
+    M3OP( "i64.mul",               -1, i_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (i64, Multiply) ),  // 0x7e
+    M3OP( "i64.div_s",             -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (i64, Divide) ),               // 0x7f
+    M3OP( "i64.div_u",             -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (u64, Divide) ),               // 0x80
+    M3OP( "i64.rem_s",             -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (i64, Remainder) ),            // 0x81
+    M3OP( "i64.rem_u",             -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (u64, Remainder) ),            // 0x82
+    M3OP( "i64.and",               -1, i_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (u64, And) ),       // 0x83
+    M3OP( "i64.or",                -1, i_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (u64, Or) ),        // 0x84
+    M3OP( "i64.xor",               -1, i_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (u64, Xor) ),       // 0x85
+    M3OP( "i64.shl",               -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (u64, జరుపు_ఎడమ) ),            // 0x86
+    M3OP( "i64.shr_s",             -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (i64, జరుపు_కుడి) ),           // 0x87
+    M3OP( "i64.shr_u",             -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (u64, జరుపు_కుడి) ),           // 0x88
+    M3OP( "i64.rotl",              -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (u64, Rotl) ),                 // 0x89
+    M3OP( "i64.rotr",              -1, i_64,   d_cc(ఖాళీ),                 d_binOpList (u64, Rotr) ),                 // 0x8a
 
-    M3OP_F( "f32.abs",             0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Abs) ),                 // 0x8b
-    M3OP_F( "f32.neg",             0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Negate) ),              // 0x8c
-    M3OP_F( "f32.ceil",            0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Ceil) ),                // 0x8d
-    M3OP_F( "f32.floor",           0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Floor) ),               // 0x8e
-    M3OP_F( "f32.trunc",           0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Trunc) ),               // 0x8f
-    M3OP_F( "f32.nearest",         0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Nearest) ),             // 0x90
-    M3OP_F( "f32.sqrt",            0,  f_32,   d_cc(NULL),                 d_unaryOpList(f32, Sqrt) ),                // 0x91
+    M3OP_F( "f32.abs",             0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, Abs) ),                 // 0x8b
+    M3OP_F( "f32.neg",             0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, Negate) ),              // 0x8c
+    M3OP_F( "f32.ceil",            0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, Ceil) ),                // 0x8d
+    M3OP_F( "f32.floor",           0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, Floor) ),               // 0x8e
+    M3OP_F( "f32.trunc",           0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, Trunc) ),               // 0x8f
+    M3OP_F( "f32.nearest",         0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, సమీప) ),             // 0x90
+    M3OP_F( "f32.sqrt",            0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList(f32, Sqrt) ),                // 0x91
 
-    M3OP_F( "f32.add",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Add) ),       // 0x92
-    M3OP_F( "f32.sub",             -1, f_32,   d_cc(NULL),                 d_binOpList (f32, Subtract) ),             // 0x93
-    M3OP_F( "f32.mul",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Multiply) ),  // 0x94
-    M3OP_F( "f32.div",             -1, f_32,   d_cc(NULL),                 d_binOpList (f32, Divide) ),               // 0x95
-    M3OP_F( "f32.min",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Min) ),       // 0x96
-    M3OP_F( "f32.max",             -1, f_32,   d_cc(NULL),                 d_commutativeBinOpList (f32, Max) ),       // 0x97
-    M3OP_F( "f32.copysign",        -1, f_32,   d_cc(NULL),                 d_binOpList (f32, CopySign) ),             // 0x98
+    M3OP_F( "f32.add",             -1, f_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f32, కూడు) ),       // 0x92
+    M3OP_F( "f32.sub",             -1, f_32,   d_cc(ఖాళీ),                 d_binOpList (f32, వ్యవకలనం) ),             // 0x93
+    M3OP_F( "f32.mul",             -1, f_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f32, Multiply) ),  // 0x94
+    M3OP_F( "f32.div",             -1, f_32,   d_cc(ఖాళీ),                 d_binOpList (f32, Divide) ),               // 0x95
+    M3OP_F( "f32.min",             -1, f_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f32, Min) ),       // 0x96
+    M3OP_F( "f32.max",             -1, f_32,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f32, Max) ),       // 0x97
+    M3OP_F( "f32.copysign",        -1, f_32,   d_cc(ఖాళీ),                 d_binOpList (f32, CopySign) ),             // 0x98
 
-    M3OP_F( "f64.abs",             0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Abs) ),                 // 0x99
-    M3OP_F( "f64.neg",             0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Negate) ),              // 0x9a
-    M3OP_F( "f64.ceil",            0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Ceil) ),                // 0x9b
-    M3OP_F( "f64.floor",           0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Floor) ),               // 0x9c
-    M3OP_F( "f64.trunc",           0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Trunc) ),               // 0x9d
-    M3OP_F( "f64.nearest",         0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Nearest) ),             // 0x9e
-    M3OP_F( "f64.sqrt",            0,  f_64,   d_cc(NULL),                 d_unaryOpList(f64, Sqrt) ),                // 0x9f
+    M3OP_F( "f64.abs",             0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, Abs) ),                 // 0x99
+    M3OP_F( "f64.neg",             0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, Negate) ),              // 0x9a
+    M3OP_F( "f64.ceil",            0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, Ceil) ),                // 0x9b
+    M3OP_F( "f64.floor",           0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, Floor) ),               // 0x9c
+    M3OP_F( "f64.trunc",           0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, Trunc) ),               // 0x9d
+    M3OP_F( "f64.nearest",         0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, సమీప) ),             // 0x9e
+    M3OP_F( "f64.sqrt",            0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList(f64, Sqrt) ),                // 0x9f
 
-    M3OP_F( "f64.add",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Add) ),       // 0xa0
-    M3OP_F( "f64.sub",             -1, f_64,   d_cc(NULL),                 d_binOpList (f64, Subtract) ),             // 0xa1
-    M3OP_F( "f64.mul",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Multiply) ),  // 0xa2
-    M3OP_F( "f64.div",             -1, f_64,   d_cc(NULL),                 d_binOpList (f64, Divide) ),               // 0xa3
-    M3OP_F( "f64.min",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Min) ),       // 0xa4
-    M3OP_F( "f64.max",             -1, f_64,   d_cc(NULL),                 d_commutativeBinOpList (f64, Max) ),       // 0xa5
-    M3OP_F( "f64.copysign",        -1, f_64,   d_cc(NULL),                 d_binOpList (f64, CopySign) ),             // 0xa6
+    M3OP_F( "f64.add",             -1, f_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f64, కూడు) ),       // 0xa0
+    M3OP_F( "f64.sub",             -1, f_64,   d_cc(ఖాళీ),                 d_binOpList (f64, వ్యవకలనం) ),             // 0xa1
+    M3OP_F( "f64.mul",             -1, f_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f64, Multiply) ),  // 0xa2
+    M3OP_F( "f64.div",             -1, f_64,   d_cc(ఖాళీ),                 d_binOpList (f64, Divide) ),               // 0xa3
+    M3OP_F( "f64.min",             -1, f_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f64, Min) ),       // 0xa4
+    M3OP_F( "f64.max",             -1, f_64,   d_cc(ఖాళీ),                 d_commutativeBinOpList (f64, Max) ),       // 0xa5
+    M3OP_F( "f64.copysign",        -1, f_64,   d_cc(ఖాళీ),                 d_binOpList (f64, CopySign) ),             // 0xa6
 
-    M3OP( "i32.wrap/i64",          0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, Wrap_i64) ),           // 0xa7
+    M3OP( "i32.wrap/i64",          0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (i32, Wrap_i64) ),           // 0xa7
     M3OP_F( "i32.trunc_s/f32",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (i32_Trunc_f32) ),         // 0xa8
     M3OP_F( "i32.trunc_u/f32",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (u32_Trunc_f32) ),         // 0xa9
     M3OP_F( "i32.trunc_s/f64",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (i32_Trunc_f64) ),         // 0xaa
     M3OP_F( "i32.trunc_u/f64",     0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (u32_Trunc_f64) ),         // 0xab
 
-    M3OP( "i64.extend_s/i32",      0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend_i32) ),         // 0xac
-    M3OP( "i64.extend_u/i32",      0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend_u32) ),         // 0xad
+    M3OP( "i64.extend_s/i32",      0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (i64, Extend_i32) ),         // 0xac
+    M3OP( "i64.extend_u/i32",      0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (i64, Extend_u32) ),         // 0xad
 
     M3OP_F( "i64.trunc_s/f32",     0,  i_64,   d_cc(Compile_Convert),      d_convertOpList (i64_Trunc_f32) ),         // 0xae
     M3OP_F( "i64.trunc_u/f32",     0,  i_64,   d_cc(Compile_Convert),      d_convertOpList (u64_Trunc_f32) ),         // 0xaf
@@ -5481,55 +5481,55 @@ const M3OpInfo c_operations[] =
     M3OP_F( "f32.convert_s/i64",   0,  f_32,   d_cc(Compile_Convert),      d_convertOpList (f32_Convert_i64) ),       // 0xb4
     M3OP_F( "f32.convert_u/i64",   0,  f_32,   d_cc(Compile_Convert),      d_convertOpList (f32_Convert_u64) ),       // 0xb5
 
-    M3OP_F( "f32.demote/f64",      0,  f_32,   d_cc(NULL),                 d_unaryOpList (f32, Demote_f64) ),         // 0xb6
+    M3OP_F( "f32.demote/f64",      0,  f_32,   d_cc(ఖాళీ),                 d_unaryOpList (f32, Demote_f64) ),         // 0xb6
 
     M3OP_F( "f64.convert_s/i32",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_i32) ),       // 0xb7
     M3OP_F( "f64.convert_u/i32",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_u32) ),       // 0xb8
     M3OP_F( "f64.convert_s/i64",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_i64) ),       // 0xb9
     M3OP_F( "f64.convert_u/i64",   0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Convert_u64) ),       // 0xba
 
-    M3OP_F( "f64.promote/f32",     0,  f_64,   d_cc(NULL),                 d_unaryOpList (f64, Promote_f32) ),        // 0xbb
+    M3OP_F( "f64.promote/f32",     0,  f_64,   d_cc(ఖాళీ),                 d_unaryOpList (f64, Promote_f32) ),        // 0xbb
 
     M3OP_F( "i32.reinterpret/f32", 0,  i_32,   d_cc(Compile_Convert),      d_convertOpList (i32_Reinterpret_f32) ),   // 0xbc
     M3OP_F( "i64.reinterpret/f64", 0,  i_64,   d_cc(Compile_Convert),      d_convertOpList (i64_Reinterpret_f64) ),   // 0xbd
     M3OP_F( "f32.reinterpret/i32", 0,  f_32,   d_cc(Compile_Convert),      d_convertOpList (f32_Reinterpret_i32) ),   // 0xbe
     M3OP_F( "f64.reinterpret/i64", 0,  f_64,   d_cc(Compile_Convert),      d_convertOpList (f64_Reinterpret_i64) ),   // 0xbf
 
-    M3OP( "i32.extend8_s",         0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, Extend8_s) ),          // 0xc0
-    M3OP( "i32.extend16_s",        0,  i_32,   d_cc(NULL),                 d_unaryOpList (i32, Extend16_s) ),         // 0xc1
-    M3OP( "i64.extend8_s",         0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend8_s) ),          // 0xc2
-    M3OP( "i64.extend16_s",        0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend16_s) ),         // 0xc3
-    M3OP( "i64.extend32_s",        0,  i_64,   d_cc(NULL),                 d_unaryOpList (i64, Extend32_s) ),         // 0xc4
+    M3OP( "i32.extend8_s",         0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (i32, Extend8_s) ),          // 0xc0
+    M3OP( "i32.extend16_s",        0,  i_32,   d_cc(ఖాళీ),                 d_unaryOpList (i32, Extend16_s) ),         // 0xc1
+    M3OP( "i64.extend8_s",         0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (i64, Extend8_s) ),          // 0xc2
+    M3OP( "i64.extend16_s",        0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (i64, Extend16_s) ),         // 0xc3
+    M3OP( "i64.extend32_s",        0,  i_64,   d_cc(ఖాళీ),                 d_unaryOpList (i64, Extend32_s) ),         // 0xc4
 
 // Internal operations, for codepage logging only. They sit past c_waOp_lastCore,
 // the last opcode this table covers, so GetOpInfo () can never reach them.
 # ifdef DEBUG // for codepage logging. the order doesn't matter:
-#define d_m3DebugOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP))
+#నిర్వచించు d_m3DebugOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP))
 
-# if d_m3HasFloat
-#define d_m3DebugTypedOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP##_i32, op_##OP##_i64, op_##OP##_f32, op_##OP##_f64))
-# else
-#define d_m3DebugTypedOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP##_i32, op_##OP##_i64))
+# ఒకవేళ d_m3HasFloat
+#నిర్వచించు d_m3DebugTypedOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP##_i32, op_##OP##_i64, op_##OP##_f32, op_##OP##_f64))
+# లేకపోతే
+#నిర్వచించు d_m3DebugTypedOp(OP) M3OP (#OP, 0, none, d_ops (op_##OP##_i32, op_##OP##_i64))
 # endif
 
-    d_m3DebugOp (Compile),          d_m3DebugOp (Entry),            d_m3DebugOp (End),
+    d_m3DebugOp (Compile),          d_m3DebugOp (నమోదు_3),            d_m3DebugOp (చివర_2),
     d_m3DebugOp (Unsupported),      d_m3DebugOp (CallRawFunction),
 
     d_m3DebugOp (GetGlobal_s32),    d_m3DebugOp (GetGlobal_s64),    d_m3DebugOp (ContinueLoop),     d_m3DebugOp (ContinueLoopIf),
-# if d_m3HasStackSwitching
-    d_m3DebugOp (ContinueLoop_Suspendable), d_m3DebugOp (ContinueLoopIf_Suspendable), d_m3DebugOp (EntryCheck),
-#  if !d_m3EntryKeepsFrame
-    d_m3DebugOp (Entry_Suspendable),
+# ఒకవేళ d_m3_Has_దొంతర_Switching
+    d_m3DebugOp (ContinueLoop_Suspendable), d_m3DebugOp (ContinueLoopIf_Suspendable), d_m3DebugOp (నమోదు_Check),
+#  ఒకవేళ !d_m3_నమోదు_Keeps_చట్రం
+    d_m3DebugOp (నమోదు_Suspendable),
 #  endif
 # endif
 
-    d_m3DebugOp (CopySlot_32),      d_m3DebugOp (PreserveCopySlot_32), d_m3DebugOp (If_s),          d_m3DebugOp (BranchIfPrologue_s),
-    d_m3DebugOp (CopySlot_64),      d_m3DebugOp (PreserveCopySlot_64), d_m3DebugOp (If_r),          d_m3DebugOp (BranchIfPrologue_r),
+    d_m3DebugOp (Copy_స్థానం_32),      d_m3DebugOp (Preserve_Copy_స్థానం_32), d_m3DebugOp (If_s),          d_m3DebugOp (BranchIfPrologue_s),
+    d_m3DebugOp (Copy_స్థానం_64),      d_m3DebugOp (Preserve_Copy_స్థానం_64), d_m3DebugOp (If_r),          d_m3DebugOp (BranchIfPrologue_r),
 
     d_m3DebugOp (Select_i32_rss),   d_m3DebugOp (Select_i32_srs),   d_m3DebugOp (Select_i32_ssr),   d_m3DebugOp (Select_i32_sss),
     d_m3DebugOp (Select_i64_rss),   d_m3DebugOp (Select_i64_srs),   d_m3DebugOp (Select_i64_ssr),   d_m3DebugOp (Select_i64_sss),
 
-# if d_m3HasFloat
+# ఒకవేళ d_m3HasFloat
     d_m3DebugOp (Select_f32_sss),   d_m3DebugOp (Select_f32_srs),   d_m3DebugOp (Select_f32_ssr),
     d_m3DebugOp (Select_f32_rss),   d_m3DebugOp (Select_f32_rrs),   d_m3DebugOp (Select_f32_rsr),
 
@@ -5537,29 +5537,29 @@ const M3OpInfo c_operations[] =
     d_m3DebugOp (Select_f64_rss),   d_m3DebugOp (Select_f64_rrs),   d_m3DebugOp (Select_f64_rsr),
 # endif
 
-    d_m3DebugOp (MemFill),          d_m3DebugOp (MemCopy),          d_m3DebugOp (MemInit),          d_m3DebugOp (DataDrop),
+    d_m3DebugOp (MemFill),          d_m3DebugOp (MemCopy),          d_m3DebugOp (MemInit),          d_m3DebugOp (దత్తాంశం_Drop),
 
-# if d_m3HasGasMetering
+# ఒకవేళ d_m3HasGasMetering
     d_m3DebugOp (UseGas),
 # endif
 
-# if d_m3HasRefTypes
-    d_m3DebugOp (TableGet),         d_m3DebugOp (TableSet),         d_m3DebugOp (TableSize),
-    d_m3DebugOp (TableGrow),        d_m3DebugOp (TableFill),        d_m3DebugOp (TableInit),
-    d_m3DebugOp (ElemDrop),         d_m3DebugOp (TableCopy),
+# ఒకవేళ d_m3HasRefTypes
+    d_m3DebugOp (పట్టిక_Get),         d_m3DebugOp (పట్టిక_సమితి),         d_m3DebugOp (పట్టిక_కొలత),
+    d_m3DebugOp (పట్టిక_Grow),        d_m3DebugOp (పట్టిక_Fill),        d_m3DebugOp (పట్టిక_Init),
+    d_m3DebugOp (ElemDrop),         d_m3DebugOp (పట్టిక_Copy),
 # endif
 
-    d_m3DebugTypedOp (SetGlobal),   d_m3DebugOp (SetGlobal_s32),    d_m3DebugOp (SetGlobal_s64),
+    d_m3DebugTypedOp (సమితి_Global),   d_m3DebugOp (సమితి_Global_s32),    d_m3DebugOp (సమితి_Global_s64),
 
-    d_m3DebugTypedOp (SetRegister), d_m3DebugTypedOp (SetSlot),     d_m3DebugTypedOp (PreserveSetSlot),
+    d_m3DebugTypedOp (సమితి_రిజిస్టరు), d_m3DebugTypedOp (సమితి_స్థానం),     d_m3DebugTypedOp (Preserve_సమితి_స్థానం),
 # endif
 
 # ifdef DEBUG
-    M3OP( "termination", 0, c_m3Type_unknown, d_emptyOpList ) // for find_operation_info
+    M3OP( "termination", 0, c_m3Type_unknown, d_ఖాళీలు_Op_List ) // for find_operation_info
 # endif
 };
 
-const M3OpInfo c_operationsFC[] =
+స్థిరరాశి M3OpInfo c_operationsFC[] =
 {
     M3OP_F( "i32.trunc_s:sat/f32", 0, i_32,   d_cc(Compile_Convert),         d_convertOpList (i32_TruncSat_f32) ),  // 0x00
     M3OP_F( "i32.trunc_u:sat/f32", 0, i_32,   d_cc(Compile_Convert),         d_convertOpList (u32_TruncSat_f32) ),  // 0x01
@@ -5570,229 +5570,229 @@ const M3OpInfo c_operationsFC[] =
     M3OP_F( "i64.trunc_s:sat/f64", 0, i_64,   d_cc(Compile_Convert),         d_convertOpList (i64_TruncSat_f64) ),  // 0x06
     M3OP_F( "i64.trunc_u:sat/f64", 0, i_64,   d_cc(Compile_Convert),         d_convertOpList (u64_TruncSat_f64) ),  // 0x07
 
-    M3OP( "memory.init",           0, none,   d_cc(Compile_Memory_Init),     d_emptyOpList ),                       // 0x08
-    M3OP( "data.drop",             0, none,   d_cc(Compile_Data_Drop),       d_emptyOpList ),                       // 0x09
+    M3OP( "memory.init",           0, none,   d_cc(Compile_జ్ఞాపకం_Init),     d_ఖాళీలు_Op_List ),                       // 0x08
+    M3OP( "data.drop",             0, none,   d_cc(Compile_దత్తాంశం_Drop),       d_ఖాళీలు_Op_List ),                       // 0x09
 
-    M3OP( "memory.copy",           0, none,   d_cc(Compile_Memory_CopyFill), d_emptyOpList ),                       // 0x0a
-    M3OP( "memory.fill",           0, none,   d_cc(Compile_Memory_CopyFill), d_emptyOpList ),                       // 0x0b
+    M3OP( "memory.copy",           0, none,   d_cc(Compile_జ్ఞాపకం_Copy_Fill), d_ఖాళీలు_Op_List ),                       // 0x0a
+    M3OP( "memory.fill",           0, none,   d_cc(Compile_జ్ఞాపకం_Copy_Fill), d_ఖాళీలు_Op_List ),                       // 0x0b
 
-#if d_m3HasRefTypes
-    M3OP( "table.init",            0, none,   d_cc(Compile_Table_Init),      d_emptyOpList ),                       // 0x0c
-    M3OP( "elem.drop",             0, none,   d_cc(Compile_Elem_Drop),       d_emptyOpList ),                       // 0x0d
-    M3OP( "table.copy",            0, none,   d_cc(Compile_Table_Copy),      d_emptyOpList ),                       // 0x0e
-#else
+#ఒకవేళ d_m3HasRefTypes
+    M3OP( "table.init",            0, none,   d_cc(Compile_పట్టిక_Init),      d_ఖాళీలు_Op_List ),                       // 0x0c
+    M3OP( "elem.drop",             0, none,   d_cc(Compile_Elem_Drop),       d_ఖాళీలు_Op_List ),                       // 0x0d
+    M3OP( "table.copy",            0, none,   d_cc(Compile_పట్టిక_Copy),      d_ఖాళీలు_Op_List ),                       // 0x0e
+#లేకపోతే
     M3OP_RESERVED, M3OP_RESERVED, M3OP_RESERVED,                                                                    // 0x0c...0x0e
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasRefTypes
-    M3OP( "table.grow",            0, i_32,   d_cc(Compile_Table_GrowFill),  d_emptyOpList ),                       // 0x0f
-    M3OP( "table.size",            1, i_32,   d_cc(Compile_Table_Size),      d_emptyOpList ),                       // 0x10
-    M3OP( "table.fill",            0, none,   d_cc(Compile_Table_GrowFill),  d_emptyOpList ),                       // 0x11
-#else
+#ఒకవేళ d_m3HasRefTypes
+    M3OP( "table.grow",            0, i_32,   d_cc(Compile_పట్టిక_Grow_Fill),  d_ఖాళీలు_Op_List ),                       // 0x0f
+    M3OP( "table.size",            1, i_32,   d_cc(Compile_పట్టిక_కొలత),      d_ఖాళీలు_Op_List ),                       // 0x10
+    M3OP( "table.fill",            0, none,   d_cc(Compile_పట్టిక_Grow_Fill),  d_ఖాళీలు_Op_List ),                       // 0x11
+#లేకపోతే
     M3OP_RESERVED, M3OP_RESERVED, M3OP_RESERVED,                                                                    // 0x0f...0x11
-#endif
+#అయితే_ముగింపు
 
-#if d_m3HasWideArithmetic
+#ఒకవేళ d_m3HasWideArithmetic
     M3OP_RESERVED,                                                                                                  // 0x12
 
     M3OP( "i64.add128",            -2, i_64,  d_cc(Compile_WideArithmetic), d_logOp (i64_Add128) ),              // 0x13
     M3OP( "i64.sub128",            -2, i_64,  d_cc(Compile_WideArithmetic), d_logOp (i64_Sub128) ),              // 0x14
     M3OP( "i64.mul_wide_s",        0,  i_64,  d_cc(Compile_WideArithmetic), d_logOp (i64_MultiplyWide) ),        // 0x15
     M3OP( "i64.mul_wide_u",        0,  i_64,  d_cc(Compile_WideArithmetic), d_logOp (u64_MultiplyWide) ),        // 0x16
-#endif
+#అయితే_ముగింపు
 
 
 # ifdef DEBUG
-    M3OP( "termination", 0, c_m3Type_unknown, d_emptyOpList ) // for find_operation_info
+    M3OP( "termination", 0, c_m3Type_unknown, d_ఖాళీలు_Op_List ) // for find_operation_info
 # endif
 };
 
-#if d_m3HasAtomics
+#ఒకవేళ d_m3HasAtomics
 
 // The 0xFE instructions share one entry per kind rather than each having its own: what
 // tells them apart, the width of the cell and the operation, is worked out from the
 // sub-opcode by Compile_Atomic. GetAtomicInfoIndex () maps a sub-opcode onto this table.
-enum {
+గణన {
     c_opAtomic_notify,
     c_opAtomic_wait32,
     c_opAtomic_wait64,
     c_opAtomic_fence,
-    c_opAtomic_load,
+    c_op_Atomic_ఎక్కించు,
     c_opAtomic_store,
     c_opAtomic_rmw,
     c_opAtomic_cmpxchg
 };
 
-const M3OpInfo c_operationsFE[] =
+స్థిరరాశి M3OpInfo c_operationsFE[] =
 {
     M3OP( "memory.atomic.notify",  -1, i_32,  d_cc(Compile_Atomic), d_logOp (AtomicNotify) ),    // c_opAtomic_notify
     M3OP( "memory.atomic.wait32",  -2, i_32,  d_cc(Compile_Atomic), d_logOp (AtomicWait32) ),    // c_opAtomic_wait32
     M3OP( "memory.atomic.wait64",  -2, i_32,  d_cc(Compile_Atomic), d_logOp (AtomicWait64) ),    // c_opAtomic_wait64
-    M3OP( "atomic.fence",           0, none,  d_cc(Compile_Atomic), d_emptyOpList ),             // c_opAtomic_fence
-    M3OP( "atomic.load",            0, any,   d_cc(Compile_Atomic), d_logOp (AtomicLoad) ),      // c_opAtomic_load
+    M3OP( "atomic.fence",           0, none,  d_cc(Compile_Atomic), d_ఖాళీలు_Op_List ),             // c_opAtomic_fence
+    M3OP( "atomic.load",            0, any,   d_cc(Compile_Atomic), d_logOp (Atomic_ఎక్కించు) ),      // c_opAtomic_load
     M3OP( "atomic.store",          -2, none,  d_cc(Compile_Atomic), d_logOp (AtomicStore) ),     // c_opAtomic_store
     M3OP( "atomic.rmw",            -1, any,   d_cc(Compile_Atomic), d_logOp (AtomicRmw) ),       // c_opAtomic_rmw
     M3OP( "atomic.rmw.cmpxchg",    -2, any,   d_cc(Compile_Atomic), d_logOp (AtomicCmpxchg) ),   // c_opAtomic_cmpxchg
 };
 
-const u32 c_numOperationsFE = M3_COUNT_OF(c_operationsFE);
+స్థిరరాశి u32 c_అంకె_Operations_FE = M3_లెక్క_యొక్క(c_operationsFE);
 
 // The entry a 0xFE sub-opcode uses, or -1 for one that names nothing: the spec leaves
 // 0x04..0x0f and everything past cmpxchg unassigned. The accesses come in runs of seven,
 // one per pairing of value type and cell width.
-static inline
-i32 GetAtomicInfoIndex (u32 i_sub)
+స్థిర అంతఃవరుస
+i32 Get_Atomic_Info_సూచీ (u32 i_sub)
 {
-    if (i_sub <= 0x03) return (i32)i_sub;
-    if (i_sub < 0x10) return -1;
-    if (i_sub <= 0x16) return c_opAtomic_load;
-    if (i_sub <= 0x1d) return c_opAtomic_store;
-    if (i_sub <= 0x47) return c_opAtomic_rmw;
-    if (i_sub <= c_waOp_lastAtomic) return c_opAtomic_cmpxchg;
-    return -1;
+    ఒకవేళ (i_sub <= 0x03) తిరిగి (i32)i_sub;
+    ఒకవేళ (i_sub < 0x10) తిరిగి -1;
+    ఒకవేళ (i_sub <= 0x16) తిరిగి c_op_Atomic_ఎక్కించు;
+    ఒకవేళ (i_sub <= 0x1d) తిరిగి c_opAtomic_store;
+    ఒకవేళ (i_sub <= 0x47) తిరిగి c_opAtomic_rmw;
+    ఒకవేళ (i_sub <= c_wa_Op_చివరి_Atomic) తిరిగి c_opAtomic_cmpxchg;
+    తిరిగి -1;
 }
 
-#endif // d_m3HasAtomics
+#అయితే_ముగింపు // d_m3HasAtomics
 
 // The opcodes above c_waOp_lastCore are sparse: the reference instructions at
 // 0xd0..0xd2 and 0xd4, and the 0xfc extended-opcode prefix. Indexing c_operations out to
 // 0xfc to reach them would leave ~50 empty entries there, so they get their own
 // table, which GetHighOpIndex () maps the opcode onto.
-enum {
-#if d_m3HasRefTypes
-    c_opHigh_refNull,
-    c_opHigh_refIsNull,
-    c_opHigh_refFunc,
-#  if d_m3HasTypedRefs
-    c_opHigh_refAsNonNull,
+గణన {
+#ఒకవేళ d_m3HasRefTypes
+    c_op_ఎగువ_ref_Null,
+    c_op_ఎగువ_ref_Is_Null,
+    c_op_ఎగువ_ref_Func,
+#  ఒకవేళ d_m3HasTypedRefs
+    c_op_ఎగువ_ref_As_Non_Null,
 #  endif
-#endif
-#if d_m3HasStackSwitching
-    c_opHigh_contNew,
-    c_opHigh_contBind,
-    c_opHigh_suspend,
-    c_opHigh_resume,
-    c_opHigh_resumeThrow,
-    c_opHigh_resumeThrowRef,
-    c_opHigh_switch,
-#endif
-#if d_m3HasAtomics
-    c_opHigh_atomic,
-#endif
-    c_opHigh_extended   // always present, so the enum is never empty
+#అయితే_ముగింపు
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+    c_op_ఎగువ_cont_New,
+    c_op_ఎగువ_cont_Bind,
+    c_op_ఎగువ_suspend,
+    c_op_ఎగువ_resume,
+    c_op_ఎగువ_resume_Throw,
+    c_op_ఎగువ_resume_Throw_Ref,
+    c_op_ఎగువ_switch,
+#అయితే_ముగింపు
+#ఒకవేళ d_m3HasAtomics
+    c_op_ఎగువ_atomic,
+#అయితే_ముగింపు
+    c_op_ఎగువ_extended   // always present, so the enum is never empty
 };
 
 // Positional, so the table must stay in c_opHigh_* order: array designators
 // are not valid C++, which the maintenance builds compile this as.
-static const M3OpInfo c_operationsHigh[] =
+స్థిర స్థిరరాశి M3OpInfo c_operations_ఎగువ[] =
 {
-#if d_m3HasRefTypes
-    M3OP( "ref.null",        1, any,               d_cc(Compile_Ref_Null),       d_emptyOpList ),  // 0xd0  c_opHigh_refNull
-    M3OP( "ref.is_null",     0, i_32,              d_cc(Compile_Ref_IsNull),     d_emptyOpList ),  // 0xd1  c_opHigh_refIsNull
-    M3OP( "ref.func",        1, any,               d_cc(Compile_Ref_Func),       d_emptyOpList ),  // 0xd2  c_opHigh_refFunc
-#  if d_m3HasTypedRefs
-    M3OP( "ref.as_non_null", 0, any,               d_cc(Compile_Ref_AsNonNull),  d_emptyOpList ),  // 0xd4  c_opHigh_refAsNonNull
+#ఒకవేళ d_m3HasRefTypes
+    M3OP( "ref.null",        1, any,               d_cc(Compile_Ref_Null),       d_ఖాళీలు_Op_List ),  // 0xd0  c_opHigh_refNull
+    M3OP( "ref.is_null",     0, i_32,              d_cc(Compile_Ref_IsNull),     d_ఖాళీలు_Op_List ),  // 0xd1  c_opHigh_refIsNull
+    M3OP( "ref.func",        1, any,               d_cc(Compile_Ref_Func),       d_ఖాళీలు_Op_List ),  // 0xd2  c_opHigh_refFunc
+#  ఒకవేళ d_m3HasTypedRefs
+    M3OP( "ref.as_non_null", 0, any,               d_cc(Compile_Ref_AsNonNull),  d_ఖాళీలు_Op_List ),  // 0xd4  c_opHigh_refAsNonNull
 #  endif
-#endif
-#if d_m3HasStackSwitching
-    M3OP( "cont.new",          1, any,             d_cc(Compile_ContNew),        d_emptyOpList ),  // 0xe0  c_opHigh_contNew
-    M3OP( "cont.bind",         2, any,             d_cc(Compile_ContBind),       d_emptyOpList ),  // 0xe1  c_opHigh_contBind
-    M3OP( "suspend",           1, any,             d_cc(Compile_Suspend),        d_emptyOpList ),  // 0xe2  c_opHigh_suspend
-    M3OP( "resume",            1, any,             d_cc(Compile_Resume),         d_emptyOpList ),  // 0xe3  c_opHigh_resume
-    M3OP( "resume_throw",      2, any,             d_cc(Compile_Resume)   ,    d_emptyOpList ),  // 0xe4  c_opHigh_resumeThrow
-    M3OP( "resume_throw_ref",  1, any,             d_cc(Compile_Resume)      , d_emptyOpList ),  // 0xe5  c_opHigh_resumeThrowRef
-    M3OP( "switch",            2, any,             d_cc(Compile_Switch),         d_emptyOpList ),  // 0xe6  c_opHigh_switch
-#endif
+#అయితే_ముగింపు
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+    M3OP( "cont.new",          1, any,             d_cc(Compile_ContNew),        d_ఖాళీలు_Op_List ),  // 0xe0  c_opHigh_contNew
+    M3OP( "cont.bind",         2, any,             d_cc(Compile_ContBind),       d_ఖాళీలు_Op_List ),  // 0xe1  c_opHigh_contBind
+    M3OP( "suspend",           1, any,             d_cc(Compile_Suspend),        d_ఖాళీలు_Op_List ),  // 0xe2  c_opHigh_suspend
+    M3OP( "resume",            1, any,             d_cc(Compile_Resume),         d_ఖాళీలు_Op_List ),  // 0xe3  c_opHigh_resume
+    M3OP( "resume_throw",      2, any,             d_cc(Compile_Resume)   ,    d_ఖాళీలు_Op_List ),  // 0xe4  c_opHigh_resumeThrow
+    M3OP( "resume_throw_ref",  1, any,             d_cc(Compile_Resume)      , d_ఖాళీలు_Op_List ),  // 0xe5  c_opHigh_resumeThrowRef
+    M3OP( "switch",            2, any,             d_cc(Compile_Switch),         d_ఖాళీలు_Op_List ),  // 0xe6  c_opHigh_switch
+#అయితే_ముగింపు
 
-#if d_m3HasAtomics
-    M3OP( "0xFE",            0, c_m3Type_unknown,  d_cc(Compile_ExtendedOpcode), d_emptyOpList ),  // 0xfe  c_opHigh_atomic
-#endif
-    M3OP( "0xFC",            0, c_m3Type_unknown,  d_cc(Compile_ExtendedOpcode), d_emptyOpList ),  // 0xfc  c_opHigh_extended
+#ఒకవేళ d_m3HasAtomics
+    M3OP( "0xFE",            0, c_m3Type_unknown,  d_cc(Compile_ExtendedOpcode), d_ఖాళీలు_Op_List ),  // 0xfe  c_opHigh_atomic
+#అయితే_ముగింపు
+    M3OP( "0xFC",            0, c_m3Type_unknown,  d_cc(Compile_ExtendedOpcode), d_ఖాళీలు_Op_List ),  // 0xfc  c_opHigh_extended
 };
-M3_STATIC_ASSERT (M3_COUNT_OF (c_operationsHigh) == c_opHigh_extended + 1, c_operationsHigh_needs_one_entry_per_c_opHigh);
+M3_STATIC_ASSERT (M3_లెక్క_యొక్క (c_operations_ఎగువ) == c_op_ఎగువ_extended + 1, c_operations_ఎగువ_needs_one_నమోదు_చొప్పున_c_op_ఎగువ);
 
 // clang-format on
 
 
 // Opcodes the spec reserves leave zeroed holes in the tables above: no compiler
 // and no operations. Every implemented op has at least one of the two.
-static inline
+స్థిర అంతఃవరుస
 bool IsImplementedOp (IM3OpInfo i_info)
 {
-    return (i_info->compiler != c_cc_NULL or i_info->operations[0] != NULL);
+    తిరిగి (i_info->compiler != c_cc_NULL or i_info->operations[0] != ఖాళీ);
 }
 
-const u32 c_numOperations   = M3_COUNT_OF(c_operations);
-const u32 c_numOperationsFC = M3_COUNT_OF(c_operationsFC);
+స్థిరరాశి u32 c_అంకె_Operations   = M3_లెక్క_యొక్క(c_operations);
+స్థిరరాశి u32 c_అంకె_Operations_FC = M3_లెక్క_యొక్క(c_operationsFC);
 
 // Maps one of the sparse opcodes above c_waOp_lastCore onto c_operationsHigh,
 // or -1 for anything else in that range.
-static inline
-i32 GetHighOpIndex (m3opcode_t opcode)
+స్థిర అంతఃవరుస
+i32 Get_ఎగువ_Op_సూచీ (m3opcode_t opcode)
 {
-    switch (opcode) {
-#if d_m3HasRefTypes
-    case c_waOp_refNull: return c_opHigh_refNull;
-    case c_waOp_refIsNull: return c_opHigh_refIsNull;
-    case c_waOp_refFunc: return c_opHigh_refFunc;
-#  if d_m3HasTypedRefs
-    case c_waOp_refAsNonNull: return c_opHigh_refAsNonNull;
+    ఎంపిక (opcode) {
+#ఒకవేళ d_m3HasRefTypes
+    స్థితి c_waOp_refNull: తిరిగి c_op_ఎగువ_ref_Null;
+    స్థితి c_waOp_refIsNull: తిరిగి c_op_ఎగువ_ref_Is_Null;
+    స్థితి c_waOp_refFunc: తిరిగి c_op_ఎగువ_ref_Func;
+#  ఒకవేళ d_m3HasTypedRefs
+    స్థితి c_waOp_refAsNonNull: తిరిగి c_op_ఎగువ_ref_As_Non_Null;
 #  endif
-#endif
-#if d_m3HasStackSwitching
-    case c_waOp_contNew: return c_opHigh_contNew;
-    case c_waOp_contBind: return c_opHigh_contBind;
-    case c_waOp_suspend: return c_opHigh_suspend;
-    case c_waOp_resume: return c_opHigh_resume;
-    case c_waOp_resumeThrow: return c_opHigh_resumeThrow;
-    case c_waOp_resumeThrowRef: return c_opHigh_resumeThrowRef;
-    case c_waOp_switch: return c_opHigh_switch;
-#endif
-    case c_waOp_extended: return c_opHigh_extended;
-#if d_m3HasAtomics
-    case c_waOp_atomic: return c_opHigh_atomic;
-#endif
-    default: return -1;
+#అయితే_ముగింపు
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+    స్థితి c_waOp_contNew: తిరిగి c_op_ఎగువ_cont_New;
+    స్థితి c_waOp_contBind: తిరిగి c_op_ఎగువ_cont_Bind;
+    స్థితి c_waOp_suspend: తిరిగి c_op_ఎగువ_suspend;
+    స్థితి c_waOp_resume: తిరిగి c_op_ఎగువ_resume;
+    స్థితి c_waOp_resumeThrow: తిరిగి c_op_ఎగువ_resume_Throw;
+    స్థితి c_waOp_resumeThrowRef: తిరిగి c_op_ఎగువ_resume_Throw_Ref;
+    స్థితి c_waOp_switch: తిరిగి c_op_ఎగువ_switch;
+#అయితే_ముగింపు
+    స్థితి c_waOp_extended: తిరిగి c_op_ఎగువ_extended;
+#ఒకవేళ d_m3HasAtomics
+    స్థితి c_waOp_atomic: తిరిగి c_op_ఎగువ_atomic;
+#అయితే_ముగింపు
+    అప్రమేయ: తిరిగి -1;
     }
 }
 
 IM3OpInfo GetOpInfo (m3opcode_t opcode)
 {
-    IM3OpInfo info = NULL;
+    IM3OpInfo info = ఖాళీ;
 
-    switch (opcode >> 8) {
-    case 0x00:
+    ఎంపిక (opcode >> 8) {
+    స్థితి 0x00:
         // c_operations is indexed by opcode only up to c_waOp_lastCore; past that
         // it holds internal operations (DEBUG builds), unreachable by opcode.
-        if (M3_LIKELY(opcode <= c_waOp_lastCore)) {
+        ఒకవేళ (M3_LIKELY(opcode <= c_wa_Op_చివరి_Core)) {
             info = &c_operations[opcode];
-        } else {
-            i32 high = GetHighOpIndex(opcode);
-            if (high >= 0) {
-                info = &c_operationsHigh[high];
+        } లేకపోతే {
+            i32 ఎగువ = Get_ఎగువ_Op_సూచీ(opcode);
+            ఒకవేళ (ఎగువ >= 0) {
+                info = &c_operations_ఎగువ[ఎగువ];
             }
         }
-        break;
-    case c_waOp_extended:
+        ఆపు;
+    స్థితి c_waOp_extended:
         opcode &= 0xFF;
-        if (M3_LIKELY(opcode <= c_waOp_lastExtended)) {
+        ఒకవేళ (M3_LIKELY(opcode <= c_wa_Op_చివరి_Extended)) {
             info = &c_operationsFC[opcode];
         }
-        break;
-#if d_m3HasAtomics
-    case c_waOp_atomic: {
-        i32 index = GetAtomicInfoIndex(opcode & 0xFF);
-        if (index >= 0) {
+        ఆపు;
+#ఒకవేళ d_m3HasAtomics
+    స్థితి c_waOp_atomic: {
+        i32 index = Get_Atomic_Info_సూచీ(opcode & 0xFF);
+        ఒకవేళ (index >= 0) {
             info = &c_operationsFE[index];
         }
-    } break;
-#endif
+    } ఆపు;
+#అయితే_ముగింపు
     }
 
-    return (info and IsImplementedOp(info)) ? info : NULL;
+    తిరిగి (info and IsImplementedOp(info)) ? info : ఖాళీ;
 }
 
-#if d_m3HasGasMetering
+#ఒకవేళ d_m3HasGasMetering
 
 //----- GAS METERING ------------------------------------------------------------------------------------------------------
 //
@@ -5820,13 +5820,13 @@ IM3OpInfo GetOpInfo (m3opcode_t opcode)
 // reference, bulk memory and exception instructions, which are priced as the
 // nearest thing it does list: a table access as a memory access, an operation
 // over a whole region as memory.grow, a throw as a branch.
-enum {
+గణన {
     c_gasLocal   = 1,          // charged once per declared local, at function entry
     c_gasNominal = 1,          // nop, block, loop, if, const
     c_gasArith   = 45,
-    c_gasShift   = 67,
+    c_gas_జరుపు   = 67,
     c_gasBranch  = 90,
-    c_gasMemSize = 100,
+    c_gas_Mem_కొలత = 100,
     c_gasAccess  = 120,        // a local, global, table or memory access
     c_gasHeavy   = 10000,      // an indirect call, or anything that works over a whole region
     c_gasDivide  = 36000
@@ -5836,156 +5836,156 @@ enum {
 // consecutive charges, which prepays exactly the same amount.
 #  define d_m3MaxSegmentGas   0xFFFFFFFF
 
-static
-u32 GetGasCost (m3opcode_t i_opcode)
+స్థిర
+u32 Get_Gas_ఖర్చు (m3opcode_t i_opcode)
 {
-    switch (i_opcode) {
-    case 0x00:                        // unreachable
-    case 0x01:                        // nop
-    case c_waOp_block:
-    case c_waOp_loop:
-    case c_waOp_if:
-    case c_waOp_tryTable:             // a block that also installs handlers
-    case c_waOp_refNull:              // a constant, by another name
-    case c_waOp_refFunc:
-        return c_gasNominal;
+    ఎంపిక (i_opcode) {
+    స్థితి 0x00:                        // unreachable
+    స్థితి 0x01:                        // nop
+    స్థితి c_wa_Op_ఖండం:
+    స్థితి c_waOp_loop:
+    స్థితి c_waOp_if:
+    స్థితి c_wa_Op_try_పట్టిక:             // a block that also installs handlers
+    స్థితి c_waOp_refNull:              // a constant, by another name
+    స్థితి c_waOp_refFunc:
+        తిరిగి c_gasNominal;
 
-    case c_waOp_end:
-        return 0;                     // the one control instruction the table prices at nothing
+    స్థితి c_wa_Op_చివర:
+        తిరిగి 0;                     // the one control instruction the table prices at nothing
 
-    case c_waOp_else:
-    case c_waOp_branch:
-    case c_waOp_branchIf:
-    case c_waOp_return:
-    case c_waOp_call:
-    case c_waOp_returnCall:
-    case c_waOp_throw:
-    case c_waOp_throwRef:
-        return c_gasBranch;
+    స్థితి c_waOp_else:
+    స్థితి c_waOp_branch:
+    స్థితి c_waOp_branchIf:
+    స్థితి c_waOp_return:
+    స్థితి c_waOp_call:
+    స్థితి c_waOp_returnCall:
+    స్థితి c_waOp_throw:
+    స్థితి c_waOp_throwRef:
+        తిరిగి c_gasBranch;
 
-    case c_waOp_branchTable:
-    case 0x1a:                        // drop
-    case 0x1b:                        // select
-    case c_waOp_selectTyped:
-        return c_gasAccess;
+    స్థితి c_wa_Op_branch_పట్టిక:
+    స్థితి 0x1a:                        // drop
+    స్థితి 0x1b:                        // select
+    స్థితి c_waOp_selectTyped:
+        తిరిగి c_gasAccess;
 
-    case c_waOp_callIndirect:
-    case c_waOp_returnCallIndirect:
-    case c_waOp_callRef:
-    case c_waOp_returnCallRef:
-    case c_waOp_memoryInit:
-    case c_waOp_memoryCopy:
-    case c_waOp_memoryFill:
-    case c_waOp_tableInit:
-    case c_waOp_tableCopy:
-    case c_waOp_tableGrow:
-    case c_waOp_tableFill:
-    case 0x40:                        // memory.grow
-        return c_gasHeavy;
+    స్థితి c_wa_Op_call_పరోక్ష:
+    స్థితి c_wa_Op_return_Call_పరోక్ష:
+    స్థితి c_waOp_callRef:
+    స్థితి c_waOp_returnCallRef:
+    స్థితి c_wa_Op_జ్ఞాపకం_Init:
+    స్థితి c_wa_Op_జ్ఞాపకం_Copy:
+    స్థితి c_wa_Op_జ్ఞాపకం_Fill:
+    స్థితి c_wa_Op_పట్టిక_Init:
+    స్థితి c_wa_Op_పట్టిక_Copy:
+    స్థితి c_wa_Op_పట్టిక_Grow:
+    స్థితి c_wa_Op_పట్టిక_Fill:
+    స్థితి 0x40:                        // memory.grow
+        తిరిగి c_gasHeavy;
 
-    case c_waOp_dataDrop:
-    case c_waOp_elemDrop:
-    case c_waOp_tableSize:
-    case 0x3f:                        // memory.size
-        return c_gasMemSize;
+    స్థితి c_wa_Op_దత్తాంశం_Drop:
+    స్థితి c_waOp_elemDrop:
+    స్థితి c_wa_Op_పట్టిక_కొలత:
+    స్థితి 0x3f:                        // memory.size
+        తిరిగి c_gas_Mem_కొలత;
 
-    case c_waOp_refIsNull:
-    case c_waOp_refAsNonNull:
-        return c_gasArith;
+    స్థితి c_waOp_refIsNull:
+    స్థితి c_waOp_refAsNonNull:
+        తిరిగి c_gasArith;
 
-    default:
-        break;
+    అప్రమేయ:
+        ఆపు;
     }
 
     // The two integer arithmetic runs are priced by position, i32 at 0x6a and
     // i64 at 0x7c, the table giving both the same shape
-    if ((i_opcode >= 0x6a and i_opcode <= 0x78) or (i_opcode >= 0x7c and i_opcode <= 0x8a)) {
+    ఒకవేళ ((i_opcode >= 0x6a and i_opcode <= 0x78) or (i_opcode >= 0x7c and i_opcode <= 0x8a)) {
         // clang-format off
-        static const u16 c_arithmeticCosts [] = {
+        స్థిర స్థిరరాశి u16 c_arithmeticCosts [] = {
             c_gasArith,  c_gasArith,  c_gasArith,                   // add, sub, mul
             c_gasDivide, c_gasDivide, c_gasDivide, c_gasDivide,     // div_s, div_u, rem_s, rem_u
             c_gasArith,  c_gasArith,  c_gasArith,                   // and, or, xor
-            c_gasShift,  c_gasShift,  c_gasShift,                   // shl, shr_s, shr_u
+            c_gas_జరుపు,  c_gas_జరుపు,  c_gas_జరుపు,                   // shl, shr_s, shr_u
             c_gasBranch, c_gasBranch                                // rotl, rotr
         };
         // clang-format on
 
-        return c_arithmeticCosts[i_opcode - (i_opcode <= 0x78 ? 0x6a : 0x7c)];
+        తిరిగి c_arithmeticCosts[i_opcode - (i_opcode <= 0x78 ? 0x6a : 0x7c)];
     }
 
     // the atomic accesses are memory accesses; what waits, wakes or orders is worth
     // as much as an operation over a whole region
-    if (i_opcode >= (c_waOp_atomic << 8) and i_opcode <= ((c_waOp_atomic << 8) | c_waOp_lastAtomic)) {
-        return (i_opcode <= c_waOp_atomicFence) ? c_gasHeavy : c_gasAccess;
+    ఒకవేళ (i_opcode >= (c_waOp_atomic << 8) and i_opcode <= ((c_waOp_atomic << 8) | c_wa_Op_చివరి_Atomic)) {
+        తిరిగి (i_opcode <= c_waOp_atomicFence) ? c_gasHeavy : c_gasAccess;
     }
-    if (i_opcode >= 0x20 and i_opcode <= 0x3e) {
-        return c_gasAccess;           // locals, globals, table accesses, loads and stores
+    ఒకవేళ (i_opcode >= 0x20 and i_opcode <= 0x3e) {
+        తిరిగి c_gasAccess;           // locals, globals, table accesses, loads and stores
     }
-    if (i_opcode >= 0x41 and i_opcode <= 0x44) {
-        return c_gasNominal;          // i32/i64/f32/f64.const
+    ఒకవేళ (i_opcode >= 0x41 and i_opcode <= 0x44) {
+        తిరిగి c_gasNominal;          // i32/i64/f32/f64.const
     }
-    if (i_opcode >= 0x8b and i_opcode <= 0xa6) {
+    ఒకవేళ (i_opcode >= 0x8b and i_opcode <= 0xa6) {
         // the float run, priced as integer arithmetic except where it divides
         bool divides = (i_opcode == 0x91 or i_opcode == 0x95 or     // f32.sqrt, f32.div
                         i_opcode == 0x9f or i_opcode == 0xa3);      // f64.sqrt, f64.div
 
-        return divides ? c_gasDivide : c_gasArith;
+        తిరిగి divides ? c_gasDivide : c_gasArith;
     }
 
     // comparisons and clz/ctz/popcnt (0x45..0x69, 0x79..0x7b), the conversions
     // and sign extensions (0xa7..0xc4), the saturating truncations, the wide
     // arithmetic, and anything else that reaches here: plain arithmetic
-    return c_gasArith;
+    తిరిగి c_gasArith;
 }
 
 // The instructions ewasm's design segments a body at. A segment runs up to and
 // including the next one of these, so every cycle a body can execute - a loop's
 // back edge, a branch out of a block, falling off the end of a function - passes
 // through at least one, and no path can run unmetered however it is entered.
-static
-bool IsGasSegmentEnd (m3opcode_t i_opcode)
+స్థిర
+bool Is_Gas_Segment_చివర (m3opcode_t i_opcode)
 {
-    switch (i_opcode) {
-    case c_waOp_loop:
-    case c_waOp_if:
-    case c_waOp_else:
-    case c_waOp_end:
-    case c_waOp_branch:
-    case c_waOp_branchIf:
-    case c_waOp_branchTable:
-    case c_waOp_return:
-    case c_waOp_returnCall:
-    case c_waOp_returnCallIndirect:
-    case c_waOp_returnCallRef:
-        return true;
-    default:
-        return false;
+    ఎంపిక (i_opcode) {
+    స్థితి c_waOp_loop:
+    స్థితి c_waOp_if:
+    స్థితి c_waOp_else:
+    స్థితి c_wa_Op_చివర:
+    స్థితి c_waOp_branch:
+    స్థితి c_waOp_branchIf:
+    స్థితి c_wa_Op_branch_పట్టిక:
+    స్థితి c_waOp_return:
+    స్థితి c_waOp_returnCall:
+    స్థితి c_wa_Op_return_Call_పరోక్ష:
+    స్థితి c_waOp_returnCallRef:
+        తిరిగి true;
+    అప్రమేయ:
+        తిరిగి false;
     }
 }
 
 // Ends the open segment by writing what it accumulated into the immediate its
 // op_UseGas is still waiting on. Emitting onto a later code page does not move
 // an earlier one, so the reservation is still where it was left.
-static
-void CloseGasSegment (IM3Compilation o)
+స్థిర
+శూన్య CloseGasSegment (IM3Compilation o)
 {
-    if (o->isGasSegmentOpen) {
-        if (o->gasPatch) {
-            u32 cost = o->gasCost;
-            memcpy(o->gasPatch, &cost, sizeof(cost));
+    ఒకవేళ (o->isGasSegmentOpen) {
+        ఒకవేళ (o->gasPatch) {
+            u32 ఖర్చు = o->gas_ఖర్చు;
+            జ్ఞాపకం_నకలు(o->gasPatch, &ఖర్చు, పరిమాణం(ఖర్చు));
 
-            o->gasPatch = NULL;
+            o->gasPatch = ఖాళీ;
         }
-        o->gasCost          = 0;
+        o->gas_ఖర్చు          = 0;
         o->isGasSegmentOpen = false;
     }
 }
 
 // Whether this compilation emits the charges
-static inline
+స్థిర అంతఃవరుస
 bool IsMetering (IM3Compilation o)
 {
-    return o->runtime->gasLimit != 0;
+    తిరిగి o->runtime->gas_హద్దు != 0;
 }
 
 // Charges one instruction to the segment being compiled, opening a segment at
@@ -5996,93 +5996,93 @@ bool IsMetering (IM3Compilation o)
 // if, else - compiles its body from inside its own compiler. The body then opens
 // a segment of its own, inside the loop or the arm, where it is charged on every
 // pass rather than once on the way in.
-static
-M3Result MeterOpcode (IM3Compilation o, m3opcode_t i_opcode)
+స్థిర
+M3_ఫలితం MeterOpcode (IM3Compilation o, m3opcode_t i_opcode)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // constant expressions are not metered: they run once at instantiation,
     // before the module is anything a gas budget was handed out for
-    if (o->function and o->page and IsMetering(o)) {
+    ఒకవేళ (o->function and o->పుట and IsMetering(o)) {
         // only the 0xFC or 0xFE prefix has been read so far; the instruction it names is
         // the LEB128 u32 the compiler is about to take. Peek it without consuming.
         // Anything the tables do not cover leaves the prefix priced on its own,
         // which is moot - the compile fails on it a moment later.
-        if (i_opcode == c_waOp_extended or i_opcode == c_waOp_atomic) {
-            bytes_t peek = o->wasm;
+        ఒకవేళ (i_opcode == c_waOp_extended or i_opcode == c_waOp_atomic) {
+            బైట్లు_t peek = o->wasm;
             u32     sub;
-            u32     last = (i_opcode == c_waOp_atomic) ? c_waOp_lastAtomic : c_waOp_lastExtended;
+            u32     చివరి = (i_opcode == c_waOp_atomic) ? c_wa_Op_చివరి_Atomic : c_wa_Op_చివరి_Extended;
 
-            if (not ReadLEB_u32(&sub, &peek, o->wasmEnd) and sub <= last) {
+            ఒకవేళ (not ReadLEB_u32(&sub, &peek, o->wasm_చివర) and sub <= చివరి) {
                 i_opcode = (m3opcode_t)((i_opcode << 8) | sub);
             }
         }
 
-        u32 cost = GetGasCost(i_opcode);
+        u32 ఖర్చు = Get_Gas_ఖర్చు(i_opcode);
 
-        if (o->isGasSegmentOpen and o->gasCost > d_m3MaxSegmentGas - cost) {
+        ఒకవేళ (o->isGasSegmentOpen and o->gas_ఖర్చు > d_m3MaxSegmentGas - ఖర్చు) {
             CloseGasSegment(o);
         }
 
-        if (not o->isGasSegmentOpen) {
+        ఒకవేళ (not o->isGasSegmentOpen) {
             o->isGasSegmentOpen = true;
 
 _           (EmitOp(o, op_UseGas));
-            o->gasPatch = (void*)GetPagePC(o->page);
+            o->gasPatch = (శూన్య*)Get_పుట_PC(o->పుట);
             EmitConstant32(o, 0);
         }
 
-        o->gasCost += cost;
+        o->gas_ఖర్చు += ఖర్చు;
 
-        if (IsGasSegmentEnd(i_opcode)) {
+        ఒకవేళ (Is_Gas_Segment_చివర(i_opcode)) {
             CloseGasSegment(o);
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasGasMetering
+#అయితే_ముగింపు // d_m3HasGasMetering
 
 
-M3Result CompileBlockStatements (IM3Compilation o)
+M3_ఫలితం Compile_ఖండం_Statements (IM3Compilation o)
 {
-    M3Result result   = m3Err_none;
-    bool     validEnd = false;
+    M3_ఫలితం ఫలితం   = m3Err_none;
+    bool     valid_చివర = false;
 
-    while (o->wasm < o->wasmEnd) {
-#if d_m3EnableOpTracing
-        if (o->numEmits) {
-            EmitOp(o, op_DumpStack);
-            EmitConstant32(o, o->numOpcodes);
-            EmitConstant32(o, GetMaxUsedSlotPlusOne(o));
-            EmitPointer(o, o->function);
+    అయితే (o->wasm < o->wasm_చివర) {
+#ఒకవేళ d_m3EnableOpTracing
+        ఒకవేళ (o->అంకె_Emits) {
+            EmitOp(o, op_Dump_దొంతర);
+            EmitConstant32(o, o->అంకె_Opcodes);
+            EmitConstant32(o, Get_Max_వాడిన_స్థానం_Plus_One(o));
+            Emit_సూచిక(o, o->function);
 
-            o->numEmits = 0;
+            o->అంకె_Emits = 0;
         }
-#endif
+#అయితే_ముగింపు
 
         m3opcode_t opcode;
-        o->lastOpcodeStart = o->wasm;
-_       (Read_opcode(&opcode, &o->wasm, o->wasmEnd));
+        o->చివరి_Opcode_ప్రారంభం = o->wasm;
+_       (Read_opcode(&opcode, &o->wasm, o->wasm_చివర));
         log_opcode(o, opcode);
 
         // Restrict opcodes when evaluating expressions
-        if (M3_UNLIKELY(not o->function)) {
+        ఒకవేళ (M3_UNLIKELY(not o->function)) {
             // clang-format off
-            switch (opcode) {
-            case c_waOp_i32_const: case c_waOp_i64_const:
-            case c_waOp_f32_const: case c_waOp_f64_const:
-            case c_waOp_getGlobal: case c_waOp_end:
-#if d_m3HasRefTypes
-            case c_waOp_refNull:   case c_waOp_refFunc:
-#endif
-#if d_m3HasExtendedConst
-            case c_waOp_i32_add:   case c_waOp_i32_sub:   case c_waOp_i32_mul:
-            case c_waOp_i64_add:   case c_waOp_i64_sub:   case c_waOp_i64_mul:
-#endif
-                break;
-            default:
+            ఎంపిక (opcode) {
+            స్థితి c_waOp_i32_const: స్థితి c_waOp_i64_const:
+            స్థితి c_waOp_f32_const: స్థితి c_waOp_f64_const:
+            స్థితి c_waOp_getGlobal: స్థితి c_wa_Op_చివర:
+#ఒకవేళ d_m3HasRefTypes
+            స్థితి c_waOp_refNull:   స్థితి c_waOp_refFunc:
+#అయితే_ముగింపు
+#ఒకవేళ d_m3HasExtendedConst
+            స్థితి c_wa_Op_i32_కూడు:   స్థితి c_waOp_i32_sub:   స్థితి c_waOp_i32_mul:
+            స్థితి c_wa_Op_i64_కూడు:   స్థితి c_waOp_i64_sub:   స్థితి c_waOp_i64_mul:
+#అయితే_ముగింపు
+                ఆపు;
+            అప్రమేయ:
                 _throw(m3Err_restrictedOpcode);
             }
             // clang-format on
@@ -6090,74 +6090,74 @@ _       (Read_opcode(&opcode, &o->wasm, o->wasmEnd));
 
         IM3OpInfo opinfo = GetOpInfo(opcode);
 
-        if (M3_UNLIKELY(opinfo == NULL)) {
+        ఒకవేళ (M3_UNLIKELY(opinfo == ఖాళీ)) {
             _throw(ErrorCompile(m3Err_unknownOpcode, o, "opcode '%x' not available", opcode));
         }
 
-#if d_m3HasGasMetering
+#ఒకవేళ d_m3HasGasMetering
 _       (MeterOpcode(o, opcode));
-#endif
+#అయితే_ముగింపు
 
-        if (opinfo->compiler != c_cc_NULL) {
+        ఒకవేళ (opinfo->compiler != c_cc_NULL) {
 _           ((*GetCompiler(opinfo))(o, opcode))
-        } else {
+        } లేకపోతే {
 _           (Compile_Operator(o, opcode));
         }
 
-        o->previousOpcode = opcode;
+        o->మునుపటి_Opcode = opcode;
 
-        if (opcode == c_waOp_else) {
-            _throwif(m3Err_wasmMalformed, o->block.opcode != c_waOp_if);
-            validEnd = true;
-            break;
-        } else if (opcode == c_waOp_end) {
-            validEnd = true;
-            break;
+        ఒకవేళ (opcode == c_waOp_else) {
+            _throwif(m3Err_wasmMalformed, o->ఖండం.opcode != c_waOp_if);
+            valid_చివర = true;
+            ఆపు;
+        } లేకపోతే ఒకవేళ (opcode == c_wa_Op_చివర) {
+            valid_చివర = true;
+            ఆపు;
         }
     }
-    _throwif(m3Err_wasmMalformed, not validEnd);
+    _throwif(m3Err_wasmMalformed, not valid_చివర);
 
 _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
-static
-M3Result PushBlockResults (IM3Compilation o)
+స్థిర
+M3_ఫలితం నెట్టు_ఖండం_Results (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u16 numResults = GetFuncTypeNumResults(o->block.type);
+    u16 అంకె_Results = Get_Func_Type_అంకె_Results(o->ఖండం.type);
 
-    for (u16 i = 0; i < numResults; ++i) {
-        m3type_t type = GetFuncTypeResultType(o->block.type, i);
+    కొరకు (u16 i = 0; i < అంకె_Results; ++i) {
+        m3type_t type = Get_Func_Type_ఫలితం_Type(o->ఖండం.type, i);
 
-        if (i == numResults - 1 and IsFpType(type)) {
-_           (PushRegister(o, type));
-        } else {
-_           (PushAllocatedSlot(o, type));
+        ఒకవేళ (i == అంకె_Results - 1 and IsFpType(type)) {
+_           (నెట్టు_రిజిస్టరు(o, type));
+        } లేకపోతే {
+_           (నెట్టు_Allocated_స్థానం(o, type));
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result CompileBlock (IM3Compilation o, IM3FuncType i_blockType, m3opcode_t i_blockOpcode)
+M3_ఫలితం Compile_ఖండం (IM3Compilation o, IM3FuncType i_ఖండం_Type, m3opcode_t i_ఖండం_Opcode)
 {
-                                                                                        d_m3Assert (not IsRegisterAllocated (o, 0));
-                                                                                        d_m3Assert (not IsRegisterAllocated (o, 1));
+                                                                                        d_m3Assert (not Is_రిజిస్టరు_Allocated (o, 0));
+                                                                                        d_m3Assert (not Is_రిజిస్టరు_Allocated (o, 1));
     InvalidateFold(o);
 
-    M3CompilationScope  outerScope = o->block;
-    M3CompilationScope* block      = &o->block;
+    M3CompilationScope  outerScope = o->ఖండం;
+    M3CompilationScope* ఖండం      = &o->ఖండం;
 
-    block->outer   = &outerScope;
-    block->pc      = GetPagePC(o->page);
-    block->patches = NULL;
-    block->type    = i_blockType;
-    block->opcode  = i_blockOpcode;
-    block->depth++;
-    block->snapshotBlock = 0;
+    ఖండం->outer   = &outerScope;
+    ఖండం->pc      = Get_పుట_PC(o->పుట);
+    ఖండం->patches = ఖాళీ;
+    ఖండం->type    = i_ఖండం_Type;
+    ఖండం->opcode  = i_ఖండం_Opcode;
+    ఖండం->లోతు++;
+    ఖండం->snapshot_ఖండం = 0;
 
     /*
      The block stack frame is a little strange but for good reasons.  Because blocks need to be restarted to
@@ -6180,424 +6180,424 @@ M3Result CompileBlock (IM3Compilation o, IM3FuncType i_blockType, m3opcode_t i_b
     */
 
 _try {
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
     // op_Loop's frame records the body, which is also the loop's identity;
     // op_TryTable's records its clause table, two words a clause back from it
-    if (i_blockOpcode == c_waOp_loop) {
-_       (RecordBlockStart(o, i_blockOpcode, block->pc, 0));
+    ఒకవేళ (i_ఖండం_Opcode == c_waOp_loop) {
+_       (రికార్డు_ఖండం_ప్రారంభం(o, i_ఖండం_Opcode, ఖండం->pc, 0));
     }
-#  if d_m3HasExceptionHandling
-    else if (i_blockOpcode == c_waOp_tryTable) {
-_       (RecordBlockStart(o, i_blockOpcode, block->pc - 2 * o->numTryClauses, o->numTryClauses));
+#  ఒకవేళ d_m3HasExceptionHandling
+    లేకపోతే ఒకవేళ (i_ఖండం_Opcode == c_wa_Op_try_పట్టిక) {
+_       (రికార్డు_ఖండం_ప్రారంభం(o, i_ఖండం_Opcode, ఖండం->pc - 2 * o->అంకె_Try_Clauses, o->అంకె_Try_Clauses));
     }
 #  endif
-#endif
+#అయితే_ముగింపు
 
     // validate and dealloc params ----------------------------
 
-    u16 stackIndex = o->stackIndex;
+    u16 దొంతర_సూచీ = o->దొంతర_సూచీ;
 
-    u16 numParams = GetFuncTypeNumParams(i_blockType);
+    u16 అంకె_Params = Get_Func_Type_అంకె_Params(i_ఖండం_Type);
 
-    if (i_blockOpcode != c_waOp_else) {
-        for (u16 i = 0; i < numParams; ++i) {
-            m3type_t type = GetFuncTypeParamType(i_blockType, numParams - 1 - i);
-_           (PopType(o, type));
+    ఒకవేళ (i_ఖండం_Opcode != c_waOp_else) {
+        కొరకు (u16 i = 0; i < అంకె_Params; ++i) {
+            m3type_t type = GetFuncTypeParamType(i_ఖండం_Type, అంకె_Params - 1 - i);
+_           (తీయి_Type(o, type));
         }
-    } else {
-        if (IsStackPolymorphic(o) && o->block.blockStackIndex + numParams > o->stackIndex) {
-            o->stackIndex = o->block.blockStackIndex;
-        } else {
-            o->stackIndex -= numParams;
+    } లేకపోతే {
+        ఒకవేళ (Is_దొంతర_Polymorphic(o) && o->ఖండం.ఖండం_దొంతర_సూచీ + అంకె_Params > o->దొంతర_సూచీ) {
+            o->దొంతర_సూచీ = o->ఖండం.ఖండం_దొంతర_సూచీ;
+        } లేకపోతే {
+            o->దొంతర_సూచీ -= అంకె_Params;
         }
     }
 
-    u16 paramIndex        = o->stackIndex;
-    block->exitStackIndex = paramIndex; // consume the params at block exit
+    u16 param_సూచీ        = o->దొంతర_సూచీ;
+    ఖండం->exit_దొంతర_సూచీ = param_సూచీ; // consume the params at block exit
 
     // keep copies of param slots in the stack
-    o->stackIndex = stackIndex;
+    o->దొంతర_సూచీ = దొంతర_సూచీ;
 
     // find slots for the results ----------------------------
-_   (PushBlockResults(o));
+_   (నెట్టు_ఖండం_Results(o));
 
-    stackIndex = o->stackIndex;
+    దొంతర_సూచీ = o->దొంతర_సూచీ;
 
     // dealloc but keep record of the result slots in the stack
-    u16 numResults = GetFuncTypeNumResults(i_blockType);
-    while (numResults--) {
-        Pop(o);
+    u16 అంకె_Results = Get_Func_Type_అంకె_Results(i_ఖండం_Type);
+    అయితే (అంకె_Results--) {
+        తీయి(o);
     }
 
-    block->blockStackIndex = o->stackIndex = stackIndex;
+    ఖండం->ఖండం_దొంతర_సూచీ = o->దొంతర_సూచీ = దొంతర_సూచీ;
 
     // push the params back onto the stack -------------------
-    for (u16 i = 0; i < numParams; ++i) {
-        m3type_t type = GetFuncTypeParamType(i_blockType, i);
+    కొరకు (u16 i = 0; i < అంకె_Params; ++i) {
+        m3type_t type = GetFuncTypeParamType(i_ఖండం_Type, i);
 
-        u16 slot = GetSlotForStackIndex(o, paramIndex + i);
-        Push(o, type, slot);
+        u16 స్థానం = Get_స్థానం_For_దొంతర_సూచీ(o, param_సూచీ + i);
+        నెట్టు(o, type, స్థానం);
 
-        if (slot >= o->slotFirstDynamicIndex && slot != c_slotUnused) {
-_           (MarkSlotsAllocatedByType(o, slot, type));
+        ఒకవేళ (స్థానం >= o->స్థానం_మొదటి_Dynamic_సూచీ && స్థానం != c_స్థానం_వాడని) {
+_           (MarkSlotsAllocatedByType(o, స్థానం, type));
         }
     }
 
     //--------------------------------------------------------
 
-#if d_m3HasExceptionHandling
+#ఒకవేళ d_m3HasExceptionHandling
     // with the scope pushed and the params back on, a catch label of 0 names
     // this block - which is what the proposal says it should
-    if (i_blockOpcode == c_waOp_tryTable) {
+    ఒకవేళ (i_ఖండం_Opcode == c_wa_Op_try_పట్టిక) {
 _       (EmitCatchStubs(o));
     }
-#endif
+#అయితే_ముగింపు
 
-_   (CompileBlockStatements(o));
+_   (Compile_ఖండం_Statements(o));
 
-_   (ValidateBlockEnd(o));
+_   (Validate_ఖండం_చివర(o));
 
-    if (o->function)    // skip for expressions
+    ఒకవేళ (o->function)    // skip for expressions
     {
-        if (not IsStackPolymorphic(o)) {
-_           (ResolveBlockResults(o, &o->block, /* isBranch: */ false));
+        ఒకవేళ (not Is_దొంతర_Polymorphic(o)) {
+_           (Resolve_ఖండం_Results(o, &o->ఖండం, /* isBranch: */ false));
         }
 
-#if d_m3HasExceptionHandling
+#ఒకవేళ d_m3HasExceptionHandling
         // Falling out of the end of a try region retires its handler. This sits
         // ahead of PatchBranches so branches into the block's exit land past it:
         // a branch out of the try popped its own handler at the branch site.
-        if (i_blockOpcode == c_waOp_tryTable) {
-_           (EmitOp(o, op_PopHandlers));
+        ఒకవేళ (i_ఖండం_Opcode == c_wa_Op_try_పట్టిక) {
+_           (EmitOp(o, op_తీయి_Handlers));
             EmitConstant32(o, 1);
         }
-#endif
+#అయితే_ముగింపు
 
-_       (UnwindBlockStack(o))
+_       (Unwind_ఖండం_దొంతర(o))
 
-        if (not ((i_blockOpcode == c_waOp_if and numResults) or o->previousOpcode == c_waOp_else)) {
-            o->stackIndex = o->block.exitStackIndex;
-_           (PushBlockResults(o));
+        ఒకవేళ (not ((i_ఖండం_Opcode == c_waOp_if and అంకె_Results) or o->మునుపటి_Opcode == c_waOp_else)) {
+            o->దొంతర_సూచీ = o->ఖండం.exit_దొంతర_సూచీ;
+_           (నెట్టు_ఖండం_Results(o));
         }
     }
 
     PatchBranches(o);
 
-#if d_m3HasSnapshots
-    RecordBlockEnd(o);
+#ఒకవేళ d_m3HasSnapshots
+    రికార్డు_ఖండం_చివర(o);
 
-    if (o->localInitDepth) {
-        for (u32 i = 0; i < o->snapshotMap->numLocals; ++i) {
-            if (o->localInitDepth[i] >= (u32)o->block.depth) {
-                o->localInitDepth[i] = UINT32_MAX;
+    ఒకవేళ (o->local_Init_లోతు) {
+        కొరకు (u32 i = 0; i < o->snapshotMap->అంకె_Locals; ++i) {
+            ఒకవేళ (o->local_Init_లోతు[i] >= (u32)o->ఖండం.లోతు) {
+                o->local_Init_లోతు[i] = UINT32_MAX;
             }
         }
     }
-#endif
-    o->block = outerScope;
+#అయితే_ముగింపు
+    o->ఖండం = outerScope;
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result CompileLocals (IM3Compilation o)
+స్థిర
+M3_ఫలితం CompileLocals (IM3Compilation o)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    u32 numLocals = 0;
-    u32 numLocalBlocks;
-_   (ReadLEB_u32(&numLocalBlocks, &o->wasm, o->wasmEnd));
+    u32 అంకె_Locals = 0;
+    u32 అంకె_Local_ఖండాలు;
+_   (ReadLEB_u32(&అంకె_Local_ఖండాలు, &o->wasm, o->wasm_చివర));
 
-    for (u32 l = 0; l < numLocalBlocks; ++l) {
-        u32      varCount;
+    కొరకు (u32 l = 0; l < అంకె_Local_ఖండాలు; ++l) {
+        u32      var_లెక్క;
         m3type_t localType;
 
-_       (ReadLEB_u32(&varCount, &o->wasm, o->wasmEnd));
-_       (ParseValueType(o->module, &localType, &o->wasm, o->wasmEnd));
-        numLocals += varCount;                                                          m3log (compile, "pushing locals. count: %d; type: %s", varCount, c_waTypes [BaseTypeOf(localType)]);
-        while (varCount--) {
-_           (PushAllocatedSlot(o, localType));
+_       (ReadLEB_u32(&var_లెక్క, &o->wasm, o->wasm_చివర));
+_       (Parse_విలువ_Type(o->module, &localType, &o->wasm, o->wasm_చివర));
+        అంకె_Locals += var_లెక్క;                                                          m3log (compile, "pushing locals. count: %d; type: %s", var_లెక్క, c_waTypes [పునాది_Type_యొక్క(localType)]);
+        అయితే (var_లెక్క--) {
+_           (నెట్టు_Allocated_స్థానం(o, localType));
         }
     }
 
-    if (o->function) {
-        o->function->numLocals = numLocals;
+    ఒకవేళ (o->function) {
+        o->function->అంకె_Locals = అంకె_Locals;
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-static
-M3Result ReserveConstants (IM3Compilation o)
+స్థిర
+M3_ఫలితం ReserveConstants (IM3Compilation o)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // in the interest of speed, this blindly scans the Wasm code looking for any byte
     // that looks like an const opcode.
-    u16 numConstantSlots = 0;
+    u16 అంకె_Constant_Slots = 0;
 
-    bytes_t wa = o->wasm;
-    while (wa < o->wasmEnd) {
-        u8  code     = *wa++;
-        u16 addSlots = 0;
+    బైట్లు_t wa = o->wasm;
+    అయితే (wa < o->wasm_చివర) {
+        u8  సంకేతం_2     = *wa++;
+        u16 కూడు_Slots = 0;
 
-        if (code == c_waOp_i32_const or code == c_waOp_f32_const) {
-            addSlots = 1;
-        } else if (code == c_waOp_i64_const or code == c_waOp_f64_const) {
-            addSlots = GetTypeNumSlots(c_m3Type_i64);
+        ఒకవేళ (సంకేతం_2 == c_waOp_i32_const or సంకేతం_2 == c_waOp_f32_const) {
+            కూడు_Slots = 1;
+        } లేకపోతే ఒకవేళ (సంకేతం_2 == c_waOp_i64_const or సంకేతం_2 == c_waOp_f64_const) {
+            కూడు_Slots = Get_Type_అంకె_Slots(c_m3Type_i64);
         }
 
-        if (numConstantSlots + addSlots >= d_m3MaxConstantTableSize) {
-            break;
+        ఒకవేళ (అంకె_Constant_Slots + కూడు_Slots >= d_m3_Max_Constant_పట్టిక_కొలత) {
+            ఆపు;
         }
 
-        numConstantSlots += addSlots;
+        అంకె_Constant_Slots += కూడు_Slots;
     }
 
     // if constants overflow their reserved stack space, the compiler simply emits op_Const
     // operations as needed. Compiled expressions (global inits) don't pass through this
     // ReserveConstants function and thus always produce inline constants.
 
-    AlignSlotToType(&numConstantSlots, c_m3Type_i64);                                           m3log (compile, "reserved constant slots: %d", numConstantSlots);
+    Align_స్థానం_గమ్యం_Type(&అంకె_Constant_Slots, c_m3Type_i64);                                           m3log (compile, "reserved constant slots: %d", అంకె_Constant_Slots);
 
-    o->slotFirstDynamicIndex = o->slotFirstConstIndex + numConstantSlots;
+    o->స్థానం_మొదటి_Dynamic_సూచీ = o->స్థానం_మొదటి_Const_సూచీ + అంకె_Constant_Slots;
 
-    if (o->slotFirstDynamicIndex >= d_m3MaxFunctionSlots) {
-        _throw(m3Err_functionStackOverflow);
+    ఒకవేళ (o->స్థానం_మొదటి_Dynamic_సూచీ >= d_m3MaxFunctionSlots) {
+        _throw(m3_Err_function_దొంతర_అధికప్రవాహం);
     }
 
     _catch:
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
 // A constant expression compiles like a miniature function root block: no args,
 // no locals and a single result, which Compile_End copies down into slot 0 for
 // EvaluateExpression to read back.
-M3Result CompileExpression (IM3Compilation o, IM3FuncType i_resultType)
+M3_ఫలితం Compile_వ్యక్తీకరణ (IM3Compilation o, IM3FuncType i_ఫలితం_Type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    o->block.type = i_resultType;
+    o->ఖండం.type = i_ఫలితం_Type;
 
-    u16 numRetSlots = GetFuncTypeNumResults(i_resultType) * c_ioSlotCount;
+    u16 అంకె_Ret_Slots = Get_Func_Type_అంకె_Results(i_ఫలితం_Type) * c_io_స్థానం_లెక్క;
 
-    for (u16 i = 0; i < numRetSlots; ++i) {
-        MarkSlotAllocated(o, i);
+    కొరకు (u16 i = 0; i < అంకె_Ret_Slots; ++i) {
+        Mark_స్థానం_Allocated(o, i);
     }
 
-    o->maxStackSlots = o->slotMaxAllocatedIndexPlusOne = o->slotFirstDynamicIndex = numRetSlots;
+    o->max_దొంతర_Slots = o->స్థానం_Max_Allocated_సూచీ_Plus_One = o->స్థానం_మొదటి_Dynamic_సూచీ = అంకె_Ret_Slots;
 
-_   (CompileBlockStatements(o));
+_   (Compile_ఖండం_Statements(o));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result CompileFunction (IM3Function io_function)
+M3_ఫలితం CompileFunction (IM3Function io_function)
 {
-    if (!io_function->wasm) {
+    ఒకవేళ (!io_function->wasm) {
         // An import. Either linking pointed it at another module's function -
         // in which case that one carries the body - or a host function was
         // bound to it, or it is simply unsatisfied.
         IM3Function impl = Function_Implementation(io_function);
 
-        if (impl != io_function) {
-            if (not impl->compiled) {
-                M3Result r = CompileFunction(impl);
-                if (r) {
-                    return r;
+        ఒకవేళ (impl != io_function) {
+            ఒకవేళ (not impl->compiled) {
+                M3_ఫలితం r = CompileFunction(impl);
+                ఒకవేళ (r) {
+                    తిరిగి r;
                 }
             }
 
             // keep the placeholder callable too, for anything still holding it
             io_function->compiled = impl->compiled;
-            return m3Err_none;
+            తిరిగి m3Err_none;
         }
 
-        if (io_function->compiled) {
-            return m3Err_none;
+        ఒకవేళ (io_function->compiled) {
+            తిరిగి m3Err_none;
         }
 
-        return ErrorModule(m3Err_functionImportMissing, io_function->module, "'%s.%s'",
+        తిరిగి ErrorModule(m3Err_functionImportMissing, io_function->module, "'%s.%s'",
                            GetFunctionImportModuleName(io_function),
                            m3_GetFunctionName(io_function));
     }
 
-#if d_m3EnableValidation
-    if (not io_function->module->runtime->skipValidation) {
-        M3Result vr = ValidateFunction(io_function);
-        if (vr) {
-            return vr;
+#ఒకవేళ d_m3EnableValidation
+    ఒకవేళ (not io_function->module->runtime->skipValidation) {
+        M3_ఫలితం vr = ValidateFunction(io_function);
+        ఒకవేళ (vr) {
+            తిరిగి vr;
         }
     }
-#endif
+#అయితే_ముగింపు
 
     IM3FuncType funcType = io_function->funcType;                   m3log (compile, "compiling: [%d] %s %s; wasm-size: %d",
-                                                                        io_function->index, m3_GetFunctionName (io_function), SPrintFuncTypeSignature (funcType), (u32) (io_function->wasmEnd - io_function->wasm));
+                                                                        io_function->index, m3_GetFunctionName (io_function), SPrintFuncTypeSignature (funcType), (u32) (io_function->wasm_చివర - io_function->wasm));
     IM3Runtime runtime = io_function->module->runtime;
 
-    IM3Compilation o = &runtime->compilation;                       d_m3Assert (d_m3MaxFunctionSlots >= d_m3MaxFunctionStackHeight * (d_m3Use32BitSlots + 1))  // need twice as many slots in 32-bit mode
-    memset(o, 0x0, sizeof(M3Compilation));
+    IM3Compilation o = &runtime->compilation;                       d_m3Assert (d_m3MaxFunctionSlots >= d_m3_Max_Function_దొంతర_ఎత్తు * (d_m3_Use32_బిట్టు_Slots + 1))  // need twice as many slots in 32-bit mode
+    memset(o, 0x0, పరిమాణం(M3Compilation));
 
     o->runtime    = runtime;
     o->module     = io_function->module;
     o->function   = io_function;
     o->wasm       = io_function->wasm;
-    o->wasmEnd    = io_function->wasmEnd;
-    o->block.type = funcType;
+    o->wasm_చివర    = io_function->wasm_చివర;
+    o->ఖండం.type = funcType;
 
 _try {
     // skip over code size. the end was already calculated during parse phase
-    u32 size;
-_   (ReadLEB_u32(&size, &o->wasm, o->wasmEnd));                     d_m3Assert (size == (o->wasmEnd - o->wasm))
+    u32 కొలత;
+_   (ReadLEB_u32(&కొలత, &o->wasm, o->wasm_చివర));                     d_m3Assert (కొలత == (o->wasm_చివర - o->wasm))
 
-#if d_m3HasSnapshots
-    o->bodyStart = o->wasm;
-#endif
+#ఒకవేళ d_m3HasSnapshots
+    o->body_ప్రారంభం = o->wasm;
+#అయితే_ముగింపు
 
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
     // only code that can be suspended can end up in a snapshot
-    if (runtime->isSuspendable) {
+    ఒకవేళ (runtime->isSuspendable) {
         o->snapshotMap = m3_AllocStruct(M3SnapshotMap);
         _throwifnull(o->snapshotMap);
     }
-#endif
+#అయితే_ముగింపు
 
-_   (AcquireCompilationCodePage(o, &o->page));
+_   (Acquire_Compilation_సంకేతం_పుట(o, &o->పుట));
 
-    pc_t pc = GetPagePC(o->page);
+    pc_t pc = Get_పుట_PC(o->పుట);
 
-    u16 numRetSlots = GetFunctionNumReturns(o->function) * c_ioSlotCount;
+    u16 అంకె_Ret_Slots = Get_Function_అంకె_Returns(o->function) * c_io_స్థానం_లెక్క;
 
-    for (u16 i = 0; i < numRetSlots; ++i) {
-        MarkSlotAllocated(o, i);
+    కొరకు (u16 i = 0; i < అంకె_Ret_Slots; ++i) {
+        Mark_స్థానం_Allocated(o, i);
     }
 
-    o->function->numRetSlots = o->slotFirstDynamicIndex = numRetSlots;
+    o->function->అంకె_Ret_Slots = o->స్థానం_మొదటి_Dynamic_సూచీ = అంకె_Ret_Slots;
 
-    u16 numArgs = GetFunctionNumArgs(o->function);
+    u16 అంకె_వాదనలు = Get_Function_అంకె_వాదనలు(o->function);
 
     // push the arg types to the type stack
-    for (u16 i = 0; i < numArgs; ++i) {
+    కొరకు (u16 i = 0; i < అంకె_వాదనలు; ++i) {
         m3type_t type = GetFunctionArgType(o->function, i);
-_       (PushAllocatedSlot(o, type));
+_       (నెట్టు_Allocated_స్థానం(o, type));
 
         // prevent allocator fill-in
-        o->slotFirstDynamicIndex += c_ioSlotCount;
+        o->స్థానం_మొదటి_Dynamic_సూచీ += c_io_స్థానం_లెక్క;
     }
 
-    o->slotMaxAllocatedIndexPlusOne = o->function->numRetAndArgSlots = o->slotFirstLocalIndex = o->slotFirstDynamicIndex;
+    o->స్థానం_Max_Allocated_సూచీ_Plus_One = o->function->అంకె_Ret_And_Arg_Slots = o->స్థానం_మొదటి_Local_సూచీ = o->స్థానం_మొదటి_Dynamic_సూచీ;
 
 _   (CompileLocals(o));
 
-#if d_m3HasSnapshots
-_   (RecordLocals(o));
-#endif
+#ఒకవేళ d_m3HasSnapshots
+_   (రికార్డు_Locals(o));
+#అయితే_ముగింపు
 
-#if d_m3HasGasMetering
+#ఒకవేళ d_m3HasGasMetering
     // the table charges for a function's locals as well as for its instructions.
     // op_Entry is what sets them up, so the charge rides on the body's first
     // segment, which is emitted right after it
-    o->gasCost = o->function->numLocals * c_gasLocal;
-#endif
+    o->gas_ఖర్చు = o->function->అంకె_Locals * c_gasLocal;
+#అయితే_ముగింపు
 
-    u16 maxSlot = GetMaxUsedSlotPlusOne(o);
+    u16 max_స్థానం = Get_Max_వాడిన_స్థానం_Plus_One(o);
 
-    o->function->numLocalBytes = (maxSlot - o->slotFirstLocalIndex) * sizeof(m3slot_t);
+    o->function->అంకె_Local_బైట్లు = (max_స్థానం - o->స్థానం_మొదటి_Local_సూచీ) * పరిమాణం(m3slot_t);
 
-    o->slotFirstConstIndex = o->slotMaxConstIndex = maxSlot;
+    o->స్థానం_మొదటి_Const_సూచీ = o->స్థానం_Max_Const_సూచీ = max_స్థానం;
 
     // ReserveConstants initializes o->firstDynamicSlotNumber
 _   (ReserveConstants(o));
 
     // start tracking the max stack used (Push() also updates this value) so that op_Entry can precisely detect stack overflow
-    o->maxStackSlots = o->slotMaxAllocatedIndexPlusOne = o->slotFirstDynamicIndex;
+    o->max_దొంతర_Slots = o->స్థానం_Max_Allocated_సూచీ_Plus_One = o->స్థానం_మొదటి_Dynamic_సూచీ;
 
-    o->block.blockStackIndex = o->stackFirstDynamicIndex = o->stackIndex;                           m3log (compile, "start stack index: %u; max stack slots: %u",
-                                                                                                           (u32) o->stackFirstDynamicIndex, (u32) o->maxStackSlots);
-#if d_m3HasStackSwitching
+    o->ఖండం.ఖండం_దొంతర_సూచీ = o->దొంతర_మొదటి_Dynamic_సూచీ = o->దొంతర_సూచీ;                           m3log (compile, "start stack index: %u; max stack slots: %u",
+                                                                                                           (u32) o->దొంతర_మొదటి_Dynamic_సూచీ, (u32) o->max_దొంతర_Slots);
+#ఒకవేళ d_m3_Has_దొంతర_Switching
     // A suspendable body opens by checking for a pause request, once its frame
     // is set up. The pause point's offset is the first instruction's, just past
     // the local declarations - the body's end, when it has no other.
-    if (runtime->isSuspendable) {
-        o->lastOpcodeStart = o->wasm;
-#  if d_m3EntryKeepsFrame
-_       (EmitOp(o, op_Entry));
-        EmitPointer(o, io_function);
-_       (EmitOp(o, op_EntryCheck));
-_       (RecordSafePoint(o, safepoint_entry, 1, 0, 0, NULL));
-#  else
-_       (EmitOp(o, op_Entry_Suspendable));
-        EmitPointer(o, io_function);
-_       (RecordSafePoint(o, safepoint_entry, 0, 0, 0, NULL));
+    ఒకవేళ (runtime->isSuspendable) {
+        o->చివరి_Opcode_ప్రారంభం = o->wasm;
+#  ఒకవేళ d_m3_నమోదు_Keeps_చట్రం
+_       (EmitOp(o, op_నమోదు));
+        Emit_సూచిక(o, io_function);
+_       (EmitOp(o, op_నమోదు_Check));
+_       (రికార్డు_సురక్షిత_బిందువు(o, safepoint_నమోదు, 1, 0, 0, ఖాళీ));
+#  లేకపోతే
+_       (EmitOp(o, op_నమోదు_Suspendable));
+        Emit_సూచిక(o, io_function);
+_       (రికార్డు_సురక్షిత_బిందువు(o, safepoint_నమోదు, 0, 0, 0, ఖాళీ));
 #  endif
-    } else
-#endif
+    } లేకపోతే
+#అయితే_ముగింపు
     {
-_       (EmitOp(o, op_Entry));
-        EmitPointer(o, io_function);
+_       (EmitOp(o, op_నమోదు));
+        Emit_సూచిక(o, io_function);
     }
 
-_   (CompileBlockStatements(o));
+_   (Compile_ఖండం_Statements(o));
 
-    _throwif(m3Err_wasmMalformed, o->previousOpcode != c_waOp_end);
+    _throwif(m3Err_wasmMalformed, o->మునుపటి_Opcode != c_wa_Op_చివర);
 
     io_function->compiled      = pc;
-    io_function->maxStackSlots = o->maxStackSlots;
+    io_function->max_దొంతర_Slots = o->max_దొంతర_Slots;
 
-    u16 numConstantSlots = o->slotMaxConstIndex - o->slotFirstConstIndex;                           m3log (compile, "unique constant slots: %u; unused slots: %u",
-                                                                                                           numConstantSlots, o->slotFirstDynamicIndex - o->slotMaxConstIndex);
-    io_function->numConstantBytes = numConstantSlots * sizeof(m3slot_t);
+    u16 అంకె_Constant_Slots = o->స్థానం_Max_Const_సూచీ - o->స్థానం_మొదటి_Const_సూచీ;                           m3log (compile, "unique constant slots: %u; unused slots: %u",
+                                                                                                           అంకె_Constant_Slots, o->స్థానం_మొదటి_Dynamic_సూచీ - o->స్థానం_Max_Const_సూచీ);
+    io_function->అంకె_Constant_బైట్లు = అంకె_Constant_Slots * పరిమాణం(m3slot_t);
 
-    if (numConstantSlots) {
-        io_function->constants = m3_CopyMem((cbytes_t)o->constants, io_function->numConstantBytes);
+    ఒకవేళ (అంకె_Constant_Slots) {
+        io_function->constants = m3_CopyMem((cbytes_t)o->constants, io_function->అంకె_Constant_బైట్లు);
         _throwifnull(io_function->constants);
     }
 
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
     io_function->snapshotMap = o->snapshotMap;
-    o->snapshotMap           = NULL;
-#endif
+    o->snapshotMap           = ఖాళీ;
+#అయితే_ముగింపు
 
 } _catch:
 
-    ReleaseCompilationCodePage(o);
+    Release_Compilation_సంకేతం_పుట(o);
 
-#if d_m3HasSnapshots
+#ఒకవేళ d_m3HasSnapshots
     SnapshotMap_Free(o->snapshotMap);
-    o->snapshotMap = NULL;
-    m3_Free(o->localInitDepth);
-#endif
+    o->snapshotMap = ఖాళీ;
+    m3_Free(o->local_Init_లోతు);
+#అయితే_ముగింపు
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
-#if d_m3HasStackSwitching
+#ఒకవేళ d_m3_Has_దొంతర_Switching
 m3ret_t ResumeContinuation (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
-    if (M3_UNLIKELY(!i_cont || i_cont->state != cont_suspended)) {
-        return m3Err_none;
+    ఒకవేళ (M3_UNLIKELY(!i_cont || i_cont->state != cont_suspended)) {
+        తిరిగి m3Err_none;
     }
 
-    M3MemoryHeader* _mem = i_cont->entryFunction ? Module_MemoryHeader(i_cont->entryFunction->module) : NULL;
+    M3_జ్ఞాపకం_శీర్షిక* _mem = i_cont->నమోదు_Function ? Module_జ్ఞాపకం_శీర్షిక(i_cont->నమోదు_Function->module) : ఖాళీ;
 
-    i_runtime->activeContinuation = i_cont;
+    i_runtime->చురుకైన_Continuation = i_cont;
     i_cont->state                 = cont_running;
 
-    i32 outermost     = (i32)i_cont->numFrames - 1;
-    i_cont->numFrames = 0;
+    i32 outermost     = (i32)i_cont->అంకె_చట్రాలు - 1;
+    i_cont->అంకె_చట్రాలు = 0;
 
     // with no frames standing, this lands straight on the suspension point
-    m3ret_t r = ReplayFrames(i_cont, outermost, _mem);
+    m3ret_t r = Replay_చట్రాలు(i_cont, outermost, _mem);
 
-    if (r == m3Err_continuationSuspended) {
+    ఒకవేళ (r == m3Err_continuationSuspended) {
         i_cont->state = cont_suspended;
-    } else {
+    } లేకపోతే {
         i_cont->state = cont_returned;
     }
-    i_runtime->activeContinuation = NULL;
+    i_runtime->చురుకైన_Continuation = ఖాళీ;
 
-    return r;
+    తిరిగి r;
 }
-#endif
+#అయితే_ముగింపు

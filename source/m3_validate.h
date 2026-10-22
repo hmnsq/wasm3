@@ -5,12 +5,12 @@
 //  Runs before compilation to catch type errors early.
 //
 
-#ifndef m3_validate_h
-#define m3_validate_h
+#నిర్వచితం_కాకపోతే m3_validate_h
+#నిర్వచించు m3_validate_h
 
-#include "m3_core.h"
-#include "m3_compile.h"
-#include "m3_env.h"
+#అన్తర్భావ "m3_core.h"
+#అన్తర్భావ "m3_compile.h"
+#అన్తర్భావ "m3_env.h"
 
 d_m3BeginExternC
 
@@ -18,8 +18,8 @@ d_m3BeginExternC
 // Performs full type-checking per the WebAssembly spec algorithm:
 //   operand type stack + control stack with polymorphic handling.
 // Returns m3Err_none on success or a validation error.
-M3Result ValidateFunction (IM3Function i_function);
+M3_ఫలితం ValidateFunction (IM3Function i_function);
 
-d_m3EndExternC
+d_m3_చివర_Extern_C
 
-#endif // m3_validate_h
+#అయితే_ముగింపు // m3_validate_h

@@ -4,33 +4,33 @@
 //  Copyright © 2026 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_deterministic.h"
+#అన్తర్భావ "m3_deterministic.h"
 
-#if d_m3DeterministicProfile
+#ఒకవేళ d_m3DeterministicProfile
 
-void Deterministic_InitRuntime (IM3Runtime io_runtime)
+శూన్య Deterministic_InitRuntime (IM3Runtime io_runtime)
 {
-    io_runtime->virtualTimeNs = 0;
-    io_runtime->randomState   = d_m3DeterministicSeed;
+    io_runtime->virtual_సమయం_Ns = 0;
+    io_runtime->randomState   = d_m3_Deterministic_విత్తనం;
 }
 
-u64 Deterministic_Time (IM3Runtime io_runtime)
+u64 Deterministic_సమయం (IM3Runtime io_runtime)
 {
-    u64 now = io_runtime->virtualTimeNs;
+    u64 now = io_runtime->virtual_సమయం_Ns;
 
     Deterministic_Advance(io_runtime, d_m3DeterministicTickNs);
 
-    return now;
+    తిరిగి now;
 }
 
-void Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds)
+శూన్య Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds)
 {
     // Saturating: a guest may ask to wait longer than the clock can express, and
     // going backwards is the one thing this clock must never do
-    if (io_runtime->virtualTimeNs > UINT64_MAX - i_nanoseconds) {
-        io_runtime->virtualTimeNs = UINT64_MAX;
-    } else {
-        io_runtime->virtualTimeNs += i_nanoseconds;
+    ఒకవేళ (io_runtime->virtual_సమయం_Ns > UINT64_MAX - i_nanoseconds) {
+        io_runtime->virtual_సమయం_Ns = UINT64_MAX;
+    } లేకపోతే {
+        io_runtime->virtual_సమయం_Ns += i_nanoseconds;
     }
 }
 
@@ -38,11 +38,11 @@ void Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds)
 // wants unpredictability - the point is the opposite - so the only property that
 // matters is that the same seed gives the same bytes on every machine, which fixed
 // width arithmetic and no floating point are enough for.
-void Deterministic_Random (IM3Runtime io_runtime, void* o_buf, size_t i_length)
+శూన్య Deterministic_Random (IM3Runtime io_runtime, శూన్య* o_buf, size_t i_నిడివి)
 {
-    u8* out = (u8*)o_buf;
+    u8* బహిర్గతం = (u8*)o_buf;
 
-    while (i_length) {
+    అయితే (i_నిడివి) {
         io_runtime->randomState += UINT64_C(0x9E3779B97F4A7C15);
 
         u64 z = io_runtime->randomState;
@@ -50,16 +50,16 @@ void Deterministic_Random (IM3Runtime io_runtime, void* o_buf, size_t i_length)
         z     = (z ^ (z >> 27)) * UINT64_C(0x94D049BB133111EB);
         z     = z ^ (z >> 31);
 
-        size_t chunk = M3_MIN(i_length, sizeof(z));
+        size_t chunk = M3_MIN(i_నిడివి, పరిమాణం(z));
 
         // one byte at a time, so the stream does not depend on the host's byte order
-        for (size_t i = 0; i < chunk; ++i) {
-            out[i] = (u8)(z >> (8 * i));
+        కొరకు (size_t i = 0; i < chunk; ++i) {
+            బహిర్గతం[i] = (u8)(z >> (8 * i));
         }
 
-        out += chunk;
-        i_length -= chunk;
+        బహిర్గతం += chunk;
+        i_నిడివి -= chunk;
     }
 }
 
-#endif // d_m3DeterministicProfile
+#అయితే_ముగింపు // d_m3DeterministicProfile

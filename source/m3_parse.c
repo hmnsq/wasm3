@@ -5,83 +5,83 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_compile.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#అన్తర్భావ "m3_env.h"
+#అన్తర్భావ "m3_compile.h"
+#అన్తర్భావ "m3_exception.h"
+#అన్తర్భావ "m3_info.h"
 
 
 // elem type + limits, shared by the table section and by table imports.
 // The declared minimum is the table's initial size; table.grow can raise it up
 // to the maximum, so an element segment reaching past the current size is out
 // of bounds.
-#if d_m3HasTypedRefs
+#ఒకవేళ d_m3HasTypedRefs
 
 // Reads a heap type: 'func', 'extern', or the index of a function type the
 // module has already defined. Yields the heap-type bits of an m3type_t, which
 // carry the canonical index rather than the module's own, so that structurally
 // equal types compare equal across modules.
-M3Result ParseHeapType (IM3Module i_module, m3type_t* o_heapBits, bytes_t* io_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_కుప్ప_Type (IM3Module i_module, m3type_t* o_కుప్ప_బిట్లు, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    i64 heap;
-_   (ReadLebSigned(&heap, 33, io_bytes, i_end));
+    i64 కుప్ప;
+_   (ReadLebSigned(&కుప్ప, 33, io_బైట్లు, i_చివర));
 
-    if (heap == -d_waType_funcref) {
-        *o_heapBits = d_m3Type_heapAbstract;
-    } else if (heap == -d_waType_externref) {
-        *o_heapBits = d_m3Type_refExtern | d_m3Type_heapAbstract;
-#  if d_m3HasStackSwitching
-    } else if (heap == -d_waType_heap_cont) {
-        *o_heapBits = d_m3Type_refCont | d_m3Type_heapAbstract;
-    } else if (heap == -d_waType_heap_nocont) {
-        *o_heapBits = d_m3Type_refCont | d_m3Type_heapNone;
+    ఒకవేళ (కుప్ప == -d_waType_funcref) {
+        *o_కుప్ప_బిట్లు = d_m3_Type_కుప్ప_Abstract;
+    } లేకపోతే ఒకవేళ (కుప్ప == -d_waType_externref) {
+        *o_కుప్ప_బిట్లు = d_m3Type_refExtern | d_m3_Type_కుప్ప_Abstract;
+#  ఒకవేళ d_m3_Has_దొంతర_Switching
+    } లేకపోతే ఒకవేళ (కుప్ప == -d_wa_Type_కుప్ప_cont) {
+        *o_కుప్ప_బిట్లు = d_m3Type_refCont | d_m3_Type_కుప్ప_Abstract;
+    } లేకపోతే ఒకవేళ (కుప్ప == -d_wa_Type_కుప్ప_nocont) {
+        *o_కుప్ప_బిట్లు = d_m3Type_refCont | d_m3_Type_కుప్ప_None;
 #  endif
-    } else if (heap >= 0) {
-        _throwif(m3Err_wasmMalformed, not i_module or (u64) heap >= i_module->numFuncTypes);
+    } లేకపోతే ఒకవేళ (కుప్ప >= 0) {
+        _throwif(m3Err_wasmMalformed, not i_module or (u64) కుప్ప >= i_module->అంకె_Func_Types);
 
-        IM3FuncType ftype = i_module->funcTypes[heap];
+        IM3FuncType ftype = i_module->funcTypes[కుప్ప];
 
         // null while the type section is still being read: a type may only name
         // one that precedes it, recursion belongs to a later proposal
         _throwif(m3Err_wasmMalformed, not ftype);
 
-        *o_heapBits = (ftype->isContinuation ? d_m3Type_refCont : 0) | ftype->canonicalIndex;
-    } else {
+        *o_కుప్ప_బిట్లు = (ftype->isContinuation ? d_m3Type_refCont : 0) | ftype->canonical_సూచీ;
+    } లేకపోతే {
         _throw(m3Err_invalidTypeId);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasTypedRefs
+#అయితే_ముగింపు // d_m3HasTypedRefs
 
 
 // Reads a value type, including the reference types the function references
 // proposal spells out in full: (ref ht) and (ref null ht).
-M3Result ParseValueType (IM3Module i_module, m3type_t* o_type, bytes_t* io_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_విలువ_Type (IM3Module i_module, m3type_t* o_type, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    _throwif(m3Err_wasmUnderrun, *io_bytes >= i_end);
+    _throwif(m3Err_wasmUnderrun, *io_బైట్లు >= i_చివర);
 
-#if d_m3HasTypedRefs
-    if (**io_bytes == d_waEncode_ref or **io_bytes == d_waEncode_refNull) {
-        u8 lead = *(*io_bytes)++;
+#ఒకవేళ d_m3HasTypedRefs
+    ఒకవేళ (**io_బైట్లు == d_waEncode_ref or **io_బైట్లు == d_waEncode_refNull) {
+        u8 lead = *(*io_బైట్లు)++;
 
-        m3type_t heapBits = d_m3Type_heapAbstract;
-_       (ParseHeapType(i_module, &heapBits, io_bytes, i_end));
+        m3type_t కుప్ప_బిట్లు = d_m3_Type_కుప్ప_Abstract;
+_       (Parse_కుప్ప_Type(i_module, &కుప్ప_బిట్లు, io_బైట్లు, i_చివర));
 
-        *o_type = d_m3Type_ref | heapBits | ((lead == d_waEncode_ref) ? d_m3Type_refNonNull : 0);
+        *o_type = d_m3Type_ref | కుప్ప_బిట్లు | ((lead == d_waEncode_ref) ? d_m3Type_refNonNull : 0);
 
-        return result;
+        తిరిగి ఫలితం;
     }
-#endif
+#అయితే_ముగింపు
 
     i8 wasmType;
     u8 plainType;
-_   (ReadLEB_i7(&wasmType, io_bytes, i_end));
+_   (ReadLEB_i7(&wasmType, io_బైట్లు, i_చివర));
 _   (NormalizeType(&plainType, wasmType));
 
     // 0x40 is the empty block type, not a value type. NormalizeType has to
@@ -90,342 +90,342 @@ _   (NormalizeType(&plainType, wasmType));
 
     *o_type = plainType;
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // Reads an elem type and limits without registering anything: an import
 // descriptor holds on to the fields and only adds the table once it has a name.
-static
-M3Result ReadType_TableType (IM3Module i_module, M3TableInfo* o_info, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం Read_Type_పట్టిక_Type (IM3Module i_module, M3_పట్టిక_Info* o_info, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     m3type_t elemType = c_m3Type_none;
     u8       flag     = 0;
-    u64      initSize = 0, maxSize = 0;
+    u64      init_కొలత = 0, max_కొలత = 0;
 
     // the width of the limits, and of every index into the table
-    u32 addrBits = 32;
+    u32 addr_బిట్లు = 32;
 
-_   (ParseValueType(i_module, &elemType, io_bytes, i_end));
-#if d_m3HasRefTypes
-    _throwif(m3Err_wasmMalformed, not IsRefType(BaseTypeOf(elemType)));
-#else
+_   (Parse_విలువ_Type(i_module, &elemType, io_బైట్లు, i_చివర));
+#ఒకవేళ d_m3HasRefTypes
+    _throwif(m3Err_wasmMalformed, not IsRefType(పునాది_Type_యొక్క(elemType)));
+#లేకపోతే
     _throwif(m3Err_wasmMalformed, elemType != c_m3Type_funcref);
-#endif
+#అయితే_ముగింపు
 
-_   (ReadLEB_u7(&flag, io_bytes, i_end));
+_   (ReadLEB_u7(&flag, io_బైట్లు, i_చివర));
 
     // bit 0: has max, bit 2: table64 - the same flag memory64 gives a memory
-#if d_m3HasMemory64
+#ఒకవేళ d_m3HasMemory64
     _throwif(m3Err_wasmMalformed, flag & ~0x05u);
-#else
+#లేకపోతే
     _throwif(m3Err_wasmMalformed, flag & ~0x01u);
-#endif
+#అయితే_ముగింపు
 
-    if (flag & 0x04u) {
-        addrBits = 64;
+    ఒకవేళ (flag & 0x04u) {
+        addr_బిట్లు = 64;
     }
 
-_   (ReadLebUnsigned(&initSize, addrBits, io_bytes, i_end));
-    _throwif("table overflow", initSize > d_m3MaxSaneTableSize);
+_   (ReadLebUnsigned(&init_కొలత, addr_బిట్లు, io_బైట్లు, i_చివర));
+    _throwif("table overflow", init_కొలత > d_m3_Max_Sane_పట్టిక_కొలత);
 
-    if (flag & 0x01u) {
-_       (ReadLebUnsigned(&maxSize, addrBits, io_bytes, i_end));
-        _throwif(m3Err_wasmMalformed, maxSize < initSize);
-        _throwif("table overflow", maxSize > d_m3MaxSaneTableSize);
+    ఒకవేళ (flag & 0x01u) {
+_       (ReadLebUnsigned(&max_కొలత, addr_బిట్లు, io_బైట్లు, i_చివర));
+        _throwif(m3Err_wasmMalformed, max_కొలత < init_కొలత);
+        _throwif("table overflow", max_కొలత > d_m3_Max_Sane_పట్టిక_కొలత);
     }
 
     _catch:
 
     o_info->elemType  = elemType;
-    o_info->initSize  = (u32)initSize;
-    o_info->maxSize   = (u32)maxSize;
+    o_info->init_కొలత  = (u32)init_కొలత;
+    o_info->max_కొలత   = (u32)max_కొలత;
     o_info->hasMax    = (flag & 0x01u) != 0;
     o_info->isTable64 = (flag & 0x04u) != 0;
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-static
-M3Result ParseType_TableType (IM3Module io_module, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం Parse_Type_పట్టిక_Type (IM3Module io_module, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3TableInfo info;
+    M3_పట్టిక_Info info;
 
-_   (ReadType_TableType(io_module, &info, io_bytes, i_end));
-_   (Module_AddTable(io_module, NULL, &info, false /* isImport */));
+_   (Read_Type_పట్టిక_Type(io_module, &info, io_బైట్లు, i_చివర));
+_   (Module_కూడు_పట్టిక(io_module, ఖాళీ, &info, false /* isImport */));
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result Parse_InitExprTyped (M3Module* io_module, bytes_t* io_bytes, cbytes_t i_end, m3type_t* o_type);
+M3_ఫలితం Parse_Init_సమాసం_Typed (M3Module* io_module, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర, m3type_t* o_type);
 
-M3Result ParseType_Table (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Type_పట్టిక (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numTables;
-_   (ReadLEB_u32(&numTables, &i_bytes, i_end));                          m3log (parse, "** Table [%d]", numTables);
+    u32 అంకె_Tables;
+_   (ReadLEB_u32(&అంకె_Tables, &i_బైట్లు, i_చివర));                          m3log (parse, "** Table [%d]", అంకె_Tables);
 
-    _throwif("too many tables", (u64)numTables + io_module->numTables > d_m3MaxSaneTableCount);
+    _throwif("too many tables", (u64)అంకె_Tables + io_module->అంకె_Tables > d_m3_Max_Sane_పట్టిక_లెక్క);
 
-    for (u32 i = 0; i < numTables; ++i) {
-#if d_m3HasTypedRefs
+    కొరకు (u32 i = 0; i < అంకె_Tables; ++i) {
+#ఒకవేళ d_m3HasTypedRefs
         // function-references: 0x40 0x00 introduces a table with an explicit
         // initializer. A reference type never starts with 0x40, so the two
         // forms are told apart by the first byte; the second is reserved.
-        bool hasInitExpr = (i_bytes < i_end) and (*i_bytes == 0x40);
-        u32  tableIndex  = io_module->numTables;
+        bool has_Init_సమాసం = (i_బైట్లు < i_చివర) and (*i_బైట్లు == 0x40);
+        u32  పట్టిక_సూచీ  = io_module->అంకె_Tables;
 
-        if (hasInitExpr) {
+        ఒకవేళ (has_Init_సమాసం) {
             u8 reserved;
-            ++i_bytes;
-_           (Read_u8(&reserved, &i_bytes, i_end));
+            ++i_బైట్లు;
+_           (Read_u8(&reserved, &i_బైట్లు, i_చివర));
             _throwif(m3Err_wasmMalformed, reserved != 0x00);
         }
 
-_       (ParseType_TableType(io_module, &i_bytes, i_end));
+_       (Parse_Type_పట్టిక_Type(io_module, &i_బైట్లు, i_చివర));
 
-        if (hasInitExpr) {
-            IM3Table table = io_module->tables[tableIndex];
+        ఒకవేళ (has_Init_సమాసం) {
+            IM3_పట్టిక పట్టిక_2 = io_module->tables[పట్టిక_సూచీ];
 
             m3type_t initType;
 
-            table->initExpr = i_bytes;
-_           (Parse_InitExprTyped(io_module, &i_bytes, i_end, &initType));
-            table->initExprSize = (u32)(i_bytes - table->initExpr);
-            _throwif(m3Err_wasmMissingInitExpr, table->initExprSize <= 1);
+            పట్టిక_2->init_సమాసం = i_బైట్లు;
+_           (Parse_Init_సమాసం_Typed(io_module, &i_బైట్లు, i_చివర, &initType));
+            పట్టిక_2->init_సమాసం_కొలత = (u32)(i_బైట్లు - పట్టిక_2->init_సమాసం);
+            _throwif(m3_Err_wasm_Missing_Init_సమాసం, పట్టిక_2->init_సమాసం_కొలత <= 1);
 
-            _throwif(m3Err_typeMismatch, not IsSubTypeOf(initType, table->type));
-        } else {
+            _throwif(m3Err_typeMismatch, not Is_Sub_Type_యొక్క(initType, పట్టిక_2->type));
+        } లేకపోతే {
             // no initializer means null, which only a nullable type can hold
             _throwif("table of non-nullable type requires an initializer",
-                     not IsNullableRef(io_module->tables[tableIndex]->type));
+                     not IsNullableRef(io_module->tables[పట్టిక_సూచీ]->type));
         }
-#else
-_       (ParseType_TableType(io_module, &i_bytes, i_end));
-#endif
+#లేకపోతే
+_       (Parse_Type_పట్టిక_Type(io_module, &i_బైట్లు, i_చివర));
+#అయితే_ముగింపు
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result ParseType_Memory (M3MemoryInfo* o_memory, bytes_t* io_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Type_జ్ఞాపకం (M3_జ్ఞాపకం_Info* o_జ్ఞాపకం, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     u8 flag;
 
     // The custom page sizes proposal admits only 1 and 65536, but nothing in
     // the engine cares which power of two it is, so any of them is accepted.
     // Declared up here so the throws below don't jump over its initialization.
-    u32 logPageSize = 16;
+    u32 log_పుట_కొలత = 16;
 
     // The width of the limits, and of everything that addresses the memory:
     // 32 unless bit 2 says memory64.
-    u32 addrBits = 32;
+    u32 addr_బిట్లు = 32;
 
-_   (ReadLEB_u7(&flag, io_bytes, i_end));
+_   (ReadLEB_u7(&flag, io_బైట్లు, i_చివర));
 
     // bit 0: has max, bit 1: shared, bit 2: memory64, bit 3: custom page size
     {
-        u32 known = 0x09u;
-#if d_m3HasAtomics
-        known |= 0x02u;
-#endif
-#if d_m3HasMemory64
-        known |= 0x04u;
-#endif
-        _throwif(m3Err_wasmMalformed, flag & ~known);
+        u32 తెలిసిన = 0x09u;
+#ఒకవేళ d_m3HasAtomics
+        తెలిసిన |= 0x02u;
+#అయితే_ముగింపు
+#ఒకవేళ d_m3HasMemory64
+        తెలిసిన |= 0x04u;
+#అయితే_ముగింపు
+        _throwif(m3Err_wasmMalformed, flag & ~తెలిసిన);
     }
 
-    o_memory->isShared = (flag & (1u << 1)) != 0;
+    o_జ్ఞాపకం->isShared = (flag & (1u << 1)) != 0;
 
-    o_memory->isMemory64 = (flag & (1u << 2)) != 0;
-    if (o_memory->isMemory64) {
-        addrBits = 64;
+    o_జ్ఞాపకం->isMemory64 = (flag & (1u << 2)) != 0;
+    ఒకవేళ (o_జ్ఞాపకం->isMemory64) {
+        addr_బిట్లు = 64;
     }
 
-_   (ReadLebUnsigned(&o_memory->initPages, addrBits, io_bytes, i_end));
+_   (ReadLebUnsigned(&o_జ్ఞాపకం->init_పుటలు, addr_బిట్లు, io_బైట్లు, i_చివర));
 
-    o_memory->maxPages = 0;
-    o_memory->hasMax   = (flag & (1u << 0)) != 0;
-    if (o_memory->hasMax) {
-_       (ReadLebUnsigned(&o_memory->maxPages, addrBits, io_bytes, i_end));
+    o_జ్ఞాపకం->max_పుటలు = 0;
+    o_జ్ఞాపకం->hasMax   = (flag & (1u << 0)) != 0;
+    ఒకవేళ (o_జ్ఞాపకం->hasMax) {
+_       (ReadLebUnsigned(&o_జ్ఞాపకం->max_పుటలు, addr_బిట్లు, io_బైట్లు, i_చివర));
 
         // Spec: memory limits validation - max must not be less than init
-        _throwif(m3Err_wasmMalformed, o_memory->maxPages < o_memory->initPages);
+        _throwif(m3Err_wasmMalformed, o_జ్ఞాపకం->max_పుటలు < o_జ్ఞాపకం->init_పుటలు);
     }
 
-    _throwif("shared memory must have maximum", o_memory->isShared and not o_memory->hasMax);
+    _throwif("shared memory must have maximum", o_జ్ఞాపకం->isShared and not o_జ్ఞాపకం->hasMax);
 
-    o_memory->pageSize = 0;
-    if (flag & (1u << 3)) {
-_       (ReadLEB_u32(&logPageSize, io_bytes, i_end));
+    o_జ్ఞాపకం->పుట_కొలత = 0;
+    ఒకవేళ (flag & (1u << 3)) {
+_       (ReadLEB_u32(&log_పుట_కొలత, io_బైట్లు, i_చివర));
 
-        _throwif("invalid custom page size", logPageSize > 16);
+        _throwif("invalid custom page size", log_పుట_కొలత > 16);
 
-        o_memory->pageSize = 1u << logPageSize;
+        o_జ్ఞాపకం->పుట_కొలత = 1u << log_పుట_కొలత;
     }
 
     // Spec: memory limits must be valid within range 2^|addrtype|/pagesize.
     // That is 65536 pages at the default page size, 2^48 for a 64-bit memory,
     // and a whole address space of them when a page is a single byte.
     {
-        u64 maxPagesAllowed = (logPageSize or addrBits < 64)
-                                ? (UINT64_C(1) << (addrBits - logPageSize))
+        u64 max_పుటలు_Allowed = (log_పుట_కొలత or addr_బిట్లు < 64)
+                                ? (UINT64_C(1) << (addr_బిట్లు - log_పుట_కొలత))
                                 : UINT64_MAX;
 
-        _throwif(m3Err_wasmMalformed, o_memory->initPages > maxPagesAllowed);
-        if (o_memory->hasMax) {
-            _throwif(m3Err_wasmMalformed, o_memory->maxPages > maxPagesAllowed);
+        _throwif(m3Err_wasmMalformed, o_జ్ఞాపకం->init_పుటలు > max_పుటలు_Allowed);
+        ఒకవేళ (o_జ్ఞాపకం->hasMax) {
+            _throwif(m3Err_wasmMalformed, o_జ్ఞాపకం->max_పుటలు > max_పుటలు_Allowed);
         }
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // One func type: [numArgs] argtypes [numRets] rettypes, with the results
 // stored ahead of the arguments the way M3FuncType wants them.
-static
-M3Result ParseFuncType (IM3Module io_module, IM3FuncType* o_type, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం ParseFuncType (IM3Module io_module, IM3FuncType* o_type, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = ఖాళీ;
 _try {
-    u32 numArgs;
-_   (ReadLEB_u32(&numArgs, io_bytes, i_end));
+    u32 అంకె_వాదనలు;
+_   (ReadLEB_u32(&అంకె_వాదనలు, io_బైట్లు, i_చివర));
 
-    _throwif(m3Err_tooManyArgsRets, numArgs > d_m3MaxSaneFunctionArgRetCount);
-#if M3_HAS_VLA
-    m3type_t argTypes[numArgs + 1]; // make ubsan happy
-#else
-    m3type_t argTypes[d_m3MaxSaneFunctionArgRetCount];
-#endif
-    for (u32 a = 0; a < numArgs; ++a) {
-_       (ParseValueType(io_module, &argTypes[a], io_bytes, i_end));
+    _throwif(m3_Err_too_Many_వాదనలు_Rets, అంకె_వాదనలు > d_m3_Max_Sane_Function_Arg_Ret_లెక్క);
+#ఒకవేళ M3_HAS_VLA
+    m3type_t argTypes[అంకె_వాదనలు + 1]; // make ubsan happy
+#లేకపోతే
+    m3type_t argTypes[d_m3_Max_Sane_Function_Arg_Ret_లెక్క];
+#అయితే_ముగింపు
+    కొరకు (u32 a = 0; a < అంకె_వాదనలు; ++a) {
+_       (Parse_విలువ_Type(io_module, &argTypes[a], io_బైట్లు, i_చివర));
     }
 
-    u32 numRets;
-_   (ReadLEB_u32(&numRets, io_bytes, i_end));
-    _throwif(m3Err_tooManyArgsRets, (u64)(numRets) + numArgs > d_m3MaxSaneFunctionArgRetCount);
+    u32 అంకె_Rets;
+_   (ReadLEB_u32(&అంకె_Rets, io_బైట్లు, i_చివర));
+    _throwif(m3_Err_too_Many_వాదనలు_Rets, (u64)(అంకె_Rets) + అంకె_వాదనలు > d_m3_Max_Sane_Function_Arg_Ret_లెక్క);
 
-_   (AllocFuncType(&ftype, numRets + numArgs));
-    ftype->numArgs = numArgs;
-    ftype->numRets = numRets;
+_   (AllocFuncType(&ftype, అంకె_Rets + అంకె_వాదనలు));
+    ftype->అంకె_వాదనలు = అంకె_వాదనలు;
+    ftype->అంకె_Rets = అంకె_Rets;
 
-    for (u32 r = 0; r < numRets; ++r) {
-_       (ParseValueType(io_module, &ftype->types[r], io_bytes, i_end));
+    కొరకు (u32 r = 0; r < అంకె_Rets; ++r) {
+_       (Parse_విలువ_Type(io_module, &ftype->types[r], io_బైట్లు, i_చివర));
     }
-    memcpy(ftype->types + numRets, argTypes, numArgs * sizeof(m3type_t));
+    జ్ఞాపకం_నకలు(ftype->types + అంకె_Rets, argTypes, అంకె_వాదనలు * పరిమాణం(m3type_t));
 
     *o_type = ftype;
-    ftype   = NULL;
+    ftype   = ఖాళీ;
 
 } _catch:
     m3_Free(ftype);
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-#if d_m3HasStackSwitching
+#ఒకవేళ d_m3_Has_దొంతర_Switching
 
 // cont $ft. A continuation carries the shape of the function it runs, so that
 // resume and the rest can read the parameters and results straight off it.
-static
-M3Result ParseContType (IM3Module io_module, IM3FuncType* o_type, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం ParseContType (IM3Module io_module, IM3FuncType* o_type, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = ఖాళీ;
 _try {
-    i64 ftIndex;
-_   (ReadLebSigned(&ftIndex, 33, io_bytes, i_end));
-    _throwif(m3Err_wasmMalformed, ftIndex < 0 or (u64) ftIndex >= io_module->numFuncTypes);
+    i64 ft_సూచీ;
+_   (ReadLebSigned(&ft_సూచీ, 33, io_బైట్లు, i_చివర));
+    _throwif(m3Err_wasmMalformed, ft_సూచీ < 0 or (u64) ft_సూచీ >= io_module->అంకె_Func_Types);
 
-    IM3FuncType underlying = io_module->funcTypes[ftIndex];
+    IM3FuncType underlying = io_module->funcTypes[ft_సూచీ];
     _throwif(m3Err_wasmMalformed, not underlying or underlying->isContinuation);
 
-    u32 total = underlying->numRets + underlying->numArgs;
-_   (AllocFuncType(&ftype, total));
-    ftype->numRets        = underlying->numRets;
-    ftype->numArgs        = underlying->numArgs;
+    u32 మొత్తం = underlying->అంకె_Rets + underlying->అంకె_వాదనలు;
+_   (AllocFuncType(&ftype, మొత్తం));
+    ftype->అంకె_Rets        = underlying->అంకె_Rets;
+    ftype->అంకె_వాదనలు        = underlying->అంకె_వాదనలు;
     ftype->isContinuation = true;
     ftype->contFuncType   = underlying;
 
-    if (total) {
-        memcpy(ftype->types, underlying->types, total * sizeof(m3type_t));
+    ఒకవేళ (మొత్తం) {
+        జ్ఞాపకం_నకలు(ftype->types, underlying->types, మొత్తం * పరిమాణం(m3type_t));
     }
 
     *o_type = ftype;
-    ftype   = NULL;
+    ftype   = ఖాళీ;
 
 } _catch:
     m3_Free(ftype);
-    return result;
+    తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasStackSwitching
+#అయితే_ముగింపు // d_m3HasStackSwitching
 
 
-static
-M3Result ParseTypeDefinition (IM3Module io_module, i8 i_form, IM3FuncType* o_type,
-                              bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం ParseTypeDefinition (IM3Module io_module, i8 i_form, IM3FuncType* o_type,
+                              బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-#if d_m3HasStackSwitching
-    if (i_form == -35) {
-        return ParseContType(io_module, o_type, io_bytes, i_end);
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+    ఒకవేళ (i_form == -35) {
+        తిరిగి ParseContType(io_module, o_type, io_బైట్లు, i_చివర);
     }
-#endif
-    if (i_form != -32) { // for Wasm MVP
-        return m3Err_wasmMalformed;
+#అయితే_ముగింపు
+    ఒకవేళ (i_form != -32) { // for Wasm MVP
+        తిరిగి m3Err_wasmMalformed;
     }
 
-    return ParseFuncType(io_module, o_type, io_bytes, i_end);
+    తిరిగి ParseFuncType(io_module, o_type, io_బైట్లు, i_చివర);
 }
 
 
-#if d_m3HasStackSwitching
+#ఒకవేళ d_m3_Has_దొంతర_Switching
 
 // Walks one type definition without resolving anything, which is how the first
 // pass over a recursive group learns what each member is before any of them can
 // be built: the members are free to name each other, so nothing can be resolved
 // until every index in the group is spoken for.
-static
-M3Result SkipTypeDefinition (i8 i_form, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం SkipTypeDefinition (i8 i_form, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
 _try {
-    if (i_form == -35) {
-        i64 ftIndex;
-_       (ReadLebSigned(&ftIndex, 33, io_bytes, i_end));
-        return result;
+    ఒకవేళ (i_form == -35) {
+        i64 ft_సూచీ;
+_       (ReadLebSigned(&ft_సూచీ, 33, io_బైట్లు, i_చివర));
+        తిరిగి ఫలితం;
     }
 
     _throwif(m3Err_wasmMalformed, i_form != -32);
 
-    for (u32 half = 0; half < 2; ++half) {
-        u32 count;
-_       (ReadLEB_u32(&count, io_bytes, i_end));
-        _throwif(m3Err_tooManyArgsRets, count > d_m3MaxSaneFunctionArgRetCount);
+    కొరకు (u32 half = 0; half < 2; ++half) {
+        u32 లెక్క;
+_       (ReadLEB_u32(&లెక్క, io_బైట్లు, i_చివర));
+        _throwif(m3_Err_too_Many_వాదనలు_Rets, లెక్క > d_m3_Max_Sane_Function_Arg_Ret_లెక్క);
 
-        for (u32 v = 0; v < count; ++v) {
+        కొరకు (u32 v = 0; v < లెక్క; ++v) {
             u8 encoding;
-_           (Read_u8(&encoding, io_bytes, i_end));
+_           (Read_u8(&encoding, io_బైట్లు, i_చివర));
 
-            if (encoding == d_waEncode_ref or encoding == d_waEncode_refNull) {
-                i64 heap;
-_               (ReadLebSigned(&heap, 33, io_bytes, i_end));
+            ఒకవేళ (encoding == d_waEncode_ref or encoding == d_waEncode_refNull) {
+                i64 కుప్ప;
+_               (ReadLebSigned(&కుప్ప, 33, io_బైట్లు, i_చివర));
             }
         }
     }
 
-} _catch: return result;
+} _catch: తిరిగి ఫలితం;
 }
 
 
@@ -434,733 +434,733 @@ _               (ReadLebSigned(&heap, 33, io_bytes, i_end));
 // is scanned once for shapes, its indices are reserved, and only then are the
 // definitions built - func types first, because a cont type is spelled in terms
 // of one.
-static
-M3Result ParseRecGroup (IM3Module io_module, u32 i_count, u32 i_firstIndex,
-                        bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం Parse_Rec_సమూహం (IM3Module io_module, u32 i_లెక్క, u32 i_మొదటి_సూచీ,
+                        బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    IM3FuncType* placeholders = NULL;
+    IM3FuncType* placeholders = ఖాళీ;
 _try {
-    bytes_t groupStart = *io_bytes;
+    బైట్లు_t సమూహం_ప్రారంభం = *io_బైట్లు;
 
-    placeholders = m3_AllocArray(IM3FuncType, i_count);
+    placeholders = m3_AllocArray(IM3FuncType, i_లెక్క);
     _throwifnull(placeholders);
 
     // pass one: what each member is, without looking at what it refers to
-    for (u32 j = 0; j < i_count; ++j) {
+    కొరకు (u32 j = 0; j < i_లెక్క; ++j) {
         i8 form;
-_       (ReadLEB_i7(&form, io_bytes, i_end));
-_       (SkipTypeDefinition(form, io_bytes, i_end));
+_       (ReadLEB_i7(&form, io_బైట్లు, i_చివర));
+_       (SkipTypeDefinition(form, io_బైట్లు, i_చివర));
 
 _       (AllocFuncType(&placeholders[j], 0));
         placeholders[j]->isContinuation = (form == -35);
     }
 
-    u16 firstCanonical;
-_   (Environment_ReserveFuncTypes(io_module->environment, i_count, &firstCanonical));
+    u16 మొదటి_Canonical;
+_   (Environment_ReserveFuncTypes(io_module->environment, i_లెక్క, &మొదటి_Canonical));
 
-    for (u32 j = 0; j < i_count; ++j) {
-        placeholders[j]->canonicalIndex        = (u16)(firstCanonical + j);
-        io_module->funcTypes[i_firstIndex + j] = placeholders[j];
+    కొరకు (u32 j = 0; j < i_లెక్క; ++j) {
+        placeholders[j]->canonical_సూచీ        = (u16)(మొదటి_Canonical + j);
+        io_module->funcTypes[i_మొదటి_సూచీ + j] = placeholders[j];
     }
 
     // pass two: the definitions themselves. A cont type copies the shape of the
     // func type it names, so every func type in the group has to be standing
     // before any cont type in it is read.
-    for (u32 pass = 0; pass < 2; ++pass) {
-        bytes_t bytes = groupStart;
+    కొరకు (u32 pass = 0; pass < 2; ++pass) {
+        బైట్లు_t బైట్లు = సమూహం_ప్రారంభం;
 
-        for (u32 j = 0; j < i_count; ++j) {
+        కొరకు (u32 j = 0; j < i_లెక్క; ++j) {
             i8 form;
-_           (ReadLEB_i7(&form, &bytes, i_end));
+_           (ReadLEB_i7(&form, &బైట్లు, i_చివర));
 
-            if ((form == -35) != (pass == 1)) {
-_               (SkipTypeDefinition(form, &bytes, i_end));
-                continue;
+            ఒకవేళ ((form == -35) != (pass == 1)) {
+_               (SkipTypeDefinition(form, &బైట్లు, i_చివర));
+                కొనసాగు;
             }
 
-            IM3FuncType ftype = NULL;
-_           (ParseTypeDefinition(io_module, form, &ftype, &bytes, i_end));
+            IM3FuncType ftype = ఖాళీ;
+_           (ParseTypeDefinition(io_module, form, &ftype, &బైట్లు, i_చివర));
 
-            Environment_AdoptFuncType(io_module->environment, ftype, placeholders[j]->canonicalIndex);
+            Environment_AdoptFuncType(io_module->environment, ftype, placeholders[j]->canonical_సూచీ);
 
             m3_Free(placeholders[j]);
-            placeholders[j]                        = NULL;
-            io_module->funcTypes[i_firstIndex + j] = ftype;
+            placeholders[j]                        = ఖాళీ;
+            io_module->funcTypes[i_మొదటి_సూచీ + j] = ftype;
         }
 
-        if (pass == 1) {
-            *io_bytes = bytes;
+        ఒకవేళ (pass == 1) {
+            *io_బైట్లు = బైట్లు;
         }
     }
 
 } _catch:
-    if (placeholders) {
-        for (u32 j = 0; j < i_count; ++j) {
+    ఒకవేళ (placeholders) {
+        కొరకు (u32 j = 0; j < i_లెక్క; ++j) {
             m3_Free(placeholders[j]);
         }
         m3_Free(placeholders);
     }
-    return result;
+    తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasStackSwitching
+#అయితే_ముగింపు // d_m3HasStackSwitching
 
 
-M3Result ParseSection_Type (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Type (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = ఖాళీ;
 
 _try {
-    u32 numTypes;
-_   (ReadLEB_u32(&numTypes, &i_bytes, i_end));                                      m3log (parse, "** Type [%d]", numTypes);
+    u32 అంకె_Types;
+_   (ReadLEB_u32(&అంకె_Types, &i_బైట్లు, i_చివర));                                      m3log (parse, "** Type [%d]", అంకె_Types);
 
-    _throwif("too many types", numTypes > d_m3MaxSaneTypesCount);
+    _throwif("too many types", అంకె_Types > d_m3_Max_Sane_Types_లెక్క);
 
-    if (numTypes) {
+    ఒకవేళ (అంకె_Types) {
         // table of IM3FuncType (that point to the actual M3FuncType struct in the Environment)
-        io_module->funcTypes = m3_AllocArray(IM3FuncType, numTypes);
+        io_module->funcTypes = m3_AllocArray(IM3FuncType, అంకె_Types);
         _throwifnull(io_module->funcTypes);
-        io_module->numFuncTypes = numTypes;
+        io_module->అంకె_Func_Types = అంకె_Types;
 
         // a recursive group is one entry of the section but any number of type
         // indices, so the two counts part ways as soon as one appears
-#if d_m3HasStackSwitching
-        u32 capacity = numTypes;
-#endif
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+        u32 సామర్థ్యం = అంకె_Types;
+#అయితే_ముగింపు
         u32 index = 0;
 
-        for (u32 i = 0; i < numTypes; ++i) {
+        కొరకు (u32 i = 0; i < అంకె_Types; ++i) {
             i8 form;
-_           (ReadLEB_i7(&form, &i_bytes, i_end));
+_           (ReadLEB_i7(&form, &i_బైట్లు, i_చివర));
 
-#if d_m3HasStackSwitching
-            if (form == -50) { // rec
-                u32 count;
-_               (ReadLEB_u32(&count, &i_bytes, i_end));
+#ఒకవేళ d_m3_Has_దొంతర_Switching
+            ఒకవేళ (form == -50) { // rec
+                u32 లెక్క;
+_               (ReadLEB_u32(&లెక్క, &i_బైట్లు, i_చివర));
 
                 // room for this group, and for one more entry per section
                 // entry still to come
-                u64 needed = (u64)index + count + (numTypes - 1 - i);
+                u64 needed = (u64)index + లెక్క + (అంకె_Types - 1 - i);
 
-                _throwif("too many types", needed > d_m3MaxSaneTypesCount);
+                _throwif("too many types", needed > d_m3_Max_Sane_Types_లెక్క);
 
-                if (needed > capacity) {
+                ఒకవేళ (needed > సామర్థ్యం) {
                     u32 grown = (u32)needed;
 
                     IM3FuncType* types =
-                      m3_ReallocArray(IM3FuncType, io_module->funcTypes, grown, capacity);
+                      m3_ReallocArray(IM3FuncType, io_module->funcTypes, grown, సామర్థ్యం);
                     _throwifnull(types);
 
                     io_module->funcTypes    = types;
-                    capacity                = grown;
-                    io_module->numFuncTypes = grown;
+                    సామర్థ్యం                = grown;
+                    io_module->అంకె_Func_Types = grown;
                 }
 
                 // a group of one says nothing a plain definition does not, and
                 // has to be able to share an entry with one
-                if (count == 1) {
-_                   (ReadLEB_i7(&form, &i_bytes, i_end));
-                } else {
-_                   (ParseRecGroup(io_module, count, index, &i_bytes, i_end));
-                    index += count;
-                    continue;
+                ఒకవేళ (లెక్క == 1) {
+_                   (ReadLEB_i7(&form, &i_బైట్లు, i_చివర));
+                } లేకపోతే {
+_                   (Parse_Rec_సమూహం(io_module, లెక్క, index, &i_బైట్లు, i_చివర));
+                    index += లెక్క;
+                    కొనసాగు;
                 }
             }
-#endif
+#అయితే_ముగింపు
 
-_           (ParseTypeDefinition(io_module, form, &ftype, &i_bytes, i_end));       m3log (parse, "    type %2d: %s", index, SPrintFuncTypeSignature (ftype));
+_           (ParseTypeDefinition(io_module, form, &ftype, &i_బైట్లు, i_చివర));       m3log (parse, "    type %2d: %s", index, SPrintFuncTypeSignature (ftype));
 
-            Environment_AddFuncType(io_module->environment, &ftype);
+            Environment_కూడు_Func_Type(io_module->environment, &ftype);
             io_module->funcTypes[index++] = ftype;
-            ftype                         = NULL; // ownership transferred to environment
+            ftype                         = ఖాళీ; // ownership transferred to environment
         }
 
-        io_module->numFuncTypes = index;
+        io_module->అంకె_Func_Types = index;
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
 } _catch:
 
-    if (result) {
+    ఒకవేళ (ఫలితం) {
         m3_Free(ftype);
         // FIX: M3FuncTypes in the table are leaked
         m3_Free(io_module->funcTypes);
-        io_module->numFuncTypes = 0;
+        io_module->అంకె_Func_Types = 0;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Function (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Function (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numFunctions;
-_   (ReadLEB_u32(&numFunctions, &i_bytes, i_end));                                  m3log (parse, "** Function [%d]", numFunctions);
+    u32 అంకె_Functions;
+_   (ReadLEB_u32(&అంకె_Functions, &i_బైట్లు, i_చివర));                                  m3log (parse, "** Function [%d]", అంకె_Functions);
 
-    _throwif("too many functions", numFunctions > d_m3MaxSaneFunctionsCount);
+    _throwif("too many functions", అంకె_Functions > d_m3_Max_Sane_Functions_లెక్క);
 
-_   (Module_PreallocFunctions(io_module, io_module->numFunctions + numFunctions));
+_   (Module_PreallocFunctions(io_module, io_module->అంకె_Functions + అంకె_Functions));
 
-    for (u32 i = 0; i < numFunctions; ++i) {
-        u32 funcTypeIndex;
-_       (ReadLEB_u32(&funcTypeIndex, &i_bytes, i_end));
+    కొరకు (u32 i = 0; i < అంకె_Functions; ++i) {
+        u32 func_Type_సూచీ;
+_       (ReadLEB_u32(&func_Type_సూచీ, &i_బైట్లు, i_చివర));
 
-_       (Module_AddFunction(io_module, funcTypeIndex, NULL /* import info */));
+_       (Module_కూడు_Function(io_module, func_Type_సూచీ, ఖాళీ /* import info */));
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // One externtype, read but not yet registered. The compact encoding that shares
 // a type across a run needs the two halves apart: the type sits ahead of the
 // item names, so it is read once and then registered for each of them.
-typedef struct M3ImportDesc {
-    u8           kind;
-    u32          typeIndex;                  // function
+రకనిర్వచనం నిర్మాణం M3ImportDesc {
+    u8           రకం;
+    u32          type_సూచీ;                  // function
     m3type_t     type;                       // global type
     u8           isMutable;                  // global
-    M3TableInfo  table;
-    M3MemoryInfo memory;
+    M3_పట్టిక_Info  పట్టిక_2;
+    M3_జ్ఞాపకం_Info జ్ఞాపకం;
 } M3ImportDesc;
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
 
 // A tag_type: a reserved attribute byte that must be 0 (the exception
 // attribute) and the index of the function type giving the payload. The
 // proposal reserves the byte so later kinds of tag can share the encoding.
-static
-M3Result ReadTagType (IM3Module i_module, u32* o_typeIndex, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం Read_ట్యాగ్_Type (IM3Module i_module, u32* o_type_సూచీ, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     u8 attribute;
-_   (Read_u8(&attribute, io_bytes, i_end));
+_   (Read_u8(&attribute, io_బైట్లు, i_చివర));
     _throwif(m3Err_wasmMalformed, attribute != 0);
 
-_   (ReadLEB_u32(o_typeIndex, io_bytes, i_end));
-    _throwif(m3Err_unknownType, not i_module or *o_typeIndex >= i_module->numFuncTypes);
+_   (ReadLEB_u32(o_type_సూచీ, io_బైట్లు, i_చివర));
+    _throwif(m3Err_unknownType, not i_module or *o_type_సూచీ >= i_module->అంకె_Func_Types);
 
-#  if !d_m3HasStackSwitching
+#  ఒకవేళ !d_m3_Has_దొంతర_Switching
     // an exception tag's type describes its payload, so it yields nothing
-    _throwif(m3Err_wasmMalformed, GetFuncTypeNumResults(i_module->funcTypes[*o_typeIndex]) != 0);
+    _throwif(m3Err_wasmMalformed, Get_Func_Type_అంకె_Results(i_module->funcTypes[*o_type_సూచీ]) != 0);
 #  endif
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
+#అయితే_ముగింపు // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
 // Reads and validates one externtype. Mutates nothing in the module, so an
 // externtype is checked even when the compact run that shares it is empty.
-static
-M3Result ReadImportDesc (IM3Module i_module, M3ImportDesc* o_desc, bytes_t* io_bytes, cbytes_t i_end)
+స్థిర
+M3_ఫలితం ReadImportDesc (IM3Module i_module, M3ImportDesc* o_desc, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-_   (Read_u8(&o_desc->kind, io_bytes, i_end));
+_   (Read_u8(&o_desc->రకం, io_బైట్లు, i_చివర));
 
-    switch (o_desc->kind) {
-    case d_externalKind_function:
-_       (ReadLEB_u32(&o_desc->typeIndex, io_bytes, i_end));
-        break;
+    ఎంపిక (o_desc->రకం) {
+    స్థితి d_external_రకం_function:
+_       (ReadLEB_u32(&o_desc->type_సూచీ, io_బైట్లు, i_చివర));
+        ఆపు;
 
-    case d_externalKind_table:
-_       (ReadType_TableType(i_module, &o_desc->table, io_bytes, i_end));
-        break;
+    స్థితి d_external_రకం_పట్టిక:
+_       (Read_Type_పట్టిక_Type(i_module, &o_desc->పట్టిక_2, io_బైట్లు, i_చివర));
+        ఆపు;
 
-    case d_externalKind_memory:
-_       (ParseType_Memory(&o_desc->memory, io_bytes, i_end));
-        break;
+    స్థితి d_external_రకం_జ్ఞాపకం:
+_       (Parse_Type_జ్ఞాపకం(&o_desc->జ్ఞాపకం, io_బైట్లు, i_చివర));
+        ఆపు;
 
-    case d_externalKind_global:
-_       (ParseValueType(i_module, &o_desc->type, io_bytes, i_end));
-_       (ReadLEB_u7(&o_desc->isMutable, io_bytes, i_end));                          m3log (parse, "     global: %s mutable=%d", c_waTypes [BaseTypeOf(o_desc->type)], (u32) o_desc->isMutable);
+    స్థితి d_external_రకం_global:
+_       (Parse_విలువ_Type(i_module, &o_desc->type, io_బైట్లు, i_చివర));
+_       (ReadLEB_u7(&o_desc->isMutable, io_బైట్లు, i_చివర));                          m3log (parse, "     global: %s mutable=%d", c_waTypes [పునాది_Type_యొక్క(o_desc->type)], (u32) o_desc->isMutable);
         _throwif(m3Err_wasmMalformed, o_desc->isMutable > 1);
-        break;
+        ఆపు;
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    case d_externalKind_tag:
-_       (ReadTagType(i_module, &o_desc->typeIndex, io_bytes, i_end));
-        break;
-#endif
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
+    స్థితి d_external_రకం_ట్యాగ్:
+_       (Read_ట్యాగ్_Type(i_module, &o_desc->type_సూచీ, io_బైట్లు, i_చివర));
+        ఆపు;
+#అయితే_ముగింపు
 
-    default:
+    అప్రమేయ:
         _throw(m3Err_wasmMalformed);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // Registers the import that i_desc describes. Takes ownership of *io_import
 // wherever the module keeps the strings, clearing the struct so the caller's
 // FreeImportInfo() doesn't free what was handed over.
-static
-M3Result ApplyImportDesc (IM3Module io_module, const M3ImportDesc* i_desc, M3ImportInfo* io_import)
+స్థిర
+M3_ఫలితం ApplyImportDesc (IM3Module io_module, స్థిరరాశి M3ImportDesc* i_desc, M3ImportInfo* io_import)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3ImportInfo clearImport = { NULL, NULL };                                      m3log (parse, "    kind: %d '%s.%s' ",
-                                                                                            (u32) i_desc->kind, io_import->moduleUtf8, io_import->fieldUtf8);
-    switch (i_desc->kind) {
-    case d_externalKind_function: {
-_       (Module_AddFunction(io_module, i_desc->typeIndex, io_import))
+    M3ImportInfo clearImport = { ఖాళీ, ఖాళీ };                                      m3log (parse, "    kind: %d '%s.%s' ",
+                                                                                            (u32) i_desc->రకం, io_import->moduleUtf8, io_import->క్షేత్రం_Utf8);
+    ఎంపిక (i_desc->రకం) {
+    స్థితి d_external_రకం_function: {
+_       (Module_కూడు_Function(io_module, i_desc->type_సూచీ, io_import))
         *io_import = clearImport;
 
-        io_module->numFuncImports++;
-    } break;
+        io_module->అంకె_Func_Imports++;
+    } ఆపు;
 
-    case d_externalKind_table: {
-        IM3Table table;
-_       (Module_AddTable(io_module, &table, &i_desc->table, true /* isImport */));
-        table->import = *io_import;
+    స్థితి d_external_రకం_పట్టిక: {
+        IM3_పట్టిక పట్టిక_2;
+_       (Module_కూడు_పట్టిక(io_module, &పట్టిక_2, &i_desc->పట్టిక_2, true /* isImport */));
+        పట్టిక_2->import = *io_import;
         *io_import    = clearImport;
-    } break;
+    } ఆపు;
 
-    case d_externalKind_memory: {
-        IM3Memory memory;
+    స్థితి d_external_రకం_జ్ఞాపకం: {
+        IM3_జ్ఞాపకం జ్ఞాపకం;
 
-#if d_m3HasMultiMemory
-        _throwif(m3Err_tooManyMemorySections, io_module->numMemories >= d_m3MaxSaneMemoriesCount);
-#else
+#ఒకవేళ d_m3_Has_Multi_జ్ఞాపకం
+        _throwif(m3_Err_too_Many_జ్ఞాపకం_Sections, io_module->అంకె_Memories >= d_m3_Max_Sane_Memories_లెక్క);
+#లేకపోతే
         // MVP: one memory per module, imported or declared
-        _throwif(m3Err_tooManyMemorySections, io_module->numMemories >= 1);
-#endif
+        _throwif(m3_Err_too_Many_జ్ఞాపకం_Sections, io_module->అంకె_Memories >= 1);
+#అయితే_ముగింపు
 
-_       (Module_AddMemory(io_module, &memory, &i_desc->memory, true /* isImport */));
-        memory->import = *io_import;
+_       (Module_కూడు_జ్ఞాపకం(io_module, &జ్ఞాపకం, &i_desc->జ్ఞాపకం, true /* isImport */));
+        జ్ఞాపకం->import = *io_import;
         *io_import     = clearImport;
-    } break;
+    } ఆపు;
 
-    case d_externalKind_global: {
+    స్థితి d_external_రకం_global: {
         IM3Global global;
-_       (Module_AddGlobal(io_module, &global, i_desc->type, i_desc->isMutable, true /* isImport */));
+_       (Module_కూడు_Global(io_module, &global, i_desc->type, i_desc->isMutable, true /* isImport */));
         global->import = *io_import;
         *io_import     = clearImport;
-    } break;
+    } ఆపు;
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    case d_externalKind_tag: {
-        IM3Tag tag;
-_       (Module_AddTag(io_module, &tag, io_module->funcTypes[i_desc->typeIndex], true /* isImport */));
-        tag->import = *io_import;
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
+    స్థితి d_external_రకం_ట్యాగ్: {
+        IM3_ట్యాగ్ ట్యాగ్;
+_       (Module_కూడు_ట్యాగ్(io_module, &ట్యాగ్, io_module->funcTypes[i_desc->type_సూచీ], true /* isImport */));
+        ట్యాగ్->import = *io_import;
         *io_import  = clearImport;
-    } break;
-#endif
+    } ఆపు;
+#అయితే_ముగింపు
 
-    default:
+    అప్రమేయ:
         _throw(m3Err_wasmMalformed);
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-#if d_m3HasCompactImports
+#ఒకవేళ d_m3HasCompactImports
 
 // The compact encodings only apply when the item name is empty. Read_utf8()
 // hands back a C string, so a name that merely begins with U+0000 would look
 // empty; the length prefix is what has to be tested.
-static
-bool IsEmptyName (bytes_t i_bytes, cbytes_t i_end)
+స్థిర
+bool Is_ఖాళీలు_Name (బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    u32 length;
-    return (not ReadLEB_u32(&length, &i_bytes, i_end)) and length == 0;
+    u32 నిడివి;
+    తిరిగి (not ReadLEB_u32(&నిడివి, &i_బైట్లు, i_చివర)) and నిడివి == 0;
 }
 
-#endif // d_m3HasCompactImports
+#అయితే_ముగింపు // d_m3HasCompactImports
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
 
-M3Result ParseSection_Tag (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Section_ట్యాగ్ (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numTags;
-_   (ReadLEB_u32(&numTags, &i_bytes, i_end));                                       m3log (parse, "** Tag [%d]", numTags);
+    u32 అంకె_ట్యాగులు;
+_   (ReadLEB_u32(&అంకె_ట్యాగులు, &i_బైట్లు, i_చివర));                                       m3log (parse, "** Tag [%d]", అంకె_ట్యాగులు);
 
-    _throwif("too many tags", numTags > d_m3MaxSaneTagsCount);
+    _throwif("too many tags", అంకె_ట్యాగులు > d_m3_Max_Sane_ట్యాగులు_లెక్క);
 
-    for (u32 i = 0; i < numTags; ++i) {
-        u32 typeIndex;
-_       (ReadTagType(io_module, &typeIndex, &i_bytes, i_end));                      m3log (parse, "    tag: [%d] type: %d", i, typeIndex);
+    కొరకు (u32 i = 0; i < అంకె_ట్యాగులు; ++i) {
+        u32 type_సూచీ;
+_       (Read_ట్యాగ్_Type(io_module, &type_సూచీ, &i_బైట్లు, i_చివర));                      m3log (parse, "    tag: [%d] type: %d", i, type_సూచీ);
 
-_       (Module_AddTag(io_module, NULL, io_module->funcTypes[typeIndex], false));
+_       (Module_కూడు_ట్యాగ్(io_module, ఖాళీ, io_module->funcTypes[type_సూచీ], false));
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
-#endif // d_m3HasExceptionHandling
+#అయితే_ముగింపు // d_m3HasExceptionHandling
 
 
-M3Result ParseSection_Import (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Import (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    M3ImportInfo import = { NULL, NULL };
+    M3ImportInfo import = { ఖాళీ, ఖాళీ };
 
     // the limit is on the imports the section declares, which a compact run
     // multiplies well past the entry count. Declared up here so the throws
     // below don't jump over its initialization.
-    u32 numImports = 0;
+    u32 అంకె_Imports = 0;
 
     // A count of entries, not of imports: under the compact encodings a single
     // entry stands for a whole run of them.
-    u32 numEntries;
-_   (ReadLEB_u32(&numEntries, &i_bytes, i_end));                                    m3log (parse, "** Import [%d]", numEntries);
+    u32 అంకె_Entries;
+_   (ReadLEB_u32(&అంకె_Entries, &i_బైట్లు, i_చివర));                                    m3log (parse, "** Import [%d]", అంకె_Entries);
 
-    _throwif("too many imports", numEntries > d_m3MaxSaneImportsCount);
+    _throwif("too many imports", అంకె_Entries > d_m3_Max_Sane_Imports_లెక్క);
 
     // Most imports are functions, so we won't waste much space anyway (if any)
-_   (Module_PreallocFunctions(io_module, io_module->numFunctions + numEntries));
+_   (Module_PreallocFunctions(io_module, io_module->అంకె_Functions + అంకె_Entries));
 
-    for (u32 i = 0; i < numEntries; ++i) {
+    కొరకు (u32 i = 0; i < అంకె_Entries; ++i) {
         M3ImportDesc desc;
 
-_       (Read_utf8(&import.moduleUtf8, &i_bytes, i_end));
+_       (Read_utf8(&import.moduleUtf8, &i_బైట్లు, i_చివర));
 
-#if d_m3HasCompactImports
-        bytes_t fieldStart = i_bytes;
-#endif
-_       (Read_utf8(&import.fieldUtf8, &i_bytes, i_end));
+#ఒకవేళ d_m3HasCompactImports
+        బైట్లు_t క్షేత్రం_ప్రారంభం = i_బైట్లు;
+#అయితే_ముగింపు
+_       (Read_utf8(&import.క్షేత్రం_Utf8, &i_బైట్లు, i_చివర));
 
-#if d_m3HasCompactImports
-        u8 compact = (i_bytes < i_end) ? *i_bytes : 0;
+#ఒకవేళ d_m3HasCompactImports
+        u8 compact = (i_బైట్లు < i_చివర) ? *i_బైట్లు : 0;
 
         // An empty item name where an externtype should start marks a compact
         // run sharing this module name. Neither marker is a valid externtype,
         // so nothing that used to parse changes meaning.
-        if ((compact == d_compactImports_perItemType or compact == d_compactImports_sharedType) and
-            IsEmptyName(fieldStart, i_end)) {
-            ++i_bytes;
+        ఒకవేళ ((compact == d_compact_Imports_చొప్పున_అంశం_Type or compact == d_compactImports_sharedType) and
+            Is_ఖాళీలు_Name(క్షేత్రం_ప్రారంభం, i_చివర)) {
+            ++i_బైట్లు;
 
-            m3_Free(import.fieldUtf8);         // it only marked the compact form
-            import.fieldUtf8 = NULL;
+            m3_Free(import.క్షేత్రం_Utf8);         // it only marked the compact form
+            import.క్షేత్రం_Utf8 = ఖాళీ;
 
             // the shared form puts its one externtype ahead of the item names,
             // so reading it here is also what validates it
-            if (compact == d_compactImports_sharedType) {
-_               (ReadImportDesc(io_module, &desc, &i_bytes, i_end));
+            ఒకవేళ (compact == d_compactImports_sharedType) {
+_               (ReadImportDesc(io_module, &desc, &i_బైట్లు, i_చివర));
             }
 
-            u32 numItems;
-_           (ReadLEB_u32(&numItems, &i_bytes, i_end));                              m3log (parse, "    compact: %d import(s) of '%s'", numItems, import.moduleUtf8);
+            u32 అంకె_వస్తువులు;
+_           (ReadLEB_u32(&అంకె_వస్తువులు, &i_బైట్లు, i_చివర));                              m3log (parse, "    compact: %d import(s) of '%s'", అంకె_వస్తువులు, import.moduleUtf8);
 
-            _throwif("too many imports", (u64)numImports + numItems > d_m3MaxSaneImportsCount);
-            numImports += numItems;
+            _throwif("too many imports", (u64)అంకె_Imports + అంకె_వస్తువులు > d_m3_Max_Sane_Imports_లెక్క);
+            అంకె_Imports += అంకె_వస్తువులు;
 
-_           (Module_PreallocFunctions(io_module, io_module->numFunctions + numItems));
+_           (Module_PreallocFunctions(io_module, io_module->అంకె_Functions + అంకె_వస్తువులు));
 
-            for (u32 j = 0; j < numItems; ++j) {
-                M3ImportInfo item = { NULL, NULL };
+            కొరకు (u32 j = 0; j < అంకె_వస్తువులు; ++j) {
+                M3ImportInfo అంశం = { ఖాళీ, ఖాళీ };
 
-                item.moduleUtf8 = (cstr_t)m3_CopyMem(import.moduleUtf8, strlen(import.moduleUtf8) + 1);
+                అంశం.moduleUtf8 = (cstr_t)m3_CopyMem(import.moduleUtf8, అక్షరశ్రేణి_పొడవు(import.moduleUtf8) + 1);
 
-                if (item.moduleUtf8) {
-                    result = Read_utf8(&item.fieldUtf8, &i_bytes, i_end);
+                ఒకవేళ (అంశం.moduleUtf8) {
+                    ఫలితం = Read_utf8(&అంశం.క్షేత్రం_Utf8, &i_బైట్లు, i_చివర);
 
                     // the shared form reuses the externtype read above
-                    if (not result and compact == d_compactImports_perItemType) {
-                        result = ReadImportDesc(io_module, &desc, &i_bytes, i_end);
+                    ఒకవేళ (not ఫలితం and compact == d_compact_Imports_చొప్పున_అంశం_Type) {
+                        ఫలితం = ReadImportDesc(io_module, &desc, &i_బైట్లు, i_చివర);
                     }
 
-                    if (not result) {
-                        result = ApplyImportDesc(io_module, &desc, &item);
+                    ఒకవేళ (not ఫలితం) {
+                        ఫలితం = ApplyImportDesc(io_module, &desc, &అంశం);
                     }
-                } else {
-                    result = m3Err_mallocFailed;
+                } లేకపోతే {
+                    ఫలితం = m3Err_mallocFailed;
                 }
 
-                FreeImportInfo(&item);
-                _throwif(result, result);
+                FreeImportInfo(&అంశం);
+                _throwif(ఫలితం, ఫలితం);
             }
 
             FreeImportInfo(&import);
-            continue;
+            కొనసాగు;
         }
-#endif // d_m3HasCompactImports
+#అయితే_ముగింపు // d_m3HasCompactImports
 
-        _throwif("too many imports", numImports >= d_m3MaxSaneImportsCount);
-        ++numImports;
+        _throwif("too many imports", అంకె_Imports >= d_m3_Max_Sane_Imports_లెక్క);
+        ++అంకె_Imports;
 
-_       (ReadImportDesc(io_module, &desc, &i_bytes, i_end));
+_       (ReadImportDesc(io_module, &desc, &i_బైట్లు, i_చివర));
 _       (ApplyImportDesc(io_module, &desc, &import));
 
         FreeImportInfo(&import);
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
     _catch:
 
     FreeImportInfo(&import);
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Export (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Export (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result    result = m3Err_none;
-    const char* utf8   = NULL;
+    M3_ఫలితం    ఫలితం = m3Err_none;
+    స్థిరరాశి అక్షరం* utf8   = ఖాళీ;
 
-    u32 numExports;
-_   (ReadLEB_u32(&numExports, &i_bytes, i_end));                                    m3log (parse, "** Export [%d]", numExports);
+    u32 అంకె_Exports;
+_   (ReadLEB_u32(&అంకె_Exports, &i_బైట్లు, i_చివర));                                    m3log (parse, "** Export [%d]", అంకె_Exports);
 
-    _throwif("too many exports", numExports > d_m3MaxSaneExportsCount);
+    _throwif("too many exports", అంకె_Exports > d_m3_Max_Sane_Exports_లెక్క);
 
     // the section order check lets this section through once, so this is
     // every export the module has
-    if (numExports) {
-        io_module->exports = m3_AllocArray(M3Export, numExports);
+    ఒకవేళ (అంకె_Exports) {
+        io_module->exports = m3_AllocArray(M3Export, అంకె_Exports);
         _throwifnull(io_module->exports);
     }
 
-    for (u32 i = 0; i < numExports; ++i) {
-        u8  exportKind;
+    కొరకు (u32 i = 0; i < అంకె_Exports; ++i) {
+        u8  export_రకం;
         u32 index;
-        u32 nameLength;
+        u32 name_నిడివి;
 
         // Read_utf8 takes the length along with the name, so read it ahead
         {
-            bytes_t lengthBytes = i_bytes;
-_           (ReadLEB_u32(&nameLength, &lengthBytes, i_end));
+            బైట్లు_t నిడివి_బైట్లు = i_బైట్లు;
+_           (ReadLEB_u32(&name_నిడివి, &నిడివి_బైట్లు, i_చివర));
         }
 
-_       (Read_utf8(&utf8, &i_bytes, i_end));
-_       (Read_u8(&exportKind, &i_bytes, i_end));
-_       (ReadLEB_u32(&index, &i_bytes, i_end));                                     m3log (parse, "    index: %3d; kind: %d; export: '%s'; ", index, (u32) exportKind, utf8);
+_       (Read_utf8(&utf8, &i_బైట్లు, i_చివర));
+_       (Read_u8(&export_రకం, &i_బైట్లు, i_చివర));
+_       (ReadLEB_u32(&index, &i_బైట్లు, i_చివర));                                     m3log (parse, "    index: %3d; kind: %d; export: '%s'; ", index, (u32) export_రకం, utf8);
 
-#if d_m3EnableValidation
+#ఒకవేళ d_m3EnableValidation
         // Spec: all export names must be different - compared by length, since
         // a name may hold a NUL
-        for (u32 j = 0; j < i; ++j) {
-            const M3Export* other = &io_module->exports[j];
+        కొరకు (u32 j = 0; j < i; ++j) {
+            స్థిరరాశి M3Export* other = &io_module->exports[j];
 
-            _throwif(m3Err_wasmMalformed, other->nameLength == nameLength and memcmp(other->name, utf8, nameLength) == 0);
+            _throwif(m3Err_wasmMalformed, other->name_నిడివి == name_నిడివి and memcmp(other->name, utf8, name_నిడివి) == 0);
         }
-#endif
+#అయితే_ముగింపు
 
-        if (exportKind == d_externalKind_function) {
-            _throwif(m3Err_wasmMalformed, index >= io_module->numFunctions);
+        ఒకవేళ (export_రకం == d_external_రకం_function) {
+            _throwif(m3Err_wasmMalformed, index >= io_module->అంకె_Functions);
             IM3Function func = &(io_module->functions[index]);
-            if (func->numNames < d_m3MaxDuplicateFunctionImpl) {
+            ఒకవేళ (func->అంకె_పేర్లు < d_m3MaxDuplicateFunctionImpl) {
                 // a name of its own: names are freed with the function
-                cstr_t name = (cstr_t)m3_CopyMem(utf8, nameLength + 1);
+                cstr_t name = (cstr_t)m3_CopyMem(utf8, name_నిడివి + 1);
                 _throwifnull(name);
-                func->names[func->numNames++] = name;
+                func->పేర్లు[func->అంకె_పేర్లు++] = name;
             }
 _           (Module_DeclareFunction(io_module, index));
-        } else if (exportKind == d_externalKind_global) {
-            _throwif(m3Err_wasmMalformed, index >= io_module->numGlobals);
-        } else if (exportKind == d_externalKind_memory) {
-            _throwif(m3Err_wasmMalformed, index >= io_module->numMemories);
-        } else if (exportKind == d_externalKind_table) {
-            _throwif(m3Err_wasmMalformed, index >= io_module->numTables);
+        } లేకపోతే ఒకవేళ (export_రకం == d_external_రకం_global) {
+            _throwif(m3Err_wasmMalformed, index >= io_module->అంకె_Globals);
+        } లేకపోతే ఒకవేళ (export_రకం == d_external_రకం_జ్ఞాపకం) {
+            _throwif(m3Err_wasmMalformed, index >= io_module->అంకె_Memories);
+        } లేకపోతే ఒకవేళ (export_రకం == d_external_రకం_పట్టిక) {
+            _throwif(m3Err_wasmMalformed, index >= io_module->అంకె_Tables);
         }
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-        else if (exportKind == d_externalKind_tag) {
-            _throwif(m3Err_wasmMalformed, index >= io_module->numTags);
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
+        లేకపోతే ఒకవేళ (export_రకం == d_external_రకం_ట్యాగ్) {
+            _throwif(m3Err_wasmMalformed, index >= io_module->అంకె_ట్యాగులు);
         }
-#endif
+#అయితే_ముగింపు
 
-        M3Export* entry   = &io_module->exports[io_module->numExports++];
-        entry->name       = utf8;
-        entry->nameLength = nameLength;
-        entry->index      = index;
-        entry->kind       = exportKind;
+        M3Export* నమోదు_2   = &io_module->exports[io_module->అంకె_Exports++];
+        నమోదు_2->name       = utf8;
+        నమోదు_2->name_నిడివి = name_నిడివి;
+        నమోదు_2->index      = index;
+        నమోదు_2->రకం       = export_రకం;
 
-        utf8 = NULL; // ownership transferred to M3Module
+        utf8 = ఖాళీ; // ownership transferred to M3Module
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
 _catch:
     m3_Free(utf8);
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Start (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Section_ప్రారంభం (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 startFuncIndex;
-_   (ReadLEB_u32(&startFuncIndex, &i_bytes, i_end));                                  m3log (parse, "** Start Function: %d", startFuncIndex);
+    u32 ప్రారంభం_Func_సూచీ;
+_   (ReadLEB_u32(&ప్రారంభం_Func_సూచీ, &i_బైట్లు, i_చివర));                                  m3log (parse, "** Start Function: %d", ప్రారంభం_Func_సూచీ);
 
-    if (startFuncIndex < io_module->numFunctions) {
+    ఒకవేళ (ప్రారంభం_Func_సూచీ < io_module->అంకె_Functions) {
         // Spec: start function type must be [] -> []
-        IM3Function func = &io_module->functions[startFuncIndex];
-        if (func->funcType) {
+        IM3Function func = &io_module->functions[ప్రారంభం_Func_సూచీ];
+        ఒకవేళ (func->funcType) {
             _throwif(m3Err_wasmMalformed,
-                     func->funcType->numArgs != 0 || func->funcType->numRets != 0);
+                     func->funcType->అంకె_వాదనలు != 0 || func->funcType->అంకె_Rets != 0);
         }
 
-        io_module->startFunction = startFuncIndex;
-    } else {
-        result = "start function index out of bounds";
+        io_module->ప్రారంభం_Function = ప్రారంభం_Func_సూచీ;
+    } లేకపోతే {
+        ఫలితం = "start function index out of bounds";
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
 // o_type, when asked for, reports what the expression leaves on the stack, so
 // the caller can check it against the type the expression is initializing.
-M3Result Parse_InitExprTyped (M3Module* io_module, bytes_t* io_bytes, cbytes_t i_end, m3type_t* o_type)
+M3_ఫలితం Parse_Init_సమాసం_Typed (M3Module* io_module, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర, m3type_t* o_type)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
     // this doesn't generate code pages. just walks the wasm bytecode to find the end
 
-#if defined(d_m3PreferStaticAlloc)
-    static M3Compilation compilation;
-#else
+#ఒకవేళ defined(d_m3PreferStaticAlloc)
+    స్థిర M3Compilation compilation;
+#లేకపోతే
     M3Compilation compilation;
-#endif
-    compilation = (M3Compilation){ .runtime = NULL, .module = io_module, .wasm = *io_bytes, .wasmEnd = i_end, .isInitExpr = true };
+#అయితే_ముగింపు
+    compilation = (M3Compilation){ .runtime = ఖాళీ, .module = io_module, .wasm = *io_బైట్లు, .wasm_చివర = i_చివర, .is_Init_సమాసం = true };
 
-    result = CompileBlockStatements(&compilation);
+    ఫలితం = Compile_ఖండం_Statements(&compilation);
 
-    *io_bytes = compilation.wasm;
+    *io_బైట్లు = compilation.wasm;
 
-    if (o_type) {
-        *o_type = compilation.stackIndex ? compilation.typeStack[compilation.stackIndex - 1]
+    ఒకవేళ (o_type) {
+        *o_type = compilation.దొంతర_సూచీ ? compilation.type_దొంతర[compilation.దొంతర_సూచీ - 1]
                                          : (m3type_t)c_m3Type_none;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result Parse_InitExpr (M3Module* io_module, bytes_t* io_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Init_సమాసం (M3Module* io_module, బైట్లు_t* io_బైట్లు, cbytes_t i_చివర)
 {
-    return Parse_InitExprTyped(io_module, io_bytes, i_end, NULL);
+    తిరిగి Parse_Init_సమాసం_Typed(io_module, io_బైట్లు, i_చివర, ఖాళీ);
 }
 
 
-M3Result ParseSection_Element (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Element (IM3Module io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32     numSegments;
-    bytes_t pos;
-_   (ReadLEB_u32(&numSegments, &i_bytes, i_end));                            m3log (parse, "** Element [%d]", numSegments);
+    u32     అంకె_Segments;
+    బైట్లు_t pos;
+_   (ReadLEB_u32(&అంకె_Segments, &i_బైట్లు, i_చివర));                            m3log (parse, "** Element [%d]", అంకె_Segments);
 
-    _throwif("too many element segments", numSegments > d_m3MaxSaneElementSegments);
+    _throwif("too many element segments", అంకె_Segments > d_m3MaxSaneElementSegments);
 
-    io_module->elementSegments = m3_AllocArray(M3ElementSegment, numSegments);
+    io_module->elementSegments = m3_AllocArray(M3ElementSegment, అంకె_Segments);
     _throwifnull(io_module->elementSegments);
-    io_module->numElementSegments = numSegments;
-    io_module->elementSectionEnd  = i_end;
+    io_module->అంకె_Element_Segments = అంకె_Segments;
+    io_module->element_Section_చివర  = i_చివర;
 
     // Records where each segment's parts live; the elements are resolved later,
     // in InitTableAndElements.
-    pos = i_bytes;
-    for (u32 i = 0; i < numSegments; ++i) {
+    pos = i_బైట్లు;
+    కొరకు (u32 i = 0; i < అంకె_Segments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         u32 flags;
-_       (ReadLEB_u32(&flags, &pos, i_end));
-#if d_m3HasRefTypes
+_       (ReadLEB_u32(&flags, &pos, i_చివర));
+#ఒకవేళ d_m3HasRefTypes
         _throwif(m3Err_wasmMalformed, flags > 7);
-#else
-        _throwif(m3Err_wasmMalformed, flags != c_m3Elem_active);
-#endif
+#లేకపోతే
+        _throwif(m3Err_wasmMalformed, flags != c_m3_Elem_చురుకైన);
+#అయితే_ముగింపు
 
-        segment->mode   = flags & 0x3;
-        segment->isExpr = (flags & 0x4) != 0;
+        segment->బహుళకం   = flags & 0x3;
+        segment->is_సమాసం = (flags & 0x4) != 0;
         segment->type   = c_m3Type_funcref;
 
-        if (segment->mode == c_m3Elem_activeIdx) {
-_           (ReadLEB_u32(&segment->tableIndex, &pos, i_end));
+        ఒకవేళ (segment->బహుళకం == c_m3_Elem_చురుకైన_Idx) {
+_           (ReadLEB_u32(&segment->పట్టిక_సూచీ, &pos, i_చివర));
         }
 
-        bool isActive = (segment->mode == c_m3Elem_active or segment->mode == c_m3Elem_activeIdx);
+        bool is_చురుకైన = (segment->బహుళకం == c_m3_Elem_చురుకైన or segment->బహుళకం == c_m3_Elem_చురుకైన_Idx);
 
-        if (isActive) {
-            _throwif(m3Err_wasmMalformed, segment->tableIndex >= io_module->numTables);
+        ఒకవేళ (is_చురుకైన) {
+            _throwif(m3Err_wasmMalformed, segment->పట్టిక_సూచీ >= io_module->అంకె_Tables);
 
-            segment->initExpr = pos;
-_           (Parse_InitExpr(io_module, &pos, i_end));
-            segment->initExprSize = (u32)(pos - segment->initExpr);
-            _throwif(m3Err_wasmMissingInitExpr, segment->initExprSize <= 1);
+            segment->init_సమాసం = pos;
+_           (Parse_Init_సమాసం(io_module, &pos, i_చివర));
+            segment->init_సమాసం_కొలత = (u32)(pos - segment->init_సమాసం);
+            _throwif(m3_Err_wasm_Missing_Init_సమాసం, segment->init_సమాసం_కొలత <= 1);
         }
 
         // Only the table-0 active form leaves the element type implicit
-        if (segment->mode != c_m3Elem_active) {
-            if (segment->isExpr) {
-_               (ParseValueType(io_module, &segment->type, &pos, i_end));
-                _throwif(m3Err_wasmMalformed, not IsRefType(BaseTypeOf(segment->type)));
-            } else {
-                u8 elemKind;
-_               (Read_u8(&elemKind, &pos, i_end));
-                _throwif(m3Err_wasmMalformed, elemKind != 0x00);   // funcref
+        ఒకవేళ (segment->బహుళకం != c_m3_Elem_చురుకైన) {
+            ఒకవేళ (segment->is_సమాసం) {
+_               (Parse_విలువ_Type(io_module, &segment->type, &pos, i_చివర));
+                _throwif(m3Err_wasmMalformed, not IsRefType(పునాది_Type_యొక్క(segment->type)));
+            } లేకపోతే {
+                u8 elem_రకం;
+_               (Read_u8(&elem_రకం, &pos, i_చివర));
+                _throwif(m3Err_wasmMalformed, elem_రకం != 0x00);   // funcref
             }
         }
 
-        if (isActive) {
-            _throwif(m3Err_typeMismatch, io_module->tables[segment->tableIndex]->type != segment->type);
+        ఒకవేళ (is_చురుకైన) {
+            _throwif(m3Err_typeMismatch, io_module->tables[segment->పట్టిక_సూచీ]->type != segment->type);
         }
 
-_       (ReadLEB_u32(&segment->numElements, &pos, i_end));
-        _throwif("table overflow", segment->numElements > d_m3MaxSaneTableSize);
+_       (ReadLEB_u32(&segment->అంకె_Elements, &pos, i_చివర));
+        _throwif("table overflow", segment->అంకె_Elements > d_m3_Max_Sane_పట్టిక_కొలత);
 
         segment->elements = pos;
 
-        for (u32 e = 0; e < segment->numElements; ++e) {
-            if (segment->isExpr) {
-_               (Parse_InitExpr(io_module, &pos, i_end))
-            } else {
-                u32 funcIndex;
-_               (ReadLEB_u32(&funcIndex, &pos, i_end));
-                _throwif("function index out of range", funcIndex >= io_module->numFunctions);
-_               (Module_DeclareFunction(io_module, funcIndex));
+        కొరకు (u32 e = 0; e < segment->అంకె_Elements; ++e) {
+            ఒకవేళ (segment->is_సమాసం) {
+_               (Parse_Init_సమాసం(io_module, &pos, i_చివర))
+            } లేకపోతే {
+                u32 func_సూచీ;
+_               (ReadLEB_u32(&func_సూచీ, &pos, i_చివర));
+                _throwif("function index out of range", func_సూచీ >= io_module->అంకె_Functions);
+_               (Module_DeclareFunction(io_module, func_సూచీ));
             }
         }
     }
 
-    _throwif(m3Err_wasmMalformed, pos != i_end);           // section size mismatch
+    _throwif(m3Err_wasmMalformed, pos != i_చివర);           // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Code (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Section_సంకేతం (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result;
+    M3_ఫలితం ఫలితం;
 
-    u32 numFunctions;
-_   (ReadLEB_u32(&numFunctions, &i_bytes, i_end));                                  m3log (parse, "** Code [%d]", numFunctions);
+    u32 అంకె_Functions;
+_   (ReadLEB_u32(&అంకె_Functions, &i_బైట్లు, i_చివర));                                  m3log (parse, "** Code [%d]", అంకె_Functions);
 
-    if (numFunctions != io_module->numFunctions - io_module->numFuncImports) {
+    ఒకవేళ (అంకె_Functions != io_module->అంకె_Functions - io_module->అంకె_Func_Imports) {
         _throw("mismatched function count in code section");
     }
 
-    for (u32 f = 0; f < numFunctions; ++f) {
-        const u8* start = i_bytes;
+    కొరకు (u32 f = 0; f < అంకె_Functions; ++f) {
+        స్థిరరాశి u8* ప్రారంభం = i_బైట్లు;
 
-        u32 size;
-_       (ReadLEB_u32(&size, &i_bytes, i_end));
+        u32 కొలత;
+_       (ReadLEB_u32(&కొలత, &i_బైట్లు, i_చివర));
 
-        if (size) {
-            i_bytes += size;
+        ఒకవేళ (కొలత) {
+            i_బైట్లు += కొలత;
 
-            if (i_bytes <= i_end) {
+            ఒకవేళ (i_బైట్లు <= i_చివర) {
                 /*
                 const u8 * ptr = i_bytes - size;
 
@@ -1183,14 +1183,14 @@ _                   (NormalizeType (& normalType, wasmType));
                 }
                  */
 
-                IM3Function func = Module_GetFunction(io_module, f + io_module->numFuncImports);
+                IM3Function func = Module_GetFunction(io_module, f + io_module->అంకె_Func_Imports);
 
                 func->module  = io_module;
-                func->wasm    = start;
-                func->wasmEnd = i_bytes;
+                func->wasm    = ప్రారంభం;
+                func->wasm_చివర = i_బైట్లు;
                 //func->ownsWasmCode = io_module->hasWasmCodeCopy;
                 //                func->numLocals = numLocals;
-            } else {
+            } లేకపోతే {
                 _throw(m3Err_wasmSectionOverrun);
             }
         }
@@ -1198,181 +1198,181 @@ _                   (NormalizeType (& normalType, wasmType));
 
     _catch:
 
-    if (not result and i_bytes != i_end) {
-        result = m3Err_wasmSectionUnderrun;
+    ఒకవేళ (not ఫలితం and i_బైట్లు != i_చివర) {
+        ఫలితం = m3Err_wasmSectionUnderrun;
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Data (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Section_దత్తాంశం (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numDataSegments;
-_   (ReadLEB_u32(&numDataSegments, &i_bytes, i_end));                               m3log (parse, "** Data [%d]", numDataSegments);
+    u32 అంకె_దత్తాంశం_Segments;
+_   (ReadLEB_u32(&అంకె_దత్తాంశం_Segments, &i_బైట్లు, i_చివర));                               m3log (parse, "** Data [%d]", అంకె_దత్తాంశం_Segments);
 
-    _throwif("too many data segments", numDataSegments > d_m3MaxSaneDataSegments);
+    _throwif("too many data segments", అంకె_దత్తాంశం_Segments > d_m3_Max_Sane_దత్తాంశం_Segments);
 
-    io_module->dataSegments = m3_AllocArray(M3DataSegment, numDataSegments);
-    _throwifnull(io_module->dataSegments);
-    io_module->numDataSegments = numDataSegments;
+    io_module->దత్తాంశం_Segments = m3_AllocArray(M3_దత్తాంశం_Segment, అంకె_దత్తాంశం_Segments);
+    _throwifnull(io_module->దత్తాంశం_Segments);
+    io_module->అంకె_దత్తాంశం_Segments = అంకె_దత్తాంశం_Segments;
 
-    for (u32 i = 0; i < numDataSegments; ++i) {
-        M3DataSegment* segment = &io_module->dataSegments[i];
+    కొరకు (u32 i = 0; i < అంకె_దత్తాంశం_Segments; ++i) {
+        M3_దత్తాంశం_Segment* segment = &io_module->దత్తాంశం_Segments[i];
 
         // 0: active in memory 0, 1: passive, 2: active with an explicit memory index
         u32 flags;
-_       (ReadLEB_u32(&flags, &i_bytes, i_end));
+_       (ReadLEB_u32(&flags, &i_బైట్లు, i_చివర));
         _throwif(m3Err_wasmMalformed, flags > 2);
 
         segment->isPassive = (flags == 1);
 
-        if (flags == 2) {
-_           (ReadLEB_u32(&segment->memoryRegion, &i_bytes, i_end));
+        ఒకవేళ (flags == 2) {
+_           (ReadLEB_u32(&segment->జ్ఞాపకం_Region, &i_బైట్లు, i_చివర));
         }
 
-        if (not segment->isPassive) {
+        ఒకవేళ (not segment->isPassive) {
             // The segment names the memory it initializes; only multi-memory
             // lets that be anything other than 0.
-#if !d_m3HasMultiMemory
-            _throwif(m3Err_wasmMalformed, segment->memoryRegion != 0);
-#endif
-            _throwif(m3Err_wasmMalformed, segment->memoryRegion >= io_module->numMemories);
+#ఒకవేళ !d_m3_Has_Multi_జ్ఞాపకం
+            _throwif(m3Err_wasmMalformed, segment->జ్ఞాపకం_Region != 0);
+#అయితే_ముగింపు
+            _throwif(m3Err_wasmMalformed, segment->జ్ఞాపకం_Region >= io_module->అంకె_Memories);
 
-            segment->initExpr = i_bytes;
-_           (Parse_InitExpr(io_module, &i_bytes, i_end));
-            segment->initExprSize = (u32)(i_bytes - segment->initExpr);
+            segment->init_సమాసం = i_బైట్లు;
+_           (Parse_Init_సమాసం(io_module, &i_బైట్లు, i_చివర));
+            segment->init_సమాసం_కొలత = (u32)(i_బైట్లు - segment->init_సమాసం);
 
-            _throwif(m3Err_wasmMissingInitExpr, segment->initExprSize <= 1);
+            _throwif(m3_Err_wasm_Missing_Init_సమాసం, segment->init_సమాసం_కొలత <= 1);
         }
 
-_       (ReadLEB_u32(&segment->size, &i_bytes, i_end));
-        segment->data = i_bytes;                                                    m3log (parse, "    segment [%u]  memory: %u;  expr-size: %d;  size: %d",
-                                                                                       i, segment->memoryRegion, segment->initExprSize, segment->size);
-        i_bytes += segment->size;
+_       (ReadLEB_u32(&segment->కొలత, &i_బైట్లు, i_చివర));
+        segment->దత్తాంశం = i_బైట్లు;                                                    m3log (parse, "    segment [%u]  memory: %u;  expr-size: %d;  size: %d",
+                                                                                       i, segment->జ్ఞాపకం_Region, segment->init_సమాసం_కొలత, segment->కొలత);
+        i_బైట్లు += segment->కొలత;
 
-        _throwif("data segment underflow", i_bytes > i_end);
+        _throwif("data segment underflow", i_బైట్లు > i_చివర);
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
     _catch:
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_DataCount (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Section_దత్తాంశం_లెక్క (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-_   (ReadLEB_u32(&io_module->dataCount, &i_bytes, i_end));                       m3log (parse, "** DataCount [%d]", io_module->dataCount);
+_   (ReadLEB_u32(&io_module->దత్తాంశం_లెక్క, &i_బైట్లు, i_చివర));                       m3log (parse, "** DataCount [%d]", io_module->దత్తాంశం_లెక్క);
 
-    io_module->hasDataCount = true;
+    io_module->has_దత్తాంశం_లెక్క = true;
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Memory (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం Parse_Section_జ్ఞాపకం (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numMemories;
-_   (ReadLEB_u32(&numMemories, &i_bytes, i_end));                                m3log (parse, "** Memory [%d]", numMemories);
+    u32 అంకె_Memories;
+_   (ReadLEB_u32(&అంకె_Memories, &i_బైట్లు, i_చివర));                                m3log (parse, "** Memory [%d]", అంకె_Memories);
 
-#if d_m3HasMultiMemory
-    _throwif(m3Err_tooManyMemorySections,
-             (u64)numMemories + io_module->numMemories > d_m3MaxSaneMemoriesCount);
-#else
+#ఒకవేళ d_m3_Has_Multi_జ్ఞాపకం
+    _throwif(m3_Err_too_Many_జ్ఞాపకం_Sections,
+             (u64)అంకె_Memories + io_module->అంకె_Memories > d_m3_Max_Sane_Memories_లెక్క);
+#లేకపోతే
     // MVP: at most one memory, counting any that was already imported
-    _throwif(m3Err_tooManyMemorySections, numMemories > 1);
-    _throwif(m3Err_tooManyMemorySections, (u64)numMemories + io_module->numMemories > 1);
-#endif
+    _throwif(m3_Err_too_Many_జ్ఞాపకం_Sections, అంకె_Memories > 1);
+    _throwif(m3_Err_too_Many_జ్ఞాపకం_Sections, (u64)అంకె_Memories + io_module->అంకె_Memories > 1);
+#అయితే_ముగింపు
 
-    for (u32 i = 0; i < numMemories; ++i) {
-        M3MemoryInfo info;
-_       (ParseType_Memory(&info, &i_bytes, i_end));
-_       (Module_AddMemory(io_module, NULL, &info, false /* isImport */));
+    కొరకు (u32 i = 0; i < అంకె_Memories; ++i) {
+        M3_జ్ఞాపకం_Info info;
+_       (Parse_Type_జ్ఞాపకం(&info, &i_బైట్లు, i_చివర));
+_       (Module_కూడు_జ్ఞాపకం(io_module, ఖాళీ, &info, false /* isImport */));
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Global (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Global (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    u32 numGlobals;
-_   (ReadLEB_u32(&numGlobals, &i_bytes, i_end));                                    m3log (parse, "** Global [%d]", numGlobals);
+    u32 అంకె_Globals;
+_   (ReadLEB_u32(&అంకె_Globals, &i_బైట్లు, i_చివర));                                    m3log (parse, "** Global [%d]", అంకె_Globals);
 
-    _throwif("too many globals", numGlobals > d_m3MaxSaneGlobalsCount);
+    _throwif("too many globals", అంకె_Globals > d_m3_Max_Sane_Globals_లెక్క);
 
-    for (u32 i = 0; i < numGlobals; ++i) {
+    కొరకు (u32 i = 0; i < అంకె_Globals; ++i) {
         m3type_t type = c_m3Type_none;
         u8       isMutable;
 
-_       (ParseValueType(io_module, &type, &i_bytes, i_end));
-_       (ReadLEB_u7(&isMutable, &i_bytes, i_end));                                    m3log (parse, "    global: [%d] %s mutable: %d", i, c_waTypes [BaseTypeOf(type)],   (u32) isMutable);
+_       (Parse_విలువ_Type(io_module, &type, &i_బైట్లు, i_చివర));
+_       (ReadLEB_u7(&isMutable, &i_బైట్లు, i_చివర));                                    m3log (parse, "    global: [%d] %s mutable: %d", i, c_waTypes [పునాది_Type_యొక్క(type)],   (u32) isMutable);
         _throwif(m3Err_wasmMalformed, isMutable > 1);
 
         IM3Global global;
-_       (Module_AddGlobal(io_module, &global, type, isMutable, false /* isImport */));
+_       (Module_కూడు_Global(io_module, &global, type, isMutable, false /* isImport */));
 
-        global->initExpr = i_bytes;
-_       (Parse_InitExpr(io_module, &i_bytes, i_end));
-        global->initExprSize = (u32)(i_bytes - global->initExpr);
+        global->init_సమాసం = i_బైట్లు;
+_       (Parse_Init_సమాసం(io_module, &i_బైట్లు, i_చివర));
+        global->init_సమాసం_కొలత = (u32)(i_బైట్లు - global->init_సమాసం);
 
-        _throwif(m3Err_wasmMissingInitExpr, global->initExprSize <= 1);
+        _throwif(m3_Err_wasm_Missing_Init_సమాసం, global->init_సమాసం_కొలత <= 1);
     }
 
-    _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
+    _throwif(m3Err_wasmMalformed, i_బైట్లు != i_చివర);      // section size mismatch
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Name (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Name (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    cstr_t name = NULL;
+    cstr_t name = ఖాళీ;
 
-    while (i_bytes < i_end) {
+    అయితే (i_బైట్లు < i_చివర) {
         u8  nameType;
-        u32 payloadLength;
+        u32 payload_నిడివి;
 
-_       (ReadLEB_u7(&nameType, &i_bytes, i_end));
-_       (ReadLEB_u32(&payloadLength, &i_bytes, i_end));
+_       (ReadLEB_u7(&nameType, &i_బైట్లు, i_చివర));
+_       (ReadLEB_u32(&payload_నిడివి, &i_బైట్లు, i_చివర));
 
-        bytes_t start = i_bytes;
-        _throwif(m3Err_wasmSectionOverrun, payloadLength > (size_t)(i_end - start));
+        బైట్లు_t ప్రారంభం = i_బైట్లు;
+        _throwif(m3Err_wasmSectionOverrun, payload_నిడివి > (size_t)(i_చివర - ప్రారంభం));
 
-        if (nameType == 1) {
-            u32 numNames;
-_           (ReadLEB_u32(&numNames, &i_bytes, i_end));
+        ఒకవేళ (nameType == 1) {
+            u32 అంకె_పేర్లు;
+_           (ReadLEB_u32(&అంకె_పేర్లు, &i_బైట్లు, i_చివర));
 
-            _throwif("too many names", numNames > d_m3MaxSaneFunctionsCount);
+            _throwif("too many names", అంకె_పేర్లు > d_m3_Max_Sane_Functions_లెక్క);
 
-            for (u32 i = 0; i < numNames; ++i) {
+            కొరకు (u32 i = 0; i < అంకె_పేర్లు; ++i) {
                 u32 index;
-_               (ReadLEB_u32(&index, &i_bytes, i_end));
-_               (Read_utf8(&name, &i_bytes, i_end));
+_               (ReadLEB_u32(&index, &i_బైట్లు, i_చివర));
+_               (Read_utf8(&name, &i_బైట్లు, i_చివర));
 
-                if (index < io_module->numFunctions) {
+                ఒకవేళ (index < io_module->అంకె_Functions) {
                     IM3Function func = &(io_module->functions[index]);
-                    if (func->numNames == 0) {
-                        func->names[0] = name;        m3log (parse, "    naming function%5d:  %s", index, name);
-                        func->numNames = 1;
+                    ఒకవేళ (func->అంకె_పేర్లు == 0) {
+                        func->పేర్లు[0] = name;        m3log (parse, "    naming function%5d:  %s", index, name);
+                        func->అంకె_పేర్లు = 1;
 
-                        name = NULL; // transfer ownership
+                        name = ఖాళీ; // transfer ownership
                     }
                     //                          else m3log (parse, "prenamed: %s", io_module->functions [index].name);
                 }
@@ -1381,44 +1381,44 @@ _               (Read_utf8(&name, &i_bytes, i_end));
             }
         }
 
-        i_bytes = start + payloadLength;
+        i_బైట్లు = ప్రారంభం + payload_నిడివి;
     }
 
-    _catch: return result;
+    _catch: తిరిగి ఫలితం;
 }
 
 
-M3Result ParseSection_Custom (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end)
+M3_ఫలితం ParseSection_Custom (M3Module* io_module, బైట్లు_t i_బైట్లు, cbytes_t i_చివర)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    cstr_t name = NULL;
-_   (Read_utf8(&name, &i_bytes, i_end));
+    cstr_t name = ఖాళీ;
+_   (Read_utf8(&name, &i_బైట్లు, i_చివర));
                                                                                     m3log (parse, "** Custom: '%s'", name);
-    if (strcmp(name, "name") == 0) {
-_       (ParseSection_Name(io_module, i_bytes, i_end));
-#if d_m3HasSnapshots
+    ఒకవేళ (strcmp(name, "name") == 0) {
+_       (ParseSection_Name(io_module, i_బైట్లు, i_చివర));
+#ఒకవేళ d_m3HasSnapshots
         // "snapshot" is the unnamed default, "snapshot.<name>" a named one. A bare
         // "snapshot." names nothing and is not either of them, so it is left to the
         // embedder's handler.
-    } else if (strcmp(name, "snapshot") == 0 || (strlen(name) > 9 && strncmp(name, "snapshot.", 9) == 0)) {
+    } లేకపోతే ఒకవేళ (strcmp(name, "snapshot") == 0 || (అక్షరశ్రేణి_పొడవు(name) > 9 && అక్షరశ్రేణి_పోలిక(name, "snapshot.", 9) == 0)) {
         // Two of the same name are kept, not refused: a custom section does not
         // decide whether the module is valid. Selecting that name is what fails.
         cstr_t              snapName = (name[8] == '.') ? name + 9 : "";
         M3EmbeddedSnapshot* snap     = m3_AllocStruct(M3EmbeddedSnapshot);
         _throwifnull(snap);
-        snap->name = (cstr_t)m3_CopyMem(snapName, strlen(snapName) + 1);
-        if (!snap->name) {
+        snap->name = (cstr_t)m3_CopyMem(snapName, అక్షరశ్రేణి_పొడవు(snapName) + 1);
+        ఒకవేళ (!snap->name) {
             m3_Free(snap);
             _throw(m3Err_mallocFailed);
         }
-        snap->data           = i_bytes;
-        snap->size           = (u32)(i_end - i_bytes);
-        snap->next           = io_module->snapshots;
+        snap->దత్తాంశం           = i_బైట్లు;
+        snap->కొలత           = (u32)(i_చివర - i_బైట్లు);
+        snap->తదుపరి           = io_module->snapshots;
         io_module->snapshots = snap;
-#endif
-    } else if (io_module->environment->customSectionHandler) {
-_       (io_module->environment->customSectionHandler(io_module, name, i_bytes, i_end));
+#అయితే_ముగింపు
+    } లేకపోతే ఒకవేళ (io_module->environment->customSectionHandler) {
+_       (io_module->environment->customSectionHandler(io_module, name, i_బైట్లు, i_చివర));
     }
 
     // the section name is freed on the error path too: a malformed "name"
@@ -1427,123 +1427,123 @@ _       (io_module->environment->customSectionHandler(io_module, name, i_bytes, 
 
     m3_Free(name);
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result ParseModuleSection (M3Module* o_module, u8 i_sectionType, bytes_t i_bytes, u32 i_numBytes)
+M3_ఫలితం ParseModuleSection (M3Module* o_module, u8 i_sectionType, బైట్లు_t i_బైట్లు, u32 i_అంకె_బైట్లు)
 {
-    M3Result result = m3Err_none;
+    M3_ఫలితం ఫలితం = m3Err_none;
 
-    typedef M3Result (*M3Parser)(M3Module*, bytes_t, cbytes_t);
+    రకనిర్వచనం M3_ఫలితం (*M3Parser)(M3Module*, బైట్లు_t, cbytes_t);
 
-    static M3Parser s_parsers[] = {
+    స్థిర M3Parser s_parsers[] = {
         ParseSection_Custom,    // 0
         ParseSection_Type,      // 1
         ParseSection_Import,    // 2
         ParseSection_Function,  // 3
-        ParseType_Table,        // 4
-        ParseSection_Memory,    // 5
+        Parse_Type_పట్టిక,        // 4
+        Parse_Section_జ్ఞాపకం,    // 5
         ParseSection_Global,    // 6
         ParseSection_Export,    // 7
-        ParseSection_Start,     // 8
+        Parse_Section_ప్రారంభం,     // 8
         ParseSection_Element,   // 9
-        ParseSection_Code,      // 10
-        ParseSection_Data,      // 11
-        ParseSection_DataCount, // 12
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-        ParseSection_Tag,       // 13
-#endif
+        Parse_Section_సంకేతం,      // 10
+        Parse_Section_దత్తాంశం,      // 11
+        Parse_Section_దత్తాంశం_లెక్క, // 12
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
+        Parse_Section_ట్యాగ్,       // 13
+#అయితే_ముగింపు
     };
 
-    M3Parser parser = NULL;
+    M3Parser parser = ఖాళీ;
 
-    if (i_sectionType < M3_COUNT_OF(s_parsers)) {
+    ఒకవేళ (i_sectionType < M3_లెక్క_యొక్క(s_parsers)) {
         parser = s_parsers[i_sectionType];
     }
 
-    if (parser) {
-        cbytes_t end = i_bytes + i_numBytes;
-        result       = parser(o_module, i_bytes, end);
-    } else {
+    ఒకవేళ (parser) {
+        cbytes_t చివర = i_బైట్లు + i_అంకె_బైట్లు;
+        ఫలితం       = parser(o_module, i_బైట్లు, చివర);
+    } లేకపోతే {
         m3log(parse, " skipped section type: %d", (u32)i_sectionType);
     }
 
-    return result;
+    తిరిగి ఫలితం;
 }
 
 
-M3Result m3_ParseModule (IM3Environment i_environment, IM3Module* o_module, cbytes_t i_bytes, u32 i_numBytes)
+M3_ఫలితం m3_ParseModule (IM3Environment i_environment, IM3Module* o_module, cbytes_t i_బైట్లు, u32 i_అంకె_బైట్లు)
 {
-    IM3Module module;                                                               m3log (parse, "load module: %d bytes", i_numBytes);
+    IM3Module module;                                                               m3log (parse, "load module: %d bytes", i_అంకె_బైట్లు);
 _try {
     module = m3_AllocStruct(M3Module);
     _throwifnull(module);
-    module->name          = ".unnamed";                                             m3log (parse, "load module: %d bytes", i_numBytes);
-    module->startFunction = -1;
+    module->name          = ".unnamed";                                             m3log (parse, "load module: %d bytes", i_అంకె_బైట్లు);
+    module->ప్రారంభం_Function = -1;
     //module->hasWasmCodeCopy = false;
     module->environment = i_environment;
 
-    const u8* pos = i_bytes;
-    const u8* end = pos + i_numBytes;
+    స్థిరరాశి u8* pos = i_బైట్లు;
+    స్థిరరాశి u8* చివర = pos + i_అంకె_బైట్లు;
 
-    module->wasmStart = pos;
-    module->wasmEnd   = end;
+    module->wasm_ప్రారంభం = pos;
+    module->wasm_చివర   = చివర;
 
-    u32 magic, version;
-_   (Read_u32(&magic, &pos, end));
-_   (Read_u32(&version, &pos, end));
+    u32 magic, సంస్కరణ;
+_   (Read_u32(&magic, &pos, చివర));
+_   (Read_u32(&సంస్కరణ, &pos, చివర));
 
     _throwif(m3Err_wasmMalformed, magic != 0x6d736100);
-    _throwif(m3Err_incompatibleWasmVersion, version != 1);
+    _throwif(m3_Err_incompatible_Wasm_సంస్కరణ, సంస్కరణ != 1);
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ఒకవేళ d_m3HasExceptionHandling || d_m3_Has_దొంతర_Switching
     // the tag section sits between memory (5) and global (6)
-    static const u8 sectionsOrder[] = { 1, 2, 3, 4, 5, 13, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
-#else
-    static const u8 sectionsOrder[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
-#endif
+    స్థిర స్థిరరాశి u8 sections_క్రమం[] = { 1, 2, 3, 4, 5, 13, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
+#లేకపోతే
+    స్థిర స్థిరరాశి u8 sections_క్రమం[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
+#అయితే_ముగింపు
     u8 expectedSection = 0;
 
-    while (pos < end) {
+    అయితే (pos < చివర) {
         u8 section;
-_       (ReadLEB_u7(&section, &pos, end));
+_       (ReadLEB_u7(&section, &pos, చివర));
 
-        if (section != 0) {
+        ఒకవేళ (section != 0) {
             // Ensure sections appear only once and in order
-            while (sectionsOrder[expectedSection++] != section) {
-                _throwif(m3Err_misorderedWasmSection, expectedSection >= M3_COUNT_OF(sectionsOrder) - 1);
+            అయితే (sections_క్రమం[expectedSection++] != section) {
+                _throwif(m3Err_misorderedWasmSection, expectedSection >= M3_లెక్క_యొక్క(sections_క్రమం) - 1);
             }
         }
 
-        u32 sectionLength;
-_       (ReadLEB_u32(&sectionLength, &pos, end));
-        _throwif(m3Err_wasmMalformed, pos + sectionLength > end);
+        u32 section_నిడివి;
+_       (ReadLEB_u32(&section_నిడివి, &pos, చివర));
+        _throwif(m3Err_wasmMalformed, pos + section_నిడివి > చివర);
 
-_       (ParseModuleSection(module, section, pos, sectionLength));
+_       (ParseModuleSection(module, section, pos, section_నిడివి));
 
-        pos += sectionLength;
+        pos += section_నిడివి;
     }
 
     // Spec: if a function section exists, a code section must also exist with
     // matching count (and vice versa). ParseSection_Code checks the other
     // direction; this covers the case where the code section is missing entirely.
-    if (module->numFunctions > module->numFuncImports) {
-        IM3Function firstNonImport = &module->functions[module->numFuncImports];
-        _throwif(m3Err_wasmMalformed, firstNonImport->wasm == NULL);
+    ఒకవేళ (module->అంకె_Functions > module->అంకె_Func_Imports) {
+        IM3Function మొదటి_Non_Import = &module->functions[module->అంకె_Func_Imports];
+        _throwif(m3Err_wasmMalformed, మొదటి_Non_Import->wasm == ఖాళీ);
     }
 
     // Spec: the data count section must agree with the data section, which may be absent
-    _throwif(m3Err_wasmMalformed, module->hasDataCount and module->dataCount != module->numDataSegments);
+    _throwif(m3Err_wasmMalformed, module->has_దత్తాంశం_లెక్క and module->దత్తాంశం_లెక్క != module->అంకె_దత్తాంశం_Segments);
 
 } _catch:
 
-    if (result) {
+    ఒకవేళ (ఫలితం) {
         m3_FreeModule(module);
-        module = NULL;
+        module = ఖాళీ;
     }
 
     *o_module = module;
 
-    return result;
+    తిరిగి ఫలితం;
 }

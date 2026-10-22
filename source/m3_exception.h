@@ -6,28 +6,28 @@
 //
 //  some macros to emulate try/catch
 
-#ifndef m3_exception_h
-#define m3_exception_h
+#నిర్వచితం_కాకపోతే m3_exception_h
+#నిర్వచించు m3_exception_h
 
-#include "m3_config.h"
+#అన్తర్భావ "m3_config.h"
 
-#if d_m3EnableExceptionBreakpoint
+#ఒకవేళ d_m3EnableExceptionBreakpoint
 
 // declared in m3_info.c
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message);
+శూన్య ExceptionBreakpoint (cstr_t i_exception, cstr_t i_సందేశం);
 
 #  define EXCEPTION_PRINT(ERROR) ExceptionBreakpoint (ERROR, (__FILE__ ":" M3_STR(__LINE__)))
 
-#else
+#లేకపోతే
 #  define EXCEPTION_PRINT(...)
-#endif
+#అయితే_ముగింపు
 
 
-#define _try                                M3Result result = m3Err_none;
-#define _(TRY)                              { result = TRY; if (M3_UNLIKELY(result)) { EXCEPTION_PRINT (result); goto _catch; } }
-#define _throw(ERROR)                       { result = ERROR; EXCEPTION_PRINT (result); goto _catch; }
-#define _throwif(ERROR, COND)               if (M3_UNLIKELY(COND)) { _throw(ERROR); }
+#నిర్వచించు _try                                M3_ఫలితం ఫలితం = m3Err_none;
+#నిర్వచించు _(TRY)                              { ఫలితం = TRY; ఒకవేళ (M3_UNLIKELY(ఫలితం)) { EXCEPTION_PRINT (ఫలితం); వెళ్ళు _catch; } }
+#నిర్వచించు _throw(ERROR)                       { ఫలితం = ERROR; EXCEPTION_PRINT (ఫలితం); వెళ్ళు _catch; }
+#నిర్వచించు _throwif(ERROR, COND)               ఒకవేళ (M3_UNLIKELY(COND)) { _throw(ERROR); }
 
-#define _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
+#నిర్వచించు _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
 
-#endif // m3_exception_h
+#అయితే_ముగింపు // m3_exception_h

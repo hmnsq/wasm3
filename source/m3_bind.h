@@ -5,16 +5,16 @@
 //  Copyright © 2020 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_bind_h
-#define m3_bind_h
+#నిర్వచితం_కాకపోతే m3_bind_h
+#నిర్వచించు m3_bind_h
 
-#include "m3_env.h"
+#అన్తర్భావ "m3_env.h"
 
 d_m3BeginExternC
 
-u8       ConvertTypeCharToTypeId (char i_code);
-M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature);
+u8       Convert_Type_Char_గమ్యం_Type_Id (అక్షరం i_సంకేతం);
+M3_ఫలితం Signature_గమ్యం_Func_Type (IM3FuncType* o_functionType, ccstr_t i_signature);
 
-d_m3EndExternC
+d_m3_చివర_Extern_C
 
-#endif /* m3_bind_h */
+#అయితే_ముగింపు /* m3_bind_h */

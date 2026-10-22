@@ -15,62 +15,62 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_none_h
-#define m3_host_none_h
+#నిర్వచితం_కాకపోతే m3_host_none_h
+#నిర్వచించు m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#అన్తర్భావ "m3_core.h"
+#అన్తర్భావ "m3_host.h"
 
-void* m3_HostStackBase (void)
+శూన్య* m3_Host_దొంతర_పునాది (శూన్య)
 {
-    return NULL;
+    తిరిగి ఖాళీ;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+శూన్య m3_Host_Install_అంతరాయం_Handler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (శూన్య)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+శూన్య m3_Host_Remove_అంతరాయం_Handler (శూన్య)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_Host_సమయం_Ms (శూన్య)
 {
-    return 0;
+    తిరిగి 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+శూన్య m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (శూన్య)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (స్థిరరాశి అక్షరం* i_మార్గం, size_t i_max_బైట్లు, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    తిరిగి m3_HostReadFile(i_మార్గం, i_max_బైట్లు, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+శూన్య m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->దత్తాంశం);
 
-    io_file->size = 0;
+    io_file->కొలత = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (స్థిరరాశి అక్షరం* i_from, స్థిరరాశి అక్షరం* i_గమ్యం)
 {
-    remove(i_to);
-    return rename(i_from, i_to) == 0;
+    remove(i_గమ్యం);
+    తిరిగి rename(i_from, i_గమ్యం) == 0;
 }
 
-#if d_m3GuardedMemory
+#ఒకవేళ d_m3_Guarded_జ్ఞాపకం
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
-#endif
+#అయితే_ముగింపు
 
-#endif // m3_host_none_h
+#అయితే_ముగింపు // m3_host_none_h

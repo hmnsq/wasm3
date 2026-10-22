@@ -5,79 +5,79 @@
 //  Copyright © 2019 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#ifndef wasm3_defs_h
-#define wasm3_defs_h
+#నిర్వచితం_కాకపోతే wasm3_defs_h
+#నిర్వచించు wasm3_defs_h
 
-#define M3_STR__(x) #x
-#define M3_STR(x)   M3_STR__(x)
+#నిర్వచించు M3_STR__(x) #x
+#నిర్వచించు M3_STR(x)   M3_STR__(x)
 
-#define M3_CONCAT__(a,b) a##b
-#define M3_CONCAT(a,b)   M3_CONCAT__(a,b)
+#నిర్వచించు M3_CONCAT__(a,b) a##b
+#నిర్వచించు M3_CONCAT(a,b)   M3_CONCAT__(a,b)
 
 // A declaration the API requires to be made but does not require to be read
-#if defined(__GNUC__) || defined(__clang__)
-#  define M3_UNUSED __attribute__((unused))
-#else
-#  define M3_UNUSED
-#endif
+#ఒకవేళ defined(__GNUC__) || defined(__clang__)
+#  define M3_వాడని __attribute__((వాడని))
+#లేకపోతే
+#  define M3_వాడని
+#అయితే_ముగింపు
 
 /*
  * Detect compiler
  */
 
-#if defined(__clang__)
+#ఒకవేళ defined(__clang__)
 #  define M3_COMPILER_CLANG 1
-#elif defined(__INTEL_COMPILER)
+#లేదావేళ defined(__INTEL_COMPILER)
 #  define M3_COMPILER_ICC 1
-#elif defined(__TINYC__)
+#లేదావేళ defined(__TINYC__)
 #  define M3_COMPILER_TCC 1
-#elif defined(__GNUC__) || defined(__GNUG__)
+#లేదావేళ defined(__GNUC__) || defined(__GNUG__)
 #  define M3_COMPILER_GCC 1
-#elif defined(_MSC_VER)
+#లేదావేళ defined(_MSC_VER)
 #  define M3_COMPILER_MSVC 1
-#else
+#లేకపోతే
 #  warning "Compiler not detected"
-#endif
+#అయితే_ముగింపు
 
-#if defined(M3_COMPILER_CLANG)
+#ఒకవేళ defined(M3_COMPILER_CLANG)
 #  define M3_CLANG_VER "Clang "  \
    M3_STR(__clang_major__) "."   \
    M3_STR(__clang_minor__) "."   \
    M3_STR(__clang_patchlevel__)
-#  if defined(WIN32)
+#  ఒకవేళ defined(WIN32)
 #    define M3_COMPILER_VER M3_CLANG_VER " for Windows"
-#  else
+#  లేకపోతే
 #    define M3_COMPILER_VER M3_CLANG_VER
 #  endif
-#elif defined(M3_COMPILER_GCC)
+#లేదావేళ defined(M3_COMPILER_GCC)
 #  define M3_COMPILER_VER "GCC " __VERSION__
-#elif defined(M3_COMPILER_ICC)
+#లేదావేళ defined(M3_COMPILER_ICC)
 #  define M3_COMPILER_VER __VERSION__
-#elif defined(M3_COMPILER_TCC)
+#లేదావేళ defined(M3_COMPILER_TCC)
 #  define M3_COMPILER_VER "TinyCC " M3_STR(__TINYC__)
-#elif defined(M3_COMPILER_MSVC)
+#లేదావేళ defined(M3_COMPILER_MSVC)
 #  define M3_COMPILER_VER "MSVC " M3_STR(_MSC_VER)
-#else
+#లేకపోతే
 #  define M3_COMPILER_VER "unknown"
-#endif
+#అయితే_ముగింపు
 
-#ifdef __has_feature
+#నిర్వచితమైతే __has_feature
 #  define M3_COMPILER_HAS_FEATURE(x)    __has_feature(x)
-#else
+#లేకపోతే
 #  define M3_COMPILER_HAS_FEATURE(x)    0
-#endif
+#అయితే_ముగింపు
 
-#ifdef __has_builtin
+#నిర్వచితమైతే __has_builtin
 #  define M3_COMPILER_HAS_BUILTIN(x)    __has_builtin(x)
-#else
+#లేకపోతే
 #  define M3_COMPILER_HAS_BUILTIN(x)    0
-#endif
+#అయితే_ముగింపు
 
-#ifdef __has_attribute
+#నిర్వచితమైతే __has_attribute
 #  define M3_COMPILER_HAS_ATTRIBUTE(x)  __has_attribute(x)
-#else
+#లేకపోతే
 #  define M3_COMPILER_HAS_ATTRIBUTE(x)  0
-#endif
+#అయితే_ముగింపు
 
 /*
  * Detect variable-length arrays
@@ -85,32 +85,32 @@
 
 // MSVC has no VLAs at all, and TinyCC's are unusable: it doesn't restore the
 // stack pointer when a goto leaves the scope a VLA was declared in
-#if defined(M3_COMPILER_MSVC) || defined(M3_COMPILER_TCC) || defined(__STDC_NO_VLA__)
+#ఒకవేళ defined(M3_COMPILER_MSVC) || defined(M3_COMPILER_TCC) || defined(__STDC_NO_VLA__)
 #  define M3_HAS_VLA 0
-#else
+#లేకపోతే
 #  define M3_HAS_VLA 1
-#endif
+#అయితే_ముగింపు
 
 /*
  * Detect endianness
  */
 
-#if defined(M3_COMPILER_MSVC)
+#ఒకవేళ defined(M3_COMPILER_MSVC)
 #  define M3_LITTLE_ENDIAN
-#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#లేదావేళ defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #  define M3_LITTLE_ENDIAN
-#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#లేదావేళ defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #  define M3_BIG_ENDIAN
-#else
+#లేకపోతే
 #  error "Byte order not detected"
-#endif
+#అయితే_ముగింపు
 
 /*
  * Detect platform
  */
 
-#if defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_GCC) || defined(M3_COMPILER_ICC) || defined(M3_COMPILER_TCC)
-#  if defined(__wasm__)
+#ఒకవేళ defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_GCC) || defined(M3_COMPILER_ICC) || defined(M3_COMPILER_TCC)
+#  ఒకవేళ defined(__wasm__)
 #    define M3_ARCH "wasm"
 
 #  elif defined(__x86_64__)
@@ -123,26 +123,26 @@
 #    define M3_ARCH "arm64-v8a"
 
 #  elif defined(__arm__)
-#    if defined(__ARM_ARCH_7A__)
-#      if defined(__ARM_NEON__)
-#        if defined(__ARM_PCS_VFP)
+#    ఒకవేళ defined(__ARM_ARCH_7A__)
+#      ఒకవేళ defined(__ARM_NEON__)
+#        ఒకవేళ defined(__ARM_PCS_VFP)
 #          define M3_ARCH "arm-v7a/NEON hard-float"
-#        else
+#        లేకపోతే
 #          define M3_ARCH "arm-v7a/NEON"
 #        endif
-#      else
-#        if defined(__ARM_PCS_VFP)
+#      లేకపోతే
+#        ఒకవేళ defined(__ARM_PCS_VFP)
 #          define M3_ARCH "arm-v7a hard-float"
-#        else
+#        లేకపోతే
 #          define M3_ARCH "arm-v7a"
 #        endif
 #      endif
-#    else
+#    లేకపోతే
 #      define M3_ARCH "arm"
 #    endif
 
 #  elif defined(__riscv)
-#    if defined(__riscv_32e)
+#    ఒకవేళ defined(__riscv_32e)
 #      define _M3_ARCH_RV "rv32e"
 #    elif __riscv_xlen == 128
 #      define _M3_ARCH_RV "rv128i"
@@ -151,35 +151,35 @@
 #    elif __riscv_xlen == 32
 #      define _M3_ARCH_RV "rv32i"
 #    endif
-#    if defined(__riscv_muldiv)
+#    ఒకవేళ defined(__riscv_muldiv)
 #      define _M3_ARCH_RV_M _M3_ARCH_RV "m"
-#    else
+#    లేకపోతే
 #      define _M3_ARCH_RV_M _M3_ARCH_RV
 #    endif
-#    if defined(__riscv_atomic)
+#    ఒకవేళ defined(__riscv_atomic)
 #      define _M3_ARCH_RV_A _M3_ARCH_RV_M "a"
-#    else
+#    లేకపోతే
 #      define _M3_ARCH_RV_A _M3_ARCH_RV_M
 #    endif
-#    if defined(__riscv_flen)
+#    ఒకవేళ defined(__riscv_flen)
 #      define _M3_ARCH_RV_F _M3_ARCH_RV_A "f"
-#    else
+#    లేకపోతే
 #      define _M3_ARCH_RV_F _M3_ARCH_RV_A
 #    endif
-#    if defined(__riscv_flen) && __riscv_flen >= 64
+#    ఒకవేళ defined(__riscv_flen) && __riscv_flen >= 64
 #      define _M3_ARCH_RV_D _M3_ARCH_RV_F "d"
-#    else
+#    లేకపోతే
 #      define _M3_ARCH_RV_D _M3_ARCH_RV_F
 #    endif
-#    if defined(__riscv_compressed)
+#    ఒకవేళ defined(__riscv_compressed)
 #      define _M3_ARCH_RV_C _M3_ARCH_RV_D "c"
-#    else
+#    లేకపోతే
 #      define _M3_ARCH_RV_C _M3_ARCH_RV_D
 #    endif
 #    define M3_ARCH _M3_ARCH_RV_C
 
 #  elif defined(__mips__)
-#    if defined(__MIPSEB__) && defined(__mips64)
+#    ఒకవేళ defined(__MIPSEB__) && defined(__mips64)
 #      define M3_ARCH "mips64 " _MIPS_ARCH
 #    elif defined(__MIPSEL__) && defined(__mips64)
 #      define M3_ARCH "mips64el " _MIPS_ARCH
@@ -190,18 +190,18 @@
 #    endif
 
 #  elif defined(__PPC__)
-#    if defined(__PPC64__) && defined(__LITTLE_ENDIAN__)
+#    ఒకవేళ defined(__PPC64__) && defined(__LITTLE_ENDIAN__)
 #      define M3_ARCH "ppc64le"
 #    elif defined(__PPC64__)
 #      define M3_ARCH "ppc64"
-#    else
+#    లేకపోతే
 #      define M3_ARCH "ppc"
 #    endif
 
 #  elif defined(__sparc__)
-#    if defined(__arch64__)
+#    ఒకవేళ defined(__arch64__)
 #      define M3_ARCH "sparc64"
-#    else
+#    లేకపోతే
 #      define M3_ARCH "sparc"
 #    endif
 
@@ -215,16 +215,16 @@
 #    define M3_ARCH "m68k"
 
 #  elif defined(__microblaze__)
-#    if defined(__MICROBLAZEEL__)
+#    ఒకవేళ defined(__MICROBLAZEEL__)
 #      define M3_ARCH "microblazeel"
-#    else
+#    లేకపోతే
 #      define M3_ARCH "microblaze"
 #    endif
 
 #  elif defined(__sh__)
-#    if defined(__SH4__)
+#    ఒకవేళ defined(__SH4__)
 #      define M3_ARCH "sh4"
-#    else
+#    లేకపోతే
 #      define M3_ARCH "sh"
 #    endif
 
@@ -237,10 +237,10 @@
 #  elif defined(__AVR__)
 #    define M3_ARCH "avr"
 #  endif
-#endif
+#అయితే_ముగింపు
 
-#if defined(M3_COMPILER_MSVC)
-#  if defined(_M_X64)
+#ఒకవేళ defined(M3_COMPILER_MSVC)
+#  ఒకవేళ defined(_M_X64)
 #    define M3_ARCH "x86_64"
 #  elif defined(_M_IX86)
 #    define M3_ARCH "i386"
@@ -249,62 +249,62 @@
 #  elif defined(_M_ARM)
 #    define M3_ARCH "arm"
 #  endif
-#endif
+#అయితే_ముగింపు
 
-#if !defined(M3_ARCH)
+#ఒకవేళ !defined(M3_ARCH)
 #  warning "Architecture not detected"
 #  define M3_ARCH "unknown"
-#endif
+#అయితే_ముగింపు
 
 /*
  * Byte swapping (for Big-Endian systems only)
  */
 
-#if defined(M3_COMPILER_MSVC)
+#ఒకవేళ defined(M3_COMPILER_MSVC)
 #  define m3_bswap16(x)     _byteswap_ushort((x))
 #  define m3_bswap32(x)     _byteswap_ulong((x))
 #  define m3_bswap64(x)     _byteswap_uint64((x))
-#elif defined(M3_COMPILER_GCC) && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))
+#లేదావేళ defined(M3_COMPILER_GCC) && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))
 // __builtin_bswap32/64 added in gcc 4.3, __builtin_bswap16 added in gcc 4.8
 #  define m3_bswap16(x)     __builtin_bswap16((x))
 #  define m3_bswap32(x)     __builtin_bswap32((x))
 #  define m3_bswap64(x)     __builtin_bswap64((x))
-#elif defined(M3_COMPILER_CLANG) && M3_COMPILER_HAS_BUILTIN(__builtin_bswap16)
+#లేదావేళ defined(M3_COMPILER_CLANG) && M3_COMPILER_HAS_BUILTIN(__builtin_bswap16)
 #  define m3_bswap16(x)     __builtin_bswap16((x))
 #  define m3_bswap32(x)     __builtin_bswap32((x))
 #  define m3_bswap64(x)     __builtin_bswap64((x))
-#elif defined(M3_COMPILER_ICC)
+#లేదావేళ defined(M3_COMPILER_ICC)
 #  define m3_bswap16(x)     __builtin_bswap16((x))
 #  define m3_bswap32(x)     __builtin_bswap32((x))
 #  define m3_bswap64(x)     __builtin_bswap64((x))
-#else
+#లేకపోతే
 #  include <stdint.h>
 #  ifdef __linux__
 #    include <endian.h>
 #  endif
-#  if defined(__bswap_16)
+#  ఒకవేళ defined(__bswap_16)
 #    define m3_bswap16(x)     __bswap_16((x))
 #    define m3_bswap32(x)     __bswap_32((x))
 #    define m3_bswap64(x)     __bswap_64((x))
-#  else
+#  లేకపోతే
 #    warning "Using naive (probably slow) bswap operations"
-static inline
+స్థిర అంతఃవరుస
 uint16_t m3_bswap16 (uint16_t x)
 {
-    return (((x >> 8) & 0xffu) | ((x & 0xffu) << 8));
+    తిరిగి (((x >> 8) & 0xffu) | ((x & 0xffu) << 8));
 }
-static inline
+స్థిర అంతఃవరుస
 uint32_t m3_bswap32 (uint32_t x)
 {
-    return (((x & 0xff000000u) >> 24) |
+    తిరిగి (((x & 0xff000000u) >> 24) |
             ((x & 0x00ff0000u) >> 8) |
             ((x & 0x0000ff00u) << 8) |
             ((x & 0x000000ffu) << 24));
 }
-static inline
+స్థిర అంతఃవరుస
 uint64_t m3_bswap64 (uint64_t x)
 {
-    return (((x & 0xff00000000000000ull) >> 56) |
+    తిరిగి (((x & 0xff00000000000000ull) >> 56) |
             ((x & 0x00ff000000000000ull) >> 40) |
             ((x & 0x0000ff0000000000ull) >> 24) |
             ((x & 0x000000ff00000000ull) >> 8) |
@@ -314,37 +314,37 @@ uint64_t m3_bswap64 (uint64_t x)
             ((x & 0x00000000000000ffull) << 56));
 }
 #  endif
-#endif
+#అయితే_ముగింపు
 
 /*
  * Bit ops
  */
-#define m3_isBitSet(val, pos)           ((val & (1 << pos)) != 0)
+#నిర్వచించు m3_is_బిట్టు_సమితి(val, pos)           ((val & (1 << pos)) != 0)
 
 /*
  * Other
  */
 
-#if defined(M3_COMPILER_GCC) || defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_ICC)
+#ఒకవేళ defined(M3_COMPILER_GCC) || defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_ICC)
 #  define M3_UNLIKELY(x) __builtin_expect(!!(x), 0)
 #  define M3_LIKELY(x)   __builtin_expect(!!(x), 1)
-#else
+#లేకపోతే
 #  define M3_UNLIKELY(x) (x)
 #  define M3_LIKELY(x)   (x)
-#endif
+#అయితే_ముగింపు
 
 // Compile-time assertion. NAME is an identifier naming the invariant; it shows
 // up in the diagnostic, so make it read like a sentence.
-#if defined(__cplusplus) && (__cplusplus >= 201103L)
+#ఒకవేళ defined(__cplusplus) && (__cplusplus >= 201103L)
 #  define M3_STATIC_ASSERT(COND, NAME)  static_assert((COND), #NAME)
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+#లేదావేళ defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #  define M3_STATIC_ASSERT(COND, NAME)  _Static_assert((COND), #NAME)
-#elif defined(M3_COMPILER_MSVC) && defined(__cplusplus)
+#లేదావేళ defined(M3_COMPILER_MSVC) && defined(__cplusplus)
 #  define M3_STATIC_ASSERT(COND, NAME)  static_assert((COND), #NAME)
-#else
+#లేకపోతే
 // Pre-C11: a negative array size is the portable stand-in. Suffixed with the
 // line number so several assertions can share a translation unit.
-#  define M3_STATIC_ASSERT(COND, NAME)  typedef char M3_CONCAT(NAME, __LINE__) [(COND) ? 1 : -1]
-#endif
+#  define M3_STATIC_ASSERT(COND, NAME)  రకనిర్వచనం అక్షరం M3_CONCAT(NAME, __LINE__) [(COND) ? 1 : -1]
+#అయితే_ముగింపు
 
-#endif // wasm3_defs_h
+#అయితే_ముగింపు // wasm3_defs_h

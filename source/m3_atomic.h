@@ -16,17 +16,17 @@
 //  plain reads and writes.
 //
 
-#ifndef m3_atomic_h
-#define m3_atomic_h
+#నిర్వచితం_కాకపోతే m3_atomic_h
+#నిర్వచించు m3_atomic_h
 
-#include "m3_core.h"
+#అన్తర్భావ "m3_core.h"
 
-#if d_m3HasAtomics
+#ఒకవేళ d_m3HasAtomics
 
 d_m3BeginExternC
 
-enum {
-    c_atomicAdd,
+గణన {
+    c_atomic_కూడు,
     c_atomicSub,
     c_atomicAnd,
     c_atomicOr,
@@ -35,18 +35,18 @@ enum {
 };
 
 #  define d_m3AtomicTyped(T)                                            \
-    static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
+    స్థిర అంతఃవరుస T m3_Atomic_ఎక్కించు##T (స్థిరరాశి u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T విలువ;                                                        \
+        జ్ఞాపకం_నకలు (& విలువ, i_cell, పరిమాణం (విలువ));                       \
+        M3_BSWAP_##T (విలువ);                                           \
+        తిరిగి విలువ;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    స్థిర అంతఃవరుస శూన్య m3_AtomicStore_##T (u8* o_cell, T i_విలువ)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_విలువ);                                         \
+        జ్ఞాపకం_నకలు (o_cell, & i_విలువ, పరిమాణం (i_విలువ));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -54,61 +54,61 @@ d_m3AtomicTyped(u16);
 d_m3AtomicTyped(u32);
 d_m3AtomicTyped(u64);
 
-static inline
-u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
+స్థిర అంతఃవరుస
+u64 m3_Atomic_ఎక్కించు_W (స్థిరరాశి u8* i_cell, u32 i_log2_వెడల్పు)
 {
-    switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    ఎంపిక (i_log2_వెడల్పు) {
+    స్థితి 0: తిరిగి m3_Atomic_ఎక్కించు_u8(i_cell);
+    స్థితి 1: తిరిగి m3_Atomic_ఎక్కించు_u16(i_cell);
+    స్థితి 2: తిరిగి m3_Atomic_ఎక్కించు_u32(i_cell);
+    అప్రమేయ: తిరిగి m3_Atomic_ఎక్కించు_u64(i_cell);
     }
 }
 
-static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+స్థిర అంతఃవరుస
+శూన్య m3_AtomicStoreW (u8* o_cell, u32 i_log2_వెడల్పు, u64 i_విలువ)
 {
-    switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    ఎంపిక (i_log2_వెడల్పు) {
+    స్థితి 0: m3_AtomicStore_u8(o_cell, (u8)i_విలువ); ఆపు;
+    స్థితి 1: m3_AtomicStore_u16(o_cell, (u16)i_విలువ); ఆపు;
+    స్థితి 2: m3_AtomicStore_u32(o_cell, (u32)i_విలువ); ఆపు;
+    అప్రమేయ: m3_AtomicStore_u64(o_cell, i_విలువ); ఆపు;
     }
 }
 
-static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+స్థిర అంతఃవరుస
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2_వెడల్పు, u32 i_రకం, u64 i_విలువ)
 {
-    u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
+    u64 old = m3_Atomic_ఎక్కించు_W(io_cell, i_log2_వెడల్పు);
     u64 updated;
 
-    switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    ఎంపిక (i_రకం) {
+    స్థితి c_atomic_కూడు: updated = old + i_విలువ; ఆపు;
+    స్థితి c_atomicSub: updated = old - i_విలువ; ఆపు;
+    స్థితి c_atomicAnd: updated = old & i_విలువ; ఆపు;
+    స్థితి c_atomicOr: updated = old | i_విలువ; ఆపు;
+    స్థితి c_atomicXor: updated = old ^ i_విలువ; ఆపు;
+    అప్రమేయ: updated = i_విలువ; ఆపు;
     }
 
-    m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    m3_AtomicStoreW(io_cell, i_log2_వెడల్పు, updated);
+    తిరిగి old;
 }
 
-static inline
-u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_replacement)
+స్థిర అంతఃవరుస
+u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2_వెడల్పు, u64 i_expected, u64 i_replacement)
 {
-    u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
-    u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
+    u64 old = m3_Atomic_ఎక్కించు_W(io_cell, i_log2_వెడల్పు);
+    u64 ముసుగు = (i_log2_వెడల్పు == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2_వెడల్పు)) - 1);
 
-    if (old == (i_expected & mask)) {
-        m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
+    ఒకవేళ (old == (i_expected & ముసుగు)) {
+        m3_AtomicStoreW(io_cell, i_log2_వెడల్పు, i_replacement);
     }
-    return old;
+    తిరిగి old;
 }
 
-d_m3EndExternC
+d_m3_చివర_Extern_C
 
-#endif // d_m3HasAtomics
+#అయితే_ముగింపు // d_m3HasAtomics
 
-#endif // m3_atomic_h
+#అయితే_ముగింపు // m3_atomic_h

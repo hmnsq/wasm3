@@ -5,228 +5,228 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <limits.h>
-#include "m3_code.h"
-#include "m3_env.h"
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ "m3_code.h"
+#అన్తర్భావ "m3_env.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
+IM3_సంకేతం_పుట New_సంకేతం_పుట (IM3Runtime i_runtime, u32 i_min_అంకె_పంక్తులు)
 {
-    IM3CodePage page;
+    IM3_సంకేతం_పుట పుట;
 
     // check multiplication overflow
-    if (i_minNumLines > UINT_MAX / sizeof(code_t)) {
-        return NULL;
+    ఒకవేళ (i_min_అంకె_పంక్తులు > UINT_MAX / పరిమాణం(సంకేతం_t)) {
+        తిరిగి ఖాళీ;
     }
-    u32 pageSize = sizeof(M3CodePageHeader) + sizeof(code_t) * i_minNumLines;
+    u32 పుట_కొలత = పరిమాణం(M3_సంకేతం_పుట_శీర్షిక) + పరిమాణం(సంకేతం_t) * i_min_అంకె_పంక్తులు;
 
     // check addition overflow
-    if (pageSize < sizeof(M3CodePageHeader)) {
-        return NULL;
+    ఒకవేళ (పుట_కొలత < పరిమాణం(M3_సంకేతం_పుట_శీర్షిక)) {
+        తిరిగి ఖాళీ;
     }
 
-    pageSize = (pageSize + (d_m3CodePageAlignSize - 1)) & ~(d_m3CodePageAlignSize - 1); // align
+    పుట_కొలత = (పుట_కొలత + (d_m3_సంకేతం_పుట_Align_కొలత - 1)) & ~(d_m3_సంకేతం_పుట_Align_కొలత - 1); // align
     // check alignment overflow
-    if (pageSize == 0) {
-        return NULL;
+    ఒకవేళ (పుట_కొలత == 0) {
+        తిరిగి ఖాళీ;
     }
 
-    page = (IM3CodePage)m3_Malloc("M3CodePage", pageSize);
+    పుట = (IM3_సంకేతం_పుట)m3_Malloc("M3CodePage", పుట_కొలత);
 
-    if (page) {
-        page->info.sequence = ++i_runtime->newCodePageSequence;
-        page->info.numLines = (pageSize - sizeof(M3CodePageHeader)) / sizeof(code_t);
+    ఒకవేళ (పుట) {
+        పుట->info.sequence = ++i_runtime->new_సంకేతం_పుట_Sequence;
+        పుట->info.అంకె_పంక్తులు = (పుట_కొలత - పరిమాణం(M3_సంకేతం_పుట_శీర్షిక)) / పరిమాణం(సంకేతం_t);
 
-#if d_m3RecordBacktraces
-        u32 pageSizeBt     = sizeof(M3CodeMappingPage) + sizeof(M3CodeMapEntry) * page->info.numLines;
-        page->info.mapping = (M3CodeMappingPage*)m3_Malloc("M3CodeMappingPage", pageSizeBt);
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+        u32 పుట_కొలత_Bt     = పరిమాణం(M3_సంకేతం_Mapping_పుట) + పరిమాణం(M3_సంకేతం_Map_నమోదు) * పుట->info.అంకె_పంక్తులు;
+        పుట->info.mapping = (M3_సంకేతం_Mapping_పుట*)m3_Malloc("M3CodeMappingPage", పుట_కొలత_Bt);
 
-        if (page->info.mapping) {
-            page->info.mapping->size     = 0;
-            page->info.mapping->capacity = page->info.numLines;
-        } else {
-            m3_Free(page);
-            return NULL;
+        ఒకవేళ (పుట->info.mapping) {
+            పుట->info.mapping->కొలత     = 0;
+            పుట->info.mapping->సామర్థ్యం = పుట->info.అంకె_పంక్తులు;
+        } లేకపోతే {
+            m3_Free(పుట);
+            తిరిగి ఖాళీ;
         }
-        page->info.mapping->basePC = GetPageStartPC(page);
-#endif // d_m3RecordBacktraces
+        పుట->info.mapping->పునాది_PC = Get_పుట_ప్రారంభం_PC(పుట);
+#అయితే_ముగింపు // d_m3RecordBacktraces
 
-        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.numLines);
+        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", Get_పుట_PC(పుట), పుట->info.sequence, పుట_కొలత, పుట->info.అంకె_పంక్తులు);
     }
 
-    return page;
+    తిరిగి పుట;
 }
 
 
-void FreeCodePages (IM3CodePage* io_list)
+శూన్య Free_సంకేతం_పుటలు (IM3_సంకేతం_పుట* io_list)
 {
-    IM3CodePage page = *io_list;
+    IM3_సంకేతం_పుట పుట = *io_list;
 
-    while (page) {
-        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.lineIndex / page->info.numLines);
+    అయితే (పుట) {
+        m3log(సంకేతం_2, "free page: %d; %p; util: %3.1f%%", పుట->info.sequence, పుట, 100. * పుట->info.పంక్తి_సూచీ / పుట->info.అంకె_పంక్తులు);
 
-        IM3CodePage next = page->info.next;
-#if d_m3RecordBacktraces
-        m3_Free(page->info.mapping);
-#endif // d_m3RecordBacktraces
-        m3_Free(page);
-        page = next;
+        IM3_సంకేతం_పుట తదుపరి = పుట->info.తదుపరి;
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+        m3_Free(పుట->info.mapping);
+#అయితే_ముగింపు // d_m3RecordBacktraces
+        m3_Free(పుట);
+        పుట = తదుపరి;
     }
 
-    *io_list = NULL;
+    *io_list = ఖాళీ;
 }
 
 
-u32 NumFreeLines (IM3CodePage i_page)
+u32 అంకె_Free_పంక్తులు (IM3_సంకేతం_పుట i_పుట)
 {
-    d_m3Assert(i_page->info.lineIndex <= i_page->info.numLines);
+    d_m3Assert(i_పుట->info.పంక్తి_సూచీ <= i_పుట->info.అంకె_పంక్తులు);
 
-    return i_page->info.numLines - i_page->info.lineIndex;
+    తిరిగి i_పుట->info.అంకె_పంక్తులు - i_పుట->info.పంక్తి_సూచీ;
 }
 
 
-void EmitWord_impl (IM3CodePage i_page, void* i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    i_page->code[i_page->info.lineIndex++] = i_word;
+శూన్య Emit_మాట_impl (IM3_సంకేతం_పుట i_పుట, శూన్య* i_మాట)
+{                                                                       d_m3Assert (i_పుట->info.పంక్తి_సూచీ+1 <= i_పుట->info.అంకె_పంక్తులు);
+    i_పుట->సంకేతం_2[i_పుట->info.పంక్తి_సూచీ++] = i_మాట;
 }
 
-void EmitWord32 (IM3CodePage i_page, const u32 i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex++], &i_word, sizeof(i_word));
+శూన్య EmitWord32 (IM3_సంకేతం_పుట i_పుట, స్థిరరాశి u32 i_మాట)
+{                                                                       d_m3Assert (i_పుట->info.పంక్తి_సూచీ+1 <= i_పుట->info.అంకె_పంక్తులు);
+    జ్ఞాపకం_నకలు(&i_పుట->సంకేతం_2[i_పుట->info.పంక్తి_సూచీ++], &i_మాట, పరిమాణం(i_మాట));
 }
 
-void EmitWord64 (IM3CodePage i_page, const u64 i_word)
+శూన్య EmitWord64 (IM3_సంకేతం_పుట i_పుట, స్థిరరాశి u64 i_మాట)
 {
-#if M3_SIZEOF_PTR == 4
-                                                                        d_m3Assert (i_page->info.lineIndex+2 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 2;
-#else
-                                                                        d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 1;
-#endif
+#ఒకవేళ M3_SIZEOF_PTR == 4
+                                                                        d_m3Assert (i_పుట->info.పంక్తి_సూచీ+2 <= i_పుట->info.అంకె_పంక్తులు);
+    జ్ఞాపకం_నకలు(&i_పుట->సంకేతం_2[i_పుట->info.పంక్తి_సూచీ], &i_మాట, పరిమాణం(i_మాట));
+    i_పుట->info.పంక్తి_సూచీ += 2;
+#లేకపోతే
+                                                                        d_m3Assert (i_పుట->info.పంక్తి_సూచీ+1 <= i_పుట->info.అంకె_పంక్తులు);
+    జ్ఞాపకం_నకలు(&i_పుట->సంకేతం_2[i_పుట->info.పంక్తి_సూచీ], &i_మాట, పరిమాణం(i_మాట));
+    i_పుట->info.పంక్తి_సూచీ += 1;
+#అయితే_ముగింపు
 }
 
 
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+శూన్య Emit_Mapping_నమోదు (IM3_సంకేతం_పుట i_పుట, u32 i_module_స్థానభ్రంశం)
 {
-    M3CodeMappingPage* page = i_page->info.mapping;
-                                                                        d_m3Assert (page->size < page->capacity);
+    M3_సంకేతం_Mapping_పుట* పుట = i_పుట->info.mapping;
+                                                                        d_m3Assert (పుట->కొలత < పుట->సామర్థ్యం);
 
-    M3CodeMapEntry* entry = &page->entries[page->size++];
-    pc_t            pc    = GetPagePC(i_page);
+    M3_సంకేతం_Map_నమోదు* నమోదు_2 = &పుట->entries[పుట->కొలత++];
+    pc_t            pc    = Get_పుట_PC(i_పుట);
 
-    entry->pcOffset     = (u32)(pc - page->basePC);
-    entry->moduleOffset = i_moduleOffset;
+    నమోదు_2->pc_స్థానభ్రంశం     = (u32)(pc - పుట->పునాది_PC);
+    నమోదు_2->module_స్థానభ్రంశం = i_module_స్థానభ్రంశం;
 }
-#endif // d_m3RecordBacktraces
+#అయితే_ముగింపు // d_m3RecordBacktraces
 
-pc_t GetPageStartPC (IM3CodePage i_page)
+pc_t Get_పుట_ప్రారంభం_PC (IM3_సంకేతం_పుట i_పుట)
 {
-    return &i_page->code[0];
+    తిరిగి &i_పుట->సంకేతం_2[0];
 }
 
 
-pc_t GetPagePC (IM3CodePage i_page)
+pc_t Get_పుట_PC (IM3_సంకేతం_పుట i_పుట)
 {
-    if (i_page) {
-        return &i_page->code[i_page->info.lineIndex];
-    } else {
-        return NULL;
+    ఒకవేళ (i_పుట) {
+        తిరిగి &i_పుట->సంకేతం_2[i_పుట->info.పంక్తి_సూచీ];
+    } లేకపోతే {
+        తిరిగి ఖాళీ;
     }
 }
 
 
-void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
+శూన్య నెట్టు_సంకేతం_పుట (IM3_సంకేతం_పుట* i_list, IM3_సంకేతం_పుట i_సంకేతం_పుట)
 {
-    IM3CodePage next      = *i_list;
-    i_codePage->info.next = next;
-    *i_list               = i_codePage;
+    IM3_సంకేతం_పుట తదుపరి      = *i_list;
+    i_సంకేతం_పుట->info.తదుపరి = తదుపరి;
+    *i_list               = i_సంకేతం_పుట;
 }
 
 
-IM3CodePage PopCodePage (IM3CodePage* i_list)
+IM3_సంకేతం_పుట తీయి_సంకేతం_పుట (IM3_సంకేతం_పుట* i_list)
 {
-    IM3CodePage page = *i_list;
-    *i_list          = page->info.next;
-    page->info.next  = NULL;
+    IM3_సంకేతం_పుట పుట = *i_list;
+    *i_list          = పుట->info.తదుపరి;
+    పుట->info.తదుపరి  = ఖాళీ;
 
-    return page;
+    తిరిగి పుట;
 }
 
 
-u32 FindCodePageEnd (IM3CodePage i_list, IM3CodePage* o_end)
+u32 కనుగొను_సంకేతం_పుట_చివర (IM3_సంకేతం_పుట i_list, IM3_సంకేతం_పుట* o_చివర)
 {
-    u32 numPages = 0;
-    *o_end       = NULL;
+    u32 అంకె_పుటలు = 0;
+    *o_చివర       = ఖాళీ;
 
-    while (i_list) {
-        *o_end = i_list;
-        ++numPages;
-        i_list = i_list->info.next;
+    అయితే (i_list) {
+        *o_చివర = i_list;
+        ++అంకె_పుటలు;
+        i_list = i_list->info.తదుపరి;
     }
 
-    return numPages;
+    తిరిగి అంకె_పుటలు;
 }
 
 
-u32 CountCodePages (IM3CodePage i_list)
+u32 లెక్క_సంకేతం_పుటలు (IM3_సంకేతం_పుట i_list)
 {
-    IM3CodePage unused;
-    return FindCodePageEnd(i_list, &unused);
+    IM3_సంకేతం_పుట వాడని;
+    తిరిగి కనుగొను_సంకేతం_పుట_చివర(i_list, &వాడని);
 }
 
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list)
+IM3_సంకేతం_పుట Get_చివర_సంకేతం_పుట (IM3_సంకేతం_పుట i_list)
 {
-    IM3CodePage end;
-    FindCodePageEnd(i_list, &end);
+    IM3_సంకేతం_పుట చివర;
+    కనుగొను_సంకేతం_పుట_చివర(i_list, &చివర);
 
-    return end;
+    తిరిగి చివర;
 }
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc)
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+bool కలిగియుంది_PC (IM3_సంకేతం_పుట i_పుట, pc_t i_pc)
 {
-    return GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
+    తిరిగి Get_పుట_ప్రారంభం_PC(i_పుట) <= i_pc && i_pc < Get_పుట_PC(i_పుట);
 }
 
 
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset)
+bool Map_PCTo_స్థానభ్రంశం (IM3_సంకేతం_పుట i_పుట, pc_t i_pc, u32* o_module_స్థానభ్రంశం)
 {
-    M3CodeMappingPage* mapping = i_page->info.mapping;
+    M3_సంకేతం_Mapping_పుట* mapping = i_పుట->info.mapping;
 
-    u32 pcOffset = (u32)(i_pc - mapping->basePC);
+    u32 pc_స్థానభ్రంశం = (u32)(i_pc - mapping->పునాది_PC);
 
-    u32 left  = 0;
-    u32 right = mapping->size;
+    u32 ఎడమ  = 0;
+    u32 కుడి = mapping->కొలత;
 
-    while (left < right) {
-        u32 mid = left + (right - left) / 2;
+    అయితే (ఎడమ < కుడి) {
+        u32 mid = ఎడమ + (కుడి - ఎడమ) / 2;
 
-        if (mapping->entries[mid].pcOffset < pcOffset) {
-            left = mid + 1;
-        } else if (mapping->entries[mid].pcOffset > pcOffset) {
-            right = mid;
-        } else {
-            *o_moduleOffset = mapping->entries[mid].moduleOffset;
-            return true;
+        ఒకవేళ (mapping->entries[mid].pc_స్థానభ్రంశం < pc_స్థానభ్రంశం) {
+            ఎడమ = mid + 1;
+        } లేకపోతే ఒకవేళ (mapping->entries[mid].pc_స్థానభ్రంశం > pc_స్థానభ్రంశం) {
+            కుడి = mid;
+        } లేకపోతే {
+            *o_module_స్థానభ్రంశం = mapping->entries[mid].module_స్థానభ్రంశం;
+            తిరిగి true;
         }
     }
 
     // Getting here means left is now one more than the element we want.
-    if (left > 0) {
-        left--;
-        *o_moduleOffset = mapping->entries[left].moduleOffset;
-        return true;
-    } else {
-        return false;
+    ఒకవేళ (ఎడమ > 0) {
+        ఎడమ--;
+        *o_module_స్థానభ్రంశం = mapping->entries[ఎడమ].module_స్థానభ్రంశం;
+        తిరిగి true;
+    } లేకపోతే {
+        తిరిగి false;
     }
 }
-#endif // d_m3RecordBacktraces
+#అయితే_ముగింపు // d_m3RecordBacktraces
 
 //---------------------------------------------------------------------------------------------------------------------------------

@@ -5,70 +5,70 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_code_h
-#define m3_code_h
+#నిర్వచితం_కాకపోతే m3_సంకేతం_h
+#నిర్వచించు m3_సంకేతం_h
 
-#include "m3_core.h"
+#అన్తర్భావ "m3_core.h"
 
 d_m3BeginExternC
 
-typedef struct M3CodePage {
-    M3CodePageHeader info;
-    code_t           code[1];
-} M3CodePage;
+రకనిర్వచనం నిర్మాణం M3_సంకేతం_పుట {
+    M3_సంకేతం_పుట_శీర్షిక info;
+    సంకేతం_t           సంకేతం_2[1];
+} M3_సంకేతం_పుట;
 
-typedef M3CodePage* IM3CodePage;
+రకనిర్వచనం M3_సంకేతం_పుట* IM3_సంకేతం_పుట;
 
 
-IM3CodePage         NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines);
+IM3_సంకేతం_పుట         New_సంకేతం_పుట (IM3Runtime i_runtime, u32 i_min_అంకె_పంక్తులు);
 
-void                FreeCodePages (IM3CodePage* io_list);
+శూన్య                Free_సంకేతం_పుటలు (IM3_సంకేతం_పుట* io_list);
 
-u32                 NumFreeLines (IM3CodePage i_page);
-pc_t                GetPageStartPC (IM3CodePage i_page);
-pc_t                GetPagePC (IM3CodePage i_page);
-void                EmitWord_impl (IM3CodePage i_page, void* i_word);
-void                EmitWord32 (IM3CodePage i_page, u32 i_word);
-void                EmitWord64 (IM3CodePage i_page, u64 i_word);
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
-#endif // d_m3RecordBacktraces
+u32                 అంకె_Free_పంక్తులు (IM3_సంకేతం_పుట i_పుట);
+pc_t                Get_పుట_ప్రారంభం_PC (IM3_సంకేతం_పుట i_పుట);
+pc_t                Get_పుట_PC (IM3_సంకేతం_పుట i_పుట);
+శూన్య                Emit_మాట_impl (IM3_సంకేతం_పుట i_పుట, శూన్య* i_మాట);
+శూన్య                EmitWord32 (IM3_సంకేతం_పుట i_పుట, u32 i_మాట);
+శూన్య                EmitWord64 (IM3_సంకేతం_పుట i_పుట, u64 i_మాట);
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+శూన్య Emit_Mapping_నమోదు (IM3_సంకేతం_పుట i_పుట, u32 i_module_స్థానభ్రంశం);
+#అయితే_ముగింపు // d_m3RecordBacktraces
 
-void        PushCodePage (IM3CodePage* io_list, IM3CodePage i_codePage);
-IM3CodePage PopCodePage (IM3CodePage* io_list);
+శూన్య        నెట్టు_సంకేతం_పుట (IM3_సంకేతం_పుట* io_list, IM3_సంకేతం_పుట i_సంకేతం_పుట);
+IM3_సంకేతం_పుట తీయి_సంకేతం_పుట (IM3_సంకేతం_పుట* io_list);
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list); // i_list = NULL is valid
-u32         CountCodePages (IM3CodePage i_list); // i_list = NULL is valid
+IM3_సంకేతం_పుట Get_చివర_సంకేతం_పుట (IM3_సంకేతం_పుట i_list); // i_list = NULL is valid
+u32         లెక్క_సంకేతం_పుటలు (IM3_సంకేతం_పుట i_list); // i_list = NULL is valid
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc);
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset);
-#endif // d_m3RecordBacktraces
+#ఒకవేళ d_m3_రికార్డు_Backtraces
+bool కలిగియుంది_PC (IM3_సంకేతం_పుట i_పుట, pc_t i_pc);
+bool Map_PCTo_స్థానభ్రంశం (IM3_సంకేతం_పుట i_పుట, pc_t i_pc, u32* o_module_స్థానభ్రంశం);
+#అయితే_ముగింపు // d_m3RecordBacktraces
 
-#ifdef DEBUG
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
-#endif
+#నిర్వచితమైతే DEBUG
+శూన్య dump_సంకేతం_పుట (IM3_సంకేతం_పుట i_సంకేతం_పుట, pc_t i_ప్రారంభం_PC);
+#అయితే_ముగింపు
 
-#define EmitWord(page, val) EmitWord_impl(page, (void*)(val))
+#నిర్వచించు Emit_మాట(పుట, val) Emit_మాట_impl(పుట, (శూన్య*)(val))
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3RecordBacktraces
+#ఒకవేళ d_m3_రికార్డు_Backtraces
 
-typedef struct M3CodeMapEntry {
-    u32 pcOffset;
-    u32 moduleOffset;
-} M3CodeMapEntry;
+రకనిర్వచనం నిర్మాణం M3_సంకేతం_Map_నమోదు {
+    u32 pc_స్థానభ్రంశం;
+    u32 module_స్థానభ్రంశం;
+} M3_సంకేతం_Map_నమోదు;
 
-typedef struct M3CodeMappingPage {
-    pc_t           basePC;
-    u32            size;
-    u32            capacity;
-    M3CodeMapEntry entries[];
-} M3CodeMappingPage;
+రకనిర్వచనం నిర్మాణం M3_సంకేతం_Mapping_పుట {
+    pc_t           పునాది_PC;
+    u32            కొలత;
+    u32            సామర్థ్యం;
+    M3_సంకేతం_Map_నమోదు entries[];
+} M3_సంకేతం_Mapping_పుట;
 
-#endif // d_m3RecordBacktraces
+#అయితే_ముగింపు // d_m3RecordBacktraces
 
-d_m3EndExternC
+d_m3_చివర_Extern_C
 
-#endif // m3_code_h
+#అయితే_ముగింపు // m3_code_h

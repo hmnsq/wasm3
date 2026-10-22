@@ -7,15 +7,15 @@
 //  All rights reserved.
 //
 
-#ifndef wasm3_ext_h
-#define wasm3_ext_h
+#నిర్వచితం_కాకపోతే wasm3_ext_h
+#నిర్వచించు wasm3_ext_h
 
-#include "wasm3.h"
-#include <stdbool.h>
+#అన్తర్భావ "wasm3.h"
+#అన్తర్భావ <stdbool.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#ఒకవేళ defined(__cplusplus)
+బాహ్య "C" {
+#అయితే_ముగింపు
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //  API extensions
@@ -34,18 +34,18 @@ IM3Module   m3_NewModule (IM3Environment i_environment);
 // To overwrite an existing function, set io_functionIndex to the desired element. i_signature must match the existing
 // function signature.
 // ** InjectFunction invalidates any existing IM3Function pointers
-M3Result    m3_InjectFunction (IM3Module            i_module,
-                               int32_t*             io_functionIndex,
-                               const char* const    i_signature,
-                               const uint8_t* const i_wasmBytes,            // i_wasmBytes is copied
+M3_ఫలితం    m3_InjectFunction (IM3Module            i_module,
+                               int32_t*             io_function_సూచీ,
+                               స్థిరరాశి అక్షరం* స్థిరరాశి    i_signature,
+                               స్థిరరాశి uint8_t* స్థిరరాశి i_wasm_బైట్లు,            // i_wasmBytes is copied
                                bool                 i_doCompilation);
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module,
-                                   uint32_t  i_index);
+IM3Function m3_Get_Function_By_సూచీ (IM3Module i_module,
+                                   uint32_t  i_సూచీ);
 
-#if defined(__cplusplus)
+#ఒకవేళ defined(__cplusplus)
 }
-#endif
+#అయితే_ముగింపు
 
-#endif // wasm3_h
+#అయితే_ముగింపు // wasm3_h
