@@ -8,7 +8,7 @@
 #ifndef m3_config_h
 #define m3_config_h
 
-#include "m3_config_platforms.h"
+#अन्तर्भाव "m3_config_platforms.h"
 
 // general --------------------------------------------------------------------
 
@@ -16,8 +16,8 @@
 #  define d_m3CodePageAlignSize                32*1024
 #endif
 
-#ifndef d_m3MaxFunctionStackHeight
-#  define d_m3MaxFunctionStackHeight           8000    // max: 32768
+#ifndef d_m3_Max_Function_चळत_Height
+#  define d_m3_Max_Function_चळत_Height           8000    // max: 32768
 #endif
 
 #ifndef d_m3MaxLinearMemoryPages
@@ -25,15 +25,15 @@
 #endif
 
 #ifndef d_m3MaxFunctionSlots
-#  define d_m3MaxFunctionSlots                 ((d_m3MaxFunctionStackHeight)*2)
+#  define d_m3MaxFunctionSlots                 ((d_m3_Max_Function_चळत_Height)*2)
 #endif
 
-#ifndef d_m3ValStack                                   // validator operand and local type stacks:
-#  define d_m3ValStack                         (d_m3MaxFunctionStackHeight)       // the same operand stack the compiler bounds
+#ifndef d_m3_Val_चळत                                   // validator operand and local type stacks:
+#  define d_m3_Val_चळत                         (d_m3_Max_Function_चळत_Height)       // the same operand stack the compiler bounds
 #endif
 
 #ifndef d_m3ValCtrlDepth                               // validator block nesting depth. Each frame is bigger than an
-#  define d_m3ValCtrlDepth                     ((d_m3MaxFunctionStackHeight)/4)   // operand entry, so this dominates the validator's stack usage
+#  define d_m3ValCtrlDepth                     ((d_m3_Max_Function_चळत_Height)/4)   // operand entry, so this dominates the validator's stack usage
 #endif
 
 #ifndef d_m3MaxConstantTableSize
@@ -125,8 +125,8 @@
 #  define d_m3LogCompile                       0       // wasm -> metacode generation phase
 #endif
 
-#ifndef d_m3LogWasmStack
-#  define d_m3LogWasmStack                     0       // dump the wasm stack when pushed or popped
+#ifndef d_m3_Log_Wasm_चळत
+#  define d_m3_Log_Wasm_चळत                     0       // dump the wasm stack when pushed or popped
 #endif
 
 #ifndef d_m3LogEmit
@@ -141,8 +141,8 @@
 #  define d_m3LogRuntime                       0       // higher-level runtime information
 #endif
 
-#ifndef d_m3LogNativeStack
-#  define d_m3LogNativeStack                   0       // track the memory usage of the C-stack
+#ifndef d_m3_Log_Native_चळत
+#  define d_m3_Log_Native_चळत                   0       // track the memory usage of the C-stack
 #endif
 
 #ifndef d_m3LogHeapOps
@@ -223,12 +223,12 @@
 #ifndef d_m3FuseBranch
 #  define d_m3FuseBranch                       1       // fuse a compare with an immediately following
 #endif                                                 // br_if/if into one op (needs d_m3FoldSetLocal)
-#if d_m3FuseBranch && !d_m3FoldSetLocal
+#यदि d_m3FuseBranch && !d_m3FoldSetLocal
 #  undef d_m3FuseBranch
 #  define d_m3FuseBranch                       0       // the fusion candidate tracking lives in the fold machinery
 #endif
 
-#if !d_m3HasFloat && !defined(d_m3NoFloatDynamic)
+#यदि !d_m3HasFloat && !defined(d_m3NoFloatDynamic)
 #  define d_m3NoFloatDynamic                   1       // if no floats, do not fail until flops are actually executed
 #endif
 
@@ -318,19 +318,19 @@
 // suspend and resume. Built on the typed reference types, which is where a
 // continuation type gets the identity that switch needs to name its peer, so
 // it follows d_m3HasTypedRefs unless asked for explicitly.
-#ifndef d_m3HasStackSwitching
-#  define d_m3HasStackSwitching                d_m3HasTypedRefs
+#ifndef d_m3_Has_चळत_Switching
+#  define d_m3_Has_चळत_Switching                d_m3HasTypedRefs
 #endif
 
-#if d_m3HasStackSwitching && !d_m3HasTypedRefs
+#यदि d_m3_Has_चळत_Switching && !d_m3HasTypedRefs
 #  error "d_m3HasStackSwitching requires d_m3HasTypedRefs"
 #endif
 
 // The Wasm value stack a continuation runs on. It has to be its own buffer
 // rather than a window onto the runtime stack, because it outlives the resume
 // that started it.
-#ifndef d_m3ContinuationStackSlots
-#  define d_m3ContinuationStackSlots           1024
+#ifndef d_m3_Continuation_चळत_Slots
+#  define d_m3_Continuation_चळत_Slots           1024
 #endif
 
 // How many values a control tag may carry, and how many a suspended
@@ -352,7 +352,7 @@
 // state (linear memory, globals, tables, value stack, and virtual frames) and
 // restoring it to resume execution.
 #ifndef d_m3HasSnapshots
-#  define d_m3HasSnapshots                     d_m3HasStackSwitching
+#  define d_m3HasSnapshots                     d_m3_Has_चळत_Switching
 #endif
 
 // Minimum run length of consecutive 0x00 or 0xFF bytes to trigger sparse
@@ -375,11 +375,11 @@
 #  define d_m3EnableValidation                 1       // pre-pass bytecode type validation
 #endif
 
-#ifndef d_m3SkipStackCheck
-#  define d_m3SkipStackCheck                   0       // skip stack overrun checks
+#ifndef d_m3_Skip_चळत_Check
+#  define d_m3_Skip_चळत_Check                   0       // skip stack overrun checks
 #endif
 
-#ifndef d_m3MaxNativeStack
+#ifndef d_m3_Max_Native_चळत
 // native C-stack budget (bytes) available to Wasm execution. A recursive
 // Wasm module builds up native call frames (op_Call -> op_Entry -> ...);
 // once this budget is exhausted the interpreter traps instead of
@@ -391,17 +391,17 @@
 // d_m3NativeStackMargin. That is what keeps the default safe on a thread
 // smaller than it - a 256KiB worker, say - without every embedder having to
 // know to lower it.
-#  define d_m3MaxNativeStack                   ((8 * 1024 * 1024) - (128 * 1024))
+#  define d_m3_Max_Native_चळत                   ((8 * 1024 * 1024) - (128 * 1024))
 #endif
 
-#ifndef d_m3NativeStackMargin
+#ifndef d_m3_Native_चळत_Margin
 // How much of a measured stack to leave below the mark. The mark is only tested
 // between calls, so everything after the last test still has to fit: the rest of
 // the op that traps, the interpreter frames unwinding behind it, and any host
 // function already on the stack. Only used where the stack was measured rather
 // than assumed; a stack too small to spare this much gives up a quarter of
 // itself instead.
-#  define d_m3NativeStackMargin                (64 * 1024)
+#  define d_m3_Native_चळत_Margin                (64 * 1024)
 #endif
 
 #ifndef d_m3SkipMemoryBoundsCheck

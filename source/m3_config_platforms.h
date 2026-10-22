@@ -8,13 +8,13 @@
 #ifndef m3_config_platforms_h
 #define m3_config_platforms_h
 
-#include "wasm3_defs.h"
+#अन्तर्भाव "wasm3_defs.h"
 
 /*
  * Internal helpers
  */
 
-#if !defined(__cplusplus) || defined(_MSC_VER)
+#यदि !defined(__cplusplus) || defined(_MSC_VER)
 #  define not      !
 #  define and      &&
 #  define or       ||
@@ -24,22 +24,22 @@
  * Detect/define features
  */
 
-#if defined(M3_COMPILER_MSVC)
+#यदि defined(M3_COMPILER_MSVC)
 #  include <stdint.h>
-#  if UINTPTR_MAX == 0xFFFFFFFF
+#  यदि UINTPTR_MAX == 0xFFFFFFFF
 #    define M3_SIZEOF_PTR 4
 #  elif UINTPTR_MAX == 0xFFFFFFFFFFFFFFFFu
 #    define M3_SIZEOF_PTR 8
-#  else
+#  अन्यथा
 #    error "Pointer size not supported"
 #  endif
-#elif defined(__SIZEOF_POINTER__)
+#नोचेद्यदि defined(__SIZEOF_POINTER__)
 #  define M3_SIZEOF_PTR __SIZEOF_POINTER__
-#else
+#अन्यथा
 #  error "Pointer size not detected"
 #endif
 
-#if defined(M3_BIG_ENDIAN)
+#यदि defined(M3_BIG_ENDIAN)
 #  define M3_BSWAP_u8(X)  {}
 #  define M3_BSWAP_u16(X) { (X)=m3_bswap16((X)); }
 #  define M3_BSWAP_u32(X) { (X)=m3_bswap32((X)); }
@@ -48,9 +48,9 @@
 #  define M3_BSWAP_i16(X) M3_BSWAP_u16(X)
 #  define M3_BSWAP_i32(X) M3_BSWAP_u32(X)
 #  define M3_BSWAP_i64(X) M3_BSWAP_u64(X)
-#  define M3_BSWAP_f32(X) { union { f32 f; u32 i; } u; u.f = (X); M3_BSWAP_u32(u.i); (X) = u.f; }
-#  define M3_BSWAP_f64(X) { union { f64 f; u64 i; } u; u.f = (X); M3_BSWAP_u64(u.i); (X) = u.f; }
-#else
+#  define M3_BSWAP_f32(X) { सङ्घ { f32 f; u32 i; } u; u.f = (X); M3_BSWAP_u32(u.i); (X) = u.f; }
+#  define M3_BSWAP_f64(X) { सङ्घ { f64 f; u64 i; } u; u.f = (X); M3_BSWAP_u64(u.i); (X) = u.f; }
+#अन्यथा
 #  define M3_BSWAP_u8(X)  {}
 #  define M3_BSWAP_u16(x) {}
 #  define M3_BSWAP_u32(x) {}
@@ -63,37 +63,37 @@
 #  define M3_BSWAP_f64(X) {}
 #endif
 
-#if defined(M3_COMPILER_MSVC)
+#यदि defined(M3_COMPILER_MSVC)
 #  define M3_WEAK //__declspec(selectany)
 #  define M3_NO_UBSAN
 #  define M3_NOINLINE
-#elif defined(__MINGW32__) || defined(__CYGWIN__)
+#नोचेद्यदि defined(__MINGW32__) || defined(__CYGWIN__)
 #  define M3_WEAK //__attribute__((selectany))
 #  define M3_NO_UBSAN
 #  define M3_NOINLINE   __attribute__((noinline))
-#else
+#अन्यथा
 #  define M3_WEAK       __attribute__((weak))
 #  define M3_NO_UBSAN   //__attribute__((no_sanitize("undefined")))
 // Workaround for Cosmopolitan noinline conflict: https://github.com/jart/cosmopolitan/issues/310
-#  if defined(noinline)
+#  यदि defined(noinline)
 #    define M3_NOINLINE   noinline
-#  else
+#  अन्यथा
 #    define M3_NOINLINE   __attribute__((noinline))
 #  endif
 #endif
 
-#if !defined(M3_HAS_TAIL_CALL)
-#  if defined(__m68k__) || defined(__microblaze__) || defined(__powerpc__) || defined(__sh__)
+#यदि !defined(M3_HAS_TAIL_CALL)
+#  यदि defined(__m68k__) || defined(__microblaze__) || defined(__powerpc__) || defined(__sh__)
 #    define M3_HAS_TAIL_CALL 0
-#  else
+#  अन्यथा
 #    define M3_HAS_TAIL_CALL 1
 #  endif
 #endif
 
-#if M3_HAS_TAIL_CALL && M3_COMPILER_HAS_ATTRIBUTE(musttail)
+#यदि M3_HAS_TAIL_CALL && M3_COMPILER_HAS_ATTRIBUTE(musttail)
 #  define M3_MUSTTAIL __attribute__((musttail))
 #  define M3_GUARANTEED_TAIL_CALL 1
-#else
+#अन्यथा
 #  define M3_MUSTTAIL
 // Without musttail a tail call happens only if the compiler feels like emitting one,
 // and that is not something we can predict: GCC on x86-64 does it at -O3, but on
@@ -106,13 +106,13 @@
 #endif
 
 #ifndef M3_THREAD_LOCAL
-#  if defined(M3_COMPILER_MSVC)
+#  यदि defined(M3_COMPILER_MSVC)
 #    define M3_THREAD_LOCAL __declspec(thread)
 #    define M3_HAS_THREAD_LOCAL 1
 #  elif defined(__GNUC__) || defined(__clang__)
 #    define M3_THREAD_LOCAL __thread
 #    define M3_HAS_THREAD_LOCAL 1
-#  else
+#  अन्यथा
 #    define M3_THREAD_LOCAL
 #    define M3_HAS_THREAD_LOCAL 0
 #  endif
@@ -123,13 +123,13 @@
 // probe must use this same primitive so they measure the same stack -- notably
 // __builtin_frame_address reads the real machine stack even when ASan relocates
 // locals to its heap "fake stack".
-#if defined(__GNUC__) || defined(__clang__)
-#  define m3_NativeStackPtr()   ((void*) __builtin_frame_address (0))
-#elif defined(_MSC_VER)
+#यदि defined(__GNUC__) || defined(__clang__)
+#  define m3_Native_चळत_Ptr()   ((शून्य*) __builtin_frame_address (0))
+#नोचेद्यदि defined(_MSC_VER)
 #  include <intrin.h>
-#  define m3_NativeStackPtr()   (_AddressOfReturnAddress ())
-#else
-#  define m3_NativeStackPtr()   ((void*) & (volatile char){ 0 })
+#  define m3_Native_चळत_Ptr()   (_AddressOfReturnAddress ())
+#अन्यथा
+#  define m3_Native_चळत_Ptr()   ((शून्य*) & (चञ्चल वर्ण){ 0 })
 #endif
 
 #ifndef M3_MIN
@@ -139,11 +139,11 @@
 #  define M3_MAX(A,B) (((A) > (B)) ? (A) : (B))
 #endif
 
-#define M3_INIT(field) memset(&field, 0, sizeof(field))
+#define M3_INIT(field) memset(&field, 0, परिमाण(field))
 
-#define M3_COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+#define M3_मोजणी_OF(x) ((परिमाण(x)/परिमाण(0[x])) / ((size_t)(!(परिमाण(x) % परिमाण(0[x])))))
 
-#if defined(__AVR__)
+#यदि defined(__AVR__)
 
 #  include <inttypes.h>
 
@@ -151,16 +151,16 @@
 #  define PRIi64         "lli"
 
 #  define d_m3ShortTypesDefined
-typedef double         f64;
-typedef float          f32;
-typedef uint64_t       u64;
-typedef int64_t        i64;
-typedef uint32_t       u32;
-typedef int32_t        i32;
-typedef short unsigned u16;
-typedef short          i16;
-typedef uint8_t        u8;
-typedef int8_t         i8;
+प्रकारनिर्देश द्विगुण         f64;
+प्रकारनिर्देश भिन्न          f32;
+प्रकारनिर्देश uint64_t       u64;
+प्रकारनिर्देश int64_t        i64;
+प्रकारनिर्देश uint32_t       u32;
+प्रकारनिर्देश int32_t        i32;
+प्रकारनिर्देश short unsigned u16;
+प्रकारनिर्देश short          i16;
+प्रकारनिर्देश uint8_t        u8;
+प्रकारनिर्देश int8_t         i8;
 
 #endif
 
@@ -168,9 +168,9 @@ typedef int8_t         i8;
  * Apply settings
  */
 
-#if defined(__SANITIZE_ADDRESS__) || M3_COMPILER_HAS_FEATURE(address_sanitizer)
+#यदि defined(__SANITIZE_ADDRESS__) || M3_COMPILER_HAS_FEATURE(address_sanitizer)
 #  define M3_HAS_ASAN 1
-#else
+#अन्यथा
 #  define M3_HAS_ASAN 0
 #endif
 
@@ -181,30 +181,30 @@ typedef int8_t         i8;
 // and the frame it addressed is read back through whatever the callee left in x19.
 // LLVM diagnoses the same conflict on x86-64 and refuses to compile it; on AArch64 it
 // emits the code anyway. An instrumented build has no use for the convention regardless.
-#if M3_COMPILER_HAS_ATTRIBUTE(preserve_none) && M3_GUARANTEED_TAIL_CALL && !M3_HAS_ASAN && \
+#यदि M3_COMPILER_HAS_ATTRIBUTE(preserve_none) && M3_GUARANTEED_TAIL_CALL && !M3_HAS_ASAN && \
   (defined(__x86_64__) || defined(__aarch64__))
 #  define vectorcall   __attribute__((preserve_none))
-#elif defined(M3_COMPILER_MSVC)
+#नोचेद्यदि defined(M3_COMPILER_MSVC)
 #  define vectorcall   // For MSVC, better not to specify any call convention
-#elif defined(__x86_64__)
+#नोचेद्यदि defined(__x86_64__)
 #  define vectorcall
 //# elif defined(__riscv) && (__riscv_xlen == 64)
 //#   define vectorcall
-#elif defined(__MINGW32__)
+#नोचेद्यदि defined(__MINGW32__)
 #  define vectorcall
-#elif defined(WIN32)
+#नोचेद्यदि defined(WIN32)
 #  define vectorcall   __vectorcall
-#elif defined(ESP8266)
+#नोचेद्यदि defined(ESP8266)
 #  include <c_types.h>
 #  define vectorcall   //ICACHE_FLASH_ATTR
-#elif defined(ESP32)
-#  if defined(M3_IN_IRAM)  // the interpreter is in IRAM, attribute not needed
+#नोचेद्यदि defined(ESP32)
+#  यदि defined(M3_IN_IRAM)  // the interpreter is in IRAM, attribute not needed
 #    define vectorcall
-#  else
+#  अन्यथा
 #    include "esp_system.h"
 #    define vectorcall   IRAM_ATTR
 #  endif
-#elif defined(FOMU)
+#नोचेद्यदि defined(FOMU)
 #  define vectorcall   __attribute__((section(".ramtext")))
 #endif
 
@@ -217,14 +217,14 @@ typedef int8_t         i8;
  * Device-specific defaults
  */
 
-#ifndef d_m3MaxFunctionStackHeight
-#  if defined(ESP8266) || defined(ESP32) || defined(ARDUINO_AMEBA) || defined(TEENSYDUINO)
-#    define d_m3MaxFunctionStackHeight          256
+#ifndef d_m3_Max_Function_चळत_Height
+#  यदि defined(ESP8266) || defined(ESP32) || defined(ARDUINO_AMEBA) || defined(TEENSYDUINO)
+#    define d_m3_Max_Function_चळत_Height          256
 #  endif
 #endif
 
 #ifndef d_m3FixedHeap
-#  if defined(ARDUINO_AMEBA)
+#  यदि defined(ARDUINO_AMEBA)
 #    define d_m3FixedHeap                       (128*1024)
 #  elif defined(BLUE_PILL) || defined(FOMU)
 #    define d_m3FixedHeap                       (12*1024)
@@ -244,16 +244,16 @@ typedef int8_t         i8;
 // answers "cannot say" to everything and costs them nothing. Cosmopolitan is left
 // out on purpose - one binary that starts on seven systems cannot pick one of these
 // at compile time.
-#if defined(__COSMOPOLITAN__) || defined(__wasi__)
+#यदि defined(__COSMOPOLITAN__) || defined(__wasi__)
 // Use m3_host_none
-#elif (defined(__linux__) || defined(__APPLE__) || defined(__ANDROID__) ||    \
+#नोचेद्यदि (defined(__linux__) || defined(__APPLE__) || defined(__ANDROID__) ||    \
        defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
        defined(__DragonFly__) || defined(__sun) || defined(_AIX) ||           \
        defined(__QNX__) || defined(__HAIKU__) || defined(__CYGWIN__))
 #  ifndef d_m3HasPosixHost
 #    define d_m3HasPosixHost 1
 #  endif
-#elif defined(_WIN32)
+#नोचेद्यदि defined(_WIN32)
 #  ifndef d_m3HasWin32Host
 #    define d_m3HasWin32Host 1
 #  endif
@@ -274,15 +274,15 @@ typedef int8_t         i8;
 // build takes the bounds checks, which is also the path worth instrumenting: a
 // reservation is a plain mapping that ASan cannot see into. Setting d_m3GuardedMemory
 // explicitly still wins, for a process that has arranged to keep the signal.
-#if M3_HAS_ASAN
+#यदि M3_HAS_ASAN
 #  ifndef d_m3GuardedMemory
 #    define d_m3GuardedMemory                    0
 #  endif
 #endif
 
-#if (d_m3HasPosixHost) || (d_m3HasWin32Host && defined(_MSC_VER))
-#  if !(defined(d_m3FixedHeap) && d_m3FixedHeap) && !defined(__CYGWIN__)
-#    if defined(__x86_64__) || defined(__aarch64__) || defined(_M_X64) || defined(_M_ARM64)
+#यदि (d_m3HasPosixHost) || (d_m3HasWin32Host && defined(_MSC_VER))
+#  यदि !(defined(d_m3FixedHeap) && d_m3FixedHeap) && !defined(__CYGWIN__)
+#    यदि defined(__x86_64__) || defined(__aarch64__) || defined(_M_X64) || defined(_M_ARM64)
 #      ifndef d_m3GuardedMemory
 #        define d_m3GuardedMemory                1
 #      endif
@@ -291,7 +291,7 @@ typedef int8_t         i8;
 #endif
 
 // Microcontrollers and other bare-metal targets, and any RTOS
-#if defined(ARDUINO) || defined(PARTICLE) || defined(PLATFORMIO) || defined(__MBED__) || \
+#यदि defined(ARDUINO) || defined(PARTICLE) || defined(PLATFORMIO) || defined(__MBED__) || \
   defined(ESP8266) || defined(ESP32) || defined(BLUE_PILL) || defined(WM_W600) || defined(FOMU)
 #  ifndef d_m3VerboseErrorMessages
 #    define d_m3VerboseErrorMessages             0
@@ -299,11 +299,11 @@ typedef int8_t         i8;
 #  ifndef d_m3MaxConstantTableSize
 #    define d_m3MaxConstantTableSize             64
 #  endif
-#  ifndef d_m3MaxFunctionStackHeight
-#    define d_m3MaxFunctionStackHeight           128
+#  ifndef d_m3_Max_Function_चळत_Height
+#    define d_m3_Max_Function_चळत_Height           128
 #  endif
-#  ifndef d_m3MaxNativeStack
-#    define d_m3MaxNativeStack                   0
+#  ifndef d_m3_Max_Native_चळत
+#    define d_m3_Max_Native_चळत                   0
 #  endif
 #  ifndef d_m3CodePageAlignSize
 #    define d_m3CodePageAlignSize                1024
@@ -323,8 +323,8 @@ typedef int8_t         i8;
 #  ifndef d_m3HasAtomics
 #    define d_m3HasAtomics                       0
 #  endif
-#  ifndef d_m3HasStackSwitching
-#    define d_m3HasStackSwitching                0
+#  ifndef d_m3_Has_चळत_Switching
+#    define d_m3_Has_चळत_Switching                0
 #  endif
 #endif
 
@@ -332,11 +332,11 @@ typedef int8_t         i8;
  * Arch-specific defaults
  */
 
-#if defined(__riscv) && (__riscv_xlen == 64)
+#यदि defined(__riscv) && (__riscv_xlen == 64)
 #  ifndef d_m3Use32BitSlots
 #    define d_m3Use32BitSlots                    0
 #  endif
-#elif defined(__aarch64__)
+#नोचेद्यदि defined(__aarch64__)
 #  ifndef d_m3PreloadNextOp
 #    define d_m3PreloadNextOp                    1
 #  endif
