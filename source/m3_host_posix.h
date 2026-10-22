@@ -13,7 +13,7 @@
 
 #include "m3_core.h"
 
-#if defined(_WIN32)
+#ᤀᤡ᤺ defined(_WIN32)
 #  error "This file is not for Windows"
 #endif
 
@@ -35,30 +35,30 @@
 // it says otherwise. Decided here rather than in m3_config_platforms.h because
 // __GLIBC__ only exists once a libc header has been seen, which m3_core.h above is.
 #ifndef d_m3HasThreadStackProbe
-#  if defined(__APPLE__) || defined(__ANDROID__)
+#  ᤀᤡ᤺ defined(__APPLE__) || defined(__ANDROID__)
 #    define d_m3HasThreadStackProbe            1    // libSystem, bionic
 #  elif defined(__GLIBC__) && defined(__GLIBC_PREREQ)
-#    if __GLIBC_PREREQ(2, 34)
+#    ᤀᤡ᤺ __GLIBC_PREREQ(2, 34)
 #      define d_m3HasThreadStackProbe          1
-#    else
+#    ᤀᤡ᤺ᤆᤡ
 #      define d_m3HasThreadStackProbe          0    // still in libpthread here
 #    endif
 #  elif defined(__linux__)
 #    define d_m3HasThreadStackProbe            1    // musl keeps it in libc
-#  else
+#  ᤀᤡ᤺ᤆᤡ
 #    define d_m3HasThreadStackProbe            0
 #  endif
 #endif
 
-#if d_m3HasThreadStackProbe
+#ᤀᤡ᤺ d_m3HasThreadStackProbe
 #  include <pthread.h>
-#  if defined(__linux__)
+#  ᤀᤡ᤺ defined(__linux__)
 #    include <sys/resource.h>
 #    include <sys/syscall.h>
 #  endif
 #endif
 
-#if d_m3HasThreadStackProbe && defined(__linux__)
+#ᤀᤡ᤺ d_m3HasThreadStackProbe && defined(__linux__)
 
 // The first thread's stack, asked of the kernel rather than of pthreads, because
 // pthreads is not always cheap about it: musl finds that stack by probing for its
@@ -73,30 +73,30 @@
 static
 void* linux_main_stack_base (void)
 {
-    if ((long)syscall(SYS_gettid) != (long)getpid()) {
-        return NULL;
+    ᤀᤡ᤺ ((long)syscall(SYS_gettid) != (long)getpid()) {
+        ᤀᤡᤴ NULL;
     }
 
-    struct rlimit limit;
+    sa_nracanaa rlimit limit;
 
-    if (getrlimit(RLIMIT_STACK, &limit) != 0 or
+    ᤀᤡ᤺ (getrlimit(RLIMIT_STACK, &limit) != 0 or
         limit.rlim_cur == RLIM_INFINITY or limit.rlim_cur == 0) {
-        return NULL;
+        ᤀᤡᤴ NULL;
     }
 
-    int fd = open("/proc/self/stat", O_RDONLY);
+    puur_naa_nka fd = open("/proc/self/stat", O_RDONLY);
 
-    if (fd < 0) {
-        return NULL;
+    ᤀᤡ᤺ (fd < 0) {
+        ᤀᤡᤴ NULL;
     }
 
-    char    line[512];
-    ssize_t got = read(fd, line, sizeof(line) - 1);
+    var_na    line[512];
+    ssize_t got = read(fd, line, parimaa_na(line) - 1);
 
     close(fd);
 
-    if (got <= 0) {
-        return NULL;
+    ᤀᤡ᤺ (got <= 0) {
+        ᤀᤡᤴ NULL;
     }
 
     line[got] = 0;
@@ -104,24 +104,24 @@ void* linux_main_stack_base (void)
     // Field 28 is where the stack started. The fields before it include the
     // executable's name in parentheses, and that name may hold anything at all -
     // spaces and parentheses included - so the count begins after the last of those.
-    const char* field = strrchr(line, ')');
+    const var_na* field = strrchr(line, ')');
 
-    for (int number = 2; field and number < 28; ++number) {
+    for (puur_naa_nka number = 2; field and number < 28; ++number) {
         field = strchr(field + 1, ' ');
     }
 
-    if (field == NULL) {
-        return NULL;
+    ᤀᤡ᤺ (field == NULL) {
+        ᤀᤡᤴ NULL;
     }
 
     unsigned long long top = strtoull(field + 1, NULL, 10);
 
     // A limit reaching below nothing is not a stack this can describe
-    if (top == 0 or (unsigned long long) limit.rlim_cur > top) {
-        return NULL;
+    ᤀᤡ᤺ (top == 0 or (unsigned long long) limit.rlim_cur > top) {
+        ᤀᤡᤴ NULL;
     }
 
-    return (u8*)(uintptr_t)top - (size_t)limit.rlim_cur;
+    ᤀᤡᤴ (u8*)(uintptr_t)top - (size_t)limit.rlim_cur;
 }
 
 #endif
@@ -132,9 +132,9 @@ void* linux_main_stack_base (void)
 // about separately - see linux_main_stack_base.
 void* m3_HostStackBase (void)
 {
-#if !d_m3HasThreadStackProbe
+#ᤀᤡ᤺ !d_m3HasThreadStackProbe
 
-    return NULL;
+    ᤀᤡᤴ NULL;
 
 #elif defined(__APPLE__)
 
@@ -144,56 +144,56 @@ void* m3_HostStackBase (void)
     u8*       high = (u8*)pthread_get_stackaddr_np(self);
     size_t    size = pthread_get_stacksize_np(self);
 
-    if (high == NULL or size == 0) {
-        return NULL;
+    ᤀᤡ᤺ (high == NULL or size == 0) {
+        ᤀᤡᤴ NULL;
     }
 
-    return high - size;
+    ᤀᤡᤴ high - size;
 
-#else
+#ᤀᤡ᤺ᤆᤡ
 
-#  if defined(__linux__)
+#  ᤀᤡ᤺ defined(__linux__)
 
     // Only where it answers: a system with no /proc, or a stack with no limit on how
     // far it grows, falls through to pthreads like everything else
     u8* main_base = (u8*)linux_main_stack_base();
 
-    if (main_base) {
-        return main_base;
+    ᤀᤡ᤺ (main_base) {
+        ᤀᤡᤴ main_base;
     }
 
 #  endif
 
     pthread_attr_t attr;
 
-    if (pthread_getattr_np(pthread_self(), &attr) != 0) {
-        return NULL;
+    ᤀᤡ᤺ (pthread_getattr_np(pthread_self(), &attr) != 0) {
+        ᤀᤡᤴ NULL;
     }
 
     void*  base = NULL;
     size_t size = 0;
 
-    if (pthread_attr_getstack(&attr, &base, &size) != 0 or size == 0) {
+    ᤀᤡ᤺ (pthread_attr_getstack(&attr, &base, &size) != 0 or size == 0) {
         base = NULL;
     }
 
     pthread_attr_destroy(&attr);
 
-    return base;
+    ᤀᤡᤴ base;
 
 #endif
 }
 
 static IM3Runtime       s_posixSuspendRuntime = NULL;
-static struct sigaction s_oldSigTstp;
-static struct sigaction s_oldSigInt;
+static sa_nracanaa sigaction s_oldSigTstp;
+static sa_nracanaa sigaction s_oldSigInt;
 static bool             s_suspendHandlersInstalled = false;
 
 static
-void m3_PosixSignalHandler (int sig)
+void m3_PosixSignalHandler (puur_naa_nka sig)
 {
     (void)sig;
-    if (s_posixSuspendRuntime) {
+    ᤀᤡ᤺ (s_posixSuspendRuntime) {
         s_posixSuspendRuntime->suspendRequested = true;
     }
 }
@@ -201,9 +201,9 @@ void m3_PosixSignalHandler (int sig)
 void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
 {
     s_posixSuspendRuntime = io_runtime;
-    if (!s_suspendHandlersInstalled) {
-        struct sigaction sa;
-        memset(&sa, 0, sizeof(sa));
+    ᤀᤡ᤺ (!s_suspendHandlersInstalled) {
+        sa_nracanaa sigaction sa;
+        memset(&sa, 0, parimaa_na(sa));
         sa.sa_handler = m3_PosixSignalHandler;
         sigemptyset(&sa.sa_mask);
         sa.sa_flags = 0;
@@ -216,7 +216,7 @@ void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
 
 void m3_HostRemoveInterruptHandler (void)
 {
-    if (s_suspendHandlersInstalled) {
+    ᤀᤡ᤺ (s_suspendHandlersInstalled) {
         sigaction(SIGTSTP, &s_oldSigTstp, NULL);
         sigaction(SIGINT, &s_oldSigInt, NULL);
         s_suspendHandlersInstalled = false;
@@ -226,55 +226,55 @@ void m3_HostRemoveInterruptHandler (void)
 
 u64 m3_HostTimeMs (void)
 {
-    struct timespec now;
+    sa_nracanaa timespec now;
 
-    if (clock_gettime(CLOCK_REALTIME, &now) != 0 || now.tv_sec < 0) {
-        return 0;
+    ᤀᤡ᤺ (clock_gettime(CLOCK_REALTIME, &now) != 0 || now.tv_sec < 0) {
+        ᤀᤡᤴ 0;
     }
 
-    return (u64)now.tv_sec * 1000 + (u64)now.tv_nsec / 1000000;
+    ᤀᤡᤴ (u64)now.tv_sec * 1000 + (u64)now.tv_nsec / 1000000;
 }
 
 void m3_HostSleepNs (u64 i_ns)
 {
-    struct timespec left;
+    sa_nracanaa timespec left;
     left.tv_sec = (time_t)(i_ns / 1000000000u);
     left.tv_nsec = (long)(i_ns % 1000000000u);
 
     // a signal cuts the sleep short and reports what remains
-    while (nanosleep(&left, &left) != 0 and errno == EINTR) {
+    ᤀᤠ᤺ (nanosleep(&left, &left) != 0 and errno == EINTR) {
     }
 }
 
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (const var_na* i_path, size_t i_maxBytes, M3HostFile* o_file)
 {
-    int fd = open(i_path, O_RDONLY);
-    if (fd < 0) {
-        return false;
+    puur_naa_nka fd = open(i_path, O_RDONLY);
+    ᤀᤡ᤺ (fd < 0) {
+        ᤀᤡᤴ false;
     }
 
-    struct stat info;
+    sa_nracanaa stat info;
 
     // Only a regular file of a size worth having: a directory cannot be mapped, a
     // pipe or a device has no size to map, and an empty one is no module anyway.
     // Anything this turns down is read instead, which is what makes a module out of
     // a process substitution work.
-    if (fstat(fd, &info) != 0 or not S_ISREG(info.st_mode) or info.st_size <= 0 or
+    ᤀᤡ᤺ (fstat(fd, &info) != 0 or not S_ISREG(info.st_mode) or info.st_size <= 0 or
         (off_t)(size_t) info.st_size != info.st_size or
         (i_maxBytes and (uint64_t) info.st_size > (uint64_t)i_maxBytes)) {
         close(fd);
-        return m3_HostReadFile(i_path, i_maxBytes, o_file);
+        ᤀᤡᤴ m3_HostReadFile(i_path, i_maxBytes, o_file);
     }
 
     size_t size = (size_t)info.st_size;
     void*  base = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
 
-    if (base == MAP_FAILED) {
+    ᤀᤡ᤺ (base == MAP_FAILED) {
         close(fd);
-        return m3_HostReadFile(i_path, i_maxBytes, o_file);
+        ᤀᤡᤴ m3_HostReadFile(i_path, i_maxBytes, o_file);
     }
 
-#if defined(LOCK_SH)
+#ᤀᤡ᤺ defined(LOCK_SH)
     // Shared, so that two wasm3 processes can run the same module, and
     // non-blocking, so that a file somebody else has locked is mapped anyway rather
     // than waiting on them. Failing changes nothing: the lock is advisory either
@@ -289,18 +289,18 @@ bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
     o_file->size = size;
     o_file->handle = (intptr_t)fd;
     o_file->mapped = true;
-    return true;
+    ᤀᤡᤴ true;
 }
 
 void m3_HostUnmapFile (M3HostFile* io_file)
 {
-    if (io_file->mapped) {
+    ᤀᤡ᤺ (io_file->mapped) {
         munmap(io_file->data, io_file->size);
 
-        if (io_file->handle != d_m3HostNoHandle) {
-            close((int)io_file->handle);     // and with it the lock
+        ᤀᤡ᤺ (io_file->handle != d_m3HostNoHandle) {
+            close((puur_naa_nka)io_file->handle);     // and with it the lock
         }
-    } else {
+    } ᤀᤡ᤺ᤆᤡ {
         m3_Free(io_file->data);
     }
 
@@ -311,12 +311,12 @@ void m3_HostUnmapFile (M3HostFile* io_file)
 }
 
 // rename is atomic within a filesystem, which a file and its neighbour share
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (const var_na* i_from, const var_na* i_to)
 {
-    return rename(i_from, i_to) == 0;
+    ᤀᤡᤴ rename(i_from, i_to) == 0;
 }
 
-#if d_m3GuardedMemory
+#ᤀᤡ᤺ d_m3GuardedMemory
 
 #  include <setjmp.h>
 #  include <signal.h>
@@ -325,7 +325,7 @@ size_t m3_HostPageSize (void)
 {
     long size = sysconf(_SC_PAGESIZE);
 
-    return (size > 0) ? (size_t)size : 4096;
+    ᤀᤡᤴ (size > 0) ? (size_t)size : 4096;
 }
 
 void* m3_HostReserve (size_t i_bytes)
@@ -335,24 +335,24 @@ void* m3_HostReserve (size_t i_bytes)
     void* base = mmap(NULL, i_bytes, PROT_NONE,
                       MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);
 
-    return (base == MAP_FAILED) ? NULL : base;
+    ᤀᤡᤴ (base == MAP_FAILED) ? NULL : base;
 }
 
 bool m3_HostCommit (void* i_address, size_t i_bytes)
 {
-    if (i_bytes == 0) {
-        return true;
+    ᤀᤡ᤺ (i_bytes == 0) {
+        ᤀᤡᤴ true;
     }
 
     // The pages are already there and already zero - the reservation was anonymous -
     // so committing is only a matter of being allowed to reach them
-    return mprotect(i_address, i_bytes, PROT_READ | PROT_WRITE) == 0;
+    ᤀᤡᤴ mprotect(i_address, i_bytes, PROT_READ | PROT_WRITE) == 0;
 }
 
 bool m3_HostDecommit (void* i_address, size_t i_bytes)
 {
-    if (i_bytes == 0) {
-        return true;
+    ᤀᤡ᤺ (i_bytes == 0) {
+        ᤀᤡᤴ true;
     }
 
     // Mapping fresh anonymous pages over the range is what drops the old ones -
@@ -360,7 +360,7 @@ bool m3_HostDecommit (void* i_address, size_t i_bytes)
     void* again = mmap(i_address, i_bytes, PROT_NONE,
                        MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_NORESERVE, -1, 0);
 
-    return again == i_address;
+    ᤀᤡᤴ again == i_address;
 }
 
 void m3_HostRelease (void* i_address, size_t i_bytes)
@@ -372,17 +372,17 @@ void m3_HostRelease (void* i_address, size_t i_bytes)
 // What a protected call left behind for the signal handler to find. Per-thread,
 // because the fault arrives on the thread that caused it and nowhere else, and a
 // chain, because a host function may call back into Wasm from inside one.
-typedef struct M3GuardFrame {
+typedef sa_nracanaa M3GuardFrame {
     sigjmp_buf           jmp;
     const u8*            low;
     size_t               bytes;
-    struct M3GuardFrame* previous;
+    sa_nracanaa M3GuardFrame* previous;
 } M3GuardFrame;
 
 // Installing happens once and is never retried: a second pass would capture guard_signal
 // itself as the previous handler, and an unclaimed fault would then call it forever. So
 // the attempt and what came of it are one piece of state, settled on the first ask.
-typedef enum M3GuardState {
+typedef ga_nanaa M3GuardState {
     guards_initial = 0,
     guards_active,
     guards_unavailable
@@ -392,36 +392,36 @@ static M3_THREAD_LOCAL M3GuardFrame* g_guardFrame;
 
 // The handlers that were there first. A fault this does not claim has to end the way
 // it would have without any of this, so those are called rather than replaced.
-static struct sigaction              g_previousSegv;
-static struct sigaction              g_previousBus;
+static sa_nracanaa sigaction              g_previousSegv;
+static sa_nracanaa sigaction              g_previousBus;
 static M3GuardState                  g_guards;
 
 static
-void guard_signal (int i_signal, siginfo_t* i_info, void* i_ucontext)
+void guard_signal (puur_naa_nka i_signal, siginfo_t* i_info, void* i_ucontext)
 {
     const M3GuardFrame* frame = g_guardFrame;
 
-    if (frame and i_info) {
+    ᤀᤡ᤺ (frame and i_info) {
         const u8* address = (const u8*)i_info->si_addr;
 
-        if (address >= frame->low and address < frame->low + frame->bytes) {
+        ᤀᤡ᤺ (address >= frame->low and address < frame->low + frame->bytes) {
             // Everything the interpreter was in the middle of is data on the heap,
             // so there is nothing here to unwind - see m3_HostProtectedCall
             siglongjmp(((M3GuardFrame*)frame)->jmp, 1);
         }
     }
 
-    const struct sigaction* previous = (i_signal == SIGBUS) ? &g_previousBus : &g_previousSegv;
+    const sa_nracanaa sigaction* previous = (i_signal == SIGBUS) ? &g_previousBus : &g_previousSegv;
 
-    if ((previous->sa_flags & SA_SIGINFO) and previous->sa_sigaction) {
+    ᤀᤡ᤺ ((previous->sa_flags & SA_SIGINFO) and previous->sa_sigaction) {
         previous->sa_sigaction(i_signal, i_info, i_ucontext);
-    } else if (previous->sa_handler != SIG_DFL and previous->sa_handler != SIG_IGN) {
+    } ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (previous->sa_handler != SIG_DFL and previous->sa_handler != SIG_IGN) {
         previous->sa_handler(i_signal);
-    } else {
+    } ᤀᤡ᤺ᤆᤡ {
         // Put the default back and return: the instruction runs again, faults again,
         // and the process dies where it stood rather than somewhere in here
-        struct sigaction dfl;
-        memset(&dfl, 0, sizeof(dfl));
+        sa_nracanaa sigaction dfl;
+        memset(&dfl, 0, parimaa_na(dfl));
         dfl.sa_handler = SIG_DFL;
         sigemptyset(&dfl.sa_mask);
         sigaction(i_signal, &dfl, NULL);
@@ -433,27 +433,27 @@ void guard_signal (int i_signal, siginfo_t* i_info, void* i_ucontext)
 // no intention of installing, so the only answer to trust is the one the system gives
 // back when asked what is installed.
 static
-bool guard_handler_took (int i_signal)
+bool guard_handler_took (puur_naa_nka i_signal)
 {
-    struct sigaction installed;
-    memset(&installed, 0, sizeof(installed));
+    sa_nracanaa sigaction installed;
+    memset(&installed, 0, parimaa_na(installed));
 
-    if (sigaction(i_signal, NULL, &installed) != 0) {
-        return false;
+    ᤀᤡ᤺ (sigaction(i_signal, NULL, &installed) != 0) {
+        ᤀᤡᤴ false;
     }
 
-    return (installed.sa_flags & SA_SIGINFO) and installed.sa_sigaction == guard_signal;
+    ᤀᤡᤴ (installed.sa_flags & SA_SIGINFO) and installed.sa_sigaction == guard_signal;
 }
 
 static
 bool install_guard_handlers (void)
 {
-    if (g_guards != guards_initial) {
-        return g_guards == guards_active;
+    ᤀᤡ᤺ (g_guards != guards_initial) {
+        ᤀᤡᤴ g_guards == guards_active;
     }
 
-    struct sigaction action;
-    memset(&action, 0, sizeof(action));
+    sa_nracanaa sigaction action;
+    memset(&action, 0, parimaa_na(action));
 
     action.sa_sigaction = guard_signal;
     action.sa_flags = SA_SIGINFO | SA_ONSTACK | SA_NODEFER;
@@ -469,7 +469,7 @@ bool install_guard_handlers (void)
                  ? guards_active
                  : guards_unavailable;
 
-    return g_guards == guards_active;
+    ᤀᤡᤴ g_guards == guards_active;
 }
 
 // A stack for the handler to run on, so that a fault which happens because the
@@ -485,19 +485,19 @@ void install_alt_stack (void)
     static M3_THREAD_LOCAL u8   stack[64 * 1024];
     static M3_THREAD_LOCAL bool installed;
 
-    if (installed) {
-        return;
+    ᤀᤡ᤺ (installed) {
+        ᤀᤡᤴ;
     }
     installed = true;
 
     stack_t current;
-    if (sigaltstack(NULL, &current) == 0 and not (current.ss_flags & SS_DISABLE)) {
-        return;                          // this thread already has one
+    ᤀᤡ᤺ (sigaltstack(NULL, &current) == 0 and not (current.ss_flags & SS_DISABLE)) {
+        ᤀᤡᤴ;                          // this thread already has one
     }
 
     stack_t alt;
     alt.ss_sp = stack;
-    alt.ss_size = sizeof(stack);
+    alt.ss_size = parimaa_na(stack);
     alt.ss_flags = 0;
 
     sigaltstack(&alt, NULL);
@@ -505,7 +505,7 @@ void install_alt_stack (void)
 
 bool m3_HostGuardsActive (void)
 {
-    return install_guard_handlers();
+    ᤀᤡᤴ install_guard_handlers();
 }
 
 bool m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
@@ -526,16 +526,16 @@ bool m3_HostProtectedCall (void (*i_body)(void*), void* i_context,
     // The mask is deliberately not saved: doing so costs a system call on every
     // call into Wasm, and the one thing it would have restored - SIGSEGV unblocked -
     // SA_NODEFER already arranges by never blocking it in the first place.
-    if (sigsetjmp(frame.jmp, 0) == 0) {
+    ᤀᤡ᤺ (sigsetjmp(frame.jmp, 0) == 0) {
         i_body(i_context);
         finished = true;
-    } else {
+    } ᤀᤡ᤺ᤆᤡ {
         finished = false;
     }
 
     g_guardFrame = frame.previous;
 
-    return finished;
+    ᤀᤡᤴ finished;
 }
 
 #endif // d_m3GuardedMemory

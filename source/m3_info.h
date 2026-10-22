@@ -18,12 +18,12 @@ void ProfileHit (cstr_t i_operationName);
 
 void        dump_type_stack (IM3Compilation o);
 void        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
-const char* get_indention_string (IM3Compilation o);
+const var_na* get_indention_string (IM3Compilation o);
 void        log_emit (IM3Compilation o, IM3Operation i_operation);
 
 cstr_t      SPrintFuncTypeSignature (IM3FuncType i_funcType);
 
-#else // DEBUG
+#ᤀᤡ᤺ᤆᤡ // DEBUG
 
 #  define   dump_type_stack(...)      {}
 #  define   log_opcode(...)           {}
