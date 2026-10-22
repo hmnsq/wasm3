@@ -5,70 +5,70 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_code_h
-#define m3_code_h
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ m3_ਕੋਡ_h
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ m3_ਕੋਡ_h
 
-#include "m3_core.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_core.h"
 
 d_m3BeginExternC
 
-typedef struct M3CodePage {
-    M3CodePageHeader info;
-    code_t           code[1];
-} M3CodePage;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ M3_ਕੋਡ_ਪੰਨਾ {
+    M3_ਕੋਡ_ਪੰਨਾ_ਸਿਰਲੇਖ info;
+    ਕੋਡ_t           ਕੋਡ[1];
+} M3_ਕੋਡ_ਪੰਨਾ;
 
-typedef M3CodePage* IM3CodePage;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ M3_ਕੋਡ_ਪੰਨਾ* IM3_ਕੋਡ_ਪੰਨਾ;
 
 
-IM3CodePage         NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines);
+IM3_ਕੋਡ_ਪੰਨਾ         New_ਕੋਡ_ਪੰਨਾ (IM3Runtime i_runtime, u32 i_min_ਅੰਕ_ਸਤਰਾਂ);
 
-void                FreeCodePages (IM3CodePage* io_list);
+ਖਾਲੀ                Free_ਕੋਡ_ਪੰਨੇ (IM3_ਕੋਡ_ਪੰਨਾ* io_list);
 
-u32                 NumFreeLines (IM3CodePage i_page);
-pc_t                GetPageStartPC (IM3CodePage i_page);
-pc_t                GetPagePC (IM3CodePage i_page);
-void                EmitWord_impl (IM3CodePage i_page, void* i_word);
-void                EmitWord32 (IM3CodePage i_page, u32 i_word);
-void                EmitWord64 (IM3CodePage i_page, u64 i_word);
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
-#endif // d_m3RecordBacktraces
+u32                 ਅੰਕ_Free_ਸਤਰਾਂ (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ);
+pc_t                Get_ਪੰਨਾ_ਸ਼ੁਰੂ_PC (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ);
+pc_t                Get_ਪੰਨਾ_PC (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ);
+ਖਾਲੀ                Emit_ਸ਼ਬਦ_impl (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, ਖਾਲੀ* i_ਸ਼ਬਦ);
+ਖਾਲੀ                EmitWord32 (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, u32 i_ਸ਼ਬਦ);
+ਖਾਲੀ                EmitWord64 (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, u64 i_ਸ਼ਬਦ);
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
+ਖਾਲੀ Emit_Mapping_ਇੰਦਰਾਜ (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, u32 i_module_ਵਿੱਥ);
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
 
-void        PushCodePage (IM3CodePage* io_list, IM3CodePage i_codePage);
-IM3CodePage PopCodePage (IM3CodePage* io_list);
+ਖਾਲੀ        ਧੱਕੋ_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ* io_list, IM3_ਕੋਡ_ਪੰਨਾ i_ਕੋਡ_ਪੰਨਾ);
+IM3_ਕੋਡ_ਪੰਨਾ ਕੱਢੋ_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ* io_list);
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list); // i_list = NULL is valid
-u32         CountCodePages (IM3CodePage i_list); // i_list = NULL is valid
+IM3_ਕੋਡ_ਪੰਨਾ Get_ਸਿਰਾ_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ i_list); // i_list = NULL is valid
+u32         ਗਿਣਤੀ_ਕੋਡ_ਪੰਨੇ (IM3_ਕੋਡ_ਪੰਨਾ i_list); // i_list = NULL is valid
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc);
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset);
-#endif // d_m3RecordBacktraces
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
+bool ਸ਼ਾਮਲ_ਹੈ_PC (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, pc_t i_pc);
+bool Map_PCTo_ਵਿੱਥ (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, pc_t i_pc, u32* o_module_ਵਿੱਥ);
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
 
-#ifdef DEBUG
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ DEBUG
+ਖਾਲੀ dump_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ i_ਕੋਡ_ਪੰਨਾ, pc_t i_ਸ਼ੁਰੂ_PC);
+#ਜੇ_ਅੰਤ
 
-#define EmitWord(page, val) EmitWord_impl(page, (void*)(val))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ Emit_ਸ਼ਬਦ(ਪੰਨਾ, val) Emit_ਸ਼ਬਦ_impl(ਪੰਨਾ, (ਖਾਲੀ*)(val))
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3RecordBacktraces
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
 
-typedef struct M3CodeMapEntry {
-    u32 pcOffset;
-    u32 moduleOffset;
-} M3CodeMapEntry;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ M3_ਕੋਡ_Map_ਇੰਦਰਾਜ {
+    u32 pc_ਵਿੱਥ;
+    u32 module_ਵਿੱਥ;
+} M3_ਕੋਡ_Map_ਇੰਦਰਾਜ;
 
-typedef struct M3CodeMappingPage {
-    pc_t           basePC;
-    u32            size;
-    u32            capacity;
-    M3CodeMapEntry entries[];
-} M3CodeMappingPage;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ M3_ਕੋਡ_Mapping_ਪੰਨਾ {
+    pc_t           ਅਧਾਰ_PC;
+    u32            ਮਾਪ;
+    u32            ਸਮਰੱਥਾ;
+    M3_ਕੋਡ_Map_ਇੰਦਰਾਜ entries[];
+} M3_ਕੋਡ_Mapping_ਪੰਨਾ;
 
-#endif // d_m3RecordBacktraces
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
 
-d_m3EndExternC
+d_m3_ਸਿਰਾ_Extern_C
 
-#endif // m3_code_h
+#ਜੇ_ਅੰਤ // m3_code_h

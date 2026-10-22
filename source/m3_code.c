@@ -5,228 +5,228 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <limits.h>
-#include "m3_code.h"
-#include "m3_env.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <limits.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_code.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_env.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
+IM3_ਕੋਡ_ਪੰਨਾ New_ਕੋਡ_ਪੰਨਾ (IM3Runtime i_runtime, u32 i_min_ਅੰਕ_ਸਤਰਾਂ)
 {
-    IM3CodePage page;
+    IM3_ਕੋਡ_ਪੰਨਾ ਪੰਨਾ;
 
     // check multiplication overflow
-    if (i_minNumLines > UINT_MAX / sizeof(code_t)) {
-        return NULL;
+    ਜੇ (i_min_ਅੰਕ_ਸਤਰਾਂ > UINT_MAX / ਆਕਾਰ(ਕੋਡ_t)) {
+        ਵਾਪਸ ਨਿਰਾ;
     }
-    u32 pageSize = sizeof(M3CodePageHeader) + sizeof(code_t) * i_minNumLines;
+    u32 ਪੰਨਾ_ਮਾਪ = ਆਕਾਰ(M3_ਕੋਡ_ਪੰਨਾ_ਸਿਰਲੇਖ) + ਆਕਾਰ(ਕੋਡ_t) * i_min_ਅੰਕ_ਸਤਰਾਂ;
 
     // check addition overflow
-    if (pageSize < sizeof(M3CodePageHeader)) {
-        return NULL;
+    ਜੇ (ਪੰਨਾ_ਮਾਪ < ਆਕਾਰ(M3_ਕੋਡ_ਪੰਨਾ_ਸਿਰਲੇਖ)) {
+        ਵਾਪਸ ਨਿਰਾ;
     }
 
-    pageSize = (pageSize + (d_m3CodePageAlignSize - 1)) & ~(d_m3CodePageAlignSize - 1); // align
+    ਪੰਨਾ_ਮਾਪ = (ਪੰਨਾ_ਮਾਪ + (d_m3_ਕੋਡ_ਪੰਨਾ_Align_ਮਾਪ - 1)) & ~(d_m3_ਕੋਡ_ਪੰਨਾ_Align_ਮਾਪ - 1); // align
     // check alignment overflow
-    if (pageSize == 0) {
-        return NULL;
+    ਜੇ (ਪੰਨਾ_ਮਾਪ == 0) {
+        ਵਾਪਸ ਨਿਰਾ;
     }
 
-    page = (IM3CodePage)m3_Malloc("M3CodePage", pageSize);
+    ਪੰਨਾ = (IM3_ਕੋਡ_ਪੰਨਾ)m3_Malloc("M3CodePage", ਪੰਨਾ_ਮਾਪ);
 
-    if (page) {
-        page->info.sequence = ++i_runtime->newCodePageSequence;
-        page->info.numLines = (pageSize - sizeof(M3CodePageHeader)) / sizeof(code_t);
+    ਜੇ (ਪੰਨਾ) {
+        ਪੰਨਾ->info.sequence = ++i_runtime->new_ਕੋਡ_ਪੰਨਾ_Sequence;
+        ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ = (ਪੰਨਾ_ਮਾਪ - ਆਕਾਰ(M3_ਕੋਡ_ਪੰਨਾ_ਸਿਰਲੇਖ)) / ਆਕਾਰ(ਕੋਡ_t);
 
-#if d_m3RecordBacktraces
-        u32 pageSizeBt     = sizeof(M3CodeMappingPage) + sizeof(M3CodeMapEntry) * page->info.numLines;
-        page->info.mapping = (M3CodeMappingPage*)m3_Malloc("M3CodeMappingPage", pageSizeBt);
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
+        u32 ਪੰਨਾ_ਮਾਪ_Bt     = ਆਕਾਰ(M3_ਕੋਡ_Mapping_ਪੰਨਾ) + ਆਕਾਰ(M3_ਕੋਡ_Map_ਇੰਦਰਾਜ) * ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ;
+        ਪੰਨਾ->info.mapping = (M3_ਕੋਡ_Mapping_ਪੰਨਾ*)m3_Malloc("M3CodeMappingPage", ਪੰਨਾ_ਮਾਪ_Bt);
 
-        if (page->info.mapping) {
-            page->info.mapping->size     = 0;
-            page->info.mapping->capacity = page->info.numLines;
-        } else {
-            m3_Free(page);
-            return NULL;
+        ਜੇ (ਪੰਨਾ->info.mapping) {
+            ਪੰਨਾ->info.mapping->ਮਾਪ     = 0;
+            ਪੰਨਾ->info.mapping->ਸਮਰੱਥਾ = ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ;
+        } ਨਹੀਂਤਾਂ {
+            m3_Free(ਪੰਨਾ);
+            ਵਾਪਸ ਨਿਰਾ;
         }
-        page->info.mapping->basePC = GetPageStartPC(page);
-#endif // d_m3RecordBacktraces
+        ਪੰਨਾ->info.mapping->ਅਧਾਰ_PC = Get_ਪੰਨਾ_ਸ਼ੁਰੂ_PC(ਪੰਨਾ);
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
 
-        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.numLines);
+        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", Get_ਪੰਨਾ_PC(ਪੰਨਾ), ਪੰਨਾ->info.sequence, ਪੰਨਾ_ਮਾਪ, ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
     }
 
-    return page;
+    ਵਾਪਸ ਪੰਨਾ;
 }
 
 
-void FreeCodePages (IM3CodePage* io_list)
+ਖਾਲੀ Free_ਕੋਡ_ਪੰਨੇ (IM3_ਕੋਡ_ਪੰਨਾ* io_list)
 {
-    IM3CodePage page = *io_list;
+    IM3_ਕੋਡ_ਪੰਨਾ ਪੰਨਾ = *io_list;
 
-    while (page) {
-        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.lineIndex / page->info.numLines);
+    ਜਦੋਂ (ਪੰਨਾ) {
+        m3log(ਕੋਡ, "free page: %d; %p; util: %3.1f%%", ਪੰਨਾ->info.sequence, ਪੰਨਾ, 100. * ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ / ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
 
-        IM3CodePage next = page->info.next;
-#if d_m3RecordBacktraces
-        m3_Free(page->info.mapping);
-#endif // d_m3RecordBacktraces
-        m3_Free(page);
-        page = next;
+        IM3_ਕੋਡ_ਪੰਨਾ ਅਗਲਾ = ਪੰਨਾ->info.ਅਗਲਾ;
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
+        m3_Free(ਪੰਨਾ->info.mapping);
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
+        m3_Free(ਪੰਨਾ);
+        ਪੰਨਾ = ਅਗਲਾ;
     }
 
-    *io_list = NULL;
+    *io_list = ਨਿਰਾ;
 }
 
 
-u32 NumFreeLines (IM3CodePage i_page)
+u32 ਅੰਕ_Free_ਸਤਰਾਂ (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ)
 {
-    d_m3Assert(i_page->info.lineIndex <= i_page->info.numLines);
+    d_m3Assert(i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ <= i_ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
 
-    return i_page->info.numLines - i_page->info.lineIndex;
+    ਵਾਪਸ i_ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ - i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ;
 }
 
 
-void EmitWord_impl (IM3CodePage i_page, void* i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    i_page->code[i_page->info.lineIndex++] = i_word;
+ਖਾਲੀ Emit_ਸ਼ਬਦ_impl (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, ਖਾਲੀ* i_ਸ਼ਬਦ)
+{                                                                       d_m3Assert (i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ+1 <= i_ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
+    i_ਪੰਨਾ->ਕੋਡ[i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ++] = i_ਸ਼ਬਦ;
 }
 
-void EmitWord32 (IM3CodePage i_page, const u32 i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex++], &i_word, sizeof(i_word));
+ਖਾਲੀ EmitWord32 (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, ਅਚਲ u32 i_ਸ਼ਬਦ)
+{                                                                       d_m3Assert (i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ+1 <= i_ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
+    ਸਮ੍ਰਿਤੀ_ਨਕਲ(&i_ਪੰਨਾ->ਕੋਡ[i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ++], &i_ਸ਼ਬਦ, ਆਕਾਰ(i_ਸ਼ਬਦ));
 }
 
-void EmitWord64 (IM3CodePage i_page, const u64 i_word)
+ਖਾਲੀ EmitWord64 (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, ਅਚਲ u64 i_ਸ਼ਬਦ)
 {
-#if M3_SIZEOF_PTR == 4
-                                                                        d_m3Assert (i_page->info.lineIndex+2 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 2;
-#else
-                                                                        d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 1;
-#endif
+#ਜੇ M3_SIZEOF_PTR == 4
+                                                                        d_m3Assert (i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ+2 <= i_ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
+    ਸਮ੍ਰਿਤੀ_ਨਕਲ(&i_ਪੰਨਾ->ਕੋਡ[i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ], &i_ਸ਼ਬਦ, ਆਕਾਰ(i_ਸ਼ਬਦ));
+    i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ += 2;
+#ਨਹੀਂਤਾਂ
+                                                                        d_m3Assert (i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ+1 <= i_ਪੰਨਾ->info.ਅੰਕ_ਸਤਰਾਂ);
+    ਸਮ੍ਰਿਤੀ_ਨਕਲ(&i_ਪੰਨਾ->ਕੋਡ[i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ], &i_ਸ਼ਬਦ, ਆਕਾਰ(i_ਸ਼ਬਦ));
+    i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ += 1;
+#ਜੇ_ਅੰਤ
 }
 
 
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
+ਖਾਲੀ Emit_Mapping_ਇੰਦਰਾਜ (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, u32 i_module_ਵਿੱਥ)
 {
-    M3CodeMappingPage* page = i_page->info.mapping;
-                                                                        d_m3Assert (page->size < page->capacity);
+    M3_ਕੋਡ_Mapping_ਪੰਨਾ* ਪੰਨਾ = i_ਪੰਨਾ->info.mapping;
+                                                                        d_m3Assert (ਪੰਨਾ->ਮਾਪ < ਪੰਨਾ->ਸਮਰੱਥਾ);
 
-    M3CodeMapEntry* entry = &page->entries[page->size++];
-    pc_t            pc    = GetPagePC(i_page);
+    M3_ਕੋਡ_Map_ਇੰਦਰਾਜ* ਇੰਦਰਾਜ = &ਪੰਨਾ->entries[ਪੰਨਾ->ਮਾਪ++];
+    pc_t            pc    = Get_ਪੰਨਾ_PC(i_ਪੰਨਾ);
 
-    entry->pcOffset     = (u32)(pc - page->basePC);
-    entry->moduleOffset = i_moduleOffset;
+    ਇੰਦਰਾਜ->pc_ਵਿੱਥ     = (u32)(pc - ਪੰਨਾ->ਅਧਾਰ_PC);
+    ਇੰਦਰਾਜ->module_ਵਿੱਥ = i_module_ਵਿੱਥ;
 }
-#endif // d_m3RecordBacktraces
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
 
-pc_t GetPageStartPC (IM3CodePage i_page)
+pc_t Get_ਪੰਨਾ_ਸ਼ੁਰੂ_PC (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ)
 {
-    return &i_page->code[0];
+    ਵਾਪਸ &i_ਪੰਨਾ->ਕੋਡ[0];
 }
 
 
-pc_t GetPagePC (IM3CodePage i_page)
+pc_t Get_ਪੰਨਾ_PC (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ)
 {
-    if (i_page) {
-        return &i_page->code[i_page->info.lineIndex];
-    } else {
-        return NULL;
+    ਜੇ (i_ਪੰਨਾ) {
+        ਵਾਪਸ &i_ਪੰਨਾ->ਕੋਡ[i_ਪੰਨਾ->info.ਸਤਰ_ਸੂਚਕਾਂਕ];
+    } ਨਹੀਂਤਾਂ {
+        ਵਾਪਸ ਨਿਰਾ;
     }
 }
 
 
-void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
+ਖਾਲੀ ਧੱਕੋ_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ* i_list, IM3_ਕੋਡ_ਪੰਨਾ i_ਕੋਡ_ਪੰਨਾ)
 {
-    IM3CodePage next      = *i_list;
-    i_codePage->info.next = next;
-    *i_list               = i_codePage;
+    IM3_ਕੋਡ_ਪੰਨਾ ਅਗਲਾ      = *i_list;
+    i_ਕੋਡ_ਪੰਨਾ->info.ਅਗਲਾ = ਅਗਲਾ;
+    *i_list               = i_ਕੋਡ_ਪੰਨਾ;
 }
 
 
-IM3CodePage PopCodePage (IM3CodePage* i_list)
+IM3_ਕੋਡ_ਪੰਨਾ ਕੱਢੋ_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ* i_list)
 {
-    IM3CodePage page = *i_list;
-    *i_list          = page->info.next;
-    page->info.next  = NULL;
+    IM3_ਕੋਡ_ਪੰਨਾ ਪੰਨਾ = *i_list;
+    *i_list          = ਪੰਨਾ->info.ਅਗਲਾ;
+    ਪੰਨਾ->info.ਅਗਲਾ  = ਨਿਰਾ;
 
-    return page;
+    ਵਾਪਸ ਪੰਨਾ;
 }
 
 
-u32 FindCodePageEnd (IM3CodePage i_list, IM3CodePage* o_end)
+u32 ਲੱਭੋ_ਕੋਡ_ਪੰਨਾ_ਸਿਰਾ (IM3_ਕੋਡ_ਪੰਨਾ i_list, IM3_ਕੋਡ_ਪੰਨਾ* o_ਸਿਰਾ)
 {
-    u32 numPages = 0;
-    *o_end       = NULL;
+    u32 ਅੰਕ_ਪੰਨੇ = 0;
+    *o_ਸਿਰਾ       = ਨਿਰਾ;
 
-    while (i_list) {
-        *o_end = i_list;
-        ++numPages;
-        i_list = i_list->info.next;
+    ਜਦੋਂ (i_list) {
+        *o_ਸਿਰਾ = i_list;
+        ++ਅੰਕ_ਪੰਨੇ;
+        i_list = i_list->info.ਅਗਲਾ;
     }
 
-    return numPages;
+    ਵਾਪਸ ਅੰਕ_ਪੰਨੇ;
 }
 
 
-u32 CountCodePages (IM3CodePage i_list)
+u32 ਗਿਣਤੀ_ਕੋਡ_ਪੰਨੇ (IM3_ਕੋਡ_ਪੰਨਾ i_list)
 {
-    IM3CodePage unused;
-    return FindCodePageEnd(i_list, &unused);
+    IM3_ਕੋਡ_ਪੰਨਾ ਅਣਵਰਤਿਆ;
+    ਵਾਪਸ ਲੱਭੋ_ਕੋਡ_ਪੰਨਾ_ਸਿਰਾ(i_list, &ਅਣਵਰਤਿਆ);
 }
 
 
-IM3CodePage GetEndCodePage (IM3CodePage i_list)
+IM3_ਕੋਡ_ਪੰਨਾ Get_ਸਿਰਾ_ਕੋਡ_ਪੰਨਾ (IM3_ਕੋਡ_ਪੰਨਾ i_list)
 {
-    IM3CodePage end;
-    FindCodePageEnd(i_list, &end);
+    IM3_ਕੋਡ_ਪੰਨਾ ਸਿਰਾ;
+    ਲੱਭੋ_ਕੋਡ_ਪੰਨਾ_ਸਿਰਾ(i_list, &ਸਿਰਾ);
 
-    return end;
+    ਵਾਪਸ ਸਿਰਾ;
 }
 
-#if d_m3RecordBacktraces
-bool ContainsPC (IM3CodePage i_page, pc_t i_pc)
+#ਜੇ d_m3_ਰਿਕਾਰਡ_Backtraces
+bool ਸ਼ਾਮਲ_ਹੈ_PC (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, pc_t i_pc)
 {
-    return GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
+    ਵਾਪਸ Get_ਪੰਨਾ_ਸ਼ੁਰੂ_PC(i_ਪੰਨਾ) <= i_pc && i_pc < Get_ਪੰਨਾ_PC(i_ਪੰਨਾ);
 }
 
 
-bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset)
+bool Map_PCTo_ਵਿੱਥ (IM3_ਕੋਡ_ਪੰਨਾ i_ਪੰਨਾ, pc_t i_pc, u32* o_module_ਵਿੱਥ)
 {
-    M3CodeMappingPage* mapping = i_page->info.mapping;
+    M3_ਕੋਡ_Mapping_ਪੰਨਾ* mapping = i_ਪੰਨਾ->info.mapping;
 
-    u32 pcOffset = (u32)(i_pc - mapping->basePC);
+    u32 pc_ਵਿੱਥ = (u32)(i_pc - mapping->ਅਧਾਰ_PC);
 
-    u32 left  = 0;
-    u32 right = mapping->size;
+    u32 ਖੱਬਾ  = 0;
+    u32 ਸੱਜਾ = mapping->ਮਾਪ;
 
-    while (left < right) {
-        u32 mid = left + (right - left) / 2;
+    ਜਦੋਂ (ਖੱਬਾ < ਸੱਜਾ) {
+        u32 mid = ਖੱਬਾ + (ਸੱਜਾ - ਖੱਬਾ) / 2;
 
-        if (mapping->entries[mid].pcOffset < pcOffset) {
-            left = mid + 1;
-        } else if (mapping->entries[mid].pcOffset > pcOffset) {
-            right = mid;
-        } else {
-            *o_moduleOffset = mapping->entries[mid].moduleOffset;
-            return true;
+        ਜੇ (mapping->entries[mid].pc_ਵਿੱਥ < pc_ਵਿੱਥ) {
+            ਖੱਬਾ = mid + 1;
+        } ਨਹੀਂਤਾਂ ਜੇ (mapping->entries[mid].pc_ਵਿੱਥ > pc_ਵਿੱਥ) {
+            ਸੱਜਾ = mid;
+        } ਨਹੀਂਤਾਂ {
+            *o_module_ਵਿੱਥ = mapping->entries[mid].module_ਵਿੱਥ;
+            ਵਾਪਸ true;
         }
     }
 
     // Getting here means left is now one more than the element we want.
-    if (left > 0) {
-        left--;
-        *o_moduleOffset = mapping->entries[left].moduleOffset;
-        return true;
-    } else {
-        return false;
+    ਜੇ (ਖੱਬਾ > 0) {
+        ਖੱਬਾ--;
+        *o_module_ਵਿੱਥ = mapping->entries[ਖੱਬਾ].module_ਵਿੱਥ;
+        ਵਾਪਸ true;
+    } ਨਹੀਂਤਾਂ {
+        ਵਾਪਸ false;
     }
 }
-#endif // d_m3RecordBacktraces
+#ਜੇ_ਅੰਤ // d_m3RecordBacktraces
 
 //---------------------------------------------------------------------------------------------------------------------------------

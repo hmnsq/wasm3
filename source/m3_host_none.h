@@ -15,62 +15,62 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_none_h
-#define m3_host_none_h
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ m3_host_none_h
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_core.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_host.h"
 
-void* m3_HostStackBase (void)
+ਖਾਲੀ* m3_Host_ਢੇਰ_ਅਧਾਰ (ਖਾਲੀ)
 {
-    return NULL;
+    ਵਾਪਸ ਨਿਰਾ;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+ਖਾਲੀ m3_Host_Install_ਰੁਕਾਵਟ_Handler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (ਖਾਲੀ)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+ਖਾਲੀ m3_Host_Remove_ਰੁਕਾਵਟ_Handler (ਖਾਲੀ)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_Host_ਸਮਾਂ_Ms (ਖਾਲੀ)
 {
-    return 0;
+    ਵਾਪਸ 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+ਖਾਲੀ m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (ਖਾਲੀ)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (ਅਚਲ ਅੱਖਰ* i_ਰਸਤਾ, size_t i_max_ਬਾਈਟਾਂ, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    ਵਾਪਸ m3_HostReadFile(i_ਰਸਤਾ, i_max_ਬਾਈਟਾਂ, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+ਖਾਲੀ m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->ਅੰਕੜੇ);
 
-    io_file->size = 0;
+    io_file->ਮਾਪ = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (ਅਚਲ ਅੱਖਰ* i_from, ਅਚਲ ਅੱਖਰ* i_ਮੰਜ਼ਿਲ)
 {
-    remove(i_to);
-    return rename(i_from, i_to) == 0;
+    remove(i_ਮੰਜ਼ਿਲ);
+    ਵਾਪਸ rename(i_from, i_ਮੰਜ਼ਿਲ) == 0;
 }
 
-#if d_m3GuardedMemory
+#ਜੇ d_m3_Guarded_ਸਮ੍ਰਿਤੀ
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
-#endif
+#ਜੇ_ਅੰਤ
 
-#endif // m3_host_none_h
+#ਜੇ_ਅੰਤ // m3_host_none_h

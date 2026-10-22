@@ -16,17 +16,17 @@
 //  plain reads and writes.
 //
 
-#ifndef m3_atomic_h
-#define m3_atomic_h
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ m3_atomic_h
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ m3_atomic_h
 
-#include "m3_core.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_core.h"
 
-#if d_m3HasAtomics
+#ਜੇ d_m3HasAtomics
 
 d_m3BeginExternC
 
-enum {
-    c_atomicAdd,
+ਗਿਣਤੀ {
+    c_atomic_ਜੋੜੋ,
     c_atomicSub,
     c_atomicAnd,
     c_atomicOr,
@@ -35,18 +35,18 @@ enum {
 };
 
 #  define d_m3AtomicTyped(T)                                            \
-    static inline T m3_AtomicLoad_##T (const u8* i_cell)                \
+    ਸਥਿਰ ਸਤਰਅੰਦਰ T m3_Atomic_ਲੱਦੋ##T (ਅਚਲ u8* i_cell)                \
     {                                                                   \
-        T value;                                                        \
-        memcpy (& value, i_cell, sizeof (value));                       \
-        M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        T ਮੁੱਲ;                                                        \
+        ਸਮ੍ਰਿਤੀ_ਨਕਲ (& ਮੁੱਲ, i_cell, ਆਕਾਰ (ਮੁੱਲ));                       \
+        M3_BSWAP_##T (ਮੁੱਲ);                                           \
+        ਵਾਪਸ ਮੁੱਲ;                                                   \
     }                                                                   \
                                                                         \
-    static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
+    ਸਥਿਰ ਸਤਰਅੰਦਰ ਖਾਲੀ m3_AtomicStore_##T (u8* o_cell, T i_ਮੁੱਲ)       \
     {                                                                   \
-        M3_BSWAP_##T (i_value);                                         \
-        memcpy (o_cell, & i_value, sizeof (i_value));                   \
+        M3_BSWAP_##T (i_ਮੁੱਲ);                                         \
+        ਸਮ੍ਰਿਤੀ_ਨਕਲ (o_cell, & i_ਮੁੱਲ, ਆਕਾਰ (i_ਮੁੱਲ));                   \
     }
 
 d_m3AtomicTyped(u8);
@@ -54,61 +54,61 @@ d_m3AtomicTyped(u16);
 d_m3AtomicTyped(u32);
 d_m3AtomicTyped(u64);
 
-static inline
-u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
+ਸਥਿਰ ਸਤਰਅੰਦਰ
+u64 m3_Atomic_ਲੱਦੋ_W (ਅਚਲ u8* i_cell, u32 i_log2_ਚੌੜਾਈ)
 {
-    switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    ਚੋਣ (i_log2_ਚੌੜਾਈ) {
+    ਹਾਲਤ 0: ਵਾਪਸ m3_Atomic_ਲੱਦੋ_u8(i_cell);
+    ਹਾਲਤ 1: ਵਾਪਸ m3_Atomic_ਲੱਦੋ_u16(i_cell);
+    ਹਾਲਤ 2: ਵਾਪਸ m3_Atomic_ਲੱਦੋ_u32(i_cell);
+    ਮੂਲ: ਵਾਪਸ m3_Atomic_ਲੱਦੋ_u64(i_cell);
     }
 }
 
-static inline
-void m3_AtomicStoreW (u8* o_cell, u32 i_log2Width, u64 i_value)
+ਸਥਿਰ ਸਤਰਅੰਦਰ
+ਖਾਲੀ m3_AtomicStoreW (u8* o_cell, u32 i_log2_ਚੌੜਾਈ, u64 i_ਮੁੱਲ)
 {
-    switch (i_log2Width) {
-    case 0: m3_AtomicStore_u8(o_cell, (u8)i_value); break;
-    case 1: m3_AtomicStore_u16(o_cell, (u16)i_value); break;
-    case 2: m3_AtomicStore_u32(o_cell, (u32)i_value); break;
-    default: m3_AtomicStore_u64(o_cell, i_value); break;
+    ਚੋਣ (i_log2_ਚੌੜਾਈ) {
+    ਹਾਲਤ 0: m3_AtomicStore_u8(o_cell, (u8)i_ਮੁੱਲ); ਰੋਕੋ;
+    ਹਾਲਤ 1: m3_AtomicStore_u16(o_cell, (u16)i_ਮੁੱਲ); ਰੋਕੋ;
+    ਹਾਲਤ 2: m3_AtomicStore_u32(o_cell, (u32)i_ਮੁੱਲ); ਰੋਕੋ;
+    ਮੂਲ: m3_AtomicStore_u64(o_cell, i_ਮੁੱਲ); ਰੋਕੋ;
     }
 }
 
-static inline
-u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
+ਸਥਿਰ ਸਤਰਅੰਦਰ
+u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2_ਚੌੜਾਈ, u32 i_ਕਿਸਮ, u64 i_ਮੁੱਲ)
 {
-    u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
+    u64 old = m3_Atomic_ਲੱਦੋ_W(io_cell, i_log2_ਚੌੜਾਈ);
     u64 updated;
 
-    switch (i_kind) {
-    case c_atomicAdd: updated = old + i_value; break;
-    case c_atomicSub: updated = old - i_value; break;
-    case c_atomicAnd: updated = old & i_value; break;
-    case c_atomicOr: updated = old | i_value; break;
-    case c_atomicXor: updated = old ^ i_value; break;
-    default: updated = i_value; break;
+    ਚੋਣ (i_ਕਿਸਮ) {
+    ਹਾਲਤ c_atomic_ਜੋੜੋ: updated = old + i_ਮੁੱਲ; ਰੋਕੋ;
+    ਹਾਲਤ c_atomicSub: updated = old - i_ਮੁੱਲ; ਰੋਕੋ;
+    ਹਾਲਤ c_atomicAnd: updated = old & i_ਮੁੱਲ; ਰੋਕੋ;
+    ਹਾਲਤ c_atomicOr: updated = old | i_ਮੁੱਲ; ਰੋਕੋ;
+    ਹਾਲਤ c_atomicXor: updated = old ^ i_ਮੁੱਲ; ਰੋਕੋ;
+    ਮੂਲ: updated = i_ਮੁੱਲ; ਰੋਕੋ;
     }
 
-    m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    m3_AtomicStoreW(io_cell, i_log2_ਚੌੜਾਈ, updated);
+    ਵਾਪਸ old;
 }
 
-static inline
-u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_replacement)
+ਸਥਿਰ ਸਤਰਅੰਦਰ
+u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2_ਚੌੜਾਈ, u64 i_expected, u64 i_replacement)
 {
-    u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
-    u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
+    u64 old = m3_Atomic_ਲੱਦੋ_W(io_cell, i_log2_ਚੌੜਾਈ);
+    u64 ਨਕਾਬ = (i_log2_ਚੌੜਾਈ == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2_ਚੌੜਾਈ)) - 1);
 
-    if (old == (i_expected & mask)) {
-        m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
+    ਜੇ (old == (i_expected & ਨਕਾਬ)) {
+        m3_AtomicStoreW(io_cell, i_log2_ਚੌੜਾਈ, i_replacement);
     }
-    return old;
+    ਵਾਪਸ old;
 }
 
-d_m3EndExternC
+d_m3_ਸਿਰਾ_Extern_C
 
-#endif // d_m3HasAtomics
+#ਜੇ_ਅੰਤ // d_m3HasAtomics
 
-#endif // m3_atomic_h
+#ਜੇ_ਅੰਤ // m3_atomic_h

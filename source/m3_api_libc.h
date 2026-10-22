@@ -5,15 +5,15 @@
 //  Copyright © 2019 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#ifndef m3_api_libc_h
-#define m3_api_libc_h
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ m3_api_libc_h
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ m3_api_libc_h
 
-#include "m3_core.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_core.h"
 
 d_m3BeginExternC
 
-M3Result m3_LinkLibC (IM3Module io_module);
+M3_ਨਤੀਜਾ m3_LinkLibC (IM3Module io_module);
 
-d_m3EndExternC
+d_m3_ਸਿਰਾ_Extern_C
 
-#endif // m3_api_libc_h
+#ਜੇ_ਅੰਤ // m3_api_libc_h

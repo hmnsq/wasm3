@@ -5,110 +5,110 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_env.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_bind.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_exception.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_info.h"
 
 
-u8 ConvertTypeCharToTypeId (char i_code)
+u8 Convert_Type_Char_ਮੰਜ਼ਿਲ_Type_Id (ਅੱਖਰ i_ਕੋਡ)
 {
-    switch (i_code) {
-    case 'v': return c_m3Type_none;
-    case 'i': return c_m3Type_i32;
-    case 'I': return c_m3Type_i64;
-    case 'f': return c_m3Type_f32;
-    case 'F': return c_m3Type_f64;
-    case '*': return c_m3Type_i32;
+    ਚੋਣ (i_ਕੋਡ) {
+    ਹਾਲਤ 'v': ਵਾਪਸ c_m3Type_none;
+    ਹਾਲਤ 'i': ਵਾਪਸ c_m3Type_i32;
+    ਹਾਲਤ 'I': ਵਾਪਸ c_m3Type_i64;
+    ਹਾਲਤ 'f': ਵਾਪਸ c_m3Type_f32;
+    ਹਾਲਤ 'F': ਵਾਪਸ c_m3Type_f64;
+    ਹਾਲਤ '*': ਵਾਪਸ c_m3Type_i32;
     // same letters c_waCompactTypes uses for the reference types
-    case 'r': return c_m3Type_funcref;
-    case 'R': return c_m3Type_externref;
-    case 'c': return c_m3Type_contref;
+    ਹਾਲਤ 'r': ਵਾਪਸ c_m3Type_funcref;
+    ਹਾਲਤ 'R': ਵਾਪਸ c_m3Type_externref;
+    ਹਾਲਤ 'c': ਵਾਪਸ c_m3Type_contref;
     }
-    return c_m3Type_unknown;
+    ਵਾਪਸ c_m3Type_unknown;
 }
 
 
-M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature)
+M3_ਨਤੀਜਾ Signature_ਮੰਜ਼ਿਲ_Func_Type (IM3FuncType* o_functionType, ccstr_t i_signature)
 {
-    IM3FuncType funcType = NULL;
+    IM3FuncType funcType = ਨਿਰਾ;
 
 _try {
-    if (not o_functionType) {
+    ਜੇ (not o_functionType) {
         _throw("null function type");
     }
 
-    if (not i_signature) {
+    ਜੇ (not i_signature) {
         _throw("null function signature");
     }
 
     cstr_t sig = i_signature;
 
-    size_t maxNumTypes = strlen(i_signature);
+    size_t max_ਅੰਕ_Types = ਲੜੀ_ਲੰਬਾਈ(i_signature);
 
     // assume min signature is "()"
-    _throwif(m3Err_malformedFunctionSignature, maxNumTypes < 2);
-    maxNumTypes -= 2;
+    _throwif(m3Err_malformedFunctionSignature, max_ਅੰਕ_Types < 2);
+    max_ਅੰਕ_Types -= 2;
 
-    _throwif(m3Err_tooManyArgsRets, maxNumTypes > d_m3MaxSaneFunctionArgRetCount);
+    _throwif(m3_Err_too_Many_ਦਲੀਲਾਂ_Rets, max_ਅੰਕ_Types > d_m3_Max_Sane_Function_Arg_Ret_ਗਿਣਤੀ);
 
-_   (AllocFuncType(&funcType, (u32)maxNumTypes));
+_   (AllocFuncType(&funcType, (u32)max_ਅੰਕ_Types));
 
     m3type_t* typelist = funcType->types;
 
     bool parsingRets = true;
-    while (*sig) {
-        char typeChar = *sig++;
+    ਜਦੋਂ (*sig) {
+        ਅੱਖਰ typeChar = *sig++;
 
-        if (typeChar == '(') {
+        ਜੇ (typeChar == '(') {
             parsingRets = false;
-            continue;
-        } else if (typeChar == ' ') {
-            continue;
-        } else if (typeChar == ')') {
-            break;
+            ਜਾਰੀ;
+        } ਨਹੀਂਤਾਂ ਜੇ (typeChar == ' ') {
+            ਜਾਰੀ;
+        } ਨਹੀਂਤਾਂ ਜੇ (typeChar == ')') {
+            ਰੋਕੋ;
         }
 
-        u8 type = ConvertTypeCharToTypeId(typeChar);
+        u8 type = Convert_Type_Char_ਮੰਜ਼ਿਲ_Type_Id(typeChar);
 
         _throwif("unknown argument type char", c_m3Type_unknown == type);
 
-        if (type == c_m3Type_none) {
-            continue;
+        ਜੇ (type == c_m3Type_none) {
+            ਜਾਰੀ;
         }
 
-        if (parsingRets) {
-            _throwif("malformed signature; return count overflow", funcType->numRets >= maxNumTypes);
-            funcType->numRets++;
+        ਜੇ (parsingRets) {
+            _throwif("malformed signature; return count overflow", funcType->ਅੰਕ_Rets >= max_ਅੰਕ_Types);
+            funcType->ਅੰਕ_Rets++;
             *typelist++ = type;
-        } else {
-            _throwif("malformed signature; arg count overflow", (u32)(funcType->numRets) + funcType->numArgs >= maxNumTypes);
-            funcType->numArgs++;
+        } ਨਹੀਂਤਾਂ {
+            _throwif("malformed signature; arg count overflow", (u32)(funcType->ਅੰਕ_Rets) + funcType->ਅੰਕ_ਦਲੀਲਾਂ >= max_ਅੰਕ_Types);
+            funcType->ਅੰਕ_ਦਲੀਲਾਂ++;
             *typelist++ = type;
         }
     }
 
 } _catch:
 
-    if (result) {
+    ਜੇ (ਨਤੀਜਾ) {
         m3_Free(funcType);
     }
 
     *o_functionType = funcType;
 
-    return result;
+    ਵਾਪਸ ਨਤੀਜਾ;
 }
 
 
-static
-M3Result ValidateSignature (IM3Function i_function, ccstr_t i_linkingSignature)
+ਸਥਿਰ
+M3_ਨਤੀਜਾ ValidateSignature (IM3Function i_function, ccstr_t i_linkingSignature)
 {
-    M3Result result = m3Err_none;
+    M3_ਨਤੀਜਾ ਨਤੀਜਾ = m3Err_none;
 
-    IM3FuncType ftype = NULL;
-_   (SignatureToFuncType(&ftype, i_linkingSignature));
+    IM3FuncType ftype = ਨਿਰਾ;
+_   (Signature_ਮੰਜ਼ਿਲ_Func_Type(&ftype, i_linkingSignature));
 
-    if (not AreFuncTypesEqual(ftype, i_function->funcType)) {
+    ਜੇ (not AreFuncTypesEqual(ftype, i_function->funcType)) {
         m3log(module, "expected: %s", SPrintFuncTypeSignature(ftype));
         m3log(module, "   found: %s", SPrintFuncTypeSignature(i_function->funcType));
 
@@ -119,11 +119,11 @@ _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
     m3_Free(ftype);
 
-    return result;
+    ਵਾਪਸ ਨਤੀਜਾ;
 }
 
 
-M3Result FindAndLinkFunction (IM3Module io_module,
+M3_ਨਤੀਜਾ ਲੱਭੋ_And_Link_Function (IM3Module io_module,
                               ccstr_t   i_moduleName,
                               ccstr_t   i_functionName,
                               ccstr_t   i_signature,
@@ -133,17 +133,17 @@ M3Result FindAndLinkFunction (IM3Module io_module,
 _try {
     _throwif(m3Err_moduleNotLinked, !io_module->runtime);
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    ਅਚਲ bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
 
-    result = m3Err_functionLookupFailed;
+    ਨਤੀਜਾ = m3Err_functionLookupFailed;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
-        const IM3Function f = &io_module->functions[i];
+    ਲਈ (u32 i = 0; i < io_module->ਅੰਕ_Functions; ++i) {
+        ਅਚਲ IM3Function f = &io_module->functions[i];
 
-        if (f->import.moduleUtf8 and f->import.fieldUtf8) {
-            if (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
+        ਜੇ (f->import.moduleUtf8 and f->import.ਖੇਤਰ_Utf8) {
+            ਜੇ (strcmp(f->import.ਖੇਤਰ_Utf8, i_functionName) == 0 and
                 (wildcardModule or strcmp(f->import.moduleUtf8, i_moduleName) == 0)) {
-                if (i_signature) {
+                ਜੇ (i_signature) {
 _                   (ValidateSignature(f, i_signature));
                 }
 _               (CompileRawFunction(io_module, f, i_function, i_userdata));
@@ -151,24 +151,24 @@ _               (CompileRawFunction(io_module, f, i_function, i_userdata));
         }
     }
 } _catch:
-    return result;
+    ਵਾਪਸ ਨਤੀਜਾ;
 }
 
-M3Result m3_LinkRawFunctionEx (IM3Module         io_module,
-                               const char* const i_moduleName,
-                               const char* const i_functionName,
-                               const char* const i_signature,
+M3_ਨਤੀਜਾ m3_LinkRawFunctionEx (IM3Module         io_module,
+                               ਅਚਲ ਅੱਖਰ* ਅਚਲ i_moduleName,
+                               ਅਚਲ ਅੱਖਰ* ਅਚਲ i_functionName,
+                               ਅਚਲ ਅੱਖਰ* ਅਚਲ i_signature,
                                M3RawCall         i_function,
-                               const void*       i_userdata)
+                               ਅਚਲ ਖਾਲੀ*       i_userdata)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
+    ਵਾਪਸ ਲੱਭੋ_And_Link_Function(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
 }
 
-M3Result m3_LinkRawFunction (IM3Module         io_module,
-                             const char* const i_moduleName,
-                             const char* const i_functionName,
-                             const char* const i_signature,
+M3_ਨਤੀਜਾ m3_LinkRawFunction (IM3Module         io_module,
+                             ਅਚਲ ਅੱਖਰ* ਅਚਲ i_moduleName,
+                             ਅਚਲ ਅੱਖਰ* ਅਚਲ i_functionName,
+                             ਅਚਲ ਅੱਖਰ* ਅਚਲ i_signature,
                              M3RawCall         i_function)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
+    ਵਾਪਸ ਲੱਭੋ_And_Link_Function(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, ਨਿਰਾ);
 }

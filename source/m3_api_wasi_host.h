@@ -29,15 +29,15 @@
 //  saying: a value left behind on an error path is one the compiler will warn about.
 //
 
-#ifndef m3_api_wasi_host_h
-#define m3_api_wasi_host_h
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ m3_api_wasi_host_h
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ m3_api_wasi_host_h
 
-#include "m3_core.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "m3_core.h"
 
-#if defined(d_m3HasWASI)
+#ਜੇ defined(d_m3HasWASI)
 
 // Fixup wasi_core.h
-#  if defined(M3_COMPILER_MSVC)
+#  ਜੇ defined(M3_COMPILER_MSVC)
 #    define _Static_assert(...)
 #    define __attribute__(...)
 #    define _Noreturn
@@ -51,22 +51,22 @@ d_m3BeginExternC
 
 // Guest paths arrive as (pointer, length); the calls below want them NUL-terminated,
 // so they are copied out into a buffer of this size.
-#  define d_m3WasiMaxPath  512
+#  define d_m3_Wasi_Max_ਰਸਤਾ  512
 
 // The preopened directories the guest is offered. The names are what it sees and are
 // the same wherever it runs; the descriptor each one holds is the host's to fill in,
 // and what sits behind that descriptor is the host's business - POSIX opens the
 // directory, Win32 cannot and keeps a placeholder.
-#  define d_m3WasiPreopenCount  5
+#  define d_m3_Wasi_Preopen_ਗਿਣਤੀ  5
 
-typedef struct m3_wasi_preopen_t {
-    int     fd;
-    ccstr_t path;
-    ccstr_t real_path;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ m3_wasi_preopen_t {
+    ਪੂਰਨ     fd;
+    ccstr_t ਰਸਤਾ;
+    ccstr_t real_ਰਸਤਾ;
 } m3_wasi_preopen_t;
 
 // Defined here rather than declared because this header has exactly one includer
-static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
+ਸਥਿਰ m3_wasi_preopen_t m3_wasi_preopen[d_m3_Wasi_Preopen_ਗਿਣਤੀ] = {
     { 0,  "<stdin>",  ""  },
     { 1,  "<stdout>", ""  },
     { 2,  "<stderr>", ""  },
@@ -76,11 +76,11 @@ static m3_wasi_preopen_t m3_wasi_preopen[d_m3WasiPreopenCount] = {
 
 // A filestat as the host can fill one in, before it is written out in whichever
 // layout the calling WASI revision asks for
-typedef struct m3_wasi_filestat_t {
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ m3_wasi_filestat_t {
     uint64_t           dev;
     uint64_t           ino;
     uint64_t           nlink;
-    uint64_t           size;
+    uint64_t           ਮਾਪ;
     __wasi_timestamp_t atim;
     __wasi_timestamp_t mtim;
     __wasi_timestamp_t ctim;
@@ -97,8 +97,8 @@ typedef struct m3_wasi_filestat_t {
 // guest can observe - and one batch covers every list a C library actually writes.
 #  define d_m3WasiMaxIovs  8
 
-typedef struct m3_wasi_iovec_t {
-    void*  buf;
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ m3_wasi_iovec_t {
+    ਖਾਲੀ*  buf;
     size_t len;
 } m3_wasi_iovec_t;
 
@@ -106,7 +106,7 @@ typedef struct m3_wasi_iovec_t {
 // decoded and the difference between the two WASI revisions' layouts already gone.
 // Which fields carry anything is decided by 'type': a clock subscription fills in
 // the three below it, a descriptor subscription fills in 'fd'.
-typedef struct m3_wasi_pollsub_t {
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ m3_wasi_pollsub_t {
     __wasi_userdata_t  userdata;
     __wasi_eventtype_t type;
 
@@ -120,7 +120,7 @@ typedef struct m3_wasi_pollsub_t {
 // One thing that turned out to be ready. 'error' describes that subscription alone -
 // a descriptor that was never open is one event with EBADF, not a failed call - and
 // the fields below it are only filled in for a descriptor event.
-typedef struct m3_wasi_pollevent_t {
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਬਣਤਰ m3_wasi_pollevent_t {
     __wasi_userdata_t     userdata;
     __wasi_errno_t        error;
     __wasi_eventtype_t    type;
@@ -130,8 +130,8 @@ typedef struct m3_wasi_pollevent_t {
 } m3_wasi_pollevent_t;
 
 
-d_m3EndExternC
+d_m3_ਸਿਰਾ_Extern_C
 
-#endif // d_m3HasWASI
+#ਜੇ_ਅੰਤ // d_m3HasWASI
 
-#endif // m3_api_wasi_host_h
+#ਜੇ_ਅੰਤ // m3_api_wasi_host_h
