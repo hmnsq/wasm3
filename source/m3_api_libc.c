@@ -77,31 +77,31 @@ m3ApiRawFunction(m3_libc_print)
 }
 
 static
-void internal_itoa (int n, char s[], int radix)
+void internal_itoa (puur_naa_nka n, var_na s[], puur_naa_nka radix)
 {
-    static char const HEXDIGITS[0x10] = {
+    static var_na const HEXDIGITS[0x10] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
-    int  i, j, sign;
-    char c;
+    puur_naa_nka  i, j, sign;
+    var_na c;
 
-    if ((sign = n) < 0) {
+    ᨀᨘ ((sign = n) < 0) {
         n = -n;
     }
     i = 0;
     do {
         s[i++] = HEXDIGITS[n % radix];
-    } while ((n /= radix) > 0);
+    } ᨀᨛ ((n /= radix) > 0);
 
-    if (sign < 0) {
+    ᨀᨘ (sign < 0) {
         s[i++] = '-';
     }
     s[i] = '\0';
 
     // reverse
-    for (i = 0, j = (int)strlen(s) - 1; i < j; i++, j--) {
+    for (i = 0, j = (puur_naa_nka)strlen(s) - 1; i < j; i++, j--) {
         c    = s[i];
         s[i] = s[j];
         s[j] = c;
@@ -112,10 +112,10 @@ m3ApiRawFunction(m3_libc_printf)
 {
     m3ApiReturnType(int32_t)
 
-    m3ApiGetArgMem(const char*, i_fmt)
+    m3ApiGetArgMem(const var_na*, i_fmt)
     m3ApiGetArgMem(wasm_ptr_t*, i_args)
 
-    if (m3ApiIsNullPtr(i_fmt)) {
+    ᨀᨘ (m3ApiIsNullPtr(i_fmt)) {
         m3ApiReturn(0);
     }
 
@@ -126,9 +126,9 @@ m3ApiRawFunction(m3_libc_printf)
     FILE*   file   = stdout;
     int32_t length = 0;
 
-    char ch;
-    while ((ch = *i_fmt++)) {
-        if ('%' != ch) {
+    var_na ch;
+    ᨀᨛ ((ch = *i_fmt++)) {
+        ᨀᨘ ('%' != ch) {
             putc(ch, file);
             length++;
             continue;
@@ -136,49 +136,49 @@ m3ApiRawFunction(m3_libc_printf)
         // A trailing '%' has no conversion character: the next byte is the
         // terminating NUL. Stop here rather than consuming it, which would
         // step the cursor past the end of the guest string.
-        if (not *i_fmt) {
-            break;
+        ᨀᨘ (not *i_fmt) {
+            bha_nga;
         }
         ch = *i_fmt++;
         switch (ch) {
-        case 'c': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            char char_temp = *i_args++;
+        pak_sa 'c': {
+            m3ApiCheckMem(i_args, parimaa_na(wasm_ptr_t));
+            var_na char_temp = *i_args++;
             fputc(char_temp, file);
             length++;
-            break;
+            bha_nga;
         }
-        case 'd':
-        case 'x': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            int  int_temp   = *i_args++;
-            char buffer[32] = { 0 };
+        pak_sa 'd':
+        pak_sa 'x': {
+            m3ApiCheckMem(i_args, parimaa_na(wasm_ptr_t));
+            puur_naa_nka  int_temp   = *i_args++;
+            var_na buffer[32] = { 0 };
             internal_itoa(int_temp, buffer, (ch == 'x') ? 16 : 10);
             fputs(buffer, file);
-            length += (int32_t)strnlen(buffer, sizeof(buffer));
-            break;
+            length += (int32_t)strnlen(buffer, parimaa_na(buffer));
+            bha_nga;
         }
-        case 's': {
-            m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            const char* string_temp;
+        pak_sa 's': {
+            m3ApiCheckMem(i_args, parimaa_na(wasm_ptr_t));
+            const var_na* string_temp;
             size_t      string_len;
 
-            string_temp = (const char*)m3ApiOffsetToPtr(*i_args++);
-            if (m3ApiIsNullPtr(string_temp)) {
+            string_temp = (const var_na*)m3ApiOffsetToPtr(*i_args++);
+            ᨀᨘ (m3ApiIsNullPtr(string_temp)) {
                 string_temp = "(null)";
                 string_len  = 6;
-            } else {
+            } ᨀᨘᨁ {
                 string_len = strnlen(string_temp, 1024);
                 m3ApiCheckMem(string_temp, string_len + 1);
             }
 
             fwrite(string_temp, 1, string_len, file);
             length += (int32_t)string_len;
-            break;
+            bha_nga;
         default:
             fputc(ch, file);
             length++;
-            break;
+            bha_nga;
         }
         }
     }
@@ -189,16 +189,16 @@ m3ApiRawFunction(m3_libc_printf)
 static
 uint64_t clock_ms (IM3Runtime i_runtime)
 {
-#if d_m3DeterministicProfile
-    return i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
-#else
+#ᨀᨘ d_m3DeterministicProfile
+    ᨀᨘᨒ i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
+#ᨀᨘᨁ
     (void)i_runtime;
 
 #  ifdef CLOCKS_PER_SEC
     const clock_t clock_divider = CLOCKS_PER_SEC / 1000;
-    return (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
-#  else
-    return (uint64_t)clock();
+    ᨀᨘᨒ (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
+#  ᨀᨘᨁ
+    ᨀᨘᨒ (uint64_t)clock();
 #  endif
 #endif
 }
@@ -220,10 +220,10 @@ m3ApiRawFunction(m3_libc_clock_ms_i64)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    ᨀᨘ (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
+        ᨀᨘᨒ m3Err_none;
+    } ᨀᨘᨁ {
+        ᨀᨘᨒ i_result;
     }
 }
 
@@ -235,18 +235,18 @@ M3Result LinkClockMs (IM3Module module, ccstr_t i_moduleName)
 {
     M3Result result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "I()", &m3_libc_clock_ms_i64);
 
-    if (result == m3Err_functionSignatureMismatch) {
+    ᨀᨘ (result == m3Err_functionSignatureMismatch) {
         result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "i()", &m3_libc_clock_ms);
     }
 
-    return SuppressLookupFailure(result);
+    ᨀᨘᨒ SuppressLookupFailure(result);
 }
 
 M3Result m3_LinkLibC (IM3Module module)
 {
     M3Result result = m3Err_none;
 
-    const char* env = "env";
+    const var_na* env = "env";
     // clang-format off
 
 _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "_debug",            "i(*i)",   &m3_libc_print)));
@@ -261,5 +261,5 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "printf",            
     // clang-format on
 
 _catch:
-    return result;
+    ᨀᨘᨒ result;
 }

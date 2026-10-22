@@ -20,7 +20,7 @@ void Module_FreeFunctions (IM3Module i_module)
 
 void m3_FreeModule (IM3Module i_module)
 {
-    if (i_module) {
+    ᨀᨘ (i_module) {
         m3log(module, "freeing module: %s (funcs: %d; segments: %d)",
               i_module->name, i_module->numFunctions, i_module->numDataSegments);
 
@@ -36,11 +36,11 @@ void m3_FreeModule (IM3Module i_module)
 
             // a slot may point at a table another module owns; that module
             // frees it
-            if (not table or table->owner != i_module) {
+            ᨀᨘ (not table or table->owner != i_module) {
                 continue;
             }
 
-            if (table->elements and i_module->runtime) {
+            ᨀᨘ (table->elements and i_module->runtime) {
                 i_module->runtime->tableElementsUsed -= table->size;
             }
             m3_Free(table->elements);
@@ -60,7 +60,7 @@ void m3_FreeModule (IM3Module i_module)
         }
         m3_Free(i_module->globals);
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ᨀᨘ d_m3HasExceptionHandling || d_m3HasStackSwitching
         for (u32 i = 0; i < i_module->numTags; ++i) {
             FreeImportInfo(&(i_module->tags[i].import));
         }
@@ -72,7 +72,7 @@ void m3_FreeModule (IM3Module i_module)
 
             // a slot may point at a memory another module owns; that module
             // frees it
-            if (not memory or memory->owner != i_module) {
+            ᨀᨘ (not memory or memory->owner != i_module) {
                 continue;
             }
 
@@ -88,9 +88,9 @@ void m3_FreeModule (IM3Module i_module)
         }
         m3_Free(i_module->exports);
 
-#if d_m3HasSnapshots
+#ᨀᨘ d_m3HasSnapshots
         M3EmbeddedSnapshot* snap = i_module->snapshots;
-        while (snap) {
+        ᨀᨛ (snap) {
             M3EmbeddedSnapshot* next = snap->next;
             m3_Free(snap->name);
             m3_Free(snap);
@@ -107,8 +107,8 @@ void m3_FreeModule (IM3Module i_module)
 // mutability: the import's mutability governs what the wasm code may do with it,
 // not whether the host may provide it in the first place.
 M3Result m3_LinkGlobal (IM3Module            io_module,
-                        const char* const    i_moduleName,
-                        const char* const    i_globalName,
+                        const var_na* const    i_moduleName,
+                        const var_na* const    i_globalName,
                         const IM3TaggedValue i_value)
 {
     M3Result result = m3Err_globalLookupFailed;
@@ -116,33 +116,33 @@ M3Result m3_LinkGlobal (IM3Module            io_module,
     for (u32 i = 0; i < io_module->numGlobals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+        ᨀᨘ (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
             continue;
         }
 
-        if (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
+        ᨀᨘ (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
             strcmp(g->import.fieldUtf8, i_globalName) != 0) {
             continue;
         }
 
-        if (g->type != i_value->type) {
-            return m3Err_globalTypeMismatch;
+        ᨀᨘ (g->type != i_value->type) {
+            ᨀᨘᨒ m3Err_globalTypeMismatch;
         }
 
         switch (i_value->type) {
-        case c_m3Type_i32: g->i32Value = i_value->value.i32; break;
-        case c_m3Type_i64: g->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-        case c_m3Type_f32: g->f32Value = i_value->value.f32; break;
-        case c_m3Type_f64: g->f64Value = i_value->value.f64; break;
+        pak_sa c_m3Type_i32: g->i32Value = i_value->value.i32; bha_nga;
+        pak_sa c_m3Type_i64: g->i64Value = i_value->value.i64; bha_nga;
+#ᨀᨘ d_m3HasFloat
+        pak_sa c_m3Type_f32: g->f32Value = i_value->value.f32; bha_nga;
+        pak_sa c_m3Type_f64: g->f64Value = i_value->value.f64; bha_nga;
 #endif
-        default: return m3Err_invalidTypeId;
+        default: ᨀᨘᨒ m3Err_invalidTypeId;
         }
 
         result = m3Err_none;
     }
 
-    return result;
+    ᨀᨘᨒ result;
 }
 
 
@@ -153,28 +153,28 @@ M3Result Module_DeclareFunction (IM3Module io_module, u32 i_index)
 {
     M3Result result = m3Err_none;
 
-    if (i_index >= io_module->numFunctions) {
-        return "function index out of range";
+    ᨀᨘ (i_index >= io_module->numFunctions) {
+        ᨀᨘᨒ "function index out of range";
     }
 
-    if (not io_module->declaredFuncs) {
+    ᨀᨘ (not io_module->declaredFuncs) {
         io_module->declaredFuncs = m3_AllocArray(u8, (io_module->numFunctions + 7) / 8);
         _throwifnull(io_module->declaredFuncs);
     }
 
     io_module->declaredFuncs[i_index / 8] |= (u8)(1u << (i_index % 8));
 
-    _catch: return result;
+    _catch: ᨀᨘᨒ result;
 }
 
 
 bool Module_IsFunctionDeclared (IM3Module i_module, u32 i_index)
 {
-    if (not i_module->declaredFuncs or i_index >= i_module->numFunctions) {
-        return false;
+    ᨀᨘ (not i_module->declaredFuncs or i_index >= i_module->numFunctions) {
+        ᨀᨘᨒ false;
     }
 
-    return (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
+    ᨀᨘᨒ (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
 }
 
 
@@ -205,15 +205,15 @@ _try {
     io_module->memories[index] = memory;
     io_module->numMemories     = index + 1;
 
-    if (o_memory) {
+    ᨀᨘ (o_memory) {
         *o_memory = memory;
     }
 
-    return result;
+    ᨀᨘᨒ result;
 
 } _catch:
     m3_Free(memory);
-    return result;
+    ᨀᨘᨒ result;
 }
 
 
@@ -244,19 +244,19 @@ _try {
     io_module->tables[index] = table;
     io_module->numTables     = index + 1;
 
-    if (o_table) {
+    ᨀᨘ (o_table) {
         *o_table = table;
     }
 
-    return result;
+    ᨀᨘᨒ result;
 
 } _catch:
     m3_Free(table);
-    return result;
+    ᨀᨘᨒ result;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ᨀᨘ d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 M3Result Module_AddTag (IM3Module io_module, IM3Tag* o_tag, IM3FuncType i_type, bool i_isImported)
 {
@@ -270,20 +270,20 @@ _try {
     tag->type     = i_type;
     tag->imported = i_isImported;
     tag->resolved = NULL;
-    memset(&tag->import, 0, sizeof(tag->import));
+    memset(&tag->import, 0, parimaa_na(tag->import));
 
-    if (o_tag) {
+    ᨀᨘ (o_tag) {
         *o_tag = tag;
     }
 
 } _catch:
-    return result;
+    ᨀᨘᨒ result;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasStackSwitching
+#ᨀᨘ d_m3HasStackSwitching
 
 // The continuation type a spelled-out reference names. Reference types carry
 // the canonical index, and the module's own type space is where a name for it
@@ -292,25 +292,25 @@ _try {
 // switches to.
 IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType)
 {
-    if (not IsSpelledRefType(i_refType)) {
-        return NULL;
+    ᨀᨘ (not IsSpelledRefType(i_refType)) {
+        ᨀᨘᨒ NULL;
     }
 
     u32 heap = HeapTypeOf(i_refType);
 
-    if (heap == d_m3Type_heapAbstract) {
-        return NULL;
+    ᨀᨘ (heap == d_m3Type_heapAbstract) {
+        ᨀᨘᨒ NULL;
     }
 
     for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
         IM3FuncType ftype = i_module->funcTypes[i];
 
-        if (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
-            return ftype;
+        ᨀᨘ (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
+            ᨀᨘᨒ ftype;
         }
     }
 
-    return NULL;
+    ᨀᨘᨒ NULL;
 }
 
 #endif // d_m3HasStackSwitching
@@ -329,24 +329,24 @@ _try {
     global->imported  = i_isImported;
     global->isMutable = i_mutable;
 
-    if (o_global) {
+    ᨀᨘ (o_global) {
         *o_global = global;
     }
 
 } _catch:
-    return result;
+    ᨀᨘᨒ result;
 }
 
 M3Result Module_PreallocFunctions (IM3Module io_module, u32 i_totalFunctions)
 {
 _try {
-    if (i_totalFunctions > io_module->allFunctions) {
+    ᨀᨘ (i_totalFunctions > io_module->allFunctions) {
         io_module->functions    = m3_ReallocArray(M3Function, io_module->functions, i_totalFunctions, io_module->allFunctions);
         io_module->allFunctions = i_totalFunctions;
         _throwifnull(io_module->functions);
     }
 } _catch:
-    return result;
+    ᨀᨘᨒ result;
 }
 
 M3Result Module_AddFunction (IM3Module io_module, u32 i_typeIndex, IM3ImportInfo i_importInfo)
@@ -368,7 +368,7 @@ _   (Module_PreallocFunctions(io_module, io_module->numFunctions));
     func->index = index;
 #endif
 
-    if (i_importInfo and func->numNames == 0) {
+    ᨀᨘ (i_importInfo and func->numNames == 0) {
         func->import   = *i_importInfo;
         func->names[0] = i_importInfo->fieldUtf8;
         func->numNames = 1;
@@ -377,7 +377,7 @@ _   (Module_PreallocFunctions(io_module, io_module->numFunctions));
     m3log(module, "   added function: %3d; sig: %d", index, i_typeIndex);
 
 } _catch:
-    return result;
+    ᨀᨘᨒ result;
 }
 
 #ifdef DEBUG
@@ -386,8 +386,8 @@ void Module_GenerateNames (IM3Module i_module)
     for (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function func = &i_module->functions[i];
 
-        if (func->numNames == 0) {
-            char* buff = m3_AllocArray(char, 16);
+        ᨀᨘ (func->numNames == 0) {
+            var_na* buff = m3_AllocArray(var_na, 16);
             snprintf(buff, 16, "$func%d", i);
             func->names[0] = buff;
             func->numNames = 1;
@@ -400,32 +400,32 @@ IM3Function Module_GetFunction (IM3Module i_module, u32 i_functionIndex)
 {
     IM3Function func = NULL;
 
-    if (i_functionIndex < i_module->numFunctions) {
+    ᨀᨘ (i_functionIndex < i_module->numFunctions) {
         func = &i_module->functions[i_functionIndex];
         //func->module = i_module;
     }
 
-    return func;
+    ᨀᨘᨒ func;
 }
 
 
-const char* m3_GetModuleName (IM3Module i_module)
+const var_na* m3_GetModuleName (IM3Module i_module)
 {
-    if (!i_module || !i_module->name) {
-        return ".unnamed";
+    ᨀᨘ (!i_module || !i_module->name) {
+        ᨀᨘᨒ ".unnamed";
     }
 
-    return i_module->name;
+    ᨀᨘᨒ i_module->name;
 }
 
-void m3_SetModuleName (IM3Module i_module, const char* name)
+void m3_SetModuleName (IM3Module i_module, const var_na* name)
 {
-    if (i_module) {
+    ᨀᨘ (i_module) {
         i_module->name = name;
     }
 }
 
 IM3Runtime m3_GetModuleRuntime (IM3Module i_module)
 {
-    return i_module ? i_module->runtime : NULL;
+    ᨀᨘᨒ i_module ? i_module->runtime : NULL;
 }

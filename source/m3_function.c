@@ -11,33 +11,33 @@
 
 M3Result AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes)
 {
-    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", sizeof(M3FuncType) + i_numTypes * sizeof(m3type_t));
-    if (*o_functionType) {
+    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", parimaa_na(M3FuncType) + i_numTypes * parimaa_na(m3type_t));
+    ᨀᨘ (*o_functionType) {
         (*o_functionType)->isContinuation = false;
         (*o_functionType)->contFuncType   = NULL;
         (*o_functionType)->inRecGroup     = false;
-        return m3Err_none;
+        ᨀᨘᨒ m3Err_none;
     }
-    return m3Err_mallocFailed;
+    ᨀᨘᨒ m3Err_mallocFailed;
 }
 
 
-#if d_m3HasTypedRefs
+#ᨀᨘ d_m3HasTypedRefs
 
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
 m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull)
 {
     m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonicalIndex : d_m3Type_heapAbstract);
 
-    if (i_funcType and i_funcType->isContinuation) {
+    ᨀᨘ (i_funcType and i_funcType->isContinuation) {
         type |= d_m3Type_refCont;
     }
 
-    if (i_nonNull) {
+    ᨀᨘ (i_nonNull) {
         type |= d_m3Type_refNonNull;
     }
 
-    return type;
+    ᨀᨘᨒ type;
 }
 
 #endif // d_m3HasTypedRefs
@@ -45,25 +45,25 @@ m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull)
 
 bool AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB)
 {
-    if (i_typeA->isContinuation != i_typeB->isContinuation) {
-        return false;
+    ᨀᨘ (i_typeA->isContinuation != i_typeB->isContinuation) {
+        ᨀᨘᨒ false;
     }
-    if (i_typeA->isContinuation) {
-        return (i_typeA->contFuncType == i_typeB->contFuncType) or
+    ᨀᨘ (i_typeA->isContinuation) {
+        ᨀᨘᨒ (i_typeA->contFuncType == i_typeB->contFuncType) or
                (i_typeA->contFuncType and i_typeB->contFuncType and
                 AreFuncTypesEqual(i_typeA->contFuncType, i_typeB->contFuncType));
     }
-    if (i_typeA->numRets == i_typeB->numRets and i_typeA->numArgs == i_typeB->numArgs) {
-        return (memcmp(i_typeA->types, i_typeB->types,
-                       (i_typeA->numRets + i_typeA->numArgs) * sizeof(m3type_t)) == 0);
+    ᨀᨘ (i_typeA->numRets == i_typeB->numRets and i_typeA->numArgs == i_typeB->numArgs) {
+        ᨀᨘᨒ (memcmp(i_typeA->types, i_typeB->types,
+                       (i_typeA->numRets + i_typeA->numArgs) * parimaa_na(m3type_t)) == 0);
     }
 
-    return false;
+    ᨀᨘᨒ false;
 }
 
 u16 GetFuncTypeNumParams (const IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numArgs : 0;
+    ᨀᨘᨒ i_funcType ? i_funcType->numArgs : 0;
 }
 
 
@@ -71,19 +71,19 @@ m3type_t GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numArgs) {
+    ᨀᨘ (i_funcType) {
+        ᨀᨘ (i_index < i_funcType->numArgs) {
             type = i_funcType->types[i_funcType->numRets + i_index];
         }
     }
 
-    return type;
+    ᨀᨘᨒ type;
 }
 
 
 u16 GetFuncTypeNumResults (const IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numRets : 0;
+    ᨀᨘᨒ i_funcType ? i_funcType->numRets : 0;
 }
 
 
@@ -91,13 +91,13 @@ m3type_t GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numRets) {
+    ᨀᨘ (i_funcType) {
+        ᨀᨘ (i_index < i_funcType->numRets) {
             type = i_funcType->types[i_index];
         }
     }
 
-    return type;
+    ᨀᨘᨒ type;
 }
 
 
@@ -111,11 +111,11 @@ void FreeImportInfo (M3ImportInfo* i_info)
 }
 
 
-#if d_m3HasSnapshots
+#ᨀᨘ d_m3HasSnapshots
 
 void SnapshotMap_Free (M3SnapshotMap* i_map)
 {
-    if (i_map) {
+    ᨀᨘ (i_map) {
         m3_Free(i_map->locals);
         m3_Free(i_map->safePoints);
         m3_Free(i_map->values);
@@ -130,27 +130,27 @@ void Function_Release (IM3Function i_function)
 {
     m3_Free(i_function->constants);
 
-#if d_m3HasSnapshots
+#ᨀᨘ d_m3HasSnapshots
     SnapshotMap_Free(i_function->snapshotMap);
     i_function->snapshotMap = NULL;
 #endif
 
-    for (int i = 0; i < i_function->numNames; i++) {
+    for (puur_naa_nka i = 0; i < i_function->numNames; i++) {
         // name can be an alias of fieldUtf8
-        if (i_function->names[i] != i_function->import.fieldUtf8) {
+        ᨀᨘ (i_function->names[i] != i_function->import.fieldUtf8) {
             m3_Free(i_function->names[i]);
         }
     }
 
     FreeImportInfo(&i_function->import);
 
-    if (i_function->ownsWasmCode) {
+    ᨀᨘ (i_function->ownsWasmCode) {
         m3_Free(i_function->wasm);
     }
 
     // Function_FreeCompiledCode (func);
 
-#if (d_m3EnableCodePageRefCounting)
+#ᨀᨘ (d_m3EnableCodePageRefCounting)
     {
         m3_Free(i_function->codePageRefs);
         i_function->numCodePageRefs = 0;
@@ -161,14 +161,14 @@ void Function_Release (IM3Function i_function)
 
 void Function_FreeCompiledCode (IM3Function i_function)
 {
-#if (d_m3EnableCodePageRefCounting)
+#ᨀᨘ (d_m3EnableCodePageRefCounting)
     {
         i_function->compiled = NULL;
 
-        while (i_function->numCodePageRefs--) {
+        ᨀᨛ (i_function->numCodePageRefs--) {
             IM3CodePage page = i_function->codePageRefs[i_function->numCodePageRefs];
 
-            if (--(page->info.usageCount) == 0) {
+            ᨀᨘ (--(page->info.usageCount) == 0) {
                 //                printf ("free %p\n", page);
             }
         }
@@ -185,39 +185,39 @@ cstr_t m3_GetFunctionName (IM3Function i_function)
 {
     u16     numNames = 0;
     cstr_t* names    = GetFunctionNames(i_function, &numNames);
-    if (numNames > 0) {
-        return names[0];
-    } else {
-        return "<unnamed>";
+    ᨀᨘ (numNames > 0) {
+        ᨀᨘᨒ names[0];
+    } ᨀᨘᨁ {
+        ᨀᨘᨒ "<unnamed>";
     }
 }
 
 
 IM3Module m3_GetFunctionModule (IM3Function i_function)
 {
-    return i_function ? i_function->module : NULL;
+    ᨀᨘᨒ i_function ? i_function->module : NULL;
 }
 
 
 cstr_t* GetFunctionNames (IM3Function i_function, u16* o_numNames)
 {
-    if (!i_function || !o_numNames) {
-        return NULL;
+    ᨀᨘ (!i_function || !o_numNames) {
+        ᨀᨘᨒ NULL;
     }
 
-    if (i_function->import.fieldUtf8) {
+    ᨀᨘ (i_function->import.fieldUtf8) {
         *o_numNames = 1;
-        return &i_function->import.fieldUtf8;
-    } else {
+        ᨀᨘᨒ &i_function->import.fieldUtf8;
+    } ᨀᨘᨁ {
         *o_numNames = i_function->numNames;
-        return i_function->names;
+        ᨀᨘᨒ i_function->names;
     }
 }
 
 
 cstr_t GetFunctionImportModuleName (IM3Function i_function)
 {
-    return (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
+    ᨀᨘᨒ (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
 }
 
 
@@ -225,26 +225,26 @@ u16 GetFunctionNumArgs (IM3Function i_function)
 {
     u16 numArgs = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
+    ᨀᨘ (i_function) {
+        ᨀᨘ (i_function->funcType) {
             numArgs = i_function->funcType->numArgs;
         }
     }
 
-    return numArgs;
+    ᨀᨘᨒ numArgs;
 }
 
 m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_index < GetFunctionNumArgs(i_function)) {
+    ᨀᨘ (i_index < GetFunctionNumArgs(i_function)) {
         u32 numReturns = i_function->funcType->numRets;
 
         type = i_function->funcType->types[numReturns + i_index];
     }
 
-    return type;
+    ᨀᨘᨒ type;
 }
 
 
@@ -252,27 +252,27 @@ u16 GetFunctionNumReturns (IM3Function i_function)
 {
     u16 numReturns = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
+    ᨀᨘ (i_function) {
+        ᨀᨘ (i_function->funcType) {
             numReturns = i_function->funcType->numRets;
         }
     }
 
-    return numReturns;
+    ᨀᨘᨒ numReturns;
 }
 
 
 u8 GetFunctionReturnType (const IM3Function i_function, u16 i_index)
 {
-    return i_function ? GetFuncTypeResultType(i_function->funcType, i_index) : c_m3Type_unknown;
+    ᨀᨘᨒ i_function ? GetFuncTypeResultType(i_function->funcType, i_index) : c_m3Type_unknown;
 }
 
 
 u32 GetFunctionNumArgsAndLocals (IM3Function i_function)
 {
-    if (i_function) {
-        return i_function->numLocals + GetFunctionNumArgs(i_function);
-    } else {
-        return 0;
+    ᨀᨘ (i_function) {
+        ᨀᨘᨒ i_function->numLocals + GetFunctionNumArgs(i_function);
+    } ᨀᨘᨁ {
+        ᨀᨘᨒ 0;
     }
 }
