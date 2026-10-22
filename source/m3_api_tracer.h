@@ -5,15 +5,15 @@
 //  Copyright © 2020 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#ifndef m3_api_tracer_h
-#define m3_api_tracer_h
+#جے_بنا_تعریف m3_api_tracer_h
+#تعریف_کرو m3_api_tracer_h
 
-#include "m3_core.h"
+#ضمن "m3_core.h"
 
 d_m3BeginExternC
 
-M3Result m3_LinkTracer (IM3Module io_module);
+M3_نتیجہ m3_LinkTracer (IM3Module io_module);
 
-d_m3EndExternC
+d_m3_سرا_Extern_C
 
-#endif // m3_api_tracer_h
+#جے_انت // m3_api_tracer_h
