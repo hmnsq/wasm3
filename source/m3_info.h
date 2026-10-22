@@ -8,27 +8,27 @@
 #ifndef m3_info_h
 #define m3_info_h
 
-#include "m3_compile.h"
+#അന്തര്ഭാവ "m3_compile.h"
 
 d_m3BeginExternC
 
-void ProfileHit (cstr_t i_operationName);
+ശൂന്യം ProfileHit (cstr_t i_operationName);
 
 #ifdef DEBUG
 
-void        dump_type_stack (IM3Compilation o);
-void        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
-const char* get_indention_string (IM3Compilation o);
-void        log_emit (IM3Compilation o, IM3Operation i_operation);
+ശൂന്യം        dump_type_അട്ടി (IM3Compilation o);
+ശൂന്യം        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
+സ്ഥിരം അക്ഷരം* get_indention_string (IM3Compilation o);
+ശൂന്യം        log_emit (IM3Compilation o, IM3Operation i_operation);
 
 cstr_t      SPrintFuncTypeSignature (IM3FuncType i_funcType);
 
-#else // DEBUG
+#അല്ലെങ്കിൽ // DEBUG
 
-#  define   dump_type_stack(...)      {}
+#  define   dump_type_അട്ടി(...)      {}
 #  define   log_opcode(...)           {}
 #  define   get_indention_string(...) ""
-#  define   emit_stack_dump(...)      {}
+#  define   emit_അട്ടി_dump(...)      {}
 #  define   log_emit(...)             {}
 
 #endif // DEBUG

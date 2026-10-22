@@ -5,45 +5,45 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_info.h"
-#include "m3_compile.h"
+#അന്തര്ഭാവ "m3_env.h"
+#അന്തര്ഭാവ "m3_info.h"
+#അന്തര്ഭാവ "m3_compile.h"
 
-#if defined(DEBUG) || (d_m3EnableStrace >= 1)
+#എങ്കിൽ defined(DEBUG) || (d_m3EnableStrace >= 1)
 
-size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type)
+size_t SPrintArg (അക്ഷരം* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type)
 {
-    int len = 0;
+    പൂർണ്ണസംഖ്യ len = 0;
 
     *o_string = 0;
 
-    if (i_type == c_m3Type_i32) {
+    എങ്കിൽ (i_type == c_m3Type_i32) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIi32, *(i32*)i_sp);
-    } else if (i_type == c_m3Type_i64) {
+    } അല്ലെങ്കിൽ എങ്കിൽ (i_type == c_m3Type_i64) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIi64, *(i64*)i_sp);
     }
-#  if d_m3HasFloat
-    else if (i_type == c_m3Type_f32) {
+#  എങ്കിൽ d_m3HasFloat
+    അല്ലെങ്കിൽ എങ്കിൽ (i_type == c_m3Type_f32) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIf32, *(f32*)i_sp);
-    } else if (i_type == c_m3Type_f64) {
+    } അല്ലെങ്കിൽ എങ്കിൽ (i_type == c_m3Type_f64) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIf64, *(f64*)i_sp);
     }
 #  endif
 
     len = M3_MAX(0, len);
 
-    return len;
+    തിരികെ len;
 }
 
 
 cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 {
-    int ret;
+    പൂർണ്ണസംഖ്യ ret;
 
-    static char string[256];
+    സ്ഥിതം അക്ഷരം string[256];
 
-    char*   s = string;
-    ccstr_t e = string + sizeof(string) - 1;
+    അക്ഷരം*   s = string;
+    ccstr_t e = string + വലുപ്പം(string) - 1;
 
     ret = snprintf(s, e - s, "(");
     s += M3_MAX(0, ret);
@@ -51,10 +51,10 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
     u64* argSp = (u64*)i_sp;
 
     IM3FuncType funcType = i_function->funcType;
-    if (funcType) {
-        u32 numArgs = funcType->numArgs;
+    എങ്കിൽ (funcType) {
+        u32 അക്കം_Args = funcType->അക്കം_Args;
 
-        for (u32 i = 0; i < numArgs; ++i) {
+        വേണ്ടി (u32 i = 0; i < അക്കം_Args; ++i) {
             m3type_t type = d_FuncArgType(funcType, i);
 
             ret = snprintf(s, e - s, "%s: ", c_waTypes[BaseTypeOf(type)]);
@@ -62,19 +62,19 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 
             s += SPrintArg(s, e - s, argSp + i, type);
 
-            if (i != numArgs - 1) {
+            എങ്കിൽ (i != അക്കം_Args - 1) {
                 ret = snprintf(s, e - s, ", ");
                 s += M3_MAX(0, ret);
             }
         }
-    } else {
+    } അല്ലെങ്കിൽ {
         printf("null signature");
     }
 
     ret = snprintf(s, e - s, ")");
     s += M3_MAX(0, ret);
 
-    return string;
+    തിരികെ string;
 }
 
 // The results of a call, comma separated, for the strace return line. Empty when
@@ -83,29 +83,29 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 // layout m3_GetResults reads.
 cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 {
-    int ret;
+    പൂർണ്ണസംഖ്യ ret;
 
-    static char string[256];
+    സ്ഥിതം അക്ഷരം string[256];
 
-    char*   s = string;
-    ccstr_t e = string + sizeof(string) - 1;
+    അക്ഷരം*   s = string;
+    ccstr_t e = string + വലുപ്പം(string) - 1;
 
     *s = 0;
 
     u64* retSp = (u64*)i_sp;
 
-    u32 numRets = i_funcType ? i_funcType->numRets : 0;
+    u32 അക്കം_Rets = i_funcType ? i_funcType->അക്കം_Rets : 0;
 
-    for (u32 i = 0; i < numRets; ++i) {
+    വേണ്ടി (u32 i = 0; i < അക്കം_Rets; ++i) {
         s += SPrintArg(s, e - s, retSp + i, d_FuncRetType(i_funcType, i));
 
-        if (i != numRets - 1) {
+        എങ്കിൽ (i != അക്കം_Rets - 1) {
             ret = snprintf(s, e - s, ", ");
             s += M3_MAX(0, ret);
         }
     }
 
-    return string;
+    തിരികെ string;
 }
 
 #endif
@@ -113,43 +113,43 @@ cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 #ifdef DEBUG
 
 // a central function you can be breakpoint:
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message)
+ശൂന്യം ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message)
 {
     printf("\nexception: '%s' @ %s\n", i_exception, i_message);
-    return;
+    തിരികെ;
 }
 
 
-typedef struct OpInfo {
+തരനിർവചനം ഘടന OpInfo {
     IM3OpInfo  info;
     m3opcode_t opcode;
 } OpInfo;
 
-void m3_PrintM3Info ()
+ശൂന്യം m3_PrintM3Info ()
 {
     printf("\n-- m3 configuration --------------------------------------------\n");
     //  printf (" sizeof M3CodePage    : %zu bytes  (%d slots) \n", sizeof (M3CodePage), c_m3CodePageNumSlots);
     printf(" sizeof M3MemPage     : %u bytes              \n", d_m3DefaultMemPageSize);
-    printf(" sizeof M3Compilation : %zu bytes             \n", sizeof(M3Compilation));
-    printf(" sizeof M3Function    : %zu bytes             \n", sizeof(M3Function));
+    printf(" sizeof M3Compilation : %zu bytes             \n", വലുപ്പം(M3Compilation));
+    printf(" sizeof M3Function    : %zu bytes             \n", വലുപ്പം(M3Function));
     printf("----------------------------------------------------------------\n\n");
 }
 
 
-void* v_PrintEnvModuleInfo (IM3Module i_module, void* i_info)
+ശൂന്യം* v_PrintEnvModuleInfo (IM3Module i_module, ശൂന്യം* i_info)
 {
     u32* io_index = (u32*)i_info;
-    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->numFunctions);
+    printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->അക്കം_Functions);
 
-    return NULL;
+    തിരികെ ശൂന്യ;
 }
 
 
-void m3_PrintRuntimeInfo (IM3Runtime i_runtime)
+ശൂന്യം m3_PrintRuntimeInfo (IM3Runtime i_runtime)
 {
     printf("\n-- m3 runtime -------------------------------------------------\n");
 
-    printf(" stack-size: %zu   \n\n", i_runtime->numStackSlots * sizeof(m3slot_t));
+    printf(" stack-size: %zu   \n\n", i_runtime->അക്കം_അട്ടി_Slots * വലുപ്പം(m3slot_t));
 
     u32 moduleIndex = 0;
     ForEachModule(i_runtime, v_PrintEnvModuleInfo, &moduleIndex);
@@ -162,10 +162,10 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 {
     u8 base = BaseTypeOf(i_m3Type);
 
-    if (base <= c_m3Type_unknown) {
-        return c_waTypes[base];
-    } else {
-        return "?";
+    എങ്കിൽ (base <= c_m3Type_unknown) {
+        തിരികെ c_waTypes[base];
+    } അല്ലെങ്കിൽ {
+        തിരികെ "?";
     }
 }
 
@@ -173,19 +173,19 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 // Appends to a string that is built up over several calls, and returns the length
 // reached. snprintf reports the length it wanted to write rather than the length
 // it wrote, so an append that truncates has to leave the cursor inside the buffer.
-static
-size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, ccstr_t i_format, ...)
+സ്ഥിതം
+size_t SPrintAppend (അക്ഷരം* o_string, size_t i_stringBufferSize, size_t i_len, ccstr_t i_format, ...)
 {
-    if (i_len + 1 >= i_stringBufferSize) {
-        return i_len;
+    എങ്കിൽ (i_len + 1 >= i_stringBufferSize) {
+        തിരികെ i_len;
     }
 
     va_list args;
     va_start(args, i_format);
-    int ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
+    പൂർണ്ണസംഖ്യ ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
     va_end(args);
 
-    return M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
+    തിരികെ M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
 }
 
 
@@ -194,60 +194,60 @@ size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, cc
 
 cstr_t SPrintFuncTypeSignature (IM3FuncType i_funcType)
 {
-    static char string[256];
+    സ്ഥിതം അക്ഷരം string[256];
 
-    size_t len = SPrintAppend(string, sizeof(string), 0, "(");
+    size_t len = SPrintAppend(string, വലുപ്പം(string), 0, "(");
 
-    for (u32 i = 0; i < i_funcType->numArgs; ++i) {
-        len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
+    വേണ്ടി (u32 i = 0; i < i_funcType->അക്കം_Args; ++i) {
+        len = SPrintAppend(string, വലുപ്പം(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncArgType(i_funcType, i)));
     }
 
-    len = SPrintAppend(string, sizeof(string), len, ") -> ");
+    len = SPrintAppend(string, വലുപ്പം(string), len, ") -> ");
 
-    for (u32 i = 0; i < i_funcType->numRets; ++i) {
-        len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
+    വേണ്ടി (u32 i = 0; i < i_funcType->അക്കം_Rets; ++i) {
+        len = SPrintAppend(string, വലുപ്പം(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncRetType(i_funcType, i)));
     }
 
-    return string;
+    തിരികെ string;
 }
 
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type)
+cstr_t SPrint_മൂല്യം (ശൂന്യം* i_മൂല്യം, m3type_t i_type)
 {
-    static char string[100];
-    SPrintArg(string, 100, (m3stack_t)i_value, i_type);
-    return string;
+    സ്ഥിതം അക്ഷരം string[100];
+    SPrintArg(string, 100, (m3stack_t)i_മൂല്യം, i_type);
+    തിരികെ string;
 }
 
 // Finds i_operation in one operation table. i_opcodeBase tags the result, so an
 // extended entry comes back as the 0xFCxx opcode the rest of the code speaks.
-static
-bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_numOps, m3opcode_t i_opcodeBase, IM3Operation i_operation)
+സ്ഥിതം
+bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_അക്കം_Ops, m3opcode_t i_opcodeBase, IM3Operation i_operation)
 {
-    for (u32 i = 0; i < i_numOps; ++i) {
+    വേണ്ടി (u32 i = 0; i < i_അക്കം_Ops; ++i) {
         IM3OpInfo oi = &i_table[i];
 
-        for (u32 o = 0; o < 4; ++o) {
-            if (oi->operations[o] == i_operation) {
+        വേണ്ടി (u32 o = 0; o < 4; ++o) {
+            എങ്കിൽ (oi->operations[o] == i_operation) {
                 io_info->info   = oi;
                 io_info->opcode = i_opcodeBase | i;
-                return true;
+                തിരികെ true;
             }
         }
     }
 
-    return false;
+    തിരികെ false;
 }
 
-static
+സ്ഥിതം
 OpInfo find_operation_info (IM3Operation i_operation)
 {
-    OpInfo opInfo = { NULL, 0 };
+    OpInfo opInfo = { ശൂന്യ, 0 };
 
-    if (!i_operation) {
-        return opInfo;
+    എങ്കിൽ (!i_operation) {
+        തിരികെ opInfo;
     }
 
     // Scans the tables directly rather than through GetOpInfo (), which rejects
@@ -255,30 +255,30 @@ OpInfo find_operation_info (IM3Operation i_operation)
     // Reserved slots are zeroed, so they never match a real operation here.
     // c_operationsHigh is not scanned: every entry in it is compiler-driven with
     // an empty operation list, so nothing there could match.
-    if (not ScanOperationTable(&opInfo, c_operations, c_numOperations, 0, i_operation)) {
-        if (not ScanOperationTable(&opInfo, c_operationsFC, c_numOperationsFC, c_waOp_extended << 8, i_operation)) {
-#  if d_m3HasAtomics
+    എങ്കിൽ (not ScanOperationTable(&opInfo, c_operations, c_അക്കം_Operations, 0, i_operation)) {
+        എങ്കിൽ (not ScanOperationTable(&opInfo, c_operationsFC, c_അക്കം_Operations_FC, c_waOp_extended << 8, i_operation)) {
+#  എങ്കിൽ d_m3HasAtomics
             // one entry serves a whole kind, so the opcode it comes back with is only the entry's index
-            ScanOperationTable(&opInfo, c_operationsFE, c_numOperationsFE, c_waOp_atomic << 8, i_operation);
+            ScanOperationTable(&opInfo, c_operationsFE, c_അക്കം_Operations_FE, c_waOp_atomic << 8, i_operation);
 #  endif
         }
     }
 
-    return opInfo;
+    തിരികെ opInfo;
 }
 
 
 #  undef fetch
 #  define fetch(TYPE) (* (TYPE *) ((*o_pc)++))
 
-#  define d_m3Decoder(FUNC) void Decode_##FUNC (char * o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t * o_pc)
+#  define d_m3Decoder(FUNC) ശൂന്യം Decode_##FUNC (അക്ഷരം * o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t * o_pc)
 
 d_m3Decoder(Call)
 {
-    void* function    = fetch(void*);
-    i32   stackOffset = fetch(i32);
+    ശൂന്യം* function    = fetch(ശൂന്യം*);
+    i32   അട്ടി_Offset = fetch(i32);
 
-    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, stackOffset);
+    snprintf(o_string, i_stringBufferSize, "%p; stack-offset: %d", function, അട്ടി_Offset);
 }
 
 
@@ -293,7 +293,7 @@ d_m3Decoder(Entry)
 
 d_m3Decoder(f64_Store)
 {
-    if (i_operation == i_opInfo->operations[0]) {
+    എങ്കിൽ (i_operation == i_opInfo->operations[0]) {
         u32 operand = fetch(u32);
         u32 offset  = fetch(u32);
 
@@ -304,7 +304,7 @@ d_m3Decoder(f64_Store)
 
 d_m3Decoder(Branch)
 {
-    void* target = fetch(void*);
+    ശൂന്യം* target = fetch(ശൂന്യം*);
     snprintf(o_string, i_stringBufferSize, "%p", target);
 }
 
@@ -318,7 +318,7 @@ d_m3Decoder(BranchTable)
 
     i32 targets = fetch(i32);
 
-    for (i32 i = 0; i < targets; ++i) {
+    വേണ്ടി (i32 i = 0; i < targets; ++i) {
         pc_t addr = fetch(pc_t);
         len       = SPrintAppend(o_string, i_stringBufferSize, len, "%" PRIi32 "=%p, ", i, addr);
     }
@@ -330,19 +330,19 @@ d_m3Decoder(BranchTable)
 
 d_m3Decoder(Const)
 {
-    u64 value  = fetch(u64);
+    u64 മൂല്യം  = fetch(u64);
     i32 offset = fetch(i32);
-    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, value);
+    snprintf(o_string, i_stringBufferSize, " slot [%d] = %" PRIu64, offset, മൂല്യം);
 }
 
 
 #  undef fetch
 
-void DecodeOperation (char* o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t* o_pc)
+ശൂന്യം DecodeOperation (അക്ഷരം* o_string, size_t i_stringBufferSize, m3opcode_t i_opcode, IM3Operation i_operation, IM3OpInfo i_opInfo, pc_t* o_pc)
 {
-#  define d_m3Decode(OPCODE, FUNC) case OPCODE: Decode_##FUNC (o_string, i_stringBufferSize, i_opcode, i_operation, i_opInfo, o_pc); break;
+#  define d_m3Decode(OPCODE, FUNC) അവസ്ഥ OPCODE: Decode_##FUNC (o_string, i_stringBufferSize, i_opcode, i_operation, i_opInfo, o_pc); നിർത്തുക;
 
-    switch (i_opcode) {
+    തിരഞ്ഞെടുപ്പ് (i_opcode) {
         //d_m3Decode (0xc0,                  Const)
         d_m3Decode(0xc5, Entry)
         d_m3Decode(c_waOp_call, Call)
@@ -354,7 +354,7 @@ void DecodeOperation (char* o_string, size_t i_stringBufferSize, m3opcode_t i_op
 
 // TODO: this isn't fully implemented. it blindly assumes each word is a Operation pointer
 // and, if an operation happens to missing from the c_operations table it won't be recognized here
-void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
+ശൂന്യം dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
 {
     m3log(code, "code page seq: %d", i_codePage->info.sequence);
 
@@ -363,31 +363,31 @@ void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
 
     m3log(code, "---------------------------------------------------------------------------------------");
 
-    while (pc < end) {
-        const pc_t operationPC = pc;
-        (void)operationPC;  // avoid unused variable warning if DEBUG is not defined
+    ആകുമ്പോൾ (pc < end) {
+        സ്ഥിരം pc_t operationPC = pc;
+        (ശൂന്യം)operationPC;  // avoid unused variable warning if DEBUG is not defined
         IM3Operation op = (IM3Operation)(*pc++);
 
         OpInfo i = find_operation_info(op);
 
-        if (i.info) {
-            char infoString[8 * 1024] = { 0 };
+        എങ്കിൽ (i.info) {
+            അക്ഷരം infoString[8 * 1024] = { 0 };
 
-            DecodeOperation(infoString, sizeof(infoString), i.opcode, op, i.info, &pc);
+            DecodeOperation(infoString, വലുപ്പം(infoString), i.opcode, op, i.info, &pc);
 
             m3log(code, "%p | %20s  %s", operationPC, i.info->name, infoString);
-        } else {
+        } അല്ലെങ്കിൽ {
             m3log(code, "%p | %p", operationPC, op);
         }
     }
 
     m3log(code, "---------------------------------------------------------------------------------------");
 
-    m3log(code, "free-lines: %d", i_codePage->info.numLines - i_codePage->info.lineIndex);
+    m3log(code, "free-lines: %d", i_codePage->info.അക്കം_വരികൾ - i_codePage->info.വരി_Index);
 }
 
 
-void dump_type_stack (IM3Compilation o)
+ശൂന്യം dump_type_അട്ടി (IM3Compilation o)
 {
     /* Reminders about how the stack works! :)
      -- args & locals remain on the type stack for duration of the function. Denoted with a constant 'A' and 'L' in this dump.
@@ -408,61 +408,61 @@ void dump_type_stack (IM3Compilation o)
     i32 regAllocated[2] = { (i32)IsRegisterAllocated(o, 0), (i32)IsRegisterAllocated(o, 1) };
 
     // display whether r0 or fp0 is allocated. these should then also be reflected somewhere in the stack too.
-    d_m3Log(stack, "\n");
-    d_m3Log(stack, "        ");
+    d_m3Log(അട്ടി, "\n");
+    d_m3Log(അട്ടി, "        ");
     printf("%s %s    ", regAllocated[0] ? "(r0)" : "    ", regAllocated[1] ? "(fp0)" : "     ");
     printf("\n");
 
-    for (u32 p = 1; p <= 2; ++p) {
-        d_m3Log(stack, "        ");
+    വേണ്ടി (u32 p = 1; p <= 2; ++p) {
+        d_m3Log(അട്ടി, "        ");
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            if (i > 0 and i == o->stackFirstDynamicIndex) {
+        വേണ്ടി (u16 i = 0; i < o->അട്ടി_Index; ++i) {
+            എങ്കിൽ (i > 0 and i == o->അട്ടി_First_Dynamic_Index) {
                 printf("#");
             }
 
-            if (i == o->block.blockStackIndex) {
+            എങ്കിൽ (i == o->block.block_അട്ടി_Index) {
                 printf(">");
             }
 
-            const char* type = c_waCompactTypes[BaseTypeOf(o->typeStack[i])];
+            സ്ഥിരം അക്ഷരം* type = c_waCompactTypes[BaseTypeOf(o->type_അട്ടി[i])];
 
-            const char* location = "";
+            സ്ഥിരം അക്ഷരം* location = "";
 
-            i32 slot = o->wasmStack[i];
+            i32 slot = o->wasm_അട്ടി[i];
 
-            if (IsRegisterSlotAlias(slot)) {
+            എങ്കിൽ (IsRegisterSlotAlias(slot)) {
                 bool isFp = IsFpRegisterSlotAlias(slot);
                 location  = isFp ? "/f" : "/r";
 
                 regAllocated[isFp]--;
                 slot = -1;
-            } else {
-                if (slot < o->slotFirstDynamicIndex) {
-                    if (slot >= o->slotFirstConstIndex) {
+            } അല്ലെങ്കിൽ {
+                എങ്കിൽ (slot < o->slotFirstDynamicIndex) {
+                    എങ്കിൽ (slot >= o->slotFirstConstIndex) {
                         location = "c";
-                    } else if (slot >= o->function->numRetAndArgSlots) {
+                    } അല്ലെങ്കിൽ എങ്കിൽ (slot >= o->function->അക്കം_Ret_And_Arg_Slots) {
                         location = "L";
-                    } else {
+                    } അല്ലെങ്കിൽ {
                         location = "a";
                     }
                 }
             }
 
-            char item[100];
+            അക്ഷരം item[100];
 
-            if (slot >= 0) {
-                snprintf(item, sizeof(item), "%s%s%d", type, location, slot);
-            } else {
-                snprintf(item, sizeof(item), "%s%s", type, location);
+            എങ്കിൽ (slot >= 0) {
+                snprintf(item, വലുപ്പം(item), "%s%s%d", type, location, slot);
+            } അല്ലെങ്കിൽ {
+                snprintf(item, വലുപ്പം(item), "%s%s", type, location);
             }
 
-            if (p == 1) {
+            എങ്കിൽ (p == 1) {
                 size_t s = strlen(item);
 
-                snprintf(item, sizeof(item), "%d", i);
+                snprintf(item, വലുപ്പം(item), "%d", i);
 
-                while (strlen(item) < s) {
+                ആകുമ്പോൾ (strlen(item) < s) {
                     strcat(item, " ");
                 }
             }
@@ -477,80 +477,80 @@ void dump_type_stack (IM3Compilation o)
 
     u16 maxSlot = GetMaxUsedSlotPlusOne(o);
 
-    if (maxSlot > o->slotFirstDynamicIndex) {
-        d_m3Log(stack, "                      -");
+    എങ്കിൽ (maxSlot > o->slotFirstDynamicIndex) {
+        d_m3Log(അട്ടി, "                      -");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        വേണ്ടി (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("----");
         }
 
         printf("\n");
 
-        d_m3Log(stack, "                 slot |");
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        d_m3Log(അട്ടി, "                 slot |");
+        വേണ്ടി (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", i);
         }
 
         printf("\n");
-        d_m3Log(stack, "                alloc |");
+        d_m3Log(അട്ടി, "                alloc |");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        വേണ്ടി (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", o->m3Slots[i]);
         }
 
         printf("\n");
     }
-    d_m3Log(stack, "\n");
+    d_m3Log(അട്ടി, "\n");
 }
 
 
-static
-const char* GetOpcodeIndentionString (i32 blockDepth)
+സ്ഥിതം
+സ്ഥിരം അക്ഷരം* GetOpcodeIndentionString (i32 blockDepth)
 {
     blockDepth += 1;
 
-    if (blockDepth < 0) {
+    എങ്കിൽ (blockDepth < 0) {
         blockDepth = 0;
     }
 
-    static const char* s_spaces = ".......................................................................................";
+    സ്ഥിതം സ്ഥിരം അക്ഷരം* s_spaces = ".......................................................................................";
 
-    const char* indent = s_spaces + strlen(s_spaces);
+    സ്ഥിരം അക്ഷരം* indent = s_spaces + strlen(s_spaces);
     indent -= (blockDepth * 2);
-    if (indent < s_spaces) {
+    എങ്കിൽ (indent < s_spaces) {
         indent = s_spaces;
     }
 
-    return indent;
+    തിരികെ indent;
 }
 
 
-const char* get_indention_string (IM3Compilation o)
+സ്ഥിരം അക്ഷരം* get_indention_string (IM3Compilation o)
 {
-    return GetOpcodeIndentionString(o->block.depth + 4);
+    തിരികെ GetOpcodeIndentionString(o->block.depth + 4);
 }
 
 
-void log_opcode (IM3Compilation o, m3opcode_t i_opcode)
+ശൂന്യം log_opcode (IM3Compilation o, m3opcode_t i_opcode)
 {
     i32 depth = o->block.depth;
-    if (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
+    എങ്കിൽ (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
         depth--;
     }
-    (void)depth;
+    (ശൂന്യം)depth;
 
-    m3log(compile, "%4d | 0x%02x  %s %s", o->numOpcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
+    m3log(compile, "%4d | 0x%02x  %s %s", o->അക്കം_Opcodes++, i_opcode, GetOpcodeIndentionString(depth), GetOpInfo(i_opcode)->name);
 }
 
 
-void log_emit (IM3Compilation o, IM3Operation i_operation)
+ശൂന്യം log_emit (IM3Compilation o, IM3Operation i_operation)
 {
     OpInfo i = find_operation_info(i_operation);
 
     d_m3Log(emit, "");
-    if (i.info) {
+    എങ്കിൽ (i.info) {
         printf("%p: %s\n", GetPagePC(o->page), i.info->name);
-    } else {
+    } അല്ലെങ്കിൽ {
         printf("not found: %p\n", i_operation);
     }
 }
@@ -558,59 +558,59 @@ void log_emit (IM3Compilation o, IM3Operation i_operation)
 #endif // DEBUG
 
 
-#if d_m3EnableOpProfiling
+#എങ്കിൽ d_m3EnableOpProfiling
 
-typedef struct M3ProfilerSlot {
+തരനിർവചനം ഘടന M3ProfilerSlot {
     cstr_t opName;
-    u64    hitCount;
+    u64    hit_എണ്ണം;
 } M3ProfilerSlot;
 
-static M3ProfilerSlot s_opProfilerCounts[d_m3ProfilerSlotMask + 1] = {};
+സ്ഥിതം M3ProfilerSlot s_opProfilerCounts[d_m3ProfilerSlotMask + 1] = {};
 
-void ProfileHit (cstr_t i_operationName)
+ശൂന്യം ProfileHit (cstr_t i_operationName)
 {
     u64 ptr = (u64)i_operationName;
 
     M3ProfilerSlot* slot = &s_opProfilerCounts[ptr & d_m3ProfilerSlotMask];
 
-    if (slot->opName) {
-        if (slot->opName != i_operationName) {
+    എങ്കിൽ (slot->opName) {
+        എങ്കിൽ (slot->opName != i_operationName) {
             m3_Abort("profiler slot collision; increase d_m3ProfilerSlotMask");
         }
     }
 
     slot->opName = i_operationName;
-    slot->hitCount++;
+    slot->hit_എണ്ണം++;
 }
 
 
-void m3_PrintProfilerInfo ()
+ശൂന്യം m3_PrintProfilerInfo ()
 {
     M3ProfilerSlot  dummy;
     M3ProfilerSlot* maxSlot = &dummy;
 
-    do {
-        maxSlot->hitCount = 0;
+    ചെയ്യുക {
+        maxSlot->hit_എണ്ണം = 0;
 
-        for (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
+        വേണ്ടി (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
             M3ProfilerSlot* slot = &s_opProfilerCounts[i];
 
-            if (slot->opName) {
-                if (slot->hitCount > maxSlot->hitCount) {
+            എങ്കിൽ (slot->opName) {
+                എങ്കിൽ (slot->hit_എണ്ണം > maxSlot->hit_എണ്ണം) {
                     maxSlot = slot;
                 }
             }
         }
 
-        if (maxSlot->opName) {
-            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hitCount, maxSlot->opName);
-            maxSlot->opName = NULL;
+        എങ്കിൽ (maxSlot->opName) {
+            fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hit_എണ്ണം, maxSlot->opName);
+            maxSlot->opName = ശൂന്യ;
         }
-    } while (maxSlot->hitCount);
+    } ആകുമ്പോൾ (maxSlot->hit_എണ്ണം);
 }
 
-#else
+#അല്ലെങ്കിൽ
 
-void m3_PrintProfilerInfo () {}
+ശൂന്യം m3_PrintProfilerInfo () {}
 
 #endif

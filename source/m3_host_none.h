@@ -18,41 +18,41 @@
 #ifndef m3_host_none_h
 #define m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#അന്തര്ഭാവ "m3_core.h"
+#അന്തര്ഭാവ "m3_host.h"
 
-void* m3_HostStackBase (void)
+ശൂന്യം* m3_Host_അട്ടി_Base (ശൂന്യം)
 {
-    return NULL;
+    തിരികെ ശൂന്യ;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+ശൂന്യം m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (ശൂന്യം)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+ശൂന്യം m3_HostRemoveInterruptHandler (ശൂന്യം)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_HostTimeMs (ശൂന്യം)
 {
-    return 0;
+    തിരികെ 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+ശൂന്യം m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (ശൂന്യം)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (സ്ഥിരം അക്ഷരം* i_path, size_t i_maxBytes, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    തിരികെ m3_HostReadFile(i_path, i_maxBytes, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+ശൂന്യം m3_HostUnmapFile (M3HostFile* io_file)
 {
     m3_Free(io_file->data);
 
@@ -63,13 +63,13 @@ void m3_HostUnmapFile (M3HostFile* io_file)
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (സ്ഥിരം അക്ഷരം* i_from, സ്ഥിരം അക്ഷരം* i_to)
 {
     remove(i_to);
-    return rename(i_from, i_to) == 0;
+    തിരികെ rename(i_from, i_to) == 0;
 }
 
-#if d_m3GuardedMemory
+#എങ്കിൽ d_m3GuardedMemory
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
 #endif
 

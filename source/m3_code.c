@@ -5,114 +5,114 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <limits.h>
-#include "m3_code.h"
-#include "m3_env.h"
+#അന്തര്ഭാവ <limits.h>
+#അന്തര്ഭാവ "m3_code.h"
+#അന്തര്ഭാവ "m3_env.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
+IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_min_അക്കം_വരികൾ)
 {
     IM3CodePage page;
 
     // check multiplication overflow
-    if (i_minNumLines > UINT_MAX / sizeof(code_t)) {
-        return NULL;
+    എങ്കിൽ (i_min_അക്കം_വരികൾ > UINT_MAX / വലുപ്പം(code_t)) {
+        തിരികെ ശൂന്യ;
     }
-    u32 pageSize = sizeof(M3CodePageHeader) + sizeof(code_t) * i_minNumLines;
+    u32 pageSize = വലുപ്പം(M3CodePageHeader) + വലുപ്പം(code_t) * i_min_അക്കം_വരികൾ;
 
     // check addition overflow
-    if (pageSize < sizeof(M3CodePageHeader)) {
-        return NULL;
+    എങ്കിൽ (pageSize < വലുപ്പം(M3CodePageHeader)) {
+        തിരികെ ശൂന്യ;
     }
 
     pageSize = (pageSize + (d_m3CodePageAlignSize - 1)) & ~(d_m3CodePageAlignSize - 1); // align
     // check alignment overflow
-    if (pageSize == 0) {
-        return NULL;
+    എങ്കിൽ (pageSize == 0) {
+        തിരികെ ശൂന്യ;
     }
 
     page = (IM3CodePage)m3_Malloc("M3CodePage", pageSize);
 
-    if (page) {
+    എങ്കിൽ (page) {
         page->info.sequence = ++i_runtime->newCodePageSequence;
-        page->info.numLines = (pageSize - sizeof(M3CodePageHeader)) / sizeof(code_t);
+        page->info.അക്കം_വരികൾ = (pageSize - വലുപ്പം(M3CodePageHeader)) / വലുപ്പം(code_t);
 
-#if d_m3RecordBacktraces
-        u32 pageSizeBt     = sizeof(M3CodeMappingPage) + sizeof(M3CodeMapEntry) * page->info.numLines;
+#എങ്കിൽ d_m3RecordBacktraces
+        u32 pageSizeBt     = വലുപ്പം(M3CodeMappingPage) + വലുപ്പം(M3CodeMapEntry) * page->info.അക്കം_വരികൾ;
         page->info.mapping = (M3CodeMappingPage*)m3_Malloc("M3CodeMappingPage", pageSizeBt);
 
-        if (page->info.mapping) {
+        എങ്കിൽ (page->info.mapping) {
             page->info.mapping->size     = 0;
-            page->info.mapping->capacity = page->info.numLines;
-        } else {
+            page->info.mapping->capacity = page->info.അക്കം_വരികൾ;
+        } അല്ലെങ്കിൽ {
             m3_Free(page);
-            return NULL;
+            തിരികെ ശൂന്യ;
         }
         page->info.mapping->basePC = GetPageStartPC(page);
 #endif // d_m3RecordBacktraces
 
-        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.numLines);
+        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.അക്കം_വരികൾ);
     }
 
-    return page;
+    തിരികെ page;
 }
 
 
-void FreeCodePages (IM3CodePage* io_list)
+ശൂന്യം FreeCodePages (IM3CodePage* io_list)
 {
     IM3CodePage page = *io_list;
 
-    while (page) {
-        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.lineIndex / page->info.numLines);
+    ആകുമ്പോൾ (page) {
+        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.വരി_Index / page->info.അക്കം_വരികൾ);
 
         IM3CodePage next = page->info.next;
-#if d_m3RecordBacktraces
+#എങ്കിൽ d_m3RecordBacktraces
         m3_Free(page->info.mapping);
 #endif // d_m3RecordBacktraces
         m3_Free(page);
         page = next;
     }
 
-    *io_list = NULL;
+    *io_list = ശൂന്യ;
 }
 
 
-u32 NumFreeLines (IM3CodePage i_page)
+u32 അക്കം_Free_വരികൾ (IM3CodePage i_page)
 {
-    d_m3Assert(i_page->info.lineIndex <= i_page->info.numLines);
+    d_m3Assert(i_page->info.വരി_Index <= i_page->info.അക്കം_വരികൾ);
 
-    return i_page->info.numLines - i_page->info.lineIndex;
+    തിരികെ i_page->info.അക്കം_വരികൾ - i_page->info.വരി_Index;
 }
 
 
-void EmitWord_impl (IM3CodePage i_page, void* i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    i_page->code[i_page->info.lineIndex++] = i_word;
+ശൂന്യം EmitWord_impl (IM3CodePage i_page, ശൂന്യം* i_word)
+{                                                                       d_m3Assert (i_page->info.വരി_Index+1 <= i_page->info.അക്കം_വരികൾ);
+    i_page->code[i_page->info.വരി_Index++] = i_word;
 }
 
-void EmitWord32 (IM3CodePage i_page, const u32 i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex++], &i_word, sizeof(i_word));
+ശൂന്യം EmitWord32 (IM3CodePage i_page, സ്ഥിരം u32 i_word)
+{                                                                       d_m3Assert (i_page->info.വരി_Index+1 <= i_page->info.അക്കം_വരികൾ);
+    memcpy(&i_page->code[i_page->info.വരി_Index++], &i_word, വലുപ്പം(i_word));
 }
 
-void EmitWord64 (IM3CodePage i_page, const u64 i_word)
+ശൂന്യം EmitWord64 (IM3CodePage i_page, സ്ഥിരം u64 i_word)
 {
-#if M3_SIZEOF_PTR == 4
-                                                                        d_m3Assert (i_page->info.lineIndex+2 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 2;
-#else
-                                                                        d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 1;
+#എങ്കിൽ M3_SIZEOF_PTR == 4
+                                                                        d_m3Assert (i_page->info.വരി_Index+2 <= i_page->info.അക്കം_വരികൾ);
+    memcpy(&i_page->code[i_page->info.വരി_Index], &i_word, വലുപ്പം(i_word));
+    i_page->info.വരി_Index += 2;
+#അല്ലെങ്കിൽ
+                                                                        d_m3Assert (i_page->info.വരി_Index+1 <= i_page->info.അക്കം_വരികൾ);
+    memcpy(&i_page->code[i_page->info.വരി_Index], &i_word, വലുപ്പം(i_word));
+    i_page->info.വരി_Index += 1;
 #endif
 }
 
 
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
+#എങ്കിൽ d_m3RecordBacktraces
+ശൂന്യം EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
 {
     M3CodeMappingPage* page = i_page->info.mapping;
                                                                         d_m3Assert (page->size < page->capacity);
@@ -127,21 +127,21 @@ void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
 
 pc_t GetPageStartPC (IM3CodePage i_page)
 {
-    return &i_page->code[0];
+    തിരികെ &i_page->code[0];
 }
 
 
 pc_t GetPagePC (IM3CodePage i_page)
 {
-    if (i_page) {
-        return &i_page->code[i_page->info.lineIndex];
-    } else {
-        return NULL;
+    എങ്കിൽ (i_page) {
+        തിരികെ &i_page->code[i_page->info.വരി_Index];
+    } അല്ലെങ്കിൽ {
+        തിരികെ ശൂന്യ;
     }
 }
 
 
-void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
+ശൂന്യം തള്ളുക_Code_Page (IM3CodePage* i_list, IM3CodePage i_codePage)
 {
     IM3CodePage next      = *i_list;
     i_codePage->info.next = next;
@@ -149,35 +149,35 @@ void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
 }
 
 
-IM3CodePage PopCodePage (IM3CodePage* i_list)
+IM3CodePage എടുക്കുക_Code_Page (IM3CodePage* i_list)
 {
     IM3CodePage page = *i_list;
     *i_list          = page->info.next;
-    page->info.next  = NULL;
+    page->info.next  = ശൂന്യ;
 
-    return page;
+    തിരികെ page;
 }
 
 
 u32 FindCodePageEnd (IM3CodePage i_list, IM3CodePage* o_end)
 {
-    u32 numPages = 0;
-    *o_end       = NULL;
+    u32 അക്കം_Pages = 0;
+    *o_end       = ശൂന്യ;
 
-    while (i_list) {
+    ആകുമ്പോൾ (i_list) {
         *o_end = i_list;
-        ++numPages;
+        ++അക്കം_Pages;
         i_list = i_list->info.next;
     }
 
-    return numPages;
+    തിരികെ അക്കം_Pages;
 }
 
 
-u32 CountCodePages (IM3CodePage i_list)
+u32 എണ്ണം_Code_Pages (IM3CodePage i_list)
 {
     IM3CodePage unused;
-    return FindCodePageEnd(i_list, &unused);
+    തിരികെ FindCodePageEnd(i_list, &unused);
 }
 
 
@@ -186,13 +186,13 @@ IM3CodePage GetEndCodePage (IM3CodePage i_list)
     IM3CodePage end;
     FindCodePageEnd(i_list, &end);
 
-    return end;
+    തിരികെ end;
 }
 
-#if d_m3RecordBacktraces
+#എങ്കിൽ d_m3RecordBacktraces
 bool ContainsPC (IM3CodePage i_page, pc_t i_pc)
 {
-    return GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
+    തിരികെ GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
 }
 
 
@@ -202,29 +202,29 @@ bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset)
 
     u32 pcOffset = (u32)(i_pc - mapping->basePC);
 
-    u32 left  = 0;
-    u32 right = mapping->size;
+    u32 ഇടത്  = 0;
+    u32 വലത് = mapping->size;
 
-    while (left < right) {
-        u32 mid = left + (right - left) / 2;
+    ആകുമ്പോൾ (ഇടത് < വലത്) {
+        u32 mid = ഇടത് + (വലത് - ഇടത്) / 2;
 
-        if (mapping->entries[mid].pcOffset < pcOffset) {
-            left = mid + 1;
-        } else if (mapping->entries[mid].pcOffset > pcOffset) {
-            right = mid;
-        } else {
+        എങ്കിൽ (mapping->entries[mid].pcOffset < pcOffset) {
+            ഇടത് = mid + 1;
+        } അല്ലെങ്കിൽ എങ്കിൽ (mapping->entries[mid].pcOffset > pcOffset) {
+            വലത് = mid;
+        } അല്ലെങ്കിൽ {
             *o_moduleOffset = mapping->entries[mid].moduleOffset;
-            return true;
+            തിരികെ true;
         }
     }
 
     // Getting here means left is now one more than the element we want.
-    if (left > 0) {
-        left--;
-        *o_moduleOffset = mapping->entries[left].moduleOffset;
-        return true;
-    } else {
-        return false;
+    എങ്കിൽ (ഇടത് > 0) {
+        ഇടത്--;
+        *o_moduleOffset = mapping->entries[ഇടത്].moduleOffset;
+        തിരികെ true;
+    } അല്ലെങ്കിൽ {
+        തിരികെ false;
     }
 }
 #endif // d_m3RecordBacktraces
