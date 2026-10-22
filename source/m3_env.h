@@ -5,16 +5,16 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_env_h
-#define m3_env_h
+#अगर_अघोषित m3_env_h
+#घोषणा m3_env_h
 
-#include "wasm3.h"
-#include "m3_code.h"
-#include "m3_compile.h"
+#समावेश "wasm3.h"
+#समावेश "m3_code.h"
+#समावेश "m3_compile.h"
 
 d_m3BeginExternC
 
-typedef struct ValCtx ValCtx;   // the validator's scratch, defined in m3_validate.c
+प्रकार काष्ठा ValCtx ValCtx;   // the validator's scratch, defined in m3_validate.c
 
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -22,10 +22,10 @@ typedef struct ValCtx ValCtx;   // the validator's scratch, defined in m3_valida
 // Page counts are u64 because a memory64 type may declare up to 2^48 pages.
 // Nothing near that can be backed, but the module still has to parse and
 // validate; it is instantiation that fails.
-typedef struct M3MemoryInfo {
+प्रकार काष्ठा M3MemoryInfo {
     u64  initPages;
     u64  maxPages;
-    u32  pageSize;
+    u32  page_आकार;
     bool hasMax;         // a declared maximum of 0 is not the same as none
     bool isMemory64;     // addressed by i64 rather than i32
     bool isShared;       // the threads proposal: a maximum is required
@@ -41,46 +41,46 @@ typedef struct M3MemoryInfo {
 // a memory another module owns - growing one has to be visible through every
 // name it has. 'owner' says which module allocated it, and so which module
 // frees it.
-typedef struct M3Memory {
+प्रकार काष्ठा M3Memory {
     M3MemoryHeader*  mallocated;
 
-    u64              numPages;
+    u64              अंक_Pages;
     u64              maxPages;
     u64              initPages;
-    u32              pageSize;
+    u32              page_आकार;
     bool             hasMax;         // see M3MemoryInfo
     bool             isMemory64;     // addressed by i64 rather than i32
     bool             isShared;       // see M3MemoryInfo
 
-    struct M3Module* owner;          // the module that allocated it
+    काष्ठा M3Module* owner;          // the module that allocated it
     M3ImportInfo     import;         // when declared as an import
     bool             imported;
 
-#if d_m3GuardedMemory
+#अगर d_m3GuardedMemory
     // The slot of the guarded arena this memory's bytes live in, and so what
     // 'mallocated' points into rather than the heap - see Guard_TakeSlot
-    void* guardSlot;
-#endif
+    व्योम* guardSlot;
+#पूर्ण_अगर
 } M3Memory;
 
-typedef M3Memory* IM3Memory;
+प्रकार M3Memory* IM3Memory;
 
 // The value type a memory's addresses, page counts and lengths are expressed
 // in. Every instruction naming the memory takes and returns that type.
-static inline
-m3type_t Memory_AddrType (const M3Memory* i_memory)
+अटल अंतरभूत
+m3type_t Memory_AddrType (स्थिर M3Memory* i_memory)
 {
-    return i_memory->isMemory64 ? c_m3Type_i64 : c_m3Type_i32;
+    वापस i_memory->isMemory64 ? c_m3Type_i64 : c_m3Type_i32;
 }
 
 
 // A module that declares no custom page size means the default one. The parser
 // leaves that as zero, and InitMemory only fills it in when it allocates, so a
 // memory has to be asked rather than read directly until then.
-static inline
-u32 Memory_PageSize (const M3Memory* i_memory)
+अटल अंतरभूत
+u32 Memory_Page_आकार (स्थिर M3Memory* i_memory)
 {
-    return i_memory->pageSize ? i_memory->pageSize : d_m3DefaultMemPageSize;
+    वापस i_memory->page_आकार ? i_memory->page_आकार : d_m3_Default_Mem_Page_आकार;
 }
 
 
@@ -89,10 +89,10 @@ u32 Memory_PageSize (const M3Memory* i_memory)
 // A table type as the module declared it. Sizes stay u32 - a table64 may name
 // far more entries than that, but d_m3MaxSaneTableSize refuses anything near
 // the limit long before it matters.
-typedef struct M3TableInfo {
+प्रकार काष्ठा M3TableInfo {
     m3type_t elemType;
-    u32      initSize;
-    u32      maxSize;
+    u32      init_आकार;
+    u32      max_आकार;
     bool     hasMax;         // a declared maximum of 0 is not the same as none
     bool     isTable64;      // indexed by i64 rather than i32
 } M3TableInfo;
@@ -100,94 +100,94 @@ typedef struct M3TableInfo {
 
 // A table's elements are opaque pointer-sized references: IM3Function for a
 // funcref table, a host handle for an externref one. NULL is the null reference.
-typedef struct M3Table {
-    void**           elements;
-    u32              size;
-    u32              maxSize;            // 0 when the module declared no maximum
+प्रकार काष्ठा M3Table {
+    व्योम**           elements;
+    u32              आकार;
+    u32              max_आकार;            // 0 when the module declared no maximum
     m3type_t         type;
 
     // Every slot starts out holding this, rather than null. A table whose
     // element type is not nullable has to say what to fill itself with.
-    bytes_t          initExpr;
-    u32              initExprSize;
+    bytes_t          init_व्यंजक;
+    u32              init_व्यंजक_आकार;
 
-    u32              initSize;       // the declared minimum
+    u32              init_आकार;       // the declared minimum
     bool             hasMax;         // a declared maximum of 0 is not the same as none
     bool             isTable64;      // indexed by i64 rather than i32
 
-    struct M3Module* owner;          // the module that allocated it
+    काष्ठा M3Module* owner;          // the module that allocated it
     M3ImportInfo     import;         // when declared as an import
     bool             imported;
 } M3Table;
 
-typedef M3Table* IM3Table;
+प्रकार M3Table* IM3Table;
 
 // The value type a table's indexes and sizes are expressed in - table64 is the
 // same choice as memory64, made per table.
-static inline
-m3type_t Table_AddrType (const M3Table* i_table)
+अटल अंतरभूत
+m3type_t Table_AddrType (स्थिर M3Table* i_table)
 {
-    return i_table->isTable64 ? c_m3Type_i64 : c_m3Type_i32;
+    वापस i_table->isTable64 ? c_m3Type_i64 : c_m3Type_i32;
 }
 
 // Element segment modes, from the low two bits of the segment's flags
-typedef enum {
+प्रकार क्रमागत {
     c_m3Elem_active      = 0,        // table 0
     c_m3Elem_passive     = 1,
     c_m3Elem_activeIdx   = 2,        // explicit table index
     c_m3Elem_declarative = 3
 } M3ElementMode;
 
-typedef struct M3ElementSegment {
-    bytes_t  initExpr;       // active segments only: the offset
+प्रकार काष्ठा M3ElementSegment {
+    bytes_t  init_व्यंजक;       // active segments only: the offset
     bytes_t  elements;       // funcidx list, or const exprs when isExpr
-    void**   resolved;       // passive segments only, for table.init
+    व्योम**   resolved;       // passive segments only, for table.init
 
-    u32      initExprSize;
-    u32      numElements;
-    u32      tableIndex;
+    u32      init_व्यंजक_आकार;
+    u32      अंक_Elements;
+    u32      table_सूचकांक;
 
     m3type_t type;
     u8       mode;
-    bool     isExpr;
+    bool     is_व्यंजक;
     bool     dropped;
 } M3ElementSegment;
 
-typedef struct M3DataSegment {
-    const u8* initExpr;           // wasm code
-    const u8* data;
+प्रकार काष्ठा M3_तथ्य_Segment {
+    स्थिर u8* init_व्यंजक;           // wasm code
+    स्थिर u8* तथ्य;
 
-    u32       initExprSize;
+    u32       init_व्यंजक_आकार;
     u32       memoryRegion;
-    u32       size;
+    u32       आकार;
 
     bool      isPassive;
     bool      dropped;            // active segments are dropped once instantiated
-} M3DataSegment;
+} M3_तथ्य_Segment;
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3Global {
+प्रकार काष्ठा M3Global {
     M3ImportInfo     import;
 
     // An import linked to another module's export: the global that actually
     // holds the value. Reads and writes go there, so a mutable global stays one
     // cell seen under two names. NULL for anything else, including an import a
     // host supplied a value for through m3_LinkGlobal.
-    struct M3Global* resolved;
+    काष्ठा M3Global* resolved;
 
-    union {
-        i32 i32Value;
-        i64 i64Value;
-#if d_m3HasFloat
-        f64 f64Value;
-        f32 f32Value;
-#endif
-        void* refValue;
+    जोड़ {
+        i32 i32_मूल्य;
+        i64 i64_मूल्य;
+#अगर d_m3HasFloat
+        f64 f64_मूल्य;
+        f32 f32_मूल्य;
+#पूर्ण_अगर
+        व्योम* ref_मूल्य;
     };
 
-    bytes_t  initExpr;       // wasm code
-    u32      initExprSize;
+    bytes_t  init_व्यंजक;       // wasm code
+    u32      init_व्यंजक_आकार;
     m3type_t type;
     bool     imported;
     bool     isMutable;
@@ -196,29 +196,29 @@ typedef struct M3Global {
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#अगर d_m3HasExceptionHandling || d_m3_Has_ढेर_Switching
 
 // An exception / control tag, as the tag section declares it. Tags are compared by
 // identity, and this struct's address is that identity.
-typedef struct M3Tag {
+प्रकार काष्ठा M3Tag {
     M3ImportInfo  import;
     IM3FuncType   type;           // params are the payload; results are empty for EH, can be non-empty for stack switching
-    struct M3Tag* resolved;
+    काष्ठा M3Tag* resolved;
     bool          imported;
 } M3Tag;
 
 // A tag m3_NewTag made. It belongs to the runtime rather than to a module, and
 // is linked in front of the runtime's others rather than kept in an array, which
 // would move the tags - and with them their identities - whenever it grew.
-typedef struct M3HostTag {
-    struct M3HostTag* next;
+प्रकार काष्ठा M3HostTag {
+    काष्ठा M3HostTag* अग्र;
     M3Tag             tag;
 } M3HostTag;
 
-#endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
+#पूर्ण_अगर // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasExceptionHandling
+#अगर d_m3HasExceptionHandling
 
 // A thrown exception: the tag that identifies it plus the payload the throw
 // site popped off the stack, one u64 per value (32-bit values are stored
@@ -232,24 +232,24 @@ typedef struct M3HostTag {
 // the outermost m3_Call() returns, which is the last moment an exnref can still
 // be reached from the Wasm stack. An exnref parked in a global or a table
 // outlives that and is left dangling - wasm3 has no collector to say otherwise.
-typedef struct M3Exception {
-    struct M3Exception* next;           // the runtime's allocation list,
-    struct M3Exception* prev;           //   doubly linked so one can leave early
+प्रकार काष्ठा M3Exception {
+    काष्ठा M3Exception* अग्र;           // the runtime's allocation list,
+    काष्ठा M3Exception* पूर्व;           //   doubly linked so one can leave early
     IM3Tag              tag;
-    u32                 numArgs;
+    u32                 अंक_Args;
     bool                reified;        // an exnref to this has been handed out
     u64                 args[];
 } M3Exception;
 
 
-M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs);
-void         FreeException (IM3Runtime io_runtime, M3Exception* i_exception);
-void         FreeExceptions (IM3Runtime io_runtime);
+M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_अंक_Args);
+व्योम         FreeException (IM3Runtime io_runtime, M3Exception* i_exception);
+व्योम         FreeExceptions (IM3Runtime io_runtime);
 
-#endif // d_m3HasExceptionHandling
+#पूर्ण_अगर // d_m3HasExceptionHandling
 
 
-#if d_m3HasStackSwitching
+#अगर d_m3_Has_ढेर_Switching
 
 // A native frame the interpreter had claimed at the moment a continuation
 // suspended, recorded so that resuming can build the same frame again.
@@ -266,19 +266,19 @@ void         FreeExceptions (IM3Runtime io_runtime);
 // one owns a return protocol that only exists while its frame is standing:
 // op_Call and friends resume the caller, op_Loop reads the continue sentinel,
 // op_TryTable catches a pending exception.
-typedef enum M3FrameKind {
+प्रकार क्रमागत M3FrameKind {
     frame_call,          // op_Call / op_CallRef / op_CallIndirect
     frame_loop,          // op_Loop
-#  if d_m3HasExceptionHandling
+#  अगर d_m3HasExceptionHandling
     frame_try,           // op_TryTable
 #  endif
-#  if d_m3EntryKeepsFrame
+#  अगर d_m3EntryKeepsFrame
     frame_entry,         // op_Entry, in builds where it keeps a frame
 #  endif
     frame_resume,        // op_Resume, when the suspend is not its to answer
 } M3FrameKind;
 
-typedef struct M3Frame {
+प्रकार काष्ठा M3Frame {
     u8        kind;      // M3FrameKind
     pc_t      pc;        // call: the return address | loop: the loop id, which is
                          // also its body | try: the clause table | entry: unused
@@ -287,24 +287,24 @@ typedef struct M3Frame {
                          // growing linear memory moves the header, so only the
                          // M3Memory stays valid across a suspend
 
-    union {
+    जोड़ {
         // op_Call resumes the caller with the registers its own native frame was
         // holding, so those belong to the frame, not to the suspension point
-        struct {
+        काष्ठा {
             IM3Function function;
             m3reg_t     r0;
-#  if d_m3HasFloat
+#  अगर d_m3HasFloat
             f64 fp0;
 #  endif
         } call;
-#  if d_m3HasExceptionHandling
-        struct {
-            u32  numClauses;
+#  अगर d_m3HasExceptionHandling
+        काष्ठा {
+            u32  अंक_Clauses;
             bool handlersLive;   // false once op_PopHandlers has retired the region
         } try_;
 #  endif
-#  if d_m3EntryKeepsFrame
-        struct {
+#  अगर d_m3EntryKeepsFrame
+        काष्ठा {
             IM3Function function;
         } entry;
 #  endif
@@ -312,24 +312,24 @@ typedef struct M3Frame {
         // tag was not one its handlers named. The continuation it was running
         // is part of what got captured, so everything needed to set it going
         // again under the same handlers is kept here.
-        struct {
-            struct M3Continuation* cont;
+        काष्ठा {
+            काष्ठा M3Continuation* cont;
             pc_t                   handlersPC;
-            u32                    numHandlers;
+            u32                    अंक_Handlers;
             pc_t                   resultsPC;
-            u32                    numResults;
+            u32                    अंक_Results;
         } resume;
     };
 } M3Frame;
 
 // Which of the three resume forms an op_Resume was emitted for
-enum {
+क्रमागत {
     d_m3ResumeNormal = 0,
     d_m3ResumeThrow,
     d_m3ResumeThrowRef,
 };
 
-typedef enum M3ContinuationState {
+प्रकार क्रमागत M3ContinuationState {
     cont_allocated = 0,
     cont_running,
     cont_suspended,
@@ -337,37 +337,37 @@ typedef enum M3ContinuationState {
     cont_consumed
 } M3ContinuationState;
 
-typedef struct M3ResumeHandler {
+प्रकार काष्ठा M3ResumeHandler {
     u8     kind;        // 0: (on $t $h), 1: (on $t switch)
     IM3Tag tag;
     pc_t   stubPC;
 } M3ResumeHandler;
 
-typedef struct M3Continuation {
-    struct M3Continuation* next;           // linked list in runtime for cleanup
+प्रकार काष्ठा M3Continuation {
+    काष्ठा M3Continuation* अग्र;           // linked list in runtime for cleanup
     IM3FuncType            type;            // continuation type (cont $ft)
     IM3Function            entryFunction;   // target function
     M3ContinuationState    state;
 
-    m3slot_t*              valStack;        // allocated value stack buffer
-    u32                    numStackSlots;
+    m3slot_t*              val_ढेर;        // allocated value stack buffer
+    u32                    अंक_ढेर_Slots;
     m3stack_t              sp;              // current value stack pointer
 
     M3Frame*               frames;          // native frames recorded by the last suspend
     u32                    framesCap;       // entries allocated
-    u32                    numFrames;       // entries in use, innermost first
+    u32                    अंक_Frames;       // entries in use, innermost first
 
     pc_t                   pc;              // resume instruction pointer
     u8                     suspendPoint;    // M3SafePointKind: what left pc where it is
     m3reg_t                r0;              // saved accumulator
-#  if d_m3HasFloat
+#  अगर d_m3HasFloat
     f64 fp0;
 #  endif
 
     // Bound args count (for cont.bind)
-    u32 boundArgsCount;
+    u32 bound_Args_गिनती;
 
-#  if d_m3HasExceptionHandling
+#  अगर d_m3HasExceptionHandling
     // resume_throw: raised at the suspension point instead of carrying on from
     // it, so the try regions inside the continuation get their turn first
     M3Exception* resumeThrow;
@@ -375,44 +375,44 @@ typedef struct M3Continuation {
 
     // Where the values go when this continuation is next given some: the slots
     // its own suspend or switch is waiting on.
-    u32                    numSuspendResults;
-    i32                    suspendResultOffsets[d_m3MaxContinuationPayload];
-    u32                    suspendResultIs64[d_m3MaxContinuationPayload];
+    u32                    अंक_Suspend_Results;
+    i32                    suspend_परिणाम_Offsets[d_m3MaxContinuationPayload];
+    u32                    suspend_परिणाम_Is64[d_m3MaxContinuationPayload];
 
     // Active handler table from enclosing resume:
-    u32                    numHandlers;
+    u32                    अंक_Handlers;
     pc_t                   handlersPC;
-    struct M3Continuation* parent;         // resumer continuation
+    काष्ठा M3Continuation* parent;         // resumer continuation
 } M3Continuation, *IM3Continuation;
 
-M3Result        Continuation_AcquireStack (IM3Runtime runtime, IM3Continuation cont);
-void            Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont);
+M3_परिणाम        Continuation_Acquire_ढेर (IM3Runtime runtime, IM3Continuation cont);
+व्योम            Continuation_Recycle_ढेर (IM3Runtime runtime, IM3Continuation cont);
 IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3Function i_function);
 IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuation i_cont);
-void            Continuation_ReleaseAll (IM3Runtime io_runtime);
+व्योम            Continuation_ReleaseAll (IM3Runtime io_runtime);
 
 // Appends one frame to the suspending continuation. Returns the marker the
 // caller should keep unwinding with: the suspend marker when the frame was
 // recorded, or a trap when it could not be - a continuation that cannot record
 // its frames cannot be resumed, so the suspend has to become a trap instead.
-m3ret_t         Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame);
+m3ret_t         Continuation_RecordFrame (IM3Runtime i_runtime, स्थिर M3Frame* i_frame);
 
 // Points runtime->stack, where the host's next call puts its arguments, above
 // whatever a suspended root continuation holds - or back at the bottom when
 // there is none.
-void            Runtime_PlaceCallStack (IM3Runtime io_runtime);
+व्योम            Runtime_Place_Call_ढेर (IM3Runtime io_runtime);
 
-#endif // d_m3HasStackSwitching
+#पूर्ण_अगर // d_m3HasStackSwitching
 
 
-#if d_m3HasSnapshots
-typedef struct M3EmbeddedSnapshot {
+#अगर d_m3HasSnapshots
+प्रकार काष्ठा M3EmbeddedSnapshot {
     cstr_t                     name;
-    bytes_t                    data;
-    u32                        size;
-    struct M3EmbeddedSnapshot* next;
+    bytes_t                    तथ्य;
+    u32                        आकार;
+    काष्ठा M3EmbeddedSnapshot* अग्र;
 } M3EmbeddedSnapshot;
-#endif
+#पूर्ण_अगर
 
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -422,52 +422,52 @@ typedef struct M3EmbeddedSnapshot {
 // import re-exported under a name of the module's own, whose slot linking points
 // at another module's entity. Every lookup by name goes through these, and
 // resolves the index against the module's index space at the time it is asked.
-typedef struct M3Export {
+प्रकार काष्ठा M3Export {
     cstr_t name;
-    u32    nameLength;   // the name may hold a NUL, which ends the C string early
+    u32    name_लंबाई;   // the name may hold a NUL, which ends the C string early
     u32    index;        // into the index space 'kind' names
     u8     kind;         // d_externalKind_*
 } M3Export;
 
-typedef struct M3Module {
-    struct M3Runtime*     runtime;
-    struct M3Environment* environment;
+प्रकार काष्ठा M3Module {
+    काष्ठा M3Runtime*     runtime;
+    काष्ठा M3Environment* environment;
 
     bytes_t               wasmStart;
     bytes_t               wasmEnd;
 
     cstr_t                name;
 
-    u32                   numFuncTypes;
+    u32                   अंक_Func_Types;
     IM3FuncType*          funcTypes;              // array of pointers to list of FuncTypes
 
-    u32                   numFuncImports;
-    u32                   numFunctions;
+    u32                   अंक_Func_Imports;
+    u32                   अंक_Functions;
     u32                   allFunctions;           // allocated functions count
     M3Function*           functions;
 
     i32                   startFunction;
 
-    u32                   numDataSegments;
-    M3DataSegment*        dataSegments;
+    u32                   अंक_तथ्य_Segments;
+    M3_तथ्य_Segment*        तथ्य_Segments;
 
-    u32                   dataCount;          // from the data count section
-    bool                  hasDataCount;
+    u32                   तथ्य_गिनती;          // from the data count section
+    bool                  has_तथ्य_गिनती;
 
     // Bitset of the functions ref.func may name: those exported, or referenced
     // by an element segment or a global initializer. One bit per function.
     u8*                   declaredFuncs;
 
     //u32                     importedGlobals;
-    u32                   numGlobals;
+    u32                   अंक_Globals;
     M3Global*             globals;
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    u32    numTags;
+#अगर d_m3HasExceptionHandling || d_m3_Has_ढेर_Switching
+    u32    अंक_Tags;
     M3Tag* tags;
-#endif
+#पूर्ण_अगर
 
-    u32               numElementSegments;
+    u32               अंक_Element_Segments;
     M3ElementSegment* elementSegments;
     bytes_t           elementSectionEnd;
 
@@ -476,13 +476,13 @@ typedef struct M3Module {
     // table another module owns - see M3Table.owner, and M3Module.memories,
     // which works the same way.
     IM3Table*         tables;
-    u32               numTables;
+    u32               अंक_Tables;
 
     // The module's memory index space: imported entries first, then declared
     // ones, exactly as the Wasm index space orders them. Entries are borrowed
     // pointers - see M3Memory.owner.
     IM3Memory*        memories;
-    u32               numMemories;
+    u32               अंक_Memories;
 
     // The interpreter always carries a valid memory header in _mem - the
     // stack-limit check, the backtrace recorder and the call ops all reach the
@@ -497,88 +497,88 @@ typedef struct M3Module {
     IM3Memory         memory0;
 
     M3Export*         exports;
-    u32               numExports;
+    u32               अंक_Exports;
 
-#if d_m3HasSnapshots
-    struct M3EmbeddedSnapshot* snapshots;
+#अगर d_m3HasSnapshots
+    काष्ठा M3EmbeddedSnapshot* snapshots;
 
     // A snapshot restores into a module none of whose code has run - start
     // function included - and a restore that fails part way leaves one that
     // can no longer run at all: its store is neither the snapshot's nor its own.
     bool                       hasRun;
     bool                       isUnusable;
-#endif
+#पूर्ण_अगर
 
-    struct M3Module* next;
+    काष्ठा M3Module* अग्र;
 } M3Module;
 
-M3Result Module_AddMemory (IM3Module io_module, IM3Memory* o_memory, const M3MemoryInfo* i_info, bool i_isImported);
+M3_परिणाम Module_AddMemory (IM3Module io_module, IM3Memory* o_memory, स्थिर M3MemoryInfo* i_info, bool i_isImported);
 
 // Memory 0 of a module - the one the interpreter's _mem register tracks while
 // that module's code is running. Never NULL once the module has been loaded.
-static inline
+अटल अंतरभूत
 IM3Memory Module_Memory0 (IM3Module i_module)
 {
-    return i_module->memory0;
+    वापस i_module->memory0;
 }
 
-static inline
+अटल अंतरभूत
 M3MemoryHeader* Module_MemoryHeader (IM3Module i_module)
 {
-    return i_module->memory0->mallocated;
+    वापस i_module->memory0->mallocated;
 }
 
-M3Result Module_AddGlobal (IM3Module io_module, IM3Global* o_global, m3type_t i_type, bool i_mutable, bool i_isImported);
-M3Result Module_AddTable (IM3Module io_module, IM3Table* o_table, const M3TableInfo* i_info, bool i_isImported);
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-M3Result Module_AddTag (IM3Module io_module, IM3Tag* o_tag, IM3FuncType i_type, bool i_isImported);
-#endif
-#if d_m3HasStackSwitching
+M3_परिणाम Module_AddGlobal (IM3Module io_module, IM3Global* o_global, m3type_t i_type, bool i_mutable, bool i_isImported);
+M3_परिणाम Module_AddTable (IM3Module io_module, IM3Table* o_table, स्थिर M3TableInfo* i_info, bool i_isImported);
+#अगर d_m3HasExceptionHandling || d_m3_Has_ढेर_Switching
+M3_परिणाम Module_AddTag (IM3Module io_module, IM3Tag* o_tag, IM3FuncType i_type, bool i_isImported);
+#पूर्ण_अगर
+#अगर d_m3_Has_ढेर_Switching
 IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType);
-#endif
-M3Result    Module_DeclareFunction (IM3Module io_module, u32 i_index);
-bool        Module_IsFunctionDeclared (IM3Module i_module, u32 i_index);
+#पूर्ण_अगर
+M3_परिणाम    Module_DeclareFunction (IM3Module io_module, u32 i_सूचकांक);
+bool        Module_IsFunctionDeclared (IM3Module i_module, u32 i_सूचकांक);
 
-M3Result    Module_PreallocFunctions (IM3Module io_module, u32 i_totalFunctions);
-M3Result    Module_AddFunction (IM3Module io_module, u32 i_typeIndex, IM3ImportInfo i_importInfo /* can be null */);
-IM3Function Module_GetFunction (IM3Module i_module, u32 i_functionIndex);
+M3_परिणाम    Module_PreallocFunctions (IM3Module io_module, u32 i_योग_Functions);
+M3_परिणाम    Module_AddFunction (IM3Module io_module, u32 i_type_सूचकांक, IM3ImportInfo i_importInfo /* can be null */);
+IM3Function Module_GetFunction (IM3Module i_module, u32 i_function_सूचकांक);
 bool        Module_HasLinkedHostImport (IM3Module i_module, cstr_t i_importModule);
 
-void        Module_GenerateNames (IM3Module i_module);
+व्योम        Module_GenerateNames (IM3Module i_module);
 
-void        FreeImportInfo (M3ImportInfo* i_info);
+व्योम        FreeImportInfo (M3ImportInfo* i_info);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3Environment {
+प्रकार काष्ठा M3Environment {
     //    struct M3Runtime *      runtimes;
 
     IM3FuncType      funcTypes;                          // linked list of unique M3FuncType structs that can be compared using pointer-equivalence
 
-    IM3FuncType      retFuncTypes[c_m3Type_count];      // these 'point' to elements in the linked list above.
+    IM3FuncType      retFuncTypes[c_m3_Type_गिनती];      // these 'point' to elements in the linked list above.
                                                                 // the number of elements must match the basic types as per M3ValueType
-    u16              numFuncTypes;                       // hands out M3FuncType.canonicalIndex
+    u16              अंक_Func_Types;                       // hands out M3FuncType.canonicalIndex
     M3CodePage*      pagesReleased;
 
     M3SectionHandler customSectionHandler;
 } M3Environment;
 
-void     Environment_Release (IM3Environment i_environment);
+व्योम     Environment_Release (IM3Environment i_environment);
 
 // takes ownership of io_funcType and returns a pointer to the persistent version (could be same or different)
-M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_funcType);
-M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_count, u16* o_firstIndex);
-void     Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex);
+M3_परिणाम Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_funcType);
+M3_परिणाम Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_गिनती, u16* o_first_सूचकांक);
+व्योम     Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonical_सूचकांक);
 
-#if d_m3HasTypedRefs
-M3Result ParseHeapType (IM3Module i_module, m3type_t* o_heapBits, bytes_t* io_bytes, cbytes_t i_end);
-#endif
-M3Result ParseValueType (IM3Module i_module, m3type_t* o_type, bytes_t* io_bytes, cbytes_t i_end);
+#अगर d_m3HasTypedRefs
+M3_परिणाम ParseHeapType (IM3Module i_module, m3type_t* o_heapBits, bytes_t* io_bytes, cbytes_t i_end);
+#पूर्ण_अगर
+M3_परिणाम Parse_मूल्य_Type (IM3Module i_module, m3type_t* o_type, bytes_t* io_bytes, cbytes_t i_end);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-typedef struct M3Runtime {
+प्रकार काष्ठा M3Runtime {
     M3Compilation  compilation;
 
     IM3Environment environment;
@@ -586,21 +586,21 @@ typedef struct M3Runtime {
     M3CodePage*    pagesOpen;      // linked list of code pages with writable space on them
     M3CodePage*    pagesFull;      // linked list of at-capacity pages
 
-    u32            numCodePages;
-    u32            numActiveCodePages;
+    u32            अंक_Code_Pages;
+    u32            अंक_Active_Code_Pages;
 
     IM3Module      modules;        // linked list of imported modules
 
-    void*          stack;
-    void*          originStack;
-    u32            stackSize;
-    u32            numStackSlots;
-    void*          stackLimit;     // native C-stack low-water mark; Wasm calls trap past it (NULL = unset)
+    व्योम*          ढेर;
+    व्योम*          origin_ढेर;
+    u32            ढेर_आकार;
+    u32            अंक_ढेर_Slots;
+    व्योम*          ढेर_Limit;     // native C-stack low-water mark; Wasm calls trap past it (NULL = unset)
     IM3Function    lastCalled;     // last function that successfully executed
     IM3Function    entered;        // entry point of the outermost call in flight, or of the last one, trapped or not
     u32            callNesting;    // RunCodeChecked() recursion depth
 
-    void*          userdata;
+    व्योम*          userdata;
 
     u32            memoryLimit;
     u64            memoryBytesLimit;
@@ -608,51 +608,51 @@ typedef struct M3Runtime {
     u64            tableElementsLimit;
     u64            tableElementsUsed;
 
-#if d_m3DeterministicProfile
+#अगर d_m3DeterministicProfile
     // What the host answers about time and entropy out of, rather than out of the
     // machine it happens to be running on - see m3_deterministic.h, which is what
     // reads and moves them. Both are per-runtime, so two runtimes replay
     // independently and a fresh runtime replays the same way as the last one.
     u64 virtualTimeNs;
     u64 randomState;
-#endif
+#पूर्ण_अगर
 
-#if d_m3EnableValidation
+#अगर d_m3EnableValidation
     bool    skipValidation; // m3_SetValidation: compile function bodies without type checking them first
     ValCtx* validator;      // created on first use
-#endif
+#पूर्ण_अगर
 
-#if d_m3EnableStrace >= 2
+#अगर d_m3EnableStrace >= 2
     u32 callDepth;
-#endif
+#पूर्ण_अगर
 
-#if d_m3HasGasMetering
+#अगर d_m3HasGasMetering
     // Both counts are in gas units (see M3_GAS_UNITS_PER_GAS). gasRemaining goes
     // negative by the cost of the segment that ran out, which is what makes the
     // gas used come out slightly over the limit, and is deliberate: a segment
     // is paid for in full before any of it runs.
     i64 gasLimit;
     i64 gasRemaining;
-#endif
+#पूर्ण_अगर
 
-#if d_m3HasExceptionHandling
+#अगर d_m3HasExceptionHandling
     u32          tryDepth;           // number of try regions whose body is executing
     M3Exception* pendingException;   // the exception currently unwinding, if any
     M3Exception* exceptions;         // the ones it still holds
     M3Exception* uncaughtException;  // a copy of what ended the last call, off the list
-#endif
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#पूर्ण_अगर
+#अगर d_m3HasExceptionHandling || d_m3_Has_ढेर_Switching
     M3HostTag* hostTags;
-#endif
+#पूर्ण_अगर
 
     // Set by the embedder and by the host's interrupt handler, so they are here
     // whether or not the interpreter was built able to act on them. Only the
     // suspendable operations read suspendRequested, and those exist only with
     // stack switching, so without it m3_RequestSuspend is simply never answered.
     bool          isSuspendable;
-    volatile bool suspendRequested;
+    अस्थिर bool suspendRequested;
 
-#if d_m3HasStackSwitching
+#अगर d_m3_Has_ढेर_Switching
     // Set while m3_ResumeRuntime replays a paused invocation: a back edge or a
     // function entry it paused at goes on past its check, so a pause already
     // requested takes effect at the next one instead of on the spot again
@@ -660,13 +660,13 @@ typedef struct M3Runtime {
 
     u32             continuationsLimit;
     u32             continuationsAllocated;
-    m3slot_t**      valStackPool;
-    u32             valStackPoolCap;
-    u32             valStackPoolCount;
+    m3slot_t**      val_ढेर_Pool;
+    u32             val_ढेर_Pool_Cap;
+    u32             val_ढेर_Pool_गिनती;
     IM3Continuation activeContinuation;
     IM3Continuation suspendedContinuation;
     IM3Continuation continuations;
-    IM3Continuation rootContinuation;
+    IM3Continuation मूल_Continuation;
 
     // The suspend on its way out, if there is one. Only ever one at a time -
     // it travels up the native stack and is answered before anything else can
@@ -677,21 +677,21 @@ typedef struct M3Runtime {
     IM3Continuation switchTarget;           // the peer to run instead, for a switch
     u64             suspendPayload[d_m3MaxContinuationPayload];
     u32             suspendPayloadIs64[d_m3MaxContinuationPayload];
-    u32             numSuspendPayload;
-#endif
+    u32             अंक_Suspend_Payload;
+#पूर्ण_अगर
 
-#if d_m3HasSnapshots
+#अगर d_m3HasSnapshots
     M3SnapshotHooks snapshotHooks;
-#endif
+#पूर्ण_अगर
 
     M3ErrorInfo error;
-#if d_m3VerboseErrorMessages
-    char error_message[256]; // the actual buffer. M3ErrorInfo can point to this
-#endif
+#अगर d_m3VerboseErrorMessages
+    अक्षर error_message[256]; // the actual buffer. M3ErrorInfo can point to this
+#पूर्ण_अगर
 
-#if d_m3RecordBacktraces
+#अगर d_m3RecordBacktraces
     M3BacktraceInfo backtrace;
-#endif
+#पूर्ण_अगर
 
     u32 newCodePageSequence;
 } M3Runtime;
@@ -705,44 +705,44 @@ typedef struct M3Runtime {
 // The stack pointer is read here rather than inside m3_NativeStackLimit so that
 // the mark measures the caller's frame, the same one d_m3CheckNativeStack tests
 // against later.
-#if d_m3MaxNativeStack > 0
-#  define d_m3StackLimitEnter(RT)                                               \
-        void * _m3SavedStackLimit = (RT)->stackLimit;                           \
-        if (not (RT)->stackLimit)                                               \
-            (RT)->stackLimit = m3_NativeStackLimit(m3_NativeStackPtr(), (d_m3MaxNativeStack));
-#  define d_m3StackLimitLeave(RT)  (RT)->stackLimit = _m3SavedStackLimit;
-#else
-#  define d_m3StackLimitEnter(RT)
-#  define d_m3StackLimitLeave(RT)
-#endif
+#अगर d_m3_Max_Native_ढेर > 0
+#  define d_m3_ढेर_Limit_Enter(RT)                                               \
+        व्योम * m3_Saved_ढेर_Limit = (RT)->ढेर_Limit;                           \
+        अगर (not (RT)->ढेर_Limit)                                               \
+            (RT)->ढेर_Limit = m3_Native_ढेर_Limit(m3_Native_ढेर_Ptr(), (d_m3_Max_Native_ढेर));
+#  define d_m3_ढेर_Limit_Leave(RT)  (RT)->ढेर_Limit = m3_Saved_ढेर_Limit;
+#अन्यथा
+#  define d_m3_ढेर_Limit_Enter(RT)
+#  define d_m3_ढेर_Limit_Leave(RT)
+#पूर्ण_अगर
 
-void     InitRuntime (IM3Runtime io_runtime, u32 i_stackSizeInBytes);
-void     Runtime_Release (IM3Runtime io_runtime);
+व्योम     InitRuntime (IM3Runtime io_runtime, u32 i_ढेर_आकार_In_Bytes);
+व्योम     Runtime_Release (IM3Runtime io_runtime);
 
-M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory io_memory, u64 i_numPages);
+M3_परिणाम ResizeMemory (IM3Runtime io_runtime, IM3Memory io_memory, u64 i_अंक_Pages);
 
 // Give back whatever is behind io_memory->mallocated, which is the heap or a slot of
 // the guarded arena depending on the build. Leaves the M3Memory itself alone.
-void     FreeMemoryBlock (IM3Memory io_memory);
+व्योम     FreeMemoryBlock (IM3Memory io_memory);
 
-typedef void* (*ModuleVisitor)(IM3Module i_module, void* i_info);
-void*       ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, void* i_info);
+प्रकार व्योम* (*ModuleVisitor)(IM3Module i_module, व्योम* i_info);
+व्योम*       ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, व्योम* i_info);
 
-void*       v_FindFunction (IM3Module i_module, void* i_info);
+व्योम*       v_FindFunction (IM3Module i_module, व्योम* i_info);
 
 IM3CodePage AcquireCodePage (IM3Runtime io_runtime);
-IM3CodePage AcquireCodePageWithCapacity (IM3Runtime io_runtime, u32 i_lineCount);
-void        ReleaseCodePage (IM3Runtime io_runtime, IM3CodePage i_codePage);
+IM3CodePage AcquireCodePageWithCapacity (IM3Runtime io_runtime, u32 i_पंक्ति_गिनती);
+व्योम        ReleaseCodePage (IM3Runtime io_runtime, IM3CodePage i_codePage);
 
-#if d_m3HasStackSwitching
-static inline
-bool Continuation_CanAcquireStack (IM3Runtime runtime)
+#अगर d_m3_Has_ढेर_Switching
+अटल अंतरभूत
+bool Continuation_Can_Acquire_ढेर (IM3Runtime runtime)
 {
-    return not runtime->continuationsLimit or
+    वापस not runtime->continuationsLimit or
            runtime->continuationsAllocated < runtime->continuationsLimit;
 }
-#endif
+#पूर्ण_अगर
 
 d_m3EndExternC
 
-#endif // m3_env_h
+#पूर्ण_अगर // m3_env_h

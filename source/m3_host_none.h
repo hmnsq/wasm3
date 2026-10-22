@@ -15,62 +15,62 @@
 //  one, and most of those are in build scripts outside this repository.
 //
 
-#ifndef m3_host_none_h
-#define m3_host_none_h
+#अगर_अघोषित m3_host_none_h
+#घोषणा m3_host_none_h
 
-#include "m3_core.h"
-#include "m3_host.h"
+#समावेश "m3_core.h"
+#समावेश "m3_host.h"
 
-void* m3_HostStackBase (void)
+व्योम* m3_Host_ढेर_Base (व्योम)
 {
-    return NULL;
+    वापस शून्य;
 }
 
-void m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
+व्योम m3_HostInstallInterruptHandler (IM3Runtime io_runtime)
 {
-    (void)io_runtime;
+    (व्योम)io_runtime;
 }
 
-void m3_HostRemoveInterruptHandler (void)
+व्योम m3_HostRemoveInterruptHandler (व्योम)
 {
 }
 
 // Plenty of these systems have no idea what time it is
-u64 m3_HostTimeMs (void)
+u64 m3_HostTimeMs (व्योम)
 {
-    return 0;
+    वापस 0;
 }
 
-void m3_HostSleepNs (u64 i_ns)
+व्योम m3_HostSleepNs (u64 i_ns)
 {
-    (void)i_ns;
+    (व्योम)i_ns;
 }
 
 // No mmap here, so the module's bytes are read directly onto the heap
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+bool m3_HostMapFile (स्थिर अक्षर* i_path, माप_प्रकार i_maxBytes, M3HostFile* o_file)
 {
-    return m3_HostReadFile(i_path, i_maxBytes, o_file);
+    वापस m3_HostReadFile(i_path, i_maxBytes, o_file);
 }
 
-void m3_HostUnmapFile (M3HostFile* io_file)
+व्योम m3_HostUnmapFile (M3HostFile* io_file)
 {
-    m3_Free(io_file->data);
+    m3_Free(io_file->तथ्य);
 
-    io_file->size = 0;
+    io_file->आकार = 0;
     io_file->handle = d_m3HostNoHandle;
     io_file->mapped = false;
 }
 
 // Standard C leaves it to the system whether rename replaces a file that
 // exists, so the target goes first. Two steps: in between, there is no i_to.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to)
+bool m3_HostReplaceFile (स्थिर अक्षर* i_from, स्थिर अक्षर* i_to)
 {
-    remove(i_to);
-    return rename(i_from, i_to) == 0;
+    हटाओ(i_to);
+    वापस नाम(i_from, i_to) == 0;
 }
 
-#if d_m3GuardedMemory
+#अगर d_m3GuardedMemory
 #  error "d_m3GuardedMemory needs a system that can reserve address space; this one has none"
-#endif
+#पूर्ण_अगर
 
-#endif // m3_host_none_h
+#पूर्ण_अगर // m3_host_none_h

@@ -7,15 +7,15 @@
 //  All rights reserved.
 //
 
-#ifndef wasm3_ext_h
-#define wasm3_ext_h
+#अगर_अघोषित wasm3_ext_h
+#घोषणा wasm3_ext_h
 
-#include "wasm3.h"
-#include <stdbool.h>
+#समावेश "wasm3.h"
+#समावेश <stdbool.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#अगर defined(__cplusplus)
+बाह्य "C" {
+#पूर्ण_अगर
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //  API extensions
@@ -34,18 +34,18 @@ IM3Module   m3_NewModule (IM3Environment i_environment);
 // To overwrite an existing function, set io_functionIndex to the desired element. i_signature must match the existing
 // function signature.
 // ** InjectFunction invalidates any existing IM3Function pointers
-M3Result    m3_InjectFunction (IM3Module            i_module,
-                               int32_t*             io_functionIndex,
-                               const char* const    i_signature,
-                               const uint8_t* const i_wasmBytes,            // i_wasmBytes is copied
+M3_परिणाम    m3_InjectFunction (IM3Module            i_module,
+                               int32_t*             io_function_सूचकांक,
+                               स्थिर अक्षर* स्थिर    i_signature,
+                               स्थिर uint8_t* स्थिर i_wasmBytes,            // i_wasmBytes is copied
                                bool                 i_doCompilation);
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module,
-                                   uint32_t  i_index);
+IM3Function m3_Get_Function_By_सूचकांक (IM3Module i_module,
+                                   uint32_t  i_सूचकांक);
 
-#if defined(__cplusplus)
+#अगर defined(__cplusplus)
 }
-#endif
+#पूर्ण_अगर
 
-#endif // wasm3_h
+#पूर्ण_अगर // wasm3_h

@@ -5,159 +5,159 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_config_h
-#define m3_config_h
+#अगर_अघोषित m3_config_h
+#घोषणा m3_config_h
 
-#include "m3_config_platforms.h"
+#समावेश "m3_config_platforms.h"
 
 // general --------------------------------------------------------------------
 
-#ifndef d_m3CodePageAlignSize
-#  define d_m3CodePageAlignSize                32*1024
-#endif
+#अगर_अघोषित d_m3_Code_Page_Align_आकार
+#  define d_m3_Code_Page_Align_आकार                32*1024
+#पूर्ण_अगर
 
-#ifndef d_m3MaxFunctionStackHeight
-#  define d_m3MaxFunctionStackHeight           8000    // max: 32768
-#endif
+#अगर_अघोषित d_m3_Max_Function_ढेर_Height
+#  define d_m3_Max_Function_ढेर_Height           8000    // max: 32768
+#पूर्ण_अगर
 
-#ifndef d_m3MaxLinearMemoryPages
+#अगर_अघोषित d_m3MaxLinearMemoryPages
 #  define d_m3MaxLinearMemoryPages             65536
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3MaxFunctionSlots
-#  define d_m3MaxFunctionSlots                 ((d_m3MaxFunctionStackHeight)*2)
-#endif
+#अगर_अघोषित d_m3MaxFunctionSlots
+#  define d_m3MaxFunctionSlots                 ((d_m3_Max_Function_ढेर_Height)*2)
+#पूर्ण_अगर
 
-#ifndef d_m3ValStack                                   // validator operand and local type stacks:
-#  define d_m3ValStack                         (d_m3MaxFunctionStackHeight)       // the same operand stack the compiler bounds
-#endif
+#अगर_अघोषित d_m3_Val_ढेर                                   // validator operand and local type stacks:
+#  define d_m3_Val_ढेर                         (d_m3_Max_Function_ढेर_Height)       // the same operand stack the compiler bounds
+#पूर्ण_अगर
 
-#ifndef d_m3ValCtrlDepth                               // validator block nesting depth. Each frame is bigger than an
-#  define d_m3ValCtrlDepth                     ((d_m3MaxFunctionStackHeight)/4)   // operand entry, so this dominates the validator's stack usage
-#endif
+#अगर_अघोषित d_m3ValCtrlDepth                               // validator block nesting depth. Each frame is bigger than an
+#  define d_m3ValCtrlDepth                     ((d_m3_Max_Function_ढेर_Height)/4)   // operand entry, so this dominates the validator's stack usage
+#पूर्ण_अगर
 
-#ifndef d_m3MaxConstantTableSize
-#  define d_m3MaxConstantTableSize             120
-#endif
+#अगर_अघोषित d_m3_Max_Constant_Table_आकार
+#  define d_m3_Max_Constant_Table_आकार             120
+#पूर्ण_अगर
 
-#ifndef d_m3MaxDuplicateFunctionImpl
+#अगर_अघोषित d_m3MaxDuplicateFunctionImpl
 #  define d_m3MaxDuplicateFunctionImpl         3
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3VerboseErrorMessages
+#अगर_अघोषित d_m3VerboseErrorMessages
 #  define d_m3VerboseErrorMessages             1
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3FixedHeap
+#अगर_अघोषित d_m3FixedHeap
 #  define d_m3FixedHeap                        false
 //# define d_m3FixedHeap                       (32*1024)
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3FixedHeapAlign
+#अगर_अघोषित d_m3FixedHeapAlign
 #  define d_m3FixedHeapAlign                   16
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3Use32BitSlots
+#अगर_अघोषित d_m3Use32BitSlots
 #  define d_m3Use32BitSlots                    1
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3ProfilerSlotMask
+#अगर_अघोषित d_m3ProfilerSlotMask
 #  define d_m3ProfilerSlotMask                 0xFFFF
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3RecordBacktraces
+#अगर_अघोषित d_m3RecordBacktraces
 #  define d_m3RecordBacktraces                 0
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3EnableExceptionBreakpoint
+#अगर_अघोषित d_m3EnableExceptionBreakpoint
 #  define d_m3EnableExceptionBreakpoint        0       // see m3_exception.h
-#endif
+#पूर्ण_अगर
 
 // Backtraces and structured traces need op_Entry to still be around when the function
 // body returns, so it can't tail-call into it.  Everywhere else it can, which keeps the
 // native stack flat across calls -- and is what makes return_call actually iterative.
-#ifndef d_m3EntryKeepsFrame
+#अगर_अघोषित d_m3EntryKeepsFrame
 #  define d_m3EntryKeepsFrame                  (d_m3RecordBacktraces || (d_m3EnableStrace >= 2))
-#endif
+#पूर्ण_अगर
 
 // Whether return_call/return_call_indirect can reuse the caller's frame.  Reusing it stops
 // the m3 stack from growing, so it's only safe where the native stack doesn't grow either
 // -- otherwise runaway tail recursion would blow the native stack with nothing to trap it.
 // Where that doesn't hold they compile to a plain call followed by a return: still
 // correct, just not iterative, and the m3 stack keeps overflowing (and trapping) first.
-#ifndef d_m3CanTailCall
-#  define d_m3CanTailCall                      (!d_m3EntryKeepsFrame && M3_GUARANTEED_TAIL_CALL)
-#endif
+#अगर_अघोषित d_m3_Can_पुच्छ_Call
+#  define d_m3_Can_पुच्छ_Call                      (!d_m3EntryKeepsFrame && M3_GUARANTEED_पुच्छ_CALL)
+#पूर्ण_अगर
 
 
 // profiling and tracing ------------------------------------------------------
 
-#ifndef d_m3EnableOpProfiling
+#अगर_अघोषित d_m3EnableOpProfiling
 #  define d_m3EnableOpProfiling                0       // opcode usage counters
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3EnableOpTracing
+#अगर_अघोषित d_m3EnableOpTracing
 #  define d_m3EnableOpTracing                  0       // only works with DEBUG
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3EnableWasiTracing
+#अगर_अघोषित d_m3EnableWasiTracing
 #  define d_m3EnableWasiTracing                0
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3EnableStrace
+#अगर_अघोषित d_m3EnableStrace
 #  define d_m3EnableStrace                     0       // 1 - trace exported function calls
 // 2 - trace all calls (structured)
 // 3 - all calls + loops + memory operations
-#endif
+#पूर्ण_अगर
 
 
 // logging --------------------------------------------------------------------
 
-#ifndef d_m3LogParse
+#अगर_अघोषित d_m3LogParse
 #  define d_m3LogParse                         0       // .wasm binary decoding info
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogModule
+#अगर_अघोषित d_m3LogModule
 #  define d_m3LogModule                        0       // wasm module info
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogCompile
+#अगर_अघोषित d_m3LogCompile
 #  define d_m3LogCompile                       0       // wasm -> metacode generation phase
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogWasmStack
-#  define d_m3LogWasmStack                     0       // dump the wasm stack when pushed or popped
-#endif
+#अगर_अघोषित d_m3_Log_Wasm_ढेर
+#  define d_m3_Log_Wasm_ढेर                     0       // dump the wasm stack when pushed or popped
+#पूर्ण_अगर
 
-#ifndef d_m3LogEmit
+#अगर_अघोषित d_m3LogEmit
 #  define d_m3LogEmit                          0       // metacode generation info
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogCodePages
+#अगर_अघोषित d_m3LogCodePages
 #  define d_m3LogCodePages                     0       // dump metacode pages when released
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogRuntime
+#अगर_अघोषित d_m3LogRuntime
 #  define d_m3LogRuntime                       0       // higher-level runtime information
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogNativeStack
-#  define d_m3LogNativeStack                   0       // track the memory usage of the C-stack
-#endif
+#अगर_अघोषित d_m3_Log_Native_ढेर
+#  define d_m3_Log_Native_ढेर                   0       // track the memory usage of the C-stack
+#पूर्ण_अगर
 
-#ifndef d_m3LogHeapOps
+#अगर_अघोषित d_m3LogHeapOps
 #  define d_m3LogHeapOps                       0       // track heap usage
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3LogTimestamps
+#अगर_अघोषित d_m3LogTimestamps
 #  define d_m3LogTimestamps                    0       // track timestamps on heap logs
-#endif
+#पूर्ण_अगर
 
 // other ----------------------------------------------------------------------
 
-#ifndef d_m3HasFloat
+#अगर_अघोषित d_m3HasFloat
 #  define d_m3HasFloat                         1       // implement floating point ops
-#endif
+#पूर्ण_अगर
 
 // The deterministic profile: the same module fed the same input produces the same
 // run, wherever and whenever it is run.
@@ -189,9 +189,9 @@
 // m3_SetResourceLimit with c_m3Limit_GasUnits, so a runaway module stops after
 // the same amount of work, and c_m3Limit_MemoryBytes (--max-memory in the CLI),
 // so memory.grow fails at the same point rather than wherever the allocator gives out.
-#ifndef d_m3DeterministicProfile
+#अगर_अघोषित d_m3DeterministicProfile
 #  define d_m3DeterministicProfile             0
-#endif
+#पूर्ण_अगर
 
 // Where a float operation's result is a NaN, the spec lets the host choose its sign
 // and payload, and different architectures choose differently: the same module
@@ -205,80 +205,80 @@
 // calls arithmetic. It changes nothing else - a canonical NaN satisfies every
 // assertion the spec suite makes about an arithmetic NaN - and abs, neg and copysign
 // keep carrying their operand's payload through, as the spec defines them to.
-#ifndef d_m3CanonicalNaN
+#अगर_अघोषित d_m3CanonicalNaN
 #  define d_m3CanonicalNaN                     d_m3DeterministicProfile
-#endif
+#पूर्ण_अगर
 
 // Issue the dispatch load for the next operation as soon as this one's immediates are
 // consumed, rather than at the point of the jump that consumes it, so the operation's
 // own work covers the load latency. See the comment in m3_exec.h.
-#ifndef d_m3PreloadNextOp
-#  define d_m3PreloadNextOp                    0
-#endif
+#अगर_अघोषित d_m3_Preload_अग्र_Op
+#  define d_m3_Preload_अग्र_Op                    0
+#पूर्ण_अगर
 
-#ifndef d_m3FoldSetLocal
+#अगर_अघोषित d_m3FoldSetLocal
 #  define d_m3FoldSetLocal                     1       // fuse a value-producing op with an immediately
-#endif                                                 // following local.set by retro-patching its destination
+#पूर्ण_अगर                                                 // following local.set by retro-patching its destination
 
-#ifndef d_m3FuseBranch
+#अगर_अघोषित d_m3FuseBranch
 #  define d_m3FuseBranch                       1       // fuse a compare with an immediately following
-#endif                                                 // br_if/if into one op (needs d_m3FoldSetLocal)
-#if d_m3FuseBranch && !d_m3FoldSetLocal
+#पूर्ण_अगर                                                 // br_if/if into one op (needs d_m3FoldSetLocal)
+#अगर d_m3FuseBranch && !d_m3FoldSetLocal
 #  undef d_m3FuseBranch
 #  define d_m3FuseBranch                       0       // the fusion candidate tracking lives in the fold machinery
-#endif
+#पूर्ण_अगर
 
-#if !d_m3HasFloat && !defined(d_m3NoFloatDynamic)
+#अगर !d_m3HasFloat && !defined(d_m3NoFloatDynamic)
 #  define d_m3NoFloatDynamic                   1       // if no floats, do not fail until flops are actually executed
-#endif
+#पूर्ण_अगर
 
 // funcref/externref values, the table instructions and multiple tables.
 // Without it a module may still declare one funcref table and use call_indirect.
-#ifndef d_m3HasRefTypes
+#अगर_अघोषित d_m3HasRefTypes
 #  define d_m3HasRefTypes                      1       // implement the reference types proposal
-#endif
+#पूर्ण_अगर
 
 // i32/i64 add, sub and mul inside constant expressions, so a global, data or
 // element offset can be computed from an imported global instead of a literal.
-#ifndef d_m3HasExtendedConst
+#अगर_अघोषित d_m3HasExtendedConst
 #  define d_m3HasExtendedConst                 1       // implement the extended constant expressions proposal
-#endif
+#पूर्ण_अगर
 
 // More than one linear memory per module, each memory instruction naming the
 // one it addresses. Memory 0 keeps the fast path -- the interpreter carries it
 // in the _mem register -- and the others are reached by swapping that register
 // around the access, so the cost lands only on modules that use them.
-#ifndef d_m3HasMultiMemory
+#अगर_अघोषित d_m3HasMultiMemory
 #  define d_m3HasMultiMemory                   1       // implement the multiple memories proposal
-#endif
+#पूर्ण_अगर
 
 // 64-bit linear memories: a memory declares whether it is addressed by i32 or
 // i64, and every instruction that names it takes operands of that type. The
 // address space wasm3 can actually back is far smaller than 2^64 either way --
 // see d_m3AddressLimit -- so this buys the addressing, not the range.
-#ifndef d_m3HasMemory64
+#अगर_अघोषित d_m3HasMemory64
 #  define d_m3HasMemory64                      1       // implement the memory64 proposal
-#endif
+#पूर्ण_अगर
 
 // The import section's compact encodings: one module name shared by a run of
 // imports, optionally with one externtype shared as well. Decoding only - a
 // module means exactly what it would spelled out the long way.
-#ifndef d_m3HasCompactImports
+#अगर_अघोषित d_m3HasCompactImports
 #  define d_m3HasCompactImports                1       // implement the compact import section proposal
-#endif
+#पूर्ण_अगर
 
 // 128-bit arithmetic over pairs of i64 halves
-#ifndef d_m3HasWideArithmetic
+#अगर_अघोषित d_m3HasWideArithmetic
 #  define d_m3HasWideArithmetic                1       // implement the wide arithmetic proposal
-#endif
+#पूर्ण_अगर
 
 // The threads proposal's 0xFE atomic instructions, and the shared flag on a memory's
 // limits. On their own they keep single-thread semantics: an atomic access is an
 // ordinary one that also checks its alignment, and memory.atomic.wait can only
 // time out. Sharing a memory between runtimes is d_m3HasThreads.
-#ifndef d_m3HasAtomics
+#अगर_अघोषित d_m3HasAtomics
 #  define d_m3HasAtomics                       1       // implement the atomic instructions of the threads proposal
-#endif
+#पूर्ण_अगर
 
 // The exception handling proposal: a tag section, the exnref value type, and
 // the try_table / throw / throw_ref instructions. Exceptions unwind by riding
@@ -303,63 +303,63 @@
 //     the enclosing function returns or an enclosing loop comes round, so a long
 //     straight-line run of try blocks in one function trades native stack for it.
 //     d_m3MaxNativeStack bounds this the same way it bounds call depth.
-#ifndef d_m3HasExceptionHandling
+#अगर_अघोषित d_m3HasExceptionHandling
 #  define d_m3HasExceptionHandling             1
-#endif
+#पूर्ण_अगर
 
 // (ref $t) and (ref null $t), call_ref and the rest of the typed function
 // references proposal. Off by default: it is not finished, and it widens the
 // value type from one byte to two wherever the compiler carries one.
-#ifndef d_m3HasTypedRefs
+#अगर_अघोषित d_m3HasTypedRefs
 #  define d_m3HasTypedRefs                     1
-#endif
+#पूर्ण_अगर
 
 // The stack switching proposal: typed first-class continuations, control tags,
 // suspend and resume. Built on the typed reference types, which is where a
 // continuation type gets the identity that switch needs to name its peer, so
 // it follows d_m3HasTypedRefs unless asked for explicitly.
-#ifndef d_m3HasStackSwitching
-#  define d_m3HasStackSwitching                d_m3HasTypedRefs
-#endif
+#अगर_अघोषित d_m3_Has_ढेर_Switching
+#  define d_m3_Has_ढेर_Switching                d_m3HasTypedRefs
+#पूर्ण_अगर
 
-#if d_m3HasStackSwitching && !d_m3HasTypedRefs
+#अगर d_m3_Has_ढेर_Switching && !d_m3HasTypedRefs
 #  error "d_m3HasStackSwitching requires d_m3HasTypedRefs"
-#endif
+#पूर्ण_अगर
 
 // The Wasm value stack a continuation runs on. It has to be its own buffer
 // rather than a window onto the runtime stack, because it outlives the resume
 // that started it.
-#ifndef d_m3ContinuationStackSlots
-#  define d_m3ContinuationStackSlots           1024
-#endif
+#अगर_अघोषित d_m3_Continuation_ढेर_Slots
+#  define d_m3_Continuation_ढेर_Slots           1024
+#पूर्ण_अगर
 
 // How many values a control tag may carry, and how many a suspended
 // continuation may be handed when it is resumed or switched into. Bounds the
 // fixed arrays a continuation keeps for them, so a module that asks for more
 // is rejected at compile time.
-#ifndef d_m3MaxContinuationPayload
+#अगर_अघोषित d_m3MaxContinuationPayload
 #  define d_m3MaxContinuationPayload           16
-#endif
+#पूर्ण_अगर
 
 // How deep the interpreter may be in native frames when a continuation
 // suspends. Only reached frames are recorded and the array grows to fit, so
 // this is a ceiling rather than an allocation; past it, the suspend traps.
-#ifndef d_m3ContinuationMaxFrames
+#अगर_अघोषित d_m3ContinuationMaxFrames
 #  define d_m3ContinuationMaxFrames            256
-#endif
+#पूर्ण_अगर
 
 // Snapshot serialization & deserialization. Allows saving suspended execution
 // state (linear memory, globals, tables, value stack, and virtual frames) and
 // restoring it to resume execution.
-#ifndef d_m3HasSnapshots
-#  define d_m3HasSnapshots                     d_m3HasStackSwitching
-#endif
+#अगर_अघोषित d_m3HasSnapshots
+#  define d_m3HasSnapshots                     d_m3_Has_ढेर_Switching
+#पूर्ण_अगर
 
 // Minimum run length of consecutive 0x00 or 0xFF bytes to trigger sparse
 // compression during snapshot linear memory encoding.
-#ifndef d_m3SnapshotRunThreshold
+#अगर_अघोषित d_m3SnapshotRunThreshold
 #  define d_m3SnapshotRunThreshold             128
-#endif
+#पूर्ण_अगर
 
 
 // Gas metering. Once m3_SetResourceLimit has armed a runtime, the compiler
@@ -367,19 +367,19 @@
 // segment of a body is charged, before any of it runs, for the instructions it
 // is about to execute, and execution traps once the budget is gone. The
 // segmentation and the per-opcode costs follow ewasm's metering design.
-#ifndef d_m3HasGasMetering
+#अगर_अघोषित d_m3HasGasMetering
 #  define d_m3HasGasMetering                   1
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3EnableValidation
+#अगर_अघोषित d_m3EnableValidation
 #  define d_m3EnableValidation                 1       // pre-pass bytecode type validation
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3SkipStackCheck
-#  define d_m3SkipStackCheck                   0       // skip stack overrun checks
-#endif
+#अगर_अघोषित d_m3_Skip_ढेर_Check
+#  define d_m3_Skip_ढेर_Check                   0       // skip stack overrun checks
+#पूर्ण_अगर
 
-#ifndef d_m3MaxNativeStack
+#अगर_अघोषित d_m3_Max_Native_ढेर
 // native C-stack budget (bytes) available to Wasm execution. A recursive
 // Wasm module builds up native call frames (op_Call -> op_Entry -> ...);
 // once this budget is exhausted the interpreter traps instead of
@@ -391,22 +391,22 @@
 // d_m3NativeStackMargin. That is what keeps the default safe on a thread
 // smaller than it - a 256KiB worker, say - without every embedder having to
 // know to lower it.
-#  define d_m3MaxNativeStack                   ((8 * 1024 * 1024) - (128 * 1024))
-#endif
+#  define d_m3_Max_Native_ढेर                   ((8 * 1024 * 1024) - (128 * 1024))
+#पूर्ण_अगर
 
-#ifndef d_m3NativeStackMargin
+#अगर_अघोषित d_m3_Native_ढेर_Margin
 // How much of a measured stack to leave below the mark. The mark is only tested
 // between calls, so everything after the last test still has to fit: the rest of
 // the op that traps, the interpreter frames unwinding behind it, and any host
 // function already on the stack. Only used where the stack was measured rather
 // than assumed; a stack too small to spare this much gives up a quarter of
 // itself instead.
-#  define d_m3NativeStackMargin                (64 * 1024)
-#endif
+#  define d_m3_Native_ढेर_Margin                (64 * 1024)
+#पूर्ण_अगर
 
-#ifndef d_m3SkipMemoryBoundsCheck
+#अगर_अघोषित d_m3SkipMemoryBoundsCheck
 #  define d_m3SkipMemoryBoundsCheck            0       // skip memory bounds checks
-#endif
+#पूर्ण_अगर
 
 // Back each linear memory with enough reserved address space that every address a
 // Wasm instruction could name lands inside it, and commit only the part the memory
@@ -432,17 +432,17 @@
 // shared by every runtime in the process and is not itself locked, so two threads
 // loading modules at the same time need the embedder to keep them apart, as the rest
 // of loading already does.
-#ifndef d_m3GuardedMemory
+#अगर_अघोषित d_m3GuardedMemory
 #  define d_m3GuardedMemory                    0
-#endif
+#पूर्ण_अगर
 
-#ifndef d_m3GuardedArenaSlots
+#अगर_अघोषित d_m3GuardedArenaSlots
 #  define d_m3GuardedArenaSlots                128
-#endif
+#पूर्ण_अगर
 
 // What it is incompatible with is checked in m3_host.h, which is the first place
 // that has seen enough of the configuration to say
 
-#define d_m3EnableCodePageRefCounting          0       // not supported currently
+#घोषणा d_m3EnableCodePageRefCounting          0       // not supported currently
 
-#endif // m3_config_h
+#पूर्ण_अगर // m3_config_h

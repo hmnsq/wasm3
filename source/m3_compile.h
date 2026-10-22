@@ -5,16 +5,16 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_compile_h
-#define m3_compile_h
+#अगर_अघोषित m3_compile_h
+#घोषणा m3_compile_h
 
-#include "m3_code.h"
-#include "m3_exec_defs.h"
-#include "m3_function.h"
+#समावेश "m3_code.h"
+#समावेश "m3_exec_defs.h"
+#समावेश "m3_function.h"
 
 d_m3BeginExternC
 
-enum {
+क्रमागत {
     c_waOp_block              = 0x02,
     c_waOp_loop               = 0x03,
     c_waOp_if                 = 0x04,
@@ -78,14 +78,14 @@ enum {
     c_waOp_atomic             = 0xfe,
 
     c_waOp_memoryInit         = 0xfc08,
-    c_waOp_dataDrop           = 0xfc09,
+    c_wa_Op_तथ्य_Drop           = 0xfc09,
     c_waOp_memoryCopy         = 0xfc0a,
     c_waOp_memoryFill         = 0xfc0b,
     c_waOp_tableInit          = 0xfc0c,
     c_waOp_elemDrop           = 0xfc0d,
     c_waOp_tableCopy          = 0xfc0e,
     c_waOp_tableGrow          = 0xfc0f,
-    c_waOp_tableSize          = 0xfc10,
+    c_wa_Op_table_आकार          = 0xfc10,
     c_waOp_tableFill          = 0xfc11,
     c_waOp_i64Add128          = 0xfc13,
     c_waOp_i64Sub128          = 0xfc14,
@@ -102,28 +102,28 @@ enum {
     // instructions. The tables run past these: with internal ops in DEBUG
     // builds, and with the designated 0xd0..0xd2 and 0xfc entries.
     c_waOp_lastCore           = 0xc4,     // i64.extend32_s
-#if d_m3HasWideArithmetic
+#अगर d_m3HasWideArithmetic
     c_waOp_lastExtended = 0x16,     // i64.mul_wide_u
-#else
+#अन्यथा
     c_waOp_lastExtended = 0x11,     // table.fill
-#endif
+#पूर्ण_अगर
     c_waOp_lastAtomic = 0x4e      // i64.atomic.rmw32.cmpxchg_u
 };
 
 
-#define d_FuncRetType(ftype,i)  ((ftype)->types[(i)])
-#define d_FuncArgType(ftype,i)  ((ftype)->types[(ftype)->numRets + (i)])
+#घोषणा d_FuncRetType(ftype,i)  ((ftype)->types[(i)])
+#घोषणा d_FuncArgType(ftype,i)  ((ftype)->types[(ftype)->अंक_Rets + (i)])
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3CompilationScope {
-    struct M3CompilationScope* outer;
+प्रकार काष्ठा M3CompilationScope {
+    काष्ठा M3CompilationScope* outer;
 
     pc_t                       pc;                 // used by ContinueLoop's
     pc_t                       patches;
     i32                        depth;
-    u16                        exitStackIndex;
-    u16                        blockStackIndex;
+    u16                        exit_ढेर_सूचकांक;
+    u16                        block_ढेर_सूचकांक;
     //    u16                             topSlot;
     IM3FuncType                type;
     m3opcode_t                 opcode;
@@ -131,27 +131,27 @@ typedef struct M3CompilationScope {
     u32                        snapshotBlock;      // its M3BlockStart in the snapshot map, plus one; 0 for none
 } M3CompilationScope;
 
-typedef M3CompilationScope* IM3CompilationScope;
+प्रकार M3CompilationScope* IM3CompilationScope;
 
-#if d_m3HasExceptionHandling
+#अगर d_m3HasExceptionHandling
 
 // One catch clause of a try_table, as Compile_TryTable reads it out of the
 // immediates. The stub that CompileBlock later emits for this clause writes its
 // own address back into stubSlot, which points at the pointer op_TryTable
 // reserved for it in the clause table.
-struct M3Tag;
+काष्ठा M3Tag;
 
-typedef struct M3CatchClause {
-    struct M3Tag* tag;            // NULL for catch_all / catch_all_ref
-    void*         stubSlot;
+प्रकार काष्ठा M3CatchClause {
+    काष्ठा M3Tag* tag;            // NULL for catch_all / catch_all_ref
+    व्योम*         stubSlot;
     u32           labelDepth;     // counted from outside the try block
     bool          hasRef;         // the _ref forms also hand over an exnref
 } M3CatchClause;
 
-#endif
+#पूर्ण_अगर
 
 
-typedef struct
+प्रकार काष्ठा
 {
     IM3Runtime         runtime;
     IM3Module          module;
@@ -166,94 +166,94 @@ typedef struct
 
     IM3CodePage        page;
 
-#ifdef DEBUG
-    u32 numEmits;
-    u32 numOpcodes;
-#endif
+#अगर_घोषित DEBUG
+    u32 अंक_Emits;
+    u32 अंक_Opcodes;
+#पूर्ण_अगर
 
-    u16        stackFirstDynamicIndex;     // args and locals are pushed to the stack so that their slot locations can be tracked. the wasm model itself doesn't
+    u16        ढेर_First_Dynamic_सूचकांक;     // args and locals are pushed to the stack so that their slot locations can be tracked. the wasm model itself doesn't
                                                     // treat these values as being on the stack, so stackFirstDynamicIndex marks the start of the real Wasm stack
-    u16        stackIndex;                 // current stack top
+    u16        ढेर_सूचकांक;                 // current stack top
 
-    u16        slotFirstConstIndex;
-    u16        slotMaxConstIndex;          // as const's are encountered during compilation this tracks their location in the "real" stack
+    u16        slot_First_Const_सूचकांक;
+    u16        slot_Max_Const_सूचकांक;          // as const's are encountered during compilation this tracks their location in the "real" stack
 
-    u16        slotFirstLocalIndex;
-    u16        slotFirstDynamicIndex;      // numArgs + numLocals + numReservedConstants. the first mutable slot available to the compiler.
+    u16        slot_First_Local_सूचकांक;
+    u16        slot_First_Dynamic_सूचकांक;      // numArgs + numLocals + numReservedConstants. the first mutable slot available to the compiler.
 
-    u16        maxStackSlots;
+    u16        max_ढेर_Slots;
 
-    m3slot_t   constants[d_m3MaxConstantTableSize];
+    m3slot_t   constants[d_m3_Max_Constant_Table_आकार];
 
     // 'wasmStack' holds slot locations
-    u16        wasmStack[d_m3MaxFunctionStackHeight];
-    m3type_t   typeStack[d_m3MaxFunctionStackHeight];
+    u16        wasm_ढेर[d_m3_Max_Function_ढेर_Height];
+    m3type_t   type_ढेर[d_m3_Max_Function_ढेर_Height];
 
     // 'm3Slots' contains allocation usage counts
     u8         m3Slots[d_m3MaxFunctionSlots];
 
-    u16        slotMaxAllocatedIndexPlusOne;
+    u16        slot_Max_Allocated_सूचकांक_Plus_One;
 
-    u16        regStackIndexPlusOne[2];
+    u16        reg_ढेर_सूचकांक_Plus_One[2];
 
     m3opcode_t previousOpcode;
 
-#if d_m3HasExceptionHandling
+#अगर d_m3HasExceptionHandling
     // handed from Compile_TryTable to the CompileBlock it is about to start.
     // The stubs are emitted from in there because a catch entry has to be
     // compiled against the try block's entry state, which is what CompileBlock
     // sets up
     M3CatchClause* tryClauses;
-    u32            numTryClauses;
-#endif
+    u32            अंक_Try_Clauses;
+#पूर्ण_अगर
 
-    bool isInitExpr;                 // walking a constant expression, not a function body
+    bool is_Init_व्यंजक;                 // walking a constant expression, not a function body
 
-#if d_m3HasGasMetering
+#अगर d_m3HasGasMetering
     // The metering segment being compiled, the cost accumulated so far, and
     // where its op_UseGas left an immediate for the cost to be written back
     // into once the segment's extent is known
-    void* gasPatch;
+    व्योम* gasPatch;
     u32   gasCost;
     bool  isGasSegmentOpen;
-#endif
+#पूर्ण_अगर
 
-#if d_m3HasSnapshots
+#अगर d_m3HasSnapshots
     // The function's snapshot map as it is being built, or NULL when this
     // compilation records none, and where the body the offsets in it count
     // from begins.
     M3SnapshotMap* snapshotMap;
     u32*           localInitDepth; // lexical scope that initialized each non-defaultable local
     u32            safePointsCapacity;
-    u32            valuesCapacity;
+    u32            मूल्यावली_Capacity;
     u32            blocksCapacity;
     bytes_t        bodyStart;
-#endif
+#पूर्ण_अगर
 
-#if d_m3FoldSetLocal
+#अगर d_m3FoldSetLocal
     // the last emitted op, when it is a candidate for local.set destination folding.
     // foldPatchPC is NULL whenever anything was emitted (or a branch target captured) since.
     pc_t       foldPatchPC;                // address of the candidate's op word in the code stream
     m3opcode_t foldOpcode;
-    u16        foldStackIndex;             // stack index of the candidate's pushed result
+    u16        fold_ढेर_सूचकांक;             // stack index of the candidate's pushed result
     u8         foldForm;                   // operand-form index the candidate was emitted with
-#endif
+#पूर्ण_अगर
 } M3Compilation;
 
-typedef M3Compilation* IM3Compilation;
+प्रकार M3Compilation* IM3Compilation;
 
-typedef M3Result (*M3Compiler)(IM3Compilation, m3opcode_t);
+प्रकार M3_परिणाम (*M3Compiler)(IM3Compilation, m3opcode_t);
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 
-typedef struct M3OpInfo {
-#ifdef DEBUG
-    const char* const name;
-#endif
+प्रकार काष्ठा M3OpInfo {
+#अगर_घोषित DEBUG
+    स्थिर अक्षर* स्थिर name;
+#पूर्ण_अगर
 
-    i8           stackOffset;
+    i8           ढेर_Offset;
     u8           type;
 
     // index into c_compilers [], 0 for an opcode with no compiler. An index
@@ -266,89 +266,89 @@ typedef struct M3OpInfo {
     IM3Operation operations[4];
 } M3OpInfo;
 
-typedef const M3OpInfo* IM3OpInfo;
+प्रकार स्थिर M3OpInfo* IM3OpInfo;
 
 IM3OpInfo               GetOpInfo (m3opcode_t opcode);
 
 // The raw tables, for the DEBUG-only reverse lookup in m3_info.c. Past the last
 // Wasm opcode c_operations also holds internal operations, which GetOpInfo hides.
-extern const M3OpInfo   c_operations[];
-extern const M3OpInfo   c_operationsFC[];
-extern const M3OpInfo   c_operationsFE[];
-extern const u32        c_numOperations;
-extern const u32        c_numOperationsFC;
-extern const u32        c_numOperationsFE;
+बाह्य स्थिर M3OpInfo   c_operations[];
+बाह्य स्थिर M3OpInfo   c_operationsFC[];
+बाह्य स्थिर M3OpInfo   c_operationsFE[];
+बाह्य स्थिर u32        c_अंक_Operations;
+बाह्य स्थिर u32        c_अंक_Operations_FC;
+बाह्य स्थिर u32        c_अंक_Operations_FE;
 
-static const u16        c_m3RegisterUnallocated = 0;
-static const u16        c_slotUnused = 0xffff;
+अटल स्थिर u16        c_m3RegisterUnallocated = 0;
+अटल स्थिर u16        c_slotUnused = 0xffff;
 
-static inline
+अटल अंतरभूत
 bool IsRegisterAllocated (IM3Compilation o, u32 i_register)
 {
-    return (o->regStackIndexPlusOne[i_register] != c_m3RegisterUnallocated);
+    वापस (o->reg_ढेर_सूचकांक_Plus_One[i_register] != c_m3RegisterUnallocated);
 }
 
-static inline
-bool IsStackPolymorphic (IM3Compilation o)
+अटल अंतरभूत
+bool Is_ढेर_Polymorphic (IM3Compilation o)
 {
-    return o->block.isPolymorphic;
+    वापस o->block.isPolymorphic;
 }
 
-static inline
+अटल अंतरभूत
 bool IsRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot >= d_m3Reg0SlotAlias and i_slot != c_slotUnused);
+    वापस (i_slot >= d_m3Reg0SlotAlias and i_slot != c_slotUnused);
 }
-static inline
+अटल अंतरभूत
 bool IsFpRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot == d_m3Fp0SlotAlias);
+    वापस (i_slot == d_m3Fp0SlotAlias);
 }
-static inline
+अटल अंतरभूत
 bool IsIntRegisterSlotAlias (u16 i_slot)
 {
-    return (i_slot == d_m3Reg0SlotAlias);
+    वापस (i_slot == d_m3Reg0SlotAlias);
 }
 
 
 // Every field is named, and named in declaration order: a mixture of designated
 // and positional initializers is not valid C++, which the maintenance builds
 // compile this as.
-#ifdef DEBUG
-#  define M3OP(_name, _offset, _type, ...)  { .name = _name, .stackOffset = _offset, .type = _type, __VA_ARGS__ }
+#अगर_घोषित DEBUG
+#  define M3OP(_name, _offset, _type, ...)  { .name = _name, .ढेर_Offset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { .name = "reserved" }
-#else
+#अन्यथा
 // Strip-off name
-#  define M3OP(_name, _offset, _type, ...)  { .stackOffset = _offset, .type = _type, __VA_ARGS__ }
+#  define M3OP(_name, _offset, _type, ...)  { .ढेर_Offset = _offset, .type = _type, __VA_ARGS__ }
 #  define M3OP_RESERVED                     { 0 }
-#endif
+#पूर्ण_अगर
 
-#if d_m3HasFloat
+#अगर d_m3HasFloat
 #  define M3OP_F          M3OP
-#elif d_m3NoFloatDynamic
+#या_अगर d_m3NoFloatDynamic
 #  define M3OP_F(n,o,t,cc,...)        M3OP(n, o, t, cc, .operations = { op_Unsupported, op_Unsupported, op_Unsupported, op_Unsupported })
-#else
+#अन्यथा
 #  define M3OP_F(...)     { 0 }
-#endif
+#पूर्ण_अगर
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 u16      GetMaxUsedSlotPlusOne (IM3Compilation o);
 
-M3Result CompileBlock (IM3Compilation io, IM3FuncType i_blockType, m3opcode_t i_blockOpcode);
+M3_परिणाम CompileBlock (IM3Compilation io, IM3FuncType i_blockType, m3opcode_t i_blockOpcode);
 
-M3Result CompileBlockStatements (IM3Compilation io);
-M3Result CompileExpression (IM3Compilation io, IM3FuncType i_resultType);
-M3Result CompileFunction (IM3Function io_function);
+M3_परिणाम CompileBlockStatements (IM3Compilation io);
+M3_परिणाम CompileExpression (IM3Compilation io, IM3FuncType i_परिणाम_Type);
+M3_परिणाम CompileFunction (IM3Function io_function);
 
-M3Result CompileRawFunction (IM3Module io_module, IM3Function io_function, const void* i_function, const void* i_userdata);
+M3_परिणाम CompileRawFunction (IM3Module io_module, IM3Function io_function, स्थिर व्योम* i_function, स्थिर व्योम* i_userdata);
 
-struct M3Continuation;
+काष्ठा M3Continuation;
 
-#if d_m3HasStackSwitching
-m3ret_t ResumeContinuation (IM3Runtime i_runtime, struct M3Continuation* i_cont);
-#endif
+#अगर d_m3_Has_ढेर_Switching
+m3ret_t ResumeContinuation (IM3Runtime i_runtime, काष्ठा M3Continuation* i_cont);
+#पूर्ण_अगर
 
 d_m3EndExternC
 
-#endif // m3_compile_h
+#पूर्ण_अगर // m3_compile_h

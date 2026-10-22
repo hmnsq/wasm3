@@ -5,20 +5,20 @@
 //  Copyright © 2020 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_tracer.h"
+#समावेश "m3_api_tracer.h"
 
-#include "m3_env.h"
-#include "m3_exception.h"
+#समावेश "m3_env.h"
+#समावेश "m3_exception.h"
 
-#if defined(d_m3HasTracer)
+#अगर defined(d_m3HasTracer)
 
 
-static FILE* trace = NULL;
+अटल खाता* trace = शून्य;
 
 m3ApiRawFunction(m3_env_log_execution)
 {
     m3ApiGetArg(uint32_t, id)
-    fprintf(trace, "exec;%d\n", id);
+    ख_लिखो(trace, "exec;%d\n", id);
     m3ApiSuccess();
 }
 
@@ -26,7 +26,7 @@ m3ApiRawFunction(m3_env_log_exec_enter)
 {
     m3ApiGetArg(uint32_t, id)
     m3ApiGetArg(uint32_t, func)
-    fprintf(trace, "enter;%d;%d\n", id, func);
+    ख_लिखो(trace, "enter;%d;%d\n", id, func);
     m3ApiSuccess();
 }
 
@@ -34,14 +34,14 @@ m3ApiRawFunction(m3_env_log_exec_exit)
 {
     m3ApiGetArg(uint32_t, id)
     m3ApiGetArg(uint32_t, func)
-    fprintf(trace, "exit;%d;%d\n", id, func);
+    ख_लिखो(trace, "exit;%d;%d\n", id, func);
     m3ApiSuccess();
 }
 
 m3ApiRawFunction(m3_env_log_exec_loop)
 {
     m3ApiGetArg(uint32_t, id)
-    fprintf(trace, "loop;%d\n", id);
+    ख_लिखो(trace, "loop;%d\n", id);
     m3ApiSuccess();
 }
 
@@ -52,7 +52,7 @@ m3ApiRawFunction(m3_env_load_ptr)
     m3ApiGetArg(uint32_t, align)
     m3ApiGetArg(uint32_t, offset)
     m3ApiGetArg(uint32_t, address)
-    fprintf(trace, "load ptr;%d;%d;%d;%d\n", id, align, offset, address);
+    ख_लिखो(trace, "load ptr;%d;%d;%d;%d\n", id, align, offset, address);
     m3ApiReturn(address);
 }
 
@@ -63,19 +63,19 @@ m3ApiRawFunction(m3_env_store_ptr)
     m3ApiGetArg(uint32_t, align)
     m3ApiGetArg(uint32_t, offset)
     m3ApiGetArg(uint32_t, address)
-    fprintf(trace, "store ptr;%d;%d;%d;%d\n", id, align, offset, address);
+    ख_लिखो(trace, "store ptr;%d;%d;%d;%d\n", id, align, offset, address);
     m3ApiReturn(address);
 }
 
 // clang-format off
 
-#define d_m3TraceMemory(FUNC, NAME, TYPE, FMT)                \
+#घोषणा d_m3TraceMemory(FUNC, NAME, TYPE, FMT)                \
 m3ApiRawFunction(m3_env_##FUNC)                               \
 {                                                             \
     m3ApiReturnType (TYPE)                                    \
     m3ApiGetArg      (uint32_t, id)                           \
     m3ApiGetArg      (TYPE,     val)                          \
-    fprintf(trace, NAME ";%d;" FMT "\n", id, val);            \
+    ख_लिखो(trace, NAME ";%d;" FMT "\n", id, val);            \
     m3ApiReturn(val);                                         \
 }
 
@@ -83,20 +83,20 @@ d_m3TraceMemory( load_val_i32,  "load i32", int32_t, "%" PRIi32)
 d_m3TraceMemory(store_val_i32, "store i32", int32_t, "%" PRIi32)
 d_m3TraceMemory( load_val_i64,  "load i64", int64_t, "%" PRIi64)
 d_m3TraceMemory(store_val_i64, "store i64", int64_t, "%" PRIi64)
-d_m3TraceMemory( load_val_f32,  "load f32", float,   "%" PRIf32)
-d_m3TraceMemory(store_val_f32, "store f32", float,   "%" PRIf32)
-d_m3TraceMemory( load_val_f64,  "load f64", double,  "%" PRIf64)
-d_m3TraceMemory(store_val_f64, "store f64", double,  "%" PRIf64)
+d_m3TraceMemory( load_val_f32,  "load f32", भग्न,   "%" PRIf32)
+d_m3TraceMemory(store_val_f32, "store f32", भग्न,   "%" PRIf32)
+d_m3TraceMemory( load_val_f64,  "load f64", द्विगुन,  "%" PRIf64)
+d_m3TraceMemory(store_val_f64, "store f64", द्विगुन,  "%" PRIf64)
 
 
-#define d_m3TraceLocal(FUNC, NAME, TYPE, FMT)                 \
+#घोषणा d_m3TraceLocal(FUNC, NAME, TYPE, FMT)                 \
 m3ApiRawFunction(m3_env_##FUNC)                               \
 {                                                             \
     m3ApiReturnType (TYPE)                                    \
     m3ApiGetArg      (uint32_t, id)                           \
     m3ApiGetArg      (uint32_t, local)                        \
     m3ApiGetArg      (TYPE,     val)                          \
-    fprintf(trace, NAME ";%d;%d;" FMT "\n", id, local, val); \
+    ख_लिखो(trace, NAME ";%d;%d;" FMT "\n", id, local, val); \
     m3ApiReturn(val);                                         \
 }
 
@@ -105,33 +105,33 @@ d_m3TraceLocal(get_i32, "get i32", int32_t, "%" PRIi32)
 d_m3TraceLocal(set_i32, "set i32", int32_t, "%" PRIi32)
 d_m3TraceLocal(get_i64, "get i64", int64_t, "%" PRIi64)
 d_m3TraceLocal(set_i64, "set i64", int64_t, "%" PRIi64)
-d_m3TraceLocal(get_f32, "get f32", float,   "%" PRIf32)
-d_m3TraceLocal(set_f32, "set f32", float,   "%" PRIf32)
-d_m3TraceLocal(get_f64, "get f64", double,  "%" PRIf64)
-d_m3TraceLocal(set_f64, "set f64", double,  "%" PRIf64)
+d_m3TraceLocal(get_f32, "get f32", भग्न,   "%" PRIf32)
+d_m3TraceLocal(set_f32, "set f32", भग्न,   "%" PRIf32)
+d_m3TraceLocal(get_f64, "get f64", द्विगुन,  "%" PRIf64)
+d_m3TraceLocal(set_f64, "set f64", द्विगुन,  "%" PRIf64)
 
 // clang-format on
 
-static
-M3Result SuppressLookupFailure (M3Result i_result)
+अटल
+M3_परिणाम SuppressLookupFailure (M3_परिणाम i_परिणाम)
 {
-    if (i_result == m3Err_none) {
+    अगर (i_परिणाम == m3Err_none) {
         // If any trace function is found in the module, open the trace file
-        if (!trace) {
-            trace = fopen("wasm3_trace.csv", "w");
+        अगर (!trace) {
+            trace = ख_खोलो("wasm3_trace.csv", "w");
         }
-    } else if (i_result == m3Err_functionLookupFailed) {
-        i_result = m3Err_none;
+    } अन्यथा अगर (i_परिणाम == m3Err_functionLookupFailed) {
+        i_परिणाम = m3Err_none;
     }
-    return i_result;
+    वापस i_परिणाम;
 }
 
 
-M3Result m3_LinkTracer (IM3Module module)
+M3_परिणाम m3_LinkTracer (IM3Module module)
 {
-    M3Result result = m3Err_none;
+    M3_परिणाम परिणाम = m3Err_none;
 
-    const char* env = "env";
+    स्थिर अक्षर* env = "env";
 
     // clang-format off
 
@@ -167,7 +167,7 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "set_f64",           
     // clang-format on
 
 _catch:
-    return result;
+    वापस परिणाम;
 }
 
-#endif // d_m3HasTracer
+#पूर्ण_अगर // d_m3HasTracer

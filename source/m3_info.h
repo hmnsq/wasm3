@@ -5,34 +5,34 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_info_h
-#define m3_info_h
+#अगर_अघोषित m3_info_h
+#घोषणा m3_info_h
 
-#include "m3_compile.h"
+#समावेश "m3_compile.h"
 
 d_m3BeginExternC
 
-void ProfileHit (cstr_t i_operationName);
+व्योम ProfileHit (cstr_t i_operationName);
 
-#ifdef DEBUG
+#अगर_घोषित DEBUG
 
-void        dump_type_stack (IM3Compilation o);
-void        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
-const char* get_indention_string (IM3Compilation o);
-void        log_emit (IM3Compilation o, IM3Operation i_operation);
+व्योम        dump_type_ढेर (IM3Compilation o);
+व्योम        log_opcode (IM3Compilation o, m3opcode_t i_opcode);
+स्थिर अक्षर* get_indention_string (IM3Compilation o);
+व्योम        log_emit (IM3Compilation o, IM3Operation i_operation);
 
 cstr_t      SPrintFuncTypeSignature (IM3FuncType i_funcType);
 
-#else // DEBUG
+#अन्यथा // DEBUG
 
-#  define   dump_type_stack(...)      {}
+#  define   dump_type_ढेर(...)      {}
 #  define   log_opcode(...)           {}
 #  define   get_indention_string(...) ""
-#  define   emit_stack_dump(...)      {}
+#  define   emit_ढेर_dump(...)      {}
 #  define   log_emit(...)             {}
 
-#endif // DEBUG
+#पूर्ण_अगर // DEBUG
 
 d_m3EndExternC
 
-#endif // m3_info_h
+#पूर्ण_अगर // m3_info_h
