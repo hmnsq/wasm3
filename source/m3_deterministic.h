@@ -7,7 +7,7 @@
 #ifndef m3_deterministic_h
 #define m3_deterministic_h
 
-#include "m3_env.h"
+#अन्तर्भाव "m3_env.h"
 
 d_m3BeginExternC
 
@@ -34,23 +34,23 @@ d_m3BeginExternC
 // absurd. The monotonic clocks start at zero, as they would anyway.
 #define d_m3WasiDeterministicEpochNs    UINT64_C(1577836800000000000)
 
-#if d_m3DeterministicProfile
+#जर d_m3DeterministicProfile
 
 // Start a runtime's clock and entropy where every other runtime starts them, which
 // is what makes a run replayable by making a fresh runtime.
-void Deterministic_InitRuntime (IM3Runtime io_runtime);
+शून्य Deterministic_InitRuntime (IM3Runtime io_runtime);
 
 // The clock counts from the moment the runtime was made, leaving it to the host API
 // to say what instant that was. Reading it advances it, so that a guest spinning
 // until time passes gets there.
 u64  Deterministic_Time (IM3Runtime io_runtime);
-void Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds);
-void Deterministic_Random (IM3Runtime io_runtime, void* o_buf, size_t i_length);
+शून्य Deterministic_Advance (IM3Runtime io_runtime, u64 i_nanoseconds);
+शून्य Deterministic_Random (IM3Runtime io_runtime, शून्य* o_buf, माप_प्रकार i_length);
 
-#else
+#अन्यथा
 
 // Nothing to seed: the fields these would set are not on M3Runtime in this build
-#  define Deterministic_InitRuntime(RT)    do {} while (0)
+#  define Deterministic_InitRuntime(RT)    करा {} पर्यंत (0)
 
 #endif
 

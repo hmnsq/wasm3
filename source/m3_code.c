@@ -5,114 +5,114 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <limits.h>
-#include "m3_code.h"
-#include "m3_env.h"
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव "m3_code.h"
+#अन्तर्भाव "m3_env.h"
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
+IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_min_अंक_ओळी)
 {
     IM3CodePage page;
 
     // check multiplication overflow
-    if (i_minNumLines > UINT_MAX / sizeof(code_t)) {
-        return NULL;
+    जर (i_min_अंक_ओळी > अच_पूर्णांक_उच्च / आकार(code_t)) {
+        परत रिक्त;
     }
-    u32 pageSize = sizeof(M3CodePageHeader) + sizeof(code_t) * i_minNumLines;
+    u32 pageSize = आकार(M3CodePageHeader) + आकार(code_t) * i_min_अंक_ओळी;
 
     // check addition overflow
-    if (pageSize < sizeof(M3CodePageHeader)) {
-        return NULL;
+    जर (pageSize < आकार(M3CodePageHeader)) {
+        परत रिक्त;
     }
 
     pageSize = (pageSize + (d_m3CodePageAlignSize - 1)) & ~(d_m3CodePageAlignSize - 1); // align
     // check alignment overflow
-    if (pageSize == 0) {
-        return NULL;
+    जर (pageSize == 0) {
+        परत रिक्त;
     }
 
     page = (IM3CodePage)m3_Malloc("M3CodePage", pageSize);
 
-    if (page) {
+    जर (page) {
         page->info.sequence = ++i_runtime->newCodePageSequence;
-        page->info.numLines = (pageSize - sizeof(M3CodePageHeader)) / sizeof(code_t);
+        page->info.अंक_ओळी = (pageSize - आकार(M3CodePageHeader)) / आकार(code_t);
 
-#if d_m3RecordBacktraces
-        u32 pageSizeBt     = sizeof(M3CodeMappingPage) + sizeof(M3CodeMapEntry) * page->info.numLines;
+#जर d_m3RecordBacktraces
+        u32 pageSizeBt     = आकार(M3CodeMappingPage) + आकार(M3CodeMapEntry) * page->info.अंक_ओळी;
         page->info.mapping = (M3CodeMappingPage*)m3_Malloc("M3CodeMappingPage", pageSizeBt);
 
-        if (page->info.mapping) {
+        जर (page->info.mapping) {
             page->info.mapping->size     = 0;
-            page->info.mapping->capacity = page->info.numLines;
-        } else {
+            page->info.mapping->capacity = page->info.अंक_ओळी;
+        } अन्यथा {
             m3_Free(page);
-            return NULL;
+            परत रिक्त;
         }
         page->info.mapping->basePC = GetPageStartPC(page);
 #endif // d_m3RecordBacktraces
 
-        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.numLines);
+        m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.अंक_ओळी);
     }
 
-    return page;
+    परत page;
 }
 
 
-void FreeCodePages (IM3CodePage* io_list)
+शून्य FreeCodePages (IM3CodePage* io_list)
 {
     IM3CodePage page = *io_list;
 
-    while (page) {
-        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.lineIndex / page->info.numLines);
+    पर्यंत (page) {
+        m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.ओळ_Index / page->info.अंक_ओळी);
 
         IM3CodePage next = page->info.next;
-#if d_m3RecordBacktraces
+#जर d_m3RecordBacktraces
         m3_Free(page->info.mapping);
 #endif // d_m3RecordBacktraces
         m3_Free(page);
         page = next;
     }
 
-    *io_list = NULL;
+    *io_list = रिक्त;
 }
 
 
-u32 NumFreeLines (IM3CodePage i_page)
+u32 अंक_Free_ओळी (IM3CodePage i_page)
 {
-    d_m3Assert(i_page->info.lineIndex <= i_page->info.numLines);
+    d_m3Assert(i_page->info.ओळ_Index <= i_page->info.अंक_ओळी);
 
-    return i_page->info.numLines - i_page->info.lineIndex;
+    परत i_page->info.अंक_ओळी - i_page->info.ओळ_Index;
 }
 
 
-void EmitWord_impl (IM3CodePage i_page, void* i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    i_page->code[i_page->info.lineIndex++] = i_word;
+शून्य EmitWord_impl (IM3CodePage i_page, शून्य* i_word)
+{                                                                       d_m3Assert (i_page->info.ओळ_Index+1 <= i_page->info.अंक_ओळी);
+    i_page->code[i_page->info.ओळ_Index++] = i_word;
 }
 
-void EmitWord32 (IM3CodePage i_page, const u32 i_word)
-{                                                                       d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex++], &i_word, sizeof(i_word));
+शून्य EmitWord32 (IM3CodePage i_page, स्थिरांक u32 i_word)
+{                                                                       d_m3Assert (i_page->info.ओळ_Index+1 <= i_page->info.अंक_ओळी);
+    स_नकल(&i_page->code[i_page->info.ओळ_Index++], &i_word, आकार(i_word));
 }
 
-void EmitWord64 (IM3CodePage i_page, const u64 i_word)
+शून्य EmitWord64 (IM3CodePage i_page, स्थिरांक u64 i_word)
 {
-#if M3_SIZEOF_PTR == 4
-                                                                        d_m3Assert (i_page->info.lineIndex+2 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 2;
-#else
-                                                                        d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
-    memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
-    i_page->info.lineIndex += 1;
+#जर M3_SIZEOF_PTR == 4
+                                                                        d_m3Assert (i_page->info.ओळ_Index+2 <= i_page->info.अंक_ओळी);
+    स_नकल(&i_page->code[i_page->info.ओळ_Index], &i_word, आकार(i_word));
+    i_page->info.ओळ_Index += 2;
+#अन्यथा
+                                                                        d_m3Assert (i_page->info.ओळ_Index+1 <= i_page->info.अंक_ओळी);
+    स_नकल(&i_page->code[i_page->info.ओळ_Index], &i_word, आकार(i_word));
+    i_page->info.ओळ_Index += 1;
 #endif
 }
 
 
-#if d_m3RecordBacktraces
-void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
+#जर d_m3RecordBacktraces
+शून्य EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
 {
     M3CodeMappingPage* page = i_page->info.mapping;
                                                                         d_m3Assert (page->size < page->capacity);
@@ -127,21 +127,21 @@ void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
 
 pc_t GetPageStartPC (IM3CodePage i_page)
 {
-    return &i_page->code[0];
+    परत &i_page->code[0];
 }
 
 
 pc_t GetPagePC (IM3CodePage i_page)
 {
-    if (i_page) {
-        return &i_page->code[i_page->info.lineIndex];
-    } else {
-        return NULL;
+    जर (i_page) {
+        परत &i_page->code[i_page->info.ओळ_Index];
+    } अन्यथा {
+        परत रिक्त;
     }
 }
 
 
-void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
+शून्य ढकला_Code_Page (IM3CodePage* i_list, IM3CodePage i_codePage)
 {
     IM3CodePage next      = *i_list;
     i_codePage->info.next = next;
@@ -149,35 +149,35 @@ void PushCodePage (IM3CodePage* i_list, IM3CodePage i_codePage)
 }
 
 
-IM3CodePage PopCodePage (IM3CodePage* i_list)
+IM3CodePage काढा_Code_Page (IM3CodePage* i_list)
 {
     IM3CodePage page = *i_list;
     *i_list          = page->info.next;
-    page->info.next  = NULL;
+    page->info.next  = रिक्त;
 
-    return page;
+    परत page;
 }
 
 
 u32 FindCodePageEnd (IM3CodePage i_list, IM3CodePage* o_end)
 {
-    u32 numPages = 0;
-    *o_end       = NULL;
+    u32 अंक_Pages = 0;
+    *o_end       = रिक्त;
 
-    while (i_list) {
+    पर्यंत (i_list) {
         *o_end = i_list;
-        ++numPages;
+        ++अंक_Pages;
         i_list = i_list->info.next;
     }
 
-    return numPages;
+    परत अंक_Pages;
 }
 
 
-u32 CountCodePages (IM3CodePage i_list)
+u32 मोजणी_Code_Pages (IM3CodePage i_list)
 {
     IM3CodePage unused;
-    return FindCodePageEnd(i_list, &unused);
+    परत FindCodePageEnd(i_list, &unused);
 }
 
 
@@ -186,13 +186,13 @@ IM3CodePage GetEndCodePage (IM3CodePage i_list)
     IM3CodePage end;
     FindCodePageEnd(i_list, &end);
 
-    return end;
+    परत end;
 }
 
-#if d_m3RecordBacktraces
+#जर d_m3RecordBacktraces
 bool ContainsPC (IM3CodePage i_page, pc_t i_pc)
 {
-    return GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
+    परत GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
 }
 
 
@@ -202,29 +202,29 @@ bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset)
 
     u32 pcOffset = (u32)(i_pc - mapping->basePC);
 
-    u32 left  = 0;
-    u32 right = mapping->size;
+    u32 डावा  = 0;
+    u32 उजवा = mapping->size;
 
-    while (left < right) {
-        u32 mid = left + (right - left) / 2;
+    पर्यंत (डावा < उजवा) {
+        u32 mid = डावा + (उजवा - डावा) / 2;
 
-        if (mapping->entries[mid].pcOffset < pcOffset) {
-            left = mid + 1;
-        } else if (mapping->entries[mid].pcOffset > pcOffset) {
-            right = mid;
-        } else {
+        जर (mapping->entries[mid].pcOffset < pcOffset) {
+            डावा = mid + 1;
+        } अन्यथा जर (mapping->entries[mid].pcOffset > pcOffset) {
+            उजवा = mid;
+        } अन्यथा {
             *o_moduleOffset = mapping->entries[mid].moduleOffset;
-            return true;
+            परत true;
         }
     }
 
     // Getting here means left is now one more than the element we want.
-    if (left > 0) {
-        left--;
-        *o_moduleOffset = mapping->entries[left].moduleOffset;
-        return true;
-    } else {
-        return false;
+    जर (डावा > 0) {
+        डावा--;
+        *o_moduleOffset = mapping->entries[डावा].moduleOffset;
+        परत true;
+    } अन्यथा {
+        परत false;
     }
 }
 #endif // d_m3RecordBacktraces
