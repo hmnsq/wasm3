@@ -12,7 +12,7 @@
 
 d_m3BeginExternC
 
-typedef struct M3CodePage {
+typedef sa_nracanaa M3CodePage {
     M3CodePageHeader info;
     code_t           code[1];
 } M3CodePage;
@@ -30,7 +30,7 @@ pc_t                GetPagePC (IM3CodePage i_page);
 void                EmitWord_impl (IM3CodePage i_page, void* i_word);
 void                EmitWord32 (IM3CodePage i_page, u32 i_word);
 void                EmitWord64 (IM3CodePage i_page, u64 i_word);
-#if d_m3RecordBacktraces
+#නම් d_m3RecordBacktraces
 void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset);
 #endif // d_m3RecordBacktraces
 
@@ -40,7 +40,7 @@ IM3CodePage PopCodePage (IM3CodePage* io_list);
 IM3CodePage GetEndCodePage (IM3CodePage i_list); // i_list = NULL is valid
 u32         CountCodePages (IM3CodePage i_list); // i_list = NULL is valid
 
-#if d_m3RecordBacktraces
+#නම් d_m3RecordBacktraces
 bool ContainsPC (IM3CodePage i_page, pc_t i_pc);
 bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset);
 #endif // d_m3RecordBacktraces
@@ -53,14 +53,14 @@ void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC);
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3RecordBacktraces
+#නම් d_m3RecordBacktraces
 
-typedef struct M3CodeMapEntry {
+typedef sa_nracanaa M3CodeMapEntry {
     u32 pcOffset;
     u32 moduleOffset;
 } M3CodeMapEntry;
 
-typedef struct M3CodeMappingPage {
+typedef sa_nracanaa M3CodeMappingPage {
     pc_t           basePC;
     u32            size;
     u32            capacity;
