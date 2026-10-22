@@ -5,274 +5,274 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#include "m3_function.h"
-#include "m3_env.h"
+#شامل "m3_function.h"
+#شامل "m3_env.h"
 
 
-M3Result AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes)
+M3_نتیجہ AllocFuncType (IM3FuncType* o_functionType, u32 i_عدد_Types)
 {
-    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", sizeof(M3FuncType) + i_numTypes * sizeof(m3type_t));
-    if (*o_functionType) {
+    *o_functionType = (IM3FuncType)m3_Malloc("M3FuncType", حجم(M3FuncType) + i_عدد_Types * حجم(m3type_t));
+    اگر (*o_functionType) {
         (*o_functionType)->isContinuation = false;
-        (*o_functionType)->contFuncType   = NULL;
-        (*o_functionType)->inRecGroup     = false;
-        return m3Err_none;
+        (*o_functionType)->contFuncType   = تہی;
+        (*o_functionType)->اندر_Rec_گروہ     = false;
+        واپس m3Err_none;
     }
-    return m3Err_mallocFailed;
+    واپس m3Err_mallocFailed;
 }
 
 
-#if d_m3HasTypedRefs
+#اگر d_m3HasTypedRefs
 
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
-m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull)
+m3type_t Ref_Type_کا_Func_Type (ثابت IM3FuncType i_funcType, bool i_nonNull)
 {
-    m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonicalIndex : d_m3Type_heapAbstract);
+    m3type_t type = d_m3Type_ref | (i_funcType ? i_funcType->canonical_اشاریہ : d_m3_Type_ڈھیر_Abstract);
 
-    if (i_funcType and i_funcType->isContinuation) {
+    اگر (i_funcType and i_funcType->isContinuation) {
         type |= d_m3Type_refCont;
     }
 
-    if (i_nonNull) {
+    اگر (i_nonNull) {
         type |= d_m3Type_refNonNull;
     }
 
-    return type;
+    واپس type;
 }
 
-#endif // d_m3HasTypedRefs
+#اگر_ختم // d_m3HasTypedRefs
 
 
-bool AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB)
+bool AreFuncTypesEqual (ثابت IM3FuncType i_typeA, ثابت IM3FuncType i_typeB)
 {
-    if (i_typeA->isContinuation != i_typeB->isContinuation) {
-        return false;
+    اگر (i_typeA->isContinuation != i_typeB->isContinuation) {
+        واپس false;
     }
-    if (i_typeA->isContinuation) {
-        return (i_typeA->contFuncType == i_typeB->contFuncType) or
+    اگر (i_typeA->isContinuation) {
+        واپس (i_typeA->contFuncType == i_typeB->contFuncType) or
                (i_typeA->contFuncType and i_typeB->contFuncType and
                 AreFuncTypesEqual(i_typeA->contFuncType, i_typeB->contFuncType));
     }
-    if (i_typeA->numRets == i_typeB->numRets and i_typeA->numArgs == i_typeB->numArgs) {
-        return (memcmp(i_typeA->types, i_typeB->types,
-                       (i_typeA->numRets + i_typeA->numArgs) * sizeof(m3type_t)) == 0);
+    اگر (i_typeA->عدد_Rets == i_typeB->عدد_Rets and i_typeA->عدد_دلائل == i_typeB->عدد_دلائل) {
+        واپس (memcmp(i_typeA->types, i_typeB->types,
+                       (i_typeA->عدد_Rets + i_typeA->عدد_دلائل) * حجم(m3type_t)) == 0);
     }
 
-    return false;
+    واپس false;
 }
 
-u16 GetFuncTypeNumParams (const IM3FuncType i_funcType)
+u16 Get_Func_Type_عدد_Params (ثابت IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numArgs : 0;
+    واپس i_funcType ? i_funcType->عدد_دلائل : 0;
 }
 
 
-m3type_t GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index)
+m3type_t GetFuncTypeParamType (ثابت IM3FuncType i_funcType, u16 i_اشاریہ)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numArgs) {
-            type = i_funcType->types[i_funcType->numRets + i_index];
+    اگر (i_funcType) {
+        اگر (i_اشاریہ < i_funcType->عدد_دلائل) {
+            type = i_funcType->types[i_funcType->عدد_Rets + i_اشاریہ];
         }
     }
 
-    return type;
+    واپس type;
 }
 
 
-u16 GetFuncTypeNumResults (const IM3FuncType i_funcType)
+u16 Get_Func_Type_عدد_Results (ثابت IM3FuncType i_funcType)
 {
-    return i_funcType ? i_funcType->numRets : 0;
+    واپس i_funcType ? i_funcType->عدد_Rets : 0;
 }
 
 
-m3type_t GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index)
+m3type_t Get_Func_Type_نتیجہ_Type (ثابت IM3FuncType i_funcType, u16 i_اشاریہ)
 {
     m3type_t type = c_m3Type_unknown;
 
-    if (i_funcType) {
-        if (i_index < i_funcType->numRets) {
-            type = i_funcType->types[i_index];
+    اگر (i_funcType) {
+        اگر (i_اشاریہ < i_funcType->عدد_Rets) {
+            type = i_funcType->types[i_اشاریہ];
         }
     }
 
-    return type;
+    واپس type;
 }
 
 
 //---------------------------------------------------------------------------------------------------------------
 
 
-void FreeImportInfo (M3ImportInfo* i_info)
+خالی FreeImportInfo (M3ImportInfo* i_info)
 {
     m3_Free(i_info->moduleUtf8);
-    m3_Free(i_info->fieldUtf8);
+    m3_Free(i_info->میدان_Utf8);
 }
 
 
-#if d_m3HasSnapshots
+#اگر d_m3HasSnapshots
 
-void SnapshotMap_Free (M3SnapshotMap* i_map)
+خالی SnapshotMap_Free (M3SnapshotMap* i_map)
 {
-    if (i_map) {
+    اگر (i_map) {
         m3_Free(i_map->locals);
-        m3_Free(i_map->safePoints);
-        m3_Free(i_map->values);
-        m3_Free(i_map->blocks);
+        m3_Free(i_map->محفوظ_Points);
+        m3_Free(i_map->اقدار);
+        m3_Free(i_map->بلاکیں);
         m3_Free(i_map);
     }
 }
 
-#endif
+#اگر_ختم
 
-void Function_Release (IM3Function i_function)
+خالی Function_Release (IM3Function i_function)
 {
     m3_Free(i_function->constants);
 
-#if d_m3HasSnapshots
+#اگر d_m3HasSnapshots
     SnapshotMap_Free(i_function->snapshotMap);
-    i_function->snapshotMap = NULL;
-#endif
+    i_function->snapshotMap = تہی;
+#اگر_ختم
 
-    for (int i = 0; i < i_function->numNames; i++) {
+    برائے (صحیح i = 0; i < i_function->عدد_نام; i++) {
         // name can be an alias of fieldUtf8
-        if (i_function->names[i] != i_function->import.fieldUtf8) {
-            m3_Free(i_function->names[i]);
+        اگر (i_function->نام[i] != i_function->import.میدان_Utf8) {
+            m3_Free(i_function->نام[i]);
         }
     }
 
     FreeImportInfo(&i_function->import);
 
-    if (i_function->ownsWasmCode) {
+    اگر (i_function->owns_Wasm_رمز) {
         m3_Free(i_function->wasm);
     }
 
     // Function_FreeCompiledCode (func);
 
-#if (d_m3EnableCodePageRefCounting)
+#اگر (d_m3_Enable_رمز_صفحہ_Ref_Counting)
     {
-        m3_Free(i_function->codePageRefs);
-        i_function->numCodePageRefs = 0;
+        m3_Free(i_function->رمز_صفحہ_Refs);
+        i_function->عدد_رمز_صفحہ_Refs = 0;
     }
-#endif
+#اگر_ختم
 }
 
 
-void Function_FreeCompiledCode (IM3Function i_function)
+خالی Function_Free_Compiled_رمز (IM3Function i_function)
 {
-#if (d_m3EnableCodePageRefCounting)
+#اگر (d_m3_Enable_رمز_صفحہ_Ref_Counting)
     {
-        i_function->compiled = NULL;
+        i_function->compiled = تہی;
 
-        while (i_function->numCodePageRefs--) {
-            IM3CodePage page = i_function->codePageRefs[i_function->numCodePageRefs];
+        جب (i_function->عدد_رمز_صفحہ_Refs--) {
+            IM3_رمز_صفحہ صفحہ = i_function->رمز_صفحہ_Refs[i_function->عدد_رمز_صفحہ_Refs];
 
-            if (--(page->info.usageCount) == 0) {
+            اگر (--(صفحہ->info.usage_گنتی) == 0) {
                 //                printf ("free %p\n", page);
             }
         }
 
-        m3_Free(i_function->codePageRefs);
+        m3_Free(i_function->رمز_صفحہ_Refs);
 
-        Runtime_ReleaseCodePages(i_function->module->runtime);
+        Runtime_Release_رمز_صفحات(i_function->module->runtime);
     }
-#endif
+#اگر_ختم
 }
 
 
 cstr_t m3_GetFunctionName (IM3Function i_function)
 {
-    u16     numNames = 0;
-    cstr_t* names    = GetFunctionNames(i_function, &numNames);
-    if (numNames > 0) {
-        return names[0];
-    } else {
-        return "<unnamed>";
+    u16     عدد_نام = 0;
+    cstr_t* نام    = Get_Function_نام(i_function, &عدد_نام);
+    اگر (عدد_نام > 0) {
+        واپس نام[0];
+    } ورنہ {
+        واپس "<unnamed>";
     }
 }
 
 
 IM3Module m3_GetFunctionModule (IM3Function i_function)
 {
-    return i_function ? i_function->module : NULL;
+    واپس i_function ? i_function->module : تہی;
 }
 
 
-cstr_t* GetFunctionNames (IM3Function i_function, u16* o_numNames)
+cstr_t* Get_Function_نام (IM3Function i_function, u16* o_عدد_نام)
 {
-    if (!i_function || !o_numNames) {
-        return NULL;
+    اگر (!i_function || !o_عدد_نام) {
+        واپس تہی;
     }
 
-    if (i_function->import.fieldUtf8) {
-        *o_numNames = 1;
-        return &i_function->import.fieldUtf8;
-    } else {
-        *o_numNames = i_function->numNames;
-        return i_function->names;
+    اگر (i_function->import.میدان_Utf8) {
+        *o_عدد_نام = 1;
+        واپس &i_function->import.میدان_Utf8;
+    } ورنہ {
+        *o_عدد_نام = i_function->عدد_نام;
+        واپس i_function->نام;
     }
 }
 
 
 cstr_t GetFunctionImportModuleName (IM3Function i_function)
 {
-    return (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
+    واپس (i_function->import.moduleUtf8) ? i_function->import.moduleUtf8 : "";
 }
 
 
-u16 GetFunctionNumArgs (IM3Function i_function)
+u16 Get_Function_عدد_دلائل (IM3Function i_function)
 {
-    u16 numArgs = 0;
+    u16 عدد_دلائل = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
-            numArgs = i_function->funcType->numArgs;
+    اگر (i_function) {
+        اگر (i_function->funcType) {
+            عدد_دلائل = i_function->funcType->عدد_دلائل;
         }
     }
 
-    return numArgs;
+    واپس عدد_دلائل;
 }
 
-m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index)
+m3type_t GetFunctionArgType (IM3Function i_function, u32 i_اشاریہ)
 {
     m3type_t type = c_m3Type_none;
 
-    if (i_index < GetFunctionNumArgs(i_function)) {
-        u32 numReturns = i_function->funcType->numRets;
+    اگر (i_اشاریہ < Get_Function_عدد_دلائل(i_function)) {
+        u32 عدد_Returns = i_function->funcType->عدد_Rets;
 
-        type = i_function->funcType->types[numReturns + i_index];
+        type = i_function->funcType->types[عدد_Returns + i_اشاریہ];
     }
 
-    return type;
+    واپس type;
 }
 
 
-u16 GetFunctionNumReturns (IM3Function i_function)
+u16 Get_Function_عدد_Returns (IM3Function i_function)
 {
-    u16 numReturns = 0;
+    u16 عدد_Returns = 0;
 
-    if (i_function) {
-        if (i_function->funcType) {
-            numReturns = i_function->funcType->numRets;
+    اگر (i_function) {
+        اگر (i_function->funcType) {
+            عدد_Returns = i_function->funcType->عدد_Rets;
         }
     }
 
-    return numReturns;
+    واپس عدد_Returns;
 }
 
 
-u8 GetFunctionReturnType (const IM3Function i_function, u16 i_index)
+u8 GetFunctionReturnType (ثابت IM3Function i_function, u16 i_اشاریہ)
 {
-    return i_function ? GetFuncTypeResultType(i_function->funcType, i_index) : c_m3Type_unknown;
+    واپس i_function ? Get_Func_Type_نتیجہ_Type(i_function->funcType, i_اشاریہ) : c_m3Type_unknown;
 }
 
 
-u32 GetFunctionNumArgsAndLocals (IM3Function i_function)
+u32 Get_Function_عدد_دلائل_And_Locals (IM3Function i_function)
 {
-    if (i_function) {
-        return i_function->numLocals + GetFunctionNumArgs(i_function);
-    } else {
-        return 0;
+    اگر (i_function) {
+        واپس i_function->عدد_Locals + Get_Function_عدد_دلائل(i_function);
+    } ورنہ {
+        واپس 0;
     }
 }

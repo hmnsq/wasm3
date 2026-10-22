@@ -5,100 +5,100 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#include "wasm3_ext.h"
+#شامل "wasm3_ext.h"
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_exception.h"
+#شامل "m3_env.h"
+#شامل "m3_bind.h"
+#شامل "m3_exception.h"
 
 
 IM3Module m3_NewModule (IM3Environment i_environment)
 {
     IM3Module module = m3_AllocStruct(M3Module);
 
-    if (module) {
+    اگر (module) {
         module->name          = ".unnamed";
-        module->startFunction = -1;
+        module->آغاز_Function = -1;
         module->environment   = i_environment;
 
-        module->wasmStart = NULL;
-        module->wasmEnd   = NULL;
+        module->wasm_آغاز = تہی;
+        module->wasm_انتہا   = تہی;
     }
 
-    return module;
+    واپس module;
 }
 
 
-M3Result m3_InjectFunction (IM3Module            i_module,
-                            int32_t*             io_functionIndex,
-                            const char* const    i_signature,
-                            const uint8_t* const i_wasmBytes,
+M3_نتیجہ m3_InjectFunction (IM3Module            i_module,
+                            int32_t*             io_function_اشاریہ,
+                            ثابت حرف* ثابت    i_signature,
+                            ثابت uint8_t* ثابت i_wasm_بائٹیں,
                             bool                 i_doCompilation)
 {
-    M3Result result = m3Err_none;                                       d_m3Assert (io_functionIndex);
+    M3_نتیجہ نتیجہ = m3Err_none;                                       d_m3Assert (io_function_اشاریہ);
 
-    IM3Function function = NULL;
-    IM3FuncType ftype    = NULL;
+    IM3Function function = تہی;
+    IM3FuncType ftype    = تہی;
 
     // Declared before the first throw below, which jumps past this point to
     // _catch and so must not skip an initialization.
     i32     index;
-    bytes_t bytes = i_wasmBytes;
-    bytes_t end   = i_wasmBytes + 5;
-    size_t  numBytes;
-    u32     size;
+    بائٹیں_t بائٹیں = i_wasm_بائٹیں;
+    بائٹیں_t انتہا   = i_wasm_بائٹیں + 5;
+    size_t  عدد_بائٹیں;
+    u32     سائز;
 
-_   (SignatureToFuncType(&ftype, i_signature));
+_   (Signature_مقصد_Func_Type(&ftype, i_signature));
 
-    index = *io_functionIndex;
+    index = *io_function_اشاریہ;
 
-_   (ReadLEB_u32(&size, &bytes, end));
-    end = bytes + size;
+_   (ReadLEB_u32(&سائز, &بائٹیں, انتہا));
+    انتہا = بائٹیں + سائز;
 
-    if (index >= 0) {
+    اگر (index >= 0) {
         // index is known non-negative here, so the counts compare as unsigned
-        _throwif("function index out of bounds", (u32)index >= i_module->numFunctions);
+        _throwif("function index out of bounds", (u32)index >= i_module->عدد_Functions);
 
         function = &i_module->functions[index];
 
-        if (not AreFuncTypesEqual(ftype, function->funcType)) {
+        اگر (not AreFuncTypesEqual(ftype, function->funcType)) {
             _throw("function type mismatch");
         }
-    } else {
+    } ورنہ {
         // add slot to function type table in the module
-        u32 funcTypeIndex   = i_module->numFuncTypes++;
-        i_module->funcTypes = m3_ReallocArray(IM3FuncType, i_module->funcTypes, i_module->numFuncTypes, funcTypeIndex);
+        u32 func_Type_اشاریہ   = i_module->عدد_Func_Types++;
+        i_module->funcTypes = m3_ReallocArray(IM3FuncType, i_module->funcTypes, i_module->عدد_Func_Types, func_Type_اشاریہ);
         _throwifnull(i_module->funcTypes);
 
         // add functype object to the environment
-        Environment_AddFuncType(i_module->environment, &ftype);
-        i_module->funcTypes[funcTypeIndex] = ftype;
+        Environment_جوڑو_Func_Type(i_module->environment, &ftype);
+        i_module->funcTypes[func_Type_اشاریہ] = ftype;
 
-        ftype = NULL; // prevent freeing below
+        ftype = تہی; // prevent freeing below
 
-        index = (i32)i_module->numFunctions;
-_       (Module_AddFunction(i_module, funcTypeIndex, NULL));
+        index = (i32)i_module->عدد_Functions;
+_       (Module_جوڑو_Function(i_module, func_Type_اشاریہ, تہی));
         function = Module_GetFunction(i_module, index);
 
-        *io_functionIndex = index;
+        *io_function_اشاریہ = index;
     }
 
-    function->compiled = NULL;
+    function->compiled = تہی;
 
-    if (function->ownsWasmCode) {
+    اگر (function->owns_Wasm_رمز) {
         m3_Free(function->wasm);
     }
 
-    numBytes       = end - i_wasmBytes;
-    function->wasm = m3_CopyMem(i_wasmBytes, numBytes);
+    عدد_بائٹیں       = انتہا - i_wasm_بائٹیں;
+    function->wasm = m3_CopyMem(i_wasm_بائٹیں, عدد_بائٹیں);
     _throwifnull(function->wasm);
 
-    function->wasmEnd      = function->wasm + numBytes;
-    function->ownsWasmCode = true;
+    function->wasm_انتہا      = function->wasm + عدد_بائٹیں;
+    function->owns_Wasm_رمز = true;
 
     function->module = i_module;
 
-    if (i_doCompilation and not i_module->runtime) {
+    اگر (i_doCompilation and not i_module->runtime) {
         _throw("module must be loaded into runtime to compile function");
     }
 
@@ -107,11 +107,11 @@ _   (CompileFunction(function));
     _catch:
     m3_Free(ftype);
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-IM3Function m3_GetFunctionByIndex (IM3Module i_module, uint32_t i_index)
+IM3Function m3_Get_Function_By_اشاریہ (IM3Module i_module, uint32_t i_اشاریہ)
 {
-    return Module_GetFunction(i_module, i_index);
+    واپس Module_GetFunction(i_module, i_اشاریہ);
 }

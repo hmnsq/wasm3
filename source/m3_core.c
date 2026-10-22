@@ -7,182 +7,182 @@
 
 // pthread_getattr_np, which m3_host_posix.h asks glibc for. Has to be set before any
 // libc header is seen, which is why it is here and not in that file.
-#ifndef _GNU_SOURCE
-#  define _GNU_SOURCE 1
-#endif
+#اگر_غیر_تعریف_شدہ GNU_ماخذ
+#  define GNU_ماخذ 1
+#اگر_ختم
 
-#define M3_IMPLEMENT_ERROR_STRINGS
-#include "m3_config.h"
-#include "wasm3.h"
+#تعریف_کرو M3_IMPLEMENT_ERROR_لڑیاں
+#شامل "m3_config.h"
+#شامل "wasm3.h"
 
-#include "m3_core.h"
-#include "m3_env.h"
+#شامل "m3_core.h"
+#شامل "m3_env.h"
 
 // The one place any of the m3_host.h implementations is built - see that header
-#include "m3_host.h"
+#شامل "m3_host.h"
 
-#if d_m3HasWin32Host
+#اگر d_m3HasWin32Host
 #  include "m3_host_win32.h"
-#elif d_m3HasPosixHost
+#وگرنہ_اگر d_m3HasPosixHost
 #  include "m3_host_posix.h"
-#else
+#ورنہ
 #  include "m3_host_none.h"
-#endif
+#اگر_ختم
 
-void m3_Abort (const char* message)
+خالی m3_Abort (ثابت حرف* پیغام)
 {
-#ifdef DEBUG
-    fprintf(stderr, "Error: %s\n", message);
-#endif
+#اگر_تعریف_شدہ DEBUG
+    fprintf(stderr, "Error: %s\n", پیغام);
+#اگر_ختم
     abort();
 }
 
 M3_WEAK
-M3Result m3_Yield ()
+M3_نتیجہ m3_Yield ()
 {
-    return m3Err_none;
+    واپس m3Err_none;
 }
 
-#if d_m3LogTimestamps
+#اگر d_m3LogTimestamps
 
 #  include <time.h>
 
-#  define SEC_TO_US(sec) ((sec)*1000000)
-#  define NS_TO_US(ns)    ((ns)/1000)
+#  define SEC_مقصد_US(sec) ((sec)*1000000)
+#  define NS_مقصد_US(ns)    ((ns)/1000)
 
-static uint64_t initial_ts = -1;
+ساکن uint64_t initial_ts = -1;
 
 uint64_t m3_GetTimestamp ()
 {
-    if (initial_ts == -1) {
+    اگر (initial_ts == -1) {
         initial_ts = 0;
         initial_ts = m3_GetTimestamp();
     }
-    struct timespec ts;
+    ساخت timespec ts;
     timespec_get(&ts, TIME_UTC);
-    uint64_t us = SEC_TO_US((uint64_t)ts.tv_sec) + NS_TO_US((uint64_t)ts.tv_nsec);
-    return us - initial_ts;
+    uint64_t us = SEC_مقصد_US((uint64_t)ts.tv_sec) + NS_مقصد_US((uint64_t)ts.tv_nsec);
+    واپس us - initial_ts;
 }
 
-#endif
+#اگر_ختم
 
-#if d_m3FixedHeap
+#اگر d_m3_Fixed_ڈھیر
 
-static u8        fixedHeap[d_m3FixedHeap];
-static u8*       fixedHeapPtr  = fixedHeap;
-static u8* const fixedHeapEnd  = fixedHeap + d_m3FixedHeap;
-static u8*       fixedHeapLast = NULL;
+ساکن u8        fixed_ڈھیر[d_m3_Fixed_ڈھیر];
+ساکن u8*       fixed_ڈھیر_Ptr  = fixed_ڈھیر;
+ساکن u8* ثابت fixed_ڈھیر_انتہا  = fixed_ڈھیر + d_m3_Fixed_ڈھیر;
+ساکن u8*       fixed_ڈھیر_آخری = تہی;
 
-#  if d_m3FixedHeapAlign > 1
-#    define HEAP_ALIGN_PTR(P) P = (u8*)(((size_t)(P)+(d_m3FixedHeapAlign-1)) & ~ (d_m3FixedHeapAlign-1));
-#  else
-#    define HEAP_ALIGN_PTR(P)
+#  اگر d_m3_Fixed_ڈھیر_Align > 1
+#    define ڈھیر_ALIGN_PTR(P) P = (u8*)(((size_t)(P)+(d_m3_Fixed_ڈھیر_Align-1)) & ~ (d_m3_Fixed_ڈھیر_Align-1));
+#  ورنہ
+#    define ڈھیر_ALIGN_PTR(P)
 #  endif
 
-void* m3_Malloc_Impl (size_t i_size)
+خالی* m3_Malloc_Impl (size_t i_سائز)
 {
-    u8* ptr = fixedHeapPtr;
+    u8* ptr = fixed_ڈھیر_Ptr;
 
-    fixedHeapPtr += i_size;
-    HEAP_ALIGN_PTR(fixedHeapPtr);
+    fixed_ڈھیر_Ptr += i_سائز;
+    ڈھیر_ALIGN_PTR(fixed_ڈھیر_Ptr);
 
-    if (fixedHeapPtr >= fixedHeapEnd) {
-        return NULL;
+    اگر (fixed_ڈھیر_Ptr >= fixed_ڈھیر_انتہا) {
+        واپس تہی;
     }
 
-    memset(ptr, 0x0, i_size);
-    fixedHeapLast = ptr;
+    memset(ptr, 0x0, i_سائز);
+    fixed_ڈھیر_آخری = ptr;
 
-    return ptr;
+    واپس ptr;
 }
 
-void m3_Free_Impl (void* i_ptr)
+خالی m3_Free_Impl (خالی* i_ptr)
 {
     // Handle the last chunk
-    if (i_ptr && i_ptr == fixedHeapLast) {
-        fixedHeapPtr  = fixedHeapLast;
-        fixedHeapLast = NULL;
-    } else {
+    اگر (i_ptr && i_ptr == fixed_ڈھیر_آخری) {
+        fixed_ڈھیر_Ptr  = fixed_ڈھیر_آخری;
+        fixed_ڈھیر_آخری = تہی;
+    } ورنہ {
         //printf("== free %p [failed]\n", io_ptr);
     }
 }
 
-void* m3_Realloc_Impl (void* i_ptr, size_t i_newSize, size_t i_oldSize)
+خالی* m3_Realloc_Impl (خالی* i_ptr, size_t i_new_سائز, size_t i_old_سائز)
 {
-    if (M3_UNLIKELY(i_newSize == i_oldSize)) {
-        return i_ptr;
+    اگر (M3_UNLIKELY(i_new_سائز == i_old_سائز)) {
+        واپس i_ptr;
     }
 
-    void* newPtr;
+    خالی* newPtr;
 
     // Handle the last chunk
-    if (i_ptr && i_ptr == fixedHeapLast) {
-        fixedHeapPtr = fixedHeapLast + i_newSize;
-        HEAP_ALIGN_PTR(fixedHeapPtr);
-        if (fixedHeapPtr >= fixedHeapEnd) {
-            return NULL;
+    اگر (i_ptr && i_ptr == fixed_ڈھیر_آخری) {
+        fixed_ڈھیر_Ptr = fixed_ڈھیر_آخری + i_new_سائز;
+        ڈھیر_ALIGN_PTR(fixed_ڈھیر_Ptr);
+        اگر (fixed_ڈھیر_Ptr >= fixed_ڈھیر_انتہا) {
+            واپس تہی;
         }
         newPtr = i_ptr;
-    } else {
-        newPtr = m3_Malloc_Impl(i_newSize);
-        if (!newPtr) {
-            return NULL;
+    } ورنہ {
+        newPtr = m3_Malloc_Impl(i_new_سائز);
+        اگر (!newPtr) {
+            واپس تہی;
         }
-        if (i_ptr) {
-            memcpy(newPtr, i_ptr, i_oldSize);
+        اگر (i_ptr) {
+            حافظہ_نقل(newPtr, i_ptr, i_old_سائز);
         }
     }
 
-    if (i_newSize > i_oldSize) {
-        memset((u8*)newPtr + i_oldSize, 0x0, i_newSize - i_oldSize);
+    اگر (i_new_سائز > i_old_سائز) {
+        memset((u8*)newPtr + i_old_سائز, 0x0, i_new_سائز - i_old_سائز);
     }
 
-    return newPtr;
+    واپس newPtr;
 }
 
-#else
+#ورنہ
 
-void* m3_Malloc_Impl (size_t i_size)
+خالی* m3_Malloc_Impl (size_t i_سائز)
 {
-    return calloc(i_size, 1);
+    واپس صفر_حافظہ_دو(i_سائز, 1);
 }
 
-void m3_Free_Impl (void* io_ptr)
+خالی m3_Free_Impl (خالی* io_ptr)
 {
-    free(io_ptr);
+    آزاد(io_ptr);
 }
 
-void* m3_Realloc_Impl (void* i_ptr, size_t i_newSize, size_t i_oldSize)
+خالی* m3_Realloc_Impl (خالی* i_ptr, size_t i_new_سائز, size_t i_old_سائز)
 {
-    if (M3_UNLIKELY(i_newSize == i_oldSize)) {
-        return i_ptr;
+    اگر (M3_UNLIKELY(i_new_سائز == i_old_سائز)) {
+        واپس i_ptr;
     }
 
-    void* newPtr = realloc(i_ptr, i_newSize);
+    خالی* newPtr = realloc(i_ptr, i_new_سائز);
 
-    if (M3_LIKELY(newPtr)) {
-        if (i_newSize > i_oldSize) {
-            memset((u8*)newPtr + i_oldSize, 0x0, i_newSize - i_oldSize);
+    اگر (M3_LIKELY(newPtr)) {
+        اگر (i_new_سائز > i_old_سائز) {
+            memset((u8*)newPtr + i_old_سائز, 0x0, i_new_سائز - i_old_سائز);
         }
-        return newPtr;
+        واپس newPtr;
     }
-    return NULL;
+    واپس تہی;
 }
 
-#endif
+#اگر_ختم
 
-void* m3_CopyMem (const void* i_from, size_t i_size)
+خالی* m3_CopyMem (ثابت خالی* i_from, size_t i_سائز)
 {
-    void* ptr = m3_Malloc("CopyMem", i_size);
-    if (ptr) {
-        memcpy(ptr, i_from, i_size);
+    خالی* ptr = m3_Malloc("CopyMem", i_سائز);
+    اگر (ptr) {
+        حافظہ_نقل(ptr, i_from, i_سائز);
     }
-    return ptr;
+    واپس ptr;
 }
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3GuardedMemory
+#اگر d_m3_Guarded_حافظہ
 
 // One reservation, cut into equal slots, because a fault has to be recognized by its
 // address alone: a signal handler cannot walk a list of scattered reservations, but
@@ -191,117 +191,117 @@ void* m3_CopyMem (const void* i_from, size_t i_size)
 // The arena costs address space and nothing else - every page of it starts out
 // uncommitted - which is why it is reserved whole on first use rather than grown.
 // A system unwilling to hand over that much is met by halving the ask until it is.
-static u8*    g_guardArena;
-static size_t g_guardArenaBytes;
-static size_t g_guardSlotBytes;
-static size_t g_guardPageSize;
-static u32    g_guardSlotCount;
-static bool   g_guardSlotTaken[d_m3GuardedArenaSlots];
+ساکن u8*    g_guardArena;
+ساکن size_t g_guard_Arena_بائٹیں;
+ساکن size_t g_guard_خانہ_بائٹیں;
+ساکن size_t g_guard_صفحہ_سائز;
+ساکن u32    g_guard_خانہ_گنتی;
+ساکن bool   g_guard_خانہ_لیا_گیا[d_m3GuardedArenaSlots];
 
 // slot: [ header page ][ data: d_m3GuardedDataBytes ][ a page of slack ]
 //
 // The slack is what makes the last address an access can name still land inside the
 // arena, so the handler recognizes it rather than letting it through as somebody
 // else's fault.
-static
-bool Guard_Reserve (void)
+ساکن
+bool Guard_Reserve (خالی)
 {
-    if (g_guardArena) {
-        return true;
+    اگر (g_guardArena) {
+        واپس true;
     }
 
-    size_t pageSize = m3_HostPageSize();
+    size_t صفحہ_سائز = m3_Host_صفحہ_سائز();
 
     // d_m3GuardedDataBytes is 8GiB, which only fits in a size_t on the 64-bit
     // systems this feature is limited to - see d_m3GuardedMemory
-    size_t slotBytes = 2 * pageSize + (size_t)d_m3GuardedDataBytes;
+    size_t خانہ_بائٹیں = 2 * صفحہ_سائز + (size_t)d_m3_Guarded_ڈیٹا_بائٹیں;
 
-    for (u32 slots = d_m3GuardedArenaSlots; slots >= 1; slots /= 2) {
-        void* base = m3_HostReserve(slotBytes * slots);
+    برائے (u32 slots = d_m3GuardedArenaSlots; slots >= 1; slots /= 2) {
+        خالی* بنیاد = m3_HostReserve(خانہ_بائٹیں * slots);
 
-        if (base) {
-            g_guardArena      = (u8*)base;
-            g_guardArenaBytes = slotBytes * slots;
-            g_guardSlotBytes  = slotBytes;
-            g_guardPageSize   = pageSize;
-            g_guardSlotCount  = slots;
-            return true;
+        اگر (بنیاد) {
+            g_guardArena      = (u8*)بنیاد;
+            g_guard_Arena_بائٹیں = خانہ_بائٹیں * slots;
+            g_guard_خانہ_بائٹیں  = خانہ_بائٹیں;
+            g_guard_صفحہ_سائز   = صفحہ_سائز;
+            g_guard_خانہ_گنتی  = slots;
+            واپس true;
         }
     }
 
-    return false;
+    واپس false;
 }
 
-void* Guard_TakeSlot (void)
+خالی* Guard_Take_خانہ (خالی)
 {
-    if (not Guard_Reserve()) {
-        return NULL;
+    اگر (not Guard_Reserve()) {
+        واپس تہی;
     }
 
-    for (u32 i = 0; i < g_guardSlotCount; ++i) {
-        if (g_guardSlotTaken[i]) {
-            continue;
+    برائے (u32 i = 0; i < g_guard_خانہ_گنتی; ++i) {
+        اگر (g_guard_خانہ_لیا_گیا[i]) {
+            جاری;
         }
 
-        u8* slot = g_guardArena + (size_t)i * g_guardSlotBytes;
+        u8* خانہ = g_guardArena + (size_t)i * g_guard_خانہ_بائٹیں;
 
         // the header has to be reachable before anything writes it; the data pages
         // wait for Guard_CommitSlot
-        if (not m3_HostCommit(slot, g_guardPageSize)) {
-            return NULL;
+        اگر (not m3_HostCommit(خانہ, g_guard_صفحہ_سائز)) {
+            واپس تہی;
         }
 
-        g_guardSlotTaken[i] = true;
-        return slot;
+        g_guard_خانہ_لیا_گیا[i] = true;
+        واپس خانہ;
     }
 
-    return NULL;
+    واپس تہی;
 }
 
-M3MemoryHeader* Guard_SlotHeader (void* i_slot)
+M3_حافظہ_سرخی* Guard_خانہ_سرخی (خالی* i_خانہ)
 {
     // the guest's bytes begin on the second page, and the header is what sits
     // immediately before them - see M3MemoryHeader
-    u8* data = (u8*)i_slot + g_guardPageSize;
+    u8* ڈیٹا = (u8*)i_خانہ + g_guard_صفحہ_سائز;
 
-    return (M3MemoryHeader*)(data - sizeof(M3MemoryHeader));
+    واپس (M3_حافظہ_سرخی*)(ڈیٹا - حجم(M3_حافظہ_سرخی));
 }
 
-bool Guard_CommitSlot (void* i_slot, size_t i_dataBytes)
+bool Guard_Commit_خانہ (خالی* i_خانہ, size_t i_ڈیٹا_بائٹیں)
 {
-    size_t rounded = (i_dataBytes + g_guardPageSize - 1) / g_guardPageSize * g_guardPageSize;
+    size_t rounded = (i_ڈیٹا_بائٹیں + g_guard_صفحہ_سائز - 1) / g_guard_صفحہ_سائز * g_guard_صفحہ_سائز;
 
-    return m3_HostCommit((u8*)i_slot + g_guardPageSize, rounded);
+    واپس m3_HostCommit((u8*)i_خانہ + g_guard_صفحہ_سائز, rounded);
 }
 
-void Guard_GiveSlot (void* i_slot)
+خالی Guard_Give_خانہ (خالی* i_خانہ)
 {
-    if (i_slot == NULL) {
-        return;
+    اگر (i_خانہ == تہی) {
+        واپس;
     }
 
-    size_t index = (size_t)((u8*)i_slot - g_guardArena) / g_guardSlotBytes;
+    size_t index = (size_t)((u8*)i_خانہ - g_guardArena) / g_guard_خانہ_بائٹیں;
 
     // Everything committed in the slot goes, which is what makes the next memory to
     // land here read as zero. A slot that would not give its pages back stays taken:
     // handing it on still holding the last module's bytes is worse than never
     // handing it on at all.
-    if (m3_HostDecommit(i_slot, g_guardSlotBytes) and index < g_guardSlotCount) {
-        g_guardSlotTaken[index] = false;
+    اگر (m3_HostDecommit(i_خانہ, g_guard_خانہ_بائٹیں) and index < g_guard_خانہ_گنتی) {
+        g_guard_خانہ_لیا_گیا[index] = false;
     }
 }
 
-void Guard_ArenaRange (void** o_low, size_t* o_bytes)
+خالی Guard_ArenaRange (خالی** o_کم, size_t* o_بائٹیں)
 {
-    *o_low   = g_guardArena;
-    *o_bytes = g_guardArenaBytes;
+    *o_کم   = g_guardArena;
+    *o_بائٹیں = g_guard_Arena_بائٹیں;
 }
 
-#endif // d_m3GuardedMemory
+#اگر_ختم // d_m3GuardedMemory
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3MaxNativeStack > 0
+#اگر d_m3_Max_Native_ڈھیر > 0
 
 // Where Wasm execution has to stop to keep the native stack intact, given the stack
 // pointer a top-level call came in on. d_m3MaxNativeStack is the budget asked for;
@@ -313,722 +313,722 @@ void Guard_ArenaRange (void** o_low, size_t* o_bytes)
 // below the mark is d_m3NativeStackMargin, or a quarter of the stack when the stack
 // is too small to spare that much - the point is to leave the trap path somewhere to
 // run, and on a small stack a fixed 64KiB would be most of it.
-void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget)
+خالی* m3_Native_ڈھیر_حد_بندی (خالی* i_ڈھیر_Ptr, size_t i_budget)
 {
-    u8* sp = (u8*)i_stackPtr;
+    u8* sp = (u8*)i_ڈھیر_Ptr;
 
-#  if M3_HAS_THREAD_LOCAL
-    static M3_THREAD_LOCAL u8* base = NULL;
-    if (base == NULL) {
-        base = (u8*)m3_HostStackBase();
+#  اگر M3_HAS_THREAD_LOCAL
+    ساکن M3_THREAD_LOCAL u8* بنیاد = تہی;
+    اگر (بنیاد == تہی) {
+        بنیاد = (u8*)m3_Host_ڈھیر_بنیاد();
     }
-#  else
-    u8* base = (u8*)m3_HostStackBase();
+#  ورنہ
+    u8* بنیاد = (u8*)m3_Host_ڈھیر_بنیاد();
 #  endif
 
     // A base at or above the stack pointer is not this thread's stack: an
     // unrecognized answer, not a stack with nothing left in it
-    if (base and base < sp) {
-        size_t available = (size_t)(sp - base);
-        size_t margin    = M3_MIN((size_t)(d_m3NativeStackMargin), available / 4);
+    اگر (بنیاد and بنیاد < sp) {
+        size_t دستیاب = (size_t)(sp - بنیاد);
+        size_t margin    = M3_MIN((size_t)(d_m3_Native_ڈھیر_Margin), دستیاب / 4);
 
-        i_budget = M3_MIN(i_budget, available - margin);
+        i_budget = M3_MIN(i_budget, دستیاب - margin);
     }
 
-    return sp - i_budget;
+    واپس sp - i_budget;
 }
 
-#endif // d_m3MaxNativeStack > 0
+#اگر_ختم // d_m3MaxNativeStack > 0
 
 //--------------------------------------------------------------------------------------------
 
-#if d_m3LogNativeStack
+#اگر d_m3_Log_Native_ڈھیر
 
-static size_t stack_start;
-static size_t stack_end;
+ساکن size_t ڈھیر_آغاز;
+ساکن size_t ڈھیر_انتہا;
 
-void m3StackCheckInit ()
+خالی m3_ڈھیر_Check_Init ()
 {
-    char stack;
-    stack_end = stack_start = (size_t)&stack;
+    حرف ڈھیر;
+    ڈھیر_انتہا = ڈھیر_آغاز = (size_t)&ڈھیر;
 }
 
-void m3StackCheck ()
+خالی m3_ڈھیر_Check ()
 {
-    char   stack;
-    size_t addr = (size_t)&stack;
+    حرف   ڈھیر;
+    size_t addr = (size_t)&ڈھیر;
 
-    size_t stackEnd = stack_end;
+    size_t ڈھیر_انتہا_2 = ڈھیر_انتہا;
 
-    stack_end = M3_MIN(stack_end, addr);
+    ڈھیر_انتہا = M3_MIN(ڈھیر_انتہا, addr);
 
     //    if (stackEnd != stack_end)
     //        printf ("maxStack: %ld\n", m3StackGetMax ());
 }
 
-int m3StackGetMax ()
+صحیح m3_ڈھیر_Get_Max ()
 {
-    return stack_start - stack_end;
+    واپس ڈھیر_آغاز - ڈھیر_انتہا;
 }
 
-#endif
+#اگر_ختم
 
 //--------------------------------------------------------------------------------------------
 
 // Value types arrive as signed 7-bit LEBs, so the encoding negates: 0x7f (i32)
 // reads as -1, 0x7b (v128) as -5, 0x70 (funcref) as -16, 0x6f (externref) as -17.
-M3Result NormalizeType (u8* o_type, i8 i_convolutedWasmType)
+M3_نتیجہ NormalizeType (u8* o_type, i8 i_convolutedWasmType)
 {
-    M3Result result = m3Err_none;
+    M3_نتیجہ نتیجہ = m3Err_none;
 
     u8 type = -i_convolutedWasmType;
 
-    if (type == 0x40) {
+    اگر (type == 0x40) {
         type = c_m3Type_none;
     }
     // always recognised: funcref names the element type of an MVP table even
     // when the reference types proposal is compiled out
-    else if (type == d_waType_funcref) {
+    ورنہ اگر (type == d_waType_funcref) {
         type = c_m3Type_funcref;
-    } else if (type == d_waType_externref) {
+    } ورنہ اگر (type == d_waType_externref) {
         type = c_m3Type_externref;
     }
-#if d_m3HasExceptionHandling
-    else if (type == d_waType_exnref) {
+#اگر d_m3HasExceptionHandling
+    ورنہ اگر (type == d_waType_exnref) {
         type = c_m3Type_exnref;
     }
-#endif
-#if d_m3HasStackSwitching
-    else if (type == d_waType_heap_cont or type == d_waType_heap_nocont) {
+#اگر_ختم
+#اگر d_m3_Has_ڈھیر_Switching
+    ورنہ اگر (type == d_wa_Type_ڈھیر_cont or type == d_wa_Type_ڈھیر_nocont) {
         type = c_m3Type_contref;
     }
-#endif
+#اگر_ختم
     // Accept v128 (wasm-encoded as 0x7b → -i_convolutedWasmType == 5)
     // as an opaque slot so modules with v128 in signatures or local
     // declarations parse. Actual v128 opcodes still hit
     // m3Err_unknownOpcode at compile time - we just stop refusing
     // unused SIMD slots that auto-vectorization emits.
-    else if (type < c_m3Type_i32 or type > c_m3Type_v128) {
-        result = m3Err_invalidTypeId;
+    ورنہ اگر (type < c_m3Type_i32 or type > c_m3Type_v128) {
+        نتیجہ = m3Err_invalidTypeId;
     }
 
     *o_type = type;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-#if d_m3HasTypedRefs
+#اگر d_m3HasTypedRefs
 
-u8 BaseTypeOf (m3type_t i_type)
+u8 بنیاد_Type_کا (m3type_t i_type)
 {
-    if (IsSpelledRefType(i_type)) {
-        if (i_type & d_m3Type_refCont) {
-            return c_m3Type_contref;
+    اگر (IsSpelledRefType(i_type)) {
+        اگر (i_type & d_m3Type_refCont) {
+            واپس c_m3Type_contref;
         }
-        return (i_type & d_m3Type_refExtern) ? c_m3Type_externref : c_m3Type_funcref;
+        واپس (i_type & d_m3Type_refExtern) ? c_m3Type_externref : c_m3Type_funcref;
     }
 
-    return (u8)i_type;
+    واپس (u8)i_type;
 }
 
 
-bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super)
+bool Is_Sub_Type_کا (m3type_t i_sub, m3type_t i_super)
 {
-    if (i_sub == i_super) {
-        return true;
+    اگر (i_sub == i_super) {
+        واپس true;
     }
 
-    u8 base = BaseTypeOf(i_sub);
+    u8 بنیاد = بنیاد_Type_کا(i_sub);
 
     // only references have a subtype relation; every other type is invariant
-    if (base != BaseTypeOf(i_super) or not IsRefType(base)) {
-        return false;
+    اگر (بنیاد != بنیاد_Type_کا(i_super) or not IsRefType(بنیاد)) {
+        واپس false;
     }
 
     // (ref ht) <: (ref null ht), never the other way around
-    if (IsNullableRef(i_sub) and not IsNullableRef(i_super)) {
-        return false;
+    اگر (IsNullableRef(i_sub) and not IsNullableRef(i_super)) {
+        واپس false;
     }
 
-#  if d_m3HasStackSwitching
+#  اگر d_m3_Has_ڈھیر_Switching
     // nocont sits under every continuation type
-    if (HeapTypeOf(i_sub) == d_m3Type_heapNone) {
-        return true;
+    اگر (ڈھیر_Type_کا(i_sub) == d_m3_Type_ڈھیر_None) {
+        واپس true;
     }
 #  endif
 
     // $t <: func, and function types are invariant among themselves, so a
     // concrete heap type matches only itself or the abstract one. Indices are
     // canonical, so structurally equal types compare equal here.
-    return (HeapTypeOf(i_super) == d_m3Type_heapAbstract) or
-           (HeapTypeOf(i_sub) == HeapTypeOf(i_super));
+    واپس (ڈھیر_Type_کا(i_super) == d_m3_Type_ڈھیر_Abstract) or
+           (ڈھیر_Type_کا(i_sub) == ڈھیر_Type_کا(i_super));
 }
 
-#endif // d_m3HasTypedRefs
+#اگر_ختم // d_m3HasTypedRefs
 
 
 bool IsFpType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
-    return (i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_f64);
+    u8 i_m3Type = بنیاد_Type_کا(i_type);
+    واپس (i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_f64);
 }
 
 
 bool IsRefType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
-    return (i_m3Type == c_m3Type_funcref or i_m3Type == c_m3Type_externref
-#if d_m3HasExceptionHandling
+    u8 i_m3Type = بنیاد_Type_کا(i_type);
+    واپس (i_m3Type == c_m3Type_funcref or i_m3Type == c_m3Type_externref
+#اگر d_m3HasExceptionHandling
             or i_m3Type == c_m3Type_exnref
-#endif
-#if d_m3HasStackSwitching
+#اگر_ختم
+#اگر d_m3_Has_ڈھیر_Switching
             or i_m3Type == c_m3Type_contref
-#endif
+#اگر_ختم
     );
 }
 
 
 bool IsIntType (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
-    return (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_i64);
+    u8 i_m3Type = بنیاد_Type_کا(i_type);
+    واپس (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_i64);
 }
 
 
-bool Is64BitType (m3type_t i_type)
+bool Is64_ثنائی_ہندسہ_Type (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
+    u8 i_m3Type = بنیاد_Type_کا(i_type);
 
-    if (i_m3Type == c_m3Type_i64 or i_m3Type == c_m3Type_f64) {
-        return true;
-    } else if (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_none) {
-        return false;
-    } else {
-        return (sizeof(voidptr_t) == 8); // all other cases are pointers
+    اگر (i_m3Type == c_m3Type_i64 or i_m3Type == c_m3Type_f64) {
+        واپس true;
+    } ورنہ اگر (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32 or i_m3Type == c_m3Type_none) {
+        واپس false;
+    } ورنہ {
+        واپس (حجم(voidptr_t) == 8); // all other cases are pointers
     }
 }
 
-u32 SizeOfType (m3type_t i_type)
+u32 سائز_کا_Type (m3type_t i_type)
 {
-    u8 i_m3Type = BaseTypeOf(i_type);
+    u8 i_m3Type = بنیاد_Type_کا(i_type);
 
-    if (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32) {
-        return sizeof(i32);
+    اگر (i_m3Type == c_m3Type_i32 or i_m3Type == c_m3Type_f32) {
+        واپس حجم(i32);
     }
 
-    if (IsRefType(i_m3Type)) {
-        return sizeof(void*);
+    اگر (IsRefType(i_m3Type)) {
+        واپس حجم(خالی*);
     }
 
-    return sizeof(i64);
+    واپس حجم(i64);
 }
 
 
 //-- Binary Wasm parsing utils  ------------------------------------------------------------------------------------------
 
 
-M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_u64 (u64* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(u64);
+    ثابت u8* ptr = *io_بائٹیں;
+    ptr += حجم(u64);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(u64));
-        M3_BSWAP_u64(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    اگر (M3_LIKELY(ptr <= i_انتہا)) {
+        حافظہ_نقل(o_قدر, *io_بائٹیں, حجم(u64));
+        M3_BSWAP_u64(*o_قدر);
+        *io_بائٹیں = ptr;
+        واپس m3Err_none;
+    } ورنہ {
+        واپس m3Err_wasmUnderrun;
     }
 }
 
 
-M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_u32 (u32* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(u32);
+    ثابت u8* ptr = *io_بائٹیں;
+    ptr += حجم(u32);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(u32));
-        M3_BSWAP_u32(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    اگر (M3_LIKELY(ptr <= i_انتہا)) {
+        حافظہ_نقل(o_قدر, *io_بائٹیں, حجم(u32));
+        M3_BSWAP_u32(*o_قدر);
+        *io_بائٹیں = ptr;
+        واپس m3Err_none;
+    } ورنہ {
+        واپس m3Err_wasmUnderrun;
     }
 }
 
-#if d_m3ImplementFloat
+#اگر d_m3ImplementFloat
 
-M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_f64 (f64* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(f64);
+    ثابت u8* ptr = *io_بائٹیں;
+    ptr += حجم(f64);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(f64));
-        M3_BSWAP_f64(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    اگر (M3_LIKELY(ptr <= i_انتہا)) {
+        حافظہ_نقل(o_قدر, *io_بائٹیں, حجم(f64));
+        M3_BSWAP_f64(*o_قدر);
+        *io_بائٹیں = ptr;
+        واپس m3Err_none;
+    } ورنہ {
+        واپس m3Err_wasmUnderrun;
     }
 }
 
 
-M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_f32 (f32* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    const u8* ptr = *io_bytes;
-    ptr += sizeof(f32);
+    ثابت u8* ptr = *io_بائٹیں;
+    ptr += حجم(f32);
 
-    if (M3_LIKELY(ptr <= i_end)) {
-        memcpy(o_value, *io_bytes, sizeof(f32));
-        M3_BSWAP_f32(*o_value);
-        *io_bytes = ptr;
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+    اگر (M3_LIKELY(ptr <= i_انتہا)) {
+        حافظہ_نقل(o_قدر, *io_بائٹیں, حجم(f32));
+        M3_BSWAP_f32(*o_قدر);
+        *io_بائٹیں = ptr;
+        واپس m3Err_none;
+    } ورنہ {
+        واپس m3Err_wasmUnderrun;
     }
 }
 
-#endif
+#اگر_ختم
 
-M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_u8 (u8* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    const u8* ptr = *io_bytes;
+    ثابت u8* ptr = *io_بائٹیں;
 
-    if (M3_LIKELY(ptr < i_end)) {
-        *o_value  = *ptr;
-        *io_bytes = ptr + 1;
+    اگر (M3_LIKELY(ptr < i_انتہا)) {
+        *o_قدر  = *ptr;
+        *io_بائٹیں = ptr + 1;
 
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+        واپس m3Err_none;
+    } ورنہ {
+        واپس m3Err_wasmUnderrun;
     }
 }
 
-M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_opcode (m3opcode_t* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    const u8* ptr = *io_bytes;
+    ثابت u8* ptr = *io_بائٹیں;
 
-    if (M3_LIKELY(ptr < i_end)) {
+    اگر (M3_LIKELY(ptr < i_انتہا)) {
         // 0xFC is returned as the bare prefix: its sub-opcode is a LEB128 u32, which
         // only the callers - Compile_ExtendedOpcode and the validator - can read.
         m3opcode_t opcode = *ptr++;
 
-        *o_value  = opcode;
-        *io_bytes = ptr;
+        *o_قدر  = opcode;
+        *io_بائٹیں = ptr;
 
-        return m3Err_none;
-    } else {
-        return m3Err_wasmUnderrun;
+        واپس m3Err_none;
+    } ورنہ {
+        واپس m3Err_wasmUnderrun;
     }
 }
 
 
-M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLebUnsigned (u64* o_قدر, u32 i_max_عدد_بٹ, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    M3Result result = m3Err_wasmUnderrun;
+    M3_نتیجہ نتیجہ = m3Err_wasmUnderrun;
 
-    u64 value = 0;
+    u64 قدر = 0;
 
     u32       shift = 0;
-    const u8* ptr   = *io_bytes;
+    ثابت u8* ptr   = *io_بائٹیں;
 
-    while (ptr < i_end) {
+    جب (ptr < i_انتہا) {
         u64 byte = *(ptr++);
 
-        value |= ((byte & 0x7f) << shift);
+        قدر |= ((byte & 0x7f) << shift);
         shift += 7;
 
-        if (M3_LIKELY((byte & 0x80) == 0)) {
-            result = m3Err_none;
+        اگر (M3_LIKELY((byte & 0x80) == 0)) {
+            نتیجہ = m3Err_none;
 
             // The last byte must not carry bits past i_maxNumBits
-            if (M3_UNLIKELY(shift > i_maxNumBits)) {
-                u32 numUsedBits = i_maxNumBits + 7 - shift;
+            اگر (M3_UNLIKELY(shift > i_max_عدد_بٹ)) {
+                u32 عدد_مستعمل_بٹ = i_max_عدد_بٹ + 7 - shift;
 
-                if (byte >> numUsedBits) {
-                    result = m3Err_lebOverflow;
+                اگر (byte >> عدد_مستعمل_بٹ) {
+                    نتیجہ = m3_Err_leb_حد_سے_تجاوز;
                 }
             }
-            break;
+            توڑو;
         }
 
-        if (M3_UNLIKELY(shift >= i_maxNumBits)) {
-            result = m3Err_lebOverflow;
-            break;
+        اگر (M3_UNLIKELY(shift >= i_max_عدد_بٹ)) {
+            نتیجہ = m3_Err_leb_حد_سے_تجاوز;
+            توڑو;
         }
     }
 
-    *o_value  = value;
-    *io_bytes = ptr;
+    *o_قدر  = قدر;
+    *io_بائٹیں = ptr;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLebSigned (i64* o_قدر, u32 i_max_عدد_بٹ, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    M3Result result = m3Err_wasmUnderrun;
+    M3_نتیجہ نتیجہ = m3Err_wasmUnderrun;
 
-    i64 value = 0;
+    i64 قدر = 0;
 
     u32       shift = 0;
-    const u8* ptr   = *io_bytes;
+    ثابت u8* ptr   = *io_بائٹیں;
 
-    while (ptr < i_end) {
+    جب (ptr < i_انتہا) {
         u64 byte = *(ptr++);
 
-        value |= ((byte & 0x7f) << shift);
+        قدر |= ((byte & 0x7f) << shift);
         shift += 7;
 
-        if (M3_LIKELY((byte & 0x80) == 0)) {
-            result = m3Err_none;
+        اگر (M3_LIKELY((byte & 0x80) == 0)) {
+            نتیجہ = m3Err_none;
 
             // The bits of the last byte past i_maxNumBits must all repeat the
             // sign bit, otherwise the value doesn't fit
-            if (M3_UNLIKELY(shift > i_maxNumBits)) {
-                u32 numUsedBits = i_maxNumBits + 7 - shift;
-                u8  signBits    = (u8)((0x7f << (numUsedBits - 1)) & 0x7f);
-                u8  bits        = (u8)(byte & signBits);
+            اگر (M3_UNLIKELY(shift > i_max_عدد_بٹ)) {
+                u32 عدد_مستعمل_بٹ = i_max_عدد_بٹ + 7 - shift;
+                u8  sign_بٹ    = (u8)((0x7f << (عدد_مستعمل_بٹ - 1)) & 0x7f);
+                u8  بٹ        = (u8)(byte & sign_بٹ);
 
-                if (bits != 0 and bits != signBits) {
-                    result = m3Err_lebOverflow;
+                اگر (بٹ != 0 and بٹ != sign_بٹ) {
+                    نتیجہ = m3_Err_leb_حد_سے_تجاوز;
                 }
             }
-            if ((byte & 0x40) and (shift < 64))    // do sign extension
+            اگر ((byte & 0x40) and (shift < 64))    // do sign extension
             {
                 u64 extend = 0;
-                value |= (~extend << shift);
+                قدر |= (~extend << shift);
             }
 
-            break;
+            توڑو;
         }
 
-        if (M3_UNLIKELY(shift >= i_maxNumBits)) {
-            result = m3Err_lebOverflow;
-            break;
+        اگر (M3_UNLIKELY(shift >= i_max_عدد_بٹ)) {
+            نتیجہ = m3_Err_leb_حد_سے_تجاوز;
+            توڑو;
         }
     }
 
-    *o_value  = value;
-    *io_bytes = ptr;
+    *o_قدر  = قدر;
+    *io_بائٹیں = ptr;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-M3Result ReadLEB_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLEB_u32 (u32* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    u64      value;
-    M3Result result = ReadLebUnsigned(&value, 32, io_bytes, i_end);
+    u64      قدر;
+    M3_نتیجہ نتیجہ = ReadLebUnsigned(&قدر, 32, io_بائٹیں, i_انتہا);
 
-    *o_value = (u32)value;
+    *o_قدر = (u32)قدر;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
 // Bit 6 of the alignment is the flag; it is a bit of the first LEB byte, so
 // testing the decoded value for it is the same test.
-#define d_memArgHasMemoryIdx    0x40u
+#تعریف_کرو d_mem_Arg_Has_حافظہ_Idx    0x40u
 
-M3Result ReadMemoryArg (u32* o_align, u32* o_memoryIdx, u64* o_offset, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_حافظہ_Arg (u32* o_align, u32* o_حافظہ_Idx, u64* o_انحراف, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    M3Result result;
+    M3_نتیجہ نتیجہ;
 
     u32 align;
-    result = ReadLEB_u32(&align, io_bytes, i_end);
-    if (result) {
-        return result;
+    نتیجہ = ReadLEB_u32(&align, io_بائٹیں, i_انتہا);
+    اگر (نتیجہ) {
+        واپس نتیجہ;
     }
 
-    *o_memoryIdx = 0;
+    *o_حافظہ_Idx = 0;
 
-#if d_m3HasMultiMemory
-    if (align & d_memArgHasMemoryIdx) {
-        align &= ~d_memArgHasMemoryIdx;
+#اگر d_m3_Has_Multi_حافظہ
+    اگر (align & d_mem_Arg_Has_حافظہ_Idx) {
+        align &= ~d_mem_Arg_Has_حافظہ_Idx;
 
-        result = ReadLEB_u32(o_memoryIdx, io_bytes, i_end);
-        if (result) {
-            return result;
+        نتیجہ = ReadLEB_u32(o_حافظہ_Idx, io_بائٹیں, i_انتہا);
+        اگر (نتیجہ) {
+            واپس نتیجہ;
         }
     }
-#endif
+#اگر_ختم
 
     *o_align = align;
 
     // memory64 widens the offset to a u64. Whether it is in range is a
     // question about the memory it addresses, so the caller checks it.
-    return ReadLebUnsigned(o_offset, 64, io_bytes, i_end);
+    واپس ReadLebUnsigned(o_انحراف, 64, io_بائٹیں, i_انتہا);
 }
 
 
-M3Result ReadLEB_u7 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLEB_u7 (u8* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    u64      value;
-    M3Result result = ReadLebUnsigned(&value, 7, io_bytes, i_end);
+    u64      قدر;
+    M3_نتیجہ نتیجہ = ReadLebUnsigned(&قدر, 7, io_بائٹیں, i_انتہا);
 
-    *o_value = (u8)value;
+    *o_قدر = (u8)قدر;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-M3Result ReadLEB_i7 (i8* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLEB_i7 (i8* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 7, io_bytes, i_end);
+    i64      قدر;
+    M3_نتیجہ نتیجہ = ReadLebSigned(&قدر, 7, io_بائٹیں, i_انتہا);
 
-    *o_value = (i8)value;
+    *o_قدر = (i8)قدر;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-M3Result ReadLEB_i32 (i32* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLEB_i32 (i32* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 32, io_bytes, i_end);
+    i64      قدر;
+    M3_نتیجہ نتیجہ = ReadLebSigned(&قدر, 32, io_بائٹیں, i_انتہا);
 
-    *o_value = (i32)value;
+    *o_قدر = (i32)قدر;
 
-    return result;
+    واپس نتیجہ;
 }
 
 
-M3Result ReadLEB_i64 (i64* o_value, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ ReadLEB_i64 (i64* o_قدر, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    i64      value;
-    M3Result result = ReadLebSigned(&value, 64, io_bytes, i_end);
+    i64      قدر;
+    M3_نتیجہ نتیجہ = ReadLebSigned(&قدر, 64, io_بائٹیں, i_انتہا);
 
-    *o_value = value;
+    *o_قدر = قدر;
 
-    return result;
+    واپس نتیجہ;
 }
 
-#if d_m3EnableValidation
+#اگر d_m3EnableValidation
 // Validate that a byte sequence is well-formed UTF-8 per the Unicode spec.
 // Returns true if valid, false otherwise.
-static
-bool IsValidUtf8 (const u8* i_data, u32 i_length)
+ساکن
+bool IsValidUtf8 (ثابت u8* i_ڈیٹا, u32 i_لمبائی)
 {
-    const u8* ptr = i_data;
-    const u8* end = i_data + i_length;
+    ثابت u8* ptr = i_ڈیٹا;
+    ثابت u8* انتہا = i_ڈیٹا + i_لمبائی;
 
-    while (ptr < end) {
+    جب (ptr < انتہا) {
         u8 b0 = *ptr++;
 
-        if (b0 < 0x80) {
+        اگر (b0 < 0x80) {
             // single-byte: 0xxxxxxx
-            continue;
-        } else if ((b0 & 0xE0) == 0xC0) {
+            جاری;
+        } ورنہ اگر ((b0 & 0xE0) == 0xC0) {
             // two-byte: 110xxxxx 10xxxxxx
-            if (b0 < 0xC2) {
-                return false;       // overlong
+            اگر (b0 < 0xC2) {
+                واپس false;       // overlong
             }
-            if (ptr >= end) {
-                return false;
+            اگر (ptr >= انتہا) {
+                واپس false;
             }
             u8 b1 = *ptr++;
-            if ((b1 & 0xC0) != 0x80) {
-                return false;
+            اگر ((b1 & 0xC0) != 0x80) {
+                واپس false;
             }
-        } else if ((b0 & 0xF0) == 0xE0) {
+        } ورنہ اگر ((b0 & 0xF0) == 0xE0) {
             // three-byte: 1110xxxx 10xxxxxx 10xxxxxx
-            if (ptr + 1 >= end) {
-                return false;
+            اگر (ptr + 1 >= انتہا) {
+                واپس false;
             }
             u8 b1 = *ptr++;
             u8 b2 = *ptr++;
-            if ((b1 & 0xC0) != 0x80) {
-                return false;
+            اگر ((b1 & 0xC0) != 0x80) {
+                واپس false;
             }
-            if ((b2 & 0xC0) != 0x80) {
-                return false;
+            اگر ((b2 & 0xC0) != 0x80) {
+                واپس false;
             }
             // reject overlong
-            if (b0 == 0xE0 && b1 < 0xA0) {
-                return false;
+            اگر (b0 == 0xE0 && b1 < 0xA0) {
+                واپس false;
             }
             // reject surrogates U+D800..U+DFFF
-            if (b0 == 0xED && b1 >= 0xA0) {
-                return false;
+            اگر (b0 == 0xED && b1 >= 0xA0) {
+                واپس false;
             }
-        } else if ((b0 & 0xF8) == 0xF0) {
+        } ورنہ اگر ((b0 & 0xF8) == 0xF0) {
             // four-byte: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            if (b0 > 0xF4) {
-                return false;       // above U+10FFFF
+            اگر (b0 > 0xF4) {
+                واپس false;       // above U+10FFFF
             }
-            if (ptr + 2 >= end) {
-                return false;
+            اگر (ptr + 2 >= انتہا) {
+                واپس false;
             }
             u8 b1 = *ptr++;
             u8 b2 = *ptr++;
             u8 b3 = *ptr++;
-            if ((b1 & 0xC0) != 0x80) {
-                return false;
+            اگر ((b1 & 0xC0) != 0x80) {
+                واپس false;
             }
-            if ((b2 & 0xC0) != 0x80) {
-                return false;
+            اگر ((b2 & 0xC0) != 0x80) {
+                واپس false;
             }
-            if ((b3 & 0xC0) != 0x80) {
-                return false;
+            اگر ((b3 & 0xC0) != 0x80) {
+                واپس false;
             }
             // reject overlong
-            if (b0 == 0xF0 && b1 < 0x90) {
-                return false;
+            اگر (b0 == 0xF0 && b1 < 0x90) {
+                واپس false;
             }
             // reject above U+10FFFF
-            if (b0 == 0xF4 && b1 > 0x8F) {
-                return false;
+            اگر (b0 == 0xF4 && b1 > 0x8F) {
+                واپس false;
             }
-        } else {
+        } ورنہ {
             // invalid leading byte (0x80..0xBF or 0xF5..0xFF)
-            return false;
+            واپس false;
         }
     }
 
-    return true;
+    واپس true;
 }
-#endif // d_m3EnableValidation
+#اگر_ختم // d_m3EnableValidation
 
 
-M3Result Read_utf8 (cstr_t* o_utf8, bytes_t* io_bytes, cbytes_t i_end)
+M3_نتیجہ Read_utf8 (cstr_t* o_utf8, بائٹیں_t* io_بائٹیں, cbytes_t i_انتہا)
 {
-    *o_utf8 = NULL;
+    *o_utf8 = تہی;
 
-    u32      utf8Length;
-    M3Result result = ReadLEB_u32(&utf8Length, io_bytes, i_end);
+    u32      utf8_لمبائی;
+    M3_نتیجہ نتیجہ = ReadLEB_u32(&utf8_لمبائی, io_بائٹیں, i_انتہا);
 
-    if (not result) {
-        if (utf8Length <= d_m3MaxSaneUtf8Length) {
-            const u8* ptr = *io_bytes;
-            if (utf8Length <= (size_t)(i_end - ptr)) {
-                const u8* end = ptr + utf8Length;
-#if d_m3EnableValidation
-                if (not IsValidUtf8(ptr, utf8Length)) {
-                    *io_bytes = end;
-                    return m3Err_wasmMalformed;
+    اگر (not نتیجہ) {
+        اگر (utf8_لمبائی <= d_m3_Max_Sane_Utf8_لمبائی) {
+            ثابت u8* ptr = *io_بائٹیں;
+            اگر (utf8_لمبائی <= (size_t)(i_انتہا - ptr)) {
+                ثابت u8* انتہا = ptr + utf8_لمبائی;
+#اگر d_m3EnableValidation
+                اگر (not IsValidUtf8(ptr, utf8_لمبائی)) {
+                    *io_بائٹیں = انتہا;
+                    واپس m3Err_wasmMalformed;
                 }
-#endif // d_m3EnableValidation
+#اگر_ختم // d_m3EnableValidation
 
-                char* utf8 = (char*)m3_Malloc("UTF8", utf8Length + 1);
+                حرف* utf8 = (حرف*)m3_Malloc("UTF8", utf8_لمبائی + 1);
 
-                if (utf8) {
-                    memcpy(utf8, ptr, utf8Length);
-                    utf8[utf8Length] = 0;
+                اگر (utf8) {
+                    حافظہ_نقل(utf8, ptr, utf8_لمبائی);
+                    utf8[utf8_لمبائی] = 0;
 
                     *o_utf8 = utf8;
-                } else {
-                    result = m3Err_mallocFailed;   // callers dereference the name; don't hand back NULL as success
+                } ورنہ {
+                    نتیجہ = m3Err_mallocFailed;   // callers dereference the name; don't hand back NULL as success
                 }
 
-                *io_bytes = end;
-            } else {
-                result = m3Err_wasmUnderrun;
+                *io_بائٹیں = انتہا;
+            } ورنہ {
+                نتیجہ = m3Err_wasmUnderrun;
             }
-        } else {
-            result = m3Err_missingUTF8;
+        } ورنہ {
+            نتیجہ = m3Err_missingUTF8;
         }
     }
 
-    return result;
+    واپس نتیجہ;
 }
 
-#if d_m3RecordBacktraces
-u32 FindModuleOffset (IM3Runtime i_runtime, pc_t i_pc)
+#اگر d_m3_ریکارڈ_Backtraces
+u32 ڈھونڈو_Module_انحراف (IM3Runtime i_runtime, pc_t i_pc)
 {
     // walk the code pages
-    IM3CodePage curr = i_runtime->pagesOpen;
+    IM3_رمز_صفحہ curr = i_runtime->صفحات_Open;
 
-    bool pageFound = false;
+    bool صفحہ_ملا = false;
 
-    while (curr) {
-        if (ContainsPC(curr, i_pc)) {
-            pageFound = true;
-            break;
+    جب (curr) {
+        اگر (شامل_ہے_PC(curr, i_pc)) {
+            صفحہ_ملا = true;
+            توڑو;
         }
-        curr = curr->info.next;
+        curr = curr->info.اگلا;
     }
 
-    if (!pageFound) {
-        curr = i_runtime->pagesFull;
-        while (curr) {
-            if (ContainsPC(curr, i_pc)) {
-                pageFound = true;
-                break;
+    اگر (!صفحہ_ملا) {
+        curr = i_runtime->صفحات_بھرا;
+        جب (curr) {
+            اگر (شامل_ہے_PC(curr, i_pc)) {
+                صفحہ_ملا = true;
+                توڑو;
             }
-            curr = curr->info.next;
+            curr = curr->info.اگلا;
         }
     }
 
-    if (pageFound) {
-        u32 result = 0;
+    اگر (صفحہ_ملا) {
+        u32 نتیجہ = 0;
 
-        bool pcFound = MapPCToOffset(curr, i_pc, &result);
-        (void)pcFound;                                                          d_m3Assert (pcFound);
+        bool pc_ملا = Map_PCTo_انحراف(curr, i_pc, &نتیجہ);
+        (خالی)pc_ملا;                                                          d_m3Assert (pc_ملا);
 
-        return result;
-    } else {
-        return 0;
+        واپس نتیجہ;
+    } ورنہ {
+        واپس 0;
     }
 }
 
 
-void PushBacktraceFrame (IM3Runtime io_runtime, pc_t i_pc)
+خالی ڈالو_Backtrace_چوکھٹا (IM3Runtime io_runtime, pc_t i_pc)
 {
     // don't try to push any more frames if we've already had an alloc failure
-    if (M3_UNLIKELY(io_runtime->backtrace.lastFrame == M3_BACKTRACE_TRUNCATED)) {
-        return;
+    اگر (M3_UNLIKELY(io_runtime->backtrace.آخری_چوکھٹا == M3_BACKTRACE_TRUNCATED)) {
+        واپس;
     }
 
-    M3BacktraceFrame* newFrame = m3_AllocStruct(M3BacktraceFrame);
+    M3_Backtrace_چوکھٹا* new_چوکھٹا = m3_AllocStruct(M3_Backtrace_چوکھٹا);
 
-    if (!newFrame) {
-        io_runtime->backtrace.lastFrame = M3_BACKTRACE_TRUNCATED;
-        return;
+    اگر (!new_چوکھٹا) {
+        io_runtime->backtrace.آخری_چوکھٹا = M3_BACKTRACE_TRUNCATED;
+        واپس;
     }
 
-    newFrame->moduleOffset = FindModuleOffset(io_runtime, i_pc);
+    new_چوکھٹا->module_انحراف = ڈھونڈو_Module_انحراف(io_runtime, i_pc);
 
-    if (!io_runtime->backtrace.frames || !io_runtime->backtrace.lastFrame) {
-        io_runtime->backtrace.frames = newFrame;
-    } else {
-        io_runtime->backtrace.lastFrame->next = newFrame;
+    اگر (!io_runtime->backtrace.چوکھٹے || !io_runtime->backtrace.آخری_چوکھٹا) {
+        io_runtime->backtrace.چوکھٹے = new_چوکھٹا;
+    } ورنہ {
+        io_runtime->backtrace.آخری_چوکھٹا->اگلا = new_چوکھٹا;
     }
-    io_runtime->backtrace.lastFrame = newFrame;
+    io_runtime->backtrace.آخری_چوکھٹا = new_چوکھٹا;
 }
 
 
-void FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function)
+خالی FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function)
 {
     // If we've had an alloc failure then the last frame doesn't refer to the
     // frame we want to fill in the function info for.
-    if (M3_UNLIKELY(io_runtime->backtrace.lastFrame == M3_BACKTRACE_TRUNCATED)) {
-        return;
+    اگر (M3_UNLIKELY(io_runtime->backtrace.آخری_چوکھٹا == M3_BACKTRACE_TRUNCATED)) {
+        واپس;
     }
 
-    if (!io_runtime->backtrace.lastFrame) {
-        return;
+    اگر (!io_runtime->backtrace.آخری_چوکھٹا) {
+        واپس;
     }
 
-    io_runtime->backtrace.lastFrame->function = i_function;
+    io_runtime->backtrace.آخری_چوکھٹا->function = i_function;
 }
 
 
-void ClearBacktrace (IM3Runtime io_runtime)
+خالی ClearBacktrace (IM3Runtime io_runtime)
 {
-    M3BacktraceFrame* currentFrame = io_runtime->backtrace.frames;
-    while (currentFrame) {
-        M3BacktraceFrame* nextFrame = currentFrame->next;
-        m3_Free(currentFrame);
-        currentFrame = nextFrame;
+    M3_Backtrace_چوکھٹا* current_چوکھٹا = io_runtime->backtrace.چوکھٹے;
+    جب (current_چوکھٹا) {
+        M3_Backtrace_چوکھٹا* اگلا_چوکھٹا = current_چوکھٹا->اگلا;
+        m3_Free(current_چوکھٹا);
+        current_چوکھٹا = اگلا_چوکھٹا;
     }
 
-    io_runtime->backtrace.frames    = NULL;
-    io_runtime->backtrace.lastFrame = NULL;
+    io_runtime->backtrace.چوکھٹے    = تہی;
+    io_runtime->backtrace.آخری_چوکھٹا = تہی;
 }
-#endif // d_m3RecordBacktraces
+#اگر_ختم // d_m3RecordBacktraces

@@ -5,54 +5,54 @@
 //  Copyright © 2021 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_function_h
-#define m3_function_h
+#اگر_غیر_تعریف_شدہ m3_function_h
+#تعریف_کرو m3_function_h
 
-#include "m3_core.h"
+#شامل "m3_core.h"
 
 d_m3BeginExternC
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-typedef struct M3FuncType {
-    struct M3FuncType* next;
+قسمتعریف ساخت M3FuncType {
+    ساخت M3FuncType* اگلا;
 
-    u16                numRets;
-    u16                numArgs;
+    u16                عدد_Rets;
+    u16                عدد_دلائل;
 
     // Position in the environment's list of distinct function types. Equal
     // types share one M3FuncType, so this doubles as the canonical heap type
     // index a (ref $t) carries, and comparing two of them is exactly the
     // structural equivalence the spec asks for.
-    u16                canonicalIndex;
+    u16                canonical_اشاریہ;
 
     bool               isContinuation;
-    struct M3FuncType* contFuncType;
+    ساخت M3FuncType* contFuncType;
 
     // A member of a recursive group. The group is its identity, so it never
     // shares an entry with a type that merely matches it field for field -
     // not one outside any group, and not one in a group spelled the same way.
-    bool               inRecGroup;
+    bool               اندر_Rec_گروہ;
 
     m3type_t           types[];        // returns, then args
 } M3FuncType;
 
-typedef M3FuncType* IM3FuncType;
+قسمتعریف M3FuncType* IM3FuncType;
 
 
-M3Result            AllocFuncType (IM3FuncType* o_functionType, u32 i_numTypes);
-bool                AreFuncTypesEqual (const IM3FuncType i_typeA, const IM3FuncType i_typeB);
+M3_نتیجہ            AllocFuncType (IM3FuncType* o_functionType, u32 i_عدد_Types);
+bool                AreFuncTypesEqual (ثابت IM3FuncType i_typeA, ثابت IM3FuncType i_typeB);
 
-u16                 GetFuncTypeNumParams (const IM3FuncType i_funcType);
-m3type_t            GetFuncTypeParamType (const IM3FuncType i_funcType, u16 i_index);
+u16                 Get_Func_Type_عدد_Params (ثابت IM3FuncType i_funcType);
+m3type_t            GetFuncTypeParamType (ثابت IM3FuncType i_funcType, u16 i_اشاریہ);
 
-u16                 GetFuncTypeNumResults (const IM3FuncType i_funcType);
-m3type_t            GetFuncTypeResultType (const IM3FuncType i_funcType, u16 i_index);
+u16                 Get_Func_Type_عدد_Results (ثابت IM3FuncType i_funcType);
+m3type_t            Get_Func_Type_نتیجہ_Type (ثابت IM3FuncType i_funcType, u16 i_اشاریہ);
 
-#if d_m3HasTypedRefs
+#اگر d_m3HasTypedRefs
 // The type a (ref $t) / (ref null $t) naming this function type is spelled as
-m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull);
-#endif
+m3type_t Ref_Type_کا_Func_Type (ثابت IM3FuncType i_funcType, bool i_nonNull);
+#اگر_ختم
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
@@ -62,15 +62,15 @@ m3type_t RefTypeOfFuncType (const IM3FuncType i_funcType, bool i_nonNull);
 // what the frame holds there, so a pc alone does not name one.
 //
 // A snapshot writes these down, so the numbering is part of the DMP format.
-typedef enum M3SafePointKind {
+قسمتعریف شمار M3_محفوظ_نقطہ_قسم {
     safepoint_op,           // at a loop back edge, which suspends in place
     safepoint_suspend,      // just past a suspend or a switch
     safepoint_call,         // a call waiting on its callee
     safepoint_resume,       // a resume waiting on the continuation it runs
-    safepoint_entry,        // at the start of a function's body, its locals set
-} M3SafePointKind;
+    safepoint_اندراج,        // at the start of a function's body, its locals set
+} M3_محفوظ_نقطہ_قسم;
 
-#if d_m3HasSnapshots
+#اگر d_m3HasSnapshots
 
 // What a snapshot needs to know about a function's compiled code, recorded by
 // the compiler when the runtime is suspendable and nowhere else.
@@ -83,14 +83,14 @@ typedef enum M3SafePointKind {
 // one build's frame and scattered into another's, whatever layout each chose.
 
 // A value the frame holds: where this build keeps it, and its type
-typedef struct M3SlotValue {
-    u16      slot;            // relative to the frame, or a register alias (d_m3Reg0SlotAlias, d_m3Fp0SlotAlias)
+قسمتعریف ساخت M3_خانہ_قدر {
+    u16      خانہ;            // relative to the frame, or a register alias (d_m3Reg0SlotAlias, d_m3Fp0SlotAlias)
     m3type_t type;       // full Wasm type, including reference heap type and nullability
-} M3SlotValue;
+} M3_خانہ_قدر;
 
 // Values that go with a safepoint
-#  define d_m3SafePointTakenBranch    0x1     // resumes a br_if that was taken: _r0 has to hold its condition
-#  define d_m3SafePointTailCall       0x2     // a return_call compiled as a call: saving walks past it, and it names no frame
+#  define d_m3_محفوظ_نقطہ_لیا_گیا_Branch    0x1     // resumes a br_if that was taken: _r0 has to hold its condition
+#  define d_m3_محفوظ_نقطہ_دم_Call       0x2     // a return_call compiled as a call: saving walks past it, and it names no frame
 
 // A place a function can be suspended at, or be waiting on something that was:
 // a loop back edge, a function's entry, a call, a suspend, a switch or a resume.
@@ -99,19 +99,19 @@ typedef struct M3SlotValue {
 // a back edge - since one br_table can branch back to several loops - the loop
 // it goes to. Safepoints are recorded in the order the body is read, so they
 // are sorted by that offset.
-typedef struct M3SafePoint {
+قسمتعریف ساخت M3_محفوظ_نقطہ {
     pc_t     pc;
-    u32      wasmOffset;     // the instruction's, from the start of the function's body
-    u32      firstValue;     // into M3SnapshotMap.values
-    u32      firstLocalValue; // local types at this point, or UINT32_MAX for the map's shared locals
-    u16      numValues;      // the live operand stack, bottom up; the locals are the map's own
-    u16      numResults;     // suspend: the top values are the slots it waits in | call, resume: results not yet written
+    u32      wasm_انحراف;     // the instruction's, from the start of the function's body
+    u32      پہلا_قدر;     // into M3SnapshotMap.values
+    u32      پہلا_Local_قدر; // local types at this point, or UINT32_MAX for the map's shared locals
+    u16      عدد_اقدار;      // the live operand stack, bottom up; the locals are the map's own
+    u16      عدد_Results;     // suspend: the top values are the slots it waits in | call, resume: results not yet written
     u16      aux;            // call: where the callee's frame starts, in slots above this one | resume: its handler count
                              // | back edge: the loop it goes to, in M3SnapshotMap.blocks
     m3type_t resumeType; // resume: expected continuation type, including the result contract
-    u8       kind;           // M3SafePointKind
+    u8       قسم;           // M3SafePointKind
     u8       flags;
-} M3SafePoint;
+} M3_محفوظ_نقطہ;
 
 // A loop or a try_table, which the interpreter keeps a native frame for while
 // its body runs, and which a snapshot names by the instruction's offset.
@@ -121,34 +121,34 @@ typedef struct M3SafePoint {
 // excluded - so a catch clause, which records its safepoints at its try_table,
 // is outside that try_table. Recorded in the order they open, so enclosing
 // regions come outermost first.
-typedef struct M3BlockStart {
+قسمتعریف ساخت M3_بلاک_آغاز {
     pc_t pc;             // what the frame records: a loop's body, a try_table's clause table
-    u32  wasmOffset;
-    u32  wasmEnd;        // the offset of its end
-    u16  numClauses;     // try_table
+    u32  wasm_انحراف;
+    u32  wasm_انتہا;        // the offset of its end
+    u16  عدد_Clauses;     // try_table
     u8   opcode;         // c_waOp_loop or c_waOp_tryTable
-} M3BlockStart;
+} M3_بلاک_آغاز;
 
-typedef struct M3SnapshotMap {
-    M3SlotValue*  locals;            // the arguments, then the declared locals
-    u32           numLocals;
+قسمتعریف ساخت M3SnapshotMap {
+    M3_خانہ_قدر*  locals;            // the arguments, then the declared locals
+    u32           عدد_Locals;
 
-    M3SafePoint*  safePoints;
-    u32           numSafePoints;
+    M3_محفوظ_نقطہ*  محفوظ_Points;
+    u32           عدد_محفوظ_Points;
 
-    M3SlotValue*  values;
-    u32           numValues;
+    M3_خانہ_قدر*  اقدار;
+    u32           عدد_اقدار;
 
-    M3BlockStart* blocks;
-    u32           numBlocks;
+    M3_بلاک_آغاز* بلاکیں;
+    u32           عدد_بلاکیں;
 } M3SnapshotMap;
 
-void SnapshotMap_Free (M3SnapshotMap* i_map);
+خالی SnapshotMap_Free (M3SnapshotMap* i_map);
 
-#endif // d_m3HasSnapshots
+#اگر_ختم // d_m3HasSnapshots
 
-typedef struct M3Function {
-    struct M3Module*   module;
+قسمتعریف ساخت M3Function {
+    ساخت M3Module*   module;
 
     M3ImportInfo       import;
 
@@ -159,7 +159,7 @@ typedef struct M3Function {
     // Holds the memory rather than its index: a slot can alias another module's
     // memory, and growing one reallocates behind it. NULL for anything that is
     // not an import bound to a host function.
-    struct M3Memory*   hostMemory;
+    ساخت M3_حافظہ*   host_حافظہ;
 
     // An import linked to another module's export: the function that actually
     // implements it. Everything that calls through an import resolves to this
@@ -167,71 +167,71 @@ typedef struct M3Function {
     // says whose linear memory the body runs against. NULL for a function with
     // a body of its own, and for an import bound to a host function (that one
     // runs against the importing module's memory).
-    struct M3Function* resolved;
+    ساخت M3Function* resolved;
 
-    bytes_t            wasm;
-    bytes_t            wasmEnd;
+    بائٹیں_t            wasm;
+    بائٹیں_t            wasm_انتہا;
 
     // What traces and errors call the function - its import name, or its first
     // few export names, or else the name section's - and what m3_FindFunction
     // falls back to once no export matches. Not a list of exports: those are
     // M3Module.exports, which keeps every one.
-    cstr_t             names[d_m3MaxDuplicateFunctionImpl];
-    u16                numNames;                               // maximum of d_m3MaxDuplicateFunctionImpl
+    cstr_t             نام[d_m3MaxDuplicateFunctionImpl];
+    u16                عدد_نام;                               // maximum of d_m3MaxDuplicateFunctionImpl
 
     IM3FuncType        funcType;
 
     pc_t               compiled;
 
-#if (d_m3EnableCodePageRefCounting)
-    IM3CodePage* codePageRefs;                           // array of all pages used
-    u32          numCodePageRefs;
-#endif
+#اگر (d_m3_Enable_رمز_صفحہ_Ref_Counting)
+    IM3_رمز_صفحہ* رمز_صفحہ_Refs;                           // array of all pages used
+    u32          عدد_رمز_صفحہ_Refs;
+#اگر_ختم
 
-#if defined(DEBUG)
-    u32 hits;
+#اگر defined(DEBUG)
+    u32 کامیابیاں;
     u32 index;
-#endif
+#اگر_ختم
 
-    u16   maxStackSlots;
+    u16   max_ڈھیر_Slots;
 
-    u16   numRetSlots;
-    u16   numRetAndArgSlots;
+    u16   عدد_Ret_Slots;
+    u16   عدد_Ret_And_Arg_Slots;
 
-    u16   numLocals;                              // not including args
-    u32   numLocalBytes;
+    u16   عدد_Locals;                              // not including args
+    u32   عدد_Local_بائٹیں;
 
-    bool  ownsWasmCode;
+    bool  owns_Wasm_رمز;
 
-    u16   numConstantBytes;
-    void* constants;
+    u16   عدد_Constant_بائٹیں;
+    خالی* constants;
 
-#if d_m3HasSnapshots
+#اگر d_m3HasSnapshots
     M3SnapshotMap* snapshotMap;                   // NULL unless compiled suspendable
-#endif
+#اگر_ختم
 } M3Function;
 
 
 // The function that actually runs when this one is called: an import linked to
 // another module resolves to that module's function, everything else to itself.
-static inline
+ساکن اندرونی
 IM3Function Function_Implementation (IM3Function i_function)
 {
-    return i_function->resolved ? i_function->resolved : i_function;
+    واپس i_function->resolved ? i_function->resolved : i_function;
 }
 
-void     Function_Release (IM3Function i_function);
-void     Function_FreeCompiledCode (IM3Function i_function);
+خالی     Function_Release (IM3Function i_function);
+خالی     Function_Free_Compiled_رمز (IM3Function i_function);
 
 cstr_t   GetFunctionImportModuleName (IM3Function i_function);
-cstr_t*  GetFunctionNames (IM3Function i_function, u16* o_numNames);
-u16      GetFunctionNumArgs (IM3Function i_function);
-m3type_t GetFunctionArgType (IM3Function i_function, u32 i_index);
+cstr_t*  Get_Function_نام (IM3Function i_function, u16* o_عدد_نام);
+u16      Get_Function_عدد_دلائل (IM3Function i_function);
+m3type_t GetFunctionArgType (IM3Function i_function, u32 i_اشاریہ);
 
-u16      GetFunctionNumReturns (IM3Function i_function);
-u8       GetFunctionReturnType (const IM3Function i_function, u16 i_index);
+u16      Get_Function_عدد_Returns (IM3Function i_function);
+u8       GetFunctionReturnType (ثابت IM3Function i_function, u16 i_اشاریہ);
 
-u32      GetFunctionNumArgsAndLocals (IM3Function i_function);
+u32      Get_Function_عدد_دلائل_And_Locals (IM3Function i_function);
 
 cstr_t   SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp);
 cstr_t   SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp);
@@ -239,6 +239,6 @@ cstr_t   SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp);
 //---------------------------------------------------------------------------------------------------------------------------------
 
 
-d_m3EndExternC
+d_m3_انتہا_Extern_C
 
-#endif /* m3_function_h */
+#اگر_ختم /* m3_function_h */

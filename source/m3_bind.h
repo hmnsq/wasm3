@@ -5,16 +5,16 @@
 //  Copyright © 2020 Steven Massey. All rights reserved.
 //
 
-#ifndef m3_bind_h
-#define m3_bind_h
+#اگر_غیر_تعریف_شدہ m3_bind_h
+#تعریف_کرو m3_bind_h
 
-#include "m3_env.h"
+#شامل "m3_env.h"
 
 d_m3BeginExternC
 
-u8       ConvertTypeCharToTypeId (char i_code);
-M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature);
+u8       Convert_Type_Char_مقصد_Type_Id (حرف i_رمز);
+M3_نتیجہ Signature_مقصد_Func_Type (IM3FuncType* o_functionType, ccstr_t i_signature);
 
-d_m3EndExternC
+d_m3_انتہا_Extern_C
 
-#endif /* m3_bind_h */
+#اگر_ختم /* m3_bind_h */
