@@ -9,9 +9,9 @@
 //  host's byte order, and everything else is 64-bit arithmetic.
 //
 
-#include "m3_core.h"
+#অন্তর্ভাৱ "m3_core.h"
 
-#if d_m3HasSnapshots
+#যদি d_m3HasSnapshots
 
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -26,48 +26,48 @@
 
 #  define XXH_STRIPE_LEN   32     // must match Xxh64.buffer
 
-static inline
-u32 XxhRead32 (const void* i_ptr)
+স্থির অন্তঃস্থ
+u32 XxhRead32 (ধ্রুৱ শূন্য* i_ptr)
 {
-    u32 value;
-    memcpy(&value, i_ptr, sizeof(value));
-    M3_BSWAP_u32(value);
-    return value;
+    u32 মান;
+    memcpy(&মান, i_ptr, পরিমাণ(মান));
+    M3_BSWAP_u32(মান);
+    ঘূৰাই মান;
 }
 
-static inline
-u64 XxhRead64 (const void* i_ptr)
+স্থির অন্তঃস্থ
+u64 XxhRead64 (ধ্রুৱ শূন্য* i_ptr)
 {
-    u64 value;
-    memcpy(&value, i_ptr, sizeof(value));
-    M3_BSWAP_u64(value);
-    return value;
+    u64 মান;
+    memcpy(&মান, i_ptr, পরিমাণ(মান));
+    M3_BSWAP_u64(মান);
+    ঘূৰাই মান;
 }
 
-static inline
-u64 XxhRotl64 (u64 i_value, u32 i_count)
+স্থির অন্তঃস্থ
+u64 XxhRotl64 (u64 i_মান, u32 i_গুনতি)
 {
-    return (i_value << i_count) | (i_value >> (64 - i_count));
+    ঘূৰাই (i_মান << i_গুনতি) | (i_মান >> (64 - i_গুনতি));
 }
 
 // One lane taking one 8-byte word
-static inline
-u64 XxhRound (u64 i_acc, u64 i_input)
+স্থির অন্তঃস্থ
+u64 XxhRound (u64 i_acc, u64 i_প্ৰবেশ)
 {
-    i_acc += i_input * XXH_PRIME64_2;
+    i_acc += i_প্ৰবেশ * XXH_PRIME64_2;
     i_acc = XxhRotl64(i_acc, 31);
-    return i_acc * XXH_PRIME64_1;
+    ঘূৰাই i_acc * XXH_PRIME64_1;
 }
 
 // ...and one lane folded into the hash at the end
-static inline
-u64 XxhMergeRound (u64 i_acc, u64 i_value)
+স্থির অন্তঃস্থ
+u64 XxhMergeRound (u64 i_acc, u64 i_মান)
 {
-    i_acc ^= XxhRound(0, i_value);
-    return i_acc * XXH_PRIME64_1 + XXH_PRIME64_4;
+    i_acc ^= XxhRound(0, i_মান);
+    ঘূৰাই i_acc * XXH_PRIME64_1 + XXH_PRIME64_4;
 }
 
-static inline
+স্থির অন্তঃস্থ
 u64 XxhAvalanche (u64 i_hash)
 {
     i_hash ^= i_hash >> 33;
@@ -75,7 +75,7 @@ u64 XxhAvalanche (u64 i_hash)
     i_hash ^= i_hash >> 29;
     i_hash *= XXH_PRIME64_3;
     i_hash ^= i_hash >> 32;
-    return i_hash;
+    ঘূৰাই i_hash;
 }
 
 
@@ -84,62 +84,62 @@ u64 XxhAvalanche (u64 i_hash)
 //---------------------------------------------------------------------------------------------------------------------------------
 
 // Takes whole 32-byte stripes and answers where in the input it stopped
-static
-const u8* XxhConsumeStripes (u64* io_acc, const u8* i_input, size_t i_size)
+স্থির
+ধ্রুৱ u8* XxhConsumeStripes (u64* io_acc, ধ্রুৱ u8* i_প্ৰবেশ, size_t i_size)
 {
-    const u8* input = i_input;
-    const u8* limit = i_input + i_size - (XXH_STRIPE_LEN - 1);
+    ধ্রুৱ u8* প্ৰবেশ = i_প্ৰবেশ;
+    ধ্রুৱ u8* limit = i_প্ৰবেশ + i_size - (XXH_STRIPE_LEN - 1);
 
-    do {
-        for (size_t lane = 0; lane < 4; ++lane) {
-            io_acc[lane] = XxhRound(io_acc[lane], XxhRead64(input));
-            input += 8;
+    কৰা {
+        বাবে (size_t lane = 0; lane < 4; ++lane) {
+            io_acc[lane] = XxhRound(io_acc[lane], XxhRead64(প্ৰবেশ));
+            প্ৰবেশ += 8;
         }
-    } while (input < limit);
+    } যেতিয়ালৈ (প্ৰবেশ < limit);
 
-    return input;
+    ঘূৰাই প্ৰবেশ;
 }
 
-static
-u64 XxhMergeAccs (const u64* i_acc)
+স্থির
+u64 XxhMergeAccs (ধ্রুৱ u64* i_acc)
 {
     u64 hash = XxhRotl64(i_acc[0], 1) + XxhRotl64(i_acc[1], 7) + XxhRotl64(i_acc[2], 12) + XxhRotl64(i_acc[3], 18);
 
-    for (size_t lane = 0; lane < 4; ++lane) {
+    বাবে (size_t lane = 0; lane < 4; ++lane) {
         hash = XxhMergeRound(hash, i_acc[lane]);
     }
 
-    return hash;
+    ঘূৰাই hash;
 }
 
 // The tail: whatever is left over after the last whole stripe, down to
 // single bytes
-static
-u64 XxhFinalize (u64 i_hash, const u8* i_input, size_t i_size)
+স্থির
+u64 XxhFinalize (u64 i_hash, ধ্রুৱ u8* i_প্ৰবেশ, size_t i_size)
 {
     size_t size = i_size & (XXH_STRIPE_LEN - 1);
 
-    while (size >= 8) {
-        i_hash ^= XxhRound(0, XxhRead64(i_input));
+    যেতিয়ালৈ (size >= 8) {
+        i_hash ^= XxhRound(0, XxhRead64(i_প্ৰবেশ));
         i_hash = XxhRotl64(i_hash, 27) * XXH_PRIME64_1 + XXH_PRIME64_4;
-        i_input += 8;
+        i_প্ৰবেশ += 8;
         size -= 8;
     }
 
-    if (size >= 4) {
-        i_hash ^= (u64)XxhRead32(i_input) * XXH_PRIME64_1;
+    যদি (size >= 4) {
+        i_hash ^= (u64)XxhRead32(i_প্ৰবেশ) * XXH_PRIME64_1;
         i_hash = XxhRotl64(i_hash, 23) * XXH_PRIME64_2 + XXH_PRIME64_3;
-        i_input += 4;
+        i_প্ৰবেশ += 4;
         size -= 4;
     }
 
-    while (size > 0) {
-        i_hash ^= (*i_input++) * XXH_PRIME64_5;
+    যেতিয়ালৈ (size > 0) {
+        i_hash ^= (*i_প্ৰবেশ++) * XXH_PRIME64_5;
         i_hash = XxhRotl64(i_hash, 11) * XXH_PRIME64_1;
         --size;
     }
 
-    return XxhAvalanche(i_hash);
+    ঘূৰাই XxhAvalanche(i_hash);
 }
 
 
@@ -147,7 +147,7 @@ u64 XxhFinalize (u64 i_hash, const u8* i_input, size_t i_size)
 //  API
 //---------------------------------------------------------------------------------------------------------------------------------
 
-void Xxh64_Init (Xxh64* o_state, u64 i_seed)
+শূন্য Xxh64_Init (Xxh64* o_state, u64 i_seed)
 {
     o_state->acc[0] = i_seed + XXH_PRIME64_1 + XXH_PRIME64_2;
     o_state->acc[1] = i_seed + XXH_PRIME64_2;
@@ -158,45 +158,45 @@ void Xxh64_Init (Xxh64* o_state, u64 i_seed)
     o_state->bufferLength = 0;
 }
 
-void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size)
+শূন্য Xxh64_Update (Xxh64* io_state, ধ্রুৱ শূন্য* i_data, size_t i_size)
 {
-    if (not i_data) {
-        return;
+    যদি (not i_data) {
+        ঘূৰাই;
     }
 
-    const u8* input = (const u8*)i_data;
-    const u8* end   = input + i_size;
+    ধ্রুৱ u8* প্ৰবেশ = (ধ্রুৱ u8*)i_data;
+    ধ্রুৱ u8* end   = প্ৰবেশ + i_size;
 
     io_state->totalLength += i_size;
 
-    if (i_size < (size_t)(XXH_STRIPE_LEN - io_state->bufferLength)) {
-        memcpy(io_state->buffer + io_state->bufferLength, input, i_size);
+    যদি (i_size < (size_t)(XXH_STRIPE_LEN - io_state->bufferLength)) {
+        memcpy(io_state->buffer + io_state->bufferLength, প্ৰবেশ, i_size);
         io_state->bufferLength += (u32)i_size;
-        return;
+        ঘূৰাই;
     }
 
     // fill up what the buffer already holds, and consume that
-    if (io_state->bufferLength) {
+    যদি (io_state->bufferLength) {
         size_t loadSize = XXH_STRIPE_LEN - io_state->bufferLength;
 
-        memcpy(io_state->buffer + io_state->bufferLength, input, loadSize);
-        input += loadSize;
+        memcpy(io_state->buffer + io_state->bufferLength, প্ৰবেশ, loadSize);
+        প্ৰবেশ += loadSize;
 
         XxhConsumeStripes(io_state->acc, io_state->buffer, XXH_STRIPE_LEN);
         io_state->bufferLength = 0;
     }
 
-    if ((size_t)(end - input) >= XXH_STRIPE_LEN) {
-        input = XxhConsumeStripes(io_state->acc, input, (size_t)(end - input));
+    যদি ((size_t)(end - প্ৰবেশ) >= XXH_STRIPE_LEN) {
+        প্ৰবেশ = XxhConsumeStripes(io_state->acc, প্ৰবেশ, (size_t)(end - প্ৰবেশ));
     }
 
-    if (input < end) {
-        memcpy(io_state->buffer, input, (size_t)(end - input));
-        io_state->bufferLength = (u32)(end - input);
+    যদি (প্ৰবেশ < end) {
+        memcpy(io_state->buffer, প্ৰবেশ, (size_t)(end - প্ৰবেশ));
+        io_state->bufferLength = (u32)(end - প্ৰবেশ);
     }
 }
 
-u64 Xxh64_Digest (const Xxh64* i_state)
+u64 Xxh64_Digest (ধ্রুৱ Xxh64* i_state)
 {
     // Short input never reached the accumulators, so it is hashed from the seed
     // alone - which acc[2] still holds, untouched by Xxh64_Init.
@@ -205,7 +205,7 @@ u64 Xxh64_Digest (const Xxh64* i_state)
 
     hash += i_state->totalLength;
 
-    return XxhFinalize(hash, i_state->buffer, (size_t)i_state->totalLength);
+    ঘূৰাই XxhFinalize(hash, i_state->buffer, (size_t)i_state->totalLength);
 }
 
 #endif // d_m3HasSnapshots

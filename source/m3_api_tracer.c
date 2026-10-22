@@ -5,15 +5,15 @@
 //  Copyright © 2020 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_tracer.h"
+#অন্তর্ভাৱ "m3_api_tracer.h"
 
-#include "m3_env.h"
-#include "m3_exception.h"
+#অন্তর্ভাৱ "m3_env.h"
+#অন্তর্ভাৱ "m3_exception.h"
 
-#if defined(d_m3HasTracer)
+#যদি defined(d_m3HasTracer)
 
 
-static FILE* trace = NULL;
+স্থির FILE* trace = রিক্ত;
 
 m3ApiRawFunction(m3_env_log_execution)
 {
@@ -83,10 +83,10 @@ d_m3TraceMemory( load_val_i32,  "load i32", int32_t, "%" PRIi32)
 d_m3TraceMemory(store_val_i32, "store i32", int32_t, "%" PRIi32)
 d_m3TraceMemory( load_val_i64,  "load i64", int64_t, "%" PRIi64)
 d_m3TraceMemory(store_val_i64, "store i64", int64_t, "%" PRIi64)
-d_m3TraceMemory( load_val_f32,  "load f32", float,   "%" PRIf32)
-d_m3TraceMemory(store_val_f32, "store f32", float,   "%" PRIf32)
-d_m3TraceMemory( load_val_f64,  "load f64", double,  "%" PRIf64)
-d_m3TraceMemory(store_val_f64, "store f64", double,  "%" PRIf64)
+d_m3TraceMemory( load_val_f32,  "load f32", ভিন্ন,   "%" PRIf32)
+d_m3TraceMemory(store_val_f32, "store f32", ভিন্ন,   "%" PRIf32)
+d_m3TraceMemory( load_val_f64,  "load f64", দ্ৱিগুণ,  "%" PRIf64)
+d_m3TraceMemory(store_val_f64, "store f64", দ্ৱিগুণ,  "%" PRIf64)
 
 
 #define d_m3TraceLocal(FUNC, NAME, TYPE, FMT)                 \
@@ -105,25 +105,25 @@ d_m3TraceLocal(get_i32, "get i32", int32_t, "%" PRIi32)
 d_m3TraceLocal(set_i32, "set i32", int32_t, "%" PRIi32)
 d_m3TraceLocal(get_i64, "get i64", int64_t, "%" PRIi64)
 d_m3TraceLocal(set_i64, "set i64", int64_t, "%" PRIi64)
-d_m3TraceLocal(get_f32, "get f32", float,   "%" PRIf32)
-d_m3TraceLocal(set_f32, "set f32", float,   "%" PRIf32)
-d_m3TraceLocal(get_f64, "get f64", double,  "%" PRIf64)
-d_m3TraceLocal(set_f64, "set f64", double,  "%" PRIf64)
+d_m3TraceLocal(get_f32, "get f32", ভিন্ন,   "%" PRIf32)
+d_m3TraceLocal(set_f32, "set f32", ভিন্ন,   "%" PRIf32)
+d_m3TraceLocal(get_f64, "get f64", দ্ৱিগুণ,  "%" PRIf64)
+d_m3TraceLocal(set_f64, "set f64", দ্ৱিগুণ,  "%" PRIf64)
 
 // clang-format on
 
-static
+স্থির
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_none) {
+    যদি (i_result == m3Err_none) {
         // If any trace function is found in the module, open the trace file
-        if (!trace) {
+        যদি (!trace) {
             trace = fopen("wasm3_trace.csv", "w");
         }
-    } else if (i_result == m3Err_functionLookupFailed) {
+    } অন্যথা যদি (i_result == m3Err_functionLookupFailed) {
         i_result = m3Err_none;
     }
-    return i_result;
+    ঘূৰাই i_result;
 }
 
 
@@ -131,7 +131,7 @@ M3Result m3_LinkTracer (IM3Module module)
 {
     M3Result result = m3Err_none;
 
-    const char* env = "env";
+    ধ্রুৱ ৱর্ণ* env = "env";
 
     // clang-format off
 
@@ -167,7 +167,7 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "set_f64",           
     // clang-format on
 
 _catch:
-    return result;
+    ঘূৰাই result;
 }
 
 #endif // d_m3HasTracer

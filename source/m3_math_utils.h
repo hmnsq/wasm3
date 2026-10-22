@@ -8,30 +8,30 @@
 #ifndef m3_math_utils_h
 #define m3_math_utils_h
 
-#include "m3_core.h"
+#অন্তর্ভাৱ "m3_core.h"
 
-#include <limits.h>
+#অন্তর্ভাৱ <limits.h>
 
-#if defined(M3_COMPILER_MSVC)
+#যদি defined(M3_COMPILER_MSVC)
 
 #  include <intrin.h>
 
 #  define __builtin_popcount    __popcnt
 
-static inline
-int __builtin_ctz (uint32_t x)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_ctz (uint32_t x)
 {
     unsigned long ret;
     _BitScanForward(&ret, x);
-    return (int)ret;
+    ঘূৰাই (পূর্ণাঙ্ক)ret;
 }
 
-static inline
-int __builtin_clz (uint32_t x)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_clz (uint32_t x)
 {
     unsigned long ret;
     _BitScanReverse(&ret, x);
-    return (int)(31 ^ ret);
+    ঘূৰাই (পূর্ণাঙ্ক)(31 ^ ret);
 }
 
 
@@ -39,76 +39,76 @@ int __builtin_clz (uint32_t x)
 
 #    define __builtin_popcountll  __popcnt64
 
-static inline
-int __builtin_ctzll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_ctzll (uint64_t মান)
 {
     unsigned long ret;
-    _BitScanForward64(&ret, value);
-    return (int)ret;
+    _BitScanForward64(&ret, মান);
+    ঘূৰাই (পূর্ণাঙ্ক)ret;
 }
 
-static inline
-int __builtin_clzll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_clzll (uint64_t মান)
 {
     unsigned long ret;
-    _BitScanReverse64(&ret, value);
-    return (int)(63 ^ ret);
+    _BitScanReverse64(&ret, মান);
+    ঘূৰাই (পূর্ণাঙ্ক)(63 ^ ret);
 }
 
-#  else // _WIN64
+#  অন্যথা // _WIN64
 
 #    define __builtin_popcountll(x)  (__popcnt((x) & 0xFFFFFFFF) + __popcnt((x) >> 32))
 
-static inline
-int __builtin_ctzll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_ctzll (uint64_t মান)
 {
     //if (value == 0) return 64; // Note: ctz(0) result is undefined anyway
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
-    if (lsh != 0) {
-        return __builtin_ctz(lsh);
+    uint32_t msh = (uint32_t)(মান >> 32);
+    uint32_t lsh = (uint32_t)(মান & 0xFFFFFFFF);
+    যদি (lsh != 0) {
+        ঘূৰাই __builtin_ctz(lsh);
     }
-    return 32 + __builtin_ctz(msh);
+    ঘূৰাই 32 + __builtin_ctz(msh);
 }
 
-static inline
-int __builtin_clzll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_clzll (uint64_t মান)
 {
     //if (value == 0) return 64; // Note: clz(0) result is undefined anyway
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
-    if (msh != 0) {
-        return __builtin_clz(msh);
+    uint32_t msh = (uint32_t)(মান >> 32);
+    uint32_t lsh = (uint32_t)(মান & 0xFFFFFFFF);
+    যদি (msh != 0) {
+        ঘূৰাই __builtin_clz(msh);
     }
-    return 32 + __builtin_clz(lsh);
+    ঘূৰাই 32 + __builtin_clz(lsh);
 }
 
 #  endif // _WIN64
 
 #endif // defined(M3_COMPILER_MSVC)
 
-#if defined(M3_COMPILER_TCC)
+#যদি defined(M3_COMPILER_TCC)
 
 // TinyCC provides none of the bit-counting builtins the interpreter uses
 
-static inline
-int __builtin_popcount (uint32_t x)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_popcount (uint32_t x)
 {
     x = x - ((x >> 1) & 0x55555555u);
     x = (x & 0x33333333u) + ((x >> 2) & 0x33333333u);
     x = (x + (x >> 4)) & 0x0f0f0f0fu;
-    return (int)((x * 0x01010101u) >> 24);
+    ঘূৰাই (পূর্ণাঙ্ক)((x * 0x01010101u) >> 24);
 }
 
-static inline
-int __builtin_ctz (uint32_t x)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_ctz (uint32_t x)
 {
     //if (x == 0) return 32; // Note: ctz(0) result is undefined anyway
-    return __builtin_popcount((x & (~x + 1u)) - 1);
+    ঘূৰাই __builtin_popcount((x & (~x + 1u)) - 1);
 }
 
-static inline
-int __builtin_clz (uint32_t x)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_clz (uint32_t x)
 {
     //if (x == 0) return 32; // Note: clz(0) result is undefined anyway
     x |= x >> 1;
@@ -116,142 +116,142 @@ int __builtin_clz (uint32_t x)
     x |= x >> 4;
     x |= x >> 8;
     x |= x >> 16;
-    return 32 - __builtin_popcount(x);
+    ঘূৰাই 32 - __builtin_popcount(x);
 }
 
-static inline
-int __builtin_popcountll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_popcountll (uint64_t মান)
 {
-    return __builtin_popcount((uint32_t)(value & 0xFFFFFFFF)) +
-           __builtin_popcount((uint32_t)(value >> 32));
+    ঘূৰাই __builtin_popcount((uint32_t)(মান & 0xFFFFFFFF)) +
+           __builtin_popcount((uint32_t)(মান >> 32));
 }
 
-static inline
-int __builtin_ctzll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_ctzll (uint64_t মান)
 {
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
-    if (lsh != 0) {
-        return __builtin_ctz(lsh);
+    uint32_t msh = (uint32_t)(মান >> 32);
+    uint32_t lsh = (uint32_t)(মান & 0xFFFFFFFF);
+    যদি (lsh != 0) {
+        ঘূৰাই __builtin_ctz(lsh);
     }
-    return 32 + __builtin_ctz(msh);
+    ঘূৰাই 32 + __builtin_ctz(msh);
 }
 
-static inline
-int __builtin_clzll (uint64_t value)
+স্থির অন্তঃস্থ
+পূর্ণাঙ্ক __builtin_clzll (uint64_t মান)
 {
-    uint32_t msh = (uint32_t)(value >> 32);
-    uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
-    if (msh != 0) {
-        return __builtin_clz(msh);
+    uint32_t msh = (uint32_t)(মান >> 32);
+    uint32_t lsh = (uint32_t)(মান & 0xFFFFFFFF);
+    যদি (msh != 0) {
+        ঘূৰাই __builtin_clz(msh);
     }
-    return 32 + __builtin_clz(lsh);
+    ঘূৰাই 32 + __builtin_clz(lsh);
 }
 
 
 // TinyCC compiles -x on floats as an arithmetic negation, which quiets signaling
 // NaNs; f32.neg/f64.neg must only flip the sign bit and leave the payload alone
 
-static inline
+স্থির অন্তঃস্থ
 f32 m3_negf (f32 x)
 {
     u32 bits;
-    memcpy(&bits, &x, sizeof(bits));
+    memcpy(&bits, &x, পরিমাণ(bits));
     bits ^= 0x80000000u;
-    memcpy(&x, &bits, sizeof(x));
-    return x;
+    memcpy(&x, &bits, পরিমাণ(x));
+    ঘূৰাই x;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f64 m3_neg (f64 x)
 {
     u64 bits;
-    memcpy(&bits, &x, sizeof(bits));
+    memcpy(&bits, &x, পরিমাণ(bits));
     bits ^= 0x8000000000000000ull;
-    memcpy(&x, &bits, sizeof(x));
-    return x;
+    memcpy(&x, &bits, পরিমাণ(x));
+    ঘূৰাই x;
 }
 
 #endif // defined(M3_COMPILER_TCC)
 
-#if defined(__AVR__)
+#যদি defined(__AVR__)
 
-static inline
-float rintf (float arg)
+স্থির অন্তঃস্থ
+ভিন্ন rintf (ভিন্ন arg)
 {
-    union {
-        float    f;
+    সঙ্ঘ {
+        ভিন্ন    f;
         uint32_t i;
     } u;
     u.f = arg;
     uint32_t ux = u.i & 0x7FFFFFFF;
-    if (M3_UNLIKELY(ux == 0 || ux > 0x5A000000)) {
-        return arg;
+    যদি (M3_UNLIKELY(ux == 0 || ux > 0x5A000000)) {
+        ঘূৰাই arg;
     }
-    return (float)lrint(arg);
+    ঘূৰাই (ভিন্ন)lrint(arg);
 }
 
-static inline
-double rint (double arg)
+স্থির অন্তঃস্থ
+দ্ৱিগুণ rint (দ্ৱিগুণ arg)
 {
-    union {
-        double   f;
+    সঙ্ঘ {
+        দ্ৱিগুণ   f;
         uint32_t i[2];
     } u;
     u.f = arg;
     uint32_t ux = u.i[1] & 0x7FFFFFFF;
-    if (M3_UNLIKELY((ux == 0 && u.i[0] == 0) || ux > 0x433FFFFF)) {
-        return arg;
+    যদি (M3_UNLIKELY((ux == 0 && u.i[0] == 0) || ux > 0x433FFFFF)) {
+        ঘূৰাই arg;
     }
-    return (double)lrint(arg);
+    ঘূৰাই (দ্ৱিগুণ)lrint(arg);
 }
 
-static inline
-uint64_t strtoull (const char* str, char** endptr, int base)
+স্থির অন্তঃস্থ
+uint64_t strtoull (ধ্রুৱ ৱর্ণ* str, ৱর্ণ** endptr, পূর্ণাঙ্ক base)
 {
     uint64_t    result = 0;
-    const char* p = str;
+    ধ্রুৱ ৱর্ণ* p = str;
 
-    while (*p == ' ' || *p == '\t') {
+    যেতিয়ালৈ (*p == ' ' || *p == '\t') {
         p++;
     }
 
-    if (base == 0) {
-        if (*p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X')) {
+    যদি (base == 0) {
+        যদি (*p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X')) {
             base = 16;
             p += 2;
-        } else if (*p == '0') {
+        } অন্যথা যদি (*p == '0') {
             base = 8;
             p++;
-        } else {
+        } অন্যথা {
             base = 10;
         }
-    } else if (base == 16 && *p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X')) {
+    } অন্যথা যদি (base == 16 && *p == '0' && (*(p + 1) == 'x' || *(p + 1) == 'X')) {
         p += 2;
     }
 
-    while (*p) {
-        int digit;
-        if (*p >= '0' && *p <= '9') {
+    যেতিয়ালৈ (*p) {
+        পূর্ণাঙ্ক digit;
+        যদি (*p >= '0' && *p <= '9') {
             digit = *p - '0';
-        } else if (*p >= 'a' && *p <= 'f') {
+        } অন্যথা যদি (*p >= 'a' && *p <= 'f') {
             digit = *p - 'a' + 10;
-        } else if (*p >= 'A' && *p <= 'F') {
+        } অন্যথা যদি (*p >= 'A' && *p <= 'F') {
             digit = *p - 'A' + 10;
-        } else {
-            break;
+        } অন্যথা {
+            ভঙ্গ;
         }
-        if (digit >= base) {
-            break;
+        যদি (digit >= base) {
+            ভঙ্গ;
         }
         result = result * base + digit;
         p++;
     }
 
-    if (endptr) {
-        *endptr = (char*)p;
+    যদি (endptr) {
+        *endptr = (ৱর্ণ*)p;
     }
-    return result;
+    ঘূৰাই result;
 }
 
 #endif
@@ -260,36 +260,36 @@ uint64_t strtoull (const char* str, char** endptr, int base)
  * Rotr, Rotl
  */
 
-static inline
+স্থির অন্তঃস্থ
 u32 rotl32 (u32 n, unsigned c)
 {
-    const unsigned mask = CHAR_BIT * sizeof(n) - 1;
+    ধ্রুৱ unsigned mask = CHAR_BIT * পরিমাণ(n) - 1;
     c &= mask & 31;
-    return (n << c) | (n >> ((32 - c) & mask));
+    ঘূৰাই (n << c) | (n >> ((32 - c) & mask));
 }
 
-static inline
+স্থির অন্তঃস্থ
 u32 rotr32 (u32 n, unsigned c)
 {
-    const unsigned mask = CHAR_BIT * sizeof(n) - 1;
+    ধ্রুৱ unsigned mask = CHAR_BIT * পরিমাণ(n) - 1;
     c &= mask & 31;
-    return (n >> c) | (n << ((32 - c) & mask));
+    ঘূৰাই (n >> c) | (n << ((32 - c) & mask));
 }
 
-static inline
+স্থির অন্তঃস্থ
 u64 rotl64 (u64 n, u64 c)
 {
-    const unsigned mask = CHAR_BIT * sizeof(n) - 1;
+    ধ্রুৱ unsigned mask = CHAR_BIT * পরিমাণ(n) - 1;
     c &= mask & 63;
-    return (n << c) | (n >> ((64 - c) & mask));
+    ঘূৰাই (n << c) | (n >> ((64 - c) & mask));
 }
 
-static inline
+স্থির অন্তঃস্থ
 u64 rotr64 (u64 n, u64 c)
 {
-    const unsigned mask = CHAR_BIT * sizeof(n) - 1;
+    ধ্রুৱ unsigned mask = CHAR_BIT * পরিমাণ(n) - 1;
     c &= mask & 63;
-    return (n >> c) | (n << ((64 - c) & mask));
+    ঘূৰাই (n >> c) | (n << ((64 - c) & mask));
 }
 
 /*
@@ -297,18 +297,18 @@ u64 rotr64 (u64 n, u64 c)
  * half returned and its high half written through o_high
  */
 
-static inline
-u64 mul_wide_u64 (u64 a, u64 b, u64* o_high)
+স্থির অন্তঃস্থ
+u64 mul_wide_u64 (u64 a, u64 b, u64* o_উপৰেৰ)
 {
-#if defined(__SIZEOF_INT128__) && (UINTPTR_MAX > UINT32_MAX || defined(__wasm_wide_arithmetic__))
+#যদি defined(__SIZEOF_INT128__) && (UINTPTR_MAX > UINT32_MAX || defined(__wasm_wide_arithmetic__))
     // a 64-bit target multiplies into a register pair in one instruction. A 32-bit
     // one that has the type anyway, wasm32 among them, would make a library call,
     // unless the target itself provides wide arithmetic instructions.
     unsigned __int128 product = (unsigned __int128)a * b;
 
-    *o_high = (u64)(product >> 64);
-    return (u64)product;
-#else
+    *o_উপৰেৰ = (u64)(product >> 64);
+    ঘূৰাই (u64)product;
+#অন্যথা
     // four 32 x 32 partial products of the halves, a1:a0 times b1:b0. The middle
     // column collects the carry out of the low one and the low halves of the two
     // cross terms, at most 3 * (2^32 - 1).
@@ -320,29 +320,29 @@ u64 mul_wide_u64 (u64 a, u64 b, u64* o_high)
     u64 hl = a1 * b0;
     u64 hh = a1 * b1;
 
-    u64 middle = (ll >> 32) + (u32)lh + (u32)hl;
+    u64 মধ্য = (ll >> 32) + (u32)lh + (u32)hl;
 
-    *o_high = hh + (lh >> 32) + (hl >> 32) + (middle >> 32);
-    return (middle << 32) | (u32)ll;
+    *o_উপৰেৰ = hh + (lh >> 32) + (hl >> 32) + (মধ্য >> 32);
+    ঘূৰাই (মধ্য << 32) | (u32)ll;
 #endif
 }
 
 // A negative factor reads 2^64 too large as unsigned, which puts 2^64 times the
 // other factor too much into the product - one other factor too much in the high
 // half, which is where it is taken back out
-static inline
-u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
+স্থির অন্তঃস্থ
+u64 mul_wide_i64 (i64 a, i64 b, u64* o_উপৰেৰ)
 {
-    u64 low = mul_wide_u64((u64)a, (u64)b, o_high);
+    u64 নিচেৰ = mul_wide_u64((u64)a, (u64)b, o_উপৰেৰ);
 
-    if (a < 0) {
-        *o_high -= (u64)b;
+    যদি (a < 0) {
+        *o_উপৰেৰ -= (u64)b;
     }
-    if (b < 0) {
-        *o_high -= (u64)a;
+    যদি (b < 0) {
+        *o_উপৰেৰ -= (u64)a;
     }
 
-    return low;
+    ঘূৰাই নিচেৰ;
 }
 
 /*
@@ -350,29 +350,29 @@ u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
  */
 
 #define OP_DIV_U(RES, A, B)                                         \
-    if (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);    \
+    যদি (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);    \
     RES = A / B;
 
 #define OP_REM_U(RES, A, B)                                         \
-    if (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);    \
+    যদি (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);    \
     RES = A % B;
 
 // 2's complement detection
-#if (INT_MIN != -INT_MAX)
+#যদি (INT_MIN != -INT_MAX)
 
 #  define OP_DIV_S(RES, A, B, TYPE_MIN)                             \
-      if (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);  \
-      if (M3_UNLIKELY(B == -1 and A == TYPE_MIN)) {                 \
+      যদি (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);  \
+      যদি (M3_UNLIKELY(B == -1 and A == TYPE_MIN)) {                 \
           newTrap (m3Err_trapIntegerOverflow);                      \
       }                                                             \
       RES = A / B;
 
 #  define OP_REM_S(RES, A, B, TYPE_MIN)                             \
-      if (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);  \
-      if (M3_UNLIKELY(B == -1 and A == TYPE_MIN)) RES = 0;          \
-      else RES = A % B;
+      যদি (M3_UNLIKELY(B == 0)) newTrap (m3Err_trapDivisionByZero);  \
+      যদি (M3_UNLIKELY(B == -1 and A == TYPE_MIN)) RES = 0;          \
+      অন্যথা RES = A % B;
 
-#else
+#অন্যথা
 
 #  define OP_DIV_S(RES, A, B, TYPE_MIN) OP_DIV_U(RES, A, B)
 #  define OP_REM_S(RES, A, B, TYPE_MIN) OP_REM_U(RES, A, B)
@@ -384,10 +384,10 @@ u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
  */
 
 #define OP_TRUNC(RES, A, TYPE, RMIN, RMAX)                  \
-    if (M3_UNLIKELY(isnan(A))) {                            \
+    যদি (M3_UNLIKELY(isnan(A))) {                            \
         newTrap (m3Err_trapIntegerConversion);              \
     }                                                       \
-    if (M3_UNLIKELY(A <= RMIN or A >= RMAX)) {              \
+    যদি (M3_UNLIKELY(A <= RMIN or A >= RMAX)) {              \
         newTrap (m3Err_trapIntegerOverflow);                \
     }                                                       \
     RES = (TYPE)A;
@@ -404,13 +404,13 @@ u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
 #define OP_U64_TRUNC_F64(RES, A)    OP_TRUNC(RES, A, u64,                   -1.0 , 18446744073709551616.0 )
 
 #define OP_TRUNC_SAT(RES, A, TYPE, RMIN, RMAX, IMIN, IMAX)  \
-    if (M3_UNLIKELY(isnan(A))) {                            \
+    যদি (M3_UNLIKELY(isnan(A))) {                            \
         RES = 0;                                            \
-    } else if (M3_UNLIKELY(A <= RMIN)) {                    \
+    } অন্যথা যদি (M3_UNLIKELY(A <= RMIN)) {                    \
         RES = IMIN;                                         \
-    } else if (M3_UNLIKELY(A >= RMAX)) {                    \
+    } অন্যথা যদি (M3_UNLIKELY(A >= RMAX)) {                    \
         RES = IMAX;                                         \
-    } else {                                                \
+    } অন্যথা {                                                \
         RES = (TYPE)A;                                      \
     }
 
@@ -428,7 +428,7 @@ u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
  * Min, Max
  */
 
-#if d_m3HasFloat
+#যদি d_m3HasFloat
 
 #  include <math.h>
 
@@ -436,76 +436,76 @@ u64 mul_wide_i64 (i64 a, i64 b, u64* o_high)
 // keep its sign and payload, but force the quiet bit, since the spec requires
 // min/max to produce an arithmetic NaN.
 
-static inline
+স্থির অন্তঃস্থ
 f32 quiet_nan_f32 (f32 arg)
 {
-    union {
+    সঙ্ঘ {
         f32 f;
         u32 i;
     } u;
     u.f = arg;
     u.i |= 0x00400000;
-    return u.f;
+    ঘূৰাই u.f;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f64 quiet_nan_f64 (f64 arg)
 {
-    union {
+    সঙ্ঘ {
         f64 f;
         u64 i;
     } u;
     u.f = arg;
     u.i |= 0x0008000000000000ULL;
-    return u.f;
+    ঘূৰাই u.f;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f32 min_f32 (f32 a, f32 b)
 {
-    if (M3_UNLIKELY(isnan(a) or isnan(b))) {
-        return quiet_nan_f32(isnan(a) ? a : b);
+    যদি (M3_UNLIKELY(isnan(a) or isnan(b))) {
+        ঘূৰাই quiet_nan_f32(isnan(a) ? a : b);
     }
-    if (M3_UNLIKELY(a == 0 and a == b)) {
-        return signbit(a) ? a : b;
+    যদি (M3_UNLIKELY(a == 0 and a == b)) {
+        ঘূৰাই signbit(a) ? a : b;
     }
-    return a > b ? b : a;
+    ঘূৰাই a > b ? b : a;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f32 max_f32 (f32 a, f32 b)
 {
-    if (M3_UNLIKELY(isnan(a) or isnan(b))) {
-        return quiet_nan_f32(isnan(a) ? a : b);
+    যদি (M3_UNLIKELY(isnan(a) or isnan(b))) {
+        ঘূৰাই quiet_nan_f32(isnan(a) ? a : b);
     }
-    if (M3_UNLIKELY(a == 0 and a == b)) {
-        return signbit(a) ? b : a;
+    যদি (M3_UNLIKELY(a == 0 and a == b)) {
+        ঘূৰাই signbit(a) ? b : a;
     }
-    return a > b ? a : b;
+    ঘূৰাই a > b ? a : b;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f64 min_f64 (f64 a, f64 b)
 {
-    if (M3_UNLIKELY(isnan(a) or isnan(b))) {
-        return quiet_nan_f64(isnan(a) ? a : b);
+    যদি (M3_UNLIKELY(isnan(a) or isnan(b))) {
+        ঘূৰাই quiet_nan_f64(isnan(a) ? a : b);
     }
-    if (M3_UNLIKELY(a == 0 and a == b)) {
-        return signbit(a) ? a : b;
+    যদি (M3_UNLIKELY(a == 0 and a == b)) {
+        ঘূৰাই signbit(a) ? a : b;
     }
-    return a > b ? b : a;
+    ঘূৰাই a > b ? b : a;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f64 max_f64 (f64 a, f64 b)
 {
-    if (M3_UNLIKELY(isnan(a) or isnan(b))) {
-        return quiet_nan_f64(isnan(a) ? a : b);
+    যদি (M3_UNLIKELY(isnan(a) or isnan(b))) {
+        ঘূৰাই quiet_nan_f64(isnan(a) ? a : b);
     }
-    if (M3_UNLIKELY(a == 0 and a == b)) {
-        return signbit(a) ? b : a;
+    যদি (M3_UNLIKELY(a == 0 and a == b)) {
+        ঘূৰাই signbit(a) ? b : a;
     }
-    return a > b ? a : b;
+    ঘূৰাই a > b ? a : b;
 }
 
 // The NaN the spec calls canonical: quiet, positive, and with nothing in its
@@ -516,39 +516,39 @@ f64 max_f64 (f64 a, f64 b)
 // Only operations the spec says produce an *arithmetic* NaN go through this. abs,
 // neg and copysign are defined bitwise and carry their operand's payload through by
 // design; canonicalizing them would be wrong, not merely stricter.
-#  if d_m3CanonicalNaN
+#  যদি d_m3CanonicalNaN
 
-static inline
+স্থির অন্তঃস্থ
 f32 canon_nan_f32 (f32 arg)
 {
     // arg != arg is the NaN test that does not need <math.h> to have been told to
     // keep it, and it is the whole of the cost when the value is not a NaN
-    if (M3_UNLIKELY(arg != arg)) {
-        union {
+    যদি (M3_UNLIKELY(arg != arg)) {
+        সঙ্ঘ {
             f32 f;
             u32 i;
         } u;
         u.i = 0x7FC00000u;
-        return u.f;
+        ঘূৰাই u.f;
     }
-    return arg;
+    ঘূৰাই arg;
 }
 
-static inline
+স্থির অন্তঃস্থ
 f64 canon_nan_f64 (f64 arg)
 {
-    if (M3_UNLIKELY(arg != arg)) {
-        union {
+    যদি (M3_UNLIKELY(arg != arg)) {
+        সঙ্ঘ {
             f64 f;
             u64 i;
         } u;
         u.i = 0x7FF8000000000000ULL;
-        return u.f;
+        ঘূৰাই u.f;
     }
-    return arg;
+    ঘূৰাই arg;
 }
 
-#  else
+#  অন্যথা
 
 #    define canon_nan_f32(ARG)  (ARG)
 #    define canon_nan_f64(ARG)  (ARG)

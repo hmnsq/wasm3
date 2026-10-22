@@ -9,24 +9,24 @@
 #ifndef m3_exception_h
 #define m3_exception_h
 
-#include "m3_config.h"
+#অন্তর্ভাৱ "m3_config.h"
 
-#if d_m3EnableExceptionBreakpoint
+#যদি d_m3EnableExceptionBreakpoint
 
 // declared in m3_info.c
-void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message);
+শূন্য ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message);
 
 #  define EXCEPTION_PRINT(ERROR) ExceptionBreakpoint (ERROR, (__FILE__ ":" M3_STR(__LINE__)))
 
-#else
+#অন্যথা
 #  define EXCEPTION_PRINT(...)
 #endif
 
 
 #define _try                                M3Result result = m3Err_none;
-#define _(TRY)                              { result = TRY; if (M3_UNLIKELY(result)) { EXCEPTION_PRINT (result); goto _catch; } }
-#define _throw(ERROR)                       { result = ERROR; EXCEPTION_PRINT (result); goto _catch; }
-#define _throwif(ERROR, COND)               if (M3_UNLIKELY(COND)) { _throw(ERROR); }
+#define _(TRY)                              { result = TRY; যদি (M3_UNLIKELY(result)) { EXCEPTION_PRINT (result); গচ্ছ _catch; } }
+#define _throw(ERROR)                       { result = ERROR; EXCEPTION_PRINT (result); গচ্ছ _catch; }
+#define _throwif(ERROR, COND)               যদি (M3_UNLIKELY(COND)) { _throw(ERROR); }
 
 #define _throwifnull(PTR)                   _throwif (m3Err_mallocFailed, !(PTR))
 
