@@ -8,19 +8,19 @@
 #ifndef m3_core_h
 #define m3_core_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <assert.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <stdbool.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <assert.h>
 
-#include "wasm3.h"
-#include "m3_config.h"
+#ଅନ୍ତର୍ଭାଵ "wasm3.h"
+#ଅନ୍ତର୍ଭାଵ "m3_config.h"
 
-#if defined(__cplusplus)
-#  define d_m3BeginExternC     extern "C" {
+#ଯଦି defined(__cplusplus)
+#  define d_m3BeginExternC     ବାହ୍ୟ "C" {
 #  define d_m3EndExternC       }
-#else
+#ଅନ୍ୟଥା
 #  define d_m3BeginExternC
 #  define d_m3EndExternC
 #endif
@@ -29,20 +29,20 @@ d_m3BeginExternC
 
 #define d_m3ImplementFloat (d_m3HasFloat || d_m3NoFloatDynamic)
 
-#if !defined(d_m3ShortTypesDefined)
+#ଯଦି !defined(d_m3ShortTypesDefined)
 
-typedef uint64_t u64;
-typedef int64_t  i64;
-typedef uint32_t u32;
-typedef int32_t  i32;
-typedef uint16_t u16;
-typedef int16_t  i16;
-typedef uint8_t  u8;
-typedef int8_t   i8;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା uint64_t u64;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା int64_t  i64;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା uint32_t u32;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା int32_t  i32;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା uint16_t u16;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା int16_t  i16;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା uint8_t  u8;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା int8_t   i8;
 
-#  if d_m3ImplementFloat
-typedef double f64;
-typedef float  f32;
+#  ଯଦି d_m3ImplementFloat
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଦ୍ୱିଗୁଣ f64;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଦଶମିକ  f32;
 #  endif
 
 #endif // d_m3ShortTypesDefined
@@ -50,89 +50,89 @@ typedef float  f32;
 #define PRIf32          "f"
 #define PRIf64          "lf"
 
-typedef const void*       m3ret_t;
-typedef const void*       voidptr_t;
-typedef const char*       cstr_t;
-typedef const char* const ccstr_t;
-typedef const u8*         bytes_t;
-typedef const u8* const   cbytes_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ ଶୂନ୍ୟ*       m3ret_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ ଶୂନ୍ୟ*       voidptr_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ ଅକ୍ଷର*       cstr_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ ଅକ୍ଷର* ଅଚଳ ccstr_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ u8*         bytes_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ u8* ଅଚଳ   cbytes_t;
 
-typedef u16               m3opcode_t;
-#if d_m3HasTypedRefs
-typedef u16 m3type_t;       // a value type, see the d_m3Type_* bits below
-#else
-typedef u8 m3type_t;       // only plain M3ValueType values exist
+ପ୍ରକାରବ୍ୟାଖ୍ୟା u16               m3opcode_t;
+#ଯଦି d_m3HasTypedRefs
+ପ୍ରକାରବ୍ୟାଖ୍ୟା u16 m3type_t;       // a value type, see the d_m3Type_* bits below
+#ଅନ୍ୟଥା
+ପ୍ରକାରବ୍ୟାଖ୍ୟା u8 m3type_t;       // only plain M3ValueType values exist
 #endif
 
-typedef i64 m3reg_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା i64 m3reg_t;
 
-#if d_m3Use32BitSlots
-typedef u32 m3slot_t;
-#else
-typedef u64 m3slot_t;
+#ଯଦି d_m3Use32BitSlots
+ପ୍ରକାରବ୍ୟାଖ୍ୟା u32 m3slot_t;
+#ଅନ୍ୟଥା
+ପ୍ରକାରବ୍ୟାଖ୍ୟା u64 m3slot_t;
 #endif
 
-typedef m3slot_t* m3stack_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା m3slot_t* m3stack_t;
 
-#define c_ioSlotCount ((u16)(sizeof(u64) / sizeof(m3slot_t)))
+#define c_io_Slot_ଗଣନା ((u16)(ଆକାର(u64) / ଆକାର(m3slot_t)))
 
-typedef const void* const cvptr_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଅଚଳ ଶୂନ୍ୟ* ଅଚଳ cvptr_t;
 
-#if defined(DEBUG)
+#ଯଦି defined(DEBUG)
 
 #  define d_m3Log(CATEGORY, FMT, ...)                printf (" %8s  |  " FMT, #CATEGORY, ##__VA_ARGS__);
 
-#  if d_m3LogParse
+#  ଯଦି d_m3LogParse
 #    define m3log_parse(CATEGORY, FMT, ...)          d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  ଅନ୍ୟଥା
 #    define m3log_parse(...) {}
 #  endif
 
-#  if d_m3LogCompile
+#  ଯଦି d_m3LogCompile
 #    define m3log_compile(CATEGORY, FMT, ...)        d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  ଅନ୍ୟଥା
 #    define m3log_compile(...) {}
 #  endif
 
-#  if d_m3LogEmit
+#  ଯଦି d_m3LogEmit
 #    define m3log_emit(CATEGORY, FMT, ...)           d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  ଅନ୍ୟଥା
 #    define m3log_emit(...) {}
 #  endif
 
-#  if d_m3LogCodePages
+#  ଯଦି d_m3LogCodePages
 #    define m3log_code(CATEGORY, FMT, ...)           d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  ଅନ୍ୟଥା
 #    define m3log_code(...) {}
 #  endif
 
-#  if d_m3LogModule
+#  ଯଦି d_m3LogModule
 #    define m3log_module(CATEGORY, FMT, ...)         d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  ଅନ୍ୟଥା
 #    define m3log_module(...) {}
 #  endif
 
-#  if d_m3LogRuntime
+#  ଯଦି d_m3LogRuntime
 #    define m3log_runtime(CATEGORY, FMT, ...)        d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  ଅନ୍ୟଥା
 #    define m3log_runtime(...) {}
 #  endif
 
 #  define m3log(CATEGORY, FMT, ...)                  m3log_##CATEGORY (CATEGORY, FMT "\n", ##__VA_ARGS__)
-#else
+#ଅନ୍ୟଥା
 #  define d_m3Log(CATEGORY, FMT, ...)                {}
 #  define m3log(CATEGORY, FMT, ...)                  {}
 #endif
 
 
-#if defined(ASSERTS) || (defined(DEBUG) && !defined(NASSERTS))
-#  define d_m3Assert(ASS)  if (!(ASS)) { printf("Assertion failed at %s:%d : %s\n", __FILE__, __LINE__, #ASS); fflush(stdout); abort(); }
-#else
+#ଯଦି defined(ASSERTS) || (defined(DEBUG) && !defined(NASSERTS))
+#  define d_m3Assert(ASS)  ଯଦି (!(ASS)) { printf("Assertion failed at %s:%d : %s\n", __FILE__, __LINE__, #ASS); fflush(stdout); abort(); }
+#ଅନ୍ୟଥା
 #  define d_m3Assert(ASS)
 #endif
 
-typedef void /*const*/*                code_t;
-typedef code_t const* /*__restrict__*/ pc_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ଶୂନ୍ୟ /*const*/*                code_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା code_t ଅଚଳ* /*__restrict__*/ pc_t;
 
 
 // Sits immediately before the linear memory it describes, so m3MemData() is
@@ -141,30 +141,30 @@ typedef code_t const* /*__restrict__*/ pc_t;
 // counts, its owning runtime - through the back-pointers here. 'memory' is what
 // makes that possible without going through the runtime, which is the
 // prerequisite for a runtime holding more than one memory.
-typedef struct M3MemoryHeader {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା M3MemoryHeader {
     IM3Runtime       runtime;
-    void*            maxStack;
+    ଶୂନ୍ୟ*            max_ଗଦା;
     size_t           length;
-    struct M3Memory* memory;         // the M3Memory this block belongs to
+    ସଂରଚନା M3Memory* memory;         // the M3Memory this block belongs to
 } M3MemoryHeader;
 
-struct M3CodeMappingPage;
+ସଂରଚନା M3CodeMappingPage;
 
-typedef struct M3CodePageHeader {
-    struct M3CodePage* next;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା M3CodePageHeader {
+    ସଂରଚନା M3CodePage* next;
 
-    u32                lineIndex;
-    u32                numLines;
+    u32                ଧାଡ଼ି_Index;
+    u32                ଅଙ୍କ_ଧାଡ଼ିଗୁଡ଼ିକ;
     u32                sequence;       // this is just used for debugging; could be removed
-    u32                usageCount;
+    u32                usage_ଗଣନା;
 
-#if d_m3RecordBacktraces
-    struct M3CodeMappingPage* mapping;
+#ଯଦି d_m3RecordBacktraces
+    ସଂରଚନା M3CodeMappingPage* mapping;
 #endif // d_m3RecordBacktraces
 } M3CodePageHeader;
 
 
-#define d_m3CodePageFreeLinesThreshold      7+2       // max is: ReturnCallIndirect (op + 6 immediates) + 2 for bridge
+#define d_m3_Code_Page_Free_ଧାଡ଼ିଗୁଡ଼ିକ_Threshold      7+2       // max is: ReturnCallIndirect (op + 6 immediates) + 2 for bridge
 
 #define d_m3DefaultMemPageSize              65536
 
@@ -185,30 +185,30 @@ typedef struct M3CodePageHeader {
 #define d_m3Reg0SlotAlias                   60000
 #define d_m3Fp0SlotAlias                    (d_m3Reg0SlotAlias + 2)
 
-#if d_m3HasTypedRefs
+#ଯଦି d_m3HasTypedRefs
 // a heap type index has to fit in the spare bits of an m3type_t, see below
-#  define d_m3MaxSaneTypesCount             4094
-#else
+#  define d_m3_Max_Sane_Types_ଗଣନା             4094
+#ଅନ୍ୟଥା
 // M3Environment.numFuncTypes is the u16 that hands out M3FuncType.canonicalIndex,
 // so the count has to stay below 65536 here as well
-#  define d_m3MaxSaneTypesCount             65500
+#  define d_m3_Max_Sane_Types_ଗଣନା             65500
 #endif
-#define d_m3MaxSaneFunctionsCount           1000000
-#define d_m3MaxSaneImportsCount             100000
-#define d_m3MaxSaneExportsCount             100000
-#define d_m3MaxSaneGlobalsCount             1000000
-#define d_m3MaxSaneTagsCount                100000
+#define d_m3_Max_Sane_Functions_ଗଣନା           1000000
+#define d_m3_Max_Sane_Imports_ଗଣନା             100000
+#define d_m3_Max_Sane_Exports_ଗଣନା             100000
+#define d_m3_Max_Sane_Globals_ଗଣନା             1000000
+#define d_m3_Max_Sane_Tags_ଗଣନା                100000
 #define d_m3MaxSaneElementSegments          10000000
 #define d_m3MaxSaneDataSegments             100000
 #define d_m3MaxSaneTableSize                10000000
-#define d_m3MaxSaneMemoriesCount            10000
-#if d_m3HasRefTypes
-#  define d_m3MaxSaneTableCount             1000
-#else
-#  define d_m3MaxSaneTableCount             1           // MVP: a single table
+#define d_m3_Max_Sane_Memories_ଗଣନା            10000
+#ଯଦି d_m3HasRefTypes
+#  define d_m3_Max_Sane_Table_ଗଣନା             1000
+#ଅନ୍ୟଥା
+#  define d_m3_Max_Sane_Table_ଗଣନା             1           // MVP: a single table
 #endif
 #define d_m3MaxSaneUtf8Length               10000
-#define d_m3MaxSaneFunctionArgRetCount      1000    // still insane, but whatever
+#define d_m3_Max_Sane_Function_Arg_Ret_ଗଣନା      1000    // still insane, but whatever
 
 #define d_externalKind_function             0
 #define d_externalKind_table                1
@@ -242,27 +242,27 @@ typedef struct M3CodePageHeader {
 
 // indexed by M3ValueType: c_m3Type_count entries for the concrete types, plus
 // one more for c_m3Type_unknown, which sits right after them
-static const char* const c_waTypes[] = { "nil", "i32", "i64", "f32", "f64", "v128", "funcref", "externref", "exnref", "contref", "unknown" };
-static const char* const c_waCompactTypes[] = { "_", "i", "I", "f", "F", "V", "r", "R", "e", "c", "?" };
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର* ଅଚଳ c_waTypes[] = { "nil", "i32", "i64", "f32", "f64", "v128", "funcref", "externref", "exnref", "contref", "unknown" };
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର* ଅଚଳ c_waCompactTypes[] = { "_", "i", "I", "f", "F", "V", "r", "R", "e", "c", "?" };
 
 
-#if d_m3VerboseErrorMessages
+#ଯଦି d_m3VerboseErrorMessages
 
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...);
+                  ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_file, u32 i_ଧାଡ଼ି_ଅଙ୍କ, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_errorMessage, ...);
 
-#  define _m3Error(RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ...) \
-            m3Error (RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ##__VA_ARGS__)
+#  define _m3Error(RESULT, RT, MOD, FUN, FILE, ଧାଡ଼ି, FORMAT, ...) \
+            m3Error (RESULT, RT, MOD, FUN, FILE, ଧାଡ଼ି, FORMAT, ##__VA_ARGS__)
 
-#else
-#  define _m3Error(RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ...) (RESULT)
+#ଅନ୍ୟଥା
+#  define _m3Error(RESULT, RT, MOD, FUN, FILE, ଧାଡ଼ି, FORMAT, ...) (RESULT)
 #endif
 
-#define ErrorRuntime(RESULT, RUNTIME, FORMAT, ...)      _m3Error (RESULT, RUNTIME, NULL, NULL,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
-#define ErrorModule(RESULT, MOD, FORMAT, ...)           _m3Error (RESULT, MOD->runtime, MOD, NULL,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
-#define ErrorCompile(RESULT, COMP, FORMAT, ...)         _m3Error (RESULT, COMP->runtime, COMP->module, NULL, __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
+#define ErrorRuntime(RESULT, RUNTIME, FORMAT, ...)      _m3Error (RESULT, RUNTIME, ଖାଲି, ଖାଲି,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
+#define ErrorModule(RESULT, MOD, FORMAT, ...)           _m3Error (RESULT, MOD->runtime, MOD, ଖାଲି,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
+#define ErrorCompile(RESULT, COMP, FORMAT, ...)         _m3Error (RESULT, COMP->runtime, COMP->module, ଖାଲି, __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
 
-#if d_m3GuardedMemory
+#ଯଦି d_m3GuardedMemory
 
 // How much address space a linear memory's bytes are given: everything a Wasm access
 // can name. A 32-bit address plus a 32-bit memarg offset reaches just under 2^33, and
@@ -273,112 +273,112 @@ M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, I
 // not be reserved at all. What comes back is the base of the slot: the memory's
 // M3MemoryHeader sits at the end of its first page, and the bytes the guest addresses
 // begin on the page after that.
-void*           Guard_TakeSlot (void);
+ଶୂନ୍ୟ*           Guard_TakeSlot (ଶୂନ୍ୟ);
 
 // The header of a slot, which is also what the guest's memory starts right after
-M3MemoryHeader* Guard_SlotHeader (void* i_slot);
+M3MemoryHeader* Guard_SlotHeader (ଶୂନ୍ୟ* i_slot);
 
 // Make the first i_dataBytes of the slot's data reachable. Only ever asked to grow,
 // and asking for what is already there costs nothing.
-bool            Guard_CommitSlot (void* i_slot, size_t i_dataBytes);
+bool            Guard_CommitSlot (ଶୂନ୍ୟ* i_slot, size_t i_dataBytes);
 
 // Give a slot back, dropping everything committed in it. The next taker gets it
 // zeroed, as a fresh linear memory has to be.
-void            Guard_GiveSlot (void* i_slot);
+ଶୂନ୍ୟ            Guard_GiveSlot (ଶୂନ୍ୟ* i_slot);
 
 // The whole arena, for a fault to be held against - see m3_HostProtectedCall. Answers
 // (NULL, 0) before anything has asked for a slot.
-void            Guard_ArenaRange (void** o_low, size_t* o_bytes);
+ଶୂନ୍ୟ            Guard_ArenaRange (ଶୂନ୍ୟ** o_ତଳ, size_t* o_bytes);
 
 #endif // d_m3GuardedMemory
 
-#if d_m3MaxNativeStack > 0
+#ଯଦି d_m3_Max_Native_ଗଦା > 0
 // The native-stack low-water mark for a top-level call that came in at i_stackPtr,
 // clamped to what the calling thread's stack really is where that can be measured.
 // See d_m3MaxNativeStack and d_m3StackLimitEnter.
-void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget);
+ଶୂନ୍ୟ* m3_Native_ଗଦା_Limit (ଶୂନ୍ୟ* i_ଗଦା_Ptr, size_t i_budget);
 #endif
 
-#if d_m3LogNativeStack
-void m3StackCheckInit ();
-void m3StackCheck ();
-int  m3StackGetMax ();
-#else
-#  define     m3StackCheckInit()
-#  define     m3StackCheck()
-#  define     m3StackGetMax()         0
+#ଯଦି d_m3_Log_Native_ଗଦା
+ଶୂନ୍ୟ m3_ଗଦା_Check_Init ();
+ଶୂନ୍ୟ m3_ଗଦା_Check ();
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା  m3_ଗଦା_Get_Max ();
+#ଅନ୍ୟଥା
+#  define     m3_ଗଦା_Check_Init()
+#  define     m3_ଗଦା_Check()
+#  define     m3_ଗଦା_Get_Max()         0
 #endif
 
-#if d_m3LogTimestamps
+#ଯଦି d_m3LogTimestamps
 #  define     PRIts                   "%llu"
 uint64_t m3_GetTimestamp ();
-#else
+#ଅନ୍ୟଥା
 #  define     PRIts                   "%s"
 #  define     m3_GetTimestamp()       ""
 #endif
 
-void  m3_Abort (const char* message);
-void* m3_Malloc_Impl (size_t i_size);
-void* m3_Realloc_Impl (void* i_ptr, size_t i_newSize, size_t i_oldSize);
-void  m3_Free_Impl (void* i_ptr);
-void* m3_CopyMem (const void* i_from, size_t i_size);
+ଶୂନ୍ୟ  m3_Abort (ଅଚଳ ଅକ୍ଷର* message);
+ଶୂନ୍ୟ* m3_Malloc_Impl (size_t i_size);
+ଶୂନ୍ୟ* m3_Realloc_Impl (ଶୂନ୍ୟ* i_ptr, size_t i_newSize, size_t i_oldSize);
+ଶୂନ୍ୟ  m3_Free_Impl (ଶୂନ୍ୟ* i_ptr);
+ଶୂନ୍ୟ* m3_CopyMem (ଅଚଳ ଶୂନ୍ୟ* i_from, size_t i_size);
 
-#if d_m3LogHeapOps
+#ଯଦି d_m3LogHeapOps
 
 // Tracing format: timestamp;heap:OpCode;name;size(bytes);new items;new ptr;old items;old ptr
 
-static inline
-void* m3_AllocStruct_Impl (ccstr_t name, size_t i_size)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
+ଶୂନ୍ୟ* m3_AllocStruct_Impl (ccstr_t name, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size);
+    ଶୂନ୍ୟ* result = m3_Malloc_Impl(i_size);
     fprintf(stderr, PRIts ";heap:AllocStruct;%s;%zu;;%p;;\n", m3_GetTimestamp(), name, i_size, result);
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
-static inline
-void* m3_AllocArray_Impl (ccstr_t name, size_t i_num, size_t i_size)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
+ଶୂନ୍ୟ* m3_AllocArray_Impl (ccstr_t name, size_t i_ଅଙ୍କ, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size * i_num);
-    fprintf(stderr, PRIts ";heap:AllocArr;%s;%zu;%zu;%p;;\n", m3_GetTimestamp(), name, i_size, i_num, result);
-    return result;
+    ଶୂନ୍ୟ* result = m3_Malloc_Impl(i_size * i_ଅଙ୍କ);
+    fprintf(stderr, PRIts ";heap:AllocArr;%s;%zu;%zu;%p;;\n", m3_GetTimestamp(), name, i_size, i_ଅଙ୍କ, result);
+    ଫେରନ୍ତୁ result;
 }
 
-static inline
-void* m3_ReallocArray_Impl (ccstr_t name, void* i_ptr_old, size_t i_num_new, size_t i_num_old, size_t i_size)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
+ଶୂନ୍ୟ* m3_ReallocArray_Impl (ccstr_t name, ଶୂନ୍ୟ* i_ptr_old, size_t i_ଅଙ୍କ_new, size_t i_ଅଙ୍କ_old, size_t i_size)
 {
-    void* result = m3_Realloc_Impl(i_ptr_old, i_size * i_num_new, i_size * i_num_old);
-    fprintf(stderr, PRIts ";heap:ReallocArr;%s;%zu;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_size, i_num_new, result, i_num_old, i_ptr_old);
-    return result;
+    ଶୂନ୍ୟ* result = m3_Realloc_Impl(i_ptr_old, i_size * i_ଅଙ୍କ_new, i_size * i_ଅଙ୍କ_old);
+    fprintf(stderr, PRIts ";heap:ReallocArr;%s;%zu;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_size, i_ଅଙ୍କ_new, result, i_ଅଙ୍କ_old, i_ptr_old);
+    ଫେରନ୍ତୁ result;
 }
 
-static inline
-void* m3_Malloc (ccstr_t name, size_t i_size)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
+ଶୂନ୍ୟ* m3_Malloc (ccstr_t name, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size);
+    ଶୂନ୍ୟ* result = m3_Malloc_Impl(i_size);
     fprintf(stderr, PRIts ";heap:AllocMem;%s;%zu;;%p;;\n", m3_GetTimestamp(), name, i_size, result);
-    return result;
+    ଫେରନ୍ତୁ result;
 }
-static inline
-void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
+ଶୂନ୍ୟ* m3_Realloc (ccstr_t name, ଶୂନ୍ୟ* i_ptr, size_t i_newSize, size_t i_oldSize)
 {
-    void* result = m3_Realloc_Impl(i_ptr, i_newSize, i_oldSize);
+    ଶୂନ୍ୟ* result = m3_Realloc_Impl(i_ptr, i_newSize, i_oldSize);
     fprintf(stderr, PRIts ";heap:ReallocMem;%s;;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_newSize, result, i_oldSize, i_ptr);
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
-#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_AllocStruct_Impl  (#STRUCT, sizeof (STRUCT))
-#  define     m3_AllocArray(STRUCT, NUM)              (STRUCT *)m3_AllocArray_Impl   (#STRUCT, NUM, sizeof (STRUCT))
-#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_ReallocArray_Impl (#STRUCT, (void *)(PTR), (NEW), (OLD), sizeof (STRUCT))
-#  define     m3_Free(P)                              do { void* p = (void*)(P);                                  \
-                                                          if (p) { fprintf(stderr, PRIts ";heap:FreeMem;;;;%p;\n", m3_GetTimestamp(), p); }     \
-                                                          m3_Free_Impl (p); (P) = NULL; } while(0)
-#else
+#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_AllocStruct_Impl  (#STRUCT, ଆକାର (STRUCT))
+#  define     m3_AllocArray(STRUCT, ଅଙ୍କ)              (STRUCT *)m3_AllocArray_Impl   (#STRUCT, ଅଙ୍କ, ଆକାର (STRUCT))
+#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_ReallocArray_Impl (#STRUCT, (ଶୂନ୍ୟ *)(PTR), (NEW), (OLD), ଆକାର (STRUCT))
+#  define     m3_Free(P)                              କର { ଶୂନ୍ୟ* p = (ଶୂନ୍ୟ*)(P);                                  \
+                                                          ଯଦି (p) { fprintf(stderr, PRIts ";heap:FreeMem;;;;%p;\n", m3_GetTimestamp(), p); }     \
+                                                          m3_Free_Impl (p); (P) = ଖାଲି; } ଯେତେବେଳେ(0)
+#ଅନ୍ୟଥା
 #  define     m3_Malloc(NAME, SIZE)                   m3_Malloc_Impl(SIZE)
 #  define     m3_Realloc(NAME, PTR, NEW, OLD)         m3_Realloc_Impl(PTR, NEW, OLD)
-#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT))
-#  define     m3_AllocArray(STRUCT, NUM)              (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT) * (NUM))
-#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_Realloc_Impl ((void *)(PTR), sizeof (STRUCT) * (NEW), sizeof (STRUCT) * (OLD))
-#  define     m3_Free(P)                              do { m3_Free_Impl ((void*)(P)); (P) = NULL; } while(0)
+#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_Malloc_Impl (ଆକାର (STRUCT))
+#  define     m3_AllocArray(STRUCT, ଅଙ୍କ)              (STRUCT *)m3_Malloc_Impl (ଆକାର (STRUCT) * (ଅଙ୍କ))
+#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_Realloc_Impl ((ଶୂନ୍ୟ *)(PTR), ଆକାର (STRUCT) * (NEW), ଆକାର (STRUCT) * (OLD))
+#  define     m3_Free(P)                              କର { m3_Free_Impl ((ଶୂନ୍ୟ*)(P)); (P) = ଖାଲି; } ଯେତେବେଳେ(0)
 #endif
 
 // A value type as the parser, compiler and validator carry it. The plain
@@ -394,7 +394,7 @@ void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
 //   bit 12     heap type cont rather than func
 //   bits 11-0  canonical function type index, or d_m3Type_heapAbstract
 
-#if d_m3HasTypedRefs
+#ଯଦି d_m3HasTypedRefs
 
 #  define d_m3Type_ref                0x8000u
 #  define d_m3Type_refNonNull         0x4000u
@@ -413,46 +413,46 @@ void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
 u8   BaseTypeOf (m3type_t i_type);
 bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super);
 
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 bool IsSpelledRefType (m3type_t i_type)
 {
-    return (i_type & d_m3Type_ref) != 0;
+    ଫେରନ୍ତୁ (i_type & d_m3Type_ref) != 0;
 }
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 bool IsNullableRef (m3type_t i_type)
 {
-    return (i_type & d_m3Type_refNonNull) == 0;
+    ଫେରନ୍ତୁ (i_type & d_m3Type_refNonNull) == 0;
 }
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 u32 HeapTypeOf (m3type_t i_type)
 {
-    return IsSpelledRefType(i_type) ? (i_type & d_m3Type_heapMask) : d_m3Type_heapAbstract;
+    ଫେରନ୍ତୁ IsSpelledRefType(i_type) ? (i_type & d_m3Type_heapMask) : d_m3Type_heapAbstract;
 }
 
-#else // no spelled-out reference types, so every value type is its own storage
+#ଅନ୍ୟଥା // no spelled-out reference types, so every value type is its own storage
       // type and subtyping collapses back to equality
 
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 u8 BaseTypeOf (m3type_t i_type)
 {
-    return (u8)i_type;
+    ଫେରନ୍ତୁ (u8)i_type;
 }
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super)
 {
-    return i_sub == i_super;
+    ଫେରନ୍ତୁ i_sub == i_super;
 }
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 bool IsSpelledRefType (m3type_t i_type)
 {
-    (void)i_type;
-    return false;
+    (ଶୂନ୍ୟ)i_type;
+    ଫେରନ୍ତୁ false;
 }
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 bool IsNullableRef (m3type_t i_type)
 {
-    (void)i_type;
-    return true;
+    (ଶୂନ୍ୟ)i_type;
+    ଫେରନ୍ତୁ true;
 }
 
 #endif // d_m3HasTypedRefs
@@ -467,58 +467,58 @@ bool     IsRefType (m3type_t i_m3Type);
 bool     Is64BitType (m3type_t i_m3Type);
 u32      SizeOfType (m3type_t i_m3Type);
 
-M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end);
-#if d_m3ImplementFloat
-M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u64 (u64* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u32 (u32* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+#ଯଦି d_m3ImplementFloat
+M3Result Read_f64 (f64* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_f32 (f32* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
 #endif
-M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u8 (u8* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_opcode (m3opcode_t* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
 
-M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLebUnsigned (u64* o_ମୂଲ୍ୟ, u32 i_max_ଅଙ୍କ_Bits, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLebSigned (i64* o_ମୂଲ୍ୟ, u32 i_max_ଅଙ୍କ_Bits, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_u32 (u32* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
 
 // The memarg immediate of a load or store: an alignment hint, then a static
 // offset. Multi-memory reinterprets the alignment as a bitfield -- bit 6 says a
 // memory index sits between the two -- so the hint is returned with that bit
 // masked off and the index defaults to 0 when it is clear.
 M3Result ReadMemoryArg (u32* o_align, u32* o_memoryIdx, u64* o_offset, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_u7 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i7 (i8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i32 (i32* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i64 (i64* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_u7 (u8* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i7 (i8* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i32 (i32* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i64 (i64* o_ମୂଲ୍ୟ, bytes_t* io_bytes, cbytes_t i_end);
 M3Result Read_utf8 (cstr_t* o_utf8, bytes_t* io_bytes, cbytes_t i_end);
 
-#if d_m3HasSnapshots
+#ଯଦି d_m3HasSnapshots
 // XXH64, in m3_xxh64.c. Initialize a state, feed it the input in any number of
 // pieces, then read the digest out. The digest depends only on the bytes fed in
 // - not on how they were split up, nor on the host's byte order, pointer width
 // or compiler - and matches the reference xxHash implementation, so anything
 // else that speaks XXH64 computes the same value. Reading the digest does not
 // consume the state.
-typedef struct Xxh64 {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା Xxh64 {
     u64 acc[4];              // the four accumulator lanes; acc[2] still holds the seed
     u64 totalLength;         // input bytes seen so far
     u8  buffer[32];          // input past the last stripe the accumulators took
     u32 bufferLength;
 } Xxh64;
 
-void Xxh64_Init (Xxh64* o_state, u64 i_seed);
-void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size);
-u64  Xxh64_Digest (const Xxh64* i_state);
+ଶୂନ୍ୟ Xxh64_Init (Xxh64* o_state, u64 i_seed);
+ଶୂନ୍ୟ Xxh64_Update (Xxh64* io_state, ଅଚଳ ଶୂନ୍ୟ* i_data, size_t i_size);
+u64  Xxh64_Digest (ଅଚଳ Xxh64* i_state);
 #endif // d_m3HasSnapshots
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type);
-size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type);
+cstr_t SPrint_ମୂଲ୍ୟ (ଶୂନ୍ୟ* i_ମୂଲ୍ୟ, m3type_t i_type);
+size_t SPrintArg (ଅକ୍ଷର* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type);
 
-void   ReportError (IM3Runtime io_runtime, IM3Module i_module, IM3Function i_function, ccstr_t i_errorMessage, ccstr_t i_file, u32 i_lineNum);
+ଶୂନ୍ୟ   ReportError (IM3Runtime io_runtime, IM3Module i_module, IM3Function i_function, ccstr_t i_errorMessage, ccstr_t i_file, u32 i_ଧାଡ଼ି_ଅଙ୍କ);
 
-#if d_m3RecordBacktraces
-void PushBacktraceFrame (IM3Runtime io_runtime, pc_t i_pc);
-void FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function);
-void ClearBacktrace (IM3Runtime io_runtime);
+#ଯଦି d_m3RecordBacktraces
+ଶୂନ୍ୟ ଠେଲ_Backtrace_Frame (IM3Runtime io_runtime, pc_t i_pc);
+ଶୂନ୍ୟ FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function);
+ଶୂନ୍ୟ ClearBacktrace (IM3Runtime io_runtime);
 #endif
 
 d_m3EndExternC

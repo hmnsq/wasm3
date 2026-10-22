@@ -5,20 +5,20 @@
 //  Copyright © 2020 Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_wasi.h"
+#ଅନ୍ତର୍ଭାଵ "m3_api_wasi.h"
 
-#include "m3_env.h"
-#include "m3_exception.h"
+#ଅନ୍ତର୍ଭାଵ "m3_env.h"
+#ଅନ୍ତର୍ଭାଵ "m3_exception.h"
 
-#if defined(d_m3HasMetaWASI)
+#ଯଦି defined(d_m3HasMetaWASI)
 
 // NOTE: MetaWASI mostly redirects WASI calls to the host WASI environment
 
-#  if !defined(__wasi__)
+#  ଯଦି !defined(__wasi__)
 #    error "MetaWASI is only supported on WASI target"
 #  endif
 
-#  if __has_include("wasi/api.h")
+#  ଯଦି __has_include("wasi/api.h")
 #    include <wasi/api.h>
 #    define USE_NEW_WASI
 #    define WASI_STAT_FIELD(f) f
@@ -30,35 +30,35 @@
 #    define __WASI_ERRNO_INVAL     __WASI_EINVAL
 #    define WASI_STAT_FIELD(f) st_##f
 
-#  else
+#  ଅନ୍ୟଥା
 #    error "Missing WASI headers"
 #  endif
 
-static m3_wasi_context_t* wasi_context;
+ସ୍ଥିର m3_wasi_context_t* wasi_context;
 
-typedef size_t __wasi_size_t;
+ପ୍ରକାରବ୍ୟାଖ୍ୟା size_t __wasi_size_t;
 
 // The WASI ABI passes paths as (pointer, length) with no terminator, but wasi-libc's
 // __wasi_path_* wrappers take NUL-terminated strings, so every path has to be copied out
 // of guest memory and terminated first.
 #  ifdef PATH_MAX
 #    define d_m3WasiPathMax   PATH_MAX
-#  else
+#  ଅନ୍ୟଥା
 #    define d_m3WasiPathMax   1024
 #  endif
 
 // Declares NAME as a NUL-terminated copy of the guest's path, or returns ENAMETOOLONG
 #  define d_m3WasiPath(NAME, PTR, LEN)                                   \
-      char NAME [d_m3WasiPathMax];                                       \
-      if ((LEN) >= sizeof (NAME)) m3ApiReturn (__WASI_ERRNO_NAMETOOLONG); \
+      ଅକ୍ଷର NAME [d_m3WasiPathMax];                                       \
+      ଯଦି ((LEN) >= ଆକାର (NAME)) m3ApiReturn (__WASI_ERRNO_NAMETOOLONG); \
       memcpy (NAME, (PTR), (LEN));                                       \
       NAME [(LEN)] = 0;
 
-static inline
-const void* copy_iov_to_host (IM3Runtime runtime, void* _mem, __wasi_iovec_t* host_iov, __wasi_iovec_t* wasi_iov, int32_t iovs_len)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
+ଅଚଳ ଶୂନ୍ୟ* copy_iov_to_host (IM3Runtime runtime, ଶୂନ୍ୟ* _mem, __wasi_iovec_t* host_iov, __wasi_iovec_t* wasi_iov, int32_t iovs_len)
 {
     // Convert wasi memory offsets to host addresses
-    for (int i = 0; i < iovs_len; i++) {
+    ପାଇଁ (ପୂର୍ଣ୍ଣସଂଖ୍ୟା i = 0; i < iovs_len; i++) {
         host_iov[i].buf     = m3ApiOffsetToPtr(wasi_iov[i].buf);
         host_iov[i].buf_len = wasi_iov[i].buf_len;
         m3ApiCheckMem(host_iov[i].buf, host_iov[i].buf_len);
@@ -66,106 +66,106 @@ const void* copy_iov_to_host (IM3Runtime runtime, void* _mem, __wasi_iovec_t* ho
     m3ApiSuccess();
 }
 
-#  if d_m3EnableWasiTracing
+#  ଯଦି d_m3EnableWasiTracing
 
-const char* wasi_errno2str (__wasi_errno_t err)
+ଅଚଳ ଅକ୍ଷର* wasi_errno2str (__wasi_errno_t err)
 {
     // clang-format off
-    switch (err) {
-    case  0: return "ESUCCESS";
-    case  1: return "E2BIG";
-    case  2: return "EACCES";
-    case  3: return "EADDRINUSE";
-    case  4: return "EADDRNOTAVAIL";
-    case  5: return "EAFNOSUPPORT";
-    case  6: return "EAGAIN";
-    case  7: return "EALREADY";
-    case  8: return "EBADF";
-    case  9: return "EBADMSG";
-    case 10: return "EBUSY";
-    case 11: return "ECANCELED";
-    case 12: return "ECHILD";
-    case 13: return "ECONNABORTED";
-    case 14: return "ECONNREFUSED";
-    case 15: return "ECONNRESET";
-    case 16: return "EDEADLK";
-    case 17: return "EDESTADDRREQ";
-    case 18: return "EDOM";
-    case 19: return "EDQUOT";
-    case 20: return "EEXIST";
-    case 21: return "EFAULT";
-    case 22: return "EFBIG";
-    case 23: return "EHOSTUNREACH";
-    case 24: return "EIDRM";
-    case 25: return "EILSEQ";
-    case 26: return "EINPROGRESS";
-    case 27: return "EINTR";
-    case 28: return "EINVAL";
-    case 29: return "EIO";
-    case 30: return "EISCONN";
-    case 31: return "EISDIR";
-    case 32: return "ELOOP";
-    case 33: return "EMFILE";
-    case 34: return "EMLINK";
-    case 35: return "EMSGSIZE";
-    case 36: return "EMULTIHOP";
-    case 37: return "ENAMETOOLONG";
-    case 38: return "ENETDOWN";
-    case 39: return "ENETRESET";
-    case 40: return "ENETUNREACH";
-    case 41: return "ENFILE";
-    case 42: return "ENOBUFS";
-    case 43: return "ENODEV";
-    case 44: return "ENOENT";
-    case 45: return "ENOEXEC";
-    case 46: return "ENOLCK";
-    case 47: return "ENOLINK";
-    case 48: return "ENOMEM";
-    case 49: return "ENOMSG";
-    case 50: return "ENOPROTOOPT";
-    case 51: return "ENOSPC";
-    case 52: return "ENOSYS";
-    case 53: return "ENOTCONN";
-    case 54: return "ENOTDIR";
-    case 55: return "ENOTEMPTY";
-    case 56: return "ENOTRECOVERABLE";
-    case 57: return "ENOTSOCK";
-    case 58: return "ENOTSUP";
-    case 59: return "ENOTTY";
-    case 60: return "ENXIO";
-    case 61: return "EOVERFLOW";
-    case 62: return "EOWNERDEAD";
-    case 63: return "EPERM";
-    case 64: return "EPIPE";
-    case 65: return "EPROTO";
-    case 66: return "EPROTONOSUPPORT";
-    case 67: return "EPROTOTYPE";
-    case 68: return "ERANGE";
-    case 69: return "EROFS";
-    case 70: return "ESPIPE";
-    case 71: return "ESRCH";
-    case 72: return "ESTALE";
-    case 73: return "ETIMEDOUT";
-    case 74: return "ETXTBSY";
-    case 75: return "EXDEV";
-    case 76: return "ENOTCAPABLE";
-    default: return "<unknown>";
+    ବାଛ (err) {
+    ସ୍ଥିତି  0: ଫେରନ୍ତୁ "ESUCCESS";
+    ସ୍ଥିତି  1: ଫେରନ୍ତୁ "E2BIG";
+    ସ୍ଥିତି  2: ଫେରନ୍ତୁ "EACCES";
+    ସ୍ଥିତି  3: ଫେରନ୍ତୁ "EADDRINUSE";
+    ସ୍ଥିତି  4: ଫେରନ୍ତୁ "EADDRNOTAVAIL";
+    ସ୍ଥିତି  5: ଫେରନ୍ତୁ "EAFNOSUPPORT";
+    ସ୍ଥିତି  6: ଫେରନ୍ତୁ "EAGAIN";
+    ସ୍ଥିତି  7: ଫେରନ୍ତୁ "EALREADY";
+    ସ୍ଥିତି  8: ଫେରନ୍ତୁ "EBADF";
+    ସ୍ଥିତି  9: ଫେରନ୍ତୁ "EBADMSG";
+    ସ୍ଥିତି 10: ଫେରନ୍ତୁ "EBUSY";
+    ସ୍ଥିତି 11: ଫେରନ୍ତୁ "ECANCELED";
+    ସ୍ଥିତି 12: ଫେରନ୍ତୁ "ECHILD";
+    ସ୍ଥିତି 13: ଫେରନ୍ତୁ "ECONNABORTED";
+    ସ୍ଥିତି 14: ଫେରନ୍ତୁ "ECONNREFUSED";
+    ସ୍ଥିତି 15: ଫେରନ୍ତୁ "ECONNRESET";
+    ସ୍ଥିତି 16: ଫେରନ୍ତୁ "EDEADLK";
+    ସ୍ଥିତି 17: ଫେରନ୍ତୁ "EDESTADDRREQ";
+    ସ୍ଥିତି 18: ଫେରନ୍ତୁ "EDOM";
+    ସ୍ଥିତି 19: ଫେରନ୍ତୁ "EDQUOT";
+    ସ୍ଥିତି 20: ଫେରନ୍ତୁ "EEXIST";
+    ସ୍ଥିତି 21: ଫେରନ୍ତୁ "EFAULT";
+    ସ୍ଥିତି 22: ଫେରନ୍ତୁ "EFBIG";
+    ସ୍ଥିତି 23: ଫେରନ୍ତୁ "EHOSTUNREACH";
+    ସ୍ଥିତି 24: ଫେରନ୍ତୁ "EIDRM";
+    ସ୍ଥିତି 25: ଫେରନ୍ତୁ "EILSEQ";
+    ସ୍ଥିତି 26: ଫେରନ୍ତୁ "EINPROGRESS";
+    ସ୍ଥିତି 27: ଫେରନ୍ତୁ "EINTR";
+    ସ୍ଥିତି 28: ଫେରନ୍ତୁ "EINVAL";
+    ସ୍ଥିତି 29: ଫେରନ୍ତୁ "EIO";
+    ସ୍ଥିତି 30: ଫେରନ୍ତୁ "EISCONN";
+    ସ୍ଥିତି 31: ଫେରନ୍ତୁ "EISDIR";
+    ସ୍ଥିତି 32: ଫେରନ୍ତୁ "ELOOP";
+    ସ୍ଥିତି 33: ଫେରନ୍ତୁ "EMFILE";
+    ସ୍ଥିତି 34: ଫେରନ୍ତୁ "EMLINK";
+    ସ୍ଥିତି 35: ଫେରନ୍ତୁ "EMSGSIZE";
+    ସ୍ଥିତି 36: ଫେରନ୍ତୁ "EMULTIHOP";
+    ସ୍ଥିତି 37: ଫେରନ୍ତୁ "ENAMETOOLONG";
+    ସ୍ଥିତି 38: ଫେରନ୍ତୁ "ENETDOWN";
+    ସ୍ଥିତି 39: ଫେରନ୍ତୁ "ENETRESET";
+    ସ୍ଥିତି 40: ଫେରନ୍ତୁ "ENETUNREACH";
+    ସ୍ଥିତି 41: ଫେରନ୍ତୁ "ENFILE";
+    ସ୍ଥିତି 42: ଫେରନ୍ତୁ "ENOBUFS";
+    ସ୍ଥିତି 43: ଫେରନ୍ତୁ "ENODEV";
+    ସ୍ଥିତି 44: ଫେରନ୍ତୁ "ENOENT";
+    ସ୍ଥିତି 45: ଫେରନ୍ତୁ "ENOEXEC";
+    ସ୍ଥିତି 46: ଫେରନ୍ତୁ "ENOLCK";
+    ସ୍ଥିତି 47: ଫେରନ୍ତୁ "ENOLINK";
+    ସ୍ଥିତି 48: ଫେରନ୍ତୁ "ENOMEM";
+    ସ୍ଥିତି 49: ଫେରନ୍ତୁ "ENOMSG";
+    ସ୍ଥିତି 50: ଫେରନ୍ତୁ "ENOPROTOOPT";
+    ସ୍ଥିତି 51: ଫେରନ୍ତୁ "ENOSPC";
+    ସ୍ଥିତି 52: ଫେରନ୍ତୁ "ENOSYS";
+    ସ୍ଥିତି 53: ଫେରନ୍ତୁ "ENOTCONN";
+    ସ୍ଥିତି 54: ଫେରନ୍ତୁ "ENOTDIR";
+    ସ୍ଥିତି 55: ଫେରନ୍ତୁ "ENOTEMPTY";
+    ସ୍ଥିତି 56: ଫେରନ୍ତୁ "ENOTRECOVERABLE";
+    ସ୍ଥିତି 57: ଫେରନ୍ତୁ "ENOTSOCK";
+    ସ୍ଥିତି 58: ଫେରନ୍ତୁ "ENOTSUP";
+    ସ୍ଥିତି 59: ଫେରନ୍ତୁ "ENOTTY";
+    ସ୍ଥିତି 60: ଫେରନ୍ତୁ "ENXIO";
+    ସ୍ଥିତି 61: ଫେରନ୍ତୁ "EOVERFLOW";
+    ସ୍ଥିତି 62: ଫେରନ୍ତୁ "EOWNERDEAD";
+    ସ୍ଥିତି 63: ଫେରନ୍ତୁ "EPERM";
+    ସ୍ଥିତି 64: ଫେରନ୍ତୁ "EPIPE";
+    ସ୍ଥିତି 65: ଫେରନ୍ତୁ "EPROTO";
+    ସ୍ଥିତି 66: ଫେରନ୍ତୁ "EPROTONOSUPPORT";
+    ସ୍ଥିତି 67: ଫେରନ୍ତୁ "EPROTOTYPE";
+    ସ୍ଥିତି 68: ଫେରନ୍ତୁ "ERANGE";
+    ସ୍ଥିତି 69: ଫେରନ୍ତୁ "EROFS";
+    ସ୍ଥିତି 70: ଫେରନ୍ତୁ "ESPIPE";
+    ସ୍ଥିତି 71: ଫେରନ୍ତୁ "ESRCH";
+    ସ୍ଥିତି 72: ଫେରନ୍ତୁ "ESTALE";
+    ସ୍ଥିତି 73: ଫେରନ୍ତୁ "ETIMEDOUT";
+    ସ୍ଥିତି 74: ଫେରନ୍ତୁ "ETXTBSY";
+    ସ୍ଥିତି 75: ଫେରନ୍ତୁ "EXDEV";
+    ସ୍ଥିତି 76: ଫେରନ୍ତୁ "ENOTCAPABLE";
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ "<unknown>";
     }
     // clang-format on
 }
 
-const char* wasi_whence2str (__wasi_whence_t whence)
+ଅଚଳ ଅକ୍ଷର* wasi_whence2str (__wasi_whence_t whence)
 {
-    switch (whence) {
-    case __WASI_WHENCE_SET: return "SET";
-    case __WASI_WHENCE_CUR: return "CUR";
-    case __WASI_WHENCE_END: return "END";
-    default: return "<unknown>";
+    ବାଛ (whence) {
+    ସ୍ଥିତି __WASI_WHENCE_SET: ଫେରନ୍ତୁ "SET";
+    ସ୍ଥିତି __WASI_WHENCE_CUR: ଫେରନ୍ତୁ "CUR";
+    ସ୍ଥିତି __WASI_WHENCE_END: ଫେରନ୍ତୁ "END";
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ "<unknown>";
     }
 }
 
 #    define WASI_TRACE(fmt, ...)    { fprintf(stderr, "%s " fmt, __FUNCTION__+16, ##__VA_ARGS__); fprintf(stderr, " => %s\n", wasi_errno2str(ret)); }
-#  else
+#  ଅନ୍ୟଥା
 #    define WASI_TRACE(fmt, ...)
 #  endif
 
@@ -177,17 +177,17 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, argv)
-    m3ApiGetArgMem(char*, argv_buf)
+    m3ApiGetArgMem(ଅକ୍ଷର*, argv_buf)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    ଯଦି (context == ଖାଲି) {
         m3ApiReturn(__WASI_ERRNO_INVAL);
     }
 
-    m3ApiCheckMem(argv, context->argc * sizeof(uint32_t));
+    m3ApiCheckMem(argv, context->argc * ଆକାର(uint32_t));
 
-    for (u32 i = 0; i < context->argc; ++i) {
+    ପାଇଁ (u32 i = 0; i < context->argc; ++i) {
         m3ApiWriteMem32(&argv[i], m3ApiPtrToOffset(argv_buf));
 
         size_t len = strlen(context->argv[i]);
@@ -207,17 +207,17 @@ m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
     m3ApiGetArgMem(__wasi_size_t*, argc)
     m3ApiGetArgMem(__wasi_size_t*, argv_buf_size)
 
-    m3ApiCheckMem(argc, sizeof(__wasi_size_t));
-    m3ApiCheckMem(argv_buf_size, sizeof(__wasi_size_t));
+    m3ApiCheckMem(argc, ଆକାର(__wasi_size_t));
+    m3ApiCheckMem(argv_buf_size, ଆକାର(__wasi_size_t));
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    ଯଦି (context == ଖାଲି) {
         m3ApiReturn(__WASI_ERRNO_INVAL);
     }
 
     __wasi_size_t buf_len = 0;
-    for (u32 i = 0; i < context->argc; ++i) {
+    ପାଇଁ (u32 i = 0; i < context->argc; ++i) {
         buf_len += strlen(context->argv[i]) + 1;
     }
 
@@ -231,17 +231,17 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArgMem(uint32_t*, env)
-    m3ApiGetArgMem(char*, env_buf)
+    m3ApiGetArgMem(ଅକ୍ଷର*, env_buf)
 
     __wasi_errno_t ret;
-    __wasi_size_t  env_count, env_buf_size;
+    __wasi_size_t  env_ଗଣନା, env_buf_size;
 
-    ret = __wasi_environ_sizes_get(&env_count, &env_buf_size);
-    if (ret != __WASI_ERRNO_SUCCESS) {
+    ret = __wasi_environ_sizes_get(&env_ଗଣନା, &env_buf_size);
+    ଯଦି (ret != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(ret);
     }
 
-    m3ApiCheckMem(env, env_count * sizeof(uint32_t));
+    m3ApiCheckMem(env, env_ଗଣନା * ଆକାର(uint32_t));
     m3ApiCheckMem(env_buf, env_buf_size);
 
     // the array is the guest's, but the host fills it with its own pointers, which
@@ -249,11 +249,11 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     uint8_t** host_env = (uint8_t**)env;
 
     ret = __wasi_environ_get(host_env, (uint8_t*)env_buf);
-    if (ret != __WASI_ERRNO_SUCCESS) {
+    ଯଦି (ret != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(ret);
     }
 
-    for (u32 i = 0; i < env_count; ++i) {
+    ପାଇଁ (u32 i = 0; i < env_ଗଣନା; ++i) {
         m3ApiWriteMem32(&env[i], m3ApiPtrToOffset(host_env[i]));
     }
 
@@ -263,13 +263,13 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
 m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(__wasi_size_t*, env_count)
+    m3ApiGetArgMem(__wasi_size_t*, env_ଗଣନା)
     m3ApiGetArgMem(__wasi_size_t*, env_buf_size)
 
-    m3ApiCheckMem(env_count, sizeof(__wasi_size_t));
-    m3ApiCheckMem(env_buf_size, sizeof(__wasi_size_t));
+    m3ApiCheckMem(env_ଗଣନା, ଆକାର(__wasi_size_t));
+    m3ApiCheckMem(env_buf_size, ଆକାର(__wasi_size_t));
 
-    __wasi_errno_t ret = __wasi_environ_sizes_get(env_count, env_buf_size);
+    __wasi_errno_t ret = __wasi_environ_sizes_get(env_ଗଣନା, env_buf_size);
 
     m3ApiReturn(ret);
 }
@@ -278,7 +278,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_dir_name)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(char*, path)
+    m3ApiGetArgMem(ଅକ୍ଷର*, path)
     m3ApiGetArg(__wasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -296,7 +296,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
     m3ApiGetArg(__wasi_fd_t, fd)
     m3ApiGetArgMem(__wasi_prestat_t*, buf)
 
-    m3ApiCheckMem(buf, sizeof(__wasi_prestat_t));
+    m3ApiCheckMem(buf, ଆକାର(__wasi_prestat_t));
 
     __wasi_errno_t ret = __wasi_fd_prestat_get(fd, buf);
 
@@ -322,7 +322,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
 
     WASI_TRACE("fd:%d", fd);
 
-    if (ret != __WASI_ERRNO_SUCCESS) {
+    ଯଦି (ret != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -355,9 +355,9 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_set_rights)
     m3ApiGetArg(__wasi_rights_t, rights_base)
     m3ApiGetArg(__wasi_rights_t, rights_inheriting)
 
-#  if 0
+#  ଯଦି 0
     __wasi_errno_t ret = __wasi_fd_fdstat_set_rights(fd, rights_base, rights_inheriting);
-#  else
+#  ଅନ୍ୟଥା
     __wasi_errno_t ret = __WASI_ERRNO_INVAL;
 #  endif
 
@@ -408,7 +408,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_filestat_get)
 
     WASI_TRACE("fd:%d | fs.size:%" PRIu64, fd, stat.WASI_STAT_FIELD(size));
 
-    if (ret != __WASI_ERRNO_SUCCESS) {
+    ଯଦି (ret != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -433,13 +433,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_seek)
     m3ApiGetArg(uint32_t, wasi_whence)
     m3ApiGetArgMem(__wasi_filesize_t*, result)
 
-    m3ApiCheckMem(result, sizeof(__wasi_filesize_t));
+    m3ApiCheckMem(result, ଆକାର(__wasi_filesize_t));
 
     __wasi_whence_t whence = -1;
-    switch (wasi_whence) {
-    case 0: whence = __WASI_WHENCE_SET; break;
-    case 1: whence = __WASI_WHENCE_CUR; break;
-    case 2: whence = __WASI_WHENCE_END; break;
+    ବାଛ (wasi_whence) {
+    ସ୍ଥିତି 0: whence = __WASI_WHENCE_SET; ଭାଙ୍ଗ;
+    ସ୍ଥିତି 1: whence = __WASI_WHENCE_CUR; ଭାଙ୍ଗ;
+    ସ୍ଥିତି 2: whence = __WASI_WHENCE_END; ଭାଙ୍ଗ;
     }
 
     __wasi_filesize_t pos;
@@ -484,7 +484,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_tell)
     m3ApiGetArg(__wasi_fd_t, fd)
     m3ApiGetArgMem(__wasi_filesize_t*, result)
 
-    m3ApiCheckMem(result, sizeof(__wasi_filesize_t));
+    m3ApiCheckMem(result, ଆକାର(__wasi_filesize_t));
 
     __wasi_filesize_t pos;
     __wasi_errno_t    ret = __wasi_fd_tell(fd, &pos);
@@ -500,7 +500,7 @@ m3ApiRawFunction(m3_wasi_p1_path_create_directory)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, path)
     m3ApiGetArg(__wasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -509,7 +509,7 @@ m3ApiRawFunction(m3_wasi_p1_path_create_directory)
 
     __wasi_errno_t ret = __wasi_path_create_directory(fd, p);
 
-    WASI_TRACE("fd:%d, path:%.*s", fd, (int)path_len, path);
+    WASI_TRACE("fd:%d, path:%.*s", fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)path_len, path);
 
     m3ApiReturn(ret);
 }
@@ -518,21 +518,21 @@ m3ApiRawFunction(m3_wasi_p1_path_readlink)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, path)
     m3ApiGetArg(__wasi_size_t, path_len)
-    m3ApiGetArgMem(char*, buf)
+    m3ApiGetArgMem(ଅକ୍ଷର*, buf)
     m3ApiGetArg(__wasi_size_t, buf_len)
     m3ApiGetArgMem(__wasi_size_t*, bufused)
 
     m3ApiCheckMem(path, path_len);
     m3ApiCheckMem(buf, buf_len);
-    m3ApiCheckMem(bufused, sizeof(__wasi_size_t));
+    m3ApiCheckMem(bufused, ଆକାର(__wasi_size_t));
 
     d_m3WasiPath(p, path, path_len)
 
     __wasi_errno_t ret = __wasi_path_readlink(fd, p, (uint8_t*)buf, buf_len, bufused);
 
-    WASI_TRACE("fd:%d, path:%.*s | buf:%s, bufused:%d", fd, (int)path_len, path, buf, *bufused);
+    WASI_TRACE("fd:%d, path:%.*s | buf:%s, bufused:%d", fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)path_len, path, buf, *bufused);
 
     m3ApiReturn(ret);
 }
@@ -541,7 +541,7 @@ m3ApiRawFunction(m3_wasi_p1_path_remove_directory)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, path)
     m3ApiGetArg(__wasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -550,7 +550,7 @@ m3ApiRawFunction(m3_wasi_p1_path_remove_directory)
 
     __wasi_errno_t ret = __wasi_path_remove_directory(fd, p);
 
-    WASI_TRACE("fd:%d, path:%.*s", fd, (int)path_len, path);
+    WASI_TRACE("fd:%d, path:%.*s", fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)path_len, path);
 
     m3ApiReturn(ret);
 }
@@ -559,10 +559,10 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, old_fd)
-    m3ApiGetArgMem(const char*, old_path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, old_path)
     m3ApiGetArg(__wasi_size_t, old_path_len)
     m3ApiGetArg(__wasi_fd_t, new_fd)
-    m3ApiGetArgMem(const char*, new_path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, new_path)
     m3ApiGetArg(__wasi_size_t, new_path_len)
 
     m3ApiCheckMem(old_path, old_path_len);
@@ -575,7 +575,7 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
                                             new_fd, np);
 
     WASI_TRACE("old_fd:%d, old_path:%.*s, new_fd:%d, new_path:%.*s",
-               old_fd, (int)old_path_len, old_path, new_fd, (int)new_path_len, new_path);
+               old_fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)old_path_len, old_path, new_fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)new_path_len, new_path);
 
     m3ApiReturn(ret);
 }
@@ -583,10 +583,10 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 m3ApiRawFunction(m3_wasi_p1_path_symlink)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(const char*, old_path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, old_path)
     m3ApiGetArg(__wasi_size_t, old_path_len)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, new_path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, new_path)
     m3ApiGetArg(__wasi_size_t, new_path_len)
 
     m3ApiCheckMem(old_path, old_path_len);
@@ -599,7 +599,7 @@ m3ApiRawFunction(m3_wasi_p1_path_symlink)
                                              fd, np);
 
     WASI_TRACE("old_path:%.*s, fd:%d, new_path:%.*s",
-               (int)old_path_len, old_path, fd, (int)new_path_len, new_path);
+               (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)old_path_len, old_path, fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)new_path_len, new_path);
 
     m3ApiReturn(ret);
 }
@@ -608,7 +608,7 @@ m3ApiRawFunction(m3_wasi_p1_path_unlink_file)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, path)
     m3ApiGetArg(__wasi_size_t, path_len)
 
     m3ApiCheckMem(path, path_len);
@@ -617,7 +617,7 @@ m3ApiRawFunction(m3_wasi_p1_path_unlink_file)
 
     __wasi_errno_t ret = __wasi_path_unlink_file(fd, p);
 
-    WASI_TRACE("fd:%d, path:%.*s", fd, (int)path_len, path);
+    WASI_TRACE("fd:%d, path:%.*s", fd, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)path_len, path);
 
     m3ApiReturn(ret);
 }
@@ -627,7 +627,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, dirfd)
     m3ApiGetArg(__wasi_lookupflags_t, dirflags)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, path)
     m3ApiGetArg(__wasi_size_t, path_len)
     m3ApiGetArg(__wasi_oflags_t, oflags)
     m3ApiGetArg(__wasi_rights_t, fs_rights_base)
@@ -636,7 +636,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiGetArgMem(__wasi_fd_t*, fd)
 
     m3ApiCheckMem(path, path_len);
-    m3ApiCheckMem(fd, sizeof(__wasi_fd_t));
+    m3ApiCheckMem(fd, ଆକାର(__wasi_fd_t));
 
     d_m3WasiPath(p, path, path_len)
 
@@ -650,7 +650,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
                                           fd);
 
     WASI_TRACE("dirfd:%d, dirflags:0x%x, path:%.*s, oflags:0x%x, fs_flags:0x%x | fd:%d",
-               dirfd, dirflags, (int)path_len, path, oflags, fs_flags, *fd);
+               dirfd, dirflags, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)path_len, path, oflags, fs_flags, *fd);
 
     m3ApiReturn(ret);
 }
@@ -660,7 +660,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
     m3ApiGetArg(__wasi_lookupflags_t, flags)
-    m3ApiGetArgMem(const char*, path)
+    m3ApiGetArgMem(ଅଚଳ ଅକ୍ଷର*, path)
     m3ApiGetArg(uint32_t, path_len)
     m3ApiGetArgMem(uint8_t*, buf)
 
@@ -674,9 +674,9 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
     __wasi_errno_t ret = __wasi_path_filestat_get(fd, flags, p, &stat);
 
     WASI_TRACE("fd:%d, flags:0x%x, path:%.*s | fs.size:%" PRIu64,
-               fd, flags, (int)path_len, path, stat.WASI_STAT_FIELD(size));
+               fd, flags, (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)path_len, path, stat.WASI_STAT_FIELD(size));
 
-    if (ret != __WASI_ERRNO_SUCCESS) {
+    ଯଦି (ret != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -702,13 +702,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     m3ApiGetArg(__wasi_filesize_t, offset)
     m3ApiGetArgMem(__wasi_size_t*, nread)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(__wasi_iovec_t));
-    m3ApiCheckMem(nread, sizeof(__wasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * ଆକାର(__wasi_iovec_t));
+    m3ApiCheckMem(nread, ଆକାର(__wasi_size_t));
 
     __wasi_iovec_t iovs[iovs_len];
-    const void*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
-    if (mem_check != m3Err_none) {
-        return mem_check;
+    ଅଚଳ ଶୂନ୍ୟ*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
+    ଯଦି (mem_check != m3Err_none) {
+        ଫେରନ୍ତୁ mem_check;
     }
 
     __wasi_errno_t ret = __wasi_fd_pread(fd, iovs, iovs_len, offset, nread);
@@ -726,13 +726,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     m3ApiGetArg(__wasi_size_t, iovs_len)
     m3ApiGetArgMem(__wasi_size_t*, nread)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(__wasi_iovec_t));
-    m3ApiCheckMem(nread, sizeof(__wasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * ଆକାର(__wasi_iovec_t));
+    m3ApiCheckMem(nread, ଆକାର(__wasi_size_t));
 
     __wasi_iovec_t iovs[iovs_len];
-    const void*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
-    if (mem_check != m3Err_none) {
-        return mem_check;
+    ଅଚଳ ଶୂନ୍ୟ*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
+    ଯଦି (mem_check != m3Err_none) {
+        ଫେରନ୍ତୁ mem_check;
     }
 
     __wasi_errno_t ret = __wasi_fd_read(fd, iovs, iovs_len, nread);
@@ -750,13 +750,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     m3ApiGetArg(__wasi_size_t, iovs_len)
     m3ApiGetArgMem(__wasi_size_t*, nwritten)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(__wasi_iovec_t));
-    m3ApiCheckMem(nwritten, sizeof(__wasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * ଆକାର(__wasi_iovec_t));
+    m3ApiCheckMem(nwritten, ଆକାର(__wasi_size_t));
 
     __wasi_iovec_t iovs[iovs_len];
-    const void*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
-    if (mem_check != m3Err_none) {
-        return mem_check;
+    ଅଚଳ ଶୂନ୍ୟ*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
+    ଯଦି (mem_check != m3Err_none) {
+        ଫେରନ୍ତୁ mem_check;
     }
 
     __wasi_errno_t ret = __wasi_fd_write(fd, (__wasi_ciovec_t*)iovs, iovs_len, nwritten);
@@ -775,13 +775,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     m3ApiGetArg(__wasi_filesize_t, offset)
     m3ApiGetArgMem(__wasi_size_t*, nwritten)
 
-    m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(__wasi_iovec_t));
-    m3ApiCheckMem(nwritten, sizeof(__wasi_size_t));
+    m3ApiCheckMem(wasi_iovs, iovs_len * ଆକାର(__wasi_iovec_t));
+    m3ApiCheckMem(nwritten, ଆକାର(__wasi_size_t));
 
     __wasi_iovec_t iovs[iovs_len];
-    const void*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
-    if (mem_check != m3Err_none) {
-        return mem_check;
+    ଅଚଳ ଶୂନ୍ୟ*    mem_check = copy_iov_to_host(runtime, _mem, iovs, wasi_iovs, iovs_len);
+    ଯଦି (mem_check != m3Err_none) {
+        ଫେରନ୍ତୁ mem_check;
     }
 
     __wasi_errno_t ret = __wasi_fd_pwrite(fd, (__wasi_ciovec_t*)iovs, iovs_len, offset, nwritten);
@@ -795,13 +795,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_readdir)
 {
     m3ApiReturnType(uint32_t)
     m3ApiGetArg(__wasi_fd_t, fd)
-    m3ApiGetArgMem(void*, buf)
+    m3ApiGetArgMem(ଶୂନ୍ୟ*, buf)
     m3ApiGetArg(__wasi_size_t, buf_len)
     m3ApiGetArg(__wasi_dircookie_t, cookie)
     m3ApiGetArgMem(__wasi_size_t*, bufused)
 
     m3ApiCheckMem(buf, buf_len);
-    m3ApiCheckMem(bufused, sizeof(__wasi_size_t));
+    m3ApiCheckMem(bufused, ଆକାର(__wasi_size_t));
 
     __wasi_errno_t ret = __wasi_fd_readdir(fd, buf, buf_len, cookie, bufused);
 
@@ -884,7 +884,7 @@ m3ApiRawFunction(m3_wasi_p1_clock_res_get)
     m3ApiGetArg(__wasi_clockid_t, wasi_clk_id)
     m3ApiGetArgMem(__wasi_timestamp_t*, resolution)
 
-    m3ApiCheckMem(resolution, sizeof(__wasi_timestamp_t));
+    m3ApiCheckMem(resolution, ଆକାର(__wasi_timestamp_t));
 
     __wasi_timestamp_t t;
     __wasi_errno_t     ret = __wasi_clock_res_get(wasi_clk_id, &t);
@@ -903,7 +903,7 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
     m3ApiGetArg(__wasi_timestamp_t, precision)
     m3ApiGetArgMem(__wasi_timestamp_t*, time)
 
-    m3ApiCheckMem(time, sizeof(__wasi_timestamp_t));
+    m3ApiCheckMem(time, ଆକାର(__wasi_timestamp_t));
 
     __wasi_timestamp_t t;
     __wasi_errno_t     ret = __wasi_clock_time_get(wasi_clk_id, precision, &t);
@@ -918,14 +918,14 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
 m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 {
     m3ApiReturnType(uint32_t)
-    m3ApiGetArgMem(const __wasi_subscription_t*, in)
+    m3ApiGetArgMem(ଅଚଳ __wasi_subscription_t*, in)
     m3ApiGetArgMem(__wasi_event_t*, out)
     m3ApiGetArg(__wasi_size_t, nsubscriptions)
     m3ApiGetArgMem(__wasi_size_t*, nevents)
 
-    m3ApiCheckMem(in, nsubscriptions * sizeof(__wasi_subscription_t));
-    m3ApiCheckMem(out, nsubscriptions * sizeof(__wasi_event_t));
-    m3ApiCheckMem(nevents, sizeof(__wasi_size_t));
+    m3ApiCheckMem(in, nsubscriptions * ଆକାର(__wasi_subscription_t));
+    m3ApiCheckMem(out, nsubscriptions * ଆକାର(__wasi_event_t));
+    m3ApiCheckMem(nevents, ଆକାର(__wasi_size_t));
 
     __wasi_errno_t ret = __wasi_poll_oneoff(in, out, nsubscriptions, nevents);
 
@@ -940,7 +940,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_exit)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context) {
+    ଯଦି (context) {
         context->exit_code = code;
     }
 
@@ -955,7 +955,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_raise)
     m3ApiGetArg(uint32_t, sig)
 
     __wasi_errno_t ret = __WASI_ERRNO_INVAL;
-#  if 0
+#  ଯଦି 0
     ret = __wasi_proc_raise(sig);
 #  endif
 
@@ -975,37 +975,37 @@ m3ApiRawFunction(m3_wasi_p1_sched_yield)
 }
 
 
-static
+ସ୍ଥିର
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    ଯଦି (i_result == m3Err_functionLookupFailed) {
+        ଫେରନ୍ତୁ m3Err_none;
+    } ଅନ୍ୟଥା {
+        ଫେରନ୍ତୁ i_result;
     }
 }
 
 m3_wasi_context_t* m3_GetWasiContext ()
 {
-    return wasi_context;
+    ଫେରନ୍ତୁ wasi_context;
 }
 
-void m3_FreeWasi (m3_wasi_context_t* wasi)
+ଶୂନ୍ୟ m3_FreeWasi (m3_wasi_context_t* wasi)
 {
     m3_Free(wasi);
 }
 
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 {
     M3Result result = m3Err_none;
 
-    static const char* namespaces[] = { "wasi_snapshot_preview1" };
+    ସ୍ଥିର ଅଚଳ ଅକ୍ଷର* namespaces[] = { "wasi_snapshot_preview1" };
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
-        const char* wasi = namespaces[i];
+    ପାଇଁ (size_t i = 0; i < M3_ଗଣନା_OF(namespaces); i++) {
+        ଅଚଳ ଅକ୍ଷର* wasi = namespaces[i];
 
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_sizes_get",     "i(**)",   &m3_wasi_p1_args_sizes_get, wasi_context)));
@@ -1064,10 +1064,10 @@ _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "sched_yield",  
     // rather than per call. A module that linked none of the above imports has
     // no WASI to satisfy, so it is not asked for the export - link_all offers
     // WASI to every module, and most have neither the imports nor a memory.
-    if (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
+    ଯଦି (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
         u32 memoryIndex;
 
-        if (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
+        ଯଦି (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
             _throw("WASI requires the module to export its memory as \"memory\"");
         }
 
@@ -1075,33 +1075,33 @@ _       (m3_BindImportMemory(module, "wasi_snapshot_preview1", memoryIndex));
     }
 
 _catch:
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 M3Result m3_NewCustomWASI (M3WASI* wasi_p)
 {
     *wasi_p = m3_AllocStruct(m3_wasi_context_t);
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
-void m3_FreeCustomWASI (M3WASI wasi)
+ଶୂନ୍ୟ m3_FreeCustomWASI (M3WASI wasi)
 {
     m3_Free(wasi);
 }
 
 M3Result m3_LinkCustomWASI (IM3Module module, M3WASI wasi)
 {
-    return _linkWASI(module, wasi);
+    ଫେରନ୍ତୁ _linkWASI(module, wasi);
 }
 
 M3Result m3_LinkWASI (IM3Module module)
 {
-    if (!wasi_context) {
+    ଯଦି (!wasi_context) {
         wasi_context = m3_AllocStruct(m3_wasi_context_t);
     }
 
-    return _linkWASI(module, wasi_context);
+    ଫେରନ୍ତୁ _linkWASI(module, wasi_context);
 }
 
 #endif // d_m3HasMetaWASI

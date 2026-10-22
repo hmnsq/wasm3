@@ -5,6 +5,6 @@
 //  Copyright © 2022 Felipe Gasper, Volodymyr Shymanskyy. All rights reserved.
 //
 
-#include "m3_api_wasi.h"
+#ଅନ୍ତର୍ଭାଵ "m3_api_wasi.h"
 
-void m3_FreeWasi (m3_wasi_context_t* wasi);
+ଶୂନ୍ୟ m3_FreeWasi (m3_wasi_context_t* wasi);

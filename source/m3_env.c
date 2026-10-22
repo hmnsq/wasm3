@@ -5,40 +5,40 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include <stdarg.h>
-#include <limits.h>
-#include <errno.h>
-#include <float.h>
-#include <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <stdarg.h>
+#ଅନ୍ତର୍ଭାଵ <limits.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <float.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_deterministic.h"
-#include "m3_compile.h"
-#include "m3_host.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#ଅନ୍ତର୍ଭାଵ "m3_env.h"
+#ଅନ୍ତର୍ଭାଵ "m3_bind.h"
+#ଅନ୍ତର୍ଭାଵ "m3_deterministic.h"
+#ଅନ୍ତର୍ଭାଵ "m3_compile.h"
+#ଅନ୍ତର୍ଭାଵ "m3_host.h"
+#ଅନ୍ତର୍ଭାଵ "m3_exception.h"
+#ଅନ୍ତର୍ଭାଵ "m3_info.h"
 
 
 IM3Environment m3_NewEnvironment ()
 {
     IM3Environment env = m3_AllocStruct(M3Environment);
 
-    if (env) {
+    ଯଦି (env) {
         _try
         {
             // create FuncTypes for all simple block return ValueTypes.
             // v128 is skipped: it parses as a slot but has no operations.
-            for (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
-                if (t == c_m3Type_v128) {
-                    continue;
+            ପାଇଁ (u8 t = c_m3Type_none; t < c_m3_Type_ଗଣନା; t++) {
+                ଯଦି (t == c_m3Type_v128) {
+                    ଜାରି;
                 }
 
                 IM3FuncType ftype;
 _               (AllocFuncType(&ftype, 1));
 
-                ftype->numArgs  = 0;
-                ftype->numRets  = (t == c_m3Type_none) ? 0 : 1;
+                ftype->ଅଙ୍କ_Args  = 0;
+                ftype->ଅଙ୍କ_Rets  = (t == c_m3Type_none) ? 0 : 1;
                 ftype->types[0] = t;
 
                 Environment_AddFuncType(env, &ftype);
@@ -48,43 +48,43 @@ _               (AllocFuncType(&ftype, 1));
         }
 
         _catch:
-        if (result) {
+        ଯଦି (result) {
             m3_FreeEnvironment(env);
-            env = NULL;
+            env = ଖାଲି;
         }
     }
 
-    return env;
+    ଫେରନ୍ତୁ env;
 }
 
 
-void Environment_Release (IM3Environment i_environment)
+ଶୂନ୍ୟ Environment_Release (IM3Environment i_environment)
 {
     IM3FuncType ftype = i_environment->funcTypes;
 
-    while (ftype) {
+    ଯେତେବେଳେ (ftype) {
         IM3FuncType next = ftype->next;
         m3_Free(ftype);
         ftype = next;
     }
 
-    m3log(runtime, "freeing %d pages from environment", CountCodePages(i_environment->pagesReleased));
+    m3log(runtime, "freeing %d pages from environment", ଗଣନା_Code_Pages(i_environment->pagesReleased));
     FreeCodePages(&i_environment->pagesReleased);
 }
 
 
-void m3_FreeEnvironment (IM3Environment i_environment)
+ଶୂନ୍ୟ m3_FreeEnvironment (IM3Environment i_environment)
 {
-    if (i_environment) {
+    ଯଦି (i_environment) {
         Environment_Release(i_environment);
         m3_Free(i_environment);
     }
 }
 
 
-void m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
+ଶୂନ୍ୟ m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
 {
-    if (i_environment) {
+    ଯଦି (i_environment) {
         i_environment->customSectionHandler = i_handler;
     }
 }
@@ -96,32 +96,32 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
     IM3FuncType addType = *io_funcType;
     IM3FuncType newType = i_environment->funcTypes;
 
-    while (newType) {
-        if (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
+    ଯେତେବେଳେ (newType) {
+        ଯଦି (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
             m3_Free(addType);
-            break;
+            ଭାଙ୍ଗ;
         }
 
         newType = newType->next;
     }
 
-    if (newType == NULL) {
+    ଯଦି (newType == ଖାଲି) {
         // a type index has to fit in the heap type field of an m3type_t
-        if (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
+        ଯଦି (i_environment->ଅଙ୍କ_Func_Types >= d_m3_Max_Sane_Types_ଗଣନା) {
             m3_Free(addType);
-            *io_funcType = NULL;
-            return "too many distinct function types";
+            *io_funcType = ଖାଲି;
+            ଫେରନ୍ତୁ "too many distinct function types";
         }
 
         newType                  = addType;
-        newType->canonicalIndex  = i_environment->numFuncTypes++;
+        newType->canonicalIndex  = i_environment->ଅଙ୍କ_Func_Types++;
         newType->next            = i_environment->funcTypes;
         i_environment->funcTypes = newType;
     }
 
     *io_funcType = newType;
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 
@@ -133,20 +133,20 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 // the same way are still two groups, and a type inside one is never the type
 // outside it that matches field for field. Reserving the indices up front is
 // also what lets the members refer to each other while they are being read.
-M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_count, u16* o_firstIndex)
+M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_ଗଣନା, u16* o_firstIndex)
 {
-    if ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
-        return "too many distinct function types";
+    ଯଦି ((u64)i_environment->ଅଙ୍କ_Func_Types + i_ଗଣନା > d_m3_Max_Sane_Types_ଗଣନା) {
+        ଫେରନ୍ତୁ "too many distinct function types";
     }
 
-    *o_firstIndex = i_environment->numFuncTypes;
-    i_environment->numFuncTypes += (u16)i_count;
+    *o_firstIndex = i_environment->ଅଙ୍କ_Func_Types;
+    i_environment->ଅଙ୍କ_Func_Types += (u16)i_ଗଣନା;
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 
-void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
+ଶୂନ୍ୟ Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_funcType, u16 i_canonicalIndex)
 {
     i_funcType->inRecGroup     = true;
     i_funcType->canonicalIndex = i_canonicalIndex;
@@ -155,56 +155,56 @@ void Environment_AdoptFuncType (IM3Environment i_environment, IM3FuncType i_func
 }
 
 
-IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimumLineCount)
+IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimum_ଧାଡ଼ି_ଗଣନା)
 {
-    IM3CodePage prev = NULL;
+    IM3CodePage prev = ଖାଲି;
     IM3CodePage page = *io_list;
 
-    while (page) {
-        if (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
+    ଯେତେବେଳେ (page) {
+        ଯଦି (ଅଙ୍କ_Free_ଧାଡ଼ିଗୁଡ଼ିକ(page) >= i_minimum_ଧାଡ଼ି_ଗଣନା) {             d_m3Assert (page->info.usage_ଗଣନା == 0);
             IM3CodePage next = page->info.next;
-            if (prev) {
+            ଯଦି (prev) {
                 prev->info.next = next; // mid-list
-            } else {
+            } ଅନ୍ୟଥା {
                 *io_list = next;       // front of list
             }
 
-            break;
+            ଭାଙ୍ଗ;
         }
 
         prev = page;
         page = page->info.next;
     }
 
-    return page;
+    ଫେରନ୍ତୁ page;
 }
 
 
-IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimumLineCount)
+IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimum_ଧାଡ଼ି_ଗଣନା)
 {
-    return RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
+    ଫେରନ୍ତୁ RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimum_ଧାଡ଼ି_ଗଣନା);
 }
 
 
-void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
+ଶୂନ୍ୟ Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_codePageList)
 {
     IM3CodePage end = i_codePageList;
 
-    while (end) {
-        end->info.lineIndex = 0; // reset page
-#if d_m3RecordBacktraces
+    ଯେତେବେଳେ (end) {
+        end->info.ଧାଡ଼ି_Index = 0; // reset page
+#ଯଦି d_m3RecordBacktraces
         end->info.mapping->size = 0;
 #endif // d_m3RecordBacktraces
 
         IM3CodePage next = end->info.next;
-        if (not next) {
-            break;
+        ଯଦି (not next) {
+            ଭାଙ୍ଗ;
         }
 
         end = next;
     }
 
-    if (end) {
+    ଯଦି (end) {
         // push list to front
         end->info.next               = i_environment->pagesReleased;
         i_environment->pagesReleased = i_codePageList;
@@ -212,11 +212,11 @@ void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_c
 }
 
 
-IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, void* i_userdata)
+IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_ଗଦା_Size_In_Bytes, ଶୂନ୍ୟ* i_userdata)
 {
     IM3Runtime runtime = m3_AllocStruct(M3Runtime);
 
-    if (runtime) {
+    ଯଦି (runtime) {
         m3_ResetErrorInfo(runtime);
 
         runtime->environment = i_environment;
@@ -224,138 +224,138 @@ IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, 
 
         Deterministic_InitRuntime(runtime);
 
-        runtime->originStack = m3_Malloc("Wasm Stack", i_stackSizeInBytes + 4 * sizeof(m3slot_t)); // TODO: more precise stack checks
+        runtime->origin_ଗଦା = m3_Malloc("Wasm Stack", i_ଗଦା_Size_In_Bytes + 4 * ଆକାର(m3slot_t)); // TODO: more precise stack checks
 
-        if (runtime->originStack) {
-            runtime->stack         = runtime->originStack;
-            runtime->numStackSlots = i_stackSizeInBytes / sizeof(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->originStack, runtime->numStackSlots);
-        } else {
+        ଯଦି (runtime->origin_ଗଦା) {
+            runtime->ଗଦା         = runtime->origin_ଗଦା;
+            runtime->ଅଙ୍କ_ଗଦା_Slots = i_ଗଦା_Size_In_Bytes / ଆକାର(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->origin_ଗଦା, runtime->ଅଙ୍କ_ଗଦା_Slots);
+        } ଅନ୍ୟଥା {
             m3_Free(runtime);
         }
     }
 
-    return runtime;
+    ଫେରନ୍ତୁ runtime;
 }
 
-void m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
+ଶୂନ୍ୟ m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
 {
-#if d_m3EnableValidation
-    if (i_runtime) {
+#ଯଦି d_m3EnableValidation
+    ଯଦି (i_runtime) {
         i_runtime->skipValidation = not i_enable;
     }
-#else
-    (void)i_runtime;
-    (void)i_enable;              // nothing to skip: the validator was compiled out
+#ଅନ୍ୟଥା
+    (ଶୂନ୍ୟ)i_runtime;
+    (ଶୂନ୍ୟ)i_enable;              // nothing to skip: the validator was compiled out
 #endif
 }
 
-M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_value)
+M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_ମୂଲ୍ୟ)
 {
-    if (not i_runtime) {
-        return m3Err_mallocFailed;
+    ଯଦି (not i_runtime) {
+        ଫେରନ୍ତୁ m3Err_mallocFailed;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes:
-        if (i_value and i_value < i_runtime->memoryBytesUsed) {
-            return m3Err_resourceLimitBelowUsage;
+    ବାଛ (i_limit) {
+    ସ୍ଥିତି c_m3Limit_MemoryBytes:
+        ଯଦି (i_ମୂଲ୍ୟ and i_ମୂଲ୍ୟ < i_runtime->memoryBytesUsed) {
+            ଫେରନ୍ତୁ m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->memoryBytesLimit = i_value;
-        return m3Err_none;
-    case c_m3Limit_TableElements:
-        if (i_value and i_value < i_runtime->tableElementsUsed) {
-            return m3Err_resourceLimitBelowUsage;
+        i_runtime->memoryBytesLimit = i_ମୂଲ୍ୟ;
+        ଫେରନ୍ତୁ m3Err_none;
+    ସ୍ଥିତି c_m3Limit_TableElements:
+        ଯଦି (i_ମୂଲ୍ୟ and i_ମୂଲ୍ୟ < i_runtime->tableElementsUsed) {
+            ଫେରନ୍ତୁ m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->tableElementsLimit = i_value;
-        return m3Err_none;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations:
-        if (i_value and i_value < i_runtime->continuationsAllocated) {
-            return m3Err_resourceLimitBelowUsage;
+        i_runtime->tableElementsLimit = i_ମୂଲ୍ୟ;
+        ଫେରନ୍ତୁ m3Err_none;
+#ଯଦି d_m3_Has_ଗଦା_Switching
+    ସ୍ଥିତି c_m3Limit_Continuations:
+        ଯଦି (i_ମୂଲ୍ୟ and i_ମୂଲ୍ୟ < i_runtime->continuationsAllocated) {
+            ଫେରନ୍ତୁ m3Err_resourceLimitBelowUsage;
         }
-        i_runtime->continuationsLimit = (u32)M3_MIN(i_value, (u64)UINT32_MAX);
-        while (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
-            m3_Free(i_runtime->valStackPool[--i_runtime->valStackPoolCount]);
+        i_runtime->continuationsLimit = (u32)M3_MIN(i_ମୂଲ୍ୟ, (u64)UINT32_MAX);
+        ଯେତେବେଳେ (i_ମୂଲ୍ୟ and i_runtime->val_ଗଦା_Pool_ଗଣନା > i_ମୂଲ୍ୟ - i_runtime->continuationsAllocated) {
+            m3_Free(i_runtime->val_ଗଦା_Pool[--i_runtime->val_ଗଦା_Pool_ଗଣନା]);
         }
-        return m3Err_none;
-#else
-    case c_m3Limit_Continuations: return m3Err_resourceLimitNotSupported;
+        ଫେରନ୍ତୁ m3Err_none;
+#ଅନ୍ୟଥା
+    ସ୍ଥିତି c_m3Limit_Continuations: ଫେରନ୍ତୁ m3Err_resourceLimitNotSupported;
 #endif
-    case c_m3Limit_GasUnits:
-#if d_m3HasGasMetering
-        i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_value, (u64)INT64_MAX);
-        return m3Err_none;
-#else
-        return m3Err_resourceLimitNotSupported;
+    ସ୍ଥିତି c_m3Limit_GasUnits:
+#ଯଦି d_m3HasGasMetering
+        i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_ମୂଲ୍ୟ, (u64)INT64_MAX);
+        ଫେରନ୍ତୁ m3Err_none;
+#ଅନ୍ୟଥା
+        ଫେରନ୍ତୁ m3Err_resourceLimitNotSupported;
 #endif
-    default: return m3Err_unknownResourceLimit;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ m3Err_unknownResourceLimit;
     }
 }
 
 uint64_t m3_GetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    ଯଦି (not i_runtime) {
+        ଫେରନ୍ତୁ 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesLimit;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsLimit;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsLimit;
+    ବାଛ (i_limit) {
+    ସ୍ଥିତି c_m3Limit_MemoryBytes: ଫେରନ୍ତୁ i_runtime->memoryBytesLimit;
+    ସ୍ଥିତି c_m3Limit_TableElements: ଫେରନ୍ତୁ i_runtime->tableElementsLimit;
+#ଯଦି d_m3_Has_ଗଦା_Switching
+    ସ୍ଥିତି c_m3Limit_Continuations: ଫେରନ୍ତୁ i_runtime->continuationsLimit;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit;
+#ଯଦି d_m3HasGasMetering
+    ସ୍ଥିତି c_m3Limit_GasUnits: ଫେରନ୍ତୁ (u64)i_runtime->gasLimit;
 #endif
-    default: return 0;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ 0;
     }
 }
 
 uint64_t m3_GetResourceUsage (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    ଯଦି (not i_runtime) {
+        ଫେରନ୍ତୁ 0;
     }
-    switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesUsed;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsUsed;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsAllocated;
+    ବାଛ (i_limit) {
+    ସ୍ଥିତି c_m3Limit_MemoryBytes: ଫେରନ୍ତୁ i_runtime->memoryBytesUsed;
+    ସ୍ଥିତି c_m3Limit_TableElements: ଫେରନ୍ତୁ i_runtime->tableElementsUsed;
+#ଯଦି d_m3_Has_ଗଦା_Switching
+    ସ୍ଥିତି c_m3Limit_Continuations: ଫେରନ୍ତୁ i_runtime->continuationsAllocated;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
+#ଯଦି d_m3HasGasMetering
+    ସ୍ଥିତି c_m3Limit_GasUnits: ଫେରନ୍ତୁ (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
 #endif
-    default: return 0;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ 0;
     }
 }
 
-void* m3_GetUserData (IM3Runtime i_runtime)
+ଶୂନ୍ୟ* m3_GetUserData (IM3Runtime i_runtime)
 {
-    return i_runtime ? i_runtime->userdata : NULL;
+    ଫେରନ୍ତୁ i_runtime ? i_runtime->userdata : ଖାଲି;
 }
 
 
-void* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, void* i_info)
+ଶୂନ୍ୟ* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, ଶୂନ୍ୟ* i_info)
 {
-    void* r = NULL;
+    ଶୂନ୍ୟ* r = ଖାଲି;
 
     IM3Module module = i_runtime->modules;
 
-    while (module) {
+    ଯେତେବେଳେ (module) {
         IM3Module next = module->next;
-        if ((r = i_visitor(module, i_info))) {
-            break;
+        ଯଦି ((r = i_visitor(module, i_info))) {
+            ଭାଙ୍ଗ;
         }
 
         module = next;
     }
 
-    return r;
+    ଫେରନ୍ତୁ r;
 }
 
 
-void* _FreeModule (IM3Module i_module, void* i_info)
+ଶୂନ୍ୟ* _FreeModule (IM3Module i_module, ଶୂନ୍ୟ* i_info)
 {
     m3_FreeModule(i_module);
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
@@ -367,63 +367,63 @@ void* _FreeModule (IM3Module i_module, void* i_info)
 // the modules borrowing from it. So clear the borrowed slots first, in a pass
 // that frees nothing; the walk then skips them on the NULL check it already
 // does, instead of reading a memory some earlier module has freed.
-void* _ReleaseBorrowedSlots (IM3Module i_module, void* i_info)
+ଶୂନ୍ୟ* _ReleaseBorrowedSlots (IM3Module i_module, ଶୂନ୍ୟ* i_info)
 {
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Memories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
-        if (memory and memory->owner != i_module) {
-            i_module->memories[i] = NULL;
+        ଯଦି (memory and memory->owner != i_module) {
+            i_module->memories[i] = ଖାଲି;
         }
     }
 
-    for (u32 i = 0; i < i_module->numTables; ++i) {
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Tables; ++i) {
         IM3Table table = i_module->tables[i];
 
-        if (table and table->owner != i_module) {
-            i_module->tables[i] = NULL;
+        ଯଦି (table and table->owner != i_module) {
+            i_module->tables[i] = ଖାଲି;
         }
     }
 
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
-void Runtime_Release (IM3Runtime i_runtime)
+ଶୂନ୍ୟ Runtime_Release (IM3Runtime i_runtime)
 {
-    ForEachModule(i_runtime, _ReleaseBorrowedSlots, NULL);
-    ForEachModule(i_runtime, _FreeModule, NULL);                    d_m3Assert (i_runtime->numActiveCodePages == 0);
+    ForEachModule(i_runtime, _ReleaseBorrowedSlots, ଖାଲି);
+    ForEachModule(i_runtime, _FreeModule, ଖାଲି);                    d_m3Assert (i_runtime->ଅଙ୍କ_Active_Code_Pages == 0);
 
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesOpen);
     Environment_ReleaseCodePages(i_runtime->environment, i_runtime->pagesFull);
 
-    m3_Free(i_runtime->originStack);
+    m3_Free(i_runtime->origin_ଗଦା);
 
-#if d_m3EnableValidation
+#ଯଦି d_m3EnableValidation
     m3_Free(i_runtime->validator);
 #endif
 
-#if d_m3HasExceptionHandling
+#ଯଦି d_m3HasExceptionHandling
     // a runtime let go of while suspended still holds its exceptions
     FreeExceptions(i_runtime);
     m3_Free(i_runtime->uncaughtException);
 #endif
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    while (i_runtime->hostTags) {
+#ଯଦି d_m3HasExceptionHandling || d_m3_Has_ଗଦା_Switching
+    ଯେତେବେଳେ (i_runtime->hostTags) {
         M3HostTag* next = i_runtime->hostTags->next;
         m3_Free(i_runtime->hostTags);
         i_runtime->hostTags = next;
     }
 #endif
-#if d_m3HasStackSwitching
+#ଯଦି d_m3_Has_ଗଦା_Switching
     Continuation_ReleaseAll(i_runtime);
 #endif
 }
 
 
-void m3_FreeRuntime (IM3Runtime i_runtime)
+ଶୂନ୍ୟ m3_FreeRuntime (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    ଯଦି (i_runtime) {
         m3_PrintProfilerInfo();
 
         Runtime_Release(i_runtime);
@@ -432,162 +432,162 @@ void m3_FreeRuntime (IM3Runtime i_runtime)
 }
 
 
-#if d_m3HasStackSwitching
+#ଯଦି d_m3_Has_ଗଦା_Switching
 
 IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3Function i_function)
 {
     IM3Continuation cont = m3_AllocStruct(M3Continuation);
-    if (!cont) {
-        return NULL;
+    ଯଦି (!cont) {
+        ଫେରନ୍ତୁ ଖାଲି;
     }
 
     cont->type          = i_type;
     cont->entryFunction = i_function;
     cont->state         = cont_allocated;
 
-    cont->numStackSlots = d_m3ContinuationStackSlots;
+    cont->ଅଙ୍କ_ଗଦା_Slots = d_m3_Continuation_ଗଦା_Slots;
     // frames are recorded only when this continuation actually suspends, and
     // only as deep as it got, so the array starts out unallocated
-    cont->frames    = NULL;
+    cont->frames    = ଖାଲି;
     cont->framesCap = 0;
-    cont->numFrames = 0;
+    cont->ଅଙ୍କ_Frames = 0;
 
-    cont->sp = cont->valStack;
-    cont->pc = i_function ? i_function->compiled : NULL;
+    cont->sp = cont->val_ଗଦା;
+    cont->pc = i_function ? i_function->compiled : ଖାଲି;
     cont->r0 = 0;
-#  if d_m3HasFloat
+#  ଯଦି d_m3HasFloat
     cont->fp0 = 0;
 #  endif
-    cont->boundArgsCount    = 0;
-    cont->numSuspendResults = 0;
-    cont->numHandlers       = 0;
-    cont->handlersPC        = NULL;
-    cont->parent            = NULL;
+    cont->bound_Args_ଗଣନା    = 0;
+    cont->ଅଙ୍କ_Suspend_Results = 0;
+    cont->ଅଙ୍କ_Handlers       = 0;
+    cont->handlersPC        = ଖାଲି;
+    cont->parent            = ଖାଲି;
 
     cont->next               = i_runtime->continuations;
     i_runtime->continuations = cont;
 
-    return cont;
+    ଫେରନ୍ତୁ cont;
 }
 
 IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
     IM3Continuation newCont = Continuation_New(i_runtime, i_cont->type, i_cont->entryFunction);
-    if (M3_UNLIKELY(not newCont)) {
-        return NULL;
+    ଯଦି (M3_UNLIKELY(not newCont)) {
+        ଫେରନ୍ତୁ ଖାଲି;
     }
 
-    newCont->valStack      = i_cont->valStack;
-    newCont->numStackSlots = i_cont->numStackSlots;
+    newCont->val_ଗଦା      = i_cont->val_ଗଦା;
+    newCont->ଅଙ୍କ_ଗଦା_Slots = i_cont->ଅଙ୍କ_ଗଦା_Slots;
     newCont->sp            = i_cont->sp;
     newCont->pc            = i_cont->pc;
     newCont->suspendPoint  = i_cont->suspendPoint;
     newCont->r0            = i_cont->r0;
-#  if d_m3HasFloat
+#  ଯଦି d_m3HasFloat
     newCont->fp0 = i_cont->fp0;
 #  endif
     newCont->frames    = i_cont->frames;
     newCont->framesCap = i_cont->framesCap;
-    newCont->numFrames = i_cont->numFrames;
+    newCont->ଅଙ୍କ_Frames = i_cont->ଅଙ୍କ_Frames;
 
-    newCont->boundArgsCount = 0;
-#  if d_m3HasExceptionHandling
+    newCont->bound_Args_ଗଣନା = 0;
+#  ଯଦି d_m3HasExceptionHandling
     newCont->resumeThrow = i_cont->resumeThrow;
-    i_cont->resumeThrow  = NULL;
+    i_cont->resumeThrow  = ଖାଲି;
 #  endif
-    newCont->numSuspendResults = i_cont->numSuspendResults;
-    for (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
+    newCont->ଅଙ୍କ_Suspend_Results = i_cont->ଅଙ୍କ_Suspend_Results;
+    ପାଇଁ (u32 i = 0; i < i_cont->ଅଙ୍କ_Suspend_Results; ++i) {
         newCont->suspendResultOffsets[i] = i_cont->suspendResultOffsets[i];
         newCont->suspendResultIs64[i]    = i_cont->suspendResultIs64[i];
     }
 
-    newCont->numHandlers = i_cont->numHandlers;
+    newCont->ଅଙ୍କ_Handlers = i_cont->ଅଙ୍କ_Handlers;
     newCont->handlersPC  = i_cont->handlersPC;
     newCont->parent      = i_cont->parent;
     newCont->state       = cont_suspended;
 
-    i_cont->valStack  = NULL;
-    i_cont->frames    = NULL;
+    i_cont->val_ଗଦା  = ଖାଲି;
+    i_cont->frames    = ଖାଲି;
     i_cont->framesCap = 0;
-    i_cont->numFrames = 0;
+    i_cont->ଅଙ୍କ_Frames = 0;
     i_cont->state     = cont_consumed;
 
-    return newCont;
+    ଫେରନ୍ତୁ newCont;
 }
 
 // Only cont.new and snapshot restoration acquire stacks. Binding and suspension
 // transfer them between records without changing the active count.
-M3Result Continuation_AcquireStack (IM3Runtime runtime, IM3Continuation cont)
+M3Result Continuation_Acquire_ଗଦା (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not Continuation_CanAcquireStack(runtime)) {
-        return m3Err_continuationLimitExceeded;
+    ଯଦି (not Continuation_Can_Acquire_ଗଦା(runtime)) {
+        ଫେରନ୍ତୁ m3Err_continuationLimitExceeded;
     }
-    if (runtime->valStackPoolCount) {
-        cont->valStack = runtime->valStackPool[--runtime->valStackPoolCount];
-        memset(cont->valStack, 0, (cont->numStackSlots + 4) * sizeof(m3slot_t));
-    } else {
-        cont->valStack = m3_AllocArray(m3slot_t, cont->numStackSlots + 4);
+    ଯଦି (runtime->val_ଗଦା_Pool_ଗଣନା) {
+        cont->val_ଗଦା = runtime->val_ଗଦା_Pool[--runtime->val_ଗଦା_Pool_ଗଣନା];
+        memset(cont->val_ଗଦା, 0, (cont->ଅଙ୍କ_ଗଦା_Slots + 4) * ଆକାର(m3slot_t));
+    } ଅନ୍ୟଥା {
+        cont->val_ଗଦା = m3_AllocArray(m3slot_t, cont->ଅଙ୍କ_ଗଦା_Slots + 4);
     }
-    if (not cont->valStack) {
-        return m3Err_mallocFailed;
+    ଯଦି (not cont->val_ଗଦା) {
+        ଫେରନ୍ତୁ m3Err_mallocFailed;
     }
-    cont->sp = cont->valStack;
+    cont->sp = cont->val_ଗଦା;
     runtime->continuationsAllocated++;
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
-void Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont)
+ଶୂନ୍ୟ Continuation_Recycle_ଗଦା (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not cont->valStack or cont == runtime->rootContinuation) {
-        return;
+    ଯଦି (not cont->val_ଗଦା or cont == runtime->ମୂଳ_Continuation) {
+        ଫେରନ୍ତୁ;
     }
-    if (not runtime->valStackPool) {
-        runtime->valStackPool = m3_AllocArray(m3slot_t*, 16);
-        if (runtime->valStackPool) {
-            runtime->valStackPoolCap = 16;
+    ଯଦି (not runtime->val_ଗଦା_Pool) {
+        runtime->val_ଗଦା_Pool = m3_AllocArray(m3slot_t*, 16);
+        ଯଦି (runtime->val_ଗଦା_Pool) {
+            runtime->val_ଗଦା_Pool_Cap = 16;
         }
     }
-    if (runtime->valStackPoolCount < runtime->valStackPoolCap and
-        (not runtime->continuationsLimit or runtime->valStackPoolCount <
+    ଯଦି (runtime->val_ଗଦା_Pool_ଗଣନା < runtime->val_ଗଦା_Pool_Cap and
+        (not runtime->continuationsLimit or runtime->val_ଗଦା_Pool_ଗଣନା <
                                               runtime->continuationsLimit - runtime->continuationsAllocated + 1)) {
-        runtime->valStackPool[runtime->valStackPoolCount++] = cont->valStack;
-        cont->valStack                                      = NULL;
-    } else {
-        m3_Free(cont->valStack);
+        runtime->val_ଗଦା_Pool[runtime->val_ଗଦା_Pool_ଗଣନା++] = cont->val_ଗଦା;
+        cont->val_ଗଦା                                      = ଖାଲି;
+    } ଅନ୍ୟଥା {
+        m3_Free(cont->val_ଗଦା);
     }
-    cont->sp = NULL;
+    cont->sp = ଖାଲି;
     runtime->continuationsAllocated--;
 }
 
-void Continuation_ReleaseAll (IM3Runtime io_runtime)
+ଶୂନ୍ୟ Continuation_ReleaseAll (IM3Runtime io_runtime)
 {
     // Records live until teardown: a consumed reference can still be in a table
     // or on a Wasm stack. Its value stack has already been recycled.
     IM3Continuation cont = io_runtime->continuations;
 
-    while (cont) {
+    ଯେତେବେଳେ (cont) {
         IM3Continuation next = cont->next;
 
-        m3_Free(cont->valStack);
+        m3_Free(cont->val_ଗଦା);
         m3_Free(cont->frames);
         m3_Free(cont);
 
         cont = next;
     }
 
-    for (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
-        m3_Free(io_runtime->valStackPool[i]);
+    ପାଇଁ (u32 i = 0; i < io_runtime->val_ଗଦା_Pool_ଗଣନା; ++i) {
+        m3_Free(io_runtime->val_ଗଦା_Pool[i]);
     }
-    m3_Free(io_runtime->valStackPool);
-    io_runtime->valStackPoolCount = io_runtime->valStackPoolCap = 0;
+    m3_Free(io_runtime->val_ଗଦା_Pool);
+    io_runtime->val_ଗଦା_Pool_ଗଣନା = io_runtime->val_ଗଦା_Pool_Cap = 0;
     io_runtime->continuationsAllocated                          = 0;
-    io_runtime->continuations                                   = NULL;
-    io_runtime->activeContinuation                              = NULL;
-    io_runtime->rootContinuation                                = NULL;
+    io_runtime->continuations                                   = ଖାଲି;
+    io_runtime->activeContinuation                              = ଖାଲି;
+    io_runtime->ମୂଳ_Continuation                                = ଖାଲି;
 }
 
 
-m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
+m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, ଅଚଳ M3Frame* i_frame)
 {
     IM3Continuation cont = i_runtime->activeContinuation;
 
@@ -595,53 +595,53 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
     // and that whole stretch has an active continuation
     d_m3Assert(cont);
 
-    if (cont->numFrames == cont->framesCap) {
+    ଯଦି (cont->ଅଙ୍କ_Frames == cont->framesCap) {
         u32 newCap = cont->framesCap ? cont->framesCap * 2 : 8;
 
-        if (newCap > d_m3ContinuationMaxFrames) {
+        ଯଦି (newCap > d_m3ContinuationMaxFrames) {
             newCap = d_m3ContinuationMaxFrames;
         }
 
-        if (newCap == cont->framesCap) {
-            return m3Err_trapStackOverflow;
+        ଯଦି (newCap == cont->framesCap) {
+            ଫେରନ୍ତୁ m3_Err_trap_ଗଦା_Overflow;
         }
 
         M3Frame* frames = m3_ReallocArray(M3Frame, cont->frames, newCap, cont->framesCap);
 
-        if (not frames) {
-            return m3Err_mallocFailed;
+        ଯଦି (not frames) {
+            ଫେରନ୍ତୁ m3Err_mallocFailed;
         }
 
         cont->frames    = frames;
         cont->framesCap = newCap;
     }
 
-    cont->frames[cont->numFrames++] = *i_frame;
+    cont->frames[cont->ଅଙ୍କ_Frames++] = *i_frame;
 
-    return m3Err_continuationSuspended;
+    ଫେରନ୍ତୁ m3Err_continuationSuspended;
 }
 
 #endif // d_m3HasStackSwitching
 
-M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
+M3Result EvaluateExpression (IM3Module i_module, ଶୂନ୍ୟ* o_expressed, m3type_t i_type, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
 
     // OPTZ: use a simplified interpreter for expressions
 
     // create a temporary runtime context
-#if defined(d_m3PreferStaticAlloc)
-    static M3Runtime runtime;
-#else
+#ଯଦି defined(d_m3PreferStaticAlloc)
+    ସ୍ଥିର M3Runtime runtime;
+#ଅନ୍ୟଥା
     M3Runtime runtime;
 #endif
     M3_INIT(runtime);
 
     runtime.environment   = i_module->runtime->environment;
-    runtime.numStackSlots = i_module->runtime->numStackSlots;
-    runtime.stack         = i_module->runtime->stack;
+    runtime.ଅଙ୍କ_ଗଦା_Slots = i_module->runtime->ଅଙ୍କ_ଗଦା_Slots;
+    runtime.ଗଦା         = i_module->runtime->ଗଦା;
 
-    m3stack_t stack = (m3stack_t)runtime.stack;
+    m3stack_t ଗଦା = (m3stack_t)runtime.ଗଦା;
 
     IM3Runtime savedRuntime = i_module->runtime;
     i_module->runtime       = &runtime;
@@ -658,23 +658,23 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
     // empty and the next expression reuses it rather than burning fresh lines.
     o->page = AcquireCodePage(&runtime);
 
-    if (o->page) {
-        IM3FuncType ftype = NULL;
+    ଯଦି (o->page) {
+        IM3FuncType ftype = ଖାଲି;
 
-#if d_m3HasTypedRefs
+#ଯଦି d_m3HasTypedRefs
         // A reference type has to be checked as the type it is: the shared
         // return types are one per storage class, so borrowing one of those
         // would let any reference at all satisfy a particular one.
-        if (IsSpelledRefType(i_type)) {
+        ଯଦି (IsSpelledRefType(i_type)) {
             result = AllocFuncType(&ftype, 1);
 
-            if (not result) {
-                ftype->numRets  = 1;
+            ଯଦି (not result) {
+                ftype->ଅଙ୍କ_Rets  = 1;
                 ftype->types[0] = i_type;
 
                 result = Environment_AddFuncType(runtime.environment, &ftype);
             }
-        } else
+        } ଅନ୍ୟଥା
 #endif
         {
             ftype = runtime.environment->retFuncTypes[BaseTypeOf(i_type)];
@@ -682,42 +682,42 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 
         pc_t m3code = GetPagePC(o->page);
 
-        if (not result) {
+        ଯଦି (not result) {
             result = CompileExpression(o, ftype);
         }
 
-        if (not result && o->maxStackSlots >= runtime.numStackSlots) {
-            result = m3Err_trapStackOverflow;
+        ଯଦି (not result && o->max_ଗଦା_Slots >= runtime.ଅଙ୍କ_ଗଦା_Slots) {
+            result = m3_Err_trap_ଗଦା_Overflow;
         }
 
-        if (not result) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-            m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs);
+        ଯଦି (not result) {
+#ଯଦି (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+            m3ret_t r = RunCode(m3code, ଗଦା, ଖାଲି, d_m3OpDefaultArgs, d_m3BaseCstr);
+#ଅନ୍ୟଥା
+            m3ret_t r = RunCode(m3code, ଗଦା, ଖାଲି, d_m3OpDefaultArgs);
 #endif
 
-            if (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
-                if (SizeOfType(BaseTypeOf(i_type)) == sizeof(u32)) {
-                    *(u32*)o_expressed = *((u32*)stack);
-                } else {
-                    *(u64*)o_expressed = *((u64*)stack);
+            ଯଦି (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrint_ମୂଲ୍ୟ (ଗଦା, i_type));
+                ଯଦି (SizeOfType(BaseTypeOf(i_type)) == ଆକାର(u32)) {
+                    *(u32*)o_expressed = *((u32*)ଗଦା);
+                } ଅନ୍ୟଥା {
+                    *(u64*)o_expressed = *((u64*)ଗଦା);
                 }
             }
         }
 
         ReleaseCodePage(&runtime, o->page);
-    } else {
+    } ଅନ୍ୟଥା {
         result = m3Err_mallocFailedCodePage;
     }
 
-    runtime.originStack = NULL;        // prevent free(stack) in ReleaseRuntime
+    runtime.origin_ଗଦା = ଖାଲି;        // prevent free(stack) in ReleaseRuntime
     Runtime_Release(&runtime);
     i_module->runtime = savedRuntime;
 
     *io_bytes = o->wasm;
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 
@@ -735,92 +735,92 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 // Whether an exporting memory or table satisfies what an import asks for. The
 // exporter's *current* size is its minimum - one that has been grown satisfies
 // a larger import than its declaration would - and it may be no less bounded.
-static
+ସ୍ଥିର
 bool LimitsSatisfy (u64 i_exportedSize, bool i_exportedHasMax, u64 i_exportedMax,
                     u64 i_importMin, bool i_importHasMax, u64 i_importMax)
 {
-    if (i_exportedSize < i_importMin) {
-        return false;
+    ଯଦି (i_exportedSize < i_importMin) {
+        ଫେରନ୍ତୁ false;
     }
 
-    if (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
-        return false;
+    ଯଦି (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
+        ଫେରନ୍ତୁ false;
     }
 
-    return true;
+    ଫେରନ୍ତୁ true;
 }
 
 
 // The export of this kind under this name, or NULL. The index it carries is
 // resolved by the caller, against the module's index space as it stands then -
 // after linking, a re-exported import's slot holds the entity it was linked to.
-static
-const M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
+ସ୍ଥିର
+ଅଚଳ M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        const M3Export* e = &i_module->exports[i];
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Exports; ++i) {
+        ଅଚଳ M3Export* e = &i_module->exports[i];
 
-        if (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
-            return e;
+        ଯଦି (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
+            ଫେରନ୍ତୁ e;
         }
     }
 
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
-static
+ସ୍ଥିର
 IM3Function Module_FindExportedFunction (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
+    ଅଚଳ M3Export* e = Module_FindExport(i_module, d_externalKind_function, i_name);
 
     // A module that re-exports an import names the placeholder here. Resolve to
     // the function that actually runs, or a host-side call would run it against
     // the importing module's memory.
-    return e ? Function_Implementation(&i_module->functions[e->index]) : NULL;
+    ଫେରନ୍ତୁ e ? Function_Implementation(&i_module->functions[e->index]) : ଖାଲି;
 }
 
 
-static
+ସ୍ଥିର
 IM3Memory Module_FindExportedMemory (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    ଅଚଳ M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    return e ? i_module->memories[e->index] : NULL;
+    ଫେରନ୍ତୁ e ? i_module->memories[e->index] : ଖାଲି;
 }
 
 
-static
+ସ୍ଥିର
 IM3Table Module_FindExportedTable (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
+    ଅଚଳ M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
 
-    return e ? i_module->tables[e->index] : NULL;
+    ଫେରନ୍ତୁ e ? i_module->tables[e->index] : ଖାଲି;
 }
 
 
-static
+ସ୍ଥିର
 IM3Global Module_FindExportedGlobal (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
+    ଅଚଳ M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
 
-    return e ? &i_module->globals[e->index] : NULL;
+    ଫେରନ୍ତୁ e ? &i_module->globals[e->index] : ଖାଲି;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-static
+#ଯଦି d_m3HasExceptionHandling || d_m3_Has_ଗଦା_Switching
+ସ୍ଥିର
 IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 {
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
+    ଅଚଳ M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
 
-    if (not e) {
-        return NULL;
+    ଯଦି (not e) {
+        ଫେରନ୍ତୁ ଖାଲି;
     }
 
     IM3Tag tag = &i_module->tags[e->index];
 
-    return tag->resolved ? tag->resolved : tag;
+    ଫେରନ୍ତୁ tag->resolved ? tag->resolved : tag;
 }
 #endif
 
@@ -829,16 +829,16 @@ IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 // unique within a module, so a name one of the lookups above missed but this
 // one finds is exported as something else - a kind the import cannot be
 // satisfied by, rather than a name the module never exported.
-static
+ସ୍ଥିର
 bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        if (strcmp(i_module->exports[i].name, i_name) == 0) {
-            return true;
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Exports; ++i) {
+        ଯଦି (strcmp(i_module->exports[i].name, i_name) == 0) {
+            ଫେରନ୍ତୁ true;
         }
     }
 
-    return false;
+    ଫେରନ୍ତୁ false;
 }
 
 
@@ -846,25 +846,25 @@ bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 // it. Runs before anything is allocated or initialized: a memory import has to
 // be resolved before InitMemory would give it pages of its own, and a global
 // import before InitGlobals runs an initializer that reads it.
-static
+ସ୍ଥିର
 M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
 
-        if (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
-            continue;
+        ଯଦି (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
+            ଜାରି;
         }
 
         IM3Module from = m3_FindModule(io_runtime, f->import.moduleUtf8);
-        if (not from) {
-            continue;
+        ଯଦି (not from) {
+            ଜାରି;
         }
 
         IM3Function exported = Module_FindExportedFunction(from, f->import.fieldUtf8);
-        if (not exported) {
+        ଯଦି (not exported) {
             // the import names a module that is loaded, so its exports settle the
             // question: a name it exports as something else is a type mismatch, and
             // one it does not export at all is an unknown import
@@ -879,20 +879,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         f->resolved = Function_Implementation(exported);
     }
 
-    for (u32 i = 0; i < io_module->numMemories; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Memories; ++i) {
         IM3Memory memory = io_module->memories[i];
 
-        if (not memory->imported or memory->owner != io_module) {
-            continue;
+        ଯଦି (not memory->imported or memory->owner != io_module) {
+            ଜାରି;
         }
 
         IM3Module from = m3_FindModule(io_runtime, memory->import.moduleUtf8);
-        if (not from) {
-            continue;
+        ଯଦି (not from) {
+            ଜାରି;
         }
 
         IM3Memory exported = Module_FindExportedMemory(from, memory->import.fieldUtf8);
-        if (not exported) {
+        ଯଦି (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, memory->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -907,7 +907,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         _throwif(m3Err_incompatibleImportType, exported->isShared != memory->isShared);
 
         _throwif(m3Err_incompatibleImportType,
-                 not LimitsSatisfy(exported->numPages, exported->hasMax, exported->maxPages,
+                 not LimitsSatisfy(exported->ଅଙ୍କ_Pages, exported->hasMax, exported->maxPages,
                                    memory->initPages, memory->hasMax, memory->maxPages));
 
         // hand the slot over to the exporter's memory, and drop the placeholder
@@ -918,20 +918,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->memories[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Tables; ++i) {
         IM3Table table = io_module->tables[i];
 
-        if (not table->imported or table->owner != io_module) {
-            continue;
+        ଯଦି (not table->imported or table->owner != io_module) {
+            ଜାରି;
         }
 
         IM3Module from = m3_FindModule(io_runtime, table->import.moduleUtf8);
-        if (not from) {
-            continue;
+        ଯଦି (not from) {
+            ଜାରି;
         }
 
         IM3Table exported = Module_FindExportedTable(from, table->import.fieldUtf8);
-        if (not exported) {
+        ଯଦି (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, table->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -953,20 +953,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->tables[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
-            continue;
+        ଯଦି (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+            ଜାରି;
         }
 
         IM3Module from = m3_FindModule(io_runtime, g->import.moduleUtf8);
-        if (not from) {
-            continue;
+        ଯଦି (not from) {
+            ଜାରି;
         }
 
         IM3Global exported = Module_FindExportedGlobal(from, g->import.fieldUtf8);
-        if (not exported) {
+        ଯଦି (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, g->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -977,21 +977,21 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         g->resolved = exported->resolved ? exported->resolved : exported;
     }
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+#ଯଦି d_m3HasExceptionHandling || d_m3_Has_ଗଦା_Switching
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Tags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
-            continue;
+        ଯଦି (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
+            ଜାରି;
         }
 
         IM3Module from = m3_FindModule(io_runtime, tag->import.moduleUtf8);
-        if (not from) {
-            continue;
+        ଯଦି (not from) {
+            ଜାରି;
         }
 
         IM3Tag exported = Module_FindExportedTag(from, tag->import.fieldUtf8);
-        if (not exported) {
+        ଯଦି (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, tag->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -1002,7 +1002,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
     }
 #endif
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 
@@ -1016,10 +1016,10 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 
     // Fixed from here on: the index space stops changing after parse, and
     // linking has already repointed any slot it was going to.
-    i_module->memory0 = i_module->numMemories ? i_module->memories[0]
+    i_module->memory0 = i_module->ଅଙ୍କ_Memories ? i_module->memories[0]
                                               : &i_module->emptyMemory;
 
-    if (i_module->numMemories == 0) {
+    ଯଦି (i_module->ଅଙ୍କ_Memories == 0) {
         // nothing addressable, but _mem still has to point somewhere
         i_module->emptyMemory.owner    = i_module;
         i_module->emptyMemory.pageSize = d_m3DefaultMemPageSize;
@@ -1027,13 +1027,13 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
     }
 
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Memories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
         // a slot that already points at another module's memory is that
         // module's to allocate
-        if (memory->owner != i_module or memory->mallocated) {
-            continue;
+        ଯଦି (memory->owner != i_module or memory->mallocated) {
+            ଜାରି;
         }
 
         u32 pageSize = Memory_PageSize(memory);
@@ -1049,7 +1049,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
         // 2^64/pagesize overflows a u64 only when a page is a single byte, and
         // a power-of-two page size divides the address space exactly, so the
         // 64-bit division below is 2^64/pagesize written so that it fits.
-        if (not memory->hasMax) {
+        ଯଦି (not memory->hasMax) {
             memory->maxPages = memory->isMemory64
                                  ? (pageSize > 1 ? (UINT64_MAX / pageSize) + 1 : UINT64_MAX)
                                  : (0x100000000ull / pageSize);
@@ -1058,52 +1058,52 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
 _       (ResizeMemory(io_runtime, memory, memory->initPages));
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 
-M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
+M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_ଅଙ୍କ_Pages)
 {
     M3Result result = m3Err_none;
 
-    u64 numPagesToAlloc = i_numPages;
+    u64 ଅଙ୍କ_Pages_To_Alloc = i_ଅଙ୍କ_Pages;
 
-    if (numPagesToAlloc <= memory->maxPages) {
+    ଯଦି (ଅଙ୍କ_Pages_To_Alloc <= memory->maxPages) {
         // A 64-bit memory may ask for up to 2^48 pages, which overflows a u64
         // of bytes. Nothing that large can be backed, so refuse it up front
         // rather than multiplying into a wrapped size.
         _throwif("linear memory limitation exceeded",
-                 numPagesToAlloc > d_m3AddressLimit / memory->pageSize);
+                 ଅଙ୍କ_Pages_To_Alloc > d_m3AddressLimit / memory->pageSize);
 
-        u64 numPageBytes = numPagesToAlloc * memory->pageSize;
+        u64 ଅଙ୍କ_Page_Bytes = ଅଙ୍କ_Pages_To_Alloc * memory->pageSize;
 
-#if d_m3MaxLinearMemoryPages > 0
+#ଯଦି d_m3MaxLinearMemoryPages > 0
         // the limit is a memory size, counted in default-sized pages; comparing
         // it against a raw page count would make it 65536 times stricter for a
         // module whose pages are one byte
         _throwif("linear memory limitation exceeded",
-                 numPageBytes > (u64)d_m3MaxLinearMemoryPages * d_m3DefaultMemPageSize);
+                 ଅଙ୍କ_Page_Bytes > (u64)d_m3MaxLinearMemoryPages * d_m3DefaultMemPageSize);
 #endif
 
         // Limit the amount of memory that gets actually allocated
-        if (io_runtime->memoryLimit) {
-            numPageBytes = M3_MIN(numPageBytes, (u64)io_runtime->memoryLimit);
+        ଯଦି (io_runtime->memoryLimit) {
+            ଅଙ୍କ_Page_Bytes = M3_MIN(ଅଙ୍କ_Page_Bytes, (u64)io_runtime->memoryLimit);
         }
 
         u64 oldLength = memory->mallocated ? memory->mallocated->length : 0;
         u64 otherUsed = io_runtime->memoryBytesUsed - oldLength;
         _throwif(m3Err_memoryLimitExceeded, io_runtime->memoryBytesLimit and
-                                              (numPageBytes > io_runtime->memoryBytesLimit or
-                                               otherUsed > io_runtime->memoryBytesLimit - numPageBytes));
+                                              (ଅଙ୍କ_Page_Bytes > io_runtime->memoryBytesLimit or
+                                               otherUsed > io_runtime->memoryBytesLimit - ଅଙ୍କ_Page_Bytes));
 
-        _throwif("linear memory limitation exceeded", numPageBytes > (u64)SIZE_MAX - sizeof(M3MemoryHeader));
+        _throwif("linear memory limitation exceeded", ଅଙ୍କ_Page_Bytes > (u64)SIZE_MAX - ଆକାର(M3MemoryHeader));
 
-#if d_m3GuardedMemory
+#ଯଦି d_m3GuardedMemory
 
         // A slot holds every address a Wasm access can name, and nothing beyond
         // that: a memory larger than the data part of one would put addresses past
         // the guard, where a fault is nobody's to recognize
-        _throwif("linear memory limitation exceeded", numPageBytes > d_m3GuardedDataBytes);
+        _throwif("linear memory limitation exceeded", ଅଙ୍କ_Page_Bytes > d_m3GuardedDataBytes);
 
         // What makes an access past the end fault is the page after the memory not
         // being committed, so the end has to fall on one of the system's page
@@ -1116,20 +1116,20 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         _throwif("guarded memory needs a page size the system's divides into",
                  (memory->pageSize % m3_HostPageSize()) != 0);
 
-        if (memory->guardSlot == NULL) {
+        ଯଦି (memory->guardSlot == ଖାଲି) {
             memory->guardSlot = Guard_TakeSlot();
             _throwifnull(memory->guardSlot);
         }
 
         // Growing only ever commits more of the same slot, so the memory never
         // moves - which the interpreter does not rely on, but nothing minds
-        _throwif(m3Err_mallocFailed, not Guard_CommitSlot(memory->guardSlot, (size_t)numPageBytes));
+        _throwif(m3Err_mallocFailed, not Guard_CommitSlot(memory->guardSlot, (size_t)ଅଙ୍କ_Page_Bytes));
 
         memory->mallocated = Guard_SlotHeader(memory->guardSlot);
 
-#else
+#ଅନ୍ୟଥା
 
-        size_t numBytes = (size_t)numPageBytes + sizeof(M3MemoryHeader);
+        size_t ଅଙ୍କ_Bytes = (size_t)ଅଙ୍କ_Page_Bytes + ଆକାର(M3MemoryHeader);
 
         // What is really there, which is not numPages * pageSize: the limit above
         // caps the bytes without capping the page count, so a memory can be short
@@ -1137,48 +1137,48 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         // MCU has. Measuring the old block by the page count would overstate it,
         // and then realloc never sees the size it already has and copies the
         // whole limit again on every grow past it.
-        size_t numPreviousBytes = memory->mallocated ? memory->mallocated->length + sizeof(M3MemoryHeader) : 0;
+        size_t ଅଙ୍କ_Previous_Bytes = memory->mallocated ? memory->mallocated->length + ଆକାର(M3MemoryHeader) : 0;
 
-        void* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, numBytes, numPreviousBytes);
+        ଶୂନ୍ୟ* newMem = m3_Realloc("Wasm Linear Memory", memory->mallocated, ଅଙ୍କ_Bytes, ଅଙ୍କ_Previous_Bytes);
         _throwifnull(newMem);
 
         memory->mallocated = (M3MemoryHeader*)newMem;
 
 #endif
 
-#if d_m3LogRuntime
+#ଯଦି d_m3LogRuntime
         M3MemoryHeader* oldMallocated = memory->mallocated;
 #endif
 
-        io_runtime->memoryBytesUsed = otherUsed + numPageBytes;
-        memory->numPages            = numPagesToAlloc;
+        io_runtime->memoryBytesUsed = otherUsed + ଅଙ୍କ_Page_Bytes;
+        memory->ଅଙ୍କ_Pages            = ଅଙ୍କ_Pages_To_Alloc;
 
-        memory->mallocated->length  = (size_t)numPageBytes;
+        memory->mallocated->length  = (size_t)ଅଙ୍କ_Page_Bytes;
         memory->mallocated->runtime = io_runtime;
         memory->mallocated->memory  = memory;
 
-        memory->mallocated->maxStack = (m3slot_t*)io_runtime->originStack + io_runtime->numStackSlots;
+        memory->mallocated->max_ଗଦା = (m3slot_t*)io_runtime->origin_ଗଦା + io_runtime->ଅଙ୍କ_ଗଦା_Slots;
 
-        m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->numPages);
-    } else {
+        m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->ଅଙ୍କ_Pages);
+    } ଅନ୍ୟଥା {
         result = m3Err_wasmMemoryOverflow;
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 
-void FreeMemoryBlock (IM3Memory io_memory)
+ଶୂନ୍ୟ FreeMemoryBlock (IM3Memory io_memory)
 {
-    if (io_memory->mallocated and io_memory->mallocated->runtime) {
+    ଯଦି (io_memory->mallocated and io_memory->mallocated->runtime) {
         io_memory->mallocated->runtime->memoryBytesUsed -= io_memory->mallocated->length;
     }
-#if d_m3GuardedMemory
+#ଯଦି d_m3GuardedMemory
     Guard_GiveSlot(io_memory->guardSlot);
-    io_memory->guardSlot = NULL;
+    io_memory->guardSlot = ଖାଲି;
 
-    io_memory->mallocated = NULL;
-#else
+    io_memory->mallocated = ଖାଲି;
+#ଅନ୍ୟଥା
     m3_Free(io_memory->mallocated);
 #endif
 }
@@ -1188,7 +1188,7 @@ M3Result InitGlobals (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (io_module->numGlobals) {
+    ଯଦି (io_module->ଅଙ୍କ_Globals) {
         // placing the globals in their structs isn't good for cache locality, but i don't really know what the global
         // access patterns typically look like yet.
 
@@ -1196,27 +1196,27 @@ M3Result InitGlobals (IM3Module io_module)
 
         //          if (io_module->globalMemory)
         {
-            for (u32 i = 0; i < io_module->numGlobals; ++i) {
+            ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Globals; ++i) {
                 M3Global* g = &io_module->globals[i];                           m3log (runtime, "initializing global: %d", i);
 
-                if (g->initExpr) {
-                    bytes_t start = g->initExpr;
+                ଯଦି (g->init_ପଦସମଷ୍ଟି) {
+                    bytes_t start = g->init_ପଦସମଷ୍ଟି;
 
-                    result = EvaluateExpression(io_module, &g->i64Value, g->type, &start, g->initExpr + g->initExprSize);
+                    result = EvaluateExpression(io_module, &g->i64_ମୂଲ୍ୟ, g->type, &start, g->init_ପଦସମଷ୍ଟି + g->init_ପଦସମଷ୍ଟି_Size);
 
-                    if (not result) {
+                    ଯଦି (not result) {
                         // io_module->globalMemory [i] = initValue;
-                    } else {
-                        break;
+                    } ଅନ୍ୟଥା {
+                        ଭାଙ୍ଗ;
                     }
-                } else {                                                        m3log (runtime, "importing global");
+                } ଅନ୍ୟଥା {                                                        m3log (runtime, "importing global");
                 }
             }
         }
         //          else result = ErrorModule (m3Err_mallocFailed, io_module, "could allocate globals for module: '%s", io_module->name);
     }
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 
@@ -1224,17 +1224,17 @@ M3Result InitDataSegments (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numDataSegments; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Data_Segments; ++i) {
         M3DataSegment* segment = &io_module->dataSegments[i];
 
         // A passive segment stays available for memory.init until data.drop.
         // An active one is copied here and then counts as dropped.
-        if (segment->isPassive) {
-            continue;
+        ଯଦି (segment->isPassive) {
+            ଜାରି;
         }
 
         _throwif("data segment memory index out of range",
-                 segment->memoryRegion >= io_module->numMemories);
+                 segment->memoryRegion >= io_module->ଅଙ୍କ_Memories);
 
         IM3Memory io_memory = io_module->memories[segment->memoryRegion];
 
@@ -1244,69 +1244,69 @@ M3Result InitDataSegments (IM3Module io_module)
         // unsigned: an i32 offset of -1 is 4294967295, way out of bounds
         // rather than negative.
         u64     segmentOffset = 0;
-        bytes_t start         = segment->initExpr;
+        bytes_t start         = segment->init_ପଦସମଷ୍ଟି;
 
-        if (io_memory->isMemory64) {
-_           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->initExpr + segment->initExprSize));
-        } else {
+        ଯଦି (io_memory->isMemory64) {
+_           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->init_ପଦସମଷ୍ଟି + segment->init_ପଦସମଷ୍ଟି_Size));
+        } ଅନ୍ୟଥା {
             u32 offset32;
-_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->initExpr + segment->initExprSize));
+_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->init_ପଦସମଷ୍ଟି + segment->init_ପଦସମଷ୍ଟି_Size));
             segmentOffset = offset32;
         }
 
         m3log(runtime, "loading data segment: %d; size: %d; offset: %llu", i, segment->size, (unsigned long long)segmentOffset);
 
-        if (segmentOffset <= io_memory->mallocated->length &&
+        ଯଦି (segmentOffset <= io_memory->mallocated->length &&
             (u64)segment->size <= io_memory->mallocated->length - segmentOffset) {
             u8* dest = m3MemData(io_memory->mallocated) + segmentOffset;
             memcpy(dest, segment->data, segment->size);
-        } else {
+        } ଅନ୍ୟଥା {
             _throw("data segment out of bounds");
         }
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 
 // Turns a segment's elements into references. Element expressions are constant
 // expressions restricted to ref.null/ref.func, so they're read directly rather
 // than run through the compiler.
-static
-M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, void** o_elements)
+ସ୍ଥିର
+M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, ଶୂନ୍ୟ** o_elements)
 {
     M3Result result = m3Err_none;
 
     bytes_t  pos = i_segment->elements;
     cbytes_t end = io_module->elementSectionEnd;
 
-    for (u32 e = 0; e < i_segment->numElements; ++e) {
+    ପାଇଁ (u32 e = 0; e < i_segment->ଅଙ୍କ_Elements; ++e) {
         u32   funcIndex;
-        void* ref = NULL;
+        ଶୂନ୍ୟ* ref = ଖାଲି;
 
-        if (i_segment->isExpr) {
+        ଯଦି (i_segment->is_ପଦସମଷ୍ଟି) {
             m3opcode_t opcode;
 _           (Read_opcode(&opcode, &pos, end));
 
-            if (opcode == c_waOp_refFunc) {
+            ଯଦି (opcode == c_waOp_refFunc) {
 _               (ReadLEB_u32(&funcIndex, &pos, end));
-                _throwif("function index out of range", funcIndex >= io_module->numFunctions);
+                _throwif("function index out of range", funcIndex >= io_module->ଅଙ୍କ_Functions);
                 ref = Function_Implementation(&io_module->functions[funcIndex]);
-            } else if (opcode == c_waOp_refNull) {
+            } ଅନ୍ୟଥା ଯଦି (opcode == c_waOp_refNull) {
                 i8 waType;
                 u8 nullType;
 _               (ReadLEB_i7(&waType, &pos, end));
 _               (NormalizeType(&nullType, waType));
                 _throwif(m3Err_typeMismatch, nullType != i_segment->type);
-            } else if (opcode == c_waOp_getGlobal) {
+            } ଅନ୍ୟଥା ଯଦି (opcode == c_waOp_getGlobal) {
                 // wasm 2.0 lets an element expression read an imported
                 // immutable global, which is how one module seeds another's
                 // table with a reference it exported.
                 u32 globalIndex;
 _               (ReadLEB_u32(&globalIndex, &pos, end));
-                _throwif(m3Err_globaIndexOutOfBounds, globalIndex >= io_module->numGlobals);
+                _throwif(m3Err_globaIndexOutOfBounds, globalIndex >= io_module->ଅଙ୍କ_Globals);
 
                 IM3Global global = &io_module->globals[globalIndex];
 
@@ -1315,27 +1315,27 @@ _               (ReadLEB_u32(&globalIndex, &pos, end));
                 _throwif(m3Err_typeMismatch, BaseTypeOf(global->type) != BaseTypeOf(i_segment->type));
 
                 // read the cell the import was linked to, not the placeholder
-                if (global->resolved) {
+                ଯଦି (global->resolved) {
                     global = global->resolved;
                 }
 
-                ref = global->refValue;
-            } else {
+                ref = global->ref_ମୂଲ୍ୟ;
+            } ଅନ୍ୟଥା {
                 _throw("constant expression required");
             }
 
 _           (Read_opcode(&opcode, &pos, end));
             _throwif(m3Err_wasmMalformed, opcode != c_waOp_end);
-        } else {
+        } ଅନ୍ୟଥା {
 _           (ReadLEB_u32(&funcIndex, &pos, end));
-            _throwif("function index out of range", funcIndex >= io_module->numFunctions);
+            _throwif("function index out of range", funcIndex >= io_module->ଅଙ୍କ_Functions);
             ref = Function_Implementation(&io_module->functions[funcIndex]);
         }
 
         o_elements[e] = ref;
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 
@@ -1346,52 +1346,52 @@ M3Result InitTableAndElements (IM3Module io_module)
     cbytes_t end = io_module->elementSectionEnd;
     M3Table* table;
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Tables; ++i) {
         table = io_module->tables[i];
 
         // a slot pointing at another module's table is that module's to fill
-        if (table->owner != io_module) {
-            continue;
+        ଯଦି (table->owner != io_module) {
+            ଜାରି;
         }
 
-        if (table->size) {
+        ଯଦି (table->size) {
             IM3Runtime runtime = io_module->runtime;
             _throwif(m3Err_tableLimitExceeded, runtime->tableElementsLimit and
                                                  table->size > runtime->tableElementsLimit - runtime->tableElementsUsed);
-            table->elements = m3_AllocArray(void*, table->size);
+            table->elements = m3_AllocArray(ଶୂନ୍ୟ*, table->size);
             _throwifnull(table->elements);
             runtime->tableElementsUsed += table->size;
 
-            if (table->initExpr) {
-                void*   value = NULL;
-                bytes_t start = table->initExpr;
-_               (EvaluateExpression(io_module, &value, BaseTypeOf(table->type),
-                                     &start, table->initExpr + table->initExprSize));
+            ଯଦି (table->init_ପଦସମଷ୍ଟି) {
+                ଶୂନ୍ୟ*   ମୂଲ୍ୟ = ଖାଲି;
+                bytes_t start = table->init_ପଦସମଷ୍ଟି;
+_               (EvaluateExpression(io_module, &ମୂଲ୍ୟ, BaseTypeOf(table->type),
+                                     &start, table->init_ପଦସମଷ୍ଟି + table->init_ପଦସମଷ୍ଟି_Size));
 
-                for (u32 e = 0; e < table->size; ++e) {
-                    table->elements[e] = value;
+                ପାଇଁ (u32 e = 0; e < table->size; ++e) {
+                    table->elements[e] = ମୂଲ୍ୟ;
                 }
             }
         }
     }
 
-    for (u32 i = 0; i < io_module->numElementSegments; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Element_Segments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         // Declarative segments only make their functions referenceable, and
         // passive ones wait for table.init, so neither is written out here.
-        if (segment->mode == c_m3Elem_declarative) {
+        ଯଦି (segment->mode == c_m3Elem_declarative) {
             segment->dropped = true;
-            continue;
+            ଜାରି;
         }
 
-        if (segment->mode == c_m3Elem_passive) {
-            if (segment->numElements) {
-                segment->resolved = m3_AllocArray(void*, segment->numElements);
+        ଯଦି (segment->mode == c_m3Elem_passive) {
+            ଯଦି (segment->ଅଙ୍କ_Elements) {
+                segment->resolved = m3_AllocArray(ଶୂନ୍ୟ*, segment->ଅଙ୍କ_Elements);
                 _throwifnull(segment->resolved);
 _               (ResolveElements(io_module, segment, segment->resolved));
             }
-            continue;
+            ଜାରି;
         }
 
         table = io_module->tables[segment->tableIndex];
@@ -1399,82 +1399,82 @@ _               (ResolveElements(io_module, segment, segment->resolved));
         // The offset expression has the table's index type, and is unsigned:
         // an i32 offset of -1 is 4294967295, out of bounds rather than negative.
         u64     offset = 0;
-        bytes_t expr   = segment->initExpr;
+        bytes_t ପଦସମଷ୍ଟି   = segment->init_ପଦସମଷ୍ଟି;
 
-        if (table->isTable64) {
-_           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &expr, end));
-        } else {
+        ଯଦି (table->isTable64) {
+_           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &ପଦସମଷ୍ଟି, end));
+        } ଅନ୍ୟଥା {
             u32 offset32;
-_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &expr, end));
+_           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &ପଦସମଷ୍ଟି, end));
             offset = offset32;
         }
 
         _throwif("out of bounds table access",
-                 offset > table->size or segment->numElements > table->size - offset);
+                 offset > table->size or segment->ଅଙ୍କ_Elements > table->size - offset);
 
 _       (ResolveElements(io_module, segment, table->elements + offset));
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 M3Result m3_CompileModule (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
-        if (f->wasm and not f->compiled) {
+        ଯଦି (f->wasm and not f->compiled) {
 _           (CompileFunction(f));
         }
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
-#if d_m3HasExceptionHandling
+#ଯଦି d_m3HasExceptionHandling
 
-M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs)
+M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_ଅଙ୍କ_Args)
 {
-    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", sizeof(M3Exception) + i_numArgs * sizeof(u64));
+    M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", ଆକାର(M3Exception) + i_ଅଙ୍କ_Args * ଆକାର(u64));
 
-    if (exception) {
+    ଯଦି (exception) {
         exception->tag     = i_tag;
-        exception->numArgs = i_numArgs;
+        exception->ଅଙ୍କ_Args = i_ଅଙ୍କ_Args;
         exception->reified = false;
-        exception->prev    = NULL;
+        exception->prev    = ଖାଲି;
         exception->next    = io_runtime->exceptions;
 
-        if (exception->next) {
+        ଯଦି (exception->next) {
             exception->next->prev = exception;
         }
 
         io_runtime->exceptions = exception;
     }
 
-    return exception;
+    ଫେରନ୍ତୁ exception;
 }
 
 
 // Releases one exception ahead of the rest. The caller has to know nothing can
 // still name it: no exnref was ever taken of it, and its payload has already
 // been copied out.
-void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
+ଶୂନ୍ୟ FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 {
-    if (i_exception->prev) {
+    ଯଦି (i_exception->prev) {
         i_exception->prev->next = i_exception->next;
-    } else {
+    } ଅନ୍ୟଥା {
         io_runtime->exceptions = i_exception->next;
     }
 
-    if (i_exception->next) {
+    ଯଦି (i_exception->next) {
         i_exception->next->prev = i_exception->prev;
     }
 
-    if (io_runtime->pendingException == i_exception) {
-        io_runtime->pendingException = NULL;
+    ଯଦି (io_runtime->pendingException == i_exception) {
+        io_runtime->pendingException = ଖାଲି;
     }
 
     m3_Free_Impl(i_exception);
@@ -1484,14 +1484,14 @@ void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 // Releases every exception the runtime still holds. Only safe once the Wasm
 // stack is empty, which is why the outermost RunCodeChecked() is the one that
 // calls it.
-void FreeExceptions (IM3Runtime io_runtime)
+ଶୂନ୍ୟ FreeExceptions (IM3Runtime io_runtime)
 {
     M3Exception* exception = io_runtime->exceptions;
 
-    io_runtime->exceptions       = NULL;
-    io_runtime->pendingException = NULL;
+    io_runtime->exceptions       = ଖାଲି;
+    io_runtime->pendingException = ଖାଲି;
 
-    while (exception) {
+    ଯେତେବେଳେ (exception) {
         M3Exception* next = exception->next;
         m3_Free_Impl(exception);
         exception = next;
@@ -1504,21 +1504,21 @@ void FreeExceptions (IM3Runtime io_runtime)
 // the original is freed with the rest before the outermost call returns - and
 // one a host function's nested call ended with may still be named by an
 // exnref further down the stack.
-static
-void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
+ସ୍ଥିର
+ଶୂନ୍ୟ RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 {
-    if (io_runtime->uncaughtException) {
+    ଯଦି (io_runtime->uncaughtException) {
         m3_Free(io_runtime->uncaughtException);
     }
 
     M3Exception* exception = io_runtime->pendingException;
 
-    if (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
-        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, sizeof(M3Exception) + exception->numArgs * sizeof(u64));
+    ଯଦି (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
+        M3Exception* copy = (M3Exception*)m3_CopyMem(exception, ଆକାର(M3Exception) + exception->ଅଙ୍କ_Args * ଆକାର(u64));
 
-        if (copy) {
-            copy->next = NULL;
-            copy->prev = NULL;
+        ଯଦି (copy) {
+            copy->next = ଖାଲି;
+            copy->prev = ଖାଲି;
         }
 
         io_runtime->uncaughtException = copy;
@@ -1528,26 +1528,26 @@ void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ଯଦି d_m3HasExceptionHandling || d_m3_Has_ଗଦା_Switching
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_tagName)
 {
-    if (not i_module or not i_tagName) {
-        return NULL;
+    ଯଦି (not i_module or not i_tagName) {
+        ଫେରନ୍ତୁ ଖାଲି;
     }
 
-    return Module_FindExportedTag(i_module, i_tagName);
+    ଫେରନ୍ତୁ Module_FindExportedTag(i_module, i_tagName);
 }
 
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_signature)
 {
-    IM3FuncType type    = NULL;
-    M3HostTag*  hostTag = NULL;
+    IM3FuncType type    = ଖାଲି;
+    M3HostTag*  hostTag = ଖାଲି;
 
 _try {
     _throwif("null tag", not o_tag);
-    *o_tag = NULL;
+    *o_tag = ଖାଲି;
     _throwif(m3Err_mallocFailed, not io_runtime);
 
 _   (SignatureToFuncType(&type, i_signature));
@@ -1563,32 +1563,32 @@ _   (Environment_AddFuncType(io_runtime->environment, &type));
 
     *o_tag = &hostTag->tag;
 } _catch:
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 
 M3Result m3_LinkTag (IM3Module         io_module,
-                     const char* const i_moduleName,
-                     const char* const i_tagName,
+                     ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_moduleName,
+                     ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_tagName,
                      IM3Tag            i_tag)
 {
-    if (not io_module or not i_moduleName or not i_tagName or not i_tag) {
-        return m3Err_tagLookupFailed;
+    ଯଦି (not io_module or not i_moduleName or not i_tagName or not i_tag) {
+        ଫେରନ୍ତୁ m3Err_tagLookupFailed;
     }
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    ଅଚଳ bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
     IM3Tag     target         = i_tag->resolved ? i_tag->resolved : i_tag;
 
     M3Result result = m3Err_tagLookupFailed;
 
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Tags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
+        ଯଦି (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
             strcmp(tag->import.fieldUtf8, i_tagName) == 0 and
             (wildcardModule or strcmp(tag->import.moduleUtf8, i_moduleName) == 0)) {
-            if (tag->type != target->type) {
-                return m3Err_incompatibleImportType;
+            ଯଦି (tag->type != target->type) {
+                ଫେରନ୍ତୁ m3Err_incompatibleImportType;
             }
 
             tag->resolved = target;
@@ -1596,64 +1596,64 @@ M3Result m3_LinkTag (IM3Module         io_module,
         }
     }
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 
-uint32_t m3_GetTagArgCount (IM3Tag i_tag)
+uint32_t m3_Get_Tag_Arg_ଗଣନା (IM3Tag i_tag)
 {
-    return i_tag ? i_tag->type->numArgs : 0;
+    ଫେରନ୍ତୁ i_tag ? i_tag->type->ଅଙ୍କ_Args : 0;
 }
 
 
-M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
+M3_ମୂଲ୍ୟ_Type m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    if (i_tag and i_index < i_tag->type->numArgs) {
-        return (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
+    ଯଦି (i_tag and i_index < i_tag->type->ଅଙ୍କ_Args) {
+        ଫେରନ୍ତୁ (M3_ମୂଲ୍ୟ_Type)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
     }
 
-    return c_m3Type_none;
+    ଫେରନ୍ତୁ c_m3Type_none;
 }
 
-#else
+#ଅନ୍ୟଥା
 
-IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
+IM3Tag m3_FindTag (IM3Module i_module, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_tagName)
 {
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
-M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
+M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_signature)
 {
-    if (o_tag) {
-        *o_tag = NULL;
+    ଯଦି (o_tag) {
+        *o_tag = ଖାଲି;
     }
-    return m3Err_tagLookupFailed;
+    ଫେରନ୍ତୁ m3Err_tagLookupFailed;
 }
 
-M3Result m3_LinkTag (IM3Module io_module, const char* const i_moduleName, const char* const i_tagName, IM3Tag i_tag)
+M3Result m3_LinkTag (IM3Module io_module, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_moduleName, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_tagName, IM3Tag i_tag)
 {
-    return m3Err_tagLookupFailed;
+    ଫେରନ୍ତୁ m3Err_tagLookupFailed;
 }
 
-uint32_t m3_GetTagArgCount (IM3Tag i_tag)
+uint32_t m3_Get_Tag_Arg_ଗଣନା (IM3Tag i_tag)
 {
-    return 0;
+    ଫେରନ୍ତୁ 0;
 }
 
-M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
+M3_ମୂଲ୍ୟ_Type m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    return c_m3Type_none;
+    ଫେରନ୍ତୁ c_m3Type_none;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasExceptionHandling
+#ଯଦି d_m3HasExceptionHandling
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, ଅଚଳ ଶୂନ୍ୟ* i_argptrs[])
 {
-    if (not io_runtime or not i_tag) {
-        return m3Err_tagLookupFailed;
+    ଯଦି (not io_runtime or not i_tag) {
+        ଫେରନ୍ତୁ m3Err_tagLookupFailed;
     }
 
     IM3Tag      tag  = i_tag->resolved ? i_tag->resolved : i_tag;
@@ -1661,150 +1661,150 @@ M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc
 
     // a tag with results is a stack switching control tag, which is suspended
     // with rather than thrown
-    if (type->numRets) {
-        return m3Err_typeMismatch;
+    ଯଦି (type->ଅଙ୍କ_Rets) {
+        ଫେରନ୍ତୁ m3Err_typeMismatch;
     }
-    if (i_argc != type->numArgs) {
-        return m3Err_argumentCountMismatch;
+    ଯଦି (i_argc != type->ଅଙ୍କ_Args) {
+        ଫେରନ୍ତୁ m3_Err_argument_ଗଣନା_Mismatch;
     }
     // with nothing on the stack there is nothing to unwind, and the exception
     // would sit on the runtime's list until some later call ended
-    if (io_runtime->callNesting == 0) {
-        return "m3_ThrowException called outside a host function";
+    ଯଦି (io_runtime->callNesting == 0) {
+        ଫେରନ୍ତୁ "m3_ThrowException called outside a host function";
     }
 
     M3Exception* exception = NewException(io_runtime, tag, i_argc);
-    if (not exception) {
-        return m3Err_mallocFailed;
+    ଯଦି (not exception) {
+        ଫେରନ୍ତୁ m3Err_mallocFailed;
     }
 
     // the layout op_Throw gives a payload: 32-bit values zero-extended, floats
     // as their bit pattern
-    for (u32 i = 0; i < i_argc; ++i) {
-        const void* value = i_argptrs[i];
+    ପାଇଁ (u32 i = 0; i < i_argc; ++i) {
+        ଅଚଳ ଶୂନ୍ୟ* ମୂଲ୍ୟ = i_argptrs[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
+        ବାଛ (BaseTypeOf(d_FuncArgType(type, i))) {
+        ସ୍ଥିତି c_m3Type_i32:
+        ସ୍ଥିତି c_m3Type_f32: {
             u32 bits;
-            memcpy(&bits, value, sizeof(bits));
+            memcpy(&bits, ମୂଲ୍ୟ, ଆକାର(bits));
             exception->args[i] = bits;
-            break;
+            ଭାଙ୍ଗ;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(&exception->args[i], value, sizeof(u64));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            exception->args[i] = (u64)(*(const uintptr_t*)value);
-            break;
-        default:
+        ସ୍ଥିତି c_m3Type_i64:
+        ସ୍ଥିତି c_m3Type_f64:
+            memcpy(&exception->args[i], ମୂଲ୍ୟ, ଆକାର(u64));
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
+        ସ୍ଥିତି c_m3Type_contref:
+            exception->args[i] = (u64)(*(ଅଚଳ uintptr_t*)ମୂଲ୍ୟ);
+            ଭାଙ୍ଗ;
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
             FreeException(io_runtime, exception);
-            return "unknown argument type";
+            ଫେରନ୍ତୁ "unknown argument type";
         }
     }
 
     io_runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    ଫେରନ୍ତୁ m3Err_pendingException;
 }
 
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    if (i_runtime and i_runtime->uncaughtException) {
-        return i_runtime->uncaughtException->tag;
+    ଯଦି (i_runtime and i_runtime->uncaughtException) {
+        ଫେରନ୍ତୁ i_runtime->uncaughtException->tag;
     }
 
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, ଅଚଳ ଶୂନ୍ୟ* o_argptrs[])
 {
-    if (not i_runtime or not i_runtime->uncaughtException) {
-        return "no uncaught exception";
+    ଯଦି (not i_runtime or not i_runtime->uncaughtException) {
+        ଫେରନ୍ତୁ "no uncaught exception";
     }
 
-    const M3Exception* exception = i_runtime->uncaughtException;
+    ଅଚଳ M3Exception* exception = i_runtime->uncaughtException;
     IM3FuncType        type      = exception->tag->type;
 
-    if (i_argc != exception->numArgs) {
-        return m3Err_argumentCountMismatch;
+    ଯଦି (i_argc != exception->ଅଙ୍କ_Args) {
+        ଫେରନ୍ତୁ m3_Err_argument_ଗଣନା_Mismatch;
     }
 
-    for (u32 i = 0; i < i_argc; ++i) {
-        void* value = (void*)o_argptrs[i];
+    ପାଇଁ (u32 i = 0; i < i_argc; ++i) {
+        ଶୂନ୍ୟ* ମୂଲ୍ୟ = (ଶୂନ୍ୟ*)o_argptrs[i];
         u64   bits  = exception->args[i];
 
-        switch (BaseTypeOf(d_FuncArgType(type, i))) {
-        case c_m3Type_i32:
-        case c_m3Type_f32: {
-            u32 low = (u32)bits;
-            memcpy(value, &low, sizeof(low));
-            break;
+        ବାଛ (BaseTypeOf(d_FuncArgType(type, i))) {
+        ସ୍ଥିତି c_m3Type_i32:
+        ସ୍ଥିତି c_m3Type_f32: {
+            u32 ତଳ = (u32)bits;
+            memcpy(ମୂଲ୍ୟ, &ତଳ, ଆକାର(ତଳ));
+            ଭାଙ୍ଗ;
         }
-        case c_m3Type_i64:
-        case c_m3Type_f64:
-            memcpy(value, &bits, sizeof(bits));
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-        case c_m3Type_contref:
-            *(uintptr_t*)value = (uintptr_t)bits;
-            break;
-        default:
-            return "unknown argument type";
+        ସ୍ଥିତି c_m3Type_i64:
+        ସ୍ଥିତି c_m3Type_f64:
+            memcpy(ମୂଲ୍ୟ, &bits, ଆକାର(bits));
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
+        ସ୍ଥିତି c_m3Type_contref:
+            *(uintptr_t*)ମୂଲ୍ୟ = (uintptr_t)bits;
+            ଭାଙ୍ଗ;
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
+            ଫେରନ୍ତୁ "unknown argument type";
         }
     }
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
-#else
+#ଅନ୍ୟଥା
 
-M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, ଅଚଳ ଶୂନ୍ୟ* i_argptrs[])
 {
-    return m3Err_tagLookupFailed;
+    ଫେରନ୍ତୁ m3Err_tagLookupFailed;
 }
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
-M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
+M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, ଅଚଳ ଶୂନ୍ୟ* o_argptrs[])
 {
-    return "no uncaught exception";
+    ଫେରନ୍ତୁ "no uncaught exception";
 }
 
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3GuardedMemory
+#ଯଦି d_m3GuardedMemory
 
 // What RunCodeProtected hands to the platform layer to run, and what comes back
-typedef struct M3ProtectedRun {
+ପ୍ରକାରବ୍ୟାଖ୍ୟା ସଂରଚନା M3ProtectedRun {
     pc_t            pc;
     IM3Runtime      runtime;
     M3MemoryHeader* mem;
     M3Result        result;
 } M3ProtectedRun;
 
-static
-void RunCodeBody (void* io_context)
+ସ୍ଥିର
+ଶୂନ୍ୟ RunCodeBody (ଶୂନ୍ୟ* io_context)
 {
     M3ProtectedRun* run = (M3ProtectedRun*)io_context;
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
+#  ଯଦି (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->ଗଦା, run->mem,
                                     d_m3OpDefaultArgs, d_m3BaseCstr);
-#  else
-    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
+#  ଅନ୍ୟଥା
+    run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->ଗଦା, run->mem,
                                     d_m3OpDefaultArgs);
 #  endif
 }
@@ -1814,13 +1814,13 @@ void RunCodeBody (void* io_context)
 // of that memory's reservation, and the fault comes back as the trap the spec asks
 // for. Nothing is left half-done by it - the Wasm stack and the memories are heap,
 // and the caller unwinds the rest.
-static
+ସ୍ଥିର
 M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_mem)
 {
     // Memory operations in this build carry no bounds check, so code only runs where a
     // fault past the end of a memory can still be turned into a trap
-    if (M3_UNLIKELY(not m3_HostGuardsActive())) {
-        return ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
+    ଯଦି (M3_UNLIKELY(not m3_HostGuardsActive())) {
+        ଫେରନ୍ତୁ ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
                             "another part of the process holds the fault signal");
     }
 
@@ -1830,35 +1830,35 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
     run.mem     = i_mem;
     run.result  = m3Err_none;
 
-    void*  arena;
+    ଶୂନ୍ୟ*  arena;
     size_t arenaBytes;
     Guard_ArenaRange(&arena, &arenaBytes);
 
-    if (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
-        return m3Err_trapOutOfBoundsMemoryAccess;
+    ଯଦି (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
+        ଫେରନ୍ତୁ m3Err_trapOutOfBoundsMemoryAccess;
     }
 
-    return run.result;
+    ଫେରନ୍ତୁ run.result;
 }
 
 #endif // d_m3GuardedMemory
 
 
-#if d_m3HasStackSwitching
+#ଯଦି d_m3_Has_ଗଦା_Switching
 
 // The function a suspended continuation stopped in: the callee of its innermost
 // call frame, or the function it was entered with if it made no call. Frames are
 // recorded innermost first, so that is the lowest-numbered call frame.
-static
+ସ୍ଥିର
 IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 {
-    for (u32 i = 0; i < i_cont->numFrames; ++i) {
-        if (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
-            return i_cont->frames[i].call.function;
+    ପାଇଁ (u32 i = 0; i < i_cont->ଅଙ୍କ_Frames; ++i) {
+        ଯଦି (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
+            ଫେରନ୍ତୁ i_cont->frames[i].call.function;
         }
     }
 
-    return i_cont->entryFunction;
+    ଫେରନ୍ତୁ i_cont->entryFunction;
 }
 
 
@@ -1869,31 +1869,31 @@ IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 // function can use. That base is the root's own sp, unless it stopped inside a
 // resume: then the suspension point belongs to the resumed continuation, and the
 // root's innermost frame is that resume.
-void Runtime_PlaceCallStack (IM3Runtime io_runtime)
+ଶୂନ୍ୟ Runtime_Place_Call_ଗଦା (IM3Runtime io_runtime)
 {
-    IM3Continuation root = io_runtime->rootContinuation;
+    IM3Continuation ମୂଳ = io_runtime->ମୂଳ_Continuation;
 
-    io_runtime->stack = io_runtime->originStack;
+    io_runtime->ଗଦା = io_runtime->origin_ଗଦା;
 
-    if (not root or root->state != cont_suspended) {
-        return;
+    ଯଦି (not ମୂଳ or ମୂଳ->state != cont_suspended) {
+        ଫେରନ୍ତୁ;
     }
 
-    m3stack_t   sp       = root->sp;
-    IM3Function function = Continuation_InnermostFunction(root);
+    m3stack_t   sp       = ମୂଳ->sp;
+    IM3Function function = Continuation_InnermostFunction(ମୂଳ);
 
-    if (root->numFrames and root->frames[0].kind == frame_resume) {
-        sp = root->frames[0].sp;
+    ଯଦି (ମୂଳ->ଅଙ୍କ_Frames and ମୂଳ->frames[0].kind == frame_resume) {
+        sp = ମୂଳ->frames[0].sp;
     }
 
-    m3slot_t* base = (m3slot_t*)io_runtime->originStack;
-    m3slot_t* top  = (m3slot_t*)sp + (function ? function->maxStackSlots : 0);
+    m3slot_t* base = (m3slot_t*)io_runtime->origin_ଗଦା;
+    m3slot_t* ଶୀର୍ଷ  = (m3slot_t*)sp + (function ? function->max_ଗଦା_Slots : 0);
 
-    if (top > base + io_runtime->numStackSlots) {
-        top = base + io_runtime->numStackSlots;
+    ଯଦି (ଶୀର୍ଷ > base + io_runtime->ଅଙ୍କ_ଗଦା_Slots) {
+        ଶୀର୍ଷ = base + io_runtime->ଅଙ୍କ_ଗଦା_Slots;
     }
 
-    io_runtime->stack = top;
+    io_runtime->ଗଦା = ଶୀର୍ଷ;
 }
 
 #endif // d_m3HasStackSwitching
@@ -1902,7 +1902,7 @@ void Runtime_PlaceCallStack (IM3Runtime io_runtime)
 // Run compiled code on the runtime's stack, bounding native recursion for the
 // duration of the call. The outermost invocation establishes the stack limit;
 // nested ones (an imported function calling back into Wasm) inherit it.
-static inline
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ
 M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
 {
     pc_t i_pc = i_function->compiled;
@@ -1911,27 +1911,27 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // to, not against some runtime-wide one
     M3MemoryHeader* _mem = Module_MemoryHeader(i_function->module);
 
-#if d_m3HasSnapshots
-    if (M3_UNLIKELY(i_function->module->isUnusable)) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+#ଯଦି d_m3HasSnapshots
+    ଯଦି (M3_UNLIKELY(i_function->module->isUnusable)) {
+        ଫେରନ୍ତୁ "a snapshot failed to restore into the module, so it cannot run";
     }
     i_function->module->hasRun = true;
 #endif
 
-    d_m3StackLimitEnter(i_runtime);
+    d_m3_ଗଦା_Limit_Enter(i_runtime);
 
     // a host function calling back into Wasm does not change which call a trap
     // ends: that is still the one the host made first
-    if (i_runtime->callNesting++ == 0) {
+    ଯଦି (i_runtime->callNesting++ == 0) {
         i_runtime->entered = i_function;
     }
-#if d_m3HasExceptionHandling
+#ଯଦି d_m3HasExceptionHandling
     // handler stacks don't nest across a call boundary: a host function calling
     // back into Wasm cannot be caught by a try_table its own caller entered
     u32 savedTryDepth   = i_runtime->tryDepth;
     i_runtime->tryDepth = 0;
 #endif
-#if d_m3HasStackSwitching
+#ଯଦି d_m3_Has_ଗଦା_Switching
     // nor do continuations: the native frames on the far side of a host call
     // are not ours to record, so a suspend in here has no handler to reach and
     // no resume to unwind to
@@ -1941,87 +1941,87 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // not scratch space. A call the host makes before resuming it gets a
     // context of its own, the way any other re-entry does, rather than having
     // the frames of the suspension reset out from under it.
-    bool claimRoot = i_runtime->isSuspendable and not savedContinuation and
-                     not (i_runtime->rootContinuation and
-                          i_runtime->rootContinuation->state == cont_suspended);
+    bool claim_ମୂଳ = i_runtime->isSuspendable and not savedContinuation and
+                     not (i_runtime->ମୂଳ_Continuation and
+                          i_runtime->ମୂଳ_Continuation->state == cont_suspended);
 
-    if (claimRoot and not i_runtime->rootContinuation) {
-        i_runtime->rootContinuation = Continuation_New(i_runtime, i_function->funcType, i_function);
+    ଯଦି (claim_ମୂଳ and not i_runtime->ମୂଳ_Continuation) {
+        i_runtime->ମୂଳ_Continuation = Continuation_New(i_runtime, i_function->funcType, i_function);
 
-        if (i_runtime->rootContinuation) {
+        ଯଦି (i_runtime->ମୂଳ_Continuation) {
             // The root borrows the runtime's stack and is not charged as cont.new.
-            i_runtime->rootContinuation->numStackSlots = i_runtime->numStackSlots;
-        } else {
-            claimRoot = false;
+            i_runtime->ମୂଳ_Continuation->ଅଙ୍କ_ଗଦା_Slots = i_runtime->ଅଙ୍କ_ଗଦା_Slots;
+        } ଅନ୍ୟଥା {
+            claim_ମୂଳ = false;
         }
     }
 
-    if (claimRoot) {
-        i_runtime->activeContinuation              = i_runtime->rootContinuation;
-        i_runtime->rootContinuation->entryFunction = i_function;
-        i_runtime->rootContinuation->state         = cont_running;
-        i_runtime->rootContinuation->numFrames     = 0;
-    } else {
-        i_runtime->activeContinuation = NULL;
+    ଯଦି (claim_ମୂଳ) {
+        i_runtime->activeContinuation              = i_runtime->ମୂଳ_Continuation;
+        i_runtime->ମୂଳ_Continuation->entryFunction = i_function;
+        i_runtime->ମୂଳ_Continuation->state         = cont_running;
+        i_runtime->ମୂଳ_Continuation->ଅଙ୍କ_Frames     = 0;
+    } ଅନ୍ୟଥା {
+        i_runtime->activeContinuation = ଖାଲି;
     }
 #endif
-#if d_m3GuardedMemory
+#ଯଦି d_m3GuardedMemory
     M3Result result = RunCodeProtected(i_runtime, i_pc, _mem);
-#elif (d_m3EnableOpProfiling || d_m3EnableOpTracing)
-    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
-    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs);
+#ନଚେତଯଦି (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->ଗଦା, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
+#ଅନ୍ୟଥା
+    M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->ଗଦା, _mem, d_m3OpDefaultArgs);
 #endif
-#if d_m3HasStackSwitching
-    if (claimRoot) {
-        i_runtime->rootContinuation->state =
+#ଯଦି d_m3_Has_ଗଦା_Switching
+    ଯଦି (claim_ମୂଳ) {
+        i_runtime->ମୂଳ_Continuation->state =
           (result == m3Err_continuationSuspended) ? cont_suspended : cont_returned;
 
-        Runtime_PlaceCallStack(i_runtime);
+        Runtime_Place_Call_ଗଦା(i_runtime);
     }
     i_runtime->activeContinuation = savedContinuation;
 #endif
-#if d_m3HasExceptionHandling
+#ଯଦି d_m3HasExceptionHandling
     i_runtime->tryDepth = savedTryDepth;
 
     // an exception that reached the bottom of the call stack found no handler
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+    ଯଦି (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(i_runtime, result);
 
     // a paused invocation can still reach the exceptions it holds, so they wait
     // for it to finish
-    if (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
+    ଯଦି (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
         FreeExceptions(i_runtime);
     }
 #endif
     i_runtime->callNesting--;
-    d_m3StackLimitLeave(i_runtime);
+    d_m3_ଗଦା_Limit_Leave(i_runtime);
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 M3Result m3_RunStart (IM3Module io_module)
 {
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // Execution disabled for fuzzing builds
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 #endif
 
     M3Result result           = m3Err_none;
     i32      startFunctionTmp = -1;
 
-    if (io_module and io_module->startFunction >= 0) {
+    ଯଦି (io_module and io_module->startFunction >= 0) {
         IM3Function function = &io_module->functions[io_module->startFunction];
 
-        if (not function->compiled) {
+        ଯଦି (not function->compiled) {
 _           (CompileFunction(function));
         }
 
         IM3FuncType ftype = function->funcType;
-        if (ftype->numArgs != 0 || ftype->numRets != 0) {
-            _throw(m3Err_argumentCountMismatch);
+        ଯଦି (ftype->ଅଙ୍କ_Args != 0 || ftype->ଅଙ୍କ_Rets != 0) {
+            _throw(m3_Err_argument_ଗଣନା_Mismatch);
         }
 
         IM3Module  module  = function->module;
@@ -2035,14 +2035,14 @@ _           (CompileFunction(function));
 
         // a start function that suspended is not to be started again: resuming
         // is what finishes it
-        if (result and result != m3Err_continuationSuspended) {
+        ଯଦି (result and result != m3Err_continuationSuspended) {
             io_module->startFunction = startFunctionTmp;
             EXCEPTION_PRINT(result);
-            goto _catch;
+            ଯାଅ _catch;
         }
     }
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 // TODO: deal with main + side-modules loading efforcement
@@ -2050,8 +2050,8 @@ M3Result m3_LoadModule (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (M3_UNLIKELY(io_module->runtime)) {
-        return m3Err_moduleAlreadyLinked;
+    ଯଦି (M3_UNLIKELY(io_module->runtime)) {
+        ଫେରନ୍ତୁ m3Err_moduleAlreadyLinked;
     }
 
     io_module->runtime = io_runtime;
@@ -2076,7 +2076,7 @@ _   (InitDataSegments(io_module));
 
     io_module->next     = io_runtime->modules;
     io_runtime->modules = io_module;
-    return result; // ok
+    ଫେରନ୍ତୁ result; // ok
 
 _catch:
     // The runtime owns the module either way. Instantiation may already have
@@ -2087,200 +2087,200 @@ _catch:
     // It goes on the tail of the list rather than the head: it is not a module
     // anyone should find by name, only one whose functions may still be
     // reachable through someone else's table.
-    io_module->next = NULL;
+    io_module->next = ଖାଲି;
 
     IM3Module* tail = &io_runtime->modules;
-    while (*tail) {
+    ଯେତେବେଳେ (*tail) {
         tail = &(*tail)->next;
     }
     *tail = io_module;
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 IM3Global m3_FindGlobal (IM3Module         io_module,
-                         const char* const i_globalName)
+                         ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_globalName)
 {
     // Search exports
     IM3Global exported = Module_FindExportedGlobal(io_module, i_globalName);
-    if (exported) {
+    ଯଦି (exported) {
         // a re-exported global is the one that was imported, so reads and
         // writes have to reach the cell that actually holds the value
-        return exported->resolved ? exported->resolved : exported;
+        ଫେରନ୍ତୁ exported->resolved ? exported->resolved : exported;
     }
 
     // Search imports
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (g->import.moduleUtf8 and g->import.fieldUtf8) {
-            if (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
-                return g->resolved ? g->resolved : g;
+        ଯଦି (g->import.moduleUtf8 and g->import.fieldUtf8) {
+            ଯଦି (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
+                ଫେରନ୍ତୁ g->resolved ? g->resolved : g;
             }
         }
     }
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 M3Result m3_GetGlobal (IM3Global      i_global,
-                       IM3TaggedValue o_value)
+                       IM3_Tagged_ମୂଲ୍ୟ o_ମୂଲ୍ୟ)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    ଯଦି (not i_global) {
+        ଫେରନ୍ତୁ m3Err_globalLookupFailed;
     }
 
-    switch (i_global->type) {
-    case c_m3Type_i32: o_value->value.i32 = i_global->i32Value; break;
-    case c_m3Type_i64: o_value->value.i64 = i_global->i64Value; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: o_value->value.f32 = i_global->f32Value; break;
-    case c_m3Type_f64: o_value->value.f64 = i_global->f64Value; break;
+    ବାଛ (i_global->type) {
+    ସ୍ଥିତି c_m3Type_i32: o_ମୂଲ୍ୟ->ମୂଲ୍ୟ.i32 = i_global->i32_ମୂଲ୍ୟ; ଭାଙ୍ଗ;
+    ସ୍ଥିତି c_m3Type_i64: o_ମୂଲ୍ୟ->ମୂଲ୍ୟ.i64 = i_global->i64_ମୂଲ୍ୟ; ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
+    ସ୍ଥିତି c_m3Type_f32: o_ମୂଲ୍ୟ->ମୂଲ୍ୟ.f32 = i_global->f32_ମୂଲ୍ୟ; ଭାଙ୍ଗ;
+    ସ୍ଥିତି c_m3Type_f64: o_ମୂଲ୍ୟ->ମୂଲ୍ୟ.f64 = i_global->f64_ମୂଲ୍ୟ; ଭାଙ୍ଗ;
 #endif
-    default: return m3Err_invalidTypeId;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ m3Err_invalidTypeId;
     }
 
-    o_value->type = (M3ValueType)(i_global->type);
-    return m3Err_none;
+    o_ମୂଲ୍ୟ->type = (M3_ମୂଲ୍ୟ_Type)(i_global->type);
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 M3Result m3_SetGlobal (IM3Global            i_global,
-                       const IM3TaggedValue i_value)
+                       ଅଚଳ IM3_Tagged_ମୂଲ୍ୟ i_ମୂଲ୍ୟ)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    ଯଦି (not i_global) {
+        ଫେରନ୍ତୁ m3Err_globalLookupFailed;
     }
-    if (not i_global->isMutable) {
-        return m3Err_globalNotMutable;
+    ଯଦି (not i_global->isMutable) {
+        ଫେରନ୍ତୁ m3Err_globalNotMutable;
     }
-    if (i_global->type != i_value->type) {
-        return m3Err_globalTypeMismatch;
+    ଯଦି (i_global->type != i_ମୂଲ୍ୟ->type) {
+        ଫେରନ୍ତୁ m3Err_globalTypeMismatch;
     }
 
-    switch (i_value->type) {
-    case c_m3Type_i32: i_global->i32Value = i_value->value.i32; break;
-    case c_m3Type_i64: i_global->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-    case c_m3Type_f32: i_global->f32Value = i_value->value.f32; break;
-    case c_m3Type_f64: i_global->f64Value = i_value->value.f64; break;
+    ବାଛ (i_ମୂଲ୍ୟ->type) {
+    ସ୍ଥିତି c_m3Type_i32: i_global->i32_ମୂଲ୍ୟ = i_ମୂଲ୍ୟ->ମୂଲ୍ୟ.i32; ଭାଙ୍ଗ;
+    ସ୍ଥିତି c_m3Type_i64: i_global->i64_ମୂଲ୍ୟ = i_ମୂଲ୍ୟ->ମୂଲ୍ୟ.i64; ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
+    ସ୍ଥିତି c_m3Type_f32: i_global->f32_ମୂଲ୍ୟ = i_ମୂଲ୍ୟ->ମୂଲ୍ୟ.f32; ଭାଙ୍ଗ;
+    ସ୍ଥିତି c_m3Type_f64: i_global->f64_ମୂଲ୍ୟ = i_ମୂଲ୍ୟ->ମୂଲ୍ୟ.f64; ଭାଙ୍ଗ;
 #endif
-    default: return m3Err_invalidTypeId;
+    ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ m3Err_invalidTypeId;
     }
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
-M3ValueType m3_GetGlobalType (IM3Global i_global)
+M3_ମୂଲ୍ୟ_Type m3_GetGlobalType (IM3Global i_global)
 {
-    return (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
+    ଫେରନ୍ତୁ (i_global) ? (M3_ମୂଲ୍ୟ_Type)(i_global->type) : c_m3Type_none;
 }
 
 
-void* v_FindFunction (IM3Module i_module, void* i_info)
+ଶୂନ୍ୟ* v_FindFunction (IM3Module i_module, ଶୂନ୍ୟ* i_info)
 {
-    const char* const i_name = (const char*)i_info;
+    ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_name = (ଅଚଳ ଅକ୍ଷର*)i_info;
 
     // Prefer exported functions
     IM3Function exported = Module_FindExportedFunction(i_module, i_name);
-    if (exported) {
-        return exported;
+    ଯଦି (exported) {
+        ଫେରନ୍ତୁ exported;
     }
 
     // Search internal functions
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Functions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         bool isImported = f->import.moduleUtf8 or f->import.fieldUtf8;
 
-        if (isImported) {
-            continue;
+        ଯଦି (isImported) {
+            ଜାରି;
         }
 
-        for (int j = 0; j < f->numNames; j++) {
-            if (f->names[j] and strcmp(f->names[j], i_name) == 0) {
-                return f;
+        ପାଇଁ (ପୂର୍ଣ୍ଣସଂଖ୍ୟା j = 0; j < f->ଅଙ୍କ_Names; j++) {
+            ଯଦି (f->names[j] and strcmp(f->names[j], i_name) == 0) {
+                ଫେରନ୍ତୁ f;
             }
         }
     }
 
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
 // Shared tail of the two lookups: a function is only usable once it has code.
-static
+ସ୍ଥିର
 M3Result PrepareFoundFunction (IM3Function* o_function, IM3Function i_function)
 {
     M3Result result = m3Err_none;
 
-    if (not i_function->compiled) {
+    ଯଦି (not i_function->compiled) {
 _       (CompileFunction(i_function))
     }
 
     _catch:
-    *o_function = result ? NULL : i_function;
+    *o_function = result ? ଖାଲି : i_function;
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 
 // Searches every module in the runtime, most recently loaded first. That is a
 // guess once more than one module is loaded and two of them export the same
 // name - m3_FindFunctionIn says which module is meant.
-M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, const char* const i_functionName)
+M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_functionName)
 {
                                                                 d_m3Assert (o_function and i_runtime and i_functionName);
-    IM3Function function = NULL;
+    IM3Function function = ଖାଲି;
 
-    if (not i_runtime->modules) {
-        *o_function = NULL;
-        return "no modules loaded";
+    ଯଦି (not i_runtime->modules) {
+        *o_function = ଖାଲି;
+        ଫେରନ୍ତୁ "no modules loaded";
     }
 
-    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (void*)i_functionName);
+    function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (ଶୂନ୍ୟ*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
+    ଯଦି (not function) {
+        *o_function = ଖାଲି;
+        ଫେରନ୍ତୁ ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    ଫେରନ୍ତୁ PrepareFoundFunction(o_function, function);
 }
 
 
-IM3Module m3_FindModule (IM3Runtime i_runtime, const char* const i_moduleName)
+IM3Module m3_FindModule (IM3Runtime i_runtime, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_moduleName)
 {
-    if (not i_runtime or not i_moduleName) {
-        return NULL;
+    ଯଦି (not i_runtime or not i_moduleName) {
+        ଫେରନ୍ତୁ ଖାଲି;
     }
 
     // the list is newest-first, so a name registered twice names the newer one
-    for (IM3Module m = i_runtime->modules; m; m = m->next) {
-        if (m->name and strcmp(m->name, i_moduleName) == 0) {
-            return m;
+    ପାଇଁ (IM3Module m = i_runtime->modules; m; m = m->next) {
+        ଯଦି (m->name and strcmp(m->name, i_moduleName) == 0) {
+            ଫେରନ୍ତୁ m;
         }
     }
 
-    return NULL;
+    ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
 // Searches one module's exports, which is what naming a module means.
-M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, const char* const i_functionName)
+M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_functionName)
 {
                                                                 d_m3Assert (o_function and i_functionName);
-    if (not i_module) {
-        *o_function = NULL;
-        return m3Err_functionLookupFailed;      // ErrorModule would deref it
+    ଯଦି (not i_module) {
+        *o_function = ଖାଲି;
+        ଫେରନ୍ତୁ m3Err_functionLookupFailed;      // ErrorModule would deref it
     }
 
-    IM3Function function = (IM3Function)v_FindFunction(i_module, (void*)i_functionName);
+    IM3Function function = (IM3Function)v_FindFunction(i_module, (ଶୂନ୍ୟ*)i_functionName);
 
-    if (not function) {
-        *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
+    ଯଦି (not function) {
+        *o_function = ଖାଲି;
+        ଫେରନ୍ତୁ ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    ଫେରନ୍ତୁ PrepareFoundFunction(o_function, function);
 }
 
 
@@ -2290,81 +2290,81 @@ _try {
     M3Table*    table;
     IM3Function function;
 
-    _throwif("no table", i_module->numTables == 0);
+    _throwif("no table", i_module->ଅଙ୍କ_Tables == 0);
 
     table = i_module->tables[0];
     _throwif("function index out of range", i_index >= table->size);
 
     function = (IM3Function)table->elements[i_index];
 
-    if (function) {
-        if (not function->compiled) {
+    ଯଦି (function) {
+        ଯଦି (not function->compiled) {
 _           (CompileFunction(function))
         }
     }
 
     *o_function = function;
 } _catch:
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
 
-static
+ସ୍ଥିର
 M3Result checkStartFunction (IM3Module i_module)
 {
     M3Result result = m3Err_none;                               d_m3Assert(i_module);
 
     // Check if start function needs to be called
-    if (i_module->startFunction >= 0) {
+    ଯଦି (i_module->startFunction >= 0) {
         result = m3_RunStart(i_module);
     }
 
-    return result;
+    ଫେରନ୍ତୁ result;
 }
 
-uint32_t m3_GetArgCount (IM3Function i_function)
+uint32_t m3_Get_Arg_ଗଣନା (IM3Function i_function)
 {
-    if (i_function) {
+    ଯଦି (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numArgs;
+        ଯଦି (ft) {
+            ଫେରନ୍ତୁ ft->ଅଙ୍କ_Args;
         }
     }
-    return 0;
+    ଫେରନ୍ତୁ 0;
 }
 
-uint32_t m3_GetRetCount (IM3Function i_function)
+uint32_t m3_Get_Ret_ଗଣନା (IM3Function i_function)
 {
-    if (i_function) {
+    ଯଦି (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numRets;
+        ଯଦି (ft) {
+            ଫେରନ୍ତୁ ft->ଅଙ୍କ_Rets;
         }
     }
-    return 0;
+    ଫେରନ୍ତୁ 0;
 }
 
 
-M3ValueType m3_GetArgType (IM3Function i_function, uint32_t index)
+M3_ମୂଲ୍ୟ_Type m3_GetArgType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    ଯଦି (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numArgs) {
-            return (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
+        ଯଦି (ft and index < ft->ଅଙ୍କ_Args) {
+            ଫେରନ୍ତୁ (M3_ମୂଲ୍ୟ_Type)BaseTypeOf(d_FuncArgType(ft, index));
         }
     }
-    return c_m3Type_none;
+    ଫେରନ୍ତୁ c_m3Type_none;
 }
 
-M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
+M3_ମୂଲ୍ୟ_Type m3_GetRetType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    ଯଦି (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numRets) {
-            return (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
+        ଯଦି (ft and index < ft->ଅଙ୍କ_Rets) {
+            ଫେରନ୍ତୁ (M3_ମୂଲ୍ୟ_Type)BaseTypeOf(d_FuncRetType(ft, index));
         }
     }
-    return c_m3Type_none;
+    ଫେରନ୍ତୁ c_m3Type_none;
 }
 
 
@@ -2375,28 +2375,28 @@ M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
 // here instead: results and arguments each take a u64 at this boundary, however
 // wide the slot is inside. Every caller goes through this, so none of them can
 // be the one that forgets.
-static
-M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
+ସ୍ଥିର
+M3Result Get_ଗଦା_Pointer_For_Args (IM3Function i_function, u8** o_ଗଦା)
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
     // the stack a paused invocation holds is not available to this one
-    size_t used      = (size_t)((u8*)runtime->stack - (u8*)runtime->originStack);
-    size_t needed    = ((size_t)ftype->numRets + ftype->numArgs) * sizeof(u64);
-    size_t available = (size_t)runtime->numStackSlots * sizeof(m3slot_t) - used;
+    size_t used      = (size_t)((u8*)runtime->ଗଦା - (u8*)runtime->origin_ଗଦା);
+    size_t needed    = ((size_t)ftype->ଅଙ୍କ_Rets + ftype->ଅଙ୍କ_Args) * ଆକାର(u64);
+    size_t available = (size_t)runtime->ଅଙ୍କ_ଗଦା_Slots * ଆକାର(m3slot_t) - used;
 
-    if (needed > available) {
-        return m3Err_trapStackOverflow;
+    ଯଦି (needed > available) {
+        ଫେରନ୍ତୁ m3_Err_trap_ଗଦା_Overflow;
     }
 
-    u64* stack = (u64*)runtime->stack;
+    u64* ଗଦା = (u64*)runtime->ଗଦା;
 
-    stack += ftype->numRets;
+    ଗଦା += ftype->ଅଙ୍କ_Rets;
 
-    *o_stack = (u8*)stack;
+    *o_ଗଦା = (u8*)ଗଦା;
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 
@@ -2406,15 +2406,15 @@ M3Result m3_CallV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_CallVL(i_function, ap);
     va_end(ap);
-    return r;
+    ଫେରନ୍ତୁ r;
 }
 
-static
-void ReportNativeStackUsage ()
+ସ୍ଥିର
+ଶୂନ୍ୟ Report_Native_ଗଦା_Usage ()
 {
-#if d_m3LogNativeStack
-    int stackUsed = m3StackGetMax();
-    fprintf(stderr, "Native stack used: %d\n", stackUsed);
+#ଯଦି d_m3_Log_Native_ଗଦା
+    ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଗଦା_Used = m3_ଗଦା_Get_Max();
+    fprintf(stderr, "Native stack used: %d\n", ଗଦା_Used);
 #endif
 }
 
@@ -2424,292 +2424,292 @@ M3Result m3_CallVL (IM3Function i_function, va_list i_args)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = ଖାଲି;
 
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    ଯଦି (!i_function->compiled) {
+        ଫେରନ୍ତୁ m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#ଯଦି d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_ଗଦା_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_ଗଦା_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    ପାଇଁ (u32 i = 0; i < ftype->ଅଙ୍କ_Args; ++i) {
+        ବାଛ (d_FuncArgType(ftype, i)) {
+        ସ୍ଥିତି c_m3Type_i32:
             *(i32*)(s) = va_arg(i_args, i32);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_i64:
             *(i64*)(s) = va_arg(i_args, i64);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
             *(uintptr_t*)(s) = va_arg(i_args, uintptr_t);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
+        ସ୍ଥିତି c_m3Type_f32:
             *(f32*)(s) = (f32)va_arg(i_args, f64);
             s += 8;
-            break; // f32 is passed as f64
-        case c_m3Type_f64:
+            ଭାଙ୍ଗ; // f32 is passed as f64
+        ସ୍ଥିତି c_m3Type_f64:
             *(f64*)(s) = va_arg(i_args, f64);
             s += 8;
-            break;
+            ଭାଙ୍ଗ;
 #endif
-        default: return "unknown argument type";
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
-    ReportNativeStackUsage();
+    Report_Native_ଗଦା_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? ଖାଲି : i_function;
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
-M3Result m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[])
+M3Result m3_Call (IM3Function i_function, uint32_t i_argc, ଅଚଳ ଶୂନ୍ୟ* i_argptrs[])
 {
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = ଖାଲି;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    ଯଦି (i_argc != ftype->ଅଙ୍କ_Args) {
+        ଫେରନ୍ତୁ m3_Err_argument_ଗଣନା_Mismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    ଯଦି (!i_function->compiled) {
+        ଫେରନ୍ତୁ m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#ଯଦି d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_ଗଦା_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_ଗଦା_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
+    ପାଇଁ (u32 i = 0; i < ftype->ଅଙ୍କ_Args; ++i) {
+        ବାଛ (d_FuncArgType(ftype, i)) {
+        ସ୍ଥିତି c_m3Type_i32:
             *(i32*)(s) = *(i32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_i64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_i64:
             *(i64*)(s) = *(i64*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
             *(uintptr_t*)(s) = *(uintptr_t*)i_argptrs[i];
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
+        ସ୍ଥିତି c_m3Type_f32:
             *(f32*)(s) = *(f32*)i_argptrs[i];
             s += 8;
-            break;
-        case c_m3Type_f64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_f64:
             *(f64*)(s) = *(f64*)i_argptrs[i];
             s += 8;
-            break;
+            ଭାଙ୍ଗ;
 #endif
-        default: return "unknown argument type";
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ "unknown argument type";
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
 
-    ReportNativeStackUsage();
+    Report_Native_ଗଦା_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? ଖାଲି : i_function;
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 // Argument parsing for m3_CallArgv. Strict on purpose: the whole string has to
 // be consumed, so "12abc" is rejected rather than read as 12, and an empty or
 // unparsable argument is an error rather than the zero that strtoul with a
 // NULL end pointer used to hand back. See wasm3/wasm3#367.
-static
-M3Result ParseArgInteger (ccstr_t i_arg, u32 i_numBits, u64* o_value)
+ସ୍ଥିର
+M3Result ParseArgInteger (ccstr_t i_arg, u32 i_ଅଙ୍କ_Bits, u64* o_ମୂଲ୍ୟ)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    ଯଦି (not i_arg or not *i_arg) {
+        ଫେରନ୍ତୁ "empty argument";
     }
 
     // strtoull would skip leading space, but trailing space is rejected below;
     // accepting one and not the other would just be confusing
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    ଯଦି (isspace((unsigned ଅକ୍ଷର)*i_arg)) {
+        ଫେରନ୍ତୁ "argument is not a number";
     }
 
-    char* end = NULL;
-    u64   value;
+    ଅକ୍ଷର* end = ଖାଲି;
+    u64   ମୂଲ୍ୟ;
 
     errno = 0;
 
     // an argument may be spelled signed or unsigned: -1 and 4294967295 name the
     // same i32
-    if (*i_arg == '-') {
-        i64 signedValue = strtoll(i_arg, &end, 10);
+    ଯଦି (*i_arg == '-') {
+        i64 signed_ମୂଲ୍ୟ = strtoll(i_arg, &end, 10);
 
-        if (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
-            return "argument out of range";
+        ଯଦି (i_ଅଙ୍କ_Bits == 32 and (signed_ମୂଲ୍ୟ < INT32_MIN or signed_ମୂଲ୍ୟ > INT32_MAX)) {
+            ଫେରନ୍ତୁ "argument out of range";
         }
 
-        value = (u64)signedValue;
-    } else {
-        value = strtoull(i_arg, &end, 10);
+        ମୂଲ୍ୟ = (u64)signed_ମୂଲ୍ୟ;
+    } ଅନ୍ୟଥା {
+        ମୂଲ୍ୟ = strtoull(i_arg, &end, 10);
 
-        if (i_numBits == 32 and value > UINT32_MAX) {
-            return "argument out of range";
+        ଯଦି (i_ଅଙ୍କ_Bits == 32 and ମୂଲ୍ୟ > UINT32_MAX) {
+            ଫେରନ୍ତୁ "argument out of range";
         }
     }
 
-    if (errno == ERANGE) {
-        return "argument out of range";
+    ଯଦି (errno == ERANGE) {
+        ଫେରନ୍ତୁ "argument out of range";
     }
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    ଯଦି (end == i_arg or *end) {
+        ଫେରନ୍ତୁ "argument is not a number";
     }
 
-    *o_value = value;
+    *o_ମୂଲ୍ୟ = ମୂଲ୍ୟ;
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 
-#if d_m3HasFloat
-static
-M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
+#ଯଦି d_m3HasFloat
+ସ୍ଥିର
+M3Result ParseArgFloat (ccstr_t i_arg, f64* o_ମୂଲ୍ୟ)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    ଯଦି (not i_arg or not *i_arg) {
+        ଫେରନ୍ତୁ "empty argument";
     }
 
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    ଯଦି (isspace((unsigned ଅକ୍ଷର)*i_arg)) {
+        ଫେରନ୍ତୁ "argument is not a number";
     }
 
-    char* end = NULL;
+    ଅକ୍ଷର* end = ଖାଲି;
 
     errno = 0;
 
-    f64 value = strtod(i_arg, &end);
+    f64 ମୂଲ୍ୟ = strtod(i_arg, &end);
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    ଯଦି (end == i_arg or *end) {
+        ଫେରନ୍ତୁ "argument is not a number";
     }
 
     // strtod reports underflow through ERANGE as well, and a denormal result is
     // perfectly usable, so only an overflow to infinity is out of range
-    if (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
-        return "argument out of range";
+    ଯଦି (errno == ERANGE and (ମୂଲ୍ୟ > DBL_MAX or ମୂଲ୍ୟ < -DBL_MAX)) {
+        ଫେରନ୍ତୁ "argument out of range";
     }
 
-    *o_value = value;
+    *o_ମୂଲ୍ୟ = ମୂଲ୍ୟ;
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 #endif
 
 
 // A reference argument is either the null reference or a host handle written as
 // an integer.
-static
-M3Result ParseArgReference (ccstr_t i_arg, u64* o_value)
+ସ୍ଥିର
+M3Result ParseArgReference (ccstr_t i_arg, u64* o_ମୂଲ୍ୟ)
 {
-    if (i_arg and strcmp(i_arg, "null") == 0) {
-        *o_value = 0;
-        return m3Err_none;
+    ଯଦି (i_arg and strcmp(i_arg, "null") == 0) {
+        *o_ମୂଲ୍ୟ = 0;
+        ଫେରନ୍ତୁ m3Err_none;
     }
 
-    return ParseArgInteger(i_arg, 64, o_value);
+    ଫେରନ୍ତୁ ParseArgInteger(i_arg, 64, o_ମୂଲ୍ୟ);
 }
 
 
-M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_argv[])
+M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, ଅଚଳ ଅକ୍ଷର* i_argv[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
     M3Result    result  = m3Err_none;
-    u8*         s       = NULL;
+    u8*         s       = ଖାଲି;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    ଯଦି (i_argc != ftype->ଅଙ୍କ_Args) {
+        ଫେରନ୍ତୁ m3_Err_argument_ଗଣନା_Mismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    ଯଦି (!i_function->compiled) {
+        ଫେରନ୍ତୁ m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#ଯଦି d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
-    m3StackCheckInit();
+    m3_ଗଦା_Check_Init();
 
 _   (checkStartFunction(i_function->module))
 
-_   (GetStackPointerForArgs(i_function, &s))
+_   (Get_ଗଦା_Pointer_For_Args(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
-        u64 value = 0;
-#if d_m3HasFloat
+    ପାଇଁ (u32 i = 0; i < ftype->ଅଙ୍କ_Args; ++i) {
+        u64 ମୂଲ୍ୟ = 0;
+#ଯଦି d_m3HasFloat
         f64 fvalue = 0;
 #endif
-        switch (d_FuncArgType(ftype, i)) {
-        case c_m3Type_i32:
-_           (ParseArgInteger(i_argv[i], 32, &value)) * (i32*)(s) = (i32)value;
+        ବାଛ (d_FuncArgType(ftype, i)) {
+        ସ୍ଥିତି c_m3Type_i32:
+_           (ParseArgInteger(i_argv[i], 32, &ମୂଲ୍ୟ)) * (i32*)(s) = (i32)ମୂଲ୍ୟ;
             s += 8;
-            break;
-        case c_m3Type_i64:
-_           (ParseArgInteger(i_argv[i], 64, &value)) * (i64*)(s) = (i64)value;
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_i64:
+_           (ParseArgInteger(i_argv[i], 64, &ମୂଲ୍ୟ)) * (i64*)(s) = (i64)ମୂଲ୍ୟ;
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
-_           (ParseArgReference(i_argv[i], &value)) * (uintptr_t*)(s) = (uintptr_t)value;
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
+_           (ParseArgReference(i_argv[i], &ମୂଲ୍ୟ)) * (uintptr_t*)(s) = (uintptr_t)ମୂଲ୍ୟ;
             s += 8;
-            break;
-#if d_m3HasFloat
+            ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
             // strtof would be less portable
-        case c_m3Type_f32:
+        ସ୍ଥିତି c_m3Type_f32:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f32*)(s) = (f32)fvalue;
             s += 8;
-            break;
-        case c_m3Type_f64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_f64:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
             s += 8;
-            break;
+            ଭାଙ୍ଗ;
 #endif
-        default: _throw("unknown argument type");
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ: _throw("unknown argument type");
         }
     }
 
     result = RunCodeChecked(runtime, i_function);
 
-    ReportNativeStackUsage();
+    Report_Native_ଗଦା_Usage();
 
-    runtime->lastCalled = result ? NULL : i_function;
+    runtime->lastCalled = result ? ଖାଲି : i_function;
 
-    _catch: return result;
+    _catch: ଫେରନ୍ତୁ result;
 }
 
 
@@ -2720,50 +2720,50 @@ _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
 //}
 
 
-M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_retptrs[])
+M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, ଅଚଳ ଶୂନ୍ୟ* o_retptrs[])
 {
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
 
-    if (i_retc != ftype->numRets) {
-        return m3Err_argumentCountMismatch;
+    ଯଦି (i_retc != ftype->ଅଙ୍କ_Rets) {
+        ଫେରନ୍ତୁ m3_Err_argument_ଗଣନା_Mismatch;
     }
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    ଯଦି (i_function != runtime->lastCalled) {
+        ଫେରନ୍ତୁ "function not called";
     }
 
-    u8* s = (u8*)runtime->stack;
+    u8* s = (u8*)runtime->ଗଦା;
 
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    ପାଇଁ (u32 i = 0; i < ftype->ଅଙ୍କ_Rets; ++i) {
+        ବାଛ (d_FuncRetType(ftype, i)) {
+        ସ୍ଥିତି c_m3Type_i32:
             *(i32*)o_retptrs[i] = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_i64:
             *(i64*)o_retptrs[i] = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
             *(uintptr_t*)o_retptrs[i] = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
+        ସ୍ଥିତି c_m3Type_f32:
             *(f32*)o_retptrs[i] = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_f64:
             *(f64*)o_retptrs[i] = *(f64*)(s);
             s += 8;
-            break;
+            ଭାଙ୍ଗ;
 #endif
-        default: return "unknown return type";
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ "unknown return type";
         }
     }
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 M3Result m3_GetResultsV (IM3Function i_function, ...)
@@ -2772,7 +2772,7 @@ M3Result m3_GetResultsV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_GetResultsVL(i_function, ap);
     va_end(ap);
-    return r;
+    ଫେରନ୍ତୁ r;
 }
 
 M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
@@ -2780,143 +2780,143 @@ M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    ଯଦି (i_function != runtime->lastCalled) {
+        ଫେରନ୍ତୁ "function not called";
     }
 
-    u8* s = (u8*)runtime->stack;
-    for (u32 i = 0; i < ftype->numRets; ++i) {
-        switch (d_FuncRetType(ftype, i)) {
-        case c_m3Type_i32:
+    u8* s = (u8*)runtime->ଗଦା;
+    ପାଇଁ (u32 i = 0; i < ftype->ଅଙ୍କ_Rets; ++i) {
+        ବାଛ (d_FuncRetType(ftype, i)) {
+        ସ୍ଥିତି c_m3Type_i32:
             *va_arg(o_rets, i32*) = *(i32*)(s);
             s += 8;
-            break;
-        case c_m3Type_i64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_i64:
             *va_arg(o_rets, i64*) = *(i64*)(s);
             s += 8;
-            break;
-        case c_m3Type_funcref:
-        case c_m3Type_externref:
-        case c_m3Type_exnref:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_funcref:
+        ସ୍ଥିତି c_m3Type_externref:
+        ସ୍ଥିତି c_m3Type_exnref:
             *va_arg(o_rets, uintptr_t*) = *(uintptr_t*)(s);
             s += 8;
-            break;
-#if d_m3HasFloat
-        case c_m3Type_f32:
+            ଭାଙ୍ଗ;
+#ଯଦି d_m3HasFloat
+        ସ୍ଥିତି c_m3Type_f32:
             *va_arg(o_rets, f32*) = *(f32*)(s);
             s += 8;
-            break;
-        case c_m3Type_f64:
+            ଭାଙ୍ଗ;
+        ସ୍ଥିତି c_m3Type_f64:
             *va_arg(o_rets, f64*) = *(f64*)(s);
             s += 8;
-            break;
+            ଭାଙ୍ଗ;
 #endif
-        default: return "unknown argument type";
+        ପୂର୍ବନିର୍ଦ୍ଧାରିତ: ଫେରନ୍ତୁ "unknown argument type";
         }
     }
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
-void ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
+ଶୂନ୍ୟ ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    ଯଦି (i_codePage) {
         IM3CodePage* list;
 
-        bool pageFull = (NumFreeLines(i_codePage) < d_m3CodePageFreeLinesThreshold);
-        if (pageFull) {
+        bool pageFull = (ଅଙ୍କ_Free_ଧାଡ଼ିଗୁଡ଼ିକ(i_codePage) < d_m3_Code_Page_Free_ଧାଡ଼ିଗୁଡ଼ିକ_Threshold);
+        ଯଦି (pageFull) {
             list = &i_runtime->pagesFull;
-        } else {
+        } ଅନ୍ୟଥା {
             list = &i_runtime->pagesOpen;
         }
 
-        PushCodePage(list, i_codePage);                         m3log (emit, "release page: %d to queue: '%s'", i_codePage->info.sequence, pageFull ? "full" : "open")
+        ଠେଲ_Code_Page(list, i_codePage);                         m3log (emit, "release page: %d to queue: '%s'", i_codePage->info.sequence, pageFull ? "full" : "open")
     }
 }
 
 
-IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_minLineCount)
+IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_min_ଧାଡ଼ି_ଗଣନା)
 {
-    IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_minLineCount);
+    IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_min_ଧାଡ଼ି_ଗଣନା);
 
-    if (not page) {
-        page = Environment_AcquireCodePage(i_runtime->environment, i_minLineCount);
+    ଯଦି (not page) {
+        page = Environment_AcquireCodePage(i_runtime->environment, i_min_ଧାଡ଼ି_ଗଣନା);
 
-        if (not page) {
-            page = NewCodePage(i_runtime, i_minLineCount);
+        ଯଦି (not page) {
+            page = NewCodePage(i_runtime, i_min_ଧାଡ଼ି_ଗଣନା);
         }
 
-        if (page) {
-            i_runtime->numCodePages++;
+        ଯଦି (page) {
+            i_runtime->ଅଙ୍କ_Code_Pages++;
         }
     }
 
-    if (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
-        i_runtime->numActiveCodePages++;
+    ଯଦି (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
+        i_runtime->ଅଙ୍କ_Active_Code_Pages++;
     }
 
-    return page;
+    ଫେରନ୍ତୁ page;
 }
 
 
 IM3CodePage AcquireCodePage (IM3Runtime i_runtime)
 {
-    return AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
+    ଫେରନ୍ତୁ AcquireCodePageWithCapacity(i_runtime, d_m3_Code_Page_Free_ଧାଡ଼ିଗୁଡ଼ିକ_Threshold);
 }
 
 
-void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
+ଶୂନ୍ୟ ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    ଯଦି (i_codePage) {
         ReleaseCodePageNoTrack(i_runtime, i_codePage);
-        i_runtime->numActiveCodePages--;
+        i_runtime->ଅଙ୍କ_Active_Code_Pages--;
 
-#if defined(DEBUG)
-        u32 numOpen = CountCodePages(i_runtime->pagesOpen);
-        u32 numFull = CountCodePages(i_runtime->pagesFull);
+#ଯଦି defined(DEBUG)
+        u32 ଅଙ୍କ_Open = ଗଣନା_Code_Pages(i_runtime->pagesOpen);
+        u32 ଅଙ୍କ_Full = ଗଣନା_Code_Pages(i_runtime->pagesFull);
 
-        m3log(runtime, "runtime: %p; open-pages: %d; full-pages: %d; active: %d; total: %d", i_runtime, numOpen, numFull, i_runtime->numActiveCodePages, i_runtime->numCodePages);
+        m3log(runtime, "runtime: %p; open-pages: %d; full-pages: %d; active: %d; total: %d", i_runtime, ଅଙ୍କ_Open, ଅଙ୍କ_Full, i_runtime->ଅଙ୍କ_Active_Code_Pages, i_runtime->ଅଙ୍କ_Code_Pages);
 
-        d_m3Assert(numOpen + numFull + i_runtime->numActiveCodePages == i_runtime->numCodePages);
+        d_m3Assert(ଅଙ୍କ_Open + ଅଙ୍କ_Full + i_runtime->ଅଙ୍କ_Active_Code_Pages == i_runtime->ଅଙ୍କ_Code_Pages);
 
-#  if d_m3LogCodePages
-        dump_code_page(i_codePage, /* startPC: */ NULL);
+#  ଯଦି d_m3LogCodePages
+        dump_code_page(i_codePage, /* startPC: */ ଖାଲି);
 #  endif
 #endif
     }
 }
 
 
-#if d_m3VerboseErrorMessages
+#ଯଦି d_m3VerboseErrorMessages
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...)
+                  ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_file, u32 i_ଧାଡ଼ି_ଅଙ୍କ, ଅଚଳ ଅକ୍ଷର* ଅଚଳ i_errorMessage, ...)
 {
-    if (i_runtime) {
-        i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .line = i_lineNum };
+    ଯଦି (i_runtime) {
+        i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .ଧାଡ଼ି_2 = i_ଧାଡ଼ି_ଅଙ୍କ };
         i_runtime->error.message = i_runtime->error_message;
 
         va_list args;
         va_start(args, i_errorMessage);
-        vsnprintf(i_runtime->error_message, sizeof(i_runtime->error_message), i_errorMessage, args);
+        vsnprintf(i_runtime->error_message, ଆକାର(i_runtime->error_message), i_errorMessage, args);
         va_end(args);
     }
 
-    return i_result;
+    ଫେରନ୍ତୁ i_result;
 }
 #endif
 
 
-void m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
+ଶୂନ୍ୟ m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
 {
-    if (i_runtime) {
+    ଯଦି (i_runtime) {
         *o_info = i_runtime->error;
         m3_ResetErrorInfo(i_runtime);
     }
 }
 
 
-void m3_ResetErrorInfo (IM3Runtime i_runtime)
+ଶୂନ୍ୟ m3_ResetErrorInfo (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    ଯଦି (i_runtime) {
         M3_INIT(i_runtime->error);
         i_runtime->error.message = "";
     }
@@ -2924,132 +2924,132 @@ void m3_ResetErrorInfo (IM3Runtime i_runtime)
 
 uint8_t* m3_GetMemory (IM3Module i_module, size_t* o_memorySizeInBytes, uint32_t i_memoryIndex)
 {
-    uint8_t* memory = NULL;
+    uint8_t* memory = ଖାଲି;
     size_t   size   = 0;
 
-    if (i_module and i_memoryIndex < i_module->numMemories) {
+    ଯଦି (i_module and i_memoryIndex < i_module->ଅଙ୍କ_Memories) {
         IM3Memory mem = i_module->memories[i_memoryIndex];
 
-        if (mem->mallocated) {
+        ଯଦି (mem->mallocated) {
             size = mem->mallocated->length;
 
-            if (size) {
+            ଯଦି (size) {
                 memory = m3MemData(mem->mallocated);
             }
         }
     }
 
-    if (o_memorySizeInBytes) {
+    ଯଦି (o_memorySizeInBytes) {
         *o_memorySizeInBytes = size;
     }
 
-    return memory;
+    ଫେରନ୍ତୁ memory;
 }
 
 
 size_t m3_GetMemorySize (IM3Module i_module, uint32_t i_memoryIndex)
 {
-    if (not i_module or i_memoryIndex >= i_module->numMemories) {
-        return 0;
+    ଯଦି (not i_module or i_memoryIndex >= i_module->ଅଙ୍କ_Memories) {
+        ଫେରନ୍ତୁ 0;
     }
 
     IM3Memory mem = i_module->memories[i_memoryIndex];
 
-    return mem->mallocated ? mem->mallocated->length : 0;
+    ଫେରନ୍ତୁ mem->mallocated ? mem->mallocated->length : 0;
 }
 
 
-size_t m3_GetMemorySizeAt (const void* i_memory)
+size_t m3_GetMemorySizeAt (ଅଚଳ ଶୂନ୍ୟ* i_memory)
 {
-    if (not i_memory) {
-        return 0;
+    ଯଦି (not i_memory) {
+        ଫେରନ୍ତୁ 0;
     }
 
     // the header sits immediately before the data it describes
-    const M3MemoryHeader* header = ((const M3MemoryHeader*)i_memory) - 1;
+    ଅଚଳ M3MemoryHeader* header = ((ଅଚଳ M3MemoryHeader*)i_memory) - 1;
 
-    return header->length;
+    ଫେରନ୍ତୁ header->length;
 }
 
 
 M3Result m3_FindExportedMemory (IM3Module i_module, cstr_t i_name, u32* o_memoryIndex)
 {
-    if (not i_module or not i_name or not o_memoryIndex) {
-        return m3Err_unknownMemory;
+    ଯଦି (not i_module or not i_name or not o_memoryIndex) {
+        ଫେରନ୍ତୁ m3Err_unknownMemory;
     }
 
-    const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
+    ଅଚଳ M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    if (not e) {
-        return m3Err_unknownMemory;
+    ଯଦି (not e) {
+        ଫେରନ୍ତୁ m3Err_unknownMemory;
     }
 
     *o_memoryIndex = e->index;
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 
 bool Module_HasLinkedHostImport (IM3Module i_module, cstr_t i_importModule)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    ପାଇଁ (u32 i = 0; i < i_module->ଅଙ୍କ_Functions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         // hostMemory is set when a host function is bound to the import, so it
         // is also the mark of one - see CompileRawFunction
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        ଯଦି (not f->hostMemory or f->wasm or f->resolved) {
+            ଜାରି;
         }
 
-        if (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
-            return true;
+        ଯଦି (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
+            ଫେରନ୍ତୁ true;
         }
     }
 
-    return false;
+    ଫେରନ୍ତୁ false;
 }
 
 
 M3Result m3_BindImportMemory (IM3Module io_module, cstr_t i_importModule, u32 i_memoryIndex)
 {
-    if (not io_module or not i_importModule) {
-        return m3Err_moduleNotLinked;
+    ଯଦି (not io_module or not i_importModule) {
+        ଫେରନ୍ତୁ m3Err_moduleNotLinked;
     }
 
-    if (i_memoryIndex >= io_module->numMemories) {
-        return m3Err_unknownMemory;
+    ଯଦି (i_memoryIndex >= io_module->ଅଙ୍କ_Memories) {
+        ଫେରନ୍ତୁ m3Err_unknownMemory;
     }
 
     // the memory itself, not the index: linking may have pointed this slot at
     // another module's memory, and growing one reallocates behind it
     IM3Memory memory = io_module->memories[i_memoryIndex];
 
-    const bool wildcardModule = (strcmp(i_importModule, "*") == 0);
+    ଅଚଳ bool wildcardModule = (strcmp(i_importModule, "*") == 0);
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    ପାଇଁ (u32 i = 0; i < io_module->ଅଙ୍କ_Functions; ++i) {
         IM3Function f = &io_module->functions[i];
 
         // only an import that a host function was bound to has a memory to
         // pin: one with a body of its own reads memory through the interpreter,
         // and one resolved to another module's export runs that module's code
-        if (not f->hostMemory or f->wasm or f->resolved) {
-            continue;
+        ଯଦି (not f->hostMemory or f->wasm or f->resolved) {
+            ଜାରି;
         }
 
-        if (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
+        ଯଦି (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
             f->hostMemory = memory;
         }
     }
 
-    return m3Err_none;
+    ଫେରନ୍ତୁ m3Err_none;
 }
 
 
 M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 {
-#if d_m3RecordBacktraces
-    return &i_runtime->backtrace;
-#else
-    return NULL;
+#ଯଦି d_m3RecordBacktraces
+    ଫେରନ୍ତୁ &i_runtime->backtrace;
+#ଅନ୍ୟଥା
+    ଫେରନ୍ତୁ ଖାଲି;
 #endif
 }
 
@@ -3058,69 +3058,69 @@ M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 //  snapshots & suspendable execution
 //-------------------------------------------------------------------------------------------------------------------------------
 
-void m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
+ଶୂନ୍ୟ m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
 {
-    if (io_runtime) {
+    ଯଦି (io_runtime) {
         io_runtime->isSuspendable = i_suspendable;
     }
 }
 
-void m3_RequestSuspend (IM3Runtime io_runtime)
+ଶୂନ୍ୟ m3_RequestSuspend (IM3Runtime io_runtime)
 {
-    if (io_runtime) {
+    ଯଦି (io_runtime) {
         io_runtime->suspendRequested = true;
     }
 }
 
 bool m3_IsSuspended (IM3Runtime i_runtime)
 {
-    if (!i_runtime) {
-        return false;
+    ଯଦି (!i_runtime) {
+        ଫେରନ୍ତୁ false;
     }
-#if d_m3HasStackSwitching
-    if (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
-        return true;
+#ଯଦି d_m3_Has_ଗଦା_Switching
+    ଯଦି (i_runtime->ମୂଳ_Continuation && i_runtime->ମୂଳ_Continuation->state == cont_suspended) {
+        ଫେରନ୍ତୁ true;
     }
 #endif
-    return false;
+    ଫେରନ୍ତୁ false;
 }
 
 M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 {
-    if (!io_runtime) {
-        return m3Err_mallocFailed;
+    ଯଦି (!io_runtime) {
+        ଫେରନ୍ତୁ m3Err_mallocFailed;
     }
-    if (!io_runtime->isSuspendable) {
-        return m3Err_none;
+    ଯଦି (!io_runtime->isSuspendable) {
+        ଫେରନ୍ତୁ m3Err_none;
     }
-#if d_m3HasSnapshots
+#ଯଦି d_m3HasSnapshots
     // a restore that failed leaves nothing to resume, and says so every time
     // rather than resuming nothing successfully
-    if (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
-        io_runtime->rootContinuation->entryFunction->module->isUnusable) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+    ଯଦି (io_runtime->ମୂଳ_Continuation and io_runtime->ମୂଳ_Continuation->entryFunction and
+        io_runtime->ମୂଳ_Continuation->entryFunction->module->isUnusable) {
+        ଫେରନ୍ତୁ "a snapshot failed to restore into the module, so it cannot run";
     }
 #endif
-#if d_m3HasStackSwitching
-    if (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
-        return m3Err_none;
+#ଯଦି d_m3_Has_ଗଦା_Switching
+    ଯଦି (!io_runtime->ମୂଳ_Continuation || io_runtime->ମୂଳ_Continuation->state != cont_suspended) {
+        ଫେରନ୍ତୁ m3Err_none;
     }
     // what finishes returns into the bottom of the stack, where it was entered
-    io_runtime->stack = io_runtime->originStack;
+    io_runtime->ଗଦା = io_runtime->origin_ଗଦା;
 
     // this is the outermost call again, as far as a host function calling back
     // into Wasm from inside it can tell
-    io_runtime->entered = io_runtime->rootContinuation->entryFunction;
+    io_runtime->entered = io_runtime->ମୂଳ_Continuation->entryFunction;
     io_runtime->callNesting++;
 
-    d_m3StackLimitEnter(io_runtime);
+    d_m3_ଗଦା_Limit_Enter(io_runtime);
     io_runtime->resumePastCheck = true;
-    M3Result result             = (M3Result)ResumeContinuation(io_runtime, io_runtime->rootContinuation);
+    M3Result result             = (M3Result)ResumeContinuation(io_runtime, io_runtime->ମୂଳ_Continuation);
     io_runtime->resumePastCheck = false;
-    d_m3StackLimitLeave(io_runtime);
+    d_m3_ଗଦା_Limit_Leave(io_runtime);
 
-#  if d_m3HasExceptionHandling
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+#  ଯଦି d_m3HasExceptionHandling
+    ଯଦି (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(io_runtime, result);
@@ -3128,19 +3128,19 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 
     io_runtime->callNesting--;
 
-#  if d_m3HasExceptionHandling
-    if (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
+#  ଯଦି d_m3HasExceptionHandling
+    ଯଦି (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
         FreeExceptions(io_runtime);
     }
 #  endif
 
     // the results are where the paused call left room for them, so a finished
     // resume can be asked for them the way the call itself could have been
-    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->rootContinuation->entryFunction : NULL;
+    io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->ମୂଳ_Continuation->entryFunction : ଖାଲି;
 
-    Runtime_PlaceCallStack(io_runtime);
-    return result;
-#else
-    return m3Err_none;
+    Runtime_Place_Call_ଗଦା(io_runtime);
+    ଫେରନ୍ତୁ result;
+#ଅନ୍ୟଥା
+    ଫେରନ୍ତୁ m3Err_none;
 #endif
 }
