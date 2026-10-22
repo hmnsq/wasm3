@@ -11,7 +11,7 @@
 
 #include "m3_core.h"
 
-#if d_m3HasSnapshots
+#ຖ້າ d_m3HasSnapshots
 
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -26,48 +26,48 @@
 
 #  define XXH_STRIPE_LEN   32     // must match Xxh64.buffer
 
-static inline
+static anta_hstha
 u32 XxhRead32 (const void* i_ptr)
 {
     u32 value;
-    memcpy(&value, i_ptr, sizeof(value));
+    memcpy(&value, i_ptr, parimaa_na(value));
     M3_BSWAP_u32(value);
-    return value;
+    ສົ່ງຄືນ value;
 }
 
-static inline
+static anta_hstha
 u64 XxhRead64 (const void* i_ptr)
 {
     u64 value;
-    memcpy(&value, i_ptr, sizeof(value));
+    memcpy(&value, i_ptr, parimaa_na(value));
     M3_BSWAP_u64(value);
-    return value;
+    ສົ່ງຄືນ value;
 }
 
-static inline
+static anta_hstha
 u64 XxhRotl64 (u64 i_value, u32 i_count)
 {
-    return (i_value << i_count) | (i_value >> (64 - i_count));
+    ສົ່ງຄືນ (i_value << i_count) | (i_value >> (64 - i_count));
 }
 
 // One lane taking one 8-byte word
-static inline
+static anta_hstha
 u64 XxhRound (u64 i_acc, u64 i_input)
 {
     i_acc += i_input * XXH_PRIME64_2;
     i_acc = XxhRotl64(i_acc, 31);
-    return i_acc * XXH_PRIME64_1;
+    ສົ່ງຄືນ i_acc * XXH_PRIME64_1;
 }
 
 // ...and one lane folded into the hash at the end
-static inline
+static anta_hstha
 u64 XxhMergeRound (u64 i_acc, u64 i_value)
 {
     i_acc ^= XxhRound(0, i_value);
-    return i_acc * XXH_PRIME64_1 + XXH_PRIME64_4;
+    ສົ່ງຄືນ i_acc * XXH_PRIME64_1 + XXH_PRIME64_4;
 }
 
-static inline
+static anta_hstha
 u64 XxhAvalanche (u64 i_hash)
 {
     i_hash ^= i_hash >> 33;
@@ -75,7 +75,7 @@ u64 XxhAvalanche (u64 i_hash)
     i_hash ^= i_hash >> 29;
     i_hash *= XXH_PRIME64_3;
     i_hash ^= i_hash >> 32;
-    return i_hash;
+    ສົ່ງຄືນ i_hash;
 }
 
 
@@ -91,13 +91,13 @@ const u8* XxhConsumeStripes (u64* io_acc, const u8* i_input, size_t i_size)
     const u8* limit = i_input + i_size - (XXH_STRIPE_LEN - 1);
 
     do {
-        for (size_t lane = 0; lane < 4; ++lane) {
+        ສຳລັບ (size_t lane = 0; lane < 4; ++lane) {
             io_acc[lane] = XxhRound(io_acc[lane], XxhRead64(input));
             input += 8;
         }
-    } while (input < limit);
+    } ໃນຂະນະທີ່ (input < limit);
 
-    return input;
+    ສົ່ງຄືນ input;
 }
 
 static
@@ -105,11 +105,11 @@ u64 XxhMergeAccs (const u64* i_acc)
 {
     u64 hash = XxhRotl64(i_acc[0], 1) + XxhRotl64(i_acc[1], 7) + XxhRotl64(i_acc[2], 12) + XxhRotl64(i_acc[3], 18);
 
-    for (size_t lane = 0; lane < 4; ++lane) {
+    ສຳລັບ (size_t lane = 0; lane < 4; ++lane) {
         hash = XxhMergeRound(hash, i_acc[lane]);
     }
 
-    return hash;
+    ສົ່ງຄືນ hash;
 }
 
 // The tail: whatever is left over after the last whole stripe, down to
@@ -119,27 +119,27 @@ u64 XxhFinalize (u64 i_hash, const u8* i_input, size_t i_size)
 {
     size_t size = i_size & (XXH_STRIPE_LEN - 1);
 
-    while (size >= 8) {
+    ໃນຂະນະທີ່ (size >= 8) {
         i_hash ^= XxhRound(0, XxhRead64(i_input));
         i_hash = XxhRotl64(i_hash, 27) * XXH_PRIME64_1 + XXH_PRIME64_4;
         i_input += 8;
         size -= 8;
     }
 
-    if (size >= 4) {
+    ຖ້າ (size >= 4) {
         i_hash ^= (u64)XxhRead32(i_input) * XXH_PRIME64_1;
         i_hash = XxhRotl64(i_hash, 23) * XXH_PRIME64_2 + XXH_PRIME64_3;
         i_input += 4;
         size -= 4;
     }
 
-    while (size > 0) {
+    ໃນຂະນະທີ່ (size > 0) {
         i_hash ^= (*i_input++) * XXH_PRIME64_5;
         i_hash = XxhRotl64(i_hash, 11) * XXH_PRIME64_1;
         --size;
     }
 
-    return XxhAvalanche(i_hash);
+    ສົ່ງຄືນ XxhAvalanche(i_hash);
 }
 
 
@@ -160,8 +160,8 @@ void Xxh64_Init (Xxh64* o_state, u64 i_seed)
 
 void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size)
 {
-    if (not i_data) {
-        return;
+    ຖ້າ (not i_data) {
+        ສົ່ງຄືນ;
     }
 
     const u8* input = (const u8*)i_data;
@@ -169,14 +169,14 @@ void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size)
 
     io_state->totalLength += i_size;
 
-    if (i_size < (size_t)(XXH_STRIPE_LEN - io_state->bufferLength)) {
+    ຖ້າ (i_size < (size_t)(XXH_STRIPE_LEN - io_state->bufferLength)) {
         memcpy(io_state->buffer + io_state->bufferLength, input, i_size);
         io_state->bufferLength += (u32)i_size;
-        return;
+        ສົ່ງຄືນ;
     }
 
     // fill up what the buffer already holds, and consume that
-    if (io_state->bufferLength) {
+    ຖ້າ (io_state->bufferLength) {
         size_t loadSize = XXH_STRIPE_LEN - io_state->bufferLength;
 
         memcpy(io_state->buffer + io_state->bufferLength, input, loadSize);
@@ -186,11 +186,11 @@ void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size)
         io_state->bufferLength = 0;
     }
 
-    if ((size_t)(end - input) >= XXH_STRIPE_LEN) {
+    ຖ້າ ((size_t)(end - input) >= XXH_STRIPE_LEN) {
         input = XxhConsumeStripes(io_state->acc, input, (size_t)(end - input));
     }
 
-    if (input < end) {
+    ຖ້າ (input < end) {
         memcpy(io_state->buffer, input, (size_t)(end - input));
         io_state->bufferLength = (u32)(end - input);
     }
@@ -205,7 +205,7 @@ u64 Xxh64_Digest (const Xxh64* i_state)
 
     hash += i_state->totalLength;
 
-    return XxhFinalize(hash, i_state->buffer, (size_t)i_state->totalLength);
+    ສົ່ງຄືນ XxhFinalize(hash, i_state->buffer, (size_t)i_state->totalLength);
 }
 
 #endif // d_m3HasSnapshots
