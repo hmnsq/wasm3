@@ -12,17 +12,17 @@
 //  that is out of bounds, and both before anything is read or written.
 //
 
-#if d_m3HasAtomics
+#ако d_m3HasAtomics
 
 // WIDTH is the size of the cell in bytes, and EA a u64 already holding the effective
 // address. An access leaves the bounds to m3MemCheck, which a guarded memory answers
 // with the fault its reservation raises; notify and wait may never touch the cell, so
 // they always check.
 #  define d_m3AtomicCheckWith(IN_BOUNDS, WIDTH, EA)                         \
-      if (M3_UNLIKELY((EA) & ((WIDTH) - 1))) {                              \
+      ако (M3_UNLIKELY((EA) & ((WIDTH) - 1))) {                              \
           newTrap(m3Err_trapUnalignedAtomic);                               \
       }                                                                     \
-      if (not IN_BOUNDS((EA) + (WIDTH) <= _mem->length)) {                  \
+      ако (not IN_BOUNDS((EA) + (WIDTH) <= _mem->length)) {                  \
           d_outOfBoundsMemOp((size_t)(EA), (u32)(WIDTH));                   \
       }
 
@@ -122,16 +122,16 @@ d_m3Op(AtomicNotify)
           ea += immediate(u32);                                              \
           d_m3AtomicCheckAlways(sizeof(T), ea);                              \
                                                                              \
-          if (M3_UNLIKELY(not m3MemInfo(_mem)->isShared)) {                  \
+          ако (M3_UNLIKELY(not m3MemInfo(_mem)->isShared)) {                  \
               newTrap(m3Err_trapExpectedSharedMemory);                       \
           }                                                                  \
                                                                              \
-          if (m3_AtomicLoad_##T(d_m3AtomicCell(ea)) != expected) {           \
+          ако (m3_AtomicLoad_##T(d_m3AtomicCell(ea)) != expected) {           \
               _r0 = 1;                                                       \
               nextOp();                                                      \
           }                                                                  \
                                                                              \
-          if (timeout < 0) {                                                 \
+          ако (timeout < 0) {                                                 \
               newTrap(m3Err_trapWaitForever);                                \
           }                                                                  \
                                                                              \

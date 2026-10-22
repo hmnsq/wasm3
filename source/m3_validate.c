@@ -9,7 +9,7 @@
 #include "m3_exception.h"
 #include "m3_info.h"
 
-#if d_m3EnableValidation
+#ако d_m3EnableValidation
 
 // clang-format off
 
@@ -51,7 +51,7 @@ struct ValCtx {
 // space; for a module that declares none, every index is out of range.
 static bool v_has_memory_idx (ValCtx * v, u32 i_memoryIdx)
 {
-    return v->module and i_memoryIdx < v->module->numMemories;
+    врати v->module and i_memoryIdx < v->module->numMemories;
 }
 
 // The type of the addresses, sizes and page counts a memory instruction takes:
@@ -59,14 +59,14 @@ static bool v_has_memory_idx (ValCtx * v, u32 i_memoryIdx)
 // v_has_memory_idx has said the index is in range.
 static m3type_t v_memory_addrtype (ValCtx * v, u32 i_memoryIdx)
 {
-    return Memory_AddrType (v->module->memories [i_memoryIdx]);
+    врати Memory_AddrType (v->module->memories [i_memoryIdx]);
 }
 
 // Spec: the static offset of a memory access must be in range of the address
 // type, so anything at all for a 64-bit memory and below 2^32 for a 32-bit one.
 static bool v_offset_in_range (ValCtx * v, u32 i_memoryIdx, u64 i_offset)
 {
-    return v_memory_addrtype (v, i_memoryIdx) == c_m3Type_i64 or i_offset <= 0xFFFFFFFFull;
+    врати v_memory_addrtype (v, i_memoryIdx) == c_m3Type_i64 or i_offset <= 0xFFFFFFFFull;
 }
 
 // The type a table's indexes and sizes are given in - table64 is the same
@@ -74,7 +74,7 @@ static bool v_offset_in_range (ValCtx * v, u32 i_memoryIdx, u64 i_offset)
 // been checked against the module's index space.
 static m3type_t v_table_addrtype (ValCtx * v, u32 i_tableIdx)
 {
-    return Table_AddrType (v->module->tables [i_tableIdx]);
+    врати Table_AddrType (v->module->tables [i_tableIdx]);
 }
 
 // Spec: the alignment immediate of a memory access must not be larger than the
@@ -87,23 +87,23 @@ static u32 v_max_align (m3opcode_t opcode)
     case 0x30: case 0x31:   // i64.load8_s, i64.load8_u
     case 0x3a:              // i32.store8
     case 0x3c:              // i64.store8
-        return 0;
+        врати 0;
     case 0x2e: case 0x2f:   // i32.load16_s, i32.load16_u
     case 0x32: case 0x33:   // i64.load16_s, i64.load16_u
     case 0x3b:              // i32.store16
     case 0x3d:              // i64.store16
-        return 1;
+        врати 1;
     case 0x29:              // i64.load
     case 0x2b:              // f64.load
     case 0x37:              // i64.store
     case 0x39:              // f64.store
-        return 3;
+        врати 3;
     default:                // 32-bit accesses, and a safe fallback
-        return 2;
+        врати 2;
     }
 }
 
-#if d_m3HasAtomics
+#ако d_m3HasAtomics
 
 // What an instruction of the 0xFE prefix (other than atomic.fence) touches and
 // takes: the width in bytes of the cell it addresses, how many operands it pops
@@ -123,30 +123,30 @@ static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_numOperands, m3type_
 
     u32 variant;
 
-    if (sub <= 0x02) {              // memory.atomic.notify, wait32, wait64
+    ако (sub <= 0x02) {              // memory.atomic.notify, wait32, wait64
         *o_width       = (sub == 0x02) ? 8 : 4;
         *o_numOperands = (sub == 0x00) ? 2 : 3;
         *o_valueType   = (sub == 0x02) ? c_m3Type_i64 : c_m3Type_i32;
         *o_resultType  = c_m3Type_i32;
-        return true;
+        врати true;
     }
 
-    if (sub < 0x10 or sub > c_waOp_lastAtomic) return false;
+    ако (sub < 0x10 or sub > c_waOp_lastAtomic) врати false;
 
-    if (sub <= 0x16) {              // loads
+    ако (sub <= 0x16) {              // loads
         variant = sub - 0x10;       *o_numOperands = 1;
-    } else if (sub <= 0x1d) {       // stores
+    } инако ако (sub <= 0x1d) {       // stores
         variant = sub - 0x17;       *o_numOperands = 2;
-    } else if (sub <= 0x47) {       // add, sub, and, or, xor, xchg
+    } инако ако (sub <= 0x47) {       // add, sub, and, or, xor, xchg
         variant = (sub - 0x1e) % 7; *o_numOperands = 2;
-    } else {                        // cmpxchg
+    } инако {                        // cmpxchg
         variant = sub - 0x48;       *o_numOperands = 3;
     }
 
     *o_width      = c_widths [variant];
     *o_valueType  = c_types [variant];
     *o_resultType = (sub >= 0x17 and sub <= 0x1d) ? c_m3Type_none : c_types [variant];
-    return true;
+    врати true;
 }
 
 #endif
@@ -155,40 +155,40 @@ static bool v_atomic_shape (u32 sub, u32 * o_width, u32 * o_numOperands, m3type_
 
 static M3Result v_push (ValCtx * v, m3type_t type)
 {
-    if (M3_UNLIKELY(v->opdTop >= d_m3ValStack))
-        return m3Err_functionStackOverflow;
+    ако (M3_UNLIKELY(v->opdTop >= d_m3ValStack))
+        врати m3Err_functionStackOverflow;
     v->opd[v->opdTop++] = type;
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 static M3Result v_pop (ValCtx * v, m3type_t * o_type)
 {
     ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
-    if (M3_UNLIKELY(v->opdTop == f->height)) {
-        if (f->is_unreachable) { *o_type = c_valBottom; return m3Err_none; }
-        return m3Err_functionStackUnderrun;
+    ако (M3_UNLIKELY(v->opdTop == f->height)) {
+        ако (f->is_unreachable) { *o_type = c_valBottom; врати m3Err_none; }
+        врати m3Err_functionStackUnderrun;
     }
     *o_type = v->opd[--v->opdTop];
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 static M3Result v_pop_expect (ValCtx * v, m3type_t expect, m3type_t * o_actual)
 {
     m3type_t actual = c_valBottom;
     M3Result r = v_pop(v, &actual);
-    if (M3_UNLIKELY(r)) return r;
-    if (M3_UNLIKELY(expect != c_valBottom && actual != c_valBottom && actual != expect))
-        return m3Err_typeMismatch;
+    ако (M3_UNLIKELY(r)) врати r;
+    ако (M3_UNLIKELY(expect != c_valBottom && actual != c_valBottom && actual != expect))
+        врати m3Err_typeMismatch;
     *o_actual = (actual == c_valBottom) ? expect : actual;
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 // ---------- Control stack ----------
 
 static M3Result v_push_ctrl (ValCtx * v, m3opcode_t op, IM3FuncType type)
 {
-    if (M3_UNLIKELY(v->ctrlTop >= d_m3ValCtrlDepth))
-        return m3Err_functionStackOverflow;
+    ако (M3_UNLIKELY(v->ctrlTop >= d_m3ValCtrlDepth))
+        врати m3Err_functionStackOverflow;
     ValCtrlFrame * f = &v->ctrl[v->ctrlTop++];
     f->opcode       = op;
     f->type         = type;
@@ -196,27 +196,27 @@ static M3Result v_push_ctrl (ValCtx * v, m3opcode_t op, IM3FuncType type)
     f->result_count = type ? type->numRets : 0;
     f->height       = v->opdTop;
     f->is_unreachable = false;
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 static M3Result v_pop_ctrl (ValCtx * v, ValCtrlFrame * o_frame)
 {
-    if (M3_UNLIKELY(v->ctrlTop == 0))
-        return m3Err_wasmMalformed;
+    ако (M3_UNLIKELY(v->ctrlTop == 0))
+        врати m3Err_wasmMalformed;
     ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
     // pop result types
-    if (f->type) {
-        for (u16 i = f->result_count; i > 0; i--) {
+    ако (f->type) {
+        за (u16 i = f->result_count; i > 0; i--) {
             m3type_t a;
             M3Result r = v_pop_expect(v, BaseTypeOf(f->type->types[i - 1]), &a);
-            if (M3_UNLIKELY(r)) return r;
+            ако (M3_UNLIKELY(r)) врати r;
         }
     }
-    if (M3_UNLIKELY(v->opdTop != f->height))
-        return m3Err_typeCountMismatch;
-    if (o_frame) *o_frame = *f;
+    ако (M3_UNLIKELY(v->opdTop != f->height))
+        врати m3Err_typeCountMismatch;
+    ако (o_frame) *o_frame = *f;
     v->ctrlTop--;
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 static void v_unreachable (ValCtx * v)
@@ -229,15 +229,15 @@ static void v_unreachable (ValCtx * v)
 // Label types: loop -> params, block/if/else/func -> results
 static u16 v_label_n (ValCtrlFrame * f)
 {
-    return (f->opcode == 0x03) ? f->param_count : f->result_count;
+    врати (f->opcode == 0x03) ? f->param_count : f->result_count;
 }
 
 static m3type_t v_label_t (ValCtrlFrame * f, u16 i)
 {
-    if (!f->type) return c_m3Type_none;
-    if (f->opcode == 0x03)
-        return BaseTypeOf(f->type->types[f->type->numRets + i]); // params
-    return BaseTypeOf(f->type->types[i]); // results
+    ако (!f->type) врати c_m3Type_none;
+    ако (f->opcode == 0x03)
+        врати BaseTypeOf(f->type->types[f->type->numRets + i]); // params
+    врати BaseTypeOf(f->type->types[i]); // results
 }
 
 // The operand i_depth below the top, without popping. Anything at or below the
@@ -247,78 +247,78 @@ static m3type_t v_peek (ValCtx * v, u16 i_depth)
 {
     ValCtrlFrame * f = &v->ctrl[v->ctrlTop - 1];
 
-    if (v->opdTop <= i_depth || (u16)(v->opdTop - i_depth - 1) < f->height)
-        return c_valBottom;
+    ако (v->opdTop <= i_depth || (u16)(v->opdTop - i_depth - 1) < f->height)
+        врати c_valBottom;
 
-    return v->opd[v->opdTop - i_depth - 1];
+    врати v->opd[v->opdTop - i_depth - 1];
 }
 
 // Pop label types for branch target
 static M3Result v_pop_labels (ValCtx * v, ValCtrlFrame * tgt)
 {
     u16 n = v_label_n(tgt);
-    for (u16 i = n; i > 0; i--) {
+    за (u16 i = n; i > 0; i--) {
         m3type_t a;
         M3Result r = v_pop_expect(v, v_label_t(tgt, i - 1), &a);
-        if (M3_UNLIKELY(r)) return r;
+        ако (M3_UNLIKELY(r)) врати r;
     }
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 // Push label types back
 static M3Result v_push_labels (ValCtx * v, ValCtrlFrame * tgt)
 {
     u16 n = v_label_n(tgt);
-    for (u16 i = 0; i < n; i++) {
+    за (u16 i = 0; i < n; i++) {
         M3Result r = v_push(v, v_label_t(tgt, i));
-        if (M3_UNLIKELY(r)) return r;
+        ако (M3_UNLIKELY(r)) врати r;
     }
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 // ---------- Block type resolution ----------
 
 static M3Result v_read_blocktype (ValCtx * v, IM3FuncType * o_type)
 {
-    if (v->wasm >= v->wasmEnd)
-        return m3Err_wasmUnderrun;
+    ако (v->wasm >= v->wasmEnd)
+        врати m3Err_wasmUnderrun;
 
-#if d_m3HasTypedRefs
-    if (*v->wasm == d_waEncode_ref or *v->wasm == d_waEncode_refNull) {
+#ако d_m3HasTypedRefs
+    ако (*v->wasm == d_waEncode_ref or *v->wasm == d_waEncode_refNull) {
         m3type_t refType;
         M3Result rr = ParseValueType(v->module, &refType, &v->wasm, v->wasmEnd);
-        if (rr) return rr;
+        ако (rr) врати rr;
         IM3FuncType ftype = NULL;
         rr = AllocFuncType(&ftype, 1);
-        if (rr) return rr;
+        ако (rr) врати rr;
         ftype->numRets = 1;
         ftype->types[0] = refType;
         // on failure this leaves ftype NULL, which would read downstream as a
         // block that returns nothing
         rr = Environment_AddFuncType(v->module->environment, &ftype);
-        if (rr) return rr;
+        ако (rr) врати rr;
         *o_type = ftype;
-        return m3Err_none;
+        врати m3Err_none;
     }
 #endif
 
     i64 type;
     M3Result r = ReadLebSigned(&type, 33, &v->wasm, v->wasmEnd);
-    if (r) return r;
+    ако (r) врати r;
 
-    if (type < 0) {
-        if (type < -64) return m3Err_invalidTypeId;
+    ако (type < 0) {
+        ако (type < -64) врати m3Err_invalidTypeId;
         u8 valtype;
         r = NormalizeType(&valtype, (i8)type);
-        if (r) return r;
+        ако (r) врати r;
         IM3Environment env = v->module->environment;
         *o_type = env->retFuncTypes[valtype];
-    } else {
-        if ((u32)type >= v->module->numFuncTypes)
-            return m3Err_unknownType;
+    } инако {
+        ако ((u32)type >= v->module->numFuncTypes)
+            врати m3Err_unknownType;
         *o_type = v->module->funcTypes[(u32)type];
     }
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 // ---------- Convenience ----------
@@ -326,8 +326,8 @@ static M3Result v_read_blocktype (ValCtx * v, IM3FuncType * o_type)
 static M3Result v_unop (ValCtx * v, m3type_t in, m3type_t out)
 {
     m3type_t a; M3Result r = v_pop_expect(v, in, &a);
-    if (M3_UNLIKELY(r)) return r;
-    return v_push(v, out);
+    ако (M3_UNLIKELY(r)) врати r;
+    врати v_push(v, out);
 }
 
 // return_call/return_call_indirect return the callee's results straight to the enclosing
@@ -339,47 +339,47 @@ static M3Result v_check_tail_results (ValCtx * v, IM3FuncType i_calleeType)
     u16 numCalleeRets = i_calleeType ? i_calleeType->numRets : 0;
     u16 numFuncRets   = ft ? ft->numRets : 0;
 
-    if (numCalleeRets != numFuncRets)
-        return m3Err_typeMismatch;
+    ако (numCalleeRets != numFuncRets)
+        врати m3Err_typeMismatch;
 
-    for (u16 i = 0; i < numCalleeRets; i++) {
-        if (i_calleeType->types[i] != ft->types[i])
-            return m3Err_typeMismatch;
+    за (u16 i = 0; i < numCalleeRets; i++) {
+        ако (i_calleeType->types[i] != ft->types[i])
+            врати m3Err_typeMismatch;
     }
 
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 static M3Result v_binop (ValCtx * v, m3type_t t)
 {
     m3type_t a; M3Result r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    return v_push(v, t);
+    r = v_pop_expect(v, t, &a); ако (M3_UNLIKELY(r)) врати r;
+    r = v_pop_expect(v, t, &a); ако (M3_UNLIKELY(r)) врати r;
+    врати v_push(v, t);
 }
 
 static M3Result v_relop (ValCtx * v, m3type_t t)
 {
     m3type_t a; M3Result r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    r = v_pop_expect(v, t, &a); if (M3_UNLIKELY(r)) return r;
-    return v_push(v, c_m3Type_i32);
+    r = v_pop_expect(v, t, &a); ако (M3_UNLIKELY(r)) врати r;
+    r = v_pop_expect(v, t, &a); ако (M3_UNLIKELY(r)) врати r;
+    врати v_push(v, c_m3Type_i32);
 }
 
 static M3Result v_testop (ValCtx * v, m3type_t t)
 {
-    return v_unop(v, t, c_m3Type_i32);
+    врати v_unop(v, t, c_m3Type_i32);
 }
 
 static M3Result v_cvtop (ValCtx * v, m3type_t in, m3type_t out)
 {
-    return v_unop(v, in, out);
+    врати v_unop(v, in, out);
 }
 
 
 // ---------- Main validation loop ----------
 
-#if d_m3HasExceptionHandling
+#ако d_m3HasExceptionHandling
 
 // One catch clause of a try_table. The label is resolved in the context the
 // try_table itself appears in - the spec checks the clauses against C, not
@@ -390,115 +390,115 @@ static M3Result v_catch_clause (ValCtx * v)
 {
     u8 kind;
     M3Result r = Read_u8(&kind, &v->wasm, v->wasmEnd);
-    if (r) return r;
-    if (kind > 0x03) return m3Err_wasmMalformed;
+    ако (r) врати r;
+    ако (kind > 0x03) врати m3Err_wasmMalformed;
 
     bool hasTag = (kind == 0x00 || kind == 0x01);
     bool hasRef = (kind == 0x01 || kind == 0x03);
 
     IM3FuncType tagType = NULL;
-    if (hasTag) {
+    ако (hasTag) {
         u32 tagIndex;
         r = ReadLEB_u32(&tagIndex, &v->wasm, v->wasmEnd);
-        if (r) return r;
-        if (!v->module || tagIndex >= v->module->numTags) return m3Err_unknownTag;
+        ако (r) врати r;
+        ако (!v->module || tagIndex >= v->module->numTags) врати m3Err_unknownTag;
         tagType = v->module->tags[tagIndex].type;
     }
 
     u32 depth;
     r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd);
-    if (r) return r;
-    if (depth >= v->ctrlTop) return m3Err_unknownLabel;
+    ако (r) врати r;
+    ако (depth >= v->ctrlTop) врати m3Err_unknownLabel;
 
     ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
 
     u16 numPayload = tagType ? tagType->numArgs : 0;
     u16 numLabel   = v_label_n(tgt);
 
-    if (numLabel != numPayload + (hasRef ? 1u : 0u))
-        return m3Err_typeCountMismatch;
+    ако (numLabel != numPayload + (hasRef ? 1u : 0u))
+        врати m3Err_typeCountMismatch;
 
-    for (u16 i = 0; i < numPayload; i++) {
-        if (v_label_t(tgt, i) != BaseTypeOf(tagType->types[tagType->numRets + i]))
-            return m3Err_typeMismatch;
+    за (u16 i = 0; i < numPayload; i++) {
+        ако (v_label_t(tgt, i) != BaseTypeOf(tagType->types[tagType->numRets + i]))
+            врати m3Err_typeMismatch;
     }
 
-    if (hasRef and v_label_t(tgt, numPayload) != c_m3Type_exnref)
-        return m3Err_typeMismatch;
+    ако (hasRef and v_label_t(tgt, numPayload) != c_m3Type_exnref)
+        врати m3Err_typeMismatch;
 
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 #endif // d_m3HasExceptionHandling
 
-#if d_m3HasStackSwitching
+#ако d_m3HasStackSwitching
 
 static M3Result v_resume_clause (ValCtx * v, u8 kind, u32 tagIdx, IM3FuncType ct)
 {
-    if (kind > 0x01) return m3Err_wasmMalformed;
-    if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+    ако (kind > 0x01) врати m3Err_wasmMalformed;
+    ако (!v->module || tagIdx >= v->module->numTags) врати m3Err_unknownTag;
     IM3FuncType tagType = v->module->tags[tagIdx].type;
 
-    if (kind == 0x00) {
+    ако (kind == 0x00) {
         u32 depth;
-        M3Result r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd); if (r) return r;
-        if (depth >= v->ctrlTop) return m3Err_unknownLabel;
+        M3Result r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd); ако (r) врати r;
+        ако (depth >= v->ctrlTop) врати m3Err_unknownLabel;
 
         ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
         u16 numPayload = tagType ? tagType->numArgs : 0;
         u16 numLabel   = v_label_n(tgt);
 
-        if (numLabel != numPayload + 1u) return m3Err_typeCountMismatch;
+        ако (numLabel != numPayload + 1u) врати m3Err_typeCountMismatch;
 
-        for (u16 j = 0; j < numPayload; j++) {
-            if (v_label_t(tgt, j) != BaseTypeOf(tagType->types[tagType->numRets + j]))
-                return m3Err_typeMismatch;
+        за (u16 j = 0; j < numPayload; j++) {
+            ако (v_label_t(tgt, j) != BaseTypeOf(tagType->types[tagType->numRets + j]))
+                врати m3Err_typeMismatch;
         }
-        if (v_label_t(tgt, numPayload) != c_m3Type_contref)
-            return m3Err_typeMismatch;
+        ако (v_label_t(tgt, numPayload) != c_m3Type_contref)
+            врати m3Err_typeMismatch;
 
-#if d_m3HasTypedRefs
+#ако d_m3HasTypedRefs
         m3type_t labelContType = (tgt->opcode == 0x03)
             ? tgt->type->types[tgt->type->numRets + numPayload]
             : tgt->type->types[numPayload];
 
-        if (HeapTypeOf(labelContType) == d_m3Type_heapAbstract ||
+        ако (HeapTypeOf(labelContType) == d_m3Type_heapAbstract ||
             HeapTypeOf(labelContType) == d_m3Type_heapNone) {
-            return m3Err_typeMismatch;
+            врати m3Err_typeMismatch;
         }
 
         u32 heapType = HeapTypeOf(labelContType);
         IM3FuncType labelCt = NULL;
-        for (u32 idx = 0; idx < v->module->numFuncTypes; ++idx) {
-            if (v->module->funcTypes[idx]->canonicalIndex == heapType &&
+        за (u32 idx = 0; idx < v->module->numFuncTypes; ++idx) {
+            ако (v->module->funcTypes[idx]->canonicalIndex == heapType &&
                 v->module->funcTypes[idx]->isContinuation) {
                 labelCt = v->module->funcTypes[idx];
                 break;
             }
         }
-        if (!labelCt) return m3Err_typeMismatch;
+        ако (!labelCt) врати m3Err_typeMismatch;
 
         IM3FuncType labelFt = labelCt->contFuncType ? labelCt->contFuncType : labelCt;
         IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
 
         u16 expectedNumParams = tagType ? tagType->numRets : 0;
-        if (labelFt->numArgs != expectedNumParams) return m3Err_typeMismatch;
-        for (u16 p = 0; p < expectedNumParams; ++p) {
-            if (labelFt->types[labelFt->numRets + p] != tagType->types[p])
-                return m3Err_typeMismatch;
+        ако (labelFt->numArgs != expectedNumParams) врати m3Err_typeMismatch;
+        за (u16 p = 0; p < expectedNumParams; ++p) {
+            ако (labelFt->types[labelFt->numRets + p] != tagType->types[p])
+                врати m3Err_typeMismatch;
         }
 
         u16 expectedNumRets = ft ? ft->numRets : 0;
-        if (labelFt->numRets != expectedNumRets) return m3Err_typeMismatch;
-        for (u16 r_idx = 0; r_idx < expectedNumRets; ++r_idx) {
-            if (labelFt->types[r_idx] != ft->types[r_idx])
-                return m3Err_typeMismatch;
+        ако (labelFt->numRets != expectedNumRets) врати m3Err_typeMismatch;
+        за (u16 r_idx = 0; r_idx < expectedNumRets; ++r_idx) {
+            ако (labelFt->types[r_idx] != ft->types[r_idx])
+                врати m3Err_typeMismatch;
         }
 #endif
-    } else {
-        if (tagType && tagType->numArgs != 0) return m3Err_typeMismatch;
+    } инако {
+        ако (tagType && tagType->numArgs != 0) врати m3Err_typeMismatch;
     }
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 #endif // d_m3HasStackSwitching
@@ -508,11 +508,11 @@ static M3Result v_validate_body (ValCtx * v)
     M3Result r = m3Err_none;
     m3type_t a = c_valBottom;
 
-    while (v->wasm < v->wasmEnd)
+    док (v->wasm < v->wasmEnd)
     {
         m3opcode_t opcode;
         r = Read_opcode(&opcode, &v->wasm, v->wasmEnd);
-        if (M3_UNLIKELY(r)) return r;
+        ако (M3_UNLIKELY(r)) врати r;
 
         switch (opcode)
         {
@@ -530,59 +530,59 @@ static M3Result v_validate_body (ValCtx * v)
         {
             IM3FuncType bt = NULL;
             r = v_read_blocktype(v, &bt);
-            if (r) return r;
-            if (opcode == 0x04) {
+            ако (r) врати r;
+            ако (opcode == 0x04) {
                 r = v_pop_expect(v, c_m3Type_i32, &a);
-                if (r) return r;
+                ако (r) врати r;
             }
             // Pop block params from caller stack
-            if (bt) {
-                for (u16 i = bt->numArgs; i > 0; i--) {
+            ако (bt) {
+                за (u16 i = bt->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(bt->types[bt->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             r = v_push_ctrl(v, opcode, bt);
-            if (r) return r;
+            ако (r) врати r;
             // Push params inside block
-            if (bt) {
-                for (u16 i = 0; i < bt->numArgs; i++) {
+            ако (bt) {
+                за (u16 i = 0; i < bt->numArgs; i++) {
                     r = v_push(v, BaseTypeOf(bt->types[bt->numRets + i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
         }
 
-#if d_m3HasExceptionHandling
+#ако d_m3HasExceptionHandling
         case 0x1f: // try_table
         {
             IM3FuncType bt = NULL;
             r = v_read_blocktype(v, &bt);
-            if (r) return r;
-            if (bt) {
-                for (u16 i = bt->numArgs; i > 0; i--) {
+            ако (r) врати r;
+            ако (bt) {
+                за (u16 i = bt->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(bt->types[bt->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             // the clauses are checked before the frame goes on, so their
             // labels count from outside the try block
             u32 numCatch;
             r = ReadLEB_u32(&numCatch, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            for (u32 i = 0; i < numCatch; i++) {
+            ако (r) врати r;
+            за (u32 i = 0; i < numCatch; i++) {
                 r = v_catch_clause(v);
-                if (r) return r;
+                ако (r) врати r;
             }
 
             r = v_push_ctrl(v, opcode, bt);
-            if (r) return r;
+            ако (r) врати r;
 
-            if (bt) {
-                for (u16 i = 0; i < bt->numArgs; i++) {
+            ако (bt) {
+                за (u16 i = 0; i < bt->numArgs; i++) {
                     r = v_push(v, BaseTypeOf(bt->types[bt->numRets + i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -592,13 +592,13 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 tagIndex;
             r = ReadLEB_u32(&tagIndex, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (!v->module || tagIndex >= v->module->numTags) return m3Err_unknownTag;
+            ако (r) врати r;
+            ако (!v->module || tagIndex >= v->module->numTags) врати m3Err_unknownTag;
             IM3FuncType tt = v->module->tags[tagIndex].type;
-            if (tt) {
-                for (u16 i = tt->numArgs; i > 0; i--) {
+            ако (tt) {
+                за (u16 i = tt->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(tt->types[tt->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             v_unreachable(v);
@@ -607,7 +607,7 @@ static M3Result v_validate_body (ValCtx * v)
 
         case 0x0a: // throw_ref
             r = v_pop_expect(v, c_m3Type_exnref, &a);
-            if (r) return r;
+            ако (r) врати r;
             v_unreachable(v);
             break;
 #endif // d_m3HasExceptionHandling
@@ -616,15 +616,15 @@ static M3Result v_validate_body (ValCtx * v)
         {
             ValCtrlFrame frame;
             r = v_pop_ctrl(v, &frame);
-            if (r) return r;
-            if (frame.opcode != 0x04)
-                return m3Err_wasmMalformed;
+            ако (r) врати r;
+            ако (frame.opcode != 0x04)
+                врати m3Err_wasmMalformed;
             r = v_push_ctrl(v, 0x05, frame.type);
-            if (r) return r;
-            if (frame.type) {
-                for (u16 i = 0; i < frame.type->numArgs; i++) {
+            ако (r) врати r;
+            ако (frame.type) {
+                за (u16 i = 0; i < frame.type->numArgs; i++) {
                     r = v_push(v, BaseTypeOf(frame.type->types[frame.type->numRets + i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -634,17 +634,17 @@ static M3Result v_validate_body (ValCtx * v)
         {
             ValCtrlFrame frame;
             r = v_pop_ctrl(v, &frame);
-            if (r) return r;
+            ако (r) врати r;
             // Push results
-            if (frame.type) {
-                for (u16 i = 0; i < frame.result_count; i++) {
+            ако (frame.type) {
+                за (u16 i = 0; i < frame.result_count; i++) {
                     r = v_push(v, BaseTypeOf(frame.type->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             // If this was the outermost frame, we're done
-            if (v->ctrlTop == 0)
-                return m3Err_none;
+            ако (v->ctrlTop == 0)
+                врати m3Err_none;
             break;
         }
 
@@ -652,11 +652,11 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 depth;
             r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (depth >= v->ctrlTop) return m3Err_unknownLabel;
+            ако (r) врати r;
+            ако (depth >= v->ctrlTop) врати m3Err_unknownLabel;
             ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
             r = v_pop_labels(v, tgt);
-            if (r) return r;
+            ако (r) врати r;
             v_unreachable(v);
             break;
         }
@@ -665,15 +665,15 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 depth;
             r = ReadLEB_u32(&depth, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (depth >= v->ctrlTop) return m3Err_unknownLabel;
+            ако (r) врати r;
+            ако (depth >= v->ctrlTop) врати m3Err_unknownLabel;
             r = v_pop_expect(v, c_m3Type_i32, &a);
-            if (r) return r;
+            ако (r) врати r;
             ValCtrlFrame * tgt = &v->ctrl[v->ctrlTop - 1 - depth];
             r = v_pop_labels(v, tgt);
-            if (r) return r;
+            ако (r) врати r;
             r = v_push_labels(v, tgt);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -681,18 +681,18 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 count;
             r = ReadLEB_u32(&count, &v->wasm, v->wasmEnd);
-            if (r) return r;
+            ако (r) врати r;
             u32 defDepth = 0;
             u16 arity = 0;
             // First pass: read all depths and validate arity + types match default
             bytes_t savedPos = v->wasm;
             // Read all targets to find the default (last one)
-            for (u32 i = 0; i <= count; i++) {
+            за (u32 i = 0; i <= count; i++) {
                 u32 d;
                 r = ReadLEB_u32(&d, &v->wasm, v->wasmEnd);
-                if (r) return r;
-                if (d >= v->ctrlTop) return m3Err_unknownLabel;
-                if (i == count) defDepth = d;
+                ако (r) врати r;
+                ако (d >= v->ctrlTop) врати m3Err_unknownLabel;
+                ако (i == count) defDepth = d;
             }
             // Now validate all labels match the default's types
             ValCtrlFrame * defTgt = &v->ctrl[v->ctrlTop - 1 - defDepth];
@@ -700,28 +700,28 @@ static M3Result v_validate_body (ValCtx * v)
             v->wasm = savedPos;
 
             r = v_pop_expect(v, c_m3Type_i32, &a);      // the index, before the labels are inspected
-            if (r) return r;
+            ако (r) врати r;
 
-            for (u32 i = 0; i <= count; i++) {
+            за (u32 i = 0; i <= count; i++) {
                 u32 d;
                 r = ReadLEB_u32(&d, &v->wasm, v->wasmEnd);
-                if (r) return r;
+                ако (r) врати r;
                 ValCtrlFrame * t = &v->ctrl[v->ctrlTop - 1 - d];
                 u16 n = v_label_n(t);
-                if (n != arity) return m3Err_typeCountMismatch;
+                ако (n != arity) врати m3Err_typeCountMismatch;
                 // Spec: each target's types must be compatible with the operand
                 // stack, not identical to the default's. In unreachable code the
                 // operands are bottom, so the targets may legitimately differ.
-                for (u16 j = 0; j < n; j++) {
+                за (u16 j = 0; j < n; j++) {
                     m3type_t want = v_label_t(t, n - 1 - j);
                     m3type_t have = v_peek(v, j);
-                    if (want != c_valBottom && have != c_valBottom && want != have)
-                        return m3Err_typeMismatch;
+                    ако (want != c_valBottom && have != c_valBottom && want != have)
+                        врати m3Err_typeMismatch;
                 }
             }
             ValCtrlFrame * dt = &v->ctrl[v->ctrlTop - 1 - defDepth];
             r = v_pop_labels(v, dt);
-            if (r) return r;
+            ако (r) врати r;
             v_unreachable(v);
             break;
         }
@@ -729,10 +729,10 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x0f: // return
         {
             IM3FuncType ft = v->function->funcType;
-            if (ft) {
-                for (u16 i = ft->numRets; i > 0; i--) {
+            ако (ft) {
+                за (u16 i = ft->numRets; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             v_unreachable(v);
@@ -744,17 +744,17 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->module->numFunctions) return m3Err_unknownFunction;
+            ако (r) врати r;
+            ако (idx >= v->module->numFunctions) врати m3Err_unknownFunction;
             IM3FuncType ft = v->module->functions[idx].funcType;
-            if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
+            ако (ft) {
+                за (u16 i = ft->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
-                for (u16 i = 0; i < ft->numRets; i++) {
+                за (u16 i = 0; i < ft->numRets; i++) {
                     r = v_push(v, BaseTypeOf(ft->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -764,25 +764,25 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 typeIdx;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
+            ако (r) врати r;
             u32 tableIdx;
             r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            ако (r) врати r;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
             // the table must exist and hold funcrefs
-            if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
-            if (v->module->tables[tableIdx]->type != c_m3Type_funcref) return m3Err_typeMismatch;
+            ако (tableIdx >= v->module->numTables) врати m3Err_unknownTable;
+            ако (v->module->tables[tableIdx]->type != c_m3Type_funcref) врати m3Err_typeMismatch;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
             r = v_pop_expect(v, v_table_addrtype(v, tableIdx), &a); // table index operand
-            if (r) return r;
-            if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
+            ако (r) врати r;
+            ако (ft) {
+                за (u16 i = ft->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
-                for (u16 i = 0; i < ft->numRets; i++) {
+                за (u16 i = 0; i < ft->numRets; i++) {
                     r = v_push(v, BaseTypeOf(ft->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -792,15 +792,15 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->module->numFunctions) return m3Err_unknownFunction;
+            ако (r) врати r;
+            ако (idx >= v->module->numFunctions) врати m3Err_unknownFunction;
             IM3FuncType ft = v->module->functions[idx].funcType;
             r = v_check_tail_results(v, ft);
-            if (r) return r;
-            if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
+            ако (r) врати r;
+            ако (ft) {
+                за (u16 i = ft->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             v_unreachable(v);
@@ -811,68 +811,68 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 typeIdx;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
+            ако (r) врати r;
             u32 tableIdx;
             r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            ако (r) врати r;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
             // the table must exist and hold funcrefs
-            if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
-            if (v->module->tables[tableIdx]->type != c_m3Type_funcref) return m3Err_typeMismatch;
+            ако (tableIdx >= v->module->numTables) врати m3Err_unknownTable;
+            ако (v->module->tables[tableIdx]->type != c_m3Type_funcref) врати m3Err_typeMismatch;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
             r = v_check_tail_results(v, ft);
-            if (r) return r;
+            ако (r) врати r;
             r = v_pop_expect(v, v_table_addrtype(v, tableIdx), &a); // table index operand
-            if (r) return r;
-            if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
+            ако (r) врати r;
+            ако (ft) {
+                за (u16 i = ft->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             v_unreachable(v);
             break;
         }
 
-#if d_m3HasTypedRefs
+#ако d_m3HasTypedRefs
         case 0x14: // call_ref
         case 0x15: // return_call_ref
         {
             u32 typeIdx;
             r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            ако (r) врати r;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
             bool isTail = (opcode == 0x15);
-            if (isTail) {
+            ако (isTail) {
                 r = v_check_tail_results(v, ft);
-                if (r) return r;
+                ако (r) врати r;
             }
             // the callee itself, as a reference to a function of this type
             r = v_pop_expect(v, c_m3Type_funcref, &a);
-            if (r) return r;
-            if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
+            ако (r) врати r;
+            ако (ft) {
+                за (u16 i = ft->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
-                if (not isTail) {
-                    for (u16 i = 0; i < ft->numRets; i++) {
+                ако (not isTail) {
+                    за (u16 i = 0; i < ft->numRets; i++) {
                         r = v_push(v, BaseTypeOf(ft->types[i]));
-                        if (r) return r;
+                        ако (r) врати r;
                     }
                 }
             }
-            if (isTail) v_unreachable(v);
+            ако (isTail) v_unreachable(v);
             break;
         }
 
         case 0xd4: // ref.as_non_null
         {
             r = v_pop_expect(v, c_m3Type_funcref, &a);
-            if (r) return r;
+            ако (r) врати r;
             r = v_push(v, (a == c_valBottom) ? c_m3Type_funcref : a);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 #endif // d_m3HasTypedRefs
@@ -880,42 +880,42 @@ static M3Result v_validate_body (ValCtx * v)
         // ---- Parametric ----
         case 0x1a: // drop
             r = v_pop(v, &a);
-            if (r) return r;
+            ако (r) врати r;
             break;
 
         case 0x1b: // select
         {
             r = v_pop_expect(v, c_m3Type_i32, &a);
-            if (r) return r;
+            ако (r) врати r;
             m3type_t t2 = c_valBottom;
             r = v_pop(v, &t2);
-            if (r) return r;
+            ако (r) врати r;
             m3type_t t1;
             r = v_pop_expect(v, t2, &t1);
-            if (r) return r;
+            ако (r) врати r;
             // untyped select is numeric only; references need the 0x1c form
-            if (t2 != c_valBottom && IsRefType(t2)) return m3Err_typeMismatch;
+            ако (t2 != c_valBottom && IsRefType(t2)) врати m3Err_typeMismatch;
             r = v_push(v, (t2 == c_valBottom) ? t1 : t2);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
-#if d_m3HasRefTypes
+#ако d_m3HasRefTypes
         case 0x1c: // select with an explicit result type
         {
             u32 numTypes;
             r = ReadLEB_u32(&numTypes, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (numTypes != 1) return m3Err_wasmMalformed;
+            ако (r) врати r;
+            ако (numTypes != 1) врати m3Err_wasmMalformed;
 
             m3type_t selType;
-            r = ParseValueType(v->module, &selType, &v->wasm, v->wasmEnd);  if (r) return r;
+            r = ParseValueType(v->module, &selType, &v->wasm, v->wasmEnd);  ако (r) врати r;
             u8 t = BaseTypeOf(selType);
 
-            r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;
-            r = v_pop_expect(v, t, &a);            if (r) return r;
-            r = v_pop_expect(v, t, &a);            if (r) return r;
-            r = v_push(v, t);                      if (r) return r;
+            r = v_pop_expect(v, c_m3Type_i32, &a); ако (r) врати r;
+            r = v_pop_expect(v, t, &a);            ако (r) врати r;
+            r = v_pop_expect(v, t, &a);            ако (r) врати r;
+            r = v_push(v, t);                      ако (r) врати r;
             break;
         }
 
@@ -924,39 +924,39 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 tableIdx;
             r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
+            ако (r) врати r;
+            ако (tableIdx >= v->module->numTables) врати m3Err_unknownTable;
             u8 t = BaseTypeOf(v->module->tables[tableIdx]->type);
             m3type_t at = v_table_addrtype(v, tableIdx);
 
-            if (opcode == 0x26) {
-                r = v_pop_expect(v, t, &a);   if (r) return r;
-                r = v_pop_expect(v, at, &a);  if (r) return r;
-            } else {
-                r = v_pop_expect(v, at, &a);  if (r) return r;
-                r = v_push(v, t);             if (r) return r;
+            ако (opcode == 0x26) {
+                r = v_pop_expect(v, t, &a);   ако (r) врати r;
+                r = v_pop_expect(v, at, &a);  ако (r) врати r;
+            } инако {
+                r = v_pop_expect(v, at, &a);  ако (r) врати r;
+                r = v_push(v, t);             ако (r) врати r;
             }
             break;
         }
 
         case 0xd0: // ref.null
         {
-#if d_m3HasTypedRefs
+#ако d_m3HasTypedRefs
             m3type_t heapBits;
-            r = ParseHeapType(v->module, &heapBits, &v->wasm, v->wasmEnd);  if (r) return r;
+            r = ParseHeapType(v->module, &heapBits, &v->wasm, v->wasmEnd);  ако (r) врати r;
             u8 t = (heapBits & d_m3Type_refExtern) ? c_m3Type_externref :
-# if d_m3HasStackSwitching
+# ако d_m3HasStackSwitching
                    (heapBits & d_m3Type_refCont)   ? c_m3Type_contref :
 # endif
                    c_m3Type_funcref;
-#else
+#инако
             i8 waType;
             u8 t;
-            r = ReadLEB_i7(&waType, &v->wasm, v->wasmEnd);   if (r) return r;
-            r = NormalizeType(&t, waType);                   if (r) return r;
-            if (!IsRefType(t)) return m3Err_wasmMalformed;
+            r = ReadLEB_i7(&waType, &v->wasm, v->wasmEnd);   ако (r) врати r;
+            r = NormalizeType(&t, waType);                   ако (r) врати r;
+            ако (!IsRefType(t)) врати m3Err_wasmMalformed;
 #endif
-            r = v_push(v, t);                                if (r) return r;
+            r = v_push(v, t);                                ако (r) врати r;
             break;
         }
 
@@ -964,10 +964,10 @@ static M3Result v_validate_body (ValCtx * v)
         {
             m3type_t t = c_valBottom;
             r = v_pop(v, &t);
-            if (r) return r;
-            if (t != c_valBottom && !IsRefType(t)) return m3Err_typeMismatch;
+            ако (r) врати r;
+            ако (t != c_valBottom && !IsRefType(t)) врати m3Err_typeMismatch;
             r = v_push(v, c_m3Type_i32);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -975,11 +975,11 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 funcIdx;
             r = ReadLEB_u32(&funcIdx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (funcIdx >= v->module->numFunctions) return m3Err_unknownFunction;
-            if (!Module_IsFunctionDeclared(v->module, funcIdx)) return m3Err_undeclaredFuncRef;
+            ако (r) врати r;
+            ако (funcIdx >= v->module->numFunctions) врати m3Err_unknownFunction;
+            ако (!Module_IsFunctionDeclared(v->module, funcIdx)) врати m3Err_undeclaredFuncRef;
             r = v_push(v, c_m3Type_funcref);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 #endif
@@ -989,10 +989,10 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->numLocals) return m3Err_unknownLocal;
+            ако (r) врати r;
+            ако (idx >= v->numLocals) врати m3Err_unknownLocal;
             r = v_push(v, v->localTypes[idx]);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -1000,10 +1000,10 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->numLocals) return m3Err_unknownLocal;
+            ако (r) врати r;
+            ако (idx >= v->numLocals) врати m3Err_unknownLocal;
             r = v_pop_expect(v, v->localTypes[idx], &a);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -1011,12 +1011,12 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->numLocals) return m3Err_unknownLocal;
+            ако (r) врати r;
+            ако (idx >= v->numLocals) врати m3Err_unknownLocal;
             r = v_pop_expect(v, v->localTypes[idx], &a);
-            if (r) return r;
+            ако (r) врати r;
             r = v_push(v, v->localTypes[idx]);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -1024,10 +1024,10 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->module->numGlobals) return m3Err_unknownGlobal;
+            ако (r) врати r;
+            ако (idx >= v->module->numGlobals) врати m3Err_unknownGlobal;
             r = v_push(v, BaseTypeOf(v->module->globals[idx].type));
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -1035,10 +1035,10 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 idx;
             r = ReadLEB_u32(&idx, &v->wasm, v->wasmEnd);
-            if (r) return r;
-            if (idx >= v->module->numGlobals) return m3Err_unknownGlobal;
+            ако (r) врати r;
+            ако (idx >= v->module->numGlobals) врати m3Err_unknownGlobal;
             r = v_pop_expect(v, BaseTypeOf(v->module->globals[idx].type), &a);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -1049,20 +1049,20 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x34: case 0x35:                         // i64.load32 s/u
         {
             u32 align, memidx; u64 offset;
-            r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); if (r) return r;
-            if (align > v_max_align(opcode)) return m3Err_invalidAlignment;
-            if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            if (not v_offset_in_range(v, memidx, offset)) return m3Err_wasmMalformed;
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
+            r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (align > v_max_align(opcode)) врати m3Err_invalidAlignment;
+            ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
+            ако (not v_offset_in_range(v, memidx, offset)) врати m3Err_wasmMalformed;
+            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); ако (r) врати r;
             u8 result;
-            if      (opcode == 0x28) result = c_m3Type_i32;
-            else if (opcode == 0x29) result = c_m3Type_i64;
-            else if (opcode == 0x2a) result = c_m3Type_f32;
-            else if (opcode == 0x2b) result = c_m3Type_f64;
-            else if (opcode <= 0x2f) result = c_m3Type_i32;
-            else                     result = c_m3Type_i64;
+            ако      (opcode == 0x28) result = c_m3Type_i32;
+            инако ако (opcode == 0x29) result = c_m3Type_i64;
+            инако ако (opcode == 0x2a) result = c_m3Type_f32;
+            инако ако (opcode == 0x2b) result = c_m3Type_f64;
+            инако ако (opcode <= 0x2f) result = c_m3Type_i32;
+            инако                     result = c_m3Type_i64;
             r = v_push(v, result);
-            if (r) return r;
+            ако (r) врати r;
             break;
         }
 
@@ -1072,19 +1072,19 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x3c: case 0x3d: case 0x3e:             // i64.store8/16/32
         {
             u32 align, memidx; u64 offset;
-            r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); if (r) return r;
-            if (align > v_max_align(opcode)) return m3Err_invalidAlignment;
-            if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            if (not v_offset_in_range(v, memidx, offset)) return m3Err_wasmMalformed;
+            r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (align > v_max_align(opcode)) врати m3Err_invalidAlignment;
+            ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
+            ако (not v_offset_in_range(v, memidx, offset)) врати m3Err_wasmMalformed;
             u8 valtype;
-            if      (opcode == 0x36) valtype = c_m3Type_i32;
-            else if (opcode == 0x37) valtype = c_m3Type_i64;
-            else if (opcode == 0x38) valtype = c_m3Type_f32;
-            else if (opcode == 0x39) valtype = c_m3Type_f64;
-            else if (opcode <= 0x3b) valtype = c_m3Type_i32;
-            else                     valtype = c_m3Type_i64;
-            r = v_pop_expect(v, valtype, &a); if (r) return r;
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
+            ако      (opcode == 0x36) valtype = c_m3Type_i32;
+            инако ако (opcode == 0x37) valtype = c_m3Type_i64;
+            инако ако (opcode == 0x38) valtype = c_m3Type_f32;
+            инако ако (opcode == 0x39) valtype = c_m3Type_f64;
+            инако ако (opcode <= 0x3b) valtype = c_m3Type_i32;
+            инако                     valtype = c_m3Type_i64;
+            r = v_pop_expect(v, valtype, &a); ако (r) врати r;
+            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); ако (r) врати r;
             break;
         }
 
@@ -1092,44 +1092,44 @@ static M3Result v_validate_body (ValCtx * v)
         case 0x3f: // memory.size
         {
             u32 memidx;
-            r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            r = v_push(v, v_memory_addrtype(v, memidx)); if (r) return r;
+            r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
+            r = v_push(v, v_memory_addrtype(v, memidx)); ако (r) врати r;
             break;
         }
         case 0x40: // memory.grow
         {
             u32 memidx;
-            r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
-            r = v_push(v, v_memory_addrtype(v, memidx)); if (r) return r;
+            r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
+            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); ако (r) врати r;
+            r = v_push(v, v_memory_addrtype(v, memidx)); ако (r) врати r;
             break;
         }
 
         // ---- Constants ----
         case 0x41: { // i32.const
             i32 val;
-            r = ReadLEB_i32(&val, &v->wasm, v->wasmEnd); if (r) return r;
-            r = v_push(v, c_m3Type_i32); if (r) return r;
+            r = ReadLEB_i32(&val, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = v_push(v, c_m3Type_i32); ако (r) врати r;
             break;
         }
         case 0x42: { // i64.const
             i64 val;
-            r = ReadLEB_i64(&val, &v->wasm, v->wasmEnd); if (r) return r;
-            r = v_push(v, c_m3Type_i64); if (r) return r;
+            r = ReadLEB_i64(&val, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = v_push(v, c_m3Type_i64); ако (r) врати r;
             break;
         }
         case 0x43: { // f32.const
-            if (v->wasm + 4 > v->wasmEnd) return m3Err_wasmUnderrun;
+            ако (v->wasm + 4 > v->wasmEnd) врати m3Err_wasmUnderrun;
             v->wasm += 4;
-            r = v_push(v, c_m3Type_f32); if (r) return r;
+            r = v_push(v, c_m3Type_f32); ако (r) врати r;
             break;
         }
         case 0x44: { // f64.const
-            if (v->wasm + 8 > v->wasmEnd) return m3Err_wasmUnderrun;
+            ако (v->wasm + 8 > v->wasmEnd) врати m3Err_wasmUnderrun;
             v->wasm += 8;
-            r = v_push(v, c_m3Type_f64); if (r) return r;
+            r = v_push(v, c_m3Type_f64); ако (r) врати r;
             break;
         }
 
@@ -1238,7 +1238,7 @@ static M3Result v_validate_body (ValCtx * v)
         {
             u32 sub;
             r = ReadLEB_u32(&sub, &v->wasm, v->wasmEnd);
-            if (r) return r;
+            ако (r) врати r;
             switch (sub) {
             case 0x00: case 0x01: // i32.trunc_sat_f32_s/u
                 r = v_cvtop(v, c_m3Type_f32, c_m3Type_i32); break;
@@ -1251,74 +1251,74 @@ static M3Result v_validate_body (ValCtx * v)
             case 0x08: // memory.init
             {
                 u32 dataidx, memidx;
-                r = ReadLEB_u32(&dataidx, &v->wasm, v->wasmEnd); if (r) return r;
-                r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
-                if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
+                r = ReadLEB_u32(&dataidx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
                 // the segments must have been declared up front by a data count section
-                if (not v->module->hasDataCount) return m3Err_dataCountRequired;
-                if (dataidx >= v->module->numDataSegments) return m3Err_unknownDataSegment;
+                ако (not v->module->hasDataCount) врати m3Err_dataCountRequired;
+                ако (dataidx >= v->module->numDataSegments) врати m3Err_unknownDataSegment;
                 // the segment is indexed as an i32 no matter how the memory is
                 // addressed; only the destination follows the address type
-                r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r; // n
-                r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r; // src
-                r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r; // dst
+                r = v_pop_expect(v, c_m3Type_i32, &a); ако (r) врати r; // n
+                r = v_pop_expect(v, c_m3Type_i32, &a); ако (r) врати r; // src
+                r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); ако (r) врати r; // dst
                 break;
             }
             case 0x09: // data.drop
             {
                 u32 dataidx;
-                r = ReadLEB_u32(&dataidx, &v->wasm, v->wasmEnd); if (r) return r;
+                r = ReadLEB_u32(&dataidx, &v->wasm, v->wasmEnd); ако (r) врати r;
                 // needs the segment, but not a memory
-                if (not v->module->hasDataCount) return m3Err_dataCountRequired;
-                if (dataidx >= v->module->numDataSegments) return m3Err_unknownDataSegment;
+                ако (not v->module->hasDataCount) врати m3Err_dataCountRequired;
+                ако (dataidx >= v->module->numDataSegments) врати m3Err_unknownDataSegment;
                 break;
             }
-#if d_m3HasRefTypes
+#ако d_m3HasRefTypes
             case 0x0c: // table.init
             case 0x0e: // table.copy
             {
                 u32 a1, a2;
-                r = ReadLEB_u32(&a1, &v->wasm, v->wasmEnd); if (r) return r;
-                r = ReadLEB_u32(&a2, &v->wasm, v->wasmEnd); if (r) return r;
+                r = ReadLEB_u32(&a1, &v->wasm, v->wasmEnd); ако (r) врати r;
+                r = ReadLEB_u32(&a2, &v->wasm, v->wasmEnd); ако (r) врати r;
 
-                if (sub == 0x0c) {                                          // elemidx, tableidx
+                ако (sub == 0x0c) {                                          // elemidx, tableidx
                     // the immediates are encoded elem-then-table, but the spec's
                     // rule requires the table to be defined before the segment
-                    if (a2 >= v->module->numTables) return m3Err_unknownTable;
-                    if (a1 >= v->module->numElementSegments) return m3Err_unknownElemSegment;
-                    if (v->module->elementSegments[a1].type != v->module->tables[a2]->type)
-                        return m3Err_typeMismatch;
-                } else {                                                    // dst, src
-                    if (a1 >= v->module->numTables) return m3Err_unknownTable;
-                    if (a2 >= v->module->numTables) return m3Err_unknownTable;
-                    if (v->module->tables[a1]->type != v->module->tables[a2]->type)
-                        return m3Err_typeMismatch;
+                    ако (a2 >= v->module->numTables) врати m3Err_unknownTable;
+                    ако (a1 >= v->module->numElementSegments) врати m3Err_unknownElemSegment;
+                    ако (v->module->elementSegments[a1].type != v->module->tables[a2]->type)
+                        врати m3Err_typeMismatch;
+                } инако {                                                    // dst, src
+                    ако (a1 >= v->module->numTables) врати m3Err_unknownTable;
+                    ако (a2 >= v->module->numTables) врати m3Err_unknownTable;
+                    ако (v->module->tables[a1]->type != v->module->tables[a2]->type)
+                        врати m3Err_typeMismatch;
                 }
 
-                if (sub == 0x0c) {
+                ако (sub == 0x0c) {
                     // table.init indexes the segment as an i32 whatever the
                     // table is; only the destination follows the table
-                    r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;             // n
-                    r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;             // s
-                    r = v_pop_expect(v, v_table_addrtype(v, a2), &a); if (r) return r;  // d
-                } else {
+                    r = v_pop_expect(v, c_m3Type_i32, &a); ако (r) врати r;             // n
+                    r = v_pop_expect(v, c_m3Type_i32, &a); ако (r) врати r;             // s
+                    r = v_pop_expect(v, v_table_addrtype(v, a2), &a); ако (r) врати r;  // d
+                } инако {
                     // table.copy: each index follows its own table, and the
                     // length the narrower of the two
                     m3type_t dType = v_table_addrtype(v, a1);
                     m3type_t sType = v_table_addrtype(v, a2);
                     m3type_t nType = (dType == c_m3Type_i64 and sType == c_m3Type_i64)
                                        ? c_m3Type_i64 : c_m3Type_i32;
-                    r = v_pop_expect(v, nType, &a); if (r) return r;  // n
-                    r = v_pop_expect(v, sType, &a); if (r) return r;  // s
-                    r = v_pop_expect(v, dType, &a); if (r) return r;  // d
+                    r = v_pop_expect(v, nType, &a); ако (r) врати r;  // n
+                    r = v_pop_expect(v, sType, &a); ако (r) врати r;  // s
+                    r = v_pop_expect(v, dType, &a); ако (r) врати r;  // d
                 }
                 break;
             }
             case 0x0d: // elem.drop
             {
                 u32 elemIdx;
-                r = ReadLEB_u32(&elemIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                if (elemIdx >= v->module->numElementSegments) return m3Err_unknownElemSegment;
+                r = ReadLEB_u32(&elemIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                ако (elemIdx >= v->module->numElementSegments) врати m3Err_unknownElemSegment;
                 break;
             }
             case 0x0f: // table.grow
@@ -1326,21 +1326,21 @@ static M3Result v_validate_body (ValCtx * v)
             case 0x11: // table.fill
             {
                 u32 tableIdx;
-                r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                if (tableIdx >= v->module->numTables) return m3Err_unknownTable;
+                r = ReadLEB_u32(&tableIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                ако (tableIdx >= v->module->numTables) врати m3Err_unknownTable;
                 u8 t = BaseTypeOf(v->module->tables[tableIdx]->type);
                 m3type_t at = v_table_addrtype(v, tableIdx);
 
-                if (sub == 0x10) {                                          // table.size
-                    r = v_push(v, at); if (r) return r;
-                } else if (sub == 0x0f) {                                   // table.grow
-                    r = v_pop_expect(v, at, &a); if (r) return r;  // n
-                    r = v_pop_expect(v, t, &a);  if (r) return r;  // init
-                    r = v_push(v, at);           if (r) return r;
-                } else {                                                    // table.fill
-                    r = v_pop_expect(v, at, &a); if (r) return r;  // n
-                    r = v_pop_expect(v, t, &a);  if (r) return r;  // val
-                    r = v_pop_expect(v, at, &a); if (r) return r;  // i
+                ако (sub == 0x10) {                                          // table.size
+                    r = v_push(v, at); ако (r) врати r;
+                } инако ако (sub == 0x0f) {                                   // table.grow
+                    r = v_pop_expect(v, at, &a); ако (r) врати r;  // n
+                    r = v_pop_expect(v, t, &a);  ако (r) врати r;  // init
+                    r = v_push(v, at);           ако (r) врати r;
+                } инако {                                                    // table.fill
+                    r = v_pop_expect(v, at, &a); ако (r) врати r;  // n
+                    r = v_pop_expect(v, t, &a);  ако (r) врати r;  // val
+                    r = v_pop_expect(v, at, &a); ако (r) врати r;  // i
                 }
                 break;
             }
@@ -1348,9 +1348,9 @@ static M3Result v_validate_body (ValCtx * v)
             case 0x0a: // memory.copy
             {
                 u32 dst, src;
-                r = ReadLEB_u32(&dst, &v->wasm, v->wasmEnd); if (r) return r;
-                r = ReadLEB_u32(&src, &v->wasm, v->wasmEnd); if (r) return r;
-                if (not v_has_memory_idx(v, dst) or not v_has_memory_idx(v, src)) return m3Err_unknownMemory;
+                r = ReadLEB_u32(&dst, &v->wasm, v->wasmEnd); ако (r) врати r;
+                r = ReadLEB_u32(&src, &v->wasm, v->wasmEnd); ако (r) врати r;
+                ако (not v_has_memory_idx(v, dst) or not v_has_memory_idx(v, src)) врати m3Err_unknownMemory;
                 // Spec: each address follows its own memory, and the length is
                 // typed by the narrower of the two - so copying between an i32
                 // and an i64 memory takes an i32 length.
@@ -1358,34 +1358,34 @@ static M3Result v_validate_body (ValCtx * v)
                 m3type_t srcType = v_memory_addrtype(v, src);
                 m3type_t lenType = (dstType == c_m3Type_i64 and srcType == c_m3Type_i64)
                                      ? c_m3Type_i64 : c_m3Type_i32;
-                r = v_pop_expect(v, lenType, &a); if (r) return r; // n
-                r = v_pop_expect(v, srcType, &a); if (r) return r; // src
-                r = v_pop_expect(v, dstType, &a); if (r) return r; // dst
+                r = v_pop_expect(v, lenType, &a); ако (r) врати r; // n
+                r = v_pop_expect(v, srcType, &a); ако (r) врати r; // src
+                r = v_pop_expect(v, dstType, &a); ако (r) врати r; // dst
                 break;
             }
             case 0x0b: // memory.fill
             {
                 u32 memidx;
-                r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); if (r) return r;
-                if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
+                r = ReadLEB_u32(&memidx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
                 m3type_t addrType = v_memory_addrtype(v, memidx);
-                r = v_pop_expect(v, addrType, &a); if (r) return r;      // n
-                r = v_pop_expect(v, c_m3Type_i32, &a); if (r) return r;  // val
-                r = v_pop_expect(v, addrType, &a); if (r) return r;      // dst
+                r = v_pop_expect(v, addrType, &a); ако (r) врати r;      // n
+                r = v_pop_expect(v, c_m3Type_i32, &a); ако (r) врати r;  // val
+                r = v_pop_expect(v, addrType, &a); ако (r) врати r;      // dst
                 break;
             }
-#if d_m3HasWideArithmetic
+#ако d_m3HasWideArithmetic
             case 0x13: case 0x14: // i64.add128, i64.sub128
             case 0x15: case 0x16: // i64.mul_wide_s, i64.mul_wide_u
             {
                 // two 128-bit operands of two i64 halves each, or two i64 factors;
                 // either way a 128-bit result, the low half pushed first
                 u32 numOperands = (sub <= 0x14) ? 4 : 2;
-                for (u32 i = 0; i < numOperands; ++i) {
-                    r = v_pop_expect(v, c_m3Type_i64, &a); if (r) return r;
+                за (u32 i = 0; i < numOperands; ++i) {
+                    r = v_pop_expect(v, c_m3Type_i64, &a); ако (r) врати r;
                 }
-                r = v_push(v, c_m3Type_i64); if (r) return r;
-                r = v_push(v, c_m3Type_i64); if (r) return r;
+                r = v_push(v, c_m3Type_i64); ако (r) врати r;
+                r = v_push(v, c_m3Type_i64); ако (r) врати r;
                 break;
             }
 #endif
@@ -1396,113 +1396,113 @@ static M3Result v_validate_body (ValCtx * v)
             break;
         }
 
-#if d_m3HasAtomics
+#ако d_m3HasAtomics
         // ---- 0xFE prefix (atomics) ----
         case 0xfe:
         {
             u32 sub;
             r = ReadLEB_u32(&sub, &v->wasm, v->wasmEnd);
-            if (r) return r;
+            ако (r) врати r;
 
-            if (sub == 0x03) { // atomic.fence
+            ако (sub == 0x03) { // atomic.fence
                 u8 reserved;
-                r = Read_u8(&reserved, &v->wasm, v->wasmEnd); if (r) return r;
-                if (reserved != 0) return m3Err_wasmMalformed;
+                r = Read_u8(&reserved, &v->wasm, v->wasmEnd); ако (r) врати r;
+                ако (reserved != 0) врати m3Err_wasmMalformed;
                 break;
             }
 
             u32 width, numOperands; m3type_t valueType, resultType;
-            if (not v_atomic_shape(sub, &width, &numOperands, &valueType, &resultType)) return m3Err_unknownOpcode;
+            ако (not v_atomic_shape(sub, &width, &numOperands, &valueType, &resultType)) врати m3Err_unknownOpcode;
 
             u32 align, memidx; u64 offset;
-            r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadMemoryArg(&align, &memidx, &offset, &v->wasm, v->wasmEnd); ако (r) врати r;
             // Spec: unlike an ordinary access, an atomic one must be aligned exactly
-            if ((1u << align) != width) return m3Err_invalidAtomicAlignment;
-            if (not v_has_memory_idx(v, memidx)) return m3Err_unknownMemory;
-            if (not v_offset_in_range(v, memidx, offset)) return m3Err_wasmMalformed;
+            ако ((1u << align) != width) врати m3Err_invalidAtomicAlignment;
+            ако (not v_has_memory_idx(v, memidx)) врати m3Err_unknownMemory;
+            ако (not v_offset_in_range(v, memidx, offset)) врати m3Err_wasmMalformed;
 
             // the operands above the address are all of the one type, except a
             // wait, whose timeout is an i64 whatever it is waiting on
-            if (sub == 0x01 or sub == 0x02) {
-                r = v_pop_expect(v, c_m3Type_i64, &a); if (r) return r;
+            ако (sub == 0x01 or sub == 0x02) {
+                r = v_pop_expect(v, c_m3Type_i64, &a); ако (r) врати r;
                 numOperands--;
             }
-            for (u32 i = 1; i < numOperands; ++i) {
-                r = v_pop_expect(v, valueType, &a); if (r) return r;
+            за (u32 i = 1; i < numOperands; ++i) {
+                r = v_pop_expect(v, valueType, &a); ако (r) врати r;
             }
-            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); if (r) return r;
-            if (resultType != c_m3Type_none) {
-                r = v_push(v, resultType); if (r) return r;
+            r = v_pop_expect(v, v_memory_addrtype(v, memidx), &a); ако (r) врати r;
+            ако (resultType != c_m3Type_none) {
+                r = v_push(v, resultType); ако (r) врати r;
             }
             break;
         }
 #endif
 
-#if d_m3HasStackSwitching
+#ако d_m3HasStackSwitching
         // ---- Stack Switching ----
         case 0xe0: // cont.new
         {
             u32 typeIdx;
-            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
             IM3FuncType ft = v->module->funcTypes[typeIdx];
-            if (!ft || !ft->isContinuation) return m3Err_typeMismatch;
-            r = v_pop_expect(v, c_m3Type_funcref, &a); if (r) return r;
-            r = v_push(v, c_m3Type_contref); if (r) return r;
+            ако (!ft || !ft->isContinuation) врати m3Err_typeMismatch;
+            r = v_pop_expect(v, c_m3Type_funcref, &a); ако (r) врати r;
+            r = v_push(v, c_m3Type_contref); ако (r) врати r;
             break;
         }
 
         case 0xe1: // cont.bind
         {
             u32 typeIdx1, typeIdx2;
-            r = ReadLEB_u32(&typeIdx1, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&typeIdx2, &v->wasm, v->wasmEnd); if (r) return r;
-            if (typeIdx1 >= v->module->numFuncTypes || typeIdx2 >= v->module->numFuncTypes) return m3Err_unknownType;
+            r = ReadLEB_u32(&typeIdx1, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = ReadLEB_u32(&typeIdx2, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (typeIdx1 >= v->module->numFuncTypes || typeIdx2 >= v->module->numFuncTypes) врати m3Err_unknownType;
             IM3FuncType ct1 = v->module->funcTypes[typeIdx1];
             IM3FuncType ct2 = v->module->funcTypes[typeIdx2];
-            if (!ct1 || !ct2 || !ct1->isContinuation || !ct2->isContinuation) return m3Err_typeMismatch;
+            ако (!ct1 || !ct2 || !ct1->isContinuation || !ct2->isContinuation) врати m3Err_typeMismatch;
 
             IM3FuncType ft1 = ct1->contFuncType ? ct1->contFuncType : ct1;
             IM3FuncType ft2 = ct2->contFuncType ? ct2->contFuncType : ct2;
 
             u16 numParams1 = ft1->numArgs;
             u16 numParams2 = ft2->numArgs;
-            if (numParams1 < numParams2) return m3Err_typeMismatch;
+            ако (numParams1 < numParams2) врати m3Err_typeMismatch;
             u32 numBound = numParams1 - numParams2;
 
-            if (ft1->numRets != ft2->numRets) return m3Err_typeMismatch;
-            for (u16 i = 0; i < ft1->numRets; ++i) {
-                if (ft1->types[i] != ft2->types[i]) return m3Err_typeMismatch;
+            ако (ft1->numRets != ft2->numRets) врати m3Err_typeMismatch;
+            за (u16 i = 0; i < ft1->numRets; ++i) {
+                ако (ft1->types[i] != ft2->types[i]) врати m3Err_typeMismatch;
             }
-            for (u16 i = 0; i < numParams2; ++i) {
-                if (ft1->types[ft1->numRets + numBound + i] != ft2->types[ft2->numRets + i]) return m3Err_typeMismatch;
+            за (u16 i = 0; i < numParams2; ++i) {
+                ако (ft1->types[ft1->numRets + numBound + i] != ft2->types[ft2->numRets + i]) врати m3Err_typeMismatch;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_pop_expect(v, c_m3Type_contref, &a); ако (r) врати r;
 
-            for (u32 i = numBound; i > 0; i--) {
+            за (u32 i = numBound; i > 0; i--) {
                 r = v_pop_expect(v, BaseTypeOf(ft1->types[ft1->numRets + i - 1]), &a);
-                if (r) return r;
+                ако (r) врати r;
             }
 
-            r = v_push(v, c_m3Type_contref); if (r) return r;
+            r = v_push(v, c_m3Type_contref); ако (r) врати r;
             break;
         }
 
         case 0xe2: // suspend
         {
             u32 tagIdx;
-            r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+            r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (!v->module || tagIdx >= v->module->numTags) врати m3Err_unknownTag;
             IM3FuncType tt = v->module->tags[tagIdx].type;
-            if (tt) {
-                for (u16 i = tt->numArgs; i > 0; i--) {
+            ако (tt) {
+                за (u16 i = tt->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(tt->types[tt->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
-                for (u16 i = 0; i < tt->numRets; i++) {
+                за (u16 i = 0; i < tt->numRets; i++) {
                     r = v_push(v, BaseTypeOf(tt->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -1511,33 +1511,33 @@ static M3Result v_validate_body (ValCtx * v)
         case 0xe3: // resume
         {
             u32 typeIdx;
-            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
-            if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
+            ако (!ct || !ct->isContinuation) врати m3Err_typeMismatch;
 
             u32 numClauses;
-            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); ако (r) врати r;
 
-            for (u32 i = 0; i < numClauses; i++) {
+            за (u32 i = 0; i < numClauses; i++) {
                 u8 kind;
-                r = Read_u8(&kind, &v->wasm, v->wasmEnd); if (r) return r;
+                r = Read_u8(&kind, &v->wasm, v->wasmEnd); ако (r) врати r;
                 u32 tagIdx;
-                r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                r = v_resume_clause(v, kind, tagIdx, ct); if (r) return r;
+                r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                r = v_resume_clause(v, kind, tagIdx, ct); ако (r) врати r;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_pop_expect(v, c_m3Type_contref, &a); ако (r) врати r;
 
             IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
-            if (ft) {
-                for (u16 i = ft->numArgs; i > 0; i--) {
+            ако (ft) {
+                за (u16 i = ft->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
-                for (u16 i = 0; i < ft->numRets; i++) {
+                за (u16 i = 0; i < ft->numRets; i++) {
                     r = v_push(v, BaseTypeOf(ft->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -1546,42 +1546,42 @@ static M3Result v_validate_body (ValCtx * v)
         case 0xe4: // resume_throw
         {
             u32 typeIdx, tagIdx, numClauses;
-            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); ако (r) врати r;
 
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
-            if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
+            ако (!v->module || tagIdx >= v->module->numTags) врати m3Err_unknownTag;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
-            if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
+            ако (!ct || !ct->isContinuation) врати m3Err_typeMismatch;
             IM3FuncType tagType = v->module->tags[tagIdx].type;
 
             // it is an exception that gets raised, so the tag has to be one
             // throw could have raised: no results
-            if (tagType && tagType->numRets != 0) return m3Err_typeMismatch;
+            ако (tagType && tagType->numRets != 0) врати m3Err_typeMismatch;
 
-            for (u32 i = 0; i < numClauses; i++) {
+            за (u32 i = 0; i < numClauses; i++) {
                 u8 kind;
-                r = Read_u8(&kind, &v->wasm, v->wasmEnd); if (r) return r;
+                r = Read_u8(&kind, &v->wasm, v->wasmEnd); ако (r) врати r;
                 u32 cTagIdx;
-                r = ReadLEB_u32(&cTagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                r = v_resume_clause(v, kind, cTagIdx, ct); if (r) return r;
+                r = ReadLEB_u32(&cTagIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                r = v_resume_clause(v, kind, cTagIdx, ct); ако (r) врати r;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_pop_expect(v, c_m3Type_contref, &a); ако (r) врати r;
 
-            if (tagType) {
-                for (u16 i = tagType->numArgs; i > 0; i--) {
+            ако (tagType) {
+                за (u16 i = tagType->numArgs; i > 0; i--) {
                     r = v_pop_expect(v, BaseTypeOf(tagType->types[tagType->numRets + i - 1]), &a);
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
 
             IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
-            if (ft) {
-                for (u16 i = 0; i < ft->numRets; i++) {
+            ако (ft) {
+                за (u16 i = 0; i < ft->numRets; i++) {
                     r = v_push(v, BaseTypeOf(ft->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -1590,29 +1590,29 @@ static M3Result v_validate_body (ValCtx * v)
         case 0xe5: // resume_throw_ref
         {
             u32 typeIdx, numClauses;
-            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = ReadLEB_u32(&numClauses, &v->wasm, v->wasmEnd); ако (r) врати r;
 
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
-            if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
+            ако (!ct || !ct->isContinuation) врати m3Err_typeMismatch;
 
-            for (u32 i = 0; i < numClauses; i++) {
+            за (u32 i = 0; i < numClauses; i++) {
                 u8 kind;
-                r = Read_u8(&kind, &v->wasm, v->wasmEnd); if (r) return r;
+                r = Read_u8(&kind, &v->wasm, v->wasmEnd); ако (r) врати r;
                 u32 cTagIdx;
-                r = ReadLEB_u32(&cTagIdx, &v->wasm, v->wasmEnd); if (r) return r;
-                r = v_resume_clause(v, kind, cTagIdx, ct); if (r) return r;
+                r = ReadLEB_u32(&cTagIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+                r = v_resume_clause(v, kind, cTagIdx, ct); ако (r) врати r;
             }
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
-            r = v_pop_expect(v, c_m3Type_exnref, &a); if (r) return r;
+            r = v_pop_expect(v, c_m3Type_contref, &a); ако (r) врати r;
+            r = v_pop_expect(v, c_m3Type_exnref, &a); ако (r) врати r;
 
             IM3FuncType ft = ct->contFuncType ? ct->contFuncType : ct;
-            if (ft) {
-                for (u16 i = 0; i < ft->numRets; i++) {
+            ако (ft) {
+                за (u16 i = 0; i < ft->numRets; i++) {
                     r = v_push(v, BaseTypeOf(ft->types[i]));
-                    if (r) return r;
+                    ако (r) врати r;
                 }
             }
             break;
@@ -1621,39 +1621,39 @@ static M3Result v_validate_body (ValCtx * v)
         case 0xe6: // switch
         {
             u32 typeIdx, tagIdx;
-            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); if (r) return r;
-            r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); if (r) return r;
+            r = ReadLEB_u32(&typeIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
+            r = ReadLEB_u32(&tagIdx, &v->wasm, v->wasmEnd); ако (r) врати r;
 
-            if (typeIdx >= v->module->numFuncTypes) return m3Err_unknownType;
-            if (!v->module || tagIdx >= v->module->numTags) return m3Err_unknownTag;
+            ако (typeIdx >= v->module->numFuncTypes) врати m3Err_unknownType;
+            ако (!v->module || tagIdx >= v->module->numTags) врати m3Err_unknownTag;
             IM3FuncType ct = v->module->funcTypes[typeIdx];
-            if (!ct || !ct->isContinuation) return m3Err_typeMismatch;
+            ако (!ct || !ct->isContinuation) врати m3Err_typeMismatch;
 
             // a switch tag carries no payload of its own
             IM3FuncType tagType = v->module->tags[tagIdx].type;
-            if (tagType && tagType->numArgs != 0) return m3Err_typeMismatch;
+            ако (tagType && tagType->numArgs != 0) врати m3Err_typeMismatch;
 
             // switch $ct1 : [t1* (ref null $ct1)] -> [t2*], where $ct1's last
             // parameter names $ct2 - the continuation this instruction
             // suspends - and t2* is $ct2's parameters, not $ct1's results
             IM3FuncType ft = ct->contFuncType;
-            if (!ft || ft->numArgs == 0) return m3Err_typeMismatch;
+            ако (!ft || ft->numArgs == 0) врати m3Err_typeMismatch;
 
             IM3FuncType peer = Module_ContTypeOfRef(v->module, ft->types[ft->numRets + ft->numArgs - 1]);
-            if (!peer || !peer->contFuncType) return m3Err_typeMismatch;
+            ако (!peer || !peer->contFuncType) врати m3Err_typeMismatch;
 
             IM3FuncType self = peer->contFuncType;
 
-            r = v_pop_expect(v, c_m3Type_contref, &a); if (r) return r;
+            r = v_pop_expect(v, c_m3Type_contref, &a); ако (r) врати r;
 
-            for (u16 i = (u16)(ft->numArgs - 1); i > 0; i--) {
+            за (u16 i = (u16)(ft->numArgs - 1); i > 0; i--) {
                 r = v_pop_expect(v, BaseTypeOf(ft->types[ft->numRets + i - 1]), &a);
-                if (r) return r;
+                ако (r) врати r;
             }
 
-            for (u16 i = 0; i < self->numArgs; i++) {
+            за (u16 i = 0; i < self->numArgs; i++) {
                 r = v_push(v, BaseTypeOf(self->types[self->numRets + i]));
-                if (r) return r;
+                ако (r) врати r;
             }
             break;
         }
@@ -1667,19 +1667,19 @@ static M3Result v_validate_body (ValCtx * v)
 
         } // switch
 
-        if (r) return r;
+        ако (r) врати r;
 
     } // while
 
     // If we ran out of bytes without hitting the final end
-    return m3Err_wasmMalformed;
+    врати m3Err_wasmMalformed;
 }
 
 // ---------- Public entry point ----------
 
 M3Result  ValidateFunction  (IM3Function i_function)
 {
-    if (!i_function->wasm) return m3Err_none;
+    ако (!i_function->wasm) врати m3Err_none;
 
     IM3FuncType funcType = i_function->funcType;
     IM3Module   module   = i_function->module;
@@ -1687,9 +1687,9 @@ M3Result  ValidateFunction  (IM3Function i_function)
     IM3Runtime runtime = module->runtime;
 
     ValCtx* v = runtime->validator;
-    if (!v) {
+    ако (!v) {
         v = m3_AllocStruct (ValCtx);
-        if (!v) return m3Err_mallocFailed;
+        ако (!v) врати m3Err_mallocFailed;
         runtime->validator = v;
     }
 
@@ -1702,39 +1702,39 @@ M3Result  ValidateFunction  (IM3Function i_function)
     // Skip code size LEB
     u32 size;
     M3Result r = ReadLEB_u32(&size, &v->wasm, v->wasmEnd);
-    if (r) return r;
+    ако (r) врати r;
 
     // Parse locals
     u32 numLocalBlocks;
     r = ReadLEB_u32(&numLocalBlocks, &v->wasm, v->wasmEnd);
-    if (r) return r;
+    ако (r) врати r;
 
     // First: params. Running out of room has to be an error, not a truncation:
     // a short localTypes would make later local.get indices read as unknown
     u16 numParams = funcType ? funcType->numArgs : 0;
-    if (numParams > d_m3ValStack) return m3Err_functionStackOverflow;
-    for (u16 i = 0; i < numParams; i++) {
+    ако (numParams > d_m3ValStack) врати m3Err_functionStackOverflow;
+    за (u16 i = 0; i < numParams; i++) {
         v->localTypes[v->numLocals++] = BaseTypeOf(funcType->types[funcType->numRets + i]);
     }
 
     // Then: declared locals
-    for (u32 b = 0; b < numLocalBlocks; b++) {
+    за (u32 b = 0; b < numLocalBlocks; b++) {
         u32 count;
         r = ReadLEB_u32(&count, &v->wasm, v->wasmEnd);
-        if (r) return r;
+        ако (r) врати r;
         m3type_t localType;
         r = ParseValueType(v->module, &localType, &v->wasm, v->wasmEnd);
-        if (r) return r;
+        ако (r) врати r;
         u8 normalized = BaseTypeOf(localType);
-        if (count > (u32) (d_m3ValStack - v->numLocals)) return m3Err_functionStackOverflow;
-        for (u32 c = 0; c < count; c++) {
+        ако (count > (u32) (d_m3ValStack - v->numLocals)) врати m3Err_functionStackOverflow;
+        за (u32 c = 0; c < count; c++) {
             v->localTypes[v->numLocals++] = normalized;
         }
     }
 
     // Push the function-level control frame
     r = v_push_ctrl(v, 0x00, funcType); // opcode 0x00 marks function frame
-    if (r) return r;
+    ако (r) врати r;
 
     // Push params onto operand stack (they're part of the function body's initial stack)
     // Actually per the spec, locals are indexed but not on the operand stack.
@@ -1745,24 +1745,24 @@ M3Result  ValidateFunction  (IM3Function i_function)
 
     // Validate the body
     r = v_validate_body(v);
-    if (r) return r;
+    ако (r) врати r;
 
     // After validation, control stack should be empty and all declared bytes consumed
-    if (v->ctrlTop != 0)
-        return m3Err_wasmMalformed;
+    ако (v->ctrlTop != 0)
+        врати m3Err_wasmMalformed;
 
-    if (v->wasm != v->wasmEnd)
-        return m3Err_wasmSectionUnderrun;
+    ако (v->wasm != v->wasmEnd)
+        врати m3Err_wasmSectionUnderrun;
 
-    return m3Err_none;
+    врати m3Err_none;
 }
 
-#else // !d_m3EnableValidation
+#инако // !d_m3EnableValidation
 
 M3Result  ValidateFunction  (IM3Function i_function)
 {
     (void)i_function;
-    return m3Err_none;
+    врати m3Err_none;
 }
 
 // clang-format on

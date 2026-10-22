@@ -28,7 +28,7 @@
 // Gas units are ten-thousandths of a gas in ewasm's cost table.
 #define M3_GAS_UNITS_PER_GAS        10000
 
-#if defined(__cplusplus)
+#ако defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -154,13 +154,13 @@ typedef M3Result (*M3SectionHandler)(IM3Module i_module, const char* name, const
 //  error codes
 // -------------------------------------------------------------------------------------------------------------------------------
 
-#if defined(M3_IMPLEMENT_ERROR_STRINGS)
-#  if defined(__cplusplus)
+#ако defined(M3_IMPLEMENT_ERROR_STRINGS)
+#  ако defined(__cplusplus)
 #    define d_m3ErrorConst(LABEL, STRING)      extern const M3Result m3Err_##LABEL = { STRING };
-#  else
+#  инако
 #    define d_m3ErrorConst(LABEL, STRING)      const M3Result m3Err_##LABEL = { STRING };
 #  endif
-#else
+#инако
 #  define d_m3ErrorConst(LABEL, STRING)        extern const M3Result m3Err_##LABEL;
 #endif
 
@@ -644,20 +644,20 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
    {   uintptr_t _m3_base = (uintptr_t)(_mem);                                     \
        uintptr_t _m3_addr = (uintptr_t)(void*)(addr);                              \
        size_t    _m3_size = m3_GetMemorySizeAt(_mem);                              \
-       if (M3_UNLIKELY(_m3_addr < _m3_base ||                                      \
+       ако (M3_UNLIKELY(_m3_addr < _m3_base ||                                      \
                        (size_t)(_m3_addr - _m3_base) > _m3_size ||                 \
                        (uint64_t)(len) > (uint64_t)(_m3_size - (size_t)(_m3_addr - _m3_base)))) \
            m3ApiTrap(m3Err_trapOutOfBoundsMemoryAccess);                           \
    }
 
 #define m3ApiRawFunction(NAME)               const void * NAME (IM3Runtime runtime, IM3ImportContext _ctx, uint64_t * _sp, void * _mem)
-#define m3ApiReturn(VALUE)                   { *raw_return = (VALUE); return m3Err_none;}
+#define m3ApiReturn(VALUE)                   { *raw_return = (VALUE); врати m3Err_none;}
 #define m3ApiMultiValueReturn(NAME, VALUE)   { *NAME = (VALUE); }
-#define m3ApiTrap(VALUE)                     { return VALUE; }
-#define m3ApiThrow(TAG, ARGC, ARGPTRS)       { return m3_ThrowException(runtime, TAG, ARGC, ARGPTRS); }
-#define m3ApiSuccess()                       { return m3Err_none; }
+#define m3ApiTrap(VALUE)                     { врати VALUE; }
+#define m3ApiThrow(TAG, ARGC, ARGPTRS)       { врати m3_ThrowException(runtime, TAG, ARGC, ARGPTRS); }
+#define m3ApiSuccess()                       { врати m3Err_none; }
 
-#if defined(M3_BIG_ENDIAN)
+#ако defined(M3_BIG_ENDIAN)
 #  define m3ApiReadMem8(ptr)         (* (uint8_t *)(ptr))
 #  define m3ApiReadMem16(ptr)        m3_bswap16((* (uint16_t *)(ptr)))
 #  define m3ApiReadMem32(ptr)        m3_bswap32((* (uint32_t *)(ptr)))
@@ -666,7 +666,7 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
 #  define m3ApiWriteMem16(ptr, val)  { * (uint16_t *)(ptr) = m3_bswap16((val)); }
 #  define m3ApiWriteMem32(ptr, val)  { * (uint32_t *)(ptr) = m3_bswap32((val)); }
 #  define m3ApiWriteMem64(ptr, val)  { * (uint64_t *)(ptr) = m3_bswap64((val)); }
-#else
+#инако
 #  define m3ApiReadMem8(ptr)         (* (uint8_t *)(ptr))
 #  define m3ApiReadMem16(ptr)        (* (uint16_t *)(ptr))
 #  define m3ApiReadMem32(ptr)        (* (uint32_t *)(ptr))
@@ -677,7 +677,7 @@ IM3BacktraceInfo m3_GetBacktrace (IM3Runtime i_runtime);
 #  define m3ApiWriteMem64(ptr, val)  { * (uint64_t *)(ptr) = (val); }
 #endif
 
-#if defined(__cplusplus)
+#ако defined(__cplusplus)
 }
 #endif
 

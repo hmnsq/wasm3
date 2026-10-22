@@ -9,36 +9,36 @@
 #include "m3_info.h"
 #include "m3_compile.h"
 
-#if defined(DEBUG) || (d_m3EnableStrace >= 1)
+#ако defined(DEBUG) || (d_m3EnableStrace >= 1)
 
 size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type)
 {
-    int len = 0;
+    цео len = 0;
 
     *o_string = 0;
 
-    if (i_type == c_m3Type_i32) {
+    ако (i_type == c_m3Type_i32) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIi32, *(i32*)i_sp);
-    } else if (i_type == c_m3Type_i64) {
+    } инако ако (i_type == c_m3Type_i64) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIi64, *(i64*)i_sp);
     }
-#  if d_m3HasFloat
-    else if (i_type == c_m3Type_f32) {
+#  ако d_m3HasFloat
+    инако ако (i_type == c_m3Type_f32) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIf32, *(f32*)i_sp);
-    } else if (i_type == c_m3Type_f64) {
+    } инако ако (i_type == c_m3Type_f64) {
         len = snprintf(o_string, i_stringBufferSize, "%" PRIf64, *(f64*)i_sp);
     }
 #  endif
 
     len = M3_MAX(0, len);
 
-    return len;
+    врати len;
 }
 
 
 cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 {
-    int ret;
+    цео ret;
 
     static char string[256];
 
@@ -51,10 +51,10 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
     u64* argSp = (u64*)i_sp;
 
     IM3FuncType funcType = i_function->funcType;
-    if (funcType) {
+    ако (funcType) {
         u32 numArgs = funcType->numArgs;
 
-        for (u32 i = 0; i < numArgs; ++i) {
+        за (u32 i = 0; i < numArgs; ++i) {
             m3type_t type = d_FuncArgType(funcType, i);
 
             ret = snprintf(s, e - s, "%s: ", c_waTypes[BaseTypeOf(type)]);
@@ -62,19 +62,19 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 
             s += SPrintArg(s, e - s, argSp + i, type);
 
-            if (i != numArgs - 1) {
+            ако (i != numArgs - 1) {
                 ret = snprintf(s, e - s, ", ");
                 s += M3_MAX(0, ret);
             }
         }
-    } else {
+    } инако {
         printf("null signature");
     }
 
     ret = snprintf(s, e - s, ")");
     s += M3_MAX(0, ret);
 
-    return string;
+    врати string;
 }
 
 // The results of a call, comma separated, for the strace return line. Empty when
@@ -83,7 +83,7 @@ cstr_t SPrintFunctionArgList (IM3Function i_function, m3stack_t i_sp)
 // layout m3_GetResults reads.
 cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 {
-    int ret;
+    цео ret;
 
     static char string[256];
 
@@ -96,16 +96,16 @@ cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 
     u32 numRets = i_funcType ? i_funcType->numRets : 0;
 
-    for (u32 i = 0; i < numRets; ++i) {
+    за (u32 i = 0; i < numRets; ++i) {
         s += SPrintArg(s, e - s, retSp + i, d_FuncRetType(i_funcType, i));
 
-        if (i != numRets - 1) {
+        ако (i != numRets - 1) {
             ret = snprintf(s, e - s, ", ");
             s += M3_MAX(0, ret);
         }
     }
 
-    return string;
+    врати string;
 }
 
 #endif
@@ -116,7 +116,7 @@ cstr_t SPrintFunctionRetList (IM3FuncType i_funcType, m3stack_t i_sp)
 void ExceptionBreakpoint (cstr_t i_exception, cstr_t i_message)
 {
     printf("\nexception: '%s' @ %s\n", i_exception, i_message);
-    return;
+    врати;
 }
 
 
@@ -141,7 +141,7 @@ void* v_PrintEnvModuleInfo (IM3Module i_module, void* i_info)
     u32* io_index = (u32*)i_info;
     printf(" module [%u]  name: '%s'; funcs: %d  \n", (*io_index)++, i_module->name, i_module->numFunctions);
 
-    return NULL;
+    врати NULL;
 }
 
 
@@ -162,10 +162,10 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 {
     u8 base = BaseTypeOf(i_m3Type);
 
-    if (base <= c_m3Type_unknown) {
-        return c_waTypes[base];
-    } else {
-        return "?";
+    ако (base <= c_m3Type_unknown) {
+        врати c_waTypes[base];
+    } инако {
+        врати "?";
     }
 }
 
@@ -176,16 +176,16 @@ cstr_t GetTypeName (m3type_t i_m3Type)
 static
 size_t SPrintAppend (char* o_string, size_t i_stringBufferSize, size_t i_len, ccstr_t i_format, ...)
 {
-    if (i_len + 1 >= i_stringBufferSize) {
-        return i_len;
+    ако (i_len + 1 >= i_stringBufferSize) {
+        врати i_len;
     }
 
     va_list args;
     va_start(args, i_format);
-    int ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
+    цео ret = vsnprintf(o_string + i_len, i_stringBufferSize - i_len, i_format, args);
     va_end(args);
 
-    return M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
+    врати M3_MIN(i_len + (size_t)M3_MAX(0, ret), i_stringBufferSize - 1);
 }
 
 
@@ -198,19 +198,19 @@ cstr_t SPrintFuncTypeSignature (IM3FuncType i_funcType)
 
     size_t len = SPrintAppend(string, sizeof(string), 0, "(");
 
-    for (u32 i = 0; i < i_funcType->numArgs; ++i) {
+    за (u32 i = 0; i < i_funcType->numArgs; ++i) {
         len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncArgType(i_funcType, i)));
     }
 
     len = SPrintAppend(string, sizeof(string), len, ") -> ");
 
-    for (u32 i = 0; i < i_funcType->numRets; ++i) {
+    за (u32 i = 0; i < i_funcType->numRets; ++i) {
         len = SPrintAppend(string, sizeof(string), len, "%s%s", i ? ", " : "",
                            GetTypeName(d_FuncRetType(i_funcType, i)));
     }
 
-    return string;
+    врати string;
 }
 
 
@@ -218,7 +218,7 @@ cstr_t SPrintValue (void* i_value, m3type_t i_type)
 {
     static char string[100];
     SPrintArg(string, 100, (m3stack_t)i_value, i_type);
-    return string;
+    врати string;
 }
 
 // Finds i_operation in one operation table. i_opcodeBase tags the result, so an
@@ -226,19 +226,19 @@ cstr_t SPrintValue (void* i_value, m3type_t i_type)
 static
 bool ScanOperationTable (OpInfo* io_info, IM3OpInfo i_table, u32 i_numOps, m3opcode_t i_opcodeBase, IM3Operation i_operation)
 {
-    for (u32 i = 0; i < i_numOps; ++i) {
+    за (u32 i = 0; i < i_numOps; ++i) {
         IM3OpInfo oi = &i_table[i];
 
-        for (u32 o = 0; o < 4; ++o) {
-            if (oi->operations[o] == i_operation) {
+        за (u32 o = 0; o < 4; ++o) {
+            ако (oi->operations[o] == i_operation) {
                 io_info->info   = oi;
                 io_info->opcode = i_opcodeBase | i;
-                return true;
+                врати true;
             }
         }
     }
 
-    return false;
+    врати false;
 }
 
 static
@@ -246,8 +246,8 @@ OpInfo find_operation_info (IM3Operation i_operation)
 {
     OpInfo opInfo = { NULL, 0 };
 
-    if (!i_operation) {
-        return opInfo;
+    ако (!i_operation) {
+        врати opInfo;
     }
 
     // Scans the tables directly rather than through GetOpInfo (), which rejects
@@ -255,16 +255,16 @@ OpInfo find_operation_info (IM3Operation i_operation)
     // Reserved slots are zeroed, so they never match a real operation here.
     // c_operationsHigh is not scanned: every entry in it is compiler-driven with
     // an empty operation list, so nothing there could match.
-    if (not ScanOperationTable(&opInfo, c_operations, c_numOperations, 0, i_operation)) {
-        if (not ScanOperationTable(&opInfo, c_operationsFC, c_numOperationsFC, c_waOp_extended << 8, i_operation)) {
-#  if d_m3HasAtomics
+    ако (not ScanOperationTable(&opInfo, c_operations, c_numOperations, 0, i_operation)) {
+        ако (not ScanOperationTable(&opInfo, c_operationsFC, c_numOperationsFC, c_waOp_extended << 8, i_operation)) {
+#  ако d_m3HasAtomics
             // one entry serves a whole kind, so the opcode it comes back with is only the entry's index
             ScanOperationTable(&opInfo, c_operationsFE, c_numOperationsFE, c_waOp_atomic << 8, i_operation);
 #  endif
         }
     }
 
-    return opInfo;
+    врати opInfo;
 }
 
 
@@ -293,7 +293,7 @@ d_m3Decoder(Entry)
 
 d_m3Decoder(f64_Store)
 {
-    if (i_operation == i_opInfo->operations[0]) {
+    ако (i_operation == i_opInfo->operations[0]) {
         u32 operand = fetch(u32);
         u32 offset  = fetch(u32);
 
@@ -318,7 +318,7 @@ d_m3Decoder(BranchTable)
 
     i32 targets = fetch(i32);
 
-    for (i32 i = 0; i < targets; ++i) {
+    за (i32 i = 0; i < targets; ++i) {
         pc_t addr = fetch(pc_t);
         len       = SPrintAppend(o_string, i_stringBufferSize, len, "%" PRIi32 "=%p, ", i, addr);
     }
@@ -363,20 +363,20 @@ void dump_code_page (IM3CodePage i_codePage, pc_t i_startPC)
 
     m3log(code, "---------------------------------------------------------------------------------------");
 
-    while (pc < end) {
+    док (pc < end) {
         const pc_t operationPC = pc;
         (void)operationPC;  // avoid unused variable warning if DEBUG is not defined
         IM3Operation op = (IM3Operation)(*pc++);
 
         OpInfo i = find_operation_info(op);
 
-        if (i.info) {
+        ако (i.info) {
             char infoString[8 * 1024] = { 0 };
 
             DecodeOperation(infoString, sizeof(infoString), i.opcode, op, i.info, &pc);
 
             m3log(code, "%p | %20s  %s", operationPC, i.info->name, infoString);
-        } else {
+        } инако {
             m3log(code, "%p | %p", operationPC, op);
         }
     }
@@ -413,15 +413,15 @@ void dump_type_stack (IM3Compilation o)
     printf("%s %s    ", regAllocated[0] ? "(r0)" : "    ", regAllocated[1] ? "(fp0)" : "     ");
     printf("\n");
 
-    for (u32 p = 1; p <= 2; ++p) {
+    за (u32 p = 1; p <= 2; ++p) {
         d_m3Log(stack, "        ");
 
-        for (u16 i = 0; i < o->stackIndex; ++i) {
-            if (i > 0 and i == o->stackFirstDynamicIndex) {
+        за (u16 i = 0; i < o->stackIndex; ++i) {
+            ако (i > 0 and i == o->stackFirstDynamicIndex) {
                 printf("#");
             }
 
-            if (i == o->block.blockStackIndex) {
+            ако (i == o->block.blockStackIndex) {
                 printf(">");
             }
 
@@ -431,19 +431,19 @@ void dump_type_stack (IM3Compilation o)
 
             i32 slot = o->wasmStack[i];
 
-            if (IsRegisterSlotAlias(slot)) {
+            ако (IsRegisterSlotAlias(slot)) {
                 bool isFp = IsFpRegisterSlotAlias(slot);
                 location  = isFp ? "/f" : "/r";
 
                 regAllocated[isFp]--;
                 slot = -1;
-            } else {
-                if (slot < o->slotFirstDynamicIndex) {
-                    if (slot >= o->slotFirstConstIndex) {
+            } инако {
+                ако (slot < o->slotFirstDynamicIndex) {
+                    ако (slot >= o->slotFirstConstIndex) {
                         location = "c";
-                    } else if (slot >= o->function->numRetAndArgSlots) {
+                    } инако ако (slot >= o->function->numRetAndArgSlots) {
                         location = "L";
-                    } else {
+                    } инако {
                         location = "a";
                     }
                 }
@@ -451,18 +451,18 @@ void dump_type_stack (IM3Compilation o)
 
             char item[100];
 
-            if (slot >= 0) {
+            ако (slot >= 0) {
                 snprintf(item, sizeof(item), "%s%s%d", type, location, slot);
-            } else {
+            } инако {
                 snprintf(item, sizeof(item), "%s%s", type, location);
             }
 
-            if (p == 1) {
+            ако (p == 1) {
                 size_t s = strlen(item);
 
                 snprintf(item, sizeof(item), "%d", i);
 
-                while (strlen(item) < s) {
+                док (strlen(item) < s) {
                     strcat(item, " ");
                 }
             }
@@ -477,24 +477,24 @@ void dump_type_stack (IM3Compilation o)
 
     u16 maxSlot = GetMaxUsedSlotPlusOne(o);
 
-    if (maxSlot > o->slotFirstDynamicIndex) {
+    ако (maxSlot > o->slotFirstDynamicIndex) {
         d_m3Log(stack, "                      -");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        за (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("----");
         }
 
         printf("\n");
 
         d_m3Log(stack, "                 slot |");
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        за (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", i);
         }
 
         printf("\n");
         d_m3Log(stack, "                alloc |");
 
-        for (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
+        за (u16 i = o->slotFirstDynamicIndex; i < maxSlot; ++i) {
             printf("%3d|", o->m3Slots[i]);
         }
 
@@ -509,7 +509,7 @@ const char* GetOpcodeIndentionString (i32 blockDepth)
 {
     blockDepth += 1;
 
-    if (blockDepth < 0) {
+    ако (blockDepth < 0) {
         blockDepth = 0;
     }
 
@@ -517,24 +517,24 @@ const char* GetOpcodeIndentionString (i32 blockDepth)
 
     const char* indent = s_spaces + strlen(s_spaces);
     indent -= (blockDepth * 2);
-    if (indent < s_spaces) {
+    ако (indent < s_spaces) {
         indent = s_spaces;
     }
 
-    return indent;
+    врати indent;
 }
 
 
 const char* get_indention_string (IM3Compilation o)
 {
-    return GetOpcodeIndentionString(o->block.depth + 4);
+    врати GetOpcodeIndentionString(o->block.depth + 4);
 }
 
 
 void log_opcode (IM3Compilation o, m3opcode_t i_opcode)
 {
     i32 depth = o->block.depth;
-    if (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
+    ако (i_opcode == c_waOp_end or i_opcode == c_waOp_else) {
         depth--;
     }
     (void)depth;
@@ -548,9 +548,9 @@ void log_emit (IM3Compilation o, IM3Operation i_operation)
     OpInfo i = find_operation_info(i_operation);
 
     d_m3Log(emit, "");
-    if (i.info) {
+    ако (i.info) {
         printf("%p: %s\n", GetPagePC(o->page), i.info->name);
-    } else {
+    } инако {
         printf("not found: %p\n", i_operation);
     }
 }
@@ -558,7 +558,7 @@ void log_emit (IM3Compilation o, IM3Operation i_operation)
 #endif // DEBUG
 
 
-#if d_m3EnableOpProfiling
+#ако d_m3EnableOpProfiling
 
 typedef struct M3ProfilerSlot {
     cstr_t opName;
@@ -573,8 +573,8 @@ void ProfileHit (cstr_t i_operationName)
 
     M3ProfilerSlot* slot = &s_opProfilerCounts[ptr & d_m3ProfilerSlotMask];
 
-    if (slot->opName) {
-        if (slot->opName != i_operationName) {
+    ако (slot->opName) {
+        ако (slot->opName != i_operationName) {
             m3_Abort("profiler slot collision; increase d_m3ProfilerSlotMask");
         }
     }
@@ -592,24 +592,24 @@ void m3_PrintProfilerInfo ()
     do {
         maxSlot->hitCount = 0;
 
-        for (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
+        за (u32 i = 0; i <= d_m3ProfilerSlotMask; ++i) {
             M3ProfilerSlot* slot = &s_opProfilerCounts[i];
 
-            if (slot->opName) {
-                if (slot->hitCount > maxSlot->hitCount) {
+            ако (slot->opName) {
+                ако (slot->hitCount > maxSlot->hitCount) {
                     maxSlot = slot;
                 }
             }
         }
 
-        if (maxSlot->opName) {
+        ако (maxSlot->opName) {
             fprintf(stderr, "%13" PRIu64 "  %s\n", maxSlot->hitCount, maxSlot->opName);
             maxSlot->opName = NULL;
         }
-    } while (maxSlot->hitCount);
+    } док (maxSlot->hitCount);
 }
 
-#else
+#инако
 
 void m3_PrintProfilerInfo () {}
 
