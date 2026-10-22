@@ -5,24 +5,24 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_exception.h"
+#ضمن "m3_env.h"
+#ضمن "m3_exception.h"
 
 
-void Module_FreeFunctions (IM3Module i_module)
+فراغ Module_FreeFunctions (IM3Module i_module)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < i_module->ژمارە_Functions; ++i) {
         IM3Function func = &i_module->functions[i];
         Function_Release(func);
     }
 }
 
 
-void m3_FreeModule (IM3Module i_module)
+فراغ m3_FreeModule (IM3Module i_module)
 {
-    if (i_module) {
+    إذا (i_module) {
         m3log(module, "freeing module: %s (funcs: %d; segments: %d)",
-              i_module->name, i_module->numFunctions, i_module->numDataSegments);
+              i_module->name, i_module->ژمارە_Functions, i_module->ژمارە_Data_Segments);
 
         Module_FreeFunctions(i_module);
 
@@ -31,16 +31,16 @@ void m3_FreeModule (IM3Module i_module)
         m3_Free(i_module->funcTypes);
         m3_Free(i_module->dataSegments);
 
-        for (u32 i = 0; i < i_module->numTables; ++i) {
+        لكل (u32 i = 0; i < i_module->ژمارە_Tables; ++i) {
             IM3Table table = i_module->tables[i];
 
             // a slot may point at a table another module owns; that module
             // frees it
-            if (not table or table->owner != i_module) {
-                continue;
+            إذا (not table or table->owner != i_module) {
+                استمر;
             }
 
-            if (table->elements and i_module->runtime) {
+            إذا (table->elements and i_module->runtime) {
                 i_module->runtime->tableElementsUsed -= table->size;
             }
             m3_Free(table->elements);
@@ -49,31 +49,31 @@ void m3_FreeModule (IM3Module i_module)
         }
         m3_Free(i_module->tables);
 
-        for (u32 i = 0; i < i_module->numElementSegments; ++i) {
+        لكل (u32 i = 0; i < i_module->ژمارە_Element_Segments; ++i) {
             m3_Free(i_module->elementSegments[i].resolved);
         }
         m3_Free(i_module->elementSegments);
         m3_Free(i_module->declaredFuncs);
 
-        for (u32 i = 0; i < i_module->numGlobals; ++i) {
+        لكل (u32 i = 0; i < i_module->ژمارە_Globals; ++i) {
             FreeImportInfo(&(i_module->globals[i].import));
         }
         m3_Free(i_module->globals);
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-        for (u32 i = 0; i < i_module->numTags; ++i) {
+#إذا d_m3HasExceptionHandling || d_m3_Has_کەڵەکە_Switching
+        لكل (u32 i = 0; i < i_module->ژمارە_Tags; ++i) {
             FreeImportInfo(&(i_module->tags[i].import));
         }
         m3_Free(i_module->tags);
 #endif
 
-        for (u32 i = 0; i < i_module->numMemories; ++i) {
+        لكل (u32 i = 0; i < i_module->ژمارە_Memories; ++i) {
             IM3Memory memory = i_module->memories[i];
 
             // a slot may point at a memory another module owns; that module
             // frees it
-            if (not memory or memory->owner != i_module) {
-                continue;
+            إذا (not memory or memory->owner != i_module) {
+                استمر;
             }
 
             FreeMemoryBlock(memory);
@@ -83,14 +83,14 @@ void m3_FreeModule (IM3Module i_module)
         m3_Free(i_module->memories);
         FreeMemoryBlock(&i_module->emptyMemory);
 
-        for (u32 i = 0; i < i_module->numExports; ++i) {
+        لكل (u32 i = 0; i < i_module->ژمارە_Exports; ++i) {
             m3_Free(i_module->exports[i].name);
         }
         m3_Free(i_module->exports);
 
-#if d_m3HasSnapshots
+#إذا d_m3HasSnapshots
         M3EmbeddedSnapshot* snap = i_module->snapshots;
-        while (snap) {
+        طالما (snap) {
             M3EmbeddedSnapshot* next = snap->next;
             m3_Free(snap->name);
             m3_Free(snap);
@@ -107,42 +107,42 @@ void m3_FreeModule (IM3Module i_module)
 // mutability: the import's mutability governs what the wasm code may do with it,
 // not whether the host may provide it in the first place.
 M3Result m3_LinkGlobal (IM3Module            io_module,
-                        const char* const    i_moduleName,
-                        const char* const    i_globalName,
-                        const IM3TaggedValue i_value)
+                        ثابت حرف* ثابت    i_moduleName,
+                        ثابت حرف* ثابت    i_globalName,
+                        ثابت IM3_Tagged_بەها i_بەها)
 {
     M3Result result = m3Err_globalLookupFailed;
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    لكل (u32 i = 0; i < io_module->ژمارە_Globals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
-            continue;
+        إذا (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+            استمر;
         }
 
-        if (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
+        إذا (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
             strcmp(g->import.fieldUtf8, i_globalName) != 0) {
-            continue;
+            استمر;
         }
 
-        if (g->type != i_value->type) {
-            return m3Err_globalTypeMismatch;
+        إذا (g->type != i_بەها->type) {
+            أرجع m3Err_globalTypeMismatch;
         }
 
-        switch (i_value->type) {
-        case c_m3Type_i32: g->i32Value = i_value->value.i32; break;
-        case c_m3Type_i64: g->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
-        case c_m3Type_f32: g->f32Value = i_value->value.f32; break;
-        case c_m3Type_f64: g->f64Value = i_value->value.f64; break;
+        بدل (i_بەها->type) {
+        حالة c_m3Type_i32: g->i32_بەها = i_بەها->بەها.i32; اكسر;
+        حالة c_m3Type_i64: g->i64_بەها = i_بەها->بەها.i64; اكسر;
+#إذا d_m3HasFloat
+        حالة c_m3Type_f32: g->f32_بەها = i_بەها->بەها.f32; اكسر;
+        حالة c_m3Type_f64: g->f64_بەها = i_بەها->بەها.f64; اكسر;
 #endif
-        default: return m3Err_invalidTypeId;
+        افتراضي: أرجع m3Err_invalidTypeId;
         }
 
         result = m3Err_none;
     }
 
-    return result;
+    أرجع result;
 }
 
 
@@ -153,39 +153,39 @@ M3Result Module_DeclareFunction (IM3Module io_module, u32 i_index)
 {
     M3Result result = m3Err_none;
 
-    if (i_index >= io_module->numFunctions) {
-        return "function index out of range";
+    إذا (i_index >= io_module->ژمارە_Functions) {
+        أرجع "function index out of range";
     }
 
-    if (not io_module->declaredFuncs) {
-        io_module->declaredFuncs = m3_AllocArray(u8, (io_module->numFunctions + 7) / 8);
+    إذا (not io_module->declaredFuncs) {
+        io_module->declaredFuncs = m3_AllocArray(u8, (io_module->ژمارە_Functions + 7) / 8);
         _throwifnull(io_module->declaredFuncs);
     }
 
     io_module->declaredFuncs[i_index / 8] |= (u8)(1u << (i_index % 8));
 
-    _catch: return result;
+    _catch: أرجع result;
 }
 
 
 bool Module_IsFunctionDeclared (IM3Module i_module, u32 i_index)
 {
-    if (not i_module->declaredFuncs or i_index >= i_module->numFunctions) {
-        return false;
+    إذا (not i_module->declaredFuncs or i_index >= i_module->ژمارە_Functions) {
+        أرجع false;
     }
 
-    return (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
+    أرجع (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
 }
 
 
 // Appends an entry to the module's memory index space. The M3Memory is
 // allocated separately from the index so that another module importing it can
 // hold the same pointer.
-M3Result Module_AddMemory (IM3Module io_module, IM3Memory* o_memory, const M3MemoryInfo* i_info, bool i_isImported)
+M3Result Module_AddMemory (IM3Module io_module, IM3Memory* o_memory, ثابت M3MemoryInfo* i_info, bool i_isImported)
 {
-    IM3Memory memory = NULL;
+    IM3Memory memory = عدم;
 _try {
-    u32 index = io_module->numMemories;
+    u32 index = io_module->ژمارە_Memories;
 
     memory = m3_AllocStruct(M3Memory);
     _throwifnull(memory);
@@ -203,28 +203,28 @@ _try {
     memory->isShared   = i_info->isShared;
 
     io_module->memories[index] = memory;
-    io_module->numMemories     = index + 1;
+    io_module->ژمارە_Memories     = index + 1;
 
-    if (o_memory) {
+    إذا (o_memory) {
         *o_memory = memory;
     }
 
-    return result;
+    أرجع result;
 
 } _catch:
     m3_Free(memory);
-    return result;
+    أرجع result;
 }
 
 
 // Appends an entry to the module's table index space. Allocated separately from
 // the index, like a memory, so another module importing it can hold the same
 // pointer.
-M3Result Module_AddTable (IM3Module io_module, IM3Table* o_table, const M3TableInfo* i_info, bool i_isImported)
+M3Result Module_AddTable (IM3Module io_module, IM3Table* o_table, ثابت M3TableInfo* i_info, bool i_isImported)
 {
-    IM3Table table = NULL;
+    IM3Table table = عدم;
 _try {
-    u32 index = io_module->numTables;
+    u32 index = io_module->ژمارە_Tables;
 
     table = m3_AllocStruct(M3Table);
     _throwifnull(table);
@@ -242,48 +242,48 @@ _try {
     table->isTable64 = i_info->isTable64;
 
     io_module->tables[index] = table;
-    io_module->numTables     = index + 1;
+    io_module->ژمارە_Tables     = index + 1;
 
-    if (o_table) {
+    إذا (o_table) {
         *o_table = table;
     }
 
-    return result;
+    أرجع result;
 
 } _catch:
     m3_Free(table);
-    return result;
+    أرجع result;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#إذا d_m3HasExceptionHandling || d_m3_Has_کەڵەکە_Switching
 
 M3Result Module_AddTag (IM3Module io_module, IM3Tag* o_tag, IM3FuncType i_type, bool i_isImported)
 {
 _try {
-    u32 index = io_module->numTags++;
+    u32 index = io_module->ژمارە_Tags++;
 
-    io_module->tags = m3_ReallocArray(M3Tag, io_module->tags, io_module->numTags, index);
+    io_module->tags = m3_ReallocArray(M3Tag, io_module->tags, io_module->ژمارە_Tags, index);
     _throwifnull(io_module->tags);
     M3Tag* tag = &io_module->tags[index];
 
     tag->type     = i_type;
     tag->imported = i_isImported;
-    tag->resolved = NULL;
-    memset(&tag->import, 0, sizeof(tag->import));
+    tag->resolved = عدم;
+    memset(&tag->import, 0, حجم(tag->import));
 
-    if (o_tag) {
+    إذا (o_tag) {
         *o_tag = tag;
     }
 
 } _catch:
-    return result;
+    أرجع result;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasStackSwitching
+#إذا d_m3_Has_کەڵەکە_Switching
 
 // The continuation type a spelled-out reference names. Reference types carry
 // the canonical index, and the module's own type space is where a name for it
@@ -292,25 +292,25 @@ _try {
 // switches to.
 IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType)
 {
-    if (not IsSpelledRefType(i_refType)) {
-        return NULL;
+    إذا (not IsSpelledRefType(i_refType)) {
+        أرجع عدم;
     }
 
     u32 heap = HeapTypeOf(i_refType);
 
-    if (heap == d_m3Type_heapAbstract) {
-        return NULL;
+    إذا (heap == d_m3Type_heapAbstract) {
+        أرجع عدم;
     }
 
-    for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
+    لكل (u32 i = 0; i < i_module->ژمارە_Func_Types; ++i) {
         IM3FuncType ftype = i_module->funcTypes[i];
 
-        if (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
-            return ftype;
+        إذا (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
+            أرجع ftype;
         }
     }
 
-    return NULL;
+    أرجع عدم;
 }
 
 #endif // d_m3HasStackSwitching
@@ -319,9 +319,9 @@ IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType)
 M3Result Module_AddGlobal (IM3Module io_module, IM3Global* o_global, m3type_t i_type, bool i_mutable, bool i_isImported)
 {
 _try {
-    u32 index = io_module->numGlobals++;
+    u32 index = io_module->ژمارە_Globals++;
 
-    io_module->globals = m3_ReallocArray(M3Global, io_module->globals, io_module->numGlobals, index);
+    io_module->globals = m3_ReallocArray(M3Global, io_module->globals, io_module->ژمارە_Globals, index);
     _throwifnull(io_module->globals);
     M3Global* global = &io_module->globals[index];
 
@@ -329,34 +329,34 @@ _try {
     global->imported  = i_isImported;
     global->isMutable = i_mutable;
 
-    if (o_global) {
+    إذا (o_global) {
         *o_global = global;
     }
 
 } _catch:
-    return result;
+    أرجع result;
 }
 
 M3Result Module_PreallocFunctions (IM3Module io_module, u32 i_totalFunctions)
 {
 _try {
-    if (i_totalFunctions > io_module->allFunctions) {
+    إذا (i_totalFunctions > io_module->allFunctions) {
         io_module->functions    = m3_ReallocArray(M3Function, io_module->functions, i_totalFunctions, io_module->allFunctions);
         io_module->allFunctions = i_totalFunctions;
         _throwifnull(io_module->functions);
     }
 } _catch:
-    return result;
+    أرجع result;
 }
 
 M3Result Module_AddFunction (IM3Module io_module, u32 i_typeIndex, IM3ImportInfo i_importInfo)
 {
 _try {
 
-    u32 index = io_module->numFunctions++;
-_   (Module_PreallocFunctions(io_module, io_module->numFunctions));
+    u32 index = io_module->ژمارە_Functions++;
+_   (Module_PreallocFunctions(io_module, io_module->ژمارە_Functions));
 
-    _throwif("type sig index out of bounds", i_typeIndex >= io_module->numFuncTypes);
+    _throwif("type sig index out of bounds", i_typeIndex >= io_module->ژمارە_Func_Types);
 
     IM3FuncType ft = io_module->funcTypes[i_typeIndex];
 
@@ -368,29 +368,29 @@ _   (Module_PreallocFunctions(io_module, io_module->numFunctions));
     func->index = index;
 #endif
 
-    if (i_importInfo and func->numNames == 0) {
+    إذا (i_importInfo and func->ژمارە_Names == 0) {
         func->import   = *i_importInfo;
         func->names[0] = i_importInfo->fieldUtf8;
-        func->numNames = 1;
+        func->ژمارە_Names = 1;
     }
 
     m3log(module, "   added function: %3d; sig: %d", index, i_typeIndex);
 
 } _catch:
-    return result;
+    أرجع result;
 }
 
 #ifdef DEBUG
-void Module_GenerateNames (IM3Module i_module)
+فراغ Module_GenerateNames (IM3Module i_module)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    لكل (u32 i = 0; i < i_module->ژمارە_Functions; ++i) {
         IM3Function func = &i_module->functions[i];
 
-        if (func->numNames == 0) {
-            char* buff = m3_AllocArray(char, 16);
+        إذا (func->ژمارە_Names == 0) {
+            حرف* buff = m3_AllocArray(حرف, 16);
             snprintf(buff, 16, "$func%d", i);
             func->names[0] = buff;
-            func->numNames = 1;
+            func->ژمارە_Names = 1;
         }
     }
 }
@@ -398,34 +398,34 @@ void Module_GenerateNames (IM3Module i_module)
 
 IM3Function Module_GetFunction (IM3Module i_module, u32 i_functionIndex)
 {
-    IM3Function func = NULL;
+    IM3Function func = عدم;
 
-    if (i_functionIndex < i_module->numFunctions) {
+    إذا (i_functionIndex < i_module->ژمارە_Functions) {
         func = &i_module->functions[i_functionIndex];
         //func->module = i_module;
     }
 
-    return func;
+    أرجع func;
 }
 
 
-const char* m3_GetModuleName (IM3Module i_module)
+ثابت حرف* m3_GetModuleName (IM3Module i_module)
 {
-    if (!i_module || !i_module->name) {
-        return ".unnamed";
+    إذا (!i_module || !i_module->name) {
+        أرجع ".unnamed";
     }
 
-    return i_module->name;
+    أرجع i_module->name;
 }
 
-void m3_SetModuleName (IM3Module i_module, const char* name)
+فراغ m3_SetModuleName (IM3Module i_module, ثابت حرف* name)
 {
-    if (i_module) {
+    إذا (i_module) {
         i_module->name = name;
     }
 }
 
 IM3Runtime m3_GetModuleRuntime (IM3Module i_module)
 {
-    return i_module ? i_module->runtime : NULL;
+    أرجع i_module ? i_module->runtime : عدم;
 }
