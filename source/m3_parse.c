@@ -5,17 +5,17 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_compile.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#ضمن "m3_env.h"
+#ضمن "m3_compile.h"
+#ضمن "m3_exception.h"
+#ضمن "m3_info.h"
 
 
 // elem type + limits, shared by the table section and by table imports.
 // The declared minimum is the table's initial size; table.grow can raise it up
 // to the maximum, so an element segment reaching past the current size is out
 // of bounds.
-#if d_m3HasTypedRefs
+#ܐܢ d_m3HasTypedRefs
 
 // Reads a heap type: 'func', 'extern', or the index of a function type the
 // module has already defined. Yields the heap-type bits of an m3type_t, which
@@ -28,17 +28,17 @@ M3Result ParseHeapType (IM3Module i_module, m3type_t* o_heapBits, bytes_t* io_by
     i64 heap;
 _   (ReadLebSigned(&heap, 33, io_bytes, i_end));
 
-    if (heap == -d_waType_funcref) {
+    ܐܢ (heap == -d_waType_funcref) {
         *o_heapBits = d_m3Type_heapAbstract;
-    } else if (heap == -d_waType_externref) {
+    } ܐܚܪܢܐ ܐܢ (heap == -d_waType_externref) {
         *o_heapBits = d_m3Type_refExtern | d_m3Type_heapAbstract;
-#  if d_m3HasStackSwitching
-    } else if (heap == -d_waType_heap_cont) {
+#  ܐܢ d_m3HasStackSwitching
+    } ܐܚܪܢܐ ܐܢ (heap == -d_waType_heap_cont) {
         *o_heapBits = d_m3Type_refCont | d_m3Type_heapAbstract;
-    } else if (heap == -d_waType_heap_nocont) {
+    } ܐܚܪܢܐ ܐܢ (heap == -d_waType_heap_nocont) {
         *o_heapBits = d_m3Type_refCont | d_m3Type_heapNone;
 #  endif
-    } else if (heap >= 0) {
+    } ܐܚܪܢܐ ܐܢ (heap >= 0) {
         _throwif(m3Err_wasmMalformed, not i_module or (u64) heap >= i_module->numFuncTypes);
 
         IM3FuncType ftype = i_module->funcTypes[heap];
@@ -48,11 +48,11 @@ _   (ReadLebSigned(&heap, 33, io_bytes, i_end));
         _throwif(m3Err_wasmMalformed, not ftype);
 
         *o_heapBits = (ftype->isContinuation ? d_m3Type_refCont : 0) | ftype->canonicalIndex;
-    } else {
+    } ܐܚܪܢܐ {
         _throw(m3Err_invalidTypeId);
     }
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 #endif // d_m3HasTypedRefs
@@ -66,8 +66,8 @@ M3Result ParseValueType (IM3Module i_module, m3type_t* o_type, bytes_t* io_bytes
 
     _throwif(m3Err_wasmUnderrun, *io_bytes >= i_end);
 
-#if d_m3HasTypedRefs
-    if (**io_bytes == d_waEncode_ref or **io_bytes == d_waEncode_refNull) {
+#ܐܢ d_m3HasTypedRefs
+    ܐܢ (**io_bytes == d_waEncode_ref or **io_bytes == d_waEncode_refNull) {
         u8 lead = *(*io_bytes)++;
 
         m3type_t heapBits = d_m3Type_heapAbstract;
@@ -75,7 +75,7 @@ _       (ParseHeapType(i_module, &heapBits, io_bytes, i_end));
 
         *o_type = d_m3Type_ref | heapBits | ((lead == d_waEncode_ref) ? d_m3Type_refNonNull : 0);
 
-        return result;
+        ܦܢܐ result;
     }
 #endif
 
@@ -90,13 +90,13 @@ _   (NormalizeType(&plainType, wasmType));
 
     *o_type = plainType;
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
 // Reads an elem type and limits without registering anything: an import
 // descriptor holds on to the fields and only adds the table once it has a name.
-static
+ساكن
 M3Result ReadType_TableType (IM3Module i_module, M3TableInfo* o_info, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
@@ -109,29 +109,29 @@ M3Result ReadType_TableType (IM3Module i_module, M3TableInfo* o_info, bytes_t* i
     u32 addrBits = 32;
 
 _   (ParseValueType(i_module, &elemType, io_bytes, i_end));
-#if d_m3HasRefTypes
+#ܐܢ d_m3HasRefTypes
     _throwif(m3Err_wasmMalformed, not IsRefType(BaseTypeOf(elemType)));
-#else
+#ܐܚܪܢܐ
     _throwif(m3Err_wasmMalformed, elemType != c_m3Type_funcref);
 #endif
 
 _   (ReadLEB_u7(&flag, io_bytes, i_end));
 
     // bit 0: has max, bit 2: table64 - the same flag memory64 gives a memory
-#if d_m3HasMemory64
+#ܐܢ d_m3HasMemory64
     _throwif(m3Err_wasmMalformed, flag & ~0x05u);
-#else
+#ܐܚܪܢܐ
     _throwif(m3Err_wasmMalformed, flag & ~0x01u);
 #endif
 
-    if (flag & 0x04u) {
+    ܐܢ (flag & 0x04u) {
         addrBits = 64;
     }
 
 _   (ReadLebUnsigned(&initSize, addrBits, io_bytes, i_end));
     _throwif("table overflow", initSize > d_m3MaxSaneTableSize);
 
-    if (flag & 0x01u) {
+    ܐܢ (flag & 0x01u) {
 _       (ReadLebUnsigned(&maxSize, addrBits, io_bytes, i_end));
         _throwif(m3Err_wasmMalformed, maxSize < initSize);
         _throwif("table overflow", maxSize > d_m3MaxSaneTableSize);
@@ -145,11 +145,11 @@ _       (ReadLebUnsigned(&maxSize, addrBits, io_bytes, i_end));
     o_info->hasMax    = (flag & 0x01u) != 0;
     o_info->isTable64 = (flag & 0x04u) != 0;
 
-    return result;
+    ܦܢܐ result;
 }
 
 
-static
+ساكن
 M3Result ParseType_TableType (IM3Module io_module, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
@@ -157,9 +157,9 @@ M3Result ParseType_TableType (IM3Module io_module, bytes_t* io_bytes, cbytes_t i
     M3TableInfo info;
 
 _   (ReadType_TableType(io_module, &info, io_bytes, i_end));
-_   (Module_AddTable(io_module, NULL, &info, false /* isImport */));
+_   (Module_AddTable(io_module, عدم, &info, false /* isImport */));
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -174,15 +174,15 @@ _   (ReadLEB_u32(&numTables, &i_bytes, i_end));                          m3log (
 
     _throwif("too many tables", (u64)numTables + io_module->numTables > d_m3MaxSaneTableCount);
 
-    for (u32 i = 0; i < numTables; ++i) {
-#if d_m3HasTypedRefs
+    لكل (u32 i = 0; i < numTables; ++i) {
+#ܐܢ d_m3HasTypedRefs
         // function-references: 0x40 0x00 introduces a table with an explicit
         // initializer. A reference type never starts with 0x40, so the two
         // forms are told apart by the first byte; the second is reserved.
         bool hasInitExpr = (i_bytes < i_end) and (*i_bytes == 0x40);
         u32  tableIndex  = io_module->numTables;
 
-        if (hasInitExpr) {
+        ܐܢ (hasInitExpr) {
             u8 reserved;
             ++i_bytes;
 _           (Read_u8(&reserved, &i_bytes, i_end));
@@ -191,7 +191,7 @@ _           (Read_u8(&reserved, &i_bytes, i_end));
 
 _       (ParseType_TableType(io_module, &i_bytes, i_end));
 
-        if (hasInitExpr) {
+        ܐܢ (hasInitExpr) {
             IM3Table table = io_module->tables[tableIndex];
 
             m3type_t initType;
@@ -202,19 +202,19 @@ _           (Parse_InitExprTyped(io_module, &i_bytes, i_end, &initType));
             _throwif(m3Err_wasmMissingInitExpr, table->initExprSize <= 1);
 
             _throwif(m3Err_typeMismatch, not IsSubTypeOf(initType, table->type));
-        } else {
+        } ܐܚܪܢܐ {
             // no initializer means null, which only a nullable type can hold
             _throwif("table of non-nullable type requires an initializer",
                      not IsNullableRef(io_module->tables[tableIndex]->type));
         }
-#else
+#ܐܚܪܢܐ
 _       (ParseType_TableType(io_module, &i_bytes, i_end));
 #endif
     }
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -238,10 +238,10 @@ _   (ReadLEB_u7(&flag, io_bytes, i_end));
     // bit 0: has max, bit 1: shared, bit 2: memory64, bit 3: custom page size
     {
         u32 known = 0x09u;
-#if d_m3HasAtomics
+#ܐܢ d_m3HasAtomics
         known |= 0x02u;
 #endif
-#if d_m3HasMemory64
+#ܐܢ d_m3HasMemory64
         known |= 0x04u;
 #endif
         _throwif(m3Err_wasmMalformed, flag & ~known);
@@ -250,7 +250,7 @@ _   (ReadLEB_u7(&flag, io_bytes, i_end));
     o_memory->isShared = (flag & (1u << 1)) != 0;
 
     o_memory->isMemory64 = (flag & (1u << 2)) != 0;
-    if (o_memory->isMemory64) {
+    ܐܢ (o_memory->isMemory64) {
         addrBits = 64;
     }
 
@@ -258,7 +258,7 @@ _   (ReadLebUnsigned(&o_memory->initPages, addrBits, io_bytes, i_end));
 
     o_memory->maxPages = 0;
     o_memory->hasMax   = (flag & (1u << 0)) != 0;
-    if (o_memory->hasMax) {
+    ܐܢ (o_memory->hasMax) {
 _       (ReadLebUnsigned(&o_memory->maxPages, addrBits, io_bytes, i_end));
 
         // Spec: memory limits validation - max must not be less than init
@@ -268,7 +268,7 @@ _       (ReadLebUnsigned(&o_memory->maxPages, addrBits, io_bytes, i_end));
     _throwif("shared memory must have maximum", o_memory->isShared and not o_memory->hasMax);
 
     o_memory->pageSize = 0;
-    if (flag & (1u << 3)) {
+    ܐܢ (flag & (1u << 3)) {
 _       (ReadLEB_u32(&logPageSize, io_bytes, i_end));
 
         _throwif("invalid custom page size", logPageSize > 16);
@@ -285,32 +285,32 @@ _       (ReadLEB_u32(&logPageSize, io_bytes, i_end));
                                 : UINT64_MAX;
 
         _throwif(m3Err_wasmMalformed, o_memory->initPages > maxPagesAllowed);
-        if (o_memory->hasMax) {
+        ܐܢ (o_memory->hasMax) {
             _throwif(m3Err_wasmMalformed, o_memory->maxPages > maxPagesAllowed);
         }
     }
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
 // One func type: [numArgs] argtypes [numRets] rettypes, with the results
 // stored ahead of the arguments the way M3FuncType wants them.
-static
+ساكن
 M3Result ParseFuncType (IM3Module io_module, IM3FuncType* o_type, bytes_t* io_bytes, cbytes_t i_end)
 {
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = عدم;
 _try {
     u32 numArgs;
 _   (ReadLEB_u32(&numArgs, io_bytes, i_end));
 
     _throwif(m3Err_tooManyArgsRets, numArgs > d_m3MaxSaneFunctionArgRetCount);
-#if M3_HAS_VLA
+#ܐܢ M3_HAS_VLA
     m3type_t argTypes[numArgs + 1]; // make ubsan happy
-#else
+#ܐܚܪܢܐ
     m3type_t argTypes[d_m3MaxSaneFunctionArgRetCount];
 #endif
-    for (u32 a = 0; a < numArgs; ++a) {
+    لكل (u32 a = 0; a < numArgs; ++a) {
 _       (ParseValueType(io_module, &argTypes[a], io_bytes, i_end));
     }
 
@@ -322,28 +322,28 @@ _   (AllocFuncType(&ftype, numRets + numArgs));
     ftype->numArgs = numArgs;
     ftype->numRets = numRets;
 
-    for (u32 r = 0; r < numRets; ++r) {
+    لكل (u32 r = 0; r < numRets; ++r) {
 _       (ParseValueType(io_module, &ftype->types[r], io_bytes, i_end));
     }
-    memcpy(ftype->types + numRets, argTypes, numArgs * sizeof(m3type_t));
+    memcpy(ftype->types + numRets, argTypes, numArgs * حجم(m3type_t));
 
     *o_type = ftype;
-    ftype   = NULL;
+    ftype   = عدم;
 
 } _catch:
     m3_Free(ftype);
-    return result;
+    ܦܢܐ result;
 }
 
 
-#if d_m3HasStackSwitching
+#ܐܢ d_m3HasStackSwitching
 
 // cont $ft. A continuation carries the shape of the function it runs, so that
 // resume and the rest can read the parameters and results straight off it.
-static
+ساكن
 M3Result ParseContType (IM3Module io_module, IM3FuncType* o_type, bytes_t* io_bytes, cbytes_t i_end)
 {
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = عدم;
 _try {
     i64 ftIndex;
 _   (ReadLebSigned(&ftIndex, 33, io_bytes, i_end));
@@ -359,73 +359,73 @@ _   (AllocFuncType(&ftype, total));
     ftype->isContinuation = true;
     ftype->contFuncType   = underlying;
 
-    if (total) {
-        memcpy(ftype->types, underlying->types, total * sizeof(m3type_t));
+    ܐܢ (total) {
+        memcpy(ftype->types, underlying->types, total * حجم(m3type_t));
     }
 
     *o_type = ftype;
-    ftype   = NULL;
+    ftype   = عدم;
 
 } _catch:
     m3_Free(ftype);
-    return result;
+    ܦܢܐ result;
 }
 
 #endif // d_m3HasStackSwitching
 
 
-static
+ساكن
 M3Result ParseTypeDefinition (IM3Module io_module, i8 i_form, IM3FuncType* o_type,
                               bytes_t* io_bytes, cbytes_t i_end)
 {
-#if d_m3HasStackSwitching
-    if (i_form == -35) {
-        return ParseContType(io_module, o_type, io_bytes, i_end);
+#ܐܢ d_m3HasStackSwitching
+    ܐܢ (i_form == -35) {
+        ܦܢܐ ParseContType(io_module, o_type, io_bytes, i_end);
     }
 #endif
-    if (i_form != -32) { // for Wasm MVP
-        return m3Err_wasmMalformed;
+    ܐܢ (i_form != -32) { // for Wasm MVP
+        ܦܢܐ m3Err_wasmMalformed;
     }
 
-    return ParseFuncType(io_module, o_type, io_bytes, i_end);
+    ܦܢܐ ParseFuncType(io_module, o_type, io_bytes, i_end);
 }
 
 
-#if d_m3HasStackSwitching
+#ܐܢ d_m3HasStackSwitching
 
 // Walks one type definition without resolving anything, which is how the first
 // pass over a recursive group learns what each member is before any of them can
 // be built: the members are free to name each other, so nothing can be resolved
 // until every index in the group is spoken for.
-static
+ساكن
 M3Result SkipTypeDefinition (i8 i_form, bytes_t* io_bytes, cbytes_t i_end)
 {
 _try {
-    if (i_form == -35) {
+    ܐܢ (i_form == -35) {
         i64 ftIndex;
 _       (ReadLebSigned(&ftIndex, 33, io_bytes, i_end));
-        return result;
+        ܦܢܐ result;
     }
 
     _throwif(m3Err_wasmMalformed, i_form != -32);
 
-    for (u32 half = 0; half < 2; ++half) {
+    لكل (u32 half = 0; half < 2; ++half) {
         u32 count;
 _       (ReadLEB_u32(&count, io_bytes, i_end));
         _throwif(m3Err_tooManyArgsRets, count > d_m3MaxSaneFunctionArgRetCount);
 
-        for (u32 v = 0; v < count; ++v) {
+        لكل (u32 v = 0; v < count; ++v) {
             u8 encoding;
 _           (Read_u8(&encoding, io_bytes, i_end));
 
-            if (encoding == d_waEncode_ref or encoding == d_waEncode_refNull) {
+            ܐܢ (encoding == d_waEncode_ref or encoding == d_waEncode_refNull) {
                 i64 heap;
 _               (ReadLebSigned(&heap, 33, io_bytes, i_end));
             }
         }
     }
 
-} _catch: return result;
+} _catch: ܦܢܐ result;
 }
 
 
@@ -434,11 +434,11 @@ _               (ReadLebSigned(&heap, 33, io_bytes, i_end));
 // is scanned once for shapes, its indices are reserved, and only then are the
 // definitions built - func types first, because a cont type is spelled in terms
 // of one.
-static
+ساكن
 M3Result ParseRecGroup (IM3Module io_module, u32 i_count, u32 i_firstIndex,
                         bytes_t* io_bytes, cbytes_t i_end)
 {
-    IM3FuncType* placeholders = NULL;
+    IM3FuncType* placeholders = عدم;
 _try {
     bytes_t groupStart = *io_bytes;
 
@@ -446,7 +446,7 @@ _try {
     _throwifnull(placeholders);
 
     // pass one: what each member is, without looking at what it refers to
-    for (u32 j = 0; j < i_count; ++j) {
+    لكل (u32 j = 0; j < i_count; ++j) {
         i8 form;
 _       (ReadLEB_i7(&form, io_bytes, i_end));
 _       (SkipTypeDefinition(form, io_bytes, i_end));
@@ -458,7 +458,7 @@ _       (AllocFuncType(&placeholders[j], 0));
     u16 firstCanonical;
 _   (Environment_ReserveFuncTypes(io_module->environment, i_count, &firstCanonical));
 
-    for (u32 j = 0; j < i_count; ++j) {
+    لكل (u32 j = 0; j < i_count; ++j) {
         placeholders[j]->canonicalIndex        = (u16)(firstCanonical + j);
         io_module->funcTypes[i_firstIndex + j] = placeholders[j];
     }
@@ -466,41 +466,41 @@ _   (Environment_ReserveFuncTypes(io_module->environment, i_count, &firstCanonic
     // pass two: the definitions themselves. A cont type copies the shape of the
     // func type it names, so every func type in the group has to be standing
     // before any cont type in it is read.
-    for (u32 pass = 0; pass < 2; ++pass) {
+    لكل (u32 pass = 0; pass < 2; ++pass) {
         bytes_t bytes = groupStart;
 
-        for (u32 j = 0; j < i_count; ++j) {
+        لكل (u32 j = 0; j < i_count; ++j) {
             i8 form;
 _           (ReadLEB_i7(&form, &bytes, i_end));
 
-            if ((form == -35) != (pass == 1)) {
+            ܐܢ ((form == -35) != (pass == 1)) {
 _               (SkipTypeDefinition(form, &bytes, i_end));
-                continue;
+                استمر;
             }
 
-            IM3FuncType ftype = NULL;
+            IM3FuncType ftype = عدم;
 _           (ParseTypeDefinition(io_module, form, &ftype, &bytes, i_end));
 
             Environment_AdoptFuncType(io_module->environment, ftype, placeholders[j]->canonicalIndex);
 
             m3_Free(placeholders[j]);
-            placeholders[j]                        = NULL;
+            placeholders[j]                        = عدم;
             io_module->funcTypes[i_firstIndex + j] = ftype;
         }
 
-        if (pass == 1) {
+        ܐܢ (pass == 1) {
             *io_bytes = bytes;
         }
     }
 
 } _catch:
-    if (placeholders) {
-        for (u32 j = 0; j < i_count; ++j) {
+    ܐܢ (placeholders) {
+        لكل (u32 j = 0; j < i_count; ++j) {
             m3_Free(placeholders[j]);
         }
         m3_Free(placeholders);
     }
-    return result;
+    ܦܢܐ result;
 }
 
 #endif // d_m3HasStackSwitching
@@ -508,7 +508,7 @@ _           (ParseTypeDefinition(io_module, form, &ftype, &bytes, i_end));
 
 M3Result ParseSection_Type (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
 {
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = عدم;
 
 _try {
     u32 numTypes;
@@ -516,7 +516,7 @@ _   (ReadLEB_u32(&numTypes, &i_bytes, i_end));                                  
 
     _throwif("too many types", numTypes > d_m3MaxSaneTypesCount);
 
-    if (numTypes) {
+    ܐܢ (numTypes) {
         // table of IM3FuncType (that point to the actual M3FuncType struct in the Environment)
         io_module->funcTypes = m3_AllocArray(IM3FuncType, numTypes);
         _throwifnull(io_module->funcTypes);
@@ -524,17 +524,17 @@ _   (ReadLEB_u32(&numTypes, &i_bytes, i_end));                                  
 
         // a recursive group is one entry of the section but any number of type
         // indices, so the two counts part ways as soon as one appears
-#if d_m3HasStackSwitching
+#ܐܢ d_m3HasStackSwitching
         u32 capacity = numTypes;
 #endif
         u32 index = 0;
 
-        for (u32 i = 0; i < numTypes; ++i) {
+        لكل (u32 i = 0; i < numTypes; ++i) {
             i8 form;
 _           (ReadLEB_i7(&form, &i_bytes, i_end));
 
-#if d_m3HasStackSwitching
-            if (form == -50) { // rec
+#ܐܢ d_m3HasStackSwitching
+            ܐܢ (form == -50) { // rec
                 u32 count;
 _               (ReadLEB_u32(&count, &i_bytes, i_end));
 
@@ -544,7 +544,7 @@ _               (ReadLEB_u32(&count, &i_bytes, i_end));
 
                 _throwif("too many types", needed > d_m3MaxSaneTypesCount);
 
-                if (needed > capacity) {
+                ܐܢ (needed > capacity) {
                     u32 grown = (u32)needed;
 
                     IM3FuncType* types =
@@ -558,12 +558,12 @@ _               (ReadLEB_u32(&count, &i_bytes, i_end));
 
                 // a group of one says nothing a plain definition does not, and
                 // has to be able to share an entry with one
-                if (count == 1) {
+                ܐܢ (count == 1) {
 _                   (ReadLEB_i7(&form, &i_bytes, i_end));
-                } else {
+                } ܐܚܪܢܐ {
 _                   (ParseRecGroup(io_module, count, index, &i_bytes, i_end));
                     index += count;
-                    continue;
+                    استمر;
                 }
             }
 #endif
@@ -572,7 +572,7 @@ _           (ParseTypeDefinition(io_module, form, &ftype, &i_bytes, i_end));    
 
             Environment_AddFuncType(io_module->environment, &ftype);
             io_module->funcTypes[index++] = ftype;
-            ftype                         = NULL; // ownership transferred to environment
+            ftype                         = عدم; // ownership transferred to environment
         }
 
         io_module->numFuncTypes = index;
@@ -582,14 +582,14 @@ _           (ParseTypeDefinition(io_module, form, &ftype, &i_bytes, i_end));    
 
 } _catch:
 
-    if (result) {
+    ܐܢ (result) {
         m3_Free(ftype);
         // FIX: M3FuncTypes in the table are leaked
         m3_Free(io_module->funcTypes);
         io_module->numFuncTypes = 0;
     }
 
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -604,23 +604,23 @@ _   (ReadLEB_u32(&numFunctions, &i_bytes, i_end));                              
 
 _   (Module_PreallocFunctions(io_module, io_module->numFunctions + numFunctions));
 
-    for (u32 i = 0; i < numFunctions; ++i) {
+    لكل (u32 i = 0; i < numFunctions; ++i) {
         u32 funcTypeIndex;
 _       (ReadLEB_u32(&funcTypeIndex, &i_bytes, i_end));
 
-_       (Module_AddFunction(io_module, funcTypeIndex, NULL /* import info */));
+_       (Module_AddFunction(io_module, funcTypeIndex, عدم /* import info */));
     }
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
 // One externtype, read but not yet registered. The compact encoding that shares
 // a type across a run needs the two halves apart: the type sits ahead of the
 // item names, so it is read once and then registered for each of them.
-typedef struct M3ImportDesc {
+تعريفنوع بنية M3ImportDesc {
     u8           kind;
     u32          typeIndex;                  // function
     m3type_t     type;                       // global type
@@ -630,12 +630,12 @@ typedef struct M3ImportDesc {
 } M3ImportDesc;
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 // A tag_type: a reserved attribute byte that must be 0 (the exception
 // attribute) and the index of the function type giving the payload. The
 // proposal reserves the byte so later kinds of tag can share the encoding.
-static
+ساكن
 M3Result ReadTagType (IM3Module i_module, u32* o_typeIndex, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
@@ -647,12 +647,12 @@ _   (Read_u8(&attribute, io_bytes, i_end));
 _   (ReadLEB_u32(o_typeIndex, io_bytes, i_end));
     _throwif(m3Err_unknownType, not i_module or *o_typeIndex >= i_module->numFuncTypes);
 
-#  if !d_m3HasStackSwitching
+#  ܐܢ !d_m3HasStackSwitching
     // an exception tag's type describes its payload, so it yields nothing
     _throwif(m3Err_wasmMalformed, GetFuncTypeNumResults(i_module->funcTypes[*o_typeIndex]) != 0);
 #  endif
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
@@ -660,77 +660,77 @@ _   (ReadLEB_u32(o_typeIndex, io_bytes, i_end));
 
 // Reads and validates one externtype. Mutates nothing in the module, so an
 // externtype is checked even when the compact run that shares it is empty.
-static
+ساكن
 M3Result ReadImportDesc (IM3Module i_module, M3ImportDesc* o_desc, bytes_t* io_bytes, cbytes_t i_end)
 {
     M3Result result = m3Err_none;
 
 _   (Read_u8(&o_desc->kind, io_bytes, i_end));
 
-    switch (o_desc->kind) {
-    case d_externalKind_function:
+    بدل (o_desc->kind) {
+    حالة d_externalKind_function:
 _       (ReadLEB_u32(&o_desc->typeIndex, io_bytes, i_end));
-        break;
+        اكسر;
 
-    case d_externalKind_table:
+    حالة d_externalKind_table:
 _       (ReadType_TableType(i_module, &o_desc->table, io_bytes, i_end));
-        break;
+        اكسر;
 
-    case d_externalKind_memory:
+    حالة d_externalKind_memory:
 _       (ParseType_Memory(&o_desc->memory, io_bytes, i_end));
-        break;
+        اكسر;
 
-    case d_externalKind_global:
+    حالة d_externalKind_global:
 _       (ParseValueType(i_module, &o_desc->type, io_bytes, i_end));
 _       (ReadLEB_u7(&o_desc->isMutable, io_bytes, i_end));                          m3log (parse, "     global: %s mutable=%d", c_waTypes [BaseTypeOf(o_desc->type)], (u32) o_desc->isMutable);
         _throwif(m3Err_wasmMalformed, o_desc->isMutable > 1);
-        break;
+        اكسر;
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    case d_externalKind_tag:
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
+    حالة d_externalKind_tag:
 _       (ReadTagType(i_module, &o_desc->typeIndex, io_bytes, i_end));
-        break;
+        اكسر;
 #endif
 
-    default:
+    افتراضي:
         _throw(m3Err_wasmMalformed);
     }
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
 // Registers the import that i_desc describes. Takes ownership of *io_import
 // wherever the module keeps the strings, clearing the struct so the caller's
 // FreeImportInfo() doesn't free what was handed over.
-static
-M3Result ApplyImportDesc (IM3Module io_module, const M3ImportDesc* i_desc, M3ImportInfo* io_import)
+ساكن
+M3Result ApplyImportDesc (IM3Module io_module, ثابت M3ImportDesc* i_desc, M3ImportInfo* io_import)
 {
     M3Result result = m3Err_none;
 
-    M3ImportInfo clearImport = { NULL, NULL };                                      m3log (parse, "    kind: %d '%s.%s' ",
+    M3ImportInfo clearImport = { عدم, عدم };                                      m3log (parse, "    kind: %d '%s.%s' ",
                                                                                             (u32) i_desc->kind, io_import->moduleUtf8, io_import->fieldUtf8);
-    switch (i_desc->kind) {
-    case d_externalKind_function: {
+    بدل (i_desc->kind) {
+    حالة d_externalKind_function: {
 _       (Module_AddFunction(io_module, i_desc->typeIndex, io_import))
         *io_import = clearImport;
 
         io_module->numFuncImports++;
-    } break;
+    } اكسر;
 
-    case d_externalKind_table: {
+    حالة d_externalKind_table: {
         IM3Table table;
 _       (Module_AddTable(io_module, &table, &i_desc->table, true /* isImport */));
         table->import = *io_import;
         *io_import    = clearImport;
-    } break;
+    } اكسر;
 
-    case d_externalKind_memory: {
+    حالة d_externalKind_memory: {
         IM3Memory memory;
 
-#if d_m3HasMultiMemory
+#ܐܢ d_m3HasMultiMemory
         _throwif(m3Err_tooManyMemorySections, io_module->numMemories >= d_m3MaxSaneMemoriesCount);
-#else
+#ܐܚܪܢܐ
         // MVP: one memory per module, imported or declared
         _throwif(m3Err_tooManyMemorySections, io_module->numMemories >= 1);
 #endif
@@ -738,48 +738,48 @@ _       (Module_AddTable(io_module, &table, &i_desc->table, true /* isImport */)
 _       (Module_AddMemory(io_module, &memory, &i_desc->memory, true /* isImport */));
         memory->import = *io_import;
         *io_import     = clearImport;
-    } break;
+    } اكسر;
 
-    case d_externalKind_global: {
+    حالة d_externalKind_global: {
         IM3Global global;
 _       (Module_AddGlobal(io_module, &global, i_desc->type, i_desc->isMutable, true /* isImport */));
         global->import = *io_import;
         *io_import     = clearImport;
-    } break;
+    } اكسر;
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    case d_externalKind_tag: {
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
+    حالة d_externalKind_tag: {
         IM3Tag tag;
 _       (Module_AddTag(io_module, &tag, io_module->funcTypes[i_desc->typeIndex], true /* isImport */));
         tag->import = *io_import;
         *io_import  = clearImport;
-    } break;
+    } اكسر;
 #endif
 
-    default:
+    افتراضي:
         _throw(m3Err_wasmMalformed);
     }
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
-#if d_m3HasCompactImports
+#ܐܢ d_m3HasCompactImports
 
 // The compact encodings only apply when the item name is empty. Read_utf8()
 // hands back a C string, so a name that merely begins with U+0000 would look
 // empty; the length prefix is what has to be tested.
-static
+ساكن
 bool IsEmptyName (bytes_t i_bytes, cbytes_t i_end)
 {
     u32 length;
-    return (not ReadLEB_u32(&length, &i_bytes, i_end)) and length == 0;
+    ܦܢܐ (not ReadLEB_u32(&length, &i_bytes, i_end)) and length == 0;
 }
 
 #endif // d_m3HasCompactImports
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 M3Result ParseSection_Tag (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
 {
@@ -790,16 +790,16 @@ _   (ReadLEB_u32(&numTags, &i_bytes, i_end));                                   
 
     _throwif("too many tags", numTags > d_m3MaxSaneTagsCount);
 
-    for (u32 i = 0; i < numTags; ++i) {
+    لكل (u32 i = 0; i < numTags; ++i) {
         u32 typeIndex;
 _       (ReadTagType(io_module, &typeIndex, &i_bytes, i_end));                      m3log (parse, "    tag: [%d] type: %d", i, typeIndex);
 
-_       (Module_AddTag(io_module, NULL, io_module->funcTypes[typeIndex], false));
+_       (Module_AddTag(io_module, عدم, io_module->funcTypes[typeIndex], false));
     }
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 #endif // d_m3HasExceptionHandling
@@ -809,7 +809,7 @@ M3Result ParseSection_Import (IM3Module io_module, bytes_t i_bytes, cbytes_t i_e
 {
     M3Result result = m3Err_none;
 
-    M3ImportInfo import = { NULL, NULL };
+    M3ImportInfo import = { عدم, عدم };
 
     // the limit is on the imports the section declares, which a compact run
     // multiplies well past the entry count. Declared up here so the throws
@@ -826,32 +826,32 @@ _   (ReadLEB_u32(&numEntries, &i_bytes, i_end));                                
     // Most imports are functions, so we won't waste much space anyway (if any)
 _   (Module_PreallocFunctions(io_module, io_module->numFunctions + numEntries));
 
-    for (u32 i = 0; i < numEntries; ++i) {
+    لكل (u32 i = 0; i < numEntries; ++i) {
         M3ImportDesc desc;
 
 _       (Read_utf8(&import.moduleUtf8, &i_bytes, i_end));
 
-#if d_m3HasCompactImports
+#ܐܢ d_m3HasCompactImports
         bytes_t fieldStart = i_bytes;
 #endif
 _       (Read_utf8(&import.fieldUtf8, &i_bytes, i_end));
 
-#if d_m3HasCompactImports
+#ܐܢ d_m3HasCompactImports
         u8 compact = (i_bytes < i_end) ? *i_bytes : 0;
 
         // An empty item name where an externtype should start marks a compact
         // run sharing this module name. Neither marker is a valid externtype,
         // so nothing that used to parse changes meaning.
-        if ((compact == d_compactImports_perItemType or compact == d_compactImports_sharedType) and
+        ܐܢ ((compact == d_compactImports_perItemType or compact == d_compactImports_sharedType) and
             IsEmptyName(fieldStart, i_end)) {
             ++i_bytes;
 
             m3_Free(import.fieldUtf8);         // it only marked the compact form
-            import.fieldUtf8 = NULL;
+            import.fieldUtf8 = عدم;
 
             // the shared form puts its one externtype ahead of the item names,
             // so reading it here is also what validates it
-            if (compact == d_compactImports_sharedType) {
+            ܐܢ (compact == d_compactImports_sharedType) {
 _               (ReadImportDesc(io_module, &desc, &i_bytes, i_end));
             }
 
@@ -863,23 +863,23 @@ _           (ReadLEB_u32(&numItems, &i_bytes, i_end));                          
 
 _           (Module_PreallocFunctions(io_module, io_module->numFunctions + numItems));
 
-            for (u32 j = 0; j < numItems; ++j) {
-                M3ImportInfo item = { NULL, NULL };
+            لكل (u32 j = 0; j < numItems; ++j) {
+                M3ImportInfo item = { عدم, عدم };
 
                 item.moduleUtf8 = (cstr_t)m3_CopyMem(import.moduleUtf8, strlen(import.moduleUtf8) + 1);
 
-                if (item.moduleUtf8) {
+                ܐܢ (item.moduleUtf8) {
                     result = Read_utf8(&item.fieldUtf8, &i_bytes, i_end);
 
                     // the shared form reuses the externtype read above
-                    if (not result and compact == d_compactImports_perItemType) {
+                    ܐܢ (not result and compact == d_compactImports_perItemType) {
                         result = ReadImportDesc(io_module, &desc, &i_bytes, i_end);
                     }
 
-                    if (not result) {
+                    ܐܢ (not result) {
                         result = ApplyImportDesc(io_module, &desc, &item);
                     }
-                } else {
+                } ܐܚܪܢܐ {
                     result = m3Err_mallocFailed;
                 }
 
@@ -888,7 +888,7 @@ _           (Module_PreallocFunctions(io_module, io_module->numFunctions + numIt
             }
 
             FreeImportInfo(&import);
-            continue;
+            استمر;
         }
 #endif // d_m3HasCompactImports
 
@@ -907,14 +907,14 @@ _       (ApplyImportDesc(io_module, &desc, &import));
 
     FreeImportInfo(&import);
 
-    return result;
+    ܦܢܐ result;
 }
 
 
 M3Result ParseSection_Export (IM3Module io_module, bytes_t i_bytes, cbytes_t i_end)
 {
     M3Result    result = m3Err_none;
-    const char* utf8   = NULL;
+    ثابت حرف* utf8   = عدم;
 
     u32 numExports;
 _   (ReadLEB_u32(&numExports, &i_bytes, i_end));                                    m3log (parse, "** Export [%d]", numExports);
@@ -923,12 +923,12 @@ _   (ReadLEB_u32(&numExports, &i_bytes, i_end));                                
 
     // the section order check lets this section through once, so this is
     // every export the module has
-    if (numExports) {
+    ܐܢ (numExports) {
         io_module->exports = m3_AllocArray(M3Export, numExports);
         _throwifnull(io_module->exports);
     }
 
-    for (u32 i = 0; i < numExports; ++i) {
+    لكل (u32 i = 0; i < numExports; ++i) {
         u8  exportKind;
         u32 index;
         u32 nameLength;
@@ -943,35 +943,35 @@ _       (Read_utf8(&utf8, &i_bytes, i_end));
 _       (Read_u8(&exportKind, &i_bytes, i_end));
 _       (ReadLEB_u32(&index, &i_bytes, i_end));                                     m3log (parse, "    index: %3d; kind: %d; export: '%s'; ", index, (u32) exportKind, utf8);
 
-#if d_m3EnableValidation
+#ܐܢ d_m3EnableValidation
         // Spec: all export names must be different - compared by length, since
         // a name may hold a NUL
-        for (u32 j = 0; j < i; ++j) {
-            const M3Export* other = &io_module->exports[j];
+        لكل (u32 j = 0; j < i; ++j) {
+            ثابت M3Export* other = &io_module->exports[j];
 
             _throwif(m3Err_wasmMalformed, other->nameLength == nameLength and memcmp(other->name, utf8, nameLength) == 0);
         }
 #endif
 
-        if (exportKind == d_externalKind_function) {
+        ܐܢ (exportKind == d_externalKind_function) {
             _throwif(m3Err_wasmMalformed, index >= io_module->numFunctions);
             IM3Function func = &(io_module->functions[index]);
-            if (func->numNames < d_m3MaxDuplicateFunctionImpl) {
+            ܐܢ (func->numNames < d_m3MaxDuplicateFunctionImpl) {
                 // a name of its own: names are freed with the function
                 cstr_t name = (cstr_t)m3_CopyMem(utf8, nameLength + 1);
                 _throwifnull(name);
                 func->names[func->numNames++] = name;
             }
 _           (Module_DeclareFunction(io_module, index));
-        } else if (exportKind == d_externalKind_global) {
+        } ܐܚܪܢܐ ܐܢ (exportKind == d_externalKind_global) {
             _throwif(m3Err_wasmMalformed, index >= io_module->numGlobals);
-        } else if (exportKind == d_externalKind_memory) {
+        } ܐܚܪܢܐ ܐܢ (exportKind == d_externalKind_memory) {
             _throwif(m3Err_wasmMalformed, index >= io_module->numMemories);
-        } else if (exportKind == d_externalKind_table) {
+        } ܐܚܪܢܐ ܐܢ (exportKind == d_externalKind_table) {
             _throwif(m3Err_wasmMalformed, index >= io_module->numTables);
         }
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-        else if (exportKind == d_externalKind_tag) {
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
+        ܐܚܪܢܐ ܐܢ (exportKind == d_externalKind_tag) {
             _throwif(m3Err_wasmMalformed, index >= io_module->numTags);
         }
 #endif
@@ -982,14 +982,14 @@ _           (Module_DeclareFunction(io_module, index));
         entry->index      = index;
         entry->kind       = exportKind;
 
-        utf8 = NULL; // ownership transferred to M3Module
+        utf8 = عدم; // ownership transferred to M3Module
     }
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
 _catch:
     m3_Free(utf8);
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -1000,22 +1000,22 @@ M3Result ParseSection_Start (IM3Module io_module, bytes_t i_bytes, cbytes_t i_en
     u32 startFuncIndex;
 _   (ReadLEB_u32(&startFuncIndex, &i_bytes, i_end));                                  m3log (parse, "** Start Function: %d", startFuncIndex);
 
-    if (startFuncIndex < io_module->numFunctions) {
+    ܐܢ (startFuncIndex < io_module->numFunctions) {
         // Spec: start function type must be [] -> []
         IM3Function func = &io_module->functions[startFuncIndex];
-        if (func->funcType) {
+        ܐܢ (func->funcType) {
             _throwif(m3Err_wasmMalformed,
                      func->funcType->numArgs != 0 || func->funcType->numRets != 0);
         }
 
         io_module->startFunction = startFuncIndex;
-    } else {
+    } ܐܚܪܢܐ {
         result = "start function index out of bounds";
     }
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -1027,29 +1027,29 @@ M3Result Parse_InitExprTyped (M3Module* io_module, bytes_t* io_bytes, cbytes_t i
 
     // this doesn't generate code pages. just walks the wasm bytecode to find the end
 
-#if defined(d_m3PreferStaticAlloc)
-    static M3Compilation compilation;
-#else
+#ܐܢ defined(d_m3PreferStaticAlloc)
+    ساكن M3Compilation compilation;
+#ܐܚܪܢܐ
     M3Compilation compilation;
 #endif
-    compilation = (M3Compilation){ .runtime = NULL, .module = io_module, .wasm = *io_bytes, .wasmEnd = i_end, .isInitExpr = true };
+    compilation = (M3Compilation){ .runtime = عدم, .module = io_module, .wasm = *io_bytes, .wasmEnd = i_end, .isInitExpr = true };
 
     result = CompileBlockStatements(&compilation);
 
     *io_bytes = compilation.wasm;
 
-    if (o_type) {
+    ܐܢ (o_type) {
         *o_type = compilation.stackIndex ? compilation.typeStack[compilation.stackIndex - 1]
                                          : (m3type_t)c_m3Type_none;
     }
 
-    return result;
+    ܦܢܐ result;
 }
 
 
 M3Result Parse_InitExpr (M3Module* io_module, bytes_t* io_bytes, cbytes_t i_end)
 {
-    return Parse_InitExprTyped(io_module, io_bytes, i_end, NULL);
+    ܦܢܐ Parse_InitExprTyped(io_module, io_bytes, i_end, عدم);
 }
 
 
@@ -1071,14 +1071,14 @@ _   (ReadLEB_u32(&numSegments, &i_bytes, i_end));                            m3l
     // Records where each segment's parts live; the elements are resolved later,
     // in InitTableAndElements.
     pos = i_bytes;
-    for (u32 i = 0; i < numSegments; ++i) {
+    لكل (u32 i = 0; i < numSegments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         u32 flags;
 _       (ReadLEB_u32(&flags, &pos, i_end));
-#if d_m3HasRefTypes
+#ܐܢ d_m3HasRefTypes
         _throwif(m3Err_wasmMalformed, flags > 7);
-#else
+#ܐܚܪܢܐ
         _throwif(m3Err_wasmMalformed, flags != c_m3Elem_active);
 #endif
 
@@ -1086,13 +1086,13 @@ _       (ReadLEB_u32(&flags, &pos, i_end));
         segment->isExpr = (flags & 0x4) != 0;
         segment->type   = c_m3Type_funcref;
 
-        if (segment->mode == c_m3Elem_activeIdx) {
+        ܐܢ (segment->mode == c_m3Elem_activeIdx) {
 _           (ReadLEB_u32(&segment->tableIndex, &pos, i_end));
         }
 
         bool isActive = (segment->mode == c_m3Elem_active or segment->mode == c_m3Elem_activeIdx);
 
-        if (isActive) {
+        ܐܢ (isActive) {
             _throwif(m3Err_wasmMalformed, segment->tableIndex >= io_module->numTables);
 
             segment->initExpr = pos;
@@ -1102,18 +1102,18 @@ _           (Parse_InitExpr(io_module, &pos, i_end));
         }
 
         // Only the table-0 active form leaves the element type implicit
-        if (segment->mode != c_m3Elem_active) {
-            if (segment->isExpr) {
+        ܐܢ (segment->mode != c_m3Elem_active) {
+            ܐܢ (segment->isExpr) {
 _               (ParseValueType(io_module, &segment->type, &pos, i_end));
                 _throwif(m3Err_wasmMalformed, not IsRefType(BaseTypeOf(segment->type)));
-            } else {
+            } ܐܚܪܢܐ {
                 u8 elemKind;
 _               (Read_u8(&elemKind, &pos, i_end));
                 _throwif(m3Err_wasmMalformed, elemKind != 0x00);   // funcref
             }
         }
 
-        if (isActive) {
+        ܐܢ (isActive) {
             _throwif(m3Err_typeMismatch, io_module->tables[segment->tableIndex]->type != segment->type);
         }
 
@@ -1122,10 +1122,10 @@ _       (ReadLEB_u32(&segment->numElements, &pos, i_end));
 
         segment->elements = pos;
 
-        for (u32 e = 0; e < segment->numElements; ++e) {
-            if (segment->isExpr) {
+        لكل (u32 e = 0; e < segment->numElements; ++e) {
+            ܐܢ (segment->isExpr) {
 _               (Parse_InitExpr(io_module, &pos, i_end))
-            } else {
+            } ܐܚܪܢܐ {
                 u32 funcIndex;
 _               (ReadLEB_u32(&funcIndex, &pos, i_end));
                 _throwif("function index out of range", funcIndex >= io_module->numFunctions);
@@ -1136,7 +1136,7 @@ _               (Module_DeclareFunction(io_module, funcIndex));
 
     _throwif(m3Err_wasmMalformed, pos != i_end);           // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -1147,20 +1147,20 @@ M3Result ParseSection_Code (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end
     u32 numFunctions;
 _   (ReadLEB_u32(&numFunctions, &i_bytes, i_end));                                  m3log (parse, "** Code [%d]", numFunctions);
 
-    if (numFunctions != io_module->numFunctions - io_module->numFuncImports) {
+    ܐܢ (numFunctions != io_module->numFunctions - io_module->numFuncImports) {
         _throw("mismatched function count in code section");
     }
 
-    for (u32 f = 0; f < numFunctions; ++f) {
-        const u8* start = i_bytes;
+    لكل (u32 f = 0; f < numFunctions; ++f) {
+        ثابت u8* start = i_bytes;
 
         u32 size;
 _       (ReadLEB_u32(&size, &i_bytes, i_end));
 
-        if (size) {
+        ܐܢ (size) {
             i_bytes += size;
 
-            if (i_bytes <= i_end) {
+            ܐܢ (i_bytes <= i_end) {
                 /*
                 const u8 * ptr = i_bytes - size;
 
@@ -1190,7 +1190,7 @@ _                   (NormalizeType (& normalType, wasmType));
                 func->wasmEnd = i_bytes;
                 //func->ownsWasmCode = io_module->hasWasmCodeCopy;
                 //                func->numLocals = numLocals;
-            } else {
+            } ܐܚܪܢܐ {
                 _throw(m3Err_wasmSectionOverrun);
             }
         }
@@ -1198,11 +1198,11 @@ _                   (NormalizeType (& normalType, wasmType));
 
     _catch:
 
-    if (not result and i_bytes != i_end) {
+    ܐܢ (not result and i_bytes != i_end) {
         result = m3Err_wasmSectionUnderrun;
     }
 
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -1219,7 +1219,7 @@ _   (ReadLEB_u32(&numDataSegments, &i_bytes, i_end));                           
     _throwifnull(io_module->dataSegments);
     io_module->numDataSegments = numDataSegments;
 
-    for (u32 i = 0; i < numDataSegments; ++i) {
+    لكل (u32 i = 0; i < numDataSegments; ++i) {
         M3DataSegment* segment = &io_module->dataSegments[i];
 
         // 0: active in memory 0, 1: passive, 2: active with an explicit memory index
@@ -1229,14 +1229,14 @@ _       (ReadLEB_u32(&flags, &i_bytes, i_end));
 
         segment->isPassive = (flags == 1);
 
-        if (flags == 2) {
+        ܐܢ (flags == 2) {
 _           (ReadLEB_u32(&segment->memoryRegion, &i_bytes, i_end));
         }
 
-        if (not segment->isPassive) {
+        ܐܢ (not segment->isPassive) {
             // The segment names the memory it initializes; only multi-memory
             // lets that be anything other than 0.
-#if !d_m3HasMultiMemory
+#ܐܢ !d_m3HasMultiMemory
             _throwif(m3Err_wasmMalformed, segment->memoryRegion != 0);
 #endif
             _throwif(m3Err_wasmMalformed, segment->memoryRegion >= io_module->numMemories);
@@ -1260,7 +1260,7 @@ _       (ReadLEB_u32(&segment->size, &i_bytes, i_end));
 
     _catch:
 
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -1274,7 +1274,7 @@ _   (ReadLEB_u32(&io_module->dataCount, &i_bytes, i_end));                      
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -1285,24 +1285,24 @@ M3Result ParseSection_Memory (M3Module* io_module, bytes_t i_bytes, cbytes_t i_e
     u32 numMemories;
 _   (ReadLEB_u32(&numMemories, &i_bytes, i_end));                                m3log (parse, "** Memory [%d]", numMemories);
 
-#if d_m3HasMultiMemory
+#ܐܢ d_m3HasMultiMemory
     _throwif(m3Err_tooManyMemorySections,
              (u64)numMemories + io_module->numMemories > d_m3MaxSaneMemoriesCount);
-#else
+#ܐܚܪܢܐ
     // MVP: at most one memory, counting any that was already imported
     _throwif(m3Err_tooManyMemorySections, numMemories > 1);
     _throwif(m3Err_tooManyMemorySections, (u64)numMemories + io_module->numMemories > 1);
 #endif
 
-    for (u32 i = 0; i < numMemories; ++i) {
+    لكل (u32 i = 0; i < numMemories; ++i) {
         M3MemoryInfo info;
 _       (ParseType_Memory(&info, &i_bytes, i_end));
-_       (Module_AddMemory(io_module, NULL, &info, false /* isImport */));
+_       (Module_AddMemory(io_module, عدم, &info, false /* isImport */));
     }
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -1315,7 +1315,7 @@ _   (ReadLEB_u32(&numGlobals, &i_bytes, i_end));                                
 
     _throwif("too many globals", numGlobals > d_m3MaxSaneGlobalsCount);
 
-    for (u32 i = 0; i < numGlobals; ++i) {
+    لكل (u32 i = 0; i < numGlobals; ++i) {
         m3type_t type = c_m3Type_none;
         u8       isMutable;
 
@@ -1335,7 +1335,7 @@ _       (Parse_InitExpr(io_module, &i_bytes, i_end));
 
     _throwif(m3Err_wasmMalformed, i_bytes != i_end);      // section size mismatch
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -1343,9 +1343,9 @@ M3Result ParseSection_Name (M3Module* io_module, bytes_t i_bytes, cbytes_t i_end
 {
     M3Result result = m3Err_none;
 
-    cstr_t name = NULL;
+    cstr_t name = عدم;
 
-    while (i_bytes < i_end) {
+    ܟܡܐ (i_bytes < i_end) {
         u8  nameType;
         u32 payloadLength;
 
@@ -1355,24 +1355,24 @@ _       (ReadLEB_u32(&payloadLength, &i_bytes, i_end));
         bytes_t start = i_bytes;
         _throwif(m3Err_wasmSectionOverrun, payloadLength > (size_t)(i_end - start));
 
-        if (nameType == 1) {
+        ܐܢ (nameType == 1) {
             u32 numNames;
 _           (ReadLEB_u32(&numNames, &i_bytes, i_end));
 
             _throwif("too many names", numNames > d_m3MaxSaneFunctionsCount);
 
-            for (u32 i = 0; i < numNames; ++i) {
+            لكل (u32 i = 0; i < numNames; ++i) {
                 u32 index;
 _               (ReadLEB_u32(&index, &i_bytes, i_end));
 _               (Read_utf8(&name, &i_bytes, i_end));
 
-                if (index < io_module->numFunctions) {
+                ܐܢ (index < io_module->numFunctions) {
                     IM3Function func = &(io_module->functions[index]);
-                    if (func->numNames == 0) {
+                    ܐܢ (func->numNames == 0) {
                         func->names[0] = name;        m3log (parse, "    naming function%5d:  %s", index, name);
                         func->numNames = 1;
 
-                        name = NULL; // transfer ownership
+                        name = عدم; // transfer ownership
                     }
                     //                          else m3log (parse, "prenamed: %s", io_module->functions [index].name);
                 }
@@ -1384,7 +1384,7 @@ _               (Read_utf8(&name, &i_bytes, i_end));
         i_bytes = start + payloadLength;
     }
 
-    _catch: return result;
+    _catch: ܦܢܐ result;
 }
 
 
@@ -1392,23 +1392,23 @@ M3Result ParseSection_Custom (M3Module* io_module, bytes_t i_bytes, cbytes_t i_e
 {
     M3Result result = m3Err_none;
 
-    cstr_t name = NULL;
+    cstr_t name = عدم;
 _   (Read_utf8(&name, &i_bytes, i_end));
                                                                                     m3log (parse, "** Custom: '%s'", name);
-    if (strcmp(name, "name") == 0) {
+    ܐܢ (strcmp(name, "name") == 0) {
 _       (ParseSection_Name(io_module, i_bytes, i_end));
-#if d_m3HasSnapshots
+#ܐܢ d_m3HasSnapshots
         // "snapshot" is the unnamed default, "snapshot.<name>" a named one. A bare
         // "snapshot." names nothing and is not either of them, so it is left to the
         // embedder's handler.
-    } else if (strcmp(name, "snapshot") == 0 || (strlen(name) > 9 && strncmp(name, "snapshot.", 9) == 0)) {
+    } ܐܚܪܢܐ ܐܢ (strcmp(name, "snapshot") == 0 || (strlen(name) > 9 && strncmp(name, "snapshot.", 9) == 0)) {
         // Two of the same name are kept, not refused: a custom section does not
         // decide whether the module is valid. Selecting that name is what fails.
         cstr_t              snapName = (name[8] == '.') ? name + 9 : "";
         M3EmbeddedSnapshot* snap     = m3_AllocStruct(M3EmbeddedSnapshot);
         _throwifnull(snap);
         snap->name = (cstr_t)m3_CopyMem(snapName, strlen(snapName) + 1);
-        if (!snap->name) {
+        ܐܢ (!snap->name) {
             m3_Free(snap);
             _throw(m3Err_mallocFailed);
         }
@@ -1417,7 +1417,7 @@ _       (ParseSection_Name(io_module, i_bytes, i_end));
         snap->next           = io_module->snapshots;
         io_module->snapshots = snap;
 #endif
-    } else if (io_module->environment->customSectionHandler) {
+    } ܐܚܪܢܐ ܐܢ (io_module->environment->customSectionHandler) {
 _       (io_module->environment->customSectionHandler(io_module, name, i_bytes, i_end));
     }
 
@@ -1427,7 +1427,7 @@ _       (io_module->environment->customSectionHandler(io_module, name, i_bytes, 
 
     m3_Free(name);
 
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -1435,9 +1435,9 @@ M3Result ParseModuleSection (M3Module* o_module, u8 i_sectionType, bytes_t i_byt
 {
     M3Result result = m3Err_none;
 
-    typedef M3Result (*M3Parser)(M3Module*, bytes_t, cbytes_t);
+    تعريفنوع M3Result (*M3Parser)(M3Module*, bytes_t, cbytes_t);
 
-    static M3Parser s_parsers[] = {
+    ساكن M3Parser s_parsers[] = {
         ParseSection_Custom,    // 0
         ParseSection_Type,      // 1
         ParseSection_Import,    // 2
@@ -1451,25 +1451,25 @@ M3Result ParseModuleSection (M3Module* o_module, u8 i_sectionType, bytes_t i_byt
         ParseSection_Code,      // 10
         ParseSection_Data,      // 11
         ParseSection_DataCount, // 12
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
         ParseSection_Tag,       // 13
 #endif
     };
 
-    M3Parser parser = NULL;
+    M3Parser parser = عدم;
 
-    if (i_sectionType < M3_COUNT_OF(s_parsers)) {
+    ܐܢ (i_sectionType < M3_COUNT_OF(s_parsers)) {
         parser = s_parsers[i_sectionType];
     }
 
-    if (parser) {
+    ܐܢ (parser) {
         cbytes_t end = i_bytes + i_numBytes;
         result       = parser(o_module, i_bytes, end);
-    } else {
+    } ܐܚܪܢܐ {
         m3log(parse, " skipped section type: %d", (u32)i_sectionType);
     }
 
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -1484,8 +1484,8 @@ _try {
     //module->hasWasmCodeCopy = false;
     module->environment = i_environment;
 
-    const u8* pos = i_bytes;
-    const u8* end = pos + i_numBytes;
+    ثابت u8* pos = i_bytes;
+    ثابت u8* end = pos + i_numBytes;
 
     module->wasmStart = pos;
     module->wasmEnd   = end;
@@ -1497,21 +1497,21 @@ _   (Read_u32(&version, &pos, end));
     _throwif(m3Err_wasmMalformed, magic != 0x6d736100);
     _throwif(m3Err_incompatibleWasmVersion, version != 1);
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#ܐܢ d_m3HasExceptionHandling || d_m3HasStackSwitching
     // the tag section sits between memory (5) and global (6)
-    static const u8 sectionsOrder[] = { 1, 2, 3, 4, 5, 13, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
-#else
-    static const u8 sectionsOrder[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
+    ساكن ثابت u8 sectionsOrder[] = { 1, 2, 3, 4, 5, 13, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
+#ܐܚܪܢܐ
+    ساكن ثابت u8 sectionsOrder[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 10, 11, 0 }; // 0 is a placeholder
 #endif
     u8 expectedSection = 0;
 
-    while (pos < end) {
+    ܟܡܐ (pos < end) {
         u8 section;
 _       (ReadLEB_u7(&section, &pos, end));
 
-        if (section != 0) {
+        ܐܢ (section != 0) {
             // Ensure sections appear only once and in order
-            while (sectionsOrder[expectedSection++] != section) {
+            ܟܡܐ (sectionsOrder[expectedSection++] != section) {
                 _throwif(m3Err_misorderedWasmSection, expectedSection >= M3_COUNT_OF(sectionsOrder) - 1);
             }
         }
@@ -1528,9 +1528,9 @@ _       (ParseModuleSection(module, section, pos, sectionLength));
     // Spec: if a function section exists, a code section must also exist with
     // matching count (and vice versa). ParseSection_Code checks the other
     // direction; this covers the case where the code section is missing entirely.
-    if (module->numFunctions > module->numFuncImports) {
+    ܐܢ (module->numFunctions > module->numFuncImports) {
         IM3Function firstNonImport = &module->functions[module->numFuncImports];
-        _throwif(m3Err_wasmMalformed, firstNonImport->wasm == NULL);
+        _throwif(m3Err_wasmMalformed, firstNonImport->wasm == عدم);
     }
 
     // Spec: the data count section must agree with the data section, which may be absent
@@ -1538,12 +1538,12 @@ _       (ParseModuleSection(module, section, pos, sectionLength));
 
 } _catch:
 
-    if (result) {
+    ܐܢ (result) {
         m3_FreeModule(module);
-        module = NULL;
+        module = عدم;
     }
 
     *o_module = module;
 
-    return result;
+    ܦܢܐ result;
 }

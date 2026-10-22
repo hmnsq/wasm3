@@ -5,40 +5,40 @@
 //  Copyright © 2019 Steven Massey. All rights reserved.
 //
 
-#include "m3_env.h"
-#include "m3_bind.h"
-#include "m3_exception.h"
-#include "m3_info.h"
+#ضمن "m3_env.h"
+#ضمن "m3_bind.h"
+#ضمن "m3_exception.h"
+#ضمن "m3_info.h"
 
 
-u8 ConvertTypeCharToTypeId (char i_code)
+u8 ConvertTypeCharToTypeId (حرف i_code)
 {
-    switch (i_code) {
-    case 'v': return c_m3Type_none;
-    case 'i': return c_m3Type_i32;
-    case 'I': return c_m3Type_i64;
-    case 'f': return c_m3Type_f32;
-    case 'F': return c_m3Type_f64;
-    case '*': return c_m3Type_i32;
+    بدل (i_code) {
+    حالة 'v': ܦܢܐ c_m3Type_none;
+    حالة 'i': ܦܢܐ c_m3Type_i32;
+    حالة 'I': ܦܢܐ c_m3Type_i64;
+    حالة 'f': ܦܢܐ c_m3Type_f32;
+    حالة 'F': ܦܢܐ c_m3Type_f64;
+    حالة '*': ܦܢܐ c_m3Type_i32;
     // same letters c_waCompactTypes uses for the reference types
-    case 'r': return c_m3Type_funcref;
-    case 'R': return c_m3Type_externref;
-    case 'c': return c_m3Type_contref;
+    حالة 'r': ܦܢܐ c_m3Type_funcref;
+    حالة 'R': ܦܢܐ c_m3Type_externref;
+    حالة 'c': ܦܢܐ c_m3Type_contref;
     }
-    return c_m3Type_unknown;
+    ܦܢܐ c_m3Type_unknown;
 }
 
 
 M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature)
 {
-    IM3FuncType funcType = NULL;
+    IM3FuncType funcType = عدم;
 
 _try {
-    if (not o_functionType) {
+    ܐܢ (not o_functionType) {
         _throw("null function type");
     }
 
-    if (not i_signature) {
+    ܐܢ (not i_signature) {
         _throw("null function signature");
     }
 
@@ -57,31 +57,31 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
     m3type_t* typelist = funcType->types;
 
     bool parsingRets = true;
-    while (*sig) {
-        char typeChar = *sig++;
+    ܟܡܐ (*sig) {
+        حرف typeChar = *sig++;
 
-        if (typeChar == '(') {
+        ܐܢ (typeChar == '(') {
             parsingRets = false;
-            continue;
-        } else if (typeChar == ' ') {
-            continue;
-        } else if (typeChar == ')') {
-            break;
+            استمر;
+        } ܐܚܪܢܐ ܐܢ (typeChar == ' ') {
+            استمر;
+        } ܐܚܪܢܐ ܐܢ (typeChar == ')') {
+            اكسر;
         }
 
         u8 type = ConvertTypeCharToTypeId(typeChar);
 
         _throwif("unknown argument type char", c_m3Type_unknown == type);
 
-        if (type == c_m3Type_none) {
-            continue;
+        ܐܢ (type == c_m3Type_none) {
+            استمر;
         }
 
-        if (parsingRets) {
+        ܐܢ (parsingRets) {
             _throwif("malformed signature; return count overflow", funcType->numRets >= maxNumTypes);
             funcType->numRets++;
             *typelist++ = type;
-        } else {
+        } ܐܚܪܢܐ {
             _throwif("malformed signature; arg count overflow", (u32)(funcType->numRets) + funcType->numArgs >= maxNumTypes);
             funcType->numArgs++;
             *typelist++ = type;
@@ -90,25 +90,25 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
 
 } _catch:
 
-    if (result) {
+    ܐܢ (result) {
         m3_Free(funcType);
     }
 
     *o_functionType = funcType;
 
-    return result;
+    ܦܢܐ result;
 }
 
 
-static
+ساكن
 M3Result ValidateSignature (IM3Function i_function, ccstr_t i_linkingSignature)
 {
     M3Result result = m3Err_none;
 
-    IM3FuncType ftype = NULL;
+    IM3FuncType ftype = عدم;
 _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
-    if (not AreFuncTypesEqual(ftype, i_function->funcType)) {
+    ܐܢ (not AreFuncTypesEqual(ftype, i_function->funcType)) {
         m3log(module, "expected: %s", SPrintFuncTypeSignature(ftype));
         m3log(module, "   found: %s", SPrintFuncTypeSignature(i_function->funcType));
 
@@ -119,7 +119,7 @@ _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
     m3_Free(ftype);
 
-    return result;
+    ܦܢܐ result;
 }
 
 
@@ -133,17 +133,17 @@ M3Result FindAndLinkFunction (IM3Module io_module,
 _try {
     _throwif(m3Err_moduleNotLinked, !io_module->runtime);
 
-    const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
+    ثابت bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
 
     result = m3Err_functionLookupFailed;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
-        const IM3Function f = &io_module->functions[i];
+    لكل (u32 i = 0; i < io_module->numFunctions; ++i) {
+        ثابت IM3Function f = &io_module->functions[i];
 
-        if (f->import.moduleUtf8 and f->import.fieldUtf8) {
-            if (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
+        ܐܢ (f->import.moduleUtf8 and f->import.fieldUtf8) {
+            ܐܢ (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
                 (wildcardModule or strcmp(f->import.moduleUtf8, i_moduleName) == 0)) {
-                if (i_signature) {
+                ܐܢ (i_signature) {
 _                   (ValidateSignature(f, i_signature));
                 }
 _               (CompileRawFunction(io_module, f, i_function, i_userdata));
@@ -151,24 +151,24 @@ _               (CompileRawFunction(io_module, f, i_function, i_userdata));
         }
     }
 } _catch:
-    return result;
+    ܦܢܐ result;
 }
 
 M3Result m3_LinkRawFunctionEx (IM3Module         io_module,
-                               const char* const i_moduleName,
-                               const char* const i_functionName,
-                               const char* const i_signature,
+                               ثابت حرف* ثابت i_moduleName,
+                               ثابت حرف* ثابت i_functionName,
+                               ثابت حرف* ثابت i_signature,
                                M3RawCall         i_function,
-                               const void*       i_userdata)
+                               ثابت فراغ*       i_userdata)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
+    ܦܢܐ FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
 }
 
 M3Result m3_LinkRawFunction (IM3Module         io_module,
-                             const char* const i_moduleName,
-                             const char* const i_functionName,
-                             const char* const i_signature,
+                             ثابت حرف* ثابت i_moduleName,
+                             ثابت حرف* ثابت i_functionName,
+                             ثابت حرف* ثابت i_signature,
                              M3RawCall         i_function)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
+    ܦܢܐ FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, عدم);
 }
