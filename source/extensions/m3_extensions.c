@@ -16,7 +16,7 @@ IM3Module m3_NewModule (IM3Environment i_environment)
 {
     IM3Module module = m3_AllocStruct(M3Module);
 
-    if (module) {
+    якщо (module) {
         module->name          = ".unnamed";
         module->startFunction = -1;
         module->environment   = i_environment;
@@ -25,7 +25,7 @@ IM3Module m3_NewModule (IM3Environment i_environment)
         module->wasmEnd   = NULL;
     }
 
-    return module;
+    повернути module;
 }
 
 
@@ -55,16 +55,16 @@ _   (SignatureToFuncType(&ftype, i_signature));
 _   (ReadLEB_u32(&size, &bytes, end));
     end = bytes + size;
 
-    if (index >= 0) {
+    якщо (index >= 0) {
         // index is known non-negative here, so the counts compare as unsigned
         _throwif("function index out of bounds", (u32)index >= i_module->numFunctions);
 
         function = &i_module->functions[index];
 
-        if (not AreFuncTypesEqual(ftype, function->funcType)) {
+        якщо (not AreFuncTypesEqual(ftype, function->funcType)) {
             _throw("function type mismatch");
         }
-    } else {
+    } інакше {
         // add slot to function type table in the module
         u32 funcTypeIndex   = i_module->numFuncTypes++;
         i_module->funcTypes = m3_ReallocArray(IM3FuncType, i_module->funcTypes, i_module->numFuncTypes, funcTypeIndex);
@@ -85,7 +85,7 @@ _       (Module_AddFunction(i_module, funcTypeIndex, NULL));
 
     function->compiled = NULL;
 
-    if (function->ownsWasmCode) {
+    якщо (function->ownsWasmCode) {
         m3_Free(function->wasm);
     }
 
@@ -98,7 +98,7 @@ _       (Module_AddFunction(i_module, funcTypeIndex, NULL));
 
     function->module = i_module;
 
-    if (i_doCompilation and not i_module->runtime) {
+    якщо (i_doCompilation and not i_module->runtime) {
         _throw("module must be loaded into runtime to compile function");
     }
 
@@ -107,11 +107,11 @@ _   (CompileFunction(function));
     _catch:
     m3_Free(ftype);
 
-    return result;
+    повернути result;
 }
 
 
 IM3Function m3_GetFunctionByIndex (IM3Module i_module, uint32_t i_index)
 {
-    return Module_GetFunction(i_module, i_index);
+    повернути Module_GetFunction(i_module, i_index);
 }

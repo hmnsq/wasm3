@@ -24,13 +24,13 @@ IM3Environment m3_NewEnvironment ()
 {
     IM3Environment env = m3_AllocStruct(M3Environment);
 
-    if (env) {
+    якщо (env) {
         _try
         {
             // create FuncTypes for all simple block return ValueTypes.
             // v128 is skipped: it parses as a slot but has no operations.
-            for (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
-                if (t == c_m3Type_v128) {
+            для (u8 t = c_m3Type_none; t < c_m3Type_count; t++) {
+                якщо (t == c_m3Type_v128) {
                     continue;
                 }
 
@@ -48,13 +48,13 @@ _               (AllocFuncType(&ftype, 1));
         }
 
         _catch:
-        if (result) {
+        якщо (result) {
             m3_FreeEnvironment(env);
             env = NULL;
         }
     }
 
-    return env;
+    повернути env;
 }
 
 
@@ -62,7 +62,7 @@ void Environment_Release (IM3Environment i_environment)
 {
     IM3FuncType ftype = i_environment->funcTypes;
 
-    while (ftype) {
+    поки (ftype) {
         IM3FuncType next = ftype->next;
         m3_Free(ftype);
         ftype = next;
@@ -75,7 +75,7 @@ void Environment_Release (IM3Environment i_environment)
 
 void m3_FreeEnvironment (IM3Environment i_environment)
 {
-    if (i_environment) {
+    якщо (i_environment) {
         Environment_Release(i_environment);
         m3_Free(i_environment);
     }
@@ -84,7 +84,7 @@ void m3_FreeEnvironment (IM3Environment i_environment)
 
 void m3_SetCustomSectionHandler (IM3Environment i_environment, M3SectionHandler i_handler)
 {
-    if (i_environment) {
+    якщо (i_environment) {
         i_environment->customSectionHandler = i_handler;
     }
 }
@@ -96,8 +96,8 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
     IM3FuncType addType = *io_funcType;
     IM3FuncType newType = i_environment->funcTypes;
 
-    while (newType) {
-        if (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
+    поки (newType) {
+        якщо (not newType->inRecGroup and AreFuncTypesEqual(newType, addType)) {
             m3_Free(addType);
             break;
         }
@@ -105,12 +105,12 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
         newType = newType->next;
     }
 
-    if (newType == NULL) {
+    якщо (newType == NULL) {
         // a type index has to fit in the heap type field of an m3type_t
-        if (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
+        якщо (i_environment->numFuncTypes >= d_m3MaxSaneTypesCount) {
             m3_Free(addType);
             *io_funcType = NULL;
-            return "too many distinct function types";
+            повернути "too many distinct function types";
         }
 
         newType                  = addType;
@@ -121,7 +121,7 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 
     *io_funcType = newType;
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 
@@ -135,14 +135,14 @@ M3Result Environment_AddFuncType (IM3Environment i_environment, IM3FuncType* io_
 // also what lets the members refer to each other while they are being read.
 M3Result Environment_ReserveFuncTypes (IM3Environment i_environment, u32 i_count, u16* o_firstIndex)
 {
-    if ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
-        return "too many distinct function types";
+    якщо ((u64)i_environment->numFuncTypes + i_count > d_m3MaxSaneTypesCount) {
+        повернути "too many distinct function types";
     }
 
     *o_firstIndex = i_environment->numFuncTypes;
     i_environment->numFuncTypes += (u16)i_count;
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 
@@ -160,12 +160,12 @@ IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimumLineCou
     IM3CodePage prev = NULL;
     IM3CodePage page = *io_list;
 
-    while (page) {
-        if (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
+    поки (page) {
+        якщо (NumFreeLines(page) >= i_minimumLineCount) {             d_m3Assert (page->info.usageCount == 0);
             IM3CodePage next = page->info.next;
-            if (prev) {
+            якщо (prev) {
                 prev->info.next = next; // mid-list
-            } else {
+            } інакше {
                 *io_list = next;       // front of list
             }
 
@@ -176,13 +176,13 @@ IM3CodePage RemoveCodePageOfCapacity (M3CodePage** io_list, u32 i_minimumLineCou
         page = page->info.next;
     }
 
-    return page;
+    повернути page;
 }
 
 
 IM3CodePage Environment_AcquireCodePage (IM3Environment i_environment, u32 i_minimumLineCount)
 {
-    return RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
+    повернути RemoveCodePageOfCapacity(&i_environment->pagesReleased, i_minimumLineCount);
 }
 
 
@@ -190,21 +190,21 @@ void Environment_ReleaseCodePages (IM3Environment i_environment, IM3CodePage i_c
 {
     IM3CodePage end = i_codePageList;
 
-    while (end) {
+    поки (end) {
         end->info.lineIndex = 0; // reset page
-#if d_m3RecordBacktraces
+#якщо d_m3RecordBacktraces
         end->info.mapping->size = 0;
 #endif // d_m3RecordBacktraces
 
         IM3CodePage next = end->info.next;
-        if (not next) {
+        якщо (not next) {
             break;
         }
 
         end = next;
     }
 
-    if (end) {
+    якщо (end) {
         // push list to front
         end->info.next               = i_environment->pagesReleased;
         i_environment->pagesReleased = i_codePageList;
@@ -216,7 +216,7 @@ IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, 
 {
     IM3Runtime runtime = m3_AllocStruct(M3Runtime);
 
-    if (runtime) {
+    якщо (runtime) {
         m3_ResetErrorInfo(runtime);
 
         runtime->environment = i_environment;
@@ -226,24 +226,24 @@ IM3Runtime m3_NewRuntime (IM3Environment i_environment, u32 i_stackSizeInBytes, 
 
         runtime->originStack = m3_Malloc("Wasm Stack", i_stackSizeInBytes + 4 * sizeof(m3slot_t)); // TODO: more precise stack checks
 
-        if (runtime->originStack) {
+        якщо (runtime->originStack) {
             runtime->stack         = runtime->originStack;
             runtime->numStackSlots = i_stackSizeInBytes / sizeof(m3slot_t);          m3log (runtime, "new stack: %p, slots: %u", runtime->originStack, runtime->numStackSlots);
-        } else {
+        } інакше {
             m3_Free(runtime);
         }
     }
 
-    return runtime;
+    повернути runtime;
 }
 
 void m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
 {
-#if d_m3EnableValidation
-    if (i_runtime) {
+#якщо d_m3EnableValidation
+    якщо (i_runtime) {
         i_runtime->skipValidation = not i_enable;
     }
-#else
+#інакше
     (void)i_runtime;
     (void)i_enable;              // nothing to skip: the validator was compiled out
 #endif
@@ -251,85 +251,85 @@ void m3_SetValidation (IM3Runtime i_runtime, bool i_enable)
 
 M3Result m3_SetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit, uint64_t i_value)
 {
-    if (not i_runtime) {
-        return m3Err_mallocFailed;
+    якщо (not i_runtime) {
+        повернути m3Err_mallocFailed;
     }
     switch (i_limit) {
     case c_m3Limit_MemoryBytes:
-        if (i_value and i_value < i_runtime->memoryBytesUsed) {
-            return m3Err_resourceLimitBelowUsage;
+        якщо (i_value and i_value < i_runtime->memoryBytesUsed) {
+            повернути m3Err_resourceLimitBelowUsage;
         }
         i_runtime->memoryBytesLimit = i_value;
-        return m3Err_none;
+        повернути m3Err_none;
     case c_m3Limit_TableElements:
-        if (i_value and i_value < i_runtime->tableElementsUsed) {
-            return m3Err_resourceLimitBelowUsage;
+        якщо (i_value and i_value < i_runtime->tableElementsUsed) {
+            повернути m3Err_resourceLimitBelowUsage;
         }
         i_runtime->tableElementsLimit = i_value;
-        return m3Err_none;
-#if d_m3HasStackSwitching
+        повернути m3Err_none;
+#якщо d_m3HasStackSwitching
     case c_m3Limit_Continuations:
-        if (i_value and i_value < i_runtime->continuationsAllocated) {
-            return m3Err_resourceLimitBelowUsage;
+        якщо (i_value and i_value < i_runtime->continuationsAllocated) {
+            повернути m3Err_resourceLimitBelowUsage;
         }
         i_runtime->continuationsLimit = (u32)M3_MIN(i_value, (u64)UINT32_MAX);
-        while (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
+        поки (i_value and i_runtime->valStackPoolCount > i_value - i_runtime->continuationsAllocated) {
             m3_Free(i_runtime->valStackPool[--i_runtime->valStackPoolCount]);
         }
-        return m3Err_none;
-#else
-    case c_m3Limit_Continuations: return m3Err_resourceLimitNotSupported;
+        повернути m3Err_none;
+#інакше
+    case c_m3Limit_Continuations: повернути m3Err_resourceLimitNotSupported;
 #endif
     case c_m3Limit_GasUnits:
-#if d_m3HasGasMetering
+#якщо d_m3HasGasMetering
         i_runtime->gasLimit = i_runtime->gasRemaining = (i64)M3_MIN(i_value, (u64)INT64_MAX);
-        return m3Err_none;
-#else
-        return m3Err_resourceLimitNotSupported;
+        повернути m3Err_none;
+#інакше
+        повернути m3Err_resourceLimitNotSupported;
 #endif
-    default: return m3Err_unknownResourceLimit;
+    default: повернути m3Err_unknownResourceLimit;
     }
 }
 
 uint64_t m3_GetResourceLimit (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    якщо (not i_runtime) {
+        повернути 0;
     }
     switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesLimit;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsLimit;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsLimit;
+    case c_m3Limit_MemoryBytes: повернути i_runtime->memoryBytesLimit;
+    case c_m3Limit_TableElements: повернути i_runtime->tableElementsLimit;
+#якщо d_m3HasStackSwitching
+    case c_m3Limit_Continuations: повернути i_runtime->continuationsLimit;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit;
+#якщо d_m3HasGasMetering
+    case c_m3Limit_GasUnits: повернути (u64)i_runtime->gasLimit;
 #endif
-    default: return 0;
+    default: повернути 0;
     }
 }
 
 uint64_t m3_GetResourceUsage (IM3Runtime i_runtime, M3ResourceLimit i_limit)
 {
-    if (not i_runtime) {
-        return 0;
+    якщо (not i_runtime) {
+        повернути 0;
     }
     switch (i_limit) {
-    case c_m3Limit_MemoryBytes: return i_runtime->memoryBytesUsed;
-    case c_m3Limit_TableElements: return i_runtime->tableElementsUsed;
-#if d_m3HasStackSwitching
-    case c_m3Limit_Continuations: return i_runtime->continuationsAllocated;
+    case c_m3Limit_MemoryBytes: повернути i_runtime->memoryBytesUsed;
+    case c_m3Limit_TableElements: повернути i_runtime->tableElementsUsed;
+#якщо d_m3HasStackSwitching
+    case c_m3Limit_Continuations: повернути i_runtime->continuationsAllocated;
 #endif
-#if d_m3HasGasMetering
-    case c_m3Limit_GasUnits: return (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
+#якщо d_m3HasGasMetering
+    case c_m3Limit_GasUnits: повернути (u64)i_runtime->gasLimit - (u64)i_runtime->gasRemaining;
 #endif
-    default: return 0;
+    default: повернути 0;
     }
 }
 
 void* m3_GetUserData (IM3Runtime i_runtime)
 {
-    return i_runtime ? i_runtime->userdata : NULL;
+    повернути i_runtime ? i_runtime->userdata : NULL;
 }
 
 
@@ -339,23 +339,23 @@ void* ForEachModule (IM3Runtime i_runtime, ModuleVisitor i_visitor, void* i_info
 
     IM3Module module = i_runtime->modules;
 
-    while (module) {
+    поки (module) {
         IM3Module next = module->next;
-        if ((r = i_visitor(module, i_info))) {
+        якщо ((r = i_visitor(module, i_info))) {
             break;
         }
 
         module = next;
     }
 
-    return r;
+    повернути r;
 }
 
 
 void* _FreeModule (IM3Module i_module, void* i_info)
 {
     m3_FreeModule(i_module);
-    return NULL;
+    повернути NULL;
 }
 
 
@@ -369,23 +369,23 @@ void* _FreeModule (IM3Module i_module, void* i_info)
 // does, instead of reading a memory some earlier module has freed.
 void* _ReleaseBorrowedSlots (IM3Module i_module, void* i_info)
 {
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    для (u32 i = 0; i < i_module->numMemories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
-        if (memory and memory->owner != i_module) {
+        якщо (memory and memory->owner != i_module) {
             i_module->memories[i] = NULL;
         }
     }
 
-    for (u32 i = 0; i < i_module->numTables; ++i) {
+    для (u32 i = 0; i < i_module->numTables; ++i) {
         IM3Table table = i_module->tables[i];
 
-        if (table and table->owner != i_module) {
+        якщо (table and table->owner != i_module) {
             i_module->tables[i] = NULL;
         }
     }
 
-    return NULL;
+    повернути NULL;
 }
 
 
@@ -399,23 +399,23 @@ void Runtime_Release (IM3Runtime i_runtime)
 
     m3_Free(i_runtime->originStack);
 
-#if d_m3EnableValidation
+#якщо d_m3EnableValidation
     m3_Free(i_runtime->validator);
 #endif
 
-#if d_m3HasExceptionHandling
+#якщо d_m3HasExceptionHandling
     // a runtime let go of while suspended still holds its exceptions
     FreeExceptions(i_runtime);
     m3_Free(i_runtime->uncaughtException);
 #endif
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    while (i_runtime->hostTags) {
+#якщо d_m3HasExceptionHandling || d_m3HasStackSwitching
+    поки (i_runtime->hostTags) {
         M3HostTag* next = i_runtime->hostTags->next;
         m3_Free(i_runtime->hostTags);
         i_runtime->hostTags = next;
     }
 #endif
-#if d_m3HasStackSwitching
+#якщо d_m3HasStackSwitching
     Continuation_ReleaseAll(i_runtime);
 #endif
 }
@@ -423,7 +423,7 @@ void Runtime_Release (IM3Runtime i_runtime)
 
 void m3_FreeRuntime (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    якщо (i_runtime) {
         m3_PrintProfilerInfo();
 
         Runtime_Release(i_runtime);
@@ -432,13 +432,13 @@ void m3_FreeRuntime (IM3Runtime i_runtime)
 }
 
 
-#if d_m3HasStackSwitching
+#якщо d_m3HasStackSwitching
 
 IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3Function i_function)
 {
     IM3Continuation cont = m3_AllocStruct(M3Continuation);
-    if (!cont) {
-        return NULL;
+    якщо (!cont) {
+        повернути NULL;
     }
 
     cont->type          = i_type;
@@ -455,7 +455,7 @@ IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3F
     cont->sp = cont->valStack;
     cont->pc = i_function ? i_function->compiled : NULL;
     cont->r0 = 0;
-#  if d_m3HasFloat
+#  якщо d_m3HasFloat
     cont->fp0 = 0;
 #  endif
     cont->boundArgsCount    = 0;
@@ -467,14 +467,14 @@ IM3Continuation Continuation_New (IM3Runtime i_runtime, IM3FuncType i_type, IM3F
     cont->next               = i_runtime->continuations;
     i_runtime->continuations = cont;
 
-    return cont;
+    повернути cont;
 }
 
 IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuation i_cont)
 {
     IM3Continuation newCont = Continuation_New(i_runtime, i_cont->type, i_cont->entryFunction);
-    if (M3_UNLIKELY(not newCont)) {
-        return NULL;
+    якщо (M3_UNLIKELY(not newCont)) {
+        повернути NULL;
     }
 
     newCont->valStack      = i_cont->valStack;
@@ -483,7 +483,7 @@ IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuatio
     newCont->pc            = i_cont->pc;
     newCont->suspendPoint  = i_cont->suspendPoint;
     newCont->r0            = i_cont->r0;
-#  if d_m3HasFloat
+#  якщо d_m3HasFloat
     newCont->fp0 = i_cont->fp0;
 #  endif
     newCont->frames    = i_cont->frames;
@@ -491,12 +491,12 @@ IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuatio
     newCont->numFrames = i_cont->numFrames;
 
     newCont->boundArgsCount = 0;
-#  if d_m3HasExceptionHandling
+#  якщо d_m3HasExceptionHandling
     newCont->resumeThrow = i_cont->resumeThrow;
     i_cont->resumeThrow  = NULL;
 #  endif
     newCont->numSuspendResults = i_cont->numSuspendResults;
-    for (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
+    для (u32 i = 0; i < i_cont->numSuspendResults; ++i) {
         newCont->suspendResultOffsets[i] = i_cont->suspendResultOffsets[i];
         newCont->suspendResultIs64[i]    = i_cont->suspendResultIs64[i];
     }
@@ -512,47 +512,47 @@ IM3Continuation Continuation_ForkSuspended (IM3Runtime i_runtime, IM3Continuatio
     i_cont->numFrames = 0;
     i_cont->state     = cont_consumed;
 
-    return newCont;
+    повернути newCont;
 }
 
 // Only cont.new and snapshot restoration acquire stacks. Binding and suspension
 // transfer them between records without changing the active count.
 M3Result Continuation_AcquireStack (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not Continuation_CanAcquireStack(runtime)) {
-        return m3Err_continuationLimitExceeded;
+    якщо (not Continuation_CanAcquireStack(runtime)) {
+        повернути m3Err_continuationLimitExceeded;
     }
-    if (runtime->valStackPoolCount) {
+    якщо (runtime->valStackPoolCount) {
         cont->valStack = runtime->valStackPool[--runtime->valStackPoolCount];
         memset(cont->valStack, 0, (cont->numStackSlots + 4) * sizeof(m3slot_t));
-    } else {
+    } інакше {
         cont->valStack = m3_AllocArray(m3slot_t, cont->numStackSlots + 4);
     }
-    if (not cont->valStack) {
-        return m3Err_mallocFailed;
+    якщо (not cont->valStack) {
+        повернути m3Err_mallocFailed;
     }
     cont->sp = cont->valStack;
     runtime->continuationsAllocated++;
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 void Continuation_RecycleStack (IM3Runtime runtime, IM3Continuation cont)
 {
-    if (not cont->valStack or cont == runtime->rootContinuation) {
-        return;
+    якщо (not cont->valStack or cont == runtime->rootContinuation) {
+        повернути;
     }
-    if (not runtime->valStackPool) {
+    якщо (not runtime->valStackPool) {
         runtime->valStackPool = m3_AllocArray(m3slot_t*, 16);
-        if (runtime->valStackPool) {
+        якщо (runtime->valStackPool) {
             runtime->valStackPoolCap = 16;
         }
     }
-    if (runtime->valStackPoolCount < runtime->valStackPoolCap and
+    якщо (runtime->valStackPoolCount < runtime->valStackPoolCap and
         (not runtime->continuationsLimit or runtime->valStackPoolCount <
                                               runtime->continuationsLimit - runtime->continuationsAllocated + 1)) {
         runtime->valStackPool[runtime->valStackPoolCount++] = cont->valStack;
         cont->valStack                                      = NULL;
-    } else {
+    } інакше {
         m3_Free(cont->valStack);
     }
     cont->sp = NULL;
@@ -565,7 +565,7 @@ void Continuation_ReleaseAll (IM3Runtime io_runtime)
     // or on a Wasm stack. Its value stack has already been recycled.
     IM3Continuation cont = io_runtime->continuations;
 
-    while (cont) {
+    поки (cont) {
         IM3Continuation next = cont->next;
 
         m3_Free(cont->valStack);
@@ -575,7 +575,7 @@ void Continuation_ReleaseAll (IM3Runtime io_runtime)
         cont = next;
     }
 
-    for (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
+    для (u32 i = 0; i < io_runtime->valStackPoolCount; ++i) {
         m3_Free(io_runtime->valStackPool[i]);
     }
     m3_Free(io_runtime->valStackPool);
@@ -595,21 +595,21 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
     // and that whole stretch has an active continuation
     d_m3Assert(cont);
 
-    if (cont->numFrames == cont->framesCap) {
+    якщо (cont->numFrames == cont->framesCap) {
         u32 newCap = cont->framesCap ? cont->framesCap * 2 : 8;
 
-        if (newCap > d_m3ContinuationMaxFrames) {
+        якщо (newCap > d_m3ContinuationMaxFrames) {
             newCap = d_m3ContinuationMaxFrames;
         }
 
-        if (newCap == cont->framesCap) {
-            return m3Err_trapStackOverflow;
+        якщо (newCap == cont->framesCap) {
+            повернути m3Err_trapStackOverflow;
         }
 
         M3Frame* frames = m3_ReallocArray(M3Frame, cont->frames, newCap, cont->framesCap);
 
-        if (not frames) {
-            return m3Err_mallocFailed;
+        якщо (not frames) {
+            повернути m3Err_mallocFailed;
         }
 
         cont->frames    = frames;
@@ -618,7 +618,7 @@ m3ret_t Continuation_RecordFrame (IM3Runtime i_runtime, const M3Frame* i_frame)
 
     cont->frames[cont->numFrames++] = *i_frame;
 
-    return m3Err_continuationSuspended;
+    повернути m3Err_continuationSuspended;
 }
 
 #endif // d_m3HasStackSwitching
@@ -630,9 +630,9 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
     // OPTZ: use a simplified interpreter for expressions
 
     // create a temporary runtime context
-#if defined(d_m3PreferStaticAlloc)
+#якщо defined(d_m3PreferStaticAlloc)
     static M3Runtime runtime;
-#else
+#інакше
     M3Runtime runtime;
 #endif
     M3_INIT(runtime);
@@ -658,23 +658,23 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
     // empty and the next expression reuses it rather than burning fresh lines.
     o->page = AcquireCodePage(&runtime);
 
-    if (o->page) {
+    якщо (o->page) {
         IM3FuncType ftype = NULL;
 
-#if d_m3HasTypedRefs
+#якщо d_m3HasTypedRefs
         // A reference type has to be checked as the type it is: the shared
         // return types are one per storage class, so borrowing one of those
         // would let any reference at all satisfy a particular one.
-        if (IsSpelledRefType(i_type)) {
+        якщо (IsSpelledRefType(i_type)) {
             result = AllocFuncType(&ftype, 1);
 
-            if (not result) {
+            якщо (not result) {
                 ftype->numRets  = 1;
                 ftype->types[0] = i_type;
 
                 result = Environment_AddFuncType(runtime.environment, &ftype);
             }
-        } else
+        } інакше
 #endif
         {
             ftype = runtime.environment->retFuncTypes[BaseTypeOf(i_type)];
@@ -682,32 +682,32 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 
         pc_t m3code = GetPagePC(o->page);
 
-        if (not result) {
+        якщо (not result) {
             result = CompileExpression(o, ftype);
         }
 
-        if (not result && o->maxStackSlots >= runtime.numStackSlots) {
+        якщо (not result && o->maxStackSlots >= runtime.numStackSlots) {
             result = m3Err_trapStackOverflow;
         }
 
-        if (not result) {
-#if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+        якщо (not result) {
+#якщо (d_m3EnableOpProfiling || d_m3EnableOpTracing)
             m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
+#інакше
             m3ret_t r = RunCode(m3code, stack, NULL, d_m3OpDefaultArgs);
 #endif
 
-            if (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
-                if (SizeOfType(BaseTypeOf(i_type)) == sizeof(u32)) {
+            якщо (r == 0) {                                                                   m3log (runtime, "expression result: %s", SPrintValue (stack, i_type));
+                якщо (SizeOfType(BaseTypeOf(i_type)) == sizeof(u32)) {
                     *(u32*)o_expressed = *((u32*)stack);
-                } else {
+                } інакше {
                     *(u64*)o_expressed = *((u64*)stack);
                 }
             }
         }
 
         ReleaseCodePage(&runtime, o->page);
-    } else {
+    } інакше {
         result = m3Err_mallocFailedCodePage;
     }
 
@@ -717,7 +717,7 @@ M3Result EvaluateExpression (IM3Module i_module, void* o_expressed, m3type_t i_t
 
     *io_bytes = o->wasm;
 
-    return result;
+    повернути result;
 }
 
 
@@ -739,15 +739,15 @@ static
 bool LimitsSatisfy (u64 i_exportedSize, bool i_exportedHasMax, u64 i_exportedMax,
                     u64 i_importMin, bool i_importHasMax, u64 i_importMax)
 {
-    if (i_exportedSize < i_importMin) {
-        return false;
+    якщо (i_exportedSize < i_importMin) {
+        повернути false;
     }
 
-    if (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
-        return false;
+    якщо (i_importHasMax and (not i_exportedHasMax or i_exportedMax > i_importMax)) {
+        повернути false;
     }
 
-    return true;
+    повернути true;
 }
 
 
@@ -757,15 +757,15 @@ bool LimitsSatisfy (u64 i_exportedSize, bool i_exportedHasMax, u64 i_exportedMax
 static
 const M3Export* Module_FindExport (IM3Module i_module, u8 i_kind, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
+    для (u32 i = 0; i < i_module->numExports; ++i) {
         const M3Export* e = &i_module->exports[i];
 
-        if (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
-            return e;
+        якщо (e->kind == i_kind and strcmp(e->name, i_name) == 0) {
+            повернути e;
         }
     }
 
-    return NULL;
+    повернути NULL;
 }
 
 
@@ -777,7 +777,7 @@ IM3Function Module_FindExportedFunction (IM3Module i_module, cstr_t i_name)
     // A module that re-exports an import names the placeholder here. Resolve to
     // the function that actually runs, or a host-side call would run it against
     // the importing module's memory.
-    return e ? Function_Implementation(&i_module->functions[e->index]) : NULL;
+    повернути e ? Function_Implementation(&i_module->functions[e->index]) : NULL;
 }
 
 
@@ -786,7 +786,7 @@ IM3Memory Module_FindExportedMemory (IM3Module i_module, cstr_t i_name)
 {
     const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    return e ? i_module->memories[e->index] : NULL;
+    повернути e ? i_module->memories[e->index] : NULL;
 }
 
 
@@ -795,7 +795,7 @@ IM3Table Module_FindExportedTable (IM3Module i_module, cstr_t i_name)
 {
     const M3Export* e = Module_FindExport(i_module, d_externalKind_table, i_name);
 
-    return e ? i_module->tables[e->index] : NULL;
+    повернути e ? i_module->tables[e->index] : NULL;
 }
 
 
@@ -804,23 +804,23 @@ IM3Global Module_FindExportedGlobal (IM3Module i_module, cstr_t i_name)
 {
     const M3Export* e = Module_FindExport(i_module, d_externalKind_global, i_name);
 
-    return e ? &i_module->globals[e->index] : NULL;
+    повернути e ? &i_module->globals[e->index] : NULL;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#якщо d_m3HasExceptionHandling || d_m3HasStackSwitching
 static
 IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 {
     const M3Export* e = Module_FindExport(i_module, d_externalKind_tag, i_name);
 
-    if (not e) {
-        return NULL;
+    якщо (not e) {
+        повернути NULL;
     }
 
     IM3Tag tag = &i_module->tags[e->index];
 
-    return tag->resolved ? tag->resolved : tag;
+    повернути tag->resolved ? tag->resolved : tag;
 }
 #endif
 
@@ -832,13 +832,13 @@ IM3Tag Module_FindExportedTag (IM3Module i_module, cstr_t i_name)
 static
 bool Module_HasExport (IM3Module i_module, cstr_t i_name)
 {
-    for (u32 i = 0; i < i_module->numExports; ++i) {
-        if (strcmp(i_module->exports[i].name, i_name) == 0) {
-            return true;
+    для (u32 i = 0; i < i_module->numExports; ++i) {
+        якщо (strcmp(i_module->exports[i].name, i_name) == 0) {
+            повернути true;
         }
     }
 
-    return false;
+    повернути false;
 }
 
 
@@ -851,20 +851,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    для (u32 i = 0; i < io_module->numFunctions; ++i) {
         IM3Function f = &io_module->functions[i];
 
-        if (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
+        якщо (f->wasm or not (f->import.moduleUtf8 and f->import.fieldUtf8)) {
             continue;
         }
 
         IM3Module from = m3_FindModule(io_runtime, f->import.moduleUtf8);
-        if (not from) {
+        якщо (not from) {
             continue;
         }
 
         IM3Function exported = Module_FindExportedFunction(from, f->import.fieldUtf8);
-        if (not exported) {
+        якщо (not exported) {
             // the import names a module that is loaded, so its exports settle the
             // question: a name it exports as something else is a type mismatch, and
             // one it does not export at all is an unknown import
@@ -879,20 +879,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         f->resolved = Function_Implementation(exported);
     }
 
-    for (u32 i = 0; i < io_module->numMemories; ++i) {
+    для (u32 i = 0; i < io_module->numMemories; ++i) {
         IM3Memory memory = io_module->memories[i];
 
-        if (not memory->imported or memory->owner != io_module) {
+        якщо (not memory->imported or memory->owner != io_module) {
             continue;
         }
 
         IM3Module from = m3_FindModule(io_runtime, memory->import.moduleUtf8);
-        if (not from) {
+        якщо (not from) {
             continue;
         }
 
         IM3Memory exported = Module_FindExportedMemory(from, memory->import.fieldUtf8);
-        if (not exported) {
+        якщо (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, memory->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -918,20 +918,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->memories[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    для (u32 i = 0; i < io_module->numTables; ++i) {
         IM3Table table = io_module->tables[i];
 
-        if (not table->imported or table->owner != io_module) {
+        якщо (not table->imported or table->owner != io_module) {
             continue;
         }
 
         IM3Module from = m3_FindModule(io_runtime, table->import.moduleUtf8);
-        if (not from) {
+        якщо (not from) {
             continue;
         }
 
         IM3Table exported = Module_FindExportedTable(from, table->import.fieldUtf8);
-        if (not exported) {
+        якщо (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, table->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -953,20 +953,20 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         io_module->tables[i] = exported;
     }
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    для (u32 i = 0; i < io_module->numGlobals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+        якщо (not g->imported or not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
             continue;
         }
 
         IM3Module from = m3_FindModule(io_runtime, g->import.moduleUtf8);
-        if (not from) {
+        якщо (not from) {
             continue;
         }
 
         IM3Global exported = Module_FindExportedGlobal(from, g->import.fieldUtf8);
-        if (not exported) {
+        якщо (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, g->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -977,21 +977,21 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
         g->resolved = exported->resolved ? exported->resolved : exported;
     }
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+#якщо d_m3HasExceptionHandling || d_m3HasStackSwitching
+    для (u32 i = 0; i < io_module->numTags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
+        якщо (not tag->imported or not (tag->import.moduleUtf8 and tag->import.fieldUtf8)) {
             continue;
         }
 
         IM3Module from = m3_FindModule(io_runtime, tag->import.moduleUtf8);
-        if (not from) {
+        якщо (not from) {
             continue;
         }
 
         IM3Tag exported = Module_FindExportedTag(from, tag->import.fieldUtf8);
-        if (not exported) {
+        якщо (not exported) {
             _throwif(m3Err_incompatibleImportType, Module_HasExport(from, tag->import.fieldUtf8));
             _throw(m3Err_unknownImport);
         }
@@ -1002,7 +1002,7 @@ M3Result LinkImports (IM3Runtime io_runtime, IM3Module io_module)
     }
 #endif
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 
@@ -1019,7 +1019,7 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
     i_module->memory0 = i_module->numMemories ? i_module->memories[0]
                                               : &i_module->emptyMemory;
 
-    if (i_module->numMemories == 0) {
+    якщо (i_module->numMemories == 0) {
         // nothing addressable, but _mem still has to point somewhere
         i_module->emptyMemory.owner    = i_module;
         i_module->emptyMemory.pageSize = d_m3DefaultMemPageSize;
@@ -1027,12 +1027,12 @@ M3Result InitMemory (IM3Runtime io_runtime, IM3Module i_module)
 _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
     }
 
-    for (u32 i = 0; i < i_module->numMemories; ++i) {
+    для (u32 i = 0; i < i_module->numMemories; ++i) {
         IM3Memory memory = i_module->memories[i];
 
         // a slot that already points at another module's memory is that
         // module's to allocate
-        if (memory->owner != i_module or memory->mallocated) {
+        якщо (memory->owner != i_module or memory->mallocated) {
             continue;
         }
 
@@ -1049,7 +1049,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
         // 2^64/pagesize overflows a u64 only when a page is a single byte, and
         // a power-of-two page size divides the address space exactly, so the
         // 64-bit division below is 2^64/pagesize written so that it fits.
-        if (not memory->hasMax) {
+        якщо (not memory->hasMax) {
             memory->maxPages = memory->isMemory64
                                  ? (pageSize > 1 ? (UINT64_MAX / pageSize) + 1 : UINT64_MAX)
                                  : (0x100000000ull / pageSize);
@@ -1058,7 +1058,7 @@ _       (ResizeMemory(io_runtime, &i_module->emptyMemory, 0));
 _       (ResizeMemory(io_runtime, memory, memory->initPages));
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 
@@ -1068,7 +1068,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
     u64 numPagesToAlloc = i_numPages;
 
-    if (numPagesToAlloc <= memory->maxPages) {
+    якщо (numPagesToAlloc <= memory->maxPages) {
         // A 64-bit memory may ask for up to 2^48 pages, which overflows a u64
         // of bytes. Nothing that large can be backed, so refuse it up front
         // rather than multiplying into a wrapped size.
@@ -1077,7 +1077,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
         u64 numPageBytes = numPagesToAlloc * memory->pageSize;
 
-#if d_m3MaxLinearMemoryPages > 0
+#якщо d_m3MaxLinearMemoryPages > 0
         // the limit is a memory size, counted in default-sized pages; comparing
         // it against a raw page count would make it 65536 times stricter for a
         // module whose pages are one byte
@@ -1086,7 +1086,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 #endif
 
         // Limit the amount of memory that gets actually allocated
-        if (io_runtime->memoryLimit) {
+        якщо (io_runtime->memoryLimit) {
             numPageBytes = M3_MIN(numPageBytes, (u64)io_runtime->memoryLimit);
         }
 
@@ -1098,7 +1098,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
         _throwif("linear memory limitation exceeded", numPageBytes > (u64)SIZE_MAX - sizeof(M3MemoryHeader));
 
-#if d_m3GuardedMemory
+#якщо d_m3GuardedMemory
 
         // A slot holds every address a Wasm access can name, and nothing beyond
         // that: a memory larger than the data part of one would put addresses past
@@ -1116,7 +1116,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         _throwif("guarded memory needs a page size the system's divides into",
                  (memory->pageSize % m3_HostPageSize()) != 0);
 
-        if (memory->guardSlot == NULL) {
+        якщо (memory->guardSlot == NULL) {
             memory->guardSlot = Guard_TakeSlot();
             _throwifnull(memory->guardSlot);
         }
@@ -1127,7 +1127,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
         memory->mallocated = Guard_SlotHeader(memory->guardSlot);
 
-#else
+#інакше
 
         size_t numBytes = (size_t)numPageBytes + sizeof(M3MemoryHeader);
 
@@ -1146,7 +1146,7 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
 
 #endif
 
-#if d_m3LogRuntime
+#якщо d_m3LogRuntime
         M3MemoryHeader* oldMallocated = memory->mallocated;
 #endif
 
@@ -1160,25 +1160,25 @@ M3Result ResizeMemory (IM3Runtime io_runtime, IM3Memory memory, u64 i_numPages)
         memory->mallocated->maxStack = (m3slot_t*)io_runtime->originStack + io_runtime->numStackSlots;
 
         m3log(runtime, "resized old: %p; mem: %p; length: %zu; pages: %llu", oldMallocated, memory->mallocated, memory->mallocated->length, (unsigned long long)memory->numPages);
-    } else {
+    } інакше {
         result = m3Err_wasmMemoryOverflow;
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 
 void FreeMemoryBlock (IM3Memory io_memory)
 {
-    if (io_memory->mallocated and io_memory->mallocated->runtime) {
+    якщо (io_memory->mallocated and io_memory->mallocated->runtime) {
         io_memory->mallocated->runtime->memoryBytesUsed -= io_memory->mallocated->length;
     }
-#if d_m3GuardedMemory
+#якщо d_m3GuardedMemory
     Guard_GiveSlot(io_memory->guardSlot);
     io_memory->guardSlot = NULL;
 
     io_memory->mallocated = NULL;
-#else
+#інакше
     m3_Free(io_memory->mallocated);
 #endif
 }
@@ -1188,7 +1188,7 @@ M3Result InitGlobals (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (io_module->numGlobals) {
+    якщо (io_module->numGlobals) {
         // placing the globals in their structs isn't good for cache locality, but i don't really know what the global
         // access patterns typically look like yet.
 
@@ -1196,27 +1196,27 @@ M3Result InitGlobals (IM3Module io_module)
 
         //          if (io_module->globalMemory)
         {
-            for (u32 i = 0; i < io_module->numGlobals; ++i) {
+            для (u32 i = 0; i < io_module->numGlobals; ++i) {
                 M3Global* g = &io_module->globals[i];                           m3log (runtime, "initializing global: %d", i);
 
-                if (g->initExpr) {
+                якщо (g->initExpr) {
                     bytes_t start = g->initExpr;
 
                     result = EvaluateExpression(io_module, &g->i64Value, g->type, &start, g->initExpr + g->initExprSize);
 
-                    if (not result) {
+                    якщо (not result) {
                         // io_module->globalMemory [i] = initValue;
-                    } else {
+                    } інакше {
                         break;
                     }
-                } else {                                                        m3log (runtime, "importing global");
+                } інакше {                                                        m3log (runtime, "importing global");
                 }
             }
         }
         //          else result = ErrorModule (m3Err_mallocFailed, io_module, "could allocate globals for module: '%s", io_module->name);
     }
 
-    return result;
+    повернути result;
 }
 
 
@@ -1224,12 +1224,12 @@ M3Result InitDataSegments (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numDataSegments; ++i) {
+    для (u32 i = 0; i < io_module->numDataSegments; ++i) {
         M3DataSegment* segment = &io_module->dataSegments[i];
 
         // A passive segment stays available for memory.init until data.drop.
         // An active one is copied here and then counts as dropped.
-        if (segment->isPassive) {
+        якщо (segment->isPassive) {
             continue;
         }
 
@@ -1246,9 +1246,9 @@ M3Result InitDataSegments (IM3Module io_module)
         u64     segmentOffset = 0;
         bytes_t start         = segment->initExpr;
 
-        if (io_memory->isMemory64) {
+        якщо (io_memory->isMemory64) {
 _           (EvaluateExpression(io_module, &segmentOffset, c_m3Type_i64, &start, segment->initExpr + segment->initExprSize));
-        } else {
+        } інакше {
             u32 offset32;
 _           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segment->initExpr + segment->initExprSize));
             segmentOffset = offset32;
@@ -1256,18 +1256,18 @@ _           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &start, segm
 
         m3log(runtime, "loading data segment: %d; size: %d; offset: %llu", i, segment->size, (unsigned long long)segmentOffset);
 
-        if (segmentOffset <= io_memory->mallocated->length &&
+        якщо (segmentOffset <= io_memory->mallocated->length &&
             (u64)segment->size <= io_memory->mallocated->length - segmentOffset) {
             u8* dest = m3MemData(io_memory->mallocated) + segmentOffset;
             memcpy(dest, segment->data, segment->size);
-        } else {
+        } інакше {
             _throw("data segment out of bounds");
         }
 
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 
@@ -1282,25 +1282,25 @@ M3Result ResolveElements (IM3Module io_module, M3ElementSegment* i_segment, void
     bytes_t  pos = i_segment->elements;
     cbytes_t end = io_module->elementSectionEnd;
 
-    for (u32 e = 0; e < i_segment->numElements; ++e) {
+    для (u32 e = 0; e < i_segment->numElements; ++e) {
         u32   funcIndex;
         void* ref = NULL;
 
-        if (i_segment->isExpr) {
+        якщо (i_segment->isExpr) {
             m3opcode_t opcode;
 _           (Read_opcode(&opcode, &pos, end));
 
-            if (opcode == c_waOp_refFunc) {
+            якщо (opcode == c_waOp_refFunc) {
 _               (ReadLEB_u32(&funcIndex, &pos, end));
                 _throwif("function index out of range", funcIndex >= io_module->numFunctions);
                 ref = Function_Implementation(&io_module->functions[funcIndex]);
-            } else if (opcode == c_waOp_refNull) {
+            } інакше якщо (opcode == c_waOp_refNull) {
                 i8 waType;
                 u8 nullType;
 _               (ReadLEB_i7(&waType, &pos, end));
 _               (NormalizeType(&nullType, waType));
                 _throwif(m3Err_typeMismatch, nullType != i_segment->type);
-            } else if (opcode == c_waOp_getGlobal) {
+            } інакше якщо (opcode == c_waOp_getGlobal) {
                 // wasm 2.0 lets an element expression read an imported
                 // immutable global, which is how one module seeds another's
                 // table with a reference it exported.
@@ -1315,18 +1315,18 @@ _               (ReadLEB_u32(&globalIndex, &pos, end));
                 _throwif(m3Err_typeMismatch, BaseTypeOf(global->type) != BaseTypeOf(i_segment->type));
 
                 // read the cell the import was linked to, not the placeholder
-                if (global->resolved) {
+                якщо (global->resolved) {
                     global = global->resolved;
                 }
 
                 ref = global->refValue;
-            } else {
+            } інакше {
                 _throw("constant expression required");
             }
 
 _           (Read_opcode(&opcode, &pos, end));
             _throwif(m3Err_wasmMalformed, opcode != c_waOp_end);
-        } else {
+        } інакше {
 _           (ReadLEB_u32(&funcIndex, &pos, end));
             _throwif("function index out of range", funcIndex >= io_module->numFunctions);
             ref = Function_Implementation(&io_module->functions[funcIndex]);
@@ -1335,7 +1335,7 @@ _           (ReadLEB_u32(&funcIndex, &pos, end));
         o_elements[e] = ref;
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 
@@ -1346,15 +1346,15 @@ M3Result InitTableAndElements (IM3Module io_module)
     cbytes_t end = io_module->elementSectionEnd;
     M3Table* table;
 
-    for (u32 i = 0; i < io_module->numTables; ++i) {
+    для (u32 i = 0; i < io_module->numTables; ++i) {
         table = io_module->tables[i];
 
         // a slot pointing at another module's table is that module's to fill
-        if (table->owner != io_module) {
+        якщо (table->owner != io_module) {
             continue;
         }
 
-        if (table->size) {
+        якщо (table->size) {
             IM3Runtime runtime = io_module->runtime;
             _throwif(m3Err_tableLimitExceeded, runtime->tableElementsLimit and
                                                  table->size > runtime->tableElementsLimit - runtime->tableElementsUsed);
@@ -1362,31 +1362,31 @@ M3Result InitTableAndElements (IM3Module io_module)
             _throwifnull(table->elements);
             runtime->tableElementsUsed += table->size;
 
-            if (table->initExpr) {
+            якщо (table->initExpr) {
                 void*   value = NULL;
                 bytes_t start = table->initExpr;
 _               (EvaluateExpression(io_module, &value, BaseTypeOf(table->type),
                                      &start, table->initExpr + table->initExprSize));
 
-                for (u32 e = 0; e < table->size; ++e) {
+                для (u32 e = 0; e < table->size; ++e) {
                     table->elements[e] = value;
                 }
             }
         }
     }
 
-    for (u32 i = 0; i < io_module->numElementSegments; ++i) {
+    для (u32 i = 0; i < io_module->numElementSegments; ++i) {
         M3ElementSegment* segment = &io_module->elementSegments[i];
 
         // Declarative segments only make their functions referenceable, and
         // passive ones wait for table.init, so neither is written out here.
-        if (segment->mode == c_m3Elem_declarative) {
+        якщо (segment->mode == c_m3Elem_declarative) {
             segment->dropped = true;
             continue;
         }
 
-        if (segment->mode == c_m3Elem_passive) {
-            if (segment->numElements) {
+        якщо (segment->mode == c_m3Elem_passive) {
+            якщо (segment->numElements) {
                 segment->resolved = m3_AllocArray(void*, segment->numElements);
                 _throwifnull(segment->resolved);
 _               (ResolveElements(io_module, segment, segment->resolved));
@@ -1401,9 +1401,9 @@ _               (ResolveElements(io_module, segment, segment->resolved));
         u64     offset = 0;
         bytes_t expr   = segment->initExpr;
 
-        if (table->isTable64) {
+        якщо (table->isTable64) {
 _           (EvaluateExpression(io_module, &offset, c_m3Type_i64, &expr, end));
-        } else {
+        } інакше {
             u32 offset32;
 _           (EvaluateExpression(io_module, &offset32, c_m3Type_i32, &expr, end));
             offset = offset32;
@@ -1417,44 +1417,44 @@ _       (ResolveElements(io_module, segment, table->elements + offset));
         segment->dropped = true;
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 M3Result m3_CompileModule (IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    для (u32 i = 0; i < io_module->numFunctions; ++i) {
         IM3Function f = &io_module->functions[i];
-        if (f->wasm and not f->compiled) {
+        якщо (f->wasm and not f->compiled) {
 _           (CompileFunction(f));
         }
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
-#if d_m3HasExceptionHandling
+#якщо d_m3HasExceptionHandling
 
 M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs)
 {
     M3Exception* exception = (M3Exception*)m3_Malloc("M3Exception", sizeof(M3Exception) + i_numArgs * sizeof(u64));
 
-    if (exception) {
+    якщо (exception) {
         exception->tag     = i_tag;
         exception->numArgs = i_numArgs;
         exception->reified = false;
         exception->prev    = NULL;
         exception->next    = io_runtime->exceptions;
 
-        if (exception->next) {
+        якщо (exception->next) {
             exception->next->prev = exception;
         }
 
         io_runtime->exceptions = exception;
     }
 
-    return exception;
+    повернути exception;
 }
 
 
@@ -1463,17 +1463,17 @@ M3Exception* NewException (IM3Runtime io_runtime, IM3Tag i_tag, u32 i_numArgs)
 // been copied out.
 void FreeException (IM3Runtime io_runtime, M3Exception* i_exception)
 {
-    if (i_exception->prev) {
+    якщо (i_exception->prev) {
         i_exception->prev->next = i_exception->next;
-    } else {
+    } інакше {
         io_runtime->exceptions = i_exception->next;
     }
 
-    if (i_exception->next) {
+    якщо (i_exception->next) {
         i_exception->next->prev = i_exception->prev;
     }
 
-    if (io_runtime->pendingException == i_exception) {
+    якщо (io_runtime->pendingException == i_exception) {
         io_runtime->pendingException = NULL;
     }
 
@@ -1491,7 +1491,7 @@ void FreeExceptions (IM3Runtime io_runtime)
     io_runtime->exceptions       = NULL;
     io_runtime->pendingException = NULL;
 
-    while (exception) {
+    поки (exception) {
         M3Exception* next = exception->next;
         m3_Free_Impl(exception);
         exception = next;
@@ -1507,16 +1507,16 @@ void FreeExceptions (IM3Runtime io_runtime)
 static
 void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 {
-    if (io_runtime->uncaughtException) {
+    якщо (io_runtime->uncaughtException) {
         m3_Free(io_runtime->uncaughtException);
     }
 
     M3Exception* exception = io_runtime->pendingException;
 
-    if (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
+    якщо (M3_UNLIKELY(i_result == m3Err_trapUncaughtException) and exception) {
         M3Exception* copy = (M3Exception*)m3_CopyMem(exception, sizeof(M3Exception) + exception->numArgs * sizeof(u64));
 
-        if (copy) {
+        якщо (copy) {
             copy->next = NULL;
             copy->prev = NULL;
         }
@@ -1528,15 +1528,15 @@ void RecordUncaughtException (IM3Runtime io_runtime, M3Result i_result)
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#якщо d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
 {
-    if (not i_module or not i_tagName) {
-        return NULL;
+    якщо (not i_module or not i_tagName) {
+        повернути NULL;
     }
 
-    return Module_FindExportedTag(i_module, i_tagName);
+    повернути Module_FindExportedTag(i_module, i_tagName);
 }
 
 
@@ -1563,7 +1563,7 @@ _   (Environment_AddFuncType(io_runtime->environment, &type));
 
     *o_tag = &hostTag->tag;
 } _catch:
-    return result;
+    повернути result;
 }
 
 
@@ -1572,8 +1572,8 @@ M3Result m3_LinkTag (IM3Module         io_module,
                      const char* const i_tagName,
                      IM3Tag            i_tag)
 {
-    if (not io_module or not i_moduleName or not i_tagName or not i_tag) {
-        return m3Err_tagLookupFailed;
+    якщо (not io_module or not i_moduleName or not i_tagName or not i_tag) {
+        повернути m3Err_tagLookupFailed;
     }
 
     const bool wildcardModule = (strcmp(i_moduleName, "*") == 0);
@@ -1581,14 +1581,14 @@ M3Result m3_LinkTag (IM3Module         io_module,
 
     M3Result result = m3Err_tagLookupFailed;
 
-    for (u32 i = 0; i < io_module->numTags; ++i) {
+    для (u32 i = 0; i < io_module->numTags; ++i) {
         IM3Tag tag = &io_module->tags[i];
 
-        if (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
+        якщо (tag->imported and tag->import.moduleUtf8 and tag->import.fieldUtf8 and
             strcmp(tag->import.fieldUtf8, i_tagName) == 0 and
             (wildcardModule or strcmp(tag->import.moduleUtf8, i_moduleName) == 0)) {
-            if (tag->type != target->type) {
-                return m3Err_incompatibleImportType;
+            якщо (tag->type != target->type) {
+                повернути m3Err_incompatibleImportType;
             }
 
             tag->resolved = target;
@@ -1596,64 +1596,64 @@ M3Result m3_LinkTag (IM3Module         io_module,
         }
     }
 
-    return result;
+    повернути result;
 }
 
 
 uint32_t m3_GetTagArgCount (IM3Tag i_tag)
 {
-    return i_tag ? i_tag->type->numArgs : 0;
+    повернути i_tag ? i_tag->type->numArgs : 0;
 }
 
 
 M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    if (i_tag and i_index < i_tag->type->numArgs) {
-        return (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
+    якщо (i_tag and i_index < i_tag->type->numArgs) {
+        повернути (M3ValueType)BaseTypeOf(d_FuncArgType(i_tag->type, i_index));
     }
 
-    return c_m3Type_none;
+    повернути c_m3Type_none;
 }
 
-#else
+#інакше
 
 IM3Tag m3_FindTag (IM3Module i_module, const char* const i_tagName)
 {
-    return NULL;
+    повернути NULL;
 }
 
 M3Result m3_NewTag (IM3Runtime io_runtime, IM3Tag* o_tag, const char* const i_signature)
 {
-    if (o_tag) {
+    якщо (o_tag) {
         *o_tag = NULL;
     }
-    return m3Err_tagLookupFailed;
+    повернути m3Err_tagLookupFailed;
 }
 
 M3Result m3_LinkTag (IM3Module io_module, const char* const i_moduleName, const char* const i_tagName, IM3Tag i_tag)
 {
-    return m3Err_tagLookupFailed;
+    повернути m3Err_tagLookupFailed;
 }
 
 uint32_t m3_GetTagArgCount (IM3Tag i_tag)
 {
-    return 0;
+    повернути 0;
 }
 
 M3ValueType m3_GetTagArgType (IM3Tag i_tag, uint32_t i_index)
 {
-    return c_m3Type_none;
+    повернути c_m3Type_none;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasExceptionHandling
+#якщо d_m3HasExceptionHandling
 
 M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
 {
-    if (not io_runtime or not i_tag) {
-        return m3Err_tagLookupFailed;
+    якщо (not io_runtime or not i_tag) {
+        повернути m3Err_tagLookupFailed;
     }
 
     IM3Tag      tag  = i_tag->resolved ? i_tag->resolved : i_tag;
@@ -1661,26 +1661,26 @@ M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc
 
     // a tag with results is a stack switching control tag, which is suspended
     // with rather than thrown
-    if (type->numRets) {
-        return m3Err_typeMismatch;
+    якщо (type->numRets) {
+        повернути m3Err_typeMismatch;
     }
-    if (i_argc != type->numArgs) {
-        return m3Err_argumentCountMismatch;
+    якщо (i_argc != type->numArgs) {
+        повернути m3Err_argumentCountMismatch;
     }
     // with nothing on the stack there is nothing to unwind, and the exception
     // would sit on the runtime's list until some later call ended
-    if (io_runtime->callNesting == 0) {
-        return "m3_ThrowException called outside a host function";
+    якщо (io_runtime->callNesting == 0) {
+        повернути "m3_ThrowException called outside a host function";
     }
 
     M3Exception* exception = NewException(io_runtime, tag, i_argc);
-    if (not exception) {
-        return m3Err_mallocFailed;
+    якщо (not exception) {
+        повернути m3Err_mallocFailed;
     }
 
     // the layout op_Throw gives a payload: 32-bit values zero-extended, floats
     // as their bit pattern
-    for (u32 i = 0; i < i_argc; ++i) {
+    для (u32 i = 0; i < i_argc; ++i) {
         const void* value = i_argptrs[i];
 
         switch (BaseTypeOf(d_FuncArgType(type, i))) {
@@ -1703,40 +1703,40 @@ M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc
             break;
         default:
             FreeException(io_runtime, exception);
-            return "unknown argument type";
+            повернути "unknown argument type";
         }
     }
 
     io_runtime->pendingException = exception;
 
-    return m3Err_pendingException;
+    повернути m3Err_pendingException;
 }
 
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    if (i_runtime and i_runtime->uncaughtException) {
-        return i_runtime->uncaughtException->tag;
+    якщо (i_runtime and i_runtime->uncaughtException) {
+        повернути i_runtime->uncaughtException->tag;
     }
 
-    return NULL;
+    повернути NULL;
 }
 
 
 M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
 {
-    if (not i_runtime or not i_runtime->uncaughtException) {
-        return "no uncaught exception";
+    якщо (not i_runtime or not i_runtime->uncaughtException) {
+        повернути "no uncaught exception";
     }
 
     const M3Exception* exception = i_runtime->uncaughtException;
     IM3FuncType        type      = exception->tag->type;
 
-    if (i_argc != exception->numArgs) {
-        return m3Err_argumentCountMismatch;
+    якщо (i_argc != exception->numArgs) {
+        повернути m3Err_argumentCountMismatch;
     }
 
-    for (u32 i = 0; i < i_argc; ++i) {
+    для (u32 i = 0; i < i_argc; ++i) {
         void* value = (void*)o_argptrs[i];
         u64   bits  = exception->args[i];
 
@@ -1758,34 +1758,34 @@ M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void*
             *(uintptr_t*)value = (uintptr_t)bits;
             break;
         default:
-            return "unknown argument type";
+            повернути "unknown argument type";
         }
     }
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
-#else
+#інакше
 
 M3Result m3_ThrowException (IM3Runtime io_runtime, IM3Tag i_tag, uint32_t i_argc, const void* i_argptrs[])
 {
-    return m3Err_tagLookupFailed;
+    повернути m3Err_tagLookupFailed;
 }
 
 IM3Tag m3_GetExceptionTag (IM3Runtime i_runtime)
 {
-    return NULL;
+    повернути NULL;
 }
 
 M3Result m3_GetExceptionArgs (IM3Runtime i_runtime, uint32_t i_argc, const void* o_argptrs[])
 {
-    return "no uncaught exception";
+    повернути "no uncaught exception";
 }
 
 #endif // d_m3HasExceptionHandling
 
 
-#if d_m3GuardedMemory
+#якщо d_m3GuardedMemory
 
 // What RunCodeProtected hands to the platform layer to run, and what comes back
 typedef struct M3ProtectedRun {
@@ -1800,10 +1800,10 @@ void RunCodeBody (void* io_context)
 {
     M3ProtectedRun* run = (M3ProtectedRun*)io_context;
 
-#  if (d_m3EnableOpProfiling || d_m3EnableOpTracing)
+#  якщо (d_m3EnableOpProfiling || d_m3EnableOpTracing)
     run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
                                     d_m3OpDefaultArgs, d_m3BaseCstr);
-#  else
+#  інакше
     run->result = (M3Result)RunCode(run->pc, (m3stack_t)run->runtime->stack, run->mem,
                                     d_m3OpDefaultArgs);
 #  endif
@@ -1819,8 +1819,8 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
 {
     // Memory operations in this build carry no bounds check, so code only runs where a
     // fault past the end of a memory can still be turned into a trap
-    if (M3_UNLIKELY(not m3_HostGuardsActive())) {
-        return ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
+    якщо (M3_UNLIKELY(not m3_HostGuardsActive())) {
+        повернути ErrorRuntime(m3Err_memoryGuardsUnavailable, i_runtime,
                             "another part of the process holds the fault signal");
     }
 
@@ -1834,17 +1834,17 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
     size_t arenaBytes;
     Guard_ArenaRange(&arena, &arenaBytes);
 
-    if (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
-        return m3Err_trapOutOfBoundsMemoryAccess;
+    якщо (not m3_HostProtectedCall(RunCodeBody, &run, arena, arenaBytes)) {
+        повернути m3Err_trapOutOfBoundsMemoryAccess;
     }
 
-    return run.result;
+    повернути run.result;
 }
 
 #endif // d_m3GuardedMemory
 
 
-#if d_m3HasStackSwitching
+#якщо d_m3HasStackSwitching
 
 // The function a suspended continuation stopped in: the callee of its innermost
 // call frame, or the function it was entered with if it made no call. Frames are
@@ -1852,13 +1852,13 @@ M3Result RunCodeProtected (IM3Runtime i_runtime, pc_t i_pc, M3MemoryHeader* i_me
 static
 IM3Function Continuation_InnermostFunction (IM3Continuation i_cont)
 {
-    for (u32 i = 0; i < i_cont->numFrames; ++i) {
-        if (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
-            return i_cont->frames[i].call.function;
+    для (u32 i = 0; i < i_cont->numFrames; ++i) {
+        якщо (i_cont->frames[i].kind == frame_call && i_cont->frames[i].call.function) {
+            повернути i_cont->frames[i].call.function;
         }
     }
 
-    return i_cont->entryFunction;
+    повернути i_cont->entryFunction;
 }
 
 
@@ -1875,21 +1875,21 @@ void Runtime_PlaceCallStack (IM3Runtime io_runtime)
 
     io_runtime->stack = io_runtime->originStack;
 
-    if (not root or root->state != cont_suspended) {
-        return;
+    якщо (not root or root->state != cont_suspended) {
+        повернути;
     }
 
     m3stack_t   sp       = root->sp;
     IM3Function function = Continuation_InnermostFunction(root);
 
-    if (root->numFrames and root->frames[0].kind == frame_resume) {
+    якщо (root->numFrames and root->frames[0].kind == frame_resume) {
         sp = root->frames[0].sp;
     }
 
     m3slot_t* base = (m3slot_t*)io_runtime->originStack;
     m3slot_t* top  = (m3slot_t*)sp + (function ? function->maxStackSlots : 0);
 
-    if (top > base + io_runtime->numStackSlots) {
+    якщо (top > base + io_runtime->numStackSlots) {
         top = base + io_runtime->numStackSlots;
     }
 
@@ -1911,9 +1911,9 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     // to, not against some runtime-wide one
     M3MemoryHeader* _mem = Module_MemoryHeader(i_function->module);
 
-#if d_m3HasSnapshots
-    if (M3_UNLIKELY(i_function->module->isUnusable)) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+#якщо d_m3HasSnapshots
+    якщо (M3_UNLIKELY(i_function->module->isUnusable)) {
+        повернути "a snapshot failed to restore into the module, so it cannot run";
     }
     i_function->module->hasRun = true;
 #endif
@@ -1922,16 +1922,16 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
 
     // a host function calling back into Wasm does not change which call a trap
     // ends: that is still the one the host made first
-    if (i_runtime->callNesting++ == 0) {
+    якщо (i_runtime->callNesting++ == 0) {
         i_runtime->entered = i_function;
     }
-#if d_m3HasExceptionHandling
+#якщо d_m3HasExceptionHandling
     // handler stacks don't nest across a call boundary: a host function calling
     // back into Wasm cannot be caught by a try_table its own caller entered
     u32 savedTryDepth   = i_runtime->tryDepth;
     i_runtime->tryDepth = 0;
 #endif
-#if d_m3HasStackSwitching
+#якщо d_m3HasStackSwitching
     // nor do continuations: the native frames on the far side of a host call
     // are not ours to record, so a suspend in here has no handler to reach and
     // no resume to unwind to
@@ -1945,35 +1945,35 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
                      not (i_runtime->rootContinuation and
                           i_runtime->rootContinuation->state == cont_suspended);
 
-    if (claimRoot and not i_runtime->rootContinuation) {
+    якщо (claimRoot and not i_runtime->rootContinuation) {
         i_runtime->rootContinuation = Continuation_New(i_runtime, i_function->funcType, i_function);
 
-        if (i_runtime->rootContinuation) {
+        якщо (i_runtime->rootContinuation) {
             // The root borrows the runtime's stack and is not charged as cont.new.
             i_runtime->rootContinuation->numStackSlots = i_runtime->numStackSlots;
-        } else {
+        } інакше {
             claimRoot = false;
         }
     }
 
-    if (claimRoot) {
+    якщо (claimRoot) {
         i_runtime->activeContinuation              = i_runtime->rootContinuation;
         i_runtime->rootContinuation->entryFunction = i_function;
         i_runtime->rootContinuation->state         = cont_running;
         i_runtime->rootContinuation->numFrames     = 0;
-    } else {
+    } інакше {
         i_runtime->activeContinuation = NULL;
     }
 #endif
-#if d_m3GuardedMemory
+#якщо d_m3GuardedMemory
     M3Result result = RunCodeProtected(i_runtime, i_pc, _mem);
 #elif (d_m3EnableOpProfiling || d_m3EnableOpTracing)
     M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs, d_m3BaseCstr);
-#else
+#інакше
     M3Result result = (M3Result)RunCode(i_pc, (m3stack_t)i_runtime->stack, _mem, d_m3OpDefaultArgs);
 #endif
-#if d_m3HasStackSwitching
-    if (claimRoot) {
+#якщо d_m3HasStackSwitching
+    якщо (claimRoot) {
         i_runtime->rootContinuation->state =
           (result == m3Err_continuationSuspended) ? cont_suspended : cont_returned;
 
@@ -1981,46 +1981,46 @@ M3Result RunCodeChecked (IM3Runtime i_runtime, IM3Function i_function)
     }
     i_runtime->activeContinuation = savedContinuation;
 #endif
-#if d_m3HasExceptionHandling
+#якщо d_m3HasExceptionHandling
     i_runtime->tryDepth = savedTryDepth;
 
     // an exception that reached the bottom of the call stack found no handler
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+    якщо (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(i_runtime, result);
 
     // a paused invocation can still reach the exceptions it holds, so they wait
     // for it to finish
-    if (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
+    якщо (i_runtime->callNesting == 1 and not m3_IsSuspended(i_runtime)) {
         FreeExceptions(i_runtime);
     }
 #endif
     i_runtime->callNesting--;
     d_m3StackLimitLeave(i_runtime);
 
-    return result;
+    повернути result;
 }
 
 M3Result m3_RunStart (IM3Module io_module)
 {
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // Execution disabled for fuzzing builds
-    return m3Err_none;
+    повернути m3Err_none;
 #endif
 
     M3Result result           = m3Err_none;
     i32      startFunctionTmp = -1;
 
-    if (io_module and io_module->startFunction >= 0) {
+    якщо (io_module and io_module->startFunction >= 0) {
         IM3Function function = &io_module->functions[io_module->startFunction];
 
-        if (not function->compiled) {
+        якщо (not function->compiled) {
 _           (CompileFunction(function));
         }
 
         IM3FuncType ftype = function->funcType;
-        if (ftype->numArgs != 0 || ftype->numRets != 0) {
+        якщо (ftype->numArgs != 0 || ftype->numRets != 0) {
             _throw(m3Err_argumentCountMismatch);
         }
 
@@ -2035,14 +2035,14 @@ _           (CompileFunction(function));
 
         // a start function that suspended is not to be started again: resuming
         // is what finishes it
-        if (result and result != m3Err_continuationSuspended) {
+        якщо (result and result != m3Err_continuationSuspended) {
             io_module->startFunction = startFunctionTmp;
             EXCEPTION_PRINT(result);
             goto _catch;
         }
     }
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 // TODO: deal with main + side-modules loading efforcement
@@ -2050,8 +2050,8 @@ M3Result m3_LoadModule (IM3Runtime io_runtime, IM3Module io_module)
 {
     M3Result result = m3Err_none;
 
-    if (M3_UNLIKELY(io_module->runtime)) {
-        return m3Err_moduleAlreadyLinked;
+    якщо (M3_UNLIKELY(io_module->runtime)) {
+        повернути m3Err_moduleAlreadyLinked;
     }
 
     io_module->runtime = io_runtime;
@@ -2076,7 +2076,7 @@ _   (InitDataSegments(io_module));
 
     io_module->next     = io_runtime->modules;
     io_runtime->modules = io_module;
-    return result; // ok
+    повернути result; // ok
 
 _catch:
     // The runtime owns the module either way. Instantiation may already have
@@ -2090,12 +2090,12 @@ _catch:
     io_module->next = NULL;
 
     IM3Module* tail = &io_runtime->modules;
-    while (*tail) {
+    поки (*tail) {
         tail = &(*tail)->next;
     }
     *tail = io_module;
 
-    return result;
+    повернути result;
 }
 
 IM3Global m3_FindGlobal (IM3Module         io_module,
@@ -2103,75 +2103,75 @@ IM3Global m3_FindGlobal (IM3Module         io_module,
 {
     // Search exports
     IM3Global exported = Module_FindExportedGlobal(io_module, i_globalName);
-    if (exported) {
+    якщо (exported) {
         // a re-exported global is the one that was imported, so reads and
         // writes have to reach the cell that actually holds the value
-        return exported->resolved ? exported->resolved : exported;
+        повернути exported->resolved ? exported->resolved : exported;
     }
 
     // Search imports
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    для (u32 i = 0; i < io_module->numGlobals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (g->import.moduleUtf8 and g->import.fieldUtf8) {
-            if (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
-                return g->resolved ? g->resolved : g;
+        якщо (g->import.moduleUtf8 and g->import.fieldUtf8) {
+            якщо (strcmp(g->import.fieldUtf8, i_globalName) == 0) {
+                повернути g->resolved ? g->resolved : g;
             }
         }
     }
-    return NULL;
+    повернути NULL;
 }
 
 M3Result m3_GetGlobal (IM3Global      i_global,
                        IM3TaggedValue o_value)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    якщо (not i_global) {
+        повернути m3Err_globalLookupFailed;
     }
 
     switch (i_global->type) {
     case c_m3Type_i32: o_value->value.i32 = i_global->i32Value; break;
     case c_m3Type_i64: o_value->value.i64 = i_global->i64Value; break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
     case c_m3Type_f32: o_value->value.f32 = i_global->f32Value; break;
     case c_m3Type_f64: o_value->value.f64 = i_global->f64Value; break;
 #endif
-    default: return m3Err_invalidTypeId;
+    default: повернути m3Err_invalidTypeId;
     }
 
     o_value->type = (M3ValueType)(i_global->type);
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 M3Result m3_SetGlobal (IM3Global            i_global,
                        const IM3TaggedValue i_value)
 {
-    if (not i_global) {
-        return m3Err_globalLookupFailed;
+    якщо (not i_global) {
+        повернути m3Err_globalLookupFailed;
     }
-    if (not i_global->isMutable) {
-        return m3Err_globalNotMutable;
+    якщо (not i_global->isMutable) {
+        повернути m3Err_globalNotMutable;
     }
-    if (i_global->type != i_value->type) {
-        return m3Err_globalTypeMismatch;
+    якщо (i_global->type != i_value->type) {
+        повернути m3Err_globalTypeMismatch;
     }
 
     switch (i_value->type) {
     case c_m3Type_i32: i_global->i32Value = i_value->value.i32; break;
     case c_m3Type_i64: i_global->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
     case c_m3Type_f32: i_global->f32Value = i_value->value.f32; break;
     case c_m3Type_f64: i_global->f64Value = i_value->value.f64; break;
 #endif
-    default: return m3Err_invalidTypeId;
+    default: повернути m3Err_invalidTypeId;
     }
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 M3ValueType m3_GetGlobalType (IM3Global i_global)
 {
-    return (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
+    повернути (i_global) ? (M3ValueType)(i_global->type) : c_m3Type_none;
 }
 
 
@@ -2181,28 +2181,28 @@ void* v_FindFunction (IM3Module i_module, void* i_info)
 
     // Prefer exported functions
     IM3Function exported = Module_FindExportedFunction(i_module, i_name);
-    if (exported) {
-        return exported;
+    якщо (exported) {
+        повернути exported;
     }
 
     // Search internal functions
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    для (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         bool isImported = f->import.moduleUtf8 or f->import.fieldUtf8;
 
-        if (isImported) {
+        якщо (isImported) {
             continue;
         }
 
-        for (int j = 0; j < f->numNames; j++) {
-            if (f->names[j] and strcmp(f->names[j], i_name) == 0) {
-                return f;
+        для (ціле j = 0; j < f->numNames; j++) {
+            якщо (f->names[j] and strcmp(f->names[j], i_name) == 0) {
+                повернути f;
             }
         }
     }
 
-    return NULL;
+    повернути NULL;
 }
 
 
@@ -2212,14 +2212,14 @@ M3Result PrepareFoundFunction (IM3Function* o_function, IM3Function i_function)
 {
     M3Result result = m3Err_none;
 
-    if (not i_function->compiled) {
+    якщо (not i_function->compiled) {
 _       (CompileFunction(i_function))
     }
 
     _catch:
     *o_function = result ? NULL : i_function;
 
-    return result;
+    повернути result;
 }
 
 
@@ -2231,36 +2231,36 @@ M3Result m3_FindFunction (IM3Function* o_function, IM3Runtime i_runtime, const c
                                                                 d_m3Assert (o_function and i_runtime and i_functionName);
     IM3Function function = NULL;
 
-    if (not i_runtime->modules) {
+    якщо (not i_runtime->modules) {
         *o_function = NULL;
-        return "no modules loaded";
+        повернути "no modules loaded";
     }
 
     function = (IM3Function)ForEachModule(i_runtime, v_FindFunction, (void*)i_functionName);
 
-    if (not function) {
+    якщо (not function) {
         *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
+        повернути ErrorModule(m3Err_functionLookupFailed, i_runtime->modules, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    повернути PrepareFoundFunction(o_function, function);
 }
 
 
 IM3Module m3_FindModule (IM3Runtime i_runtime, const char* const i_moduleName)
 {
-    if (not i_runtime or not i_moduleName) {
-        return NULL;
+    якщо (not i_runtime or not i_moduleName) {
+        повернути NULL;
     }
 
     // the list is newest-first, so a name registered twice names the newer one
-    for (IM3Module m = i_runtime->modules; m; m = m->next) {
-        if (m->name and strcmp(m->name, i_moduleName) == 0) {
-            return m;
+    для (IM3Module m = i_runtime->modules; m; m = m->next) {
+        якщо (m->name and strcmp(m->name, i_moduleName) == 0) {
+            повернути m;
         }
     }
 
-    return NULL;
+    повернути NULL;
 }
 
 
@@ -2268,19 +2268,19 @@ IM3Module m3_FindModule (IM3Runtime i_runtime, const char* const i_moduleName)
 M3Result m3_FindFunctionIn (IM3Function* o_function, IM3Module i_module, const char* const i_functionName)
 {
                                                                 d_m3Assert (o_function and i_functionName);
-    if (not i_module) {
+    якщо (not i_module) {
         *o_function = NULL;
-        return m3Err_functionLookupFailed;      // ErrorModule would deref it
+        повернути m3Err_functionLookupFailed;      // ErrorModule would deref it
     }
 
     IM3Function function = (IM3Function)v_FindFunction(i_module, (void*)i_functionName);
 
-    if (not function) {
+    якщо (not function) {
         *o_function = NULL;
-        return ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
+        повернути ErrorModule(m3Err_functionLookupFailed, i_module, "'%s'", i_functionName);
     }
 
-    return PrepareFoundFunction(o_function, function);
+    повернути PrepareFoundFunction(o_function, function);
 }
 
 
@@ -2297,15 +2297,15 @@ _try {
 
     function = (IM3Function)table->elements[i_index];
 
-    if (function) {
-        if (not function->compiled) {
+    якщо (function) {
+        якщо (not function->compiled) {
 _           (CompileFunction(function))
         }
     }
 
     *o_function = function;
 } _catch:
-    return result;
+    повернути result;
 }
 
 
@@ -2315,56 +2315,56 @@ M3Result checkStartFunction (IM3Module i_module)
     M3Result result = m3Err_none;                               d_m3Assert(i_module);
 
     // Check if start function needs to be called
-    if (i_module->startFunction >= 0) {
+    якщо (i_module->startFunction >= 0) {
         result = m3_RunStart(i_module);
     }
 
-    return result;
+    повернути result;
 }
 
 uint32_t m3_GetArgCount (IM3Function i_function)
 {
-    if (i_function) {
+    якщо (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numArgs;
+        якщо (ft) {
+            повернути ft->numArgs;
         }
     }
-    return 0;
+    повернути 0;
 }
 
 uint32_t m3_GetRetCount (IM3Function i_function)
 {
-    if (i_function) {
+    якщо (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft) {
-            return ft->numRets;
+        якщо (ft) {
+            повернути ft->numRets;
         }
     }
-    return 0;
+    повернути 0;
 }
 
 
 M3ValueType m3_GetArgType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    якщо (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numArgs) {
-            return (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
+        якщо (ft and index < ft->numArgs) {
+            повернути (M3ValueType)BaseTypeOf(d_FuncArgType(ft, index));
         }
     }
-    return c_m3Type_none;
+    повернути c_m3Type_none;
 }
 
 M3ValueType m3_GetRetType (IM3Function i_function, uint32_t index)
 {
-    if (i_function) {
+    якщо (i_function) {
         IM3FuncType ft = i_function->funcType;
-        if (ft and index < ft->numRets) {
-            return (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
+        якщо (ft and index < ft->numRets) {
+            повернути (M3ValueType)BaseTypeOf(d_FuncRetType(ft, index));
         }
     }
-    return c_m3Type_none;
+    повернути c_m3Type_none;
 }
 
 
@@ -2386,8 +2386,8 @@ M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
     size_t needed    = ((size_t)ftype->numRets + ftype->numArgs) * sizeof(u64);
     size_t available = (size_t)runtime->numStackSlots * sizeof(m3slot_t) - used;
 
-    if (needed > available) {
-        return m3Err_trapStackOverflow;
+    якщо (needed > available) {
+        повернути m3Err_trapStackOverflow;
     }
 
     u64* stack = (u64*)runtime->stack;
@@ -2396,7 +2396,7 @@ M3Result GetStackPointerForArgs (IM3Function i_function, u8** o_stack)
 
     *o_stack = (u8*)stack;
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 
@@ -2406,14 +2406,14 @@ M3Result m3_CallV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_CallVL(i_function, ap);
     va_end(ap);
-    return r;
+    повернути r;
 }
 
 static
 void ReportNativeStackUsage ()
 {
-#if d_m3LogNativeStack
-    int stackUsed = m3StackGetMax();
+#якщо d_m3LogNativeStack
+    ціле stackUsed = m3StackGetMax();
     fprintf(stderr, "Native stack used: %d\n", stackUsed);
 #endif
 }
@@ -2426,11 +2426,11 @@ M3Result m3_CallVL (IM3Function i_function, va_list i_args)
     M3Result    result  = m3Err_none;
     u8*         s       = NULL;
 
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    якщо (!i_function->compiled) {
+        повернути m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#якщо d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
@@ -2440,7 +2440,7 @@ _   (checkStartFunction(i_function->module))
 
 _   (GetStackPointerForArgs(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
+    для (u32 i = 0; i < ftype->numArgs; ++i) {
         switch (d_FuncArgType(ftype, i)) {
         case c_m3Type_i32:
             *(i32*)(s) = va_arg(i_args, i32);
@@ -2456,7 +2456,7 @@ _   (GetStackPointerForArgs(i_function, &s))
             *(uintptr_t*)(s) = va_arg(i_args, uintptr_t);
             s += 8;
             break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
         case c_m3Type_f32:
             *(f32*)(s) = (f32)va_arg(i_args, f64);
             s += 8;
@@ -2466,7 +2466,7 @@ _   (GetStackPointerForArgs(i_function, &s))
             s += 8;
             break;
 #endif
-        default: return "unknown argument type";
+        default: повернути "unknown argument type";
         }
     }
 
@@ -2475,7 +2475,7 @@ _   (GetStackPointerForArgs(i_function, &s))
 
     runtime->lastCalled = result ? NULL : i_function;
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 M3Result m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs[])
@@ -2485,14 +2485,14 @@ M3Result m3_Call (IM3Function i_function, uint32_t i_argc, const void* i_argptrs
     M3Result    result  = m3Err_none;
     u8*         s       = NULL;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    якщо (i_argc != ftype->numArgs) {
+        повернути m3Err_argumentCountMismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    якщо (!i_function->compiled) {
+        повернути m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#якщо d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
@@ -2502,7 +2502,7 @@ _   (checkStartFunction(i_function->module))
 
 _   (GetStackPointerForArgs(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
+    для (u32 i = 0; i < ftype->numArgs; ++i) {
         switch (d_FuncArgType(ftype, i)) {
         case c_m3Type_i32:
             *(i32*)(s) = *(i32*)i_argptrs[i];
@@ -2518,7 +2518,7 @@ _   (GetStackPointerForArgs(i_function, &s))
             *(uintptr_t*)(s) = *(uintptr_t*)i_argptrs[i];
             s += 8;
             break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
         case c_m3Type_f32:
             *(f32*)(s) = *(f32*)i_argptrs[i];
             s += 8;
@@ -2528,7 +2528,7 @@ _   (GetStackPointerForArgs(i_function, &s))
             s += 8;
             break;
 #endif
-        default: return "unknown argument type";
+        default: повернути "unknown argument type";
         }
     }
 
@@ -2538,7 +2538,7 @@ _   (GetStackPointerForArgs(i_function, &s))
 
     runtime->lastCalled = result ? NULL : i_function;
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 // Argument parsing for m3_CallArgv. Strict on purpose: the whole string has to
@@ -2548,14 +2548,14 @@ _   (GetStackPointerForArgs(i_function, &s))
 static
 M3Result ParseArgInteger (ccstr_t i_arg, u32 i_numBits, u64* o_value)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    якщо (not i_arg or not *i_arg) {
+        повернути "empty argument";
     }
 
     // strtoull would skip leading space, but trailing space is rejected below;
     // accepting one and not the other would just be confusing
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    якщо (isspace((unsigned char)*i_arg)) {
+        повернути "argument is not a number";
     }
 
     char* end = NULL;
@@ -2565,46 +2565,46 @@ M3Result ParseArgInteger (ccstr_t i_arg, u32 i_numBits, u64* o_value)
 
     // an argument may be spelled signed or unsigned: -1 and 4294967295 name the
     // same i32
-    if (*i_arg == '-') {
+    якщо (*i_arg == '-') {
         i64 signedValue = strtoll(i_arg, &end, 10);
 
-        if (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
-            return "argument out of range";
+        якщо (i_numBits == 32 and (signedValue < INT32_MIN or signedValue > INT32_MAX)) {
+            повернути "argument out of range";
         }
 
         value = (u64)signedValue;
-    } else {
+    } інакше {
         value = strtoull(i_arg, &end, 10);
 
-        if (i_numBits == 32 and value > UINT32_MAX) {
-            return "argument out of range";
+        якщо (i_numBits == 32 and value > UINT32_MAX) {
+            повернути "argument out of range";
         }
     }
 
-    if (errno == ERANGE) {
-        return "argument out of range";
+    якщо (errno == ERANGE) {
+        повернути "argument out of range";
     }
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    якщо (end == i_arg or *end) {
+        повернути "argument is not a number";
     }
 
     *o_value = value;
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 
-#if d_m3HasFloat
+#якщо d_m3HasFloat
 static
 M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
 {
-    if (not i_arg or not *i_arg) {
-        return "empty argument";
+    якщо (not i_arg or not *i_arg) {
+        повернути "empty argument";
     }
 
-    if (isspace((unsigned char)*i_arg)) {
-        return "argument is not a number";
+    якщо (isspace((unsigned char)*i_arg)) {
+        повернути "argument is not a number";
     }
 
     char* end = NULL;
@@ -2613,19 +2613,19 @@ M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
 
     f64 value = strtod(i_arg, &end);
 
-    if (end == i_arg or *end) {
-        return "argument is not a number";
+    якщо (end == i_arg or *end) {
+        повернути "argument is not a number";
     }
 
     // strtod reports underflow through ERANGE as well, and a denormal result is
     // perfectly usable, so only an overflow to infinity is out of range
-    if (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
-        return "argument out of range";
+    якщо (errno == ERANGE and (value > DBL_MAX or value < -DBL_MAX)) {
+        повернути "argument out of range";
     }
 
     *o_value = value;
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 #endif
 
@@ -2635,12 +2635,12 @@ M3Result ParseArgFloat (ccstr_t i_arg, f64* o_value)
 static
 M3Result ParseArgReference (ccstr_t i_arg, u64* o_value)
 {
-    if (i_arg and strcmp(i_arg, "null") == 0) {
+    якщо (i_arg and strcmp(i_arg, "null") == 0) {
         *o_value = 0;
-        return m3Err_none;
+        повернути m3Err_none;
     }
 
-    return ParseArgInteger(i_arg, 64, o_value);
+    повернути ParseArgInteger(i_arg, 64, o_value);
 }
 
 
@@ -2651,14 +2651,14 @@ M3Result m3_CallArgv (IM3Function i_function, uint32_t i_argc, const char* i_arg
     M3Result    result  = m3Err_none;
     u8*         s       = NULL;
 
-    if (i_argc != ftype->numArgs) {
-        return m3Err_argumentCountMismatch;
+    якщо (i_argc != ftype->numArgs) {
+        повернути m3Err_argumentCountMismatch;
     }
-    if (!i_function->compiled) {
-        return m3Err_missingCompiledCode;
+    якщо (!i_function->compiled) {
+        повернути m3Err_missingCompiledCode;
     }
 
-#if d_m3RecordBacktraces
+#якщо d_m3RecordBacktraces
     ClearBacktrace(runtime);
 #endif
 
@@ -2668,9 +2668,9 @@ _   (checkStartFunction(i_function->module))
 
 _   (GetStackPointerForArgs(i_function, &s))
 
-    for (u32 i = 0; i < ftype->numArgs; ++i) {
+    для (u32 i = 0; i < ftype->numArgs; ++i) {
         u64 value = 0;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
         f64 fvalue = 0;
 #endif
         switch (d_FuncArgType(ftype, i)) {
@@ -2688,7 +2688,7 @@ _           (ParseArgInteger(i_argv[i], 64, &value)) * (i64*)(s) = (i64)value;
 _           (ParseArgReference(i_argv[i], &value)) * (uintptr_t*)(s) = (uintptr_t)value;
             s += 8;
             break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
             // strtof would be less portable
         case c_m3Type_f32:
 _           (ParseArgFloat(i_argv[i], &fvalue)) * (f32*)(s) = (f32)fvalue;
@@ -2709,7 +2709,7 @@ _           (ParseArgFloat(i_argv[i], &fvalue)) * (f64*)(s) = fvalue;
 
     runtime->lastCalled = result ? NULL : i_function;
 
-    _catch: return result;
+    _catch: повернути result;
 }
 
 
@@ -2725,16 +2725,16 @@ M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_r
     IM3FuncType ftype   = i_function->funcType;
     IM3Runtime  runtime = i_function->module->runtime;
 
-    if (i_retc != ftype->numRets) {
-        return m3Err_argumentCountMismatch;
+    якщо (i_retc != ftype->numRets) {
+        повернути m3Err_argumentCountMismatch;
     }
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    якщо (i_function != runtime->lastCalled) {
+        повернути "function not called";
     }
 
     u8* s = (u8*)runtime->stack;
 
-    for (u32 i = 0; i < ftype->numRets; ++i) {
+    для (u32 i = 0; i < ftype->numRets; ++i) {
         switch (d_FuncRetType(ftype, i)) {
         case c_m3Type_i32:
             *(i32*)o_retptrs[i] = *(i32*)(s);
@@ -2750,7 +2750,7 @@ M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_r
             *(uintptr_t*)o_retptrs[i] = *(uintptr_t*)(s);
             s += 8;
             break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
         case c_m3Type_f32:
             *(f32*)o_retptrs[i] = *(f32*)(s);
             s += 8;
@@ -2760,10 +2760,10 @@ M3Result m3_GetResults (IM3Function i_function, uint32_t i_retc, const void* o_r
             s += 8;
             break;
 #endif
-        default: return "unknown return type";
+        default: повернути "unknown return type";
         }
     }
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 M3Result m3_GetResultsV (IM3Function i_function, ...)
@@ -2772,7 +2772,7 @@ M3Result m3_GetResultsV (IM3Function i_function, ...)
     va_start(ap, i_function);
     M3Result r = m3_GetResultsVL(i_function, ap);
     va_end(ap);
-    return r;
+    повернути r;
 }
 
 M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
@@ -2780,12 +2780,12 @@ M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
     IM3Runtime  runtime = i_function->module->runtime;
     IM3FuncType ftype   = i_function->funcType;
 
-    if (i_function != runtime->lastCalled) {
-        return "function not called";
+    якщо (i_function != runtime->lastCalled) {
+        повернути "function not called";
     }
 
     u8* s = (u8*)runtime->stack;
-    for (u32 i = 0; i < ftype->numRets; ++i) {
+    для (u32 i = 0; i < ftype->numRets; ++i) {
         switch (d_FuncRetType(ftype, i)) {
         case c_m3Type_i32:
             *va_arg(o_rets, i32*) = *(i32*)(s);
@@ -2801,7 +2801,7 @@ M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
             *va_arg(o_rets, uintptr_t*) = *(uintptr_t*)(s);
             s += 8;
             break;
-#if d_m3HasFloat
+#якщо d_m3HasFloat
         case c_m3Type_f32:
             *va_arg(o_rets, f32*) = *(f32*)(s);
             s += 8;
@@ -2811,21 +2811,21 @@ M3Result m3_GetResultsVL (IM3Function i_function, va_list o_rets)
             s += 8;
             break;
 #endif
-        default: return "unknown argument type";
+        default: повернути "unknown argument type";
         }
     }
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 void ReleaseCodePageNoTrack (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    якщо (i_codePage) {
         IM3CodePage* list;
 
         bool pageFull = (NumFreeLines(i_codePage) < d_m3CodePageFreeLinesThreshold);
-        if (pageFull) {
+        якщо (pageFull) {
             list = &i_runtime->pagesFull;
-        } else {
+        } інакше {
             list = &i_runtime->pagesOpen;
         }
 
@@ -2838,39 +2838,39 @@ IM3CodePage AcquireCodePageWithCapacity (IM3Runtime i_runtime, u32 i_minLineCoun
 {
     IM3CodePage page = RemoveCodePageOfCapacity(&i_runtime->pagesOpen, i_minLineCount);
 
-    if (not page) {
+    якщо (not page) {
         page = Environment_AcquireCodePage(i_runtime->environment, i_minLineCount);
 
-        if (not page) {
+        якщо (not page) {
             page = NewCodePage(i_runtime, i_minLineCount);
         }
 
-        if (page) {
+        якщо (page) {
             i_runtime->numCodePages++;
         }
     }
 
-    if (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
+    якщо (page) {                                                  m3log (emit, "acquire page: %d", page->info.sequence);
         i_runtime->numActiveCodePages++;
     }
 
-    return page;
+    повернути page;
 }
 
 
 IM3CodePage AcquireCodePage (IM3Runtime i_runtime)
 {
-    return AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
+    повернути AcquireCodePageWithCapacity(i_runtime, d_m3CodePageFreeLinesThreshold);
 }
 
 
 void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 {
-    if (i_codePage) {
+    якщо (i_codePage) {
         ReleaseCodePageNoTrack(i_runtime, i_codePage);
         i_runtime->numActiveCodePages--;
 
-#if defined(DEBUG)
+#якщо defined(DEBUG)
         u32 numOpen = CountCodePages(i_runtime->pagesOpen);
         u32 numFull = CountCodePages(i_runtime->pagesFull);
 
@@ -2878,7 +2878,7 @@ void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 
         d_m3Assert(numOpen + numFull + i_runtime->numActiveCodePages == i_runtime->numCodePages);
 
-#  if d_m3LogCodePages
+#  якщо d_m3LogCodePages
         dump_code_page(i_codePage, /* startPC: */ NULL);
 #  endif
 #endif
@@ -2886,11 +2886,11 @@ void ReleaseCodePage (IM3Runtime i_runtime, IM3CodePage i_codePage)
 }
 
 
-#if d_m3VerboseErrorMessages
+#якщо d_m3VerboseErrorMessages
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
                   const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...)
 {
-    if (i_runtime) {
+    якщо (i_runtime) {
         i_runtime->error         = (M3ErrorInfo){ .result = i_result, .runtime = i_runtime, .module = i_module, .function = i_function, .file = i_file, .line = i_lineNum };
         i_runtime->error.message = i_runtime->error_message;
 
@@ -2900,14 +2900,14 @@ M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, I
         va_end(args);
     }
 
-    return i_result;
+    повернути i_result;
 }
 #endif
 
 
 void m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
 {
-    if (i_runtime) {
+    якщо (i_runtime) {
         *o_info = i_runtime->error;
         m3_ResetErrorInfo(i_runtime);
     }
@@ -2916,7 +2916,7 @@ void m3_GetErrorInfo (IM3Runtime i_runtime, M3ErrorInfo* o_info)
 
 void m3_ResetErrorInfo (IM3Runtime i_runtime)
 {
-    if (i_runtime) {
+    якщо (i_runtime) {
         M3_INIT(i_runtime->error);
         i_runtime->error.message = "";
     }
@@ -2927,96 +2927,96 @@ uint8_t* m3_GetMemory (IM3Module i_module, size_t* o_memorySizeInBytes, uint32_t
     uint8_t* memory = NULL;
     size_t   size   = 0;
 
-    if (i_module and i_memoryIndex < i_module->numMemories) {
+    якщо (i_module and i_memoryIndex < i_module->numMemories) {
         IM3Memory mem = i_module->memories[i_memoryIndex];
 
-        if (mem->mallocated) {
+        якщо (mem->mallocated) {
             size = mem->mallocated->length;
 
-            if (size) {
+            якщо (size) {
                 memory = m3MemData(mem->mallocated);
             }
         }
     }
 
-    if (o_memorySizeInBytes) {
+    якщо (o_memorySizeInBytes) {
         *o_memorySizeInBytes = size;
     }
 
-    return memory;
+    повернути memory;
 }
 
 
 size_t m3_GetMemorySize (IM3Module i_module, uint32_t i_memoryIndex)
 {
-    if (not i_module or i_memoryIndex >= i_module->numMemories) {
-        return 0;
+    якщо (not i_module or i_memoryIndex >= i_module->numMemories) {
+        повернути 0;
     }
 
     IM3Memory mem = i_module->memories[i_memoryIndex];
 
-    return mem->mallocated ? mem->mallocated->length : 0;
+    повернути mem->mallocated ? mem->mallocated->length : 0;
 }
 
 
 size_t m3_GetMemorySizeAt (const void* i_memory)
 {
-    if (not i_memory) {
-        return 0;
+    якщо (not i_memory) {
+        повернути 0;
     }
 
     // the header sits immediately before the data it describes
     const M3MemoryHeader* header = ((const M3MemoryHeader*)i_memory) - 1;
 
-    return header->length;
+    повернути header->length;
 }
 
 
 M3Result m3_FindExportedMemory (IM3Module i_module, cstr_t i_name, u32* o_memoryIndex)
 {
-    if (not i_module or not i_name or not o_memoryIndex) {
-        return m3Err_unknownMemory;
+    якщо (not i_module or not i_name or not o_memoryIndex) {
+        повернути m3Err_unknownMemory;
     }
 
     const M3Export* e = Module_FindExport(i_module, d_externalKind_memory, i_name);
 
-    if (not e) {
-        return m3Err_unknownMemory;
+    якщо (not e) {
+        повернути m3Err_unknownMemory;
     }
 
     *o_memoryIndex = e->index;
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 
 bool Module_HasLinkedHostImport (IM3Module i_module, cstr_t i_importModule)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    для (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function f = &i_module->functions[i];
 
         // hostMemory is set when a host function is bound to the import, so it
         // is also the mark of one - see CompileRawFunction
-        if (not f->hostMemory or f->wasm or f->resolved) {
+        якщо (not f->hostMemory or f->wasm or f->resolved) {
             continue;
         }
 
-        if (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
-            return true;
+        якщо (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0) {
+            повернути true;
         }
     }
 
-    return false;
+    повернути false;
 }
 
 
 M3Result m3_BindImportMemory (IM3Module io_module, cstr_t i_importModule, u32 i_memoryIndex)
 {
-    if (not io_module or not i_importModule) {
-        return m3Err_moduleNotLinked;
+    якщо (not io_module or not i_importModule) {
+        повернути m3Err_moduleNotLinked;
     }
 
-    if (i_memoryIndex >= io_module->numMemories) {
-        return m3Err_unknownMemory;
+    якщо (i_memoryIndex >= io_module->numMemories) {
+        повернути m3Err_unknownMemory;
     }
 
     // the memory itself, not the index: linking may have pointed this slot at
@@ -3025,31 +3025,31 @@ M3Result m3_BindImportMemory (IM3Module io_module, cstr_t i_importModule, u32 i_
 
     const bool wildcardModule = (strcmp(i_importModule, "*") == 0);
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    для (u32 i = 0; i < io_module->numFunctions; ++i) {
         IM3Function f = &io_module->functions[i];
 
         // only an import that a host function was bound to has a memory to
         // pin: one with a body of its own reads memory through the interpreter,
         // and one resolved to another module's export runs that module's code
-        if (not f->hostMemory or f->wasm or f->resolved) {
+        якщо (not f->hostMemory or f->wasm or f->resolved) {
             continue;
         }
 
-        if (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
+        якщо (wildcardModule or (f->import.moduleUtf8 and strcmp(f->import.moduleUtf8, i_importModule) == 0)) {
             f->hostMemory = memory;
         }
     }
 
-    return m3Err_none;
+    повернути m3Err_none;
 }
 
 
 M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 {
-#if d_m3RecordBacktraces
-    return &i_runtime->backtrace;
-#else
-    return NULL;
+#якщо d_m3RecordBacktraces
+    повернути &i_runtime->backtrace;
+#інакше
+    повернути NULL;
 #endif
 }
 
@@ -3060,50 +3060,50 @@ M3BacktraceInfo* m3_GetBacktrace (IM3Runtime i_runtime)
 
 void m3_SetSuspendable (IM3Runtime io_runtime, bool i_suspendable)
 {
-    if (io_runtime) {
+    якщо (io_runtime) {
         io_runtime->isSuspendable = i_suspendable;
     }
 }
 
 void m3_RequestSuspend (IM3Runtime io_runtime)
 {
-    if (io_runtime) {
+    якщо (io_runtime) {
         io_runtime->suspendRequested = true;
     }
 }
 
 bool m3_IsSuspended (IM3Runtime i_runtime)
 {
-    if (!i_runtime) {
-        return false;
+    якщо (!i_runtime) {
+        повернути false;
     }
-#if d_m3HasStackSwitching
-    if (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
-        return true;
+#якщо d_m3HasStackSwitching
+    якщо (i_runtime->rootContinuation && i_runtime->rootContinuation->state == cont_suspended) {
+        повернути true;
     }
 #endif
-    return false;
+    повернути false;
 }
 
 M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 {
-    if (!io_runtime) {
-        return m3Err_mallocFailed;
+    якщо (!io_runtime) {
+        повернути m3Err_mallocFailed;
     }
-    if (!io_runtime->isSuspendable) {
-        return m3Err_none;
+    якщо (!io_runtime->isSuspendable) {
+        повернути m3Err_none;
     }
-#if d_m3HasSnapshots
+#якщо d_m3HasSnapshots
     // a restore that failed leaves nothing to resume, and says so every time
     // rather than resuming nothing successfully
-    if (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
+    якщо (io_runtime->rootContinuation and io_runtime->rootContinuation->entryFunction and
         io_runtime->rootContinuation->entryFunction->module->isUnusable) {
-        return "a snapshot failed to restore into the module, so it cannot run";
+        повернути "a snapshot failed to restore into the module, so it cannot run";
     }
 #endif
-#if d_m3HasStackSwitching
-    if (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
-        return m3Err_none;
+#якщо d_m3HasStackSwitching
+    якщо (!io_runtime->rootContinuation || io_runtime->rootContinuation->state != cont_suspended) {
+        повернути m3Err_none;
     }
     // what finishes returns into the bottom of the stack, where it was entered
     io_runtime->stack = io_runtime->originStack;
@@ -3119,8 +3119,8 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
     io_runtime->resumePastCheck = false;
     d_m3StackLimitLeave(io_runtime);
 
-#  if d_m3HasExceptionHandling
-    if (M3_UNLIKELY(result == m3Err_pendingException)) {
+#  якщо d_m3HasExceptionHandling
+    якщо (M3_UNLIKELY(result == m3Err_pendingException)) {
         result = m3Err_trapUncaughtException;
     }
     RecordUncaughtException(io_runtime, result);
@@ -3128,8 +3128,8 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
 
     io_runtime->callNesting--;
 
-#  if d_m3HasExceptionHandling
-    if (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
+#  якщо d_m3HasExceptionHandling
+    якщо (result != m3Err_continuationSuspended and io_runtime->callNesting == 0) {
         FreeExceptions(io_runtime);
     }
 #  endif
@@ -3139,8 +3139,8 @@ M3Result m3_ResumeRuntime (IM3Runtime io_runtime)
     io_runtime->lastCalled = (result == m3Err_none) ? io_runtime->rootContinuation->entryFunction : NULL;
 
     Runtime_PlaceCallStack(io_runtime);
-    return result;
-#else
-    return m3Err_none;
+    повернути result;
+#інакше
+    повернути m3Err_none;
 #endif
 }

@@ -105,8 +105,8 @@ static inline
 bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
 {
     FILE* f = fopen(i_path, "rb");
-    if (f == NULL) {
-        return false;
+    якщо (f == NULL) {
+        повернути false;
     }
 
     // The size is taken before anything is allocated, so that a file too big to be
@@ -115,32 +115,32 @@ bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
     long tell = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    if (tell < 0 or (i_maxBytes and (size_t) tell > i_maxBytes)) {
+    якщо (tell < 0 or (i_maxBytes and (size_t) tell > i_maxBytes)) {
         fclose(f);
-        return false;
+        повернути false;
     }
 
     size_t size = (size_t)tell;
     void*  data = m3_Malloc("Host File", size ? size : 1);
 
-    if (data == NULL) {
+    якщо (data == NULL) {
         fclose(f);
-        return false;
+        повернути false;
     }
 
     bool read = (fread(data, 1, size, f) == size);
     fclose(f);
 
-    if (not read) {
+    якщо (not read) {
         m3_Free(data);
-        return false;
+        повернути false;
     }
 
     o_file->data = data;
     o_file->size = size;
     o_file->handle = d_m3HostNoHandle;
     o_file->mapped = false;
-    return true;
+    повернути true;
 }
 
 // A module is parsed in place and keeps pointing into the mapped bytes for as long
@@ -162,15 +162,15 @@ bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
 //
 // So on POSIX this narrows the window rather than closing it.
 
-#if d_m3GuardedMemory
+#якщо d_m3GuardedMemory
 
-#  if M3_SIZEOF_PTR < 8
+#  якщо M3_SIZEOF_PTR < 8
 #    error "d_m3GuardedMemory needs a 64-bit address space"
 #  endif
-#  if d_m3FixedHeap
+#  якщо d_m3FixedHeap
 #    error "d_m3GuardedMemory and d_m3FixedHeap are two different places for a linear memory to come from"
 #  endif
-#  if defined(_WIN32) && !defined(_MSC_VER)
+#  якщо defined(_WIN32) && !defined(_MSC_VER)
 #    error "d_m3GuardedMemory on Windows needs __try/__except - build with MSVC or clang-cl"
 #  endif
 

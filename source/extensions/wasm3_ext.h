@@ -13,7 +13,7 @@
 #include "wasm3.h"
 #include <stdbool.h>
 
-#if defined(__cplusplus)
+#якщо defined(__cplusplus)
 extern "C" {
 #endif
 
@@ -44,7 +44,7 @@ M3Result    m3_InjectFunction (IM3Module            i_module,
 IM3Function m3_GetFunctionByIndex (IM3Module i_module,
                                    uint32_t  i_index);
 
-#if defined(__cplusplus)
+#якщо defined(__cplusplus)
 }
 #endif
 

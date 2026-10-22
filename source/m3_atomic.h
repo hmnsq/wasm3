@@ -21,7 +21,7 @@
 
 #include "m3_core.h"
 
-#if d_m3HasAtomics
+#якщо d_m3HasAtomics
 
 d_m3BeginExternC
 
@@ -40,7 +40,7 @@ enum {
         T value;                                                        \
         memcpy (& value, i_cell, sizeof (value));                       \
         M3_BSWAP_##T (value);                                           \
-        return value;                                                   \
+        повернути value;                                                   \
     }                                                                   \
                                                                         \
     static inline void m3_AtomicStore_##T (u8* o_cell, T i_value)       \
@@ -58,10 +58,10 @@ static inline
 u64 m3_AtomicLoadW (const u8* i_cell, u32 i_log2Width)
 {
     switch (i_log2Width) {
-    case 0: return m3_AtomicLoad_u8(i_cell);
-    case 1: return m3_AtomicLoad_u16(i_cell);
-    case 2: return m3_AtomicLoad_u32(i_cell);
-    default: return m3_AtomicLoad_u64(i_cell);
+    case 0: повернути m3_AtomicLoad_u8(i_cell);
+    case 1: повернути m3_AtomicLoad_u16(i_cell);
+    case 2: повернути m3_AtomicLoad_u32(i_cell);
+    default: повернути m3_AtomicLoad_u64(i_cell);
     }
 }
 
@@ -92,7 +92,7 @@ u64 m3_AtomicRmwW (u8* io_cell, u32 i_log2Width, u32 i_kind, u64 i_value)
     }
 
     m3_AtomicStoreW(io_cell, i_log2Width, updated);
-    return old;
+    повернути old;
 }
 
 static inline
@@ -101,10 +101,10 @@ u64 m3_AtomicCmpxchgW (u8* io_cell, u32 i_log2Width, u64 i_expected, u64 i_repla
     u64 old = m3_AtomicLoadW(io_cell, i_log2Width);
     u64 mask = (i_log2Width == 3) ? ~(u64)0 : (((u64)1 << (8u << i_log2Width)) - 1);
 
-    if (old == (i_expected & mask)) {
+    якщо (old == (i_expected & mask)) {
         m3_AtomicStoreW(io_cell, i_log2Width, i_replacement);
     }
-    return old;
+    повернути old;
 }
 
 d_m3EndExternC

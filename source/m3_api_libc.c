@@ -77,31 +77,31 @@ m3ApiRawFunction(m3_libc_print)
 }
 
 static
-void internal_itoa (int n, char s[], int radix)
+void internal_itoa (ціле n, char s[], ціле radix)
 {
     static char const HEXDIGITS[0x10] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
-    int  i, j, sign;
+    ціле  i, j, sign;
     char c;
 
-    if ((sign = n) < 0) {
+    якщо ((sign = n) < 0) {
         n = -n;
     }
     i = 0;
     do {
         s[i++] = HEXDIGITS[n % radix];
-    } while ((n /= radix) > 0);
+    } поки ((n /= radix) > 0);
 
-    if (sign < 0) {
+    якщо (sign < 0) {
         s[i++] = '-';
     }
     s[i] = '\0';
 
     // reverse
-    for (i = 0, j = (int)strlen(s) - 1; i < j; i++, j--) {
+    для (i = 0, j = (ціле)strlen(s) - 1; i < j; i++, j--) {
         c    = s[i];
         s[i] = s[j];
         s[j] = c;
@@ -115,7 +115,7 @@ m3ApiRawFunction(m3_libc_printf)
     m3ApiGetArgMem(const char*, i_fmt)
     m3ApiGetArgMem(wasm_ptr_t*, i_args)
 
-    if (m3ApiIsNullPtr(i_fmt)) {
+    якщо (m3ApiIsNullPtr(i_fmt)) {
         m3ApiReturn(0);
     }
 
@@ -127,8 +127,8 @@ m3ApiRawFunction(m3_libc_printf)
     int32_t length = 0;
 
     char ch;
-    while ((ch = *i_fmt++)) {
-        if ('%' != ch) {
+    поки ((ch = *i_fmt++)) {
+        якщо ('%' != ch) {
             putc(ch, file);
             length++;
             continue;
@@ -136,7 +136,7 @@ m3ApiRawFunction(m3_libc_printf)
         // A trailing '%' has no conversion character: the next byte is the
         // terminating NUL. Stop here rather than consuming it, which would
         // step the cursor past the end of the guest string.
-        if (not *i_fmt) {
+        якщо (not *i_fmt) {
             break;
         }
         ch = *i_fmt++;
@@ -151,7 +151,7 @@ m3ApiRawFunction(m3_libc_printf)
         case 'd':
         case 'x': {
             m3ApiCheckMem(i_args, sizeof(wasm_ptr_t));
-            int  int_temp   = *i_args++;
+            ціле  int_temp   = *i_args++;
             char buffer[32] = { 0 };
             internal_itoa(int_temp, buffer, (ch == 'x') ? 16 : 10);
             fputs(buffer, file);
@@ -164,10 +164,10 @@ m3ApiRawFunction(m3_libc_printf)
             size_t      string_len;
 
             string_temp = (const char*)m3ApiOffsetToPtr(*i_args++);
-            if (m3ApiIsNullPtr(string_temp)) {
+            якщо (m3ApiIsNullPtr(string_temp)) {
                 string_temp = "(null)";
                 string_len  = 6;
-            } else {
+            } інакше {
                 string_len = strnlen(string_temp, 1024);
                 m3ApiCheckMem(string_temp, string_len + 1);
             }
@@ -189,16 +189,16 @@ m3ApiRawFunction(m3_libc_printf)
 static
 uint64_t clock_ms (IM3Runtime i_runtime)
 {
-#if d_m3DeterministicProfile
-    return i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
-#else
+#якщо d_m3DeterministicProfile
+    повернути i_runtime ? Deterministic_Time(i_runtime) / 1000000 : 0;
+#інакше
     (void)i_runtime;
 
 #  ifdef CLOCKS_PER_SEC
     const clock_t clock_divider = CLOCKS_PER_SEC / 1000;
-    return (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
-#  else
-    return (uint64_t)clock();
+    повернути (uint64_t)(clock() / (clock_divider > 0 ? clock_divider : 1));
+#  інакше
+    повернути (uint64_t)clock();
 #  endif
 #endif
 }
@@ -220,10 +220,10 @@ m3ApiRawFunction(m3_libc_clock_ms_i64)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    якщо (i_result == m3Err_functionLookupFailed or i_result == m3Err_globalLookupFailed) {
+        повернути m3Err_none;
+    } інакше {
+        повернути i_result;
     }
 }
 
@@ -235,11 +235,11 @@ M3Result LinkClockMs (IM3Module module, ccstr_t i_moduleName)
 {
     M3Result result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "I()", &m3_libc_clock_ms_i64);
 
-    if (result == m3Err_functionSignatureMismatch) {
+    якщо (result == m3Err_functionSignatureMismatch) {
         result = m3_LinkRawFunction(module, i_moduleName, "clock_ms", "i()", &m3_libc_clock_ms);
     }
 
-    return SuppressLookupFailure(result);
+    повернути SuppressLookupFailure(result);
 }
 
 M3Result m3_LinkLibC (IM3Module module)
@@ -261,5 +261,5 @@ _   (SuppressLookupFailure(m3_LinkRawFunction(module, env, "printf",            
     // clang-format on
 
 _catch:
-    return result;
+    повернути result;
 }
