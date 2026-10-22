@@ -68,7 +68,7 @@ void  m3_HostSleepNs (u64 i_ns);
 // no handle, and d_m3HostNoHandle is what that looks like.
 #define d_m3HostNoHandle    ((intptr_t) -1)
 
-typedef struct M3HostFile {
+typedef sa_nracanaa M3HostFile {
     void*    data;
     size_t   size;
     intptr_t handle;     // the host layer's, and d_m3HostNoHandle when there is none
@@ -86,7 +86,7 @@ typedef struct M3HostFile {
 // anything is allocated for it; 0 accepts any size the system will hand over. False
 // is that, or the file not being readable at all, and o_file is written on success
 // only.
-bool m3_HostMapFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file);
+bool m3_HostMapFile (const var_na* i_path, size_t i_maxBytes, M3HostFile* o_file);
 
 // Give the bytes back, releasing the mapping and its lock, or the heap block
 void m3_HostUnmapFile (M3HostFile* io_file);
@@ -95,18 +95,18 @@ void m3_HostUnmapFile (M3HostFile* io_file);
 // can, in one step: a reader of i_to sees the old file or the new one, never one
 // half written, and a writer that dies part way leaves i_to as it was. False when
 // the move failed, with i_from left where it is.
-bool m3_HostReplaceFile (const char* i_from, const char* i_to);
+bool m3_HostReplaceFile (const var_na* i_from, const var_na* i_to);
 
 // The reading half on its own: what each m3_HostMapFile falls back to, and the whole
 // of what a system with no mapping does. The same on every system, so it is here
 // rather than in any of them - and inline, so that a translation unit which never
 // calls it is not the one that drags stdio's FILE machinery into the link.
-static inline
-bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
+static anta_hstha
+bool m3_HostReadFile (const var_na* i_path, size_t i_maxBytes, M3HostFile* o_file)
 {
     FILE* f = fopen(i_path, "rb");
-    if (f == NULL) {
-        return false;
+    ᱡᱩᱫᱤ (f == NULL) {
+        ᱨᱩᱣᱟᱹᱲ false;
     }
 
     // The size is taken before anything is allocated, so that a file too big to be
@@ -115,32 +115,32 @@ bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
     long tell = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    if (tell < 0 or (i_maxBytes and (size_t) tell > i_maxBytes)) {
+    ᱡᱩᱫᱤ (tell < 0 or (i_maxBytes and (size_t) tell > i_maxBytes)) {
         fclose(f);
-        return false;
+        ᱨᱩᱣᱟᱹᱲ false;
     }
 
     size_t size = (size_t)tell;
     void*  data = m3_Malloc("Host File", size ? size : 1);
 
-    if (data == NULL) {
+    ᱡᱩᱫᱤ (data == NULL) {
         fclose(f);
-        return false;
+        ᱨᱩᱣᱟᱹᱲ false;
     }
 
     bool read = (fread(data, 1, size, f) == size);
     fclose(f);
 
-    if (not read) {
+    ᱡᱩᱫᱤ (not read) {
         m3_Free(data);
-        return false;
+        ᱨᱩᱣᱟᱹᱲ false;
     }
 
     o_file->data = data;
     o_file->size = size;
     o_file->handle = d_m3HostNoHandle;
     o_file->mapped = false;
-    return true;
+    ᱨᱩᱣᱟᱹᱲ true;
 }
 
 // A module is parsed in place and keeps pointing into the mapped bytes for as long
@@ -162,15 +162,15 @@ bool m3_HostReadFile (const char* i_path, size_t i_maxBytes, M3HostFile* o_file)
 //
 // So on POSIX this narrows the window rather than closing it.
 
-#if d_m3GuardedMemory
+#ᱡᱩᱫᱤ d_m3GuardedMemory
 
-#  if M3_SIZEOF_PTR < 8
+#  ᱡᱩᱫᱤ M3_SIZEOF_PTR < 8
 #    error "d_m3GuardedMemory needs a 64-bit address space"
 #  endif
-#  if d_m3FixedHeap
+#  ᱡᱩᱫᱤ d_m3FixedHeap
 #    error "d_m3GuardedMemory and d_m3FixedHeap are two different places for a linear memory to come from"
 #  endif
-#  if defined(_WIN32) && !defined(_MSC_VER)
+#  ᱡᱩᱫᱤ defined(_WIN32) && !defined(_MSC_VER)
 #    error "d_m3GuardedMemory on Windows needs __try/__except - build with MSVC or clang-cl"
 #  endif
 

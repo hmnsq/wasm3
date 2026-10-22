@@ -64,7 +64,7 @@ typedef uint32_t __wasi_size_t; // fixme for wasm64
  */
 typedef uint64_t __wasi_filesize_t;
 
-_Static_assert(sizeof(__wasi_filesize_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_filesize_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filesize_t) == 8, "witx calculated align");
 
 /**
@@ -72,7 +72,7 @@ _Static_assert(_Alignof(__wasi_filesize_t) == 8, "witx calculated align");
  */
 typedef uint64_t __wasi_timestamp_t;
 
-_Static_assert(sizeof(__wasi_timestamp_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_timestamp_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_timestamp_t) == 8, "witx calculated align");
 
 /**
@@ -104,7 +104,7 @@ typedef uint32_t __wasi_clockid_t;
  */
 #define __WASI_CLOCKID_THREAD_CPUTIME_ID (UINT32_C(3))
 
-_Static_assert(sizeof(__wasi_clockid_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_clockid_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_clockid_t) == 4, "witx calculated align");
 
 /**
@@ -500,7 +500,7 @@ typedef uint16_t __wasi_errno_t;
  */
 #define __WASI_ERRNO_NOTCAPABLE (UINT16_C(76))
 
-_Static_assert(sizeof(__wasi_errno_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_errno_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_errno_t) == 2, "witx calculated align");
 
 /**
@@ -665,7 +665,7 @@ typedef uint64_t __wasi_rights_t;
  */
 #define __WASI_RIGHTS_SOCK_SHUTDOWN (UINT64_C(268435456))
 
-_Static_assert(sizeof(__wasi_rights_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_rights_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_rights_t) == 8, "witx calculated align");
 
 /**
@@ -673,13 +673,13 @@ _Static_assert(_Alignof(__wasi_rights_t) == 8, "witx calculated align");
  */
 typedef uint32_t __wasi_fd_t;
 
-_Static_assert(sizeof(__wasi_fd_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_fd_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fd_t) == 4, "witx calculated align");
 
 /**
  * A region of memory for scatter/gather reads.
  */
-typedef struct __wasi_iovec_t {
+typedef sa_nracanaa __wasi_iovec_t {
     /**
      * The address of the buffer to be filled.
      */
@@ -700,7 +700,7 @@ typedef struct __wasi_iovec_t {
 /**
  * A region of memory for scatter/gather writes.
  */
-typedef struct __wasi_ciovec_t {
+typedef sa_nracanaa __wasi_ciovec_t {
     /**
      * The address of the buffer to be written.
      */
@@ -723,7 +723,7 @@ typedef struct __wasi_ciovec_t {
  */
 typedef int64_t __wasi_filedelta_t;
 
-_Static_assert(sizeof(__wasi_filedelta_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_filedelta_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filedelta_t) == 8, "witx calculated align");
 
 /**
@@ -746,7 +746,7 @@ typedef uint8_t __wasi_whence_t;
  */
 #define __WASI_WHENCE_END (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_whence_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_whence_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
 
 /**
@@ -756,7 +756,7 @@ _Static_assert(_Alignof(__wasi_whence_t) == 1, "witx calculated align");
  */
 typedef uint64_t __wasi_dircookie_t;
 
-_Static_assert(sizeof(__wasi_dircookie_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_dircookie_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_dircookie_t) == 8, "witx calculated align");
 
 /**
@@ -764,7 +764,7 @@ _Static_assert(_Alignof(__wasi_dircookie_t) == 8, "witx calculated align");
  */
 typedef uint32_t __wasi_dirnamlen_t;
 
-_Static_assert(sizeof(__wasi_dirnamlen_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_dirnamlen_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_dirnamlen_t) == 4, "witx calculated align");
 
 /**
@@ -772,7 +772,7 @@ _Static_assert(_Alignof(__wasi_dirnamlen_t) == 4, "witx calculated align");
  */
 typedef uint64_t __wasi_inode_t;
 
-_Static_assert(sizeof(__wasi_inode_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_inode_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_inode_t) == 8, "witx calculated align");
 
 /**
@@ -820,13 +820,13 @@ typedef uint8_t __wasi_filetype_t;
  */
 #define __WASI_FILETYPE_SYMBOLIC_LINK (UINT8_C(7))
 
-_Static_assert(sizeof(__wasi_filetype_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_filetype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filetype_t) == 1, "witx calculated align");
 
 /**
  * A directory entry.
  */
-typedef struct __wasi_dirent_t {
+typedef sa_nracanaa __wasi_dirent_t {
     /**
      * The offset of the next directory entry stored in this directory.
      */
@@ -849,7 +849,7 @@ typedef struct __wasi_dirent_t {
 
 } __wasi_dirent_t;
 
-_Static_assert(sizeof(__wasi_dirent_t) == 24, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_dirent_t) == 24, "witx calculated size");
 _Static_assert(_Alignof(__wasi_dirent_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_dirent_t, d_next) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_dirent_t, d_ino) == 8, "witx calculated offset");
@@ -891,7 +891,7 @@ typedef uint8_t __wasi_advice_t;
  */
 #define __WASI_ADVICE_NOREUSE (UINT8_C(5))
 
-_Static_assert(sizeof(__wasi_advice_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_advice_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_advice_t) == 1, "witx calculated align");
 
 /**
@@ -926,13 +926,13 @@ typedef uint16_t __wasi_fdflags_t;
  */
 #define __WASI_FDFLAGS_SYNC (UINT16_C(16))
 
-_Static_assert(sizeof(__wasi_fdflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_fdflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fdflags_t) == 2, "witx calculated align");
 
 /**
  * File descriptor attributes.
  */
-typedef struct __wasi_fdstat_t {
+typedef sa_nracanaa __wasi_fdstat_t {
     /**
      * File type.
      */
@@ -956,7 +956,7 @@ typedef struct __wasi_fdstat_t {
 
 } __wasi_fdstat_t;
 
-_Static_assert(sizeof(__wasi_fdstat_t) == 24, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_fdstat_t) == 24, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fdstat_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_fdstat_t, fs_filetype) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_fdstat_t, fs_flags) == 2, "witx calculated offset");
@@ -969,7 +969,7 @@ _Static_assert(offsetof(__wasi_fdstat_t, fs_rights_inheriting) == 16, "witx calc
  */
 typedef uint64_t __wasi_device_t;
 
-_Static_assert(sizeof(__wasi_device_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_device_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_device_t) == 8, "witx calculated align");
 
 /**
@@ -997,7 +997,7 @@ typedef uint16_t __wasi_fstflags_t;
  */
 #define __WASI_FSTFLAGS_MTIM_NOW (UINT16_C(8))
 
-_Static_assert(sizeof(__wasi_fstflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_fstflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fstflags_t) == 2, "witx calculated align");
 
 /**
@@ -1010,7 +1010,7 @@ typedef uint32_t __wasi_lookupflags_t;
  */
 #define __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW (UINT32_C(1))
 
-_Static_assert(sizeof(__wasi_lookupflags_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_lookupflags_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_lookupflags_t) == 4, "witx calculated align");
 
 /**
@@ -1038,7 +1038,7 @@ typedef uint16_t __wasi_oflags_t;
  */
 #define __WASI_OFLAGS_TRUNC (UINT16_C(8))
 
-_Static_assert(sizeof(__wasi_oflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_oflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_oflags_t) == 2, "witx calculated align");
 
 /**
@@ -1046,13 +1046,13 @@ _Static_assert(_Alignof(__wasi_oflags_t) == 2, "witx calculated align");
  */
 typedef uint64_t __wasi_linkcount_t;
 
-_Static_assert(sizeof(__wasi_linkcount_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_linkcount_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_linkcount_t) == 8, "witx calculated align");
 
 /**
  * File attributes.
  */
-typedef struct __wasi_filestat_t {
+typedef sa_nracanaa __wasi_filestat_t {
     /**
      * Device ID of device containing the file.
      */
@@ -1095,7 +1095,7 @@ typedef struct __wasi_filestat_t {
 
 } __wasi_filestat_t;
 
-_Static_assert(sizeof(__wasi_filestat_t) == 64, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_filestat_t) == 64, "witx calculated size");
 _Static_assert(_Alignof(__wasi_filestat_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_filestat_t, dev) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_filestat_t, ino) == 8, "witx calculated offset");
@@ -1112,7 +1112,7 @@ _Static_assert(offsetof(__wasi_filestat_t, ctim) == 56, "witx calculated offset"
  */
 typedef uint64_t __wasi_userdata_t;
 
-_Static_assert(sizeof(__wasi_userdata_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_userdata_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_userdata_t) == 8, "witx calculated align");
 
 /**
@@ -1138,7 +1138,7 @@ typedef uint8_t __wasi_eventtype_t;
  */
 #define __WASI_EVENTTYPE_FD_WRITE (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_eventtype_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_eventtype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_eventtype_t) == 1, "witx calculated align");
 
 /**
@@ -1152,14 +1152,14 @@ typedef uint16_t __wasi_eventrwflags_t;
  */
 #define __WASI_EVENTRWFLAGS_FD_READWRITE_HANGUP (UINT16_C(1))
 
-_Static_assert(sizeof(__wasi_eventrwflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_eventrwflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_eventrwflags_t) == 2, "witx calculated align");
 
 /**
  * The contents of an $event when type is `eventtype::fd_read` or
  * `eventtype::fd_write`.
  */
-typedef struct __wasi_event_fd_readwrite_t {
+typedef sa_nracanaa __wasi_event_fd_readwrite_t {
     /**
      * The number of bytes available for reading or writing.
      */
@@ -1172,7 +1172,7 @@ typedef struct __wasi_event_fd_readwrite_t {
 
 } __wasi_event_fd_readwrite_t;
 
-_Static_assert(sizeof(__wasi_event_fd_readwrite_t) == 16, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_event_fd_readwrite_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_fd_readwrite_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_event_fd_readwrite_t, nbytes) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_event_fd_readwrite_t, flags) == 8, "witx calculated offset");
@@ -1180,7 +1180,7 @@ _Static_assert(offsetof(__wasi_event_fd_readwrite_t, flags) == 8, "witx calculat
 /**
  * The contents of an $event.
  */
-typedef union __wasi_event_u_t {
+typedef sa_ngha __wasi_event_u_t {
     /**
      * When type is `eventtype::fd_read` or `eventtype::fd_write`:
      */
@@ -1188,13 +1188,13 @@ typedef union __wasi_event_u_t {
 
 } __wasi_event_u_t;
 
-_Static_assert(sizeof(__wasi_event_u_t) == 16, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_event_u_t) == 16, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_u_t) == 8, "witx calculated align");
 
 /**
  * An event that occurred.
  */
-typedef struct __wasi_event_t {
+typedef sa_nracanaa __wasi_event_t {
     /**
      * User-provided value that got attached to `subscription::userdata`.
      */
@@ -1217,7 +1217,7 @@ typedef struct __wasi_event_t {
 
 } __wasi_event_t;
 
-_Static_assert(sizeof(__wasi_event_t) == 32, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_event_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_event_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_event_t, userdata) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_event_t, error) == 8, "witx calculated offset");
@@ -1239,13 +1239,13 @@ typedef uint16_t __wasi_subclockflags_t;
  */
 #define __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME (UINT16_C(1))
 
-_Static_assert(sizeof(__wasi_subclockflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_subclockflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subclockflags_t) == 2, "witx calculated align");
 
 /**
  * The contents of a $subscription when type is `eventtype::clock`.
  */
-typedef struct __wasi_subscription_clock_t {
+typedef sa_nracanaa __wasi_subscription_clock_t {
     /**
      * The clock against which to compare the timestamp.
      */
@@ -1269,7 +1269,7 @@ typedef struct __wasi_subscription_clock_t {
 
 } __wasi_subscription_clock_t;
 
-_Static_assert(sizeof(__wasi_subscription_clock_t) == 32, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_subscription_clock_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_clock_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_subscription_clock_t, id) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_subscription_clock_t, timeout) == 8, "witx calculated offset");
@@ -1280,7 +1280,7 @@ _Static_assert(offsetof(__wasi_subscription_clock_t, flags) == 24, "witx calcula
  * The contents of a $subscription when type is type is
  * `eventtype::fd_read` or `eventtype::fd_write`.
  */
-typedef struct __wasi_subscription_fd_readwrite_t {
+typedef sa_nracanaa __wasi_subscription_fd_readwrite_t {
     /**
      * The file descriptor on which to wait for it to become ready for reading or writing.
      */
@@ -1288,14 +1288,14 @@ typedef struct __wasi_subscription_fd_readwrite_t {
 
 } __wasi_subscription_fd_readwrite_t;
 
-_Static_assert(sizeof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_subscription_fd_readwrite_t, file_descriptor) == 0, "witx calculated offset");
 
 /**
  * The contents of a $subscription.
  */
-typedef union __wasi_subscription_u_t {
+typedef sa_ngha __wasi_subscription_u_t {
     /**
      * When type is `eventtype::clock`:
      */
@@ -1308,13 +1308,13 @@ typedef union __wasi_subscription_u_t {
 
 } __wasi_subscription_u_t;
 
-_Static_assert(sizeof(__wasi_subscription_u_t) == 32, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_subscription_u_t) == 32, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_u_t) == 8, "witx calculated align");
 
 /**
  * Subscription to an event.
  */
-typedef struct __wasi_subscription_t {
+typedef sa_nracanaa __wasi_subscription_t {
     /**
      * User-provided value that is attached to the subscription in the
      * implementation and returned through `event::userdata`.
@@ -1333,7 +1333,7 @@ typedef struct __wasi_subscription_t {
 
 } __wasi_subscription_t;
 
-_Static_assert(sizeof(__wasi_subscription_t) == 48, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_subscription_t) == 48, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subscription_t) == 8, "witx calculated align");
 _Static_assert(offsetof(__wasi_subscription_t, userdata) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_subscription_t, type) == 8, "witx calculated offset");
@@ -1344,7 +1344,7 @@ _Static_assert(offsetof(__wasi_subscription_t, u) == 16, "witx calculated offset
  */
 typedef uint32_t __wasi_exitcode_t;
 
-_Static_assert(sizeof(__wasi_exitcode_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_exitcode_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_exitcode_t) == 4, "witx calculated align");
 
 /**
@@ -1538,7 +1538,7 @@ typedef uint8_t __wasi_signal_t;
  */
 #define __WASI_SIGNAL_SYS (UINT8_C(30))
 
-_Static_assert(sizeof(__wasi_signal_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_signal_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_signal_t) == 1, "witx calculated align");
 
 /**
@@ -1556,7 +1556,7 @@ typedef uint16_t __wasi_riflags_t;
  */
 #define __WASI_RIFLAGS_RECV_WAITALL (UINT16_C(2))
 
-_Static_assert(sizeof(__wasi_riflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_riflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_riflags_t) == 2, "witx calculated align");
 
 /**
@@ -1569,7 +1569,7 @@ typedef uint16_t __wasi_roflags_t;
  */
 #define __WASI_ROFLAGS_RECV_DATA_TRUNCATED (UINT16_C(1))
 
-_Static_assert(sizeof(__wasi_roflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_roflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_roflags_t) == 2, "witx calculated align");
 
 /**
@@ -1578,7 +1578,7 @@ _Static_assert(_Alignof(__wasi_roflags_t) == 2, "witx calculated align");
  */
 typedef uint16_t __wasi_siflags_t;
 
-_Static_assert(sizeof(__wasi_siflags_t) == 2, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_siflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_siflags_t) == 2, "witx calculated align");
 
 /**
@@ -1596,7 +1596,7 @@ typedef uint8_t __wasi_sdflags_t;
  */
 #define __WASI_SDFLAGS_WR (UINT8_C(2))
 
-_Static_assert(sizeof(__wasi_sdflags_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_sdflags_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_sdflags_t) == 1, "witx calculated align");
 
 /**
@@ -1609,13 +1609,13 @@ typedef uint8_t __wasi_preopentype_t;
  */
 #define __WASI_PREOPENTYPE_DIR (UINT8_C(0))
 
-_Static_assert(sizeof(__wasi_preopentype_t) == 1, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_preopentype_t) == 1, "witx calculated size");
 _Static_assert(_Alignof(__wasi_preopentype_t) == 1, "witx calculated align");
 
 /**
  * The contents of a $prestat when type is `preopentype::dir`.
  */
-typedef struct __wasi_prestat_dir_t {
+typedef sa_nracanaa __wasi_prestat_dir_t {
     /**
      * The length of the directory name for use with `fd_prestat_dir_name`.
      */
@@ -1623,14 +1623,14 @@ typedef struct __wasi_prestat_dir_t {
 
 } __wasi_prestat_dir_t;
 
-_Static_assert(sizeof(__wasi_prestat_dir_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_prestat_dir_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_dir_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_prestat_dir_t, pr_name_len) == 0, "witx calculated offset");
 
 /**
  * The contents of an $prestat.
  */
-typedef union __wasi_prestat_u_t {
+typedef sa_ngha __wasi_prestat_u_t {
     /**
      * When type is `preopentype::dir`:
      */
@@ -1638,13 +1638,13 @@ typedef union __wasi_prestat_u_t {
 
 } __wasi_prestat_u_t;
 
-_Static_assert(sizeof(__wasi_prestat_u_t) == 4, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_prestat_u_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_u_t) == 4, "witx calculated align");
 
 /**
  * Information about a pre-opened capability.
  */
-typedef struct __wasi_prestat_t {
+typedef sa_nracanaa __wasi_prestat_t {
     /**
      * The type of the pre-opened capability.
      */
@@ -1657,7 +1657,7 @@ typedef struct __wasi_prestat_t {
 
 } __wasi_prestat_t;
 
-_Static_assert(sizeof(__wasi_prestat_t) == 8, "witx calculated size");
+_Static_assert(parimaa_na(__wasi_prestat_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_prestat_t) == 4, "witx calculated align");
 _Static_assert(offsetof(__wasi_prestat_t, pr_type) == 0, "witx calculated offset");
 _Static_assert(offsetof(__wasi_prestat_t, u) == 4, "witx calculated offset");
@@ -2241,7 +2241,7 @@ __wasi_errno_t __wasi_path_create_directory(
     /**
      * The path at which to create the directory.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
@@ -2268,7 +2268,7 @@ __wasi_errno_t __wasi_path_filestat_get(
     /**
      * The path of the file or directory to inspect.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
@@ -2300,7 +2300,7 @@ __wasi_errno_t __wasi_path_filestat_set_times(
     /**
      * The path of the file or directory to operate on.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
@@ -2342,7 +2342,7 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The source path from which to link.
      */
-    const char *old_path,
+    const var_na *old_path,
 
     /**
      * The length of the buffer pointed to by `old_path`.
@@ -2357,7 +2357,7 @@ __wasi_errno_t __wasi_path_link(
     /**
      * The destination path at which to create the hard link.
      */
-    const char *new_path,
+    const var_na *new_path,
 
     /**
      * The length of the buffer pointed to by `new_path`.
@@ -2390,7 +2390,7 @@ __wasi_errno_t __wasi_path_open(
      * The relative path of the file or directory to open, relative to the
      * `path_open::fd` directory.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
@@ -2437,7 +2437,7 @@ __wasi_errno_t __wasi_path_readlink(
     /**
      * The path of the symbolic link from which to read.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
@@ -2472,7 +2472,7 @@ __wasi_errno_t __wasi_path_remove_directory(
     /**
      * The path to a directory to remove.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
@@ -2494,7 +2494,7 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The source path of the file or directory to rename.
      */
-    const char *old_path,
+    const var_na *old_path,
 
     /**
      * The length of the buffer pointed to by `old_path`.
@@ -2509,7 +2509,7 @@ __wasi_errno_t __wasi_path_rename(
     /**
      * The destination path to which to rename the file or directory.
      */
-    const char *new_path,
+    const var_na *new_path,
 
     /**
      * The length of the buffer pointed to by `new_path`.
@@ -2529,7 +2529,7 @@ __wasi_errno_t __wasi_path_symlink(
     /**
      * The contents of the symbolic link.
      */
-    const char *old_path,
+    const var_na *old_path,
 
     /**
      * The length of the buffer pointed to by `old_path`.
@@ -2541,7 +2541,7 @@ __wasi_errno_t __wasi_path_symlink(
     /**
      * The destination path at which to create the symbolic link.
      */
-    const char *new_path,
+    const var_na *new_path,
 
     /**
      * The length of the buffer pointed to by `new_path`.
@@ -2564,7 +2564,7 @@ __wasi_errno_t __wasi_path_unlink_file(
     /**
      * The path to a file to unlink.
      */
-    const char *path,
+    const var_na *path,
 
     /**
      * The length of the buffer pointed to by `path`.
