@@ -8,19 +8,19 @@
 #ifndef m3_core_h
 #define m3_core_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <assert.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <stdbool.h>
+#ضمن <string.h>
+#ضمن <assert.h>
 
-#include "wasm3.h"
-#include "m3_config.h"
+#ضمن "wasm3.h"
+#ضمن "m3_config.h"
 
-#if defined(__cplusplus)
-#  define d_m3BeginExternC     extern "C" {
+#إذا defined(__cplusplus)
+#  define d_m3BeginExternC     خارجي "C" {
 #  define d_m3EndExternC       }
-#else
+#وإلا
 #  define d_m3BeginExternC
 #  define d_m3EndExternC
 #endif
@@ -29,20 +29,20 @@ d_m3BeginExternC
 
 #define d_m3ImplementFloat (d_m3HasFloat || d_m3NoFloatDynamic)
 
-#if !defined(d_m3ShortTypesDefined)
+#إذا !defined(d_m3ShortTypesDefined)
 
-typedef uint64_t u64;
-typedef int64_t  i64;
-typedef uint32_t u32;
-typedef int32_t  i32;
-typedef uint16_t u16;
-typedef int16_t  i16;
-typedef uint8_t  u8;
-typedef int8_t   i8;
+تعريفنوع uint64_t u64;
+تعريفنوع int64_t  i64;
+تعريفنوع uint32_t u32;
+تعريفنوع int32_t  i32;
+تعريفنوع uint16_t u16;
+تعريفنوع int16_t  i16;
+تعريفنوع uint8_t  u8;
+تعريفنوع int8_t   i8;
 
-#  if d_m3ImplementFloat
-typedef double f64;
-typedef float  f32;
+#  إذا d_m3ImplementFloat
+تعريفنوع مزدوج f64;
+تعريفنوع عائم  f32;
 #  endif
 
 #endif // d_m3ShortTypesDefined
@@ -50,89 +50,89 @@ typedef float  f32;
 #define PRIf32          "f"
 #define PRIf64          "lf"
 
-typedef const void*       m3ret_t;
-typedef const void*       voidptr_t;
-typedef const char*       cstr_t;
-typedef const char* const ccstr_t;
-typedef const u8*         bytes_t;
-typedef const u8* const   cbytes_t;
+تعريفنوع ثابت فراغ*       m3ret_t;
+تعريفنوع ثابت فراغ*       voidptr_t;
+تعريفنوع ثابت حرف*       cstr_t;
+تعريفنوع ثابت حرف* ثابت ccstr_t;
+تعريفنوع ثابت u8*         bytes_t;
+تعريفنوع ثابت u8* ثابت   cbytes_t;
 
-typedef u16               m3opcode_t;
-#if d_m3HasTypedRefs
-typedef u16 m3type_t;       // a value type, see the d_m3Type_* bits below
-#else
-typedef u8 m3type_t;       // only plain M3ValueType values exist
+تعريفنوع u16               m3opcode_t;
+#إذا d_m3HasTypedRefs
+تعريفنوع u16 m3type_t;       // a value type, see the d_m3Type_* bits below
+#وإلا
+تعريفنوع u8 m3type_t;       // only plain M3ValueType values exist
 #endif
 
-typedef i64 m3reg_t;
+تعريفنوع i64 m3reg_t;
 
-#if d_m3Use32BitSlots
-typedef u32 m3slot_t;
-#else
-typedef u64 m3slot_t;
+#إذا d_m3Use32BitSlots
+تعريفنوع u32 m3slot_t;
+#وإلا
+تعريفنوع u64 m3slot_t;
 #endif
 
-typedef m3slot_t* m3stack_t;
+تعريفنوع m3slot_t* m3stack_t;
 
-#define c_ioSlotCount ((u16)(sizeof(u64) / sizeof(m3slot_t)))
+#define c_io_Slot_كدي ((u16)(حجم(u64) / حجم(m3slot_t)))
 
-typedef const void* const cvptr_t;
+تعريفنوع ثابت فراغ* ثابت cvptr_t;
 
-#if defined(DEBUG)
+#إذا defined(DEBUG)
 
 #  define d_m3Log(CATEGORY, FMT, ...)                printf (" %8s  |  " FMT, #CATEGORY, ##__VA_ARGS__);
 
-#  if d_m3LogParse
+#  إذا d_m3LogParse
 #    define m3log_parse(CATEGORY, FMT, ...)          d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  وإلا
 #    define m3log_parse(...) {}
 #  endif
 
-#  if d_m3LogCompile
+#  إذا d_m3LogCompile
 #    define m3log_compile(CATEGORY, FMT, ...)        d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  وإلا
 #    define m3log_compile(...) {}
 #  endif
 
-#  if d_m3LogEmit
+#  إذا d_m3LogEmit
 #    define m3log_emit(CATEGORY, FMT, ...)           d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  وإلا
 #    define m3log_emit(...) {}
 #  endif
 
-#  if d_m3LogCodePages
+#  إذا d_m3LogCodePages
 #    define m3log_code(CATEGORY, FMT, ...)           d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  وإلا
 #    define m3log_code(...) {}
 #  endif
 
-#  if d_m3LogModule
+#  إذا d_m3LogModule
 #    define m3log_module(CATEGORY, FMT, ...)         d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  وإلا
 #    define m3log_module(...) {}
 #  endif
 
-#  if d_m3LogRuntime
+#  إذا d_m3LogRuntime
 #    define m3log_runtime(CATEGORY, FMT, ...)        d_m3Log(CATEGORY, FMT, ##__VA_ARGS__)
-#  else
+#  وإلا
 #    define m3log_runtime(...) {}
 #  endif
 
 #  define m3log(CATEGORY, FMT, ...)                  m3log_##CATEGORY (CATEGORY, FMT "\n", ##__VA_ARGS__)
-#else
+#وإلا
 #  define d_m3Log(CATEGORY, FMT, ...)                {}
 #  define m3log(CATEGORY, FMT, ...)                  {}
 #endif
 
 
-#if defined(ASSERTS) || (defined(DEBUG) && !defined(NASSERTS))
-#  define d_m3Assert(ASS)  if (!(ASS)) { printf("Assertion failed at %s:%d : %s\n", __FILE__, __LINE__, #ASS); fflush(stdout); abort(); }
-#else
+#إذا defined(ASSERTS) || (defined(DEBUG) && !defined(NASSERTS))
+#  define d_m3Assert(ASS)  إذا (!(ASS)) { printf("Assertion failed at %s:%d : %s\n", __FILE__, __LINE__, #ASS); fflush(stdout); abort(); }
+#وإلا
 #  define d_m3Assert(ASS)
 #endif
 
-typedef void /*const*/*                code_t;
-typedef code_t const* /*__restrict__*/ pc_t;
+تعريفنوع فراغ /*const*/*                code_t;
+تعريفنوع code_t ثابت* /*__restrict__*/ pc_t;
 
 
 // Sits immediately before the linear memory it describes, so m3MemData() is
@@ -141,30 +141,30 @@ typedef code_t const* /*__restrict__*/ pc_t;
 // counts, its owning runtime - through the back-pointers here. 'memory' is what
 // makes that possible without going through the runtime, which is the
 // prerequisite for a runtime holding more than one memory.
-typedef struct M3MemoryHeader {
+تعريفنوع بنية M3MemoryHeader {
     IM3Runtime       runtime;
-    void*            maxStack;
+    فراغ*            max_تر;
     size_t           length;
-    struct M3Memory* memory;         // the M3Memory this block belongs to
+    بنية M3Memory* memory;         // the M3Memory this block belongs to
 } M3MemoryHeader;
 
-struct M3CodeMappingPage;
+بنية M3CodeMappingPage;
 
-typedef struct M3CodePageHeader {
-    struct M3CodePage* next;
+تعريفنوع بنية M3CodePageHeader {
+    بنية M3CodePage* next;
 
-    u32                lineIndex;
-    u32                numLines;
+    u32                لي_Index;
+    u32                لمب_ليوك;
     u32                sequence;       // this is just used for debugging; could be removed
-    u32                usageCount;
+    u32                usage_كدي;
 
-#if d_m3RecordBacktraces
-    struct M3CodeMappingPage* mapping;
+#إذا d_m3RecordBacktraces
+    بنية M3CodeMappingPage* mapping;
 #endif // d_m3RecordBacktraces
 } M3CodePageHeader;
 
 
-#define d_m3CodePageFreeLinesThreshold      7+2       // max is: ReturnCallIndirect (op + 6 immediates) + 2 for bridge
+#define d_m3_Code_Page_Free_ليوك_Threshold      7+2       // max is: ReturnCallIndirect (op + 6 immediates) + 2 for bridge
 
 #define d_m3DefaultMemPageSize              65536
 
@@ -185,30 +185,30 @@ typedef struct M3CodePageHeader {
 #define d_m3Reg0SlotAlias                   60000
 #define d_m3Fp0SlotAlias                    (d_m3Reg0SlotAlias + 2)
 
-#if d_m3HasTypedRefs
+#إذا d_m3HasTypedRefs
 // a heap type index has to fit in the spare bits of an m3type_t, see below
-#  define d_m3MaxSaneTypesCount             4094
-#else
+#  define d_m3_Max_Sane_Types_كدي             4094
+#وإلا
 // M3Environment.numFuncTypes is the u16 that hands out M3FuncType.canonicalIndex,
 // so the count has to stay below 65536 here as well
-#  define d_m3MaxSaneTypesCount             65500
+#  define d_m3_Max_Sane_Types_كدي             65500
 #endif
-#define d_m3MaxSaneFunctionsCount           1000000
-#define d_m3MaxSaneImportsCount             100000
-#define d_m3MaxSaneExportsCount             100000
-#define d_m3MaxSaneGlobalsCount             1000000
-#define d_m3MaxSaneTagsCount                100000
+#define d_m3_Max_Sane_Functions_كدي           1000000
+#define d_m3_Max_Sane_Imports_كدي             100000
+#define d_m3_Max_Sane_Exports_كدي             100000
+#define d_m3_Max_Sane_Globals_كدي             1000000
+#define d_m3_Max_Sane_Tags_كدي                100000
 #define d_m3MaxSaneElementSegments          10000000
 #define d_m3MaxSaneDataSegments             100000
 #define d_m3MaxSaneTableSize                10000000
-#define d_m3MaxSaneMemoriesCount            10000
-#if d_m3HasRefTypes
-#  define d_m3MaxSaneTableCount             1000
-#else
-#  define d_m3MaxSaneTableCount             1           // MVP: a single table
+#define d_m3_Max_Sane_Memories_كدي            10000
+#إذا d_m3HasRefTypes
+#  define d_m3_Max_Sane_Table_كدي             1000
+#وإلا
+#  define d_m3_Max_Sane_Table_كدي             1           // MVP: a single table
 #endif
 #define d_m3MaxSaneUtf8Length               10000
-#define d_m3MaxSaneFunctionArgRetCount      1000    // still insane, but whatever
+#define d_m3_Max_Sane_Function_Arg_Ret_كدي      1000    // still insane, but whatever
 
 #define d_externalKind_function             0
 #define d_externalKind_table                1
@@ -242,27 +242,27 @@ typedef struct M3CodePageHeader {
 
 // indexed by M3ValueType: c_m3Type_count entries for the concrete types, plus
 // one more for c_m3Type_unknown, which sits right after them
-static const char* const c_waTypes[] = { "nil", "i32", "i64", "f32", "f64", "v128", "funcref", "externref", "exnref", "contref", "unknown" };
-static const char* const c_waCompactTypes[] = { "_", "i", "I", "f", "F", "V", "r", "R", "e", "c", "?" };
+ساكن ثابت حرف* ثابت c_waTypes[] = { "nil", "i32", "i64", "f32", "f64", "v128", "funcref", "externref", "exnref", "contref", "unknown" };
+ساكن ثابت حرف* ثابت c_waCompactTypes[] = { "_", "i", "I", "f", "F", "V", "r", "R", "e", "c", "?" };
 
 
-#if d_m3VerboseErrorMessages
+#إذا d_m3VerboseErrorMessages
 
 M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, IM3Function i_function,
-                  const char* const i_file, u32 i_lineNum, const char* const i_errorMessage, ...);
+                  ثابت حرف* ثابت i_file, u32 i_لي_لمب, ثابت حرف* ثابت i_errorMessage, ...);
 
-#  define _m3Error(RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ...) \
-            m3Error (RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ##__VA_ARGS__)
+#  define _m3Error(RESULT, RT, MOD, FUN, FILE, لي, FORMAT, ...) \
+            m3Error (RESULT, RT, MOD, FUN, FILE, لي, FORMAT, ##__VA_ARGS__)
 
-#else
-#  define _m3Error(RESULT, RT, MOD, FUN, FILE, LINE, FORMAT, ...) (RESULT)
+#وإلا
+#  define _m3Error(RESULT, RT, MOD, FUN, FILE, لي, FORMAT, ...) (RESULT)
 #endif
 
-#define ErrorRuntime(RESULT, RUNTIME, FORMAT, ...)      _m3Error (RESULT, RUNTIME, NULL, NULL,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
-#define ErrorModule(RESULT, MOD, FORMAT, ...)           _m3Error (RESULT, MOD->runtime, MOD, NULL,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
-#define ErrorCompile(RESULT, COMP, FORMAT, ...)         _m3Error (RESULT, COMP->runtime, COMP->module, NULL, __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
+#define ErrorRuntime(RESULT, RUNTIME, FORMAT, ...)      _m3Error (RESULT, RUNTIME, عدم, عدم,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
+#define ErrorModule(RESULT, MOD, FORMAT, ...)           _m3Error (RESULT, MOD->runtime, MOD, عدم,  __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
+#define ErrorCompile(RESULT, COMP, FORMAT, ...)         _m3Error (RESULT, COMP->runtime, COMP->module, عدم, __FILE__, __LINE__, FORMAT, ##__VA_ARGS__)
 
-#if d_m3GuardedMemory
+#إذا d_m3GuardedMemory
 
 // How much address space a linear memory's bytes are given: everything a Wasm access
 // can name. A 32-bit address plus a 32-bit memarg offset reaches just under 2^33, and
@@ -273,112 +273,112 @@ M3Result m3Error (M3Result i_result, IM3Runtime i_runtime, IM3Module i_module, I
 // not be reserved at all. What comes back is the base of the slot: the memory's
 // M3MemoryHeader sits at the end of its first page, and the bytes the guest addresses
 // begin on the page after that.
-void*           Guard_TakeSlot (void);
+فراغ*           Guard_TakeSlot (فراغ);
 
 // The header of a slot, which is also what the guest's memory starts right after
-M3MemoryHeader* Guard_SlotHeader (void* i_slot);
+M3MemoryHeader* Guard_SlotHeader (فراغ* i_slot);
 
 // Make the first i_dataBytes of the slot's data reachable. Only ever asked to grow,
 // and asking for what is already there costs nothing.
-bool            Guard_CommitSlot (void* i_slot, size_t i_dataBytes);
+bool            Guard_CommitSlot (فراغ* i_slot, size_t i_dataBytes);
 
 // Give a slot back, dropping everything committed in it. The next taker gets it
 // zeroed, as a fresh linear memory has to be.
-void            Guard_GiveSlot (void* i_slot);
+فراغ            Guard_GiveSlot (فراغ* i_slot);
 
 // The whole arena, for a fault to be held against - see m3_HostProtectedCall. Answers
 // (NULL, 0) before anything has asked for a slot.
-void            Guard_ArenaRange (void** o_low, size_t* o_bytes);
+فراغ            Guard_ArenaRange (فراغ** o_كس, size_t* o_bytes);
 
 #endif // d_m3GuardedMemory
 
-#if d_m3MaxNativeStack > 0
+#إذا d_m3_Max_Native_تر > 0
 // The native-stack low-water mark for a top-level call that came in at i_stackPtr,
 // clamped to what the calling thread's stack really is where that can be measured.
 // See d_m3MaxNativeStack and d_m3StackLimitEnter.
-void* m3_NativeStackLimit (void* i_stackPtr, size_t i_budget);
+فراغ* m3_Native_تر_Limit (فراغ* i_تر_Ptr, size_t i_budget);
 #endif
 
-#if d_m3LogNativeStack
-void m3StackCheckInit ();
-void m3StackCheck ();
-int  m3StackGetMax ();
-#else
-#  define     m3StackCheckInit()
-#  define     m3StackCheck()
-#  define     m3StackGetMax()         0
+#إذا d_m3_Log_Native_تر
+فراغ m3_تر_Check_Init ();
+فراغ m3_تر_Check ();
+صحيح  m3_تر_Get_Max ();
+#وإلا
+#  define     m3_تر_Check_Init()
+#  define     m3_تر_Check()
+#  define     m3_تر_Get_Max()         0
 #endif
 
-#if d_m3LogTimestamps
+#إذا d_m3LogTimestamps
 #  define     PRIts                   "%llu"
 uint64_t m3_GetTimestamp ();
-#else
+#وإلا
 #  define     PRIts                   "%s"
 #  define     m3_GetTimestamp()       ""
 #endif
 
-void  m3_Abort (const char* message);
-void* m3_Malloc_Impl (size_t i_size);
-void* m3_Realloc_Impl (void* i_ptr, size_t i_newSize, size_t i_oldSize);
-void  m3_Free_Impl (void* i_ptr);
-void* m3_CopyMem (const void* i_from, size_t i_size);
+فراغ  m3_Abort (ثابت حرف* message);
+فراغ* m3_Malloc_Impl (size_t i_size);
+فراغ* m3_Realloc_Impl (فراغ* i_ptr, size_t i_newSize, size_t i_oldSize);
+فراغ  m3_Free_Impl (فراغ* i_ptr);
+فراغ* m3_CopyMem (ثابت فراغ* i_from, size_t i_size);
 
-#if d_m3LogHeapOps
+#إذا d_m3LogHeapOps
 
 // Tracing format: timestamp;heap:OpCode;name;size(bytes);new items;new ptr;old items;old ptr
 
-static inline
-void* m3_AllocStruct_Impl (ccstr_t name, size_t i_size)
+ساكن مضمن
+فراغ* m3_AllocStruct_Impl (ccstr_t name, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size);
+    فراغ* result = m3_Malloc_Impl(i_size);
     fprintf(stderr, PRIts ";heap:AllocStruct;%s;%zu;;%p;;\n", m3_GetTimestamp(), name, i_size, result);
-    return result;
+    أرجع result;
 }
 
-static inline
-void* m3_AllocArray_Impl (ccstr_t name, size_t i_num, size_t i_size)
+ساكن مضمن
+فراغ* m3_AllocArray_Impl (ccstr_t name, size_t i_لمب, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size * i_num);
-    fprintf(stderr, PRIts ";heap:AllocArr;%s;%zu;%zu;%p;;\n", m3_GetTimestamp(), name, i_size, i_num, result);
-    return result;
+    فراغ* result = m3_Malloc_Impl(i_size * i_لمب);
+    fprintf(stderr, PRIts ";heap:AllocArr;%s;%zu;%zu;%p;;\n", m3_GetTimestamp(), name, i_size, i_لمب, result);
+    أرجع result;
 }
 
-static inline
-void* m3_ReallocArray_Impl (ccstr_t name, void* i_ptr_old, size_t i_num_new, size_t i_num_old, size_t i_size)
+ساكن مضمن
+فراغ* m3_ReallocArray_Impl (ccstr_t name, فراغ* i_ptr_old, size_t i_لمب_new, size_t i_لمب_old, size_t i_size)
 {
-    void* result = m3_Realloc_Impl(i_ptr_old, i_size * i_num_new, i_size * i_num_old);
-    fprintf(stderr, PRIts ";heap:ReallocArr;%s;%zu;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_size, i_num_new, result, i_num_old, i_ptr_old);
-    return result;
+    فراغ* result = m3_Realloc_Impl(i_ptr_old, i_size * i_لمب_new, i_size * i_لمب_old);
+    fprintf(stderr, PRIts ";heap:ReallocArr;%s;%zu;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_size, i_لمب_new, result, i_لمب_old, i_ptr_old);
+    أرجع result;
 }
 
-static inline
-void* m3_Malloc (ccstr_t name, size_t i_size)
+ساكن مضمن
+فراغ* m3_Malloc (ccstr_t name, size_t i_size)
 {
-    void* result = m3_Malloc_Impl(i_size);
+    فراغ* result = m3_Malloc_Impl(i_size);
     fprintf(stderr, PRIts ";heap:AllocMem;%s;%zu;;%p;;\n", m3_GetTimestamp(), name, i_size, result);
-    return result;
+    أرجع result;
 }
-static inline
-void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
+ساكن مضمن
+فراغ* m3_Realloc (ccstr_t name, فراغ* i_ptr, size_t i_newSize, size_t i_oldSize)
 {
-    void* result = m3_Realloc_Impl(i_ptr, i_newSize, i_oldSize);
+    فراغ* result = m3_Realloc_Impl(i_ptr, i_newSize, i_oldSize);
     fprintf(stderr, PRIts ";heap:ReallocMem;%s;;%zu;%p;%zu;%p\n", m3_GetTimestamp(), name, i_newSize, result, i_oldSize, i_ptr);
-    return result;
+    أرجع result;
 }
 
-#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_AllocStruct_Impl  (#STRUCT, sizeof (STRUCT))
-#  define     m3_AllocArray(STRUCT, NUM)              (STRUCT *)m3_AllocArray_Impl   (#STRUCT, NUM, sizeof (STRUCT))
-#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_ReallocArray_Impl (#STRUCT, (void *)(PTR), (NEW), (OLD), sizeof (STRUCT))
-#  define     m3_Free(P)                              do { void* p = (void*)(P);                                  \
-                                                          if (p) { fprintf(stderr, PRIts ";heap:FreeMem;;;;%p;\n", m3_GetTimestamp(), p); }     \
-                                                          m3_Free_Impl (p); (P) = NULL; } while(0)
-#else
+#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_AllocStruct_Impl  (#STRUCT, حجم (STRUCT))
+#  define     m3_AllocArray(STRUCT, لمب)              (STRUCT *)m3_AllocArray_Impl   (#STRUCT, لمب, حجم (STRUCT))
+#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_ReallocArray_Impl (#STRUCT, (فراغ *)(PTR), (NEW), (OLD), حجم (STRUCT))
+#  define     m3_Free(P)                              افعل { فراغ* p = (فراغ*)(P);                                  \
+                                                          إذا (p) { fprintf(stderr, PRIts ";heap:FreeMem;;;;%p;\n", m3_GetTimestamp(), p); }     \
+                                                          m3_Free_Impl (p); (P) = عدم; } طالما(0)
+#وإلا
 #  define     m3_Malloc(NAME, SIZE)                   m3_Malloc_Impl(SIZE)
 #  define     m3_Realloc(NAME, PTR, NEW, OLD)         m3_Realloc_Impl(PTR, NEW, OLD)
-#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT))
-#  define     m3_AllocArray(STRUCT, NUM)              (STRUCT *)m3_Malloc_Impl (sizeof (STRUCT) * (NUM))
-#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_Realloc_Impl ((void *)(PTR), sizeof (STRUCT) * (NEW), sizeof (STRUCT) * (OLD))
-#  define     m3_Free(P)                              do { m3_Free_Impl ((void*)(P)); (P) = NULL; } while(0)
+#  define     m3_AllocStruct(STRUCT)                  (STRUCT *)m3_Malloc_Impl (حجم (STRUCT))
+#  define     m3_AllocArray(STRUCT, لمب)              (STRUCT *)m3_Malloc_Impl (حجم (STRUCT) * (لمب))
+#  define     m3_ReallocArray(STRUCT, PTR, NEW, OLD)  (STRUCT *)m3_Realloc_Impl ((فراغ *)(PTR), حجم (STRUCT) * (NEW), حجم (STRUCT) * (OLD))
+#  define     m3_Free(P)                              افعل { m3_Free_Impl ((فراغ*)(P)); (P) = عدم; } طالما(0)
 #endif
 
 // A value type as the parser, compiler and validator carry it. The plain
@@ -394,7 +394,7 @@ void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
 //   bit 12     heap type cont rather than func
 //   bits 11-0  canonical function type index, or d_m3Type_heapAbstract
 
-#if d_m3HasTypedRefs
+#إذا d_m3HasTypedRefs
 
 #  define d_m3Type_ref                0x8000u
 #  define d_m3Type_refNonNull         0x4000u
@@ -413,46 +413,46 @@ void* m3_Realloc (ccstr_t name, void* i_ptr, size_t i_newSize, size_t i_oldSize)
 u8   BaseTypeOf (m3type_t i_type);
 bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super);
 
-static inline
+ساكن مضمن
 bool IsSpelledRefType (m3type_t i_type)
 {
-    return (i_type & d_m3Type_ref) != 0;
+    أرجع (i_type & d_m3Type_ref) != 0;
 }
-static inline
+ساكن مضمن
 bool IsNullableRef (m3type_t i_type)
 {
-    return (i_type & d_m3Type_refNonNull) == 0;
+    أرجع (i_type & d_m3Type_refNonNull) == 0;
 }
-static inline
+ساكن مضمن
 u32 HeapTypeOf (m3type_t i_type)
 {
-    return IsSpelledRefType(i_type) ? (i_type & d_m3Type_heapMask) : d_m3Type_heapAbstract;
+    أرجع IsSpelledRefType(i_type) ? (i_type & d_m3Type_heapMask) : d_m3Type_heapAbstract;
 }
 
-#else // no spelled-out reference types, so every value type is its own storage
+#وإلا // no spelled-out reference types, so every value type is its own storage
       // type and subtyping collapses back to equality
 
-static inline
+ساكن مضمن
 u8 BaseTypeOf (m3type_t i_type)
 {
-    return (u8)i_type;
+    أرجع (u8)i_type;
 }
-static inline
+ساكن مضمن
 bool IsSubTypeOf (m3type_t i_sub, m3type_t i_super)
 {
-    return i_sub == i_super;
+    أرجع i_sub == i_super;
 }
-static inline
+ساكن مضمن
 bool IsSpelledRefType (m3type_t i_type)
 {
-    (void)i_type;
-    return false;
+    (فراغ)i_type;
+    أرجع false;
 }
-static inline
+ساكن مضمن
 bool IsNullableRef (m3type_t i_type)
 {
-    (void)i_type;
-    return true;
+    (فراغ)i_type;
+    أرجع true;
 }
 
 #endif // d_m3HasTypedRefs
@@ -467,58 +467,58 @@ bool     IsRefType (m3type_t i_m3Type);
 bool     Is64BitType (m3type_t i_m3Type);
 u32      SizeOfType (m3type_t i_m3Type);
 
-M3Result Read_u64 (u64* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end);
-#if d_m3ImplementFloat
-M3Result Read_f64 (f64* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_f32 (f32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u64 (u64* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u32 (u32* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+#إذا d_m3ImplementFloat
+M3Result Read_f64 (f64* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_f32 (f32* o_درج, bytes_t* io_bytes, cbytes_t i_end);
 #endif
-M3Result Read_u8 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result Read_opcode (m3opcode_t* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_u8 (u8* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+M3Result Read_opcode (m3opcode_t* o_درج, bytes_t* io_bytes, cbytes_t i_end);
 
-M3Result ReadLebUnsigned (u64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLebSigned (i64* o_value, u32 i_maxNumBits, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_u32 (u32* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLebUnsigned (u64* o_درج, u32 i_max_لمب_Bits, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLebSigned (i64* o_درج, u32 i_max_لمب_Bits, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_u32 (u32* o_درج, bytes_t* io_bytes, cbytes_t i_end);
 
 // The memarg immediate of a load or store: an alignment hint, then a static
 // offset. Multi-memory reinterprets the alignment as a bitfield -- bit 6 says a
 // memory index sits between the two -- so the hint is returned with that bit
 // masked off and the index defaults to 0 when it is clear.
 M3Result ReadMemoryArg (u32* o_align, u32* o_memoryIdx, u64* o_offset, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_u7 (u8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i7 (i8* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i32 (i32* o_value, bytes_t* io_bytes, cbytes_t i_end);
-M3Result ReadLEB_i64 (i64* o_value, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_u7 (u8* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i7 (i8* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i32 (i32* o_درج, bytes_t* io_bytes, cbytes_t i_end);
+M3Result ReadLEB_i64 (i64* o_درج, bytes_t* io_bytes, cbytes_t i_end);
 M3Result Read_utf8 (cstr_t* o_utf8, bytes_t* io_bytes, cbytes_t i_end);
 
-#if d_m3HasSnapshots
+#إذا d_m3HasSnapshots
 // XXH64, in m3_xxh64.c. Initialize a state, feed it the input in any number of
 // pieces, then read the digest out. The digest depends only on the bytes fed in
 // - not on how they were split up, nor on the host's byte order, pointer width
 // or compiler - and matches the reference xxHash implementation, so anything
 // else that speaks XXH64 computes the same value. Reading the digest does not
 // consume the state.
-typedef struct Xxh64 {
+تعريفنوع بنية Xxh64 {
     u64 acc[4];              // the four accumulator lanes; acc[2] still holds the seed
     u64 totalLength;         // input bytes seen so far
     u8  buffer[32];          // input past the last stripe the accumulators took
     u32 bufferLength;
 } Xxh64;
 
-void Xxh64_Init (Xxh64* o_state, u64 i_seed);
-void Xxh64_Update (Xxh64* io_state, const void* i_data, size_t i_size);
-u64  Xxh64_Digest (const Xxh64* i_state);
+فراغ Xxh64_Init (Xxh64* o_state, u64 i_seed);
+فراغ Xxh64_Update (Xxh64* io_state, ثابت فراغ* i_data, size_t i_size);
+u64  Xxh64_Digest (ثابت Xxh64* i_state);
 #endif // d_m3HasSnapshots
 
-cstr_t SPrintValue (void* i_value, m3type_t i_type);
-size_t SPrintArg (char* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type);
+cstr_t SPrint_درج (فراغ* i_درج, m3type_t i_type);
+size_t SPrintArg (حرف* o_string, size_t i_stringBufferSize, voidptr_t i_sp, m3type_t i_type);
 
-void   ReportError (IM3Runtime io_runtime, IM3Module i_module, IM3Function i_function, ccstr_t i_errorMessage, ccstr_t i_file, u32 i_lineNum);
+فراغ   ReportError (IM3Runtime io_runtime, IM3Module i_module, IM3Function i_function, ccstr_t i_errorMessage, ccstr_t i_file, u32 i_لي_لمب);
 
-#if d_m3RecordBacktraces
-void PushBacktraceFrame (IM3Runtime io_runtime, pc_t i_pc);
-void FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function);
-void ClearBacktrace (IM3Runtime io_runtime);
+#إذا d_m3RecordBacktraces
+فراغ تور_Backtrace_Frame (IM3Runtime io_runtime, pc_t i_pc);
+فراغ FillBacktraceFunctionInfo (IM3Runtime io_runtime, IM3Function i_function);
+فراغ ClearBacktrace (IM3Runtime io_runtime);
 #endif
 
 d_m3EndExternC
