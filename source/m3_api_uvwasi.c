@@ -10,7 +10,7 @@
 #include "m3_env.h"
 #include "m3_exception.h"
 
-#if defined(d_m3HasUVWASI)
+#もし defined(d_m3HasUVWASI)
 
 #  include <stdio.h>
 #  include <string.h>
@@ -29,90 +29,90 @@ typedef struct wasi_iovec_t {
     uvwasi_size_t buf_len;
 } wasi_iovec_t;
 
-#  if d_m3EnableWasiTracing
+#  もし d_m3EnableWasiTracing
 
 const char* wasi_errno2str (uvwasi_errno_t err)
 {
     // clang-format off
     switch (err) {
-    case  0: return "ESUCCESS";
-    case  1: return "E2BIG";
-    case  2: return "EACCES";
-    case  3: return "EADDRINUSE";
-    case  4: return "EADDRNOTAVAIL";
-    case  5: return "EAFNOSUPPORT";
-    case  6: return "EAGAIN";
-    case  7: return "EALREADY";
-    case  8: return "EBADF";
-    case  9: return "EBADMSG";
-    case 10: return "EBUSY";
-    case 11: return "ECANCELED";
-    case 12: return "ECHILD";
-    case 13: return "ECONNABORTED";
-    case 14: return "ECONNREFUSED";
-    case 15: return "ECONNRESET";
-    case 16: return "EDEADLK";
-    case 17: return "EDESTADDRREQ";
-    case 18: return "EDOM";
-    case 19: return "EDQUOT";
-    case 20: return "EEXIST";
-    case 21: return "EFAULT";
-    case 22: return "EFBIG";
-    case 23: return "EHOSTUNREACH";
-    case 24: return "EIDRM";
-    case 25: return "EILSEQ";
-    case 26: return "EINPROGRESS";
-    case 27: return "EINTR";
-    case 28: return "EINVAL";
-    case 29: return "EIO";
-    case 30: return "EISCONN";
-    case 31: return "EISDIR";
-    case 32: return "ELOOP";
-    case 33: return "EMFILE";
-    case 34: return "EMLINK";
-    case 35: return "EMSGSIZE";
-    case 36: return "EMULTIHOP";
-    case 37: return "ENAMETOOLONG";
-    case 38: return "ENETDOWN";
-    case 39: return "ENETRESET";
-    case 40: return "ENETUNREACH";
-    case 41: return "ENFILE";
-    case 42: return "ENOBUFS";
-    case 43: return "ENODEV";
-    case 44: return "ENOENT";
-    case 45: return "ENOEXEC";
-    case 46: return "ENOLCK";
-    case 47: return "ENOLINK";
-    case 48: return "ENOMEM";
-    case 49: return "ENOMSG";
-    case 50: return "ENOPROTOOPT";
-    case 51: return "ENOSPC";
-    case 52: return "ENOSYS";
-    case 53: return "ENOTCONN";
-    case 54: return "ENOTDIR";
-    case 55: return "ENOTEMPTY";
-    case 56: return "ENOTRECOVERABLE";
-    case 57: return "ENOTSOCK";
-    case 58: return "ENOTSUP";
-    case 59: return "ENOTTY";
-    case 60: return "ENXIO";
-    case 61: return "EOVERFLOW";
-    case 62: return "EOWNERDEAD";
-    case 63: return "EPERM";
-    case 64: return "EPIPE";
-    case 65: return "EPROTO";
-    case 66: return "EPROTONOSUPPORT";
-    case 67: return "EPROTOTYPE";
-    case 68: return "ERANGE";
-    case 69: return "EROFS";
-    case 70: return "ESPIPE";
-    case 71: return "ESRCH";
-    case 72: return "ESTALE";
-    case 73: return "ETIMEDOUT";
-    case 74: return "ETXTBSY";
-    case 75: return "EXDEV";
-    case 76: return "ENOTCAPABLE";
-    default: return "<unknown>";
+    case  0: 戻る "ESUCCESS";
+    case  1: 戻る "E2BIG";
+    case  2: 戻る "EACCES";
+    case  3: 戻る "EADDRINUSE";
+    case  4: 戻る "EADDRNOTAVAIL";
+    case  5: 戻る "EAFNOSUPPORT";
+    case  6: 戻る "EAGAIN";
+    case  7: 戻る "EALREADY";
+    case  8: 戻る "EBADF";
+    case  9: 戻る "EBADMSG";
+    case 10: 戻る "EBUSY";
+    case 11: 戻る "ECANCELED";
+    case 12: 戻る "ECHILD";
+    case 13: 戻る "ECONNABORTED";
+    case 14: 戻る "ECONNREFUSED";
+    case 15: 戻る "ECONNRESET";
+    case 16: 戻る "EDEADLK";
+    case 17: 戻る "EDESTADDRREQ";
+    case 18: 戻る "EDOM";
+    case 19: 戻る "EDQUOT";
+    case 20: 戻る "EEXIST";
+    case 21: 戻る "EFAULT";
+    case 22: 戻る "EFBIG";
+    case 23: 戻る "EHOSTUNREACH";
+    case 24: 戻る "EIDRM";
+    case 25: 戻る "EILSEQ";
+    case 26: 戻る "EINPROGRESS";
+    case 27: 戻る "EINTR";
+    case 28: 戻る "EINVAL";
+    case 29: 戻る "EIO";
+    case 30: 戻る "EISCONN";
+    case 31: 戻る "EISDIR";
+    case 32: 戻る "ELOOP";
+    case 33: 戻る "EMFILE";
+    case 34: 戻る "EMLINK";
+    case 35: 戻る "EMSGSIZE";
+    case 36: 戻る "EMULTIHOP";
+    case 37: 戻る "ENAMETOOLONG";
+    case 38: 戻る "ENETDOWN";
+    case 39: 戻る "ENETRESET";
+    case 40: 戻る "ENETUNREACH";
+    case 41: 戻る "ENFILE";
+    case 42: 戻る "ENOBUFS";
+    case 43: 戻る "ENODEV";
+    case 44: 戻る "ENOENT";
+    case 45: 戻る "ENOEXEC";
+    case 46: 戻る "ENOLCK";
+    case 47: 戻る "ENOLINK";
+    case 48: 戻る "ENOMEM";
+    case 49: 戻る "ENOMSG";
+    case 50: 戻る "ENOPROTOOPT";
+    case 51: 戻る "ENOSPC";
+    case 52: 戻る "ENOSYS";
+    case 53: 戻る "ENOTCONN";
+    case 54: 戻る "ENOTDIR";
+    case 55: 戻る "ENOTEMPTY";
+    case 56: 戻る "ENOTRECOVERABLE";
+    case 57: 戻る "ENOTSOCK";
+    case 58: 戻る "ENOTSUP";
+    case 59: 戻る "ENOTTY";
+    case 60: 戻る "ENXIO";
+    case 61: 戻る "EOVERFLOW";
+    case 62: 戻る "EOWNERDEAD";
+    case 63: 戻る "EPERM";
+    case 64: 戻る "EPIPE";
+    case 65: 戻る "EPROTO";
+    case 66: 戻る "EPROTONOSUPPORT";
+    case 67: 戻る "EPROTOTYPE";
+    case 68: 戻る "ERANGE";
+    case 69: 戻る "EROFS";
+    case 70: 戻る "ESPIPE";
+    case 71: 戻る "ESRCH";
+    case 72: 戻る "ESTALE";
+    case 73: 戻る "ETIMEDOUT";
+    case 74: 戻る "ETXTBSY";
+    case 75: 戻る "EXDEV";
+    case 76: 戻る "ENOTCAPABLE";
+    default: 戻る "<unknown>";
     }
     // clang-format on
 }
@@ -120,15 +120,15 @@ const char* wasi_errno2str (uvwasi_errno_t err)
 const char* wasi_whence2str (uvwasi_whence_t whence)
 {
     switch (whence) {
-    case UVWASI_WHENCE_SET: return "SET";
-    case UVWASI_WHENCE_CUR: return "CUR";
-    case UVWASI_WHENCE_END: return "END";
-    default: return "<unknown>";
+    case UVWASI_WHENCE_SET: 戻る "SET";
+    case UVWASI_WHENCE_CUR: 戻る "CUR";
+    case UVWASI_WHENCE_END: 戻る "END";
+    default: 戻る "<unknown>";
     }
 }
 
 #    define WASI_TRACE(fmt, ...)    { fprintf(stderr, "%s " fmt, __FUNCTION__+16, ##__VA_ARGS__); fprintf(stderr, " => %s\n", wasi_errno2str(ret)); }
-#  else
+#  否则
 #    define WASI_TRACE(fmt, ...)
 #  endif
 
@@ -137,7 +137,7 @@ uvwasi_t* _get_uvwasi_p (IM3ImportContext _ctx)
 {
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
     assert(context != NULL);
-    return &context->uvwasi;
+    戻る &context->uvwasi;
 }
 
 /*
@@ -152,13 +152,13 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    もし (context == NULL) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
     m3ApiCheckMem(argv, context->argc * sizeof(uint32_t));
 
-    for (u32 i = 0; i < context->argc; ++i) {
+    ために (u32 i = 0; i < context->argc; ++i) {
         m3ApiWriteMem32(&argv[i], m3ApiPtrToOffset(argv_buf));
 
         size_t len = strlen(context->argv[i]);
@@ -183,12 +183,12 @@ m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    もし (context == NULL) {
         m3ApiReturn(UVWASI_EINVAL);
     }
 
     uvwasi_size_t buf_len = 0;
-    for (u32 i = 0; i < context->argc; ++i) {
+    ために (u32 i = 0; i < context->argc; ++i) {
         buf_len += (uvwasi_size_t)strlen(context->argv[i]) + 1;
     }
 
@@ -209,7 +209,7 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     uvwasi_size_t  env_count, env_buf_size;
 
     ret = uvwasi_environ_sizes_get(_get_uvwasi_p(_ctx), &env_count, &env_buf_size);
-    if (ret != UVWASI_ESUCCESS) {
+    もし (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -217,19 +217,19 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     m3ApiCheckMem(env_buf, env_buf_size);
 
     environment = calloc(env_count, sizeof(char*));
-    if (environment == NULL) {
+    もし (environment == NULL) {
         m3ApiReturn(UVWASI_ENOMEM);
     }
 
     ret = uvwasi_environ_get(_get_uvwasi_p(_ctx), environment, env_buf);
-    if (ret != UVWASI_ESUCCESS) {
+    もし (ret != UVWASI_ESUCCESS) {
         free(environment);
         m3ApiReturn(ret);
     }
 
     uint32_t environ_buf_offset = m3ApiPtrToOffset(env_buf);
 
-    for (u32 i = 0; i < env_count; ++i) {
+    ために (u32 i = 0; i < env_count; ++i) {
         uint32_t offset = environ_buf_offset +
                           (uint32_t)(environment[i] - environment[0]);
         m3ApiWriteMem32(&env[i], offset);
@@ -289,7 +289,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
 
     WASI_TRACE("fd:%d | type:%d, name_len:%d", fd, prestat.pr_type, prestat.u.dir.pr_name_len);
 
-    if (ret != UVWASI_ESUCCESS) {
+    もし (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -311,7 +311,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
 
     WASI_TRACE("fd:%d", fd);
 
-    if (ret != UVWASI_ESUCCESS) {
+    もし (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -392,7 +392,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_filestat_get)
 
     WASI_TRACE("fd:%d | fs.size:%" PRIu64, fd, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    もし (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -648,7 +648,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
 
     WASI_TRACE("fd:%d, flags:0x%x, path:%s | fs.size:%" PRIu64, fd, flags, path, stat.st_size);
 
-    if (ret != UVWASI_ESUCCESS) {
+    もし (ret != UVWASI_ESUCCESS) {
         m3ApiReturn(ret);
     }
 
@@ -677,19 +677,19 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  もし M3_HAS_VLA
+    もし (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  否则
+    もし (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
 #  endif
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    ために (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -717,13 +717,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nread, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  もし M3_HAS_VLA
+    もし (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  否则
+    もし (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_iovec_t iovs[32];
@@ -731,7 +731,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     uvwasi_size_t  num_read;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    ために (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -757,13 +757,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  もし M3_HAS_VLA
+    もし (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  否则
+    もし (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
@@ -771,7 +771,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     uvwasi_size_t  num_written;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    ために (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -797,13 +797,13 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     m3ApiCheckMem(wasi_iovs, iovs_len * sizeof(wasi_iovec_t));
     m3ApiCheckMem(nwritten, sizeof(uvwasi_size_t));
 
-#  if M3_HAS_VLA
-    if (iovs_len > 128) {
+#  もし M3_HAS_VLA
+    もし (iovs_len > 128) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[iovs_len];
-#  else
-    if (iovs_len > 32) {
+#  否则
+    もし (iovs_len > 32) {
         m3ApiReturn(UVWASI_EINVAL);
     }
     uvwasi_ciovec_t iovs[32];
@@ -811,7 +811,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     uvwasi_size_t  num_written;
     uvwasi_errno_t ret;
 
-    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+    ために (uvwasi_size_t i = 0; i < iovs_len; ++i) {
         iovs[i].buf     = m3ApiOffsetToPtr(m3ApiReadMem32(&wasi_iovs[i].buf));
         iovs[i].buf_len = m3ApiReadMem32(&wasi_iovs[i].buf_len);
         m3ApiCheckMem(iovs[i].buf, iovs[i].buf_len);
@@ -971,7 +971,7 @@ static
 void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
                          uvwasi_size_t i_count)
 {
-    for (uvwasi_size_t i = 0; i < i_count; ++i) {
+    ために (uvwasi_size_t i = 0; i < i_count; ++i) {
         const uint8_t* s = i_in + (size_t)i * d_m3WasiSubscriptionSize;
 
         memset(&o_subs[i], 0, sizeof(o_subs[i]));
@@ -979,12 +979,12 @@ void read_subscriptions (uvwasi_subscription_t* o_subs, const uint8_t* i_in,
         o_subs[i].userdata = m3ApiReadMem64(s + 0);
         o_subs[i].type     = m3ApiReadMem8(s + 8);
 
-        if (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
+        もし (o_subs[i].type == UVWASI_EVENTTYPE_CLOCK) {
             o_subs[i].u.clock.clock_id  = m3ApiReadMem32(s + 16);
             o_subs[i].u.clock.timeout   = m3ApiReadMem64(s + 24);
             o_subs[i].u.clock.precision = m3ApiReadMem64(s + 32);
             o_subs[i].u.clock.flags     = m3ApiReadMem16(s + 40);
-        } else {
+        } 否则 {
             o_subs[i].u.fd_readwrite.fd = m3ApiReadMem32(s + 16);
         }
     }
@@ -1019,19 +1019,19 @@ uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscri
 
     uvwasi_event_t* events = i_count ? m3_AllocArray(uvwasi_event_t, i_count) : NULL;
 
-    if (i_count and not events) {
-        return UVWASI_ENOMEM;
+    もし (i_count and not events) {
+        戻る UVWASI_ENOMEM;
     }
 
     uvwasi_size_t  written = 0;
     uvwasi_errno_t ret     = uvwasi_poll_oneoff(i_uvwasi, i_subs, events, i_count, &written);
 
-    if (ret == UVWASI_ESUCCESS) {
+    もし (ret == UVWASI_ESUCCESS) {
         // One event per subscription is the most that was checked for, and the most
         // there can be; clamping keeps a surprise from reaching past that
         written = M3_MIN(written, i_count);
 
-        for (uvwasi_size_t i = 0; i < written; ++i) {
+        ために (uvwasi_size_t i = 0; i < written; ++i) {
             write_event(o_out + (size_t)i * d_m3WasiEventSize, &events[i]);
         }
         *o_written = written;
@@ -1039,7 +1039,7 @@ uvwasi_errno_t poll_wasi_subscriptions (uvwasi_t* i_uvwasi, const uvwasi_subscri
 
     m3_Free(events);
 
-    return ret;
+    戻る ret;
 }
 
 m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
@@ -1056,9 +1056,9 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 
     uvwasi_subscription_t* subs = NULL;
 
-    if (nsubscriptions) {
+    もし (nsubscriptions) {
         subs = m3_AllocArray(uvwasi_subscription_t, nsubscriptions);
-        if (not subs) {
+        もし (not subs) {
             m3ApiReturn(UVWASI_ENOMEM);
         }
         read_subscriptions(subs, in, nsubscriptions);
@@ -1084,7 +1084,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_exit)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context) {
+    もし (context) {
         context->exit_code = code;
     }
 
@@ -1117,16 +1117,16 @@ m3ApiRawFunction(m3_wasi_p1_sched_yield)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    もし (i_result == m3Err_functionLookupFailed) {
+        戻る m3Err_none;
+    } 否则 {
+        戻る i_result;
     }
 }
 
 m3_wasi_context_t* m3_GetWasiContext ()
 {
-    return wasi_context;
+    戻る wasi_context;
 }
 
 static const char* DEFAULT_ENVIRONMENT[] = {
@@ -1159,7 +1159,7 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
+    ために (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
         const char* wasi = namespaces[i];
 
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
@@ -1220,10 +1220,10 @@ _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "sched_yield",
     // rather than per call. A module that linked none of the above imports has
     // no WASI to satisfy, so it is not asked for the export - link_all offers
     // WASI to every module, and most have neither the imports nor a memory.
-    if (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
+    もし (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
         u32 memoryIndex;
 
-        if (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
+        もし (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
             _throw("WASI requires the module to export its memory as \"memory\"");
         }
 
@@ -1231,7 +1231,7 @@ _       (m3_BindImportMemory(module, "wasi_snapshot_preview1", memoryIndex));
     }
 
 _catch:
-    return result;
+    戻る result;
 }
 
 M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_options)
@@ -1241,11 +1241,11 @@ M3Result m3_NewCustomWASIWithOptions (M3WASI* ctx_p, uvwasi_options_t init_optio
 
     uvwasi_errno_t ret = uvwasi_init(&(*ctx_p)->uvwasi, &init_options);
 
-    if (ret != UVWASI_ESUCCESS) {
-        return "uvwasi_init failed";
+    もし (ret != UVWASI_ESUCCESS) {
+        戻る "uvwasi_init failed";
     }
 
-    return m3Err_none;
+    戻る m3Err_none;
 }
 
 M3Result m3_NewCustomWASI (M3WASI* wasi_p)
@@ -1253,12 +1253,12 @@ M3Result m3_NewCustomWASI (M3WASI* wasi_p)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_NewCustomWASIWithOptions(wasi_p, opts);
+    戻る m3_NewCustomWASIWithOptions(wasi_p, opts);
 }
 
 M3Result m3_LinkCustomWASI (IM3Module module, M3WASI wasi)
 {
-    return _linkWASI(module, wasi);
+    戻る _linkWASI(module, wasi);
 }
 
 void m3_FreeWASI (m3_wasi_context_t* wasi)
@@ -1272,19 +1272,19 @@ M3Result m3_LinkWASI (IM3Module module)
     uvwasi_options_t opts;
     _m3_set_up_default_uvwasi_opts(&opts);
 
-    return m3_LinkWASIWithOptions(module, opts);
+    戻る m3_LinkWASIWithOptions(module, opts);
 }
 
 M3Result m3_LinkWASIWithOptions (IM3Module module, uvwasi_options_t init_options)
 {
-    if (NULL == wasi_context) {
+    もし (NULL == wasi_context) {
         M3Result res = m3_NewCustomWASIWithOptions(&wasi_context, init_options);
-        if (res) {
-            return res;
+        もし (res) {
+            戻る res;
         }
     }
 
-    return _linkWASI(module, wasi_context);
+    戻る _linkWASI(module, wasi_context);
 }
 
 #endif // d_m3HasUVWASI

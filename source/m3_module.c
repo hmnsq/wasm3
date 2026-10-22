@@ -11,7 +11,7 @@
 
 void Module_FreeFunctions (IM3Module i_module)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    ために (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function func = &i_module->functions[i];
         Function_Release(func);
     }
@@ -20,7 +20,7 @@ void Module_FreeFunctions (IM3Module i_module)
 
 void m3_FreeModule (IM3Module i_module)
 {
-    if (i_module) {
+    もし (i_module) {
         m3log(module, "freeing module: %s (funcs: %d; segments: %d)",
               i_module->name, i_module->numFunctions, i_module->numDataSegments);
 
@@ -31,16 +31,16 @@ void m3_FreeModule (IM3Module i_module)
         m3_Free(i_module->funcTypes);
         m3_Free(i_module->dataSegments);
 
-        for (u32 i = 0; i < i_module->numTables; ++i) {
+        ために (u32 i = 0; i < i_module->numTables; ++i) {
             IM3Table table = i_module->tables[i];
 
             // a slot may point at a table another module owns; that module
             // frees it
-            if (not table or table->owner != i_module) {
+            もし (not table or table->owner != i_module) {
                 continue;
             }
 
-            if (table->elements and i_module->runtime) {
+            もし (table->elements and i_module->runtime) {
                 i_module->runtime->tableElementsUsed -= table->size;
             }
             m3_Free(table->elements);
@@ -49,30 +49,30 @@ void m3_FreeModule (IM3Module i_module)
         }
         m3_Free(i_module->tables);
 
-        for (u32 i = 0; i < i_module->numElementSegments; ++i) {
+        ために (u32 i = 0; i < i_module->numElementSegments; ++i) {
             m3_Free(i_module->elementSegments[i].resolved);
         }
         m3_Free(i_module->elementSegments);
         m3_Free(i_module->declaredFuncs);
 
-        for (u32 i = 0; i < i_module->numGlobals; ++i) {
+        ために (u32 i = 0; i < i_module->numGlobals; ++i) {
             FreeImportInfo(&(i_module->globals[i].import));
         }
         m3_Free(i_module->globals);
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
-        for (u32 i = 0; i < i_module->numTags; ++i) {
+#もし d_m3HasExceptionHandling || d_m3HasStackSwitching
+        ために (u32 i = 0; i < i_module->numTags; ++i) {
             FreeImportInfo(&(i_module->tags[i].import));
         }
         m3_Free(i_module->tags);
 #endif
 
-        for (u32 i = 0; i < i_module->numMemories; ++i) {
+        ために (u32 i = 0; i < i_module->numMemories; ++i) {
             IM3Memory memory = i_module->memories[i];
 
             // a slot may point at a memory another module owns; that module
             // frees it
-            if (not memory or memory->owner != i_module) {
+            もし (not memory or memory->owner != i_module) {
                 continue;
             }
 
@@ -83,14 +83,14 @@ void m3_FreeModule (IM3Module i_module)
         m3_Free(i_module->memories);
         FreeMemoryBlock(&i_module->emptyMemory);
 
-        for (u32 i = 0; i < i_module->numExports; ++i) {
+        ために (u32 i = 0; i < i_module->numExports; ++i) {
             m3_Free(i_module->exports[i].name);
         }
         m3_Free(i_module->exports);
 
-#if d_m3HasSnapshots
+#もし d_m3HasSnapshots
         M3EmbeddedSnapshot* snap = i_module->snapshots;
-        while (snap) {
+        ながら (snap) {
             M3EmbeddedSnapshot* next = snap->next;
             m3_Free(snap->name);
             m3_Free(snap);
@@ -113,36 +113,36 @@ M3Result m3_LinkGlobal (IM3Module            io_module,
 {
     M3Result result = m3Err_globalLookupFailed;
 
-    for (u32 i = 0; i < io_module->numGlobals; ++i) {
+    ために (u32 i = 0; i < io_module->numGlobals; ++i) {
         IM3Global g = &io_module->globals[i];
 
-        if (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
+        もし (not (g->import.moduleUtf8 and g->import.fieldUtf8)) {
             continue;
         }
 
-        if (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
+        もし (strcmp(g->import.moduleUtf8, i_moduleName) != 0 or
             strcmp(g->import.fieldUtf8, i_globalName) != 0) {
             continue;
         }
 
-        if (g->type != i_value->type) {
-            return m3Err_globalTypeMismatch;
+        もし (g->type != i_value->type) {
+            戻る m3Err_globalTypeMismatch;
         }
 
         switch (i_value->type) {
         case c_m3Type_i32: g->i32Value = i_value->value.i32; break;
         case c_m3Type_i64: g->i64Value = i_value->value.i64; break;
-#if d_m3HasFloat
+#もし d_m3HasFloat
         case c_m3Type_f32: g->f32Value = i_value->value.f32; break;
         case c_m3Type_f64: g->f64Value = i_value->value.f64; break;
 #endif
-        default: return m3Err_invalidTypeId;
+        default: 戻る m3Err_invalidTypeId;
         }
 
         result = m3Err_none;
     }
 
-    return result;
+    戻る result;
 }
 
 
@@ -153,28 +153,28 @@ M3Result Module_DeclareFunction (IM3Module io_module, u32 i_index)
 {
     M3Result result = m3Err_none;
 
-    if (i_index >= io_module->numFunctions) {
-        return "function index out of range";
+    もし (i_index >= io_module->numFunctions) {
+        戻る "function index out of range";
     }
 
-    if (not io_module->declaredFuncs) {
+    もし (not io_module->declaredFuncs) {
         io_module->declaredFuncs = m3_AllocArray(u8, (io_module->numFunctions + 7) / 8);
         _throwifnull(io_module->declaredFuncs);
     }
 
     io_module->declaredFuncs[i_index / 8] |= (u8)(1u << (i_index % 8));
 
-    _catch: return result;
+    _catch: 戻る result;
 }
 
 
 bool Module_IsFunctionDeclared (IM3Module i_module, u32 i_index)
 {
-    if (not i_module->declaredFuncs or i_index >= i_module->numFunctions) {
-        return false;
+    もし (not i_module->declaredFuncs or i_index >= i_module->numFunctions) {
+        戻る false;
     }
 
-    return (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
+    戻る (i_module->declaredFuncs[i_index / 8] & (1u << (i_index % 8))) != 0;
 }
 
 
@@ -205,15 +205,15 @@ _try {
     io_module->memories[index] = memory;
     io_module->numMemories     = index + 1;
 
-    if (o_memory) {
+    もし (o_memory) {
         *o_memory = memory;
     }
 
-    return result;
+    戻る result;
 
 } _catch:
     m3_Free(memory);
-    return result;
+    戻る result;
 }
 
 
@@ -244,19 +244,19 @@ _try {
     io_module->tables[index] = table;
     io_module->numTables     = index + 1;
 
-    if (o_table) {
+    もし (o_table) {
         *o_table = table;
     }
 
-    return result;
+    戻る result;
 
 } _catch:
     m3_Free(table);
-    return result;
+    戻る result;
 }
 
 
-#if d_m3HasExceptionHandling || d_m3HasStackSwitching
+#もし d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 M3Result Module_AddTag (IM3Module io_module, IM3Tag* o_tag, IM3FuncType i_type, bool i_isImported)
 {
@@ -272,18 +272,18 @@ _try {
     tag->resolved = NULL;
     memset(&tag->import, 0, sizeof(tag->import));
 
-    if (o_tag) {
+    もし (o_tag) {
         *o_tag = tag;
     }
 
 } _catch:
-    return result;
+    戻る result;
 }
 
 #endif // d_m3HasExceptionHandling || d_m3HasStackSwitching
 
 
-#if d_m3HasStackSwitching
+#もし d_m3HasStackSwitching
 
 // The continuation type a spelled-out reference names. Reference types carry
 // the canonical index, and the module's own type space is where a name for it
@@ -292,25 +292,25 @@ _try {
 // switches to.
 IM3FuncType Module_ContTypeOfRef (IM3Module i_module, m3type_t i_refType)
 {
-    if (not IsSpelledRefType(i_refType)) {
-        return NULL;
+    もし (not IsSpelledRefType(i_refType)) {
+        戻る NULL;
     }
 
     u32 heap = HeapTypeOf(i_refType);
 
-    if (heap == d_m3Type_heapAbstract) {
-        return NULL;
+    もし (heap == d_m3Type_heapAbstract) {
+        戻る NULL;
     }
 
-    for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
+    ために (u32 i = 0; i < i_module->numFuncTypes; ++i) {
         IM3FuncType ftype = i_module->funcTypes[i];
 
-        if (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
-            return ftype;
+        もし (ftype and ftype->isContinuation and ftype->canonicalIndex == heap) {
+            戻る ftype;
         }
     }
 
-    return NULL;
+    戻る NULL;
 }
 
 #endif // d_m3HasStackSwitching
@@ -329,24 +329,24 @@ _try {
     global->imported  = i_isImported;
     global->isMutable = i_mutable;
 
-    if (o_global) {
+    もし (o_global) {
         *o_global = global;
     }
 
 } _catch:
-    return result;
+    戻る result;
 }
 
 M3Result Module_PreallocFunctions (IM3Module io_module, u32 i_totalFunctions)
 {
 _try {
-    if (i_totalFunctions > io_module->allFunctions) {
+    もし (i_totalFunctions > io_module->allFunctions) {
         io_module->functions    = m3_ReallocArray(M3Function, io_module->functions, i_totalFunctions, io_module->allFunctions);
         io_module->allFunctions = i_totalFunctions;
         _throwifnull(io_module->functions);
     }
 } _catch:
-    return result;
+    戻る result;
 }
 
 M3Result Module_AddFunction (IM3Module io_module, u32 i_typeIndex, IM3ImportInfo i_importInfo)
@@ -368,7 +368,7 @@ _   (Module_PreallocFunctions(io_module, io_module->numFunctions));
     func->index = index;
 #endif
 
-    if (i_importInfo and func->numNames == 0) {
+    もし (i_importInfo and func->numNames == 0) {
         func->import   = *i_importInfo;
         func->names[0] = i_importInfo->fieldUtf8;
         func->numNames = 1;
@@ -377,16 +377,16 @@ _   (Module_PreallocFunctions(io_module, io_module->numFunctions));
     m3log(module, "   added function: %3d; sig: %d", index, i_typeIndex);
 
 } _catch:
-    return result;
+    戻る result;
 }
 
 #ifdef DEBUG
 void Module_GenerateNames (IM3Module i_module)
 {
-    for (u32 i = 0; i < i_module->numFunctions; ++i) {
+    ために (u32 i = 0; i < i_module->numFunctions; ++i) {
         IM3Function func = &i_module->functions[i];
 
-        if (func->numNames == 0) {
+        もし (func->numNames == 0) {
             char* buff = m3_AllocArray(char, 16);
             snprintf(buff, 16, "$func%d", i);
             func->names[0] = buff;
@@ -400,32 +400,32 @@ IM3Function Module_GetFunction (IM3Module i_module, u32 i_functionIndex)
 {
     IM3Function func = NULL;
 
-    if (i_functionIndex < i_module->numFunctions) {
+    もし (i_functionIndex < i_module->numFunctions) {
         func = &i_module->functions[i_functionIndex];
         //func->module = i_module;
     }
 
-    return func;
+    戻る func;
 }
 
 
 const char* m3_GetModuleName (IM3Module i_module)
 {
-    if (!i_module || !i_module->name) {
-        return ".unnamed";
+    もし (!i_module || !i_module->name) {
+        戻る ".unnamed";
     }
 
-    return i_module->name;
+    戻る i_module->name;
 }
 
 void m3_SetModuleName (IM3Module i_module, const char* name)
 {
-    if (i_module) {
+    もし (i_module) {
         i_module->name = name;
     }
 }
 
 IM3Runtime m3_GetModuleRuntime (IM3Module i_module)
 {
-    return i_module ? i_module->runtime : NULL;
+    戻る i_module ? i_module->runtime : NULL;
 }

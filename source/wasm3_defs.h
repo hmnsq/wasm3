@@ -15,9 +15,9 @@
 #define M3_CONCAT(a,b)   M3_CONCAT__(a,b)
 
 // A declaration the API requires to be made but does not require to be read
-#if defined(__GNUC__) || defined(__clang__)
+#もし defined(__GNUC__) || defined(__clang__)
 #  define M3_UNUSED __attribute__((unused))
-#else
+#否则
 #  define M3_UNUSED
 #endif
 
@@ -25,7 +25,7 @@
  * Detect compiler
  */
 
-#if defined(__clang__)
+#もし defined(__clang__)
 #  define M3_COMPILER_CLANG 1
 #elif defined(__INTEL_COMPILER)
 #  define M3_COMPILER_ICC 1
@@ -35,18 +35,18 @@
 #  define M3_COMPILER_GCC 1
 #elif defined(_MSC_VER)
 #  define M3_COMPILER_MSVC 1
-#else
+#否则
 #  warning "Compiler not detected"
 #endif
 
-#if defined(M3_COMPILER_CLANG)
+#もし defined(M3_COMPILER_CLANG)
 #  define M3_CLANG_VER "Clang "  \
    M3_STR(__clang_major__) "."   \
    M3_STR(__clang_minor__) "."   \
    M3_STR(__clang_patchlevel__)
-#  if defined(WIN32)
+#  もし defined(WIN32)
 #    define M3_COMPILER_VER M3_CLANG_VER " for Windows"
-#  else
+#  否则
 #    define M3_COMPILER_VER M3_CLANG_VER
 #  endif
 #elif defined(M3_COMPILER_GCC)
@@ -57,25 +57,25 @@
 #  define M3_COMPILER_VER "TinyCC " M3_STR(__TINYC__)
 #elif defined(M3_COMPILER_MSVC)
 #  define M3_COMPILER_VER "MSVC " M3_STR(_MSC_VER)
-#else
+#否则
 #  define M3_COMPILER_VER "unknown"
 #endif
 
 #ifdef __has_feature
 #  define M3_COMPILER_HAS_FEATURE(x)    __has_feature(x)
-#else
+#否则
 #  define M3_COMPILER_HAS_FEATURE(x)    0
 #endif
 
 #ifdef __has_builtin
 #  define M3_COMPILER_HAS_BUILTIN(x)    __has_builtin(x)
-#else
+#否则
 #  define M3_COMPILER_HAS_BUILTIN(x)    0
 #endif
 
 #ifdef __has_attribute
 #  define M3_COMPILER_HAS_ATTRIBUTE(x)  __has_attribute(x)
-#else
+#否则
 #  define M3_COMPILER_HAS_ATTRIBUTE(x)  0
 #endif
 
@@ -85,9 +85,9 @@
 
 // MSVC has no VLAs at all, and TinyCC's are unusable: it doesn't restore the
 // stack pointer when a goto leaves the scope a VLA was declared in
-#if defined(M3_COMPILER_MSVC) || defined(M3_COMPILER_TCC) || defined(__STDC_NO_VLA__)
+#もし defined(M3_COMPILER_MSVC) || defined(M3_COMPILER_TCC) || defined(__STDC_NO_VLA__)
 #  define M3_HAS_VLA 0
-#else
+#否则
 #  define M3_HAS_VLA 1
 #endif
 
@@ -95,13 +95,13 @@
  * Detect endianness
  */
 
-#if defined(M3_COMPILER_MSVC)
+#もし defined(M3_COMPILER_MSVC)
 #  define M3_LITTLE_ENDIAN
 #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #  define M3_LITTLE_ENDIAN
 #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #  define M3_BIG_ENDIAN
-#else
+#否则
 #  error "Byte order not detected"
 #endif
 
@@ -109,8 +109,8 @@
  * Detect platform
  */
 
-#if defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_GCC) || defined(M3_COMPILER_ICC) || defined(M3_COMPILER_TCC)
-#  if defined(__wasm__)
+#もし defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_GCC) || defined(M3_COMPILER_ICC) || defined(M3_COMPILER_TCC)
+#  もし defined(__wasm__)
 #    define M3_ARCH "wasm"
 
 #  elif defined(__x86_64__)
@@ -123,26 +123,26 @@
 #    define M3_ARCH "arm64-v8a"
 
 #  elif defined(__arm__)
-#    if defined(__ARM_ARCH_7A__)
-#      if defined(__ARM_NEON__)
-#        if defined(__ARM_PCS_VFP)
+#    もし defined(__ARM_ARCH_7A__)
+#      もし defined(__ARM_NEON__)
+#        もし defined(__ARM_PCS_VFP)
 #          define M3_ARCH "arm-v7a/NEON hard-float"
-#        else
+#        否则
 #          define M3_ARCH "arm-v7a/NEON"
 #        endif
-#      else
-#        if defined(__ARM_PCS_VFP)
+#      否则
+#        もし defined(__ARM_PCS_VFP)
 #          define M3_ARCH "arm-v7a hard-float"
-#        else
+#        否则
 #          define M3_ARCH "arm-v7a"
 #        endif
 #      endif
-#    else
+#    否则
 #      define M3_ARCH "arm"
 #    endif
 
 #  elif defined(__riscv)
-#    if defined(__riscv_32e)
+#    もし defined(__riscv_32e)
 #      define _M3_ARCH_RV "rv32e"
 #    elif __riscv_xlen == 128
 #      define _M3_ARCH_RV "rv128i"
@@ -151,35 +151,35 @@
 #    elif __riscv_xlen == 32
 #      define _M3_ARCH_RV "rv32i"
 #    endif
-#    if defined(__riscv_muldiv)
+#    もし defined(__riscv_muldiv)
 #      define _M3_ARCH_RV_M _M3_ARCH_RV "m"
-#    else
+#    否则
 #      define _M3_ARCH_RV_M _M3_ARCH_RV
 #    endif
-#    if defined(__riscv_atomic)
+#    もし defined(__riscv_atomic)
 #      define _M3_ARCH_RV_A _M3_ARCH_RV_M "a"
-#    else
+#    否则
 #      define _M3_ARCH_RV_A _M3_ARCH_RV_M
 #    endif
-#    if defined(__riscv_flen)
+#    もし defined(__riscv_flen)
 #      define _M3_ARCH_RV_F _M3_ARCH_RV_A "f"
-#    else
+#    否则
 #      define _M3_ARCH_RV_F _M3_ARCH_RV_A
 #    endif
-#    if defined(__riscv_flen) && __riscv_flen >= 64
+#    もし defined(__riscv_flen) && __riscv_flen >= 64
 #      define _M3_ARCH_RV_D _M3_ARCH_RV_F "d"
-#    else
+#    否则
 #      define _M3_ARCH_RV_D _M3_ARCH_RV_F
 #    endif
-#    if defined(__riscv_compressed)
+#    もし defined(__riscv_compressed)
 #      define _M3_ARCH_RV_C _M3_ARCH_RV_D "c"
-#    else
+#    否则
 #      define _M3_ARCH_RV_C _M3_ARCH_RV_D
 #    endif
 #    define M3_ARCH _M3_ARCH_RV_C
 
 #  elif defined(__mips__)
-#    if defined(__MIPSEB__) && defined(__mips64)
+#    もし defined(__MIPSEB__) && defined(__mips64)
 #      define M3_ARCH "mips64 " _MIPS_ARCH
 #    elif defined(__MIPSEL__) && defined(__mips64)
 #      define M3_ARCH "mips64el " _MIPS_ARCH
@@ -190,18 +190,18 @@
 #    endif
 
 #  elif defined(__PPC__)
-#    if defined(__PPC64__) && defined(__LITTLE_ENDIAN__)
+#    もし defined(__PPC64__) && defined(__LITTLE_ENDIAN__)
 #      define M3_ARCH "ppc64le"
 #    elif defined(__PPC64__)
 #      define M3_ARCH "ppc64"
-#    else
+#    否则
 #      define M3_ARCH "ppc"
 #    endif
 
 #  elif defined(__sparc__)
-#    if defined(__arch64__)
+#    もし defined(__arch64__)
 #      define M3_ARCH "sparc64"
-#    else
+#    否则
 #      define M3_ARCH "sparc"
 #    endif
 
@@ -215,16 +215,16 @@
 #    define M3_ARCH "m68k"
 
 #  elif defined(__microblaze__)
-#    if defined(__MICROBLAZEEL__)
+#    もし defined(__MICROBLAZEEL__)
 #      define M3_ARCH "microblazeel"
-#    else
+#    否则
 #      define M3_ARCH "microblaze"
 #    endif
 
 #  elif defined(__sh__)
-#    if defined(__SH4__)
+#    もし defined(__SH4__)
 #      define M3_ARCH "sh4"
-#    else
+#    否则
 #      define M3_ARCH "sh"
 #    endif
 
@@ -239,8 +239,8 @@
 #  endif
 #endif
 
-#if defined(M3_COMPILER_MSVC)
-#  if defined(_M_X64)
+#もし defined(M3_COMPILER_MSVC)
+#  もし defined(_M_X64)
 #    define M3_ARCH "x86_64"
 #  elif defined(_M_IX86)
 #    define M3_ARCH "i386"
@@ -251,7 +251,7 @@
 #  endif
 #endif
 
-#if !defined(M3_ARCH)
+#もし !defined(M3_ARCH)
 #  warning "Architecture not detected"
 #  define M3_ARCH "unknown"
 #endif
@@ -260,7 +260,7 @@
  * Byte swapping (for Big-Endian systems only)
  */
 
-#if defined(M3_COMPILER_MSVC)
+#もし defined(M3_COMPILER_MSVC)
 #  define m3_bswap16(x)     _byteswap_ushort((x))
 #  define m3_bswap32(x)     _byteswap_ulong((x))
 #  define m3_bswap64(x)     _byteswap_uint64((x))
@@ -277,26 +277,26 @@
 #  define m3_bswap16(x)     __builtin_bswap16((x))
 #  define m3_bswap32(x)     __builtin_bswap32((x))
 #  define m3_bswap64(x)     __builtin_bswap64((x))
-#else
+#否则
 #  include <stdint.h>
 #  ifdef __linux__
 #    include <endian.h>
 #  endif
-#  if defined(__bswap_16)
+#  もし defined(__bswap_16)
 #    define m3_bswap16(x)     __bswap_16((x))
 #    define m3_bswap32(x)     __bswap_32((x))
 #    define m3_bswap64(x)     __bswap_64((x))
-#  else
+#  否则
 #    warning "Using naive (probably slow) bswap operations"
 static inline
 uint16_t m3_bswap16 (uint16_t x)
 {
-    return (((x >> 8) & 0xffu) | ((x & 0xffu) << 8));
+    戻る (((x >> 8) & 0xffu) | ((x & 0xffu) << 8));
 }
 static inline
 uint32_t m3_bswap32 (uint32_t x)
 {
-    return (((x & 0xff000000u) >> 24) |
+    戻る (((x & 0xff000000u) >> 24) |
             ((x & 0x00ff0000u) >> 8) |
             ((x & 0x0000ff00u) << 8) |
             ((x & 0x000000ffu) << 24));
@@ -304,7 +304,7 @@ uint32_t m3_bswap32 (uint32_t x)
 static inline
 uint64_t m3_bswap64 (uint64_t x)
 {
-    return (((x & 0xff00000000000000ull) >> 56) |
+    戻る (((x & 0xff00000000000000ull) >> 56) |
             ((x & 0x00ff000000000000ull) >> 40) |
             ((x & 0x0000ff0000000000ull) >> 24) |
             ((x & 0x000000ff00000000ull) >> 8) |
@@ -325,23 +325,23 @@ uint64_t m3_bswap64 (uint64_t x)
  * Other
  */
 
-#if defined(M3_COMPILER_GCC) || defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_ICC)
+#もし defined(M3_COMPILER_GCC) || defined(M3_COMPILER_CLANG) || defined(M3_COMPILER_ICC)
 #  define M3_UNLIKELY(x) __builtin_expect(!!(x), 0)
 #  define M3_LIKELY(x)   __builtin_expect(!!(x), 1)
-#else
+#否则
 #  define M3_UNLIKELY(x) (x)
 #  define M3_LIKELY(x)   (x)
 #endif
 
 // Compile-time assertion. NAME is an identifier naming the invariant; it shows
 // up in the diagnostic, so make it read like a sentence.
-#if defined(__cplusplus) && (__cplusplus >= 201103L)
+#もし defined(__cplusplus) && (__cplusplus >= 201103L)
 #  define M3_STATIC_ASSERT(COND, NAME)  static_assert((COND), #NAME)
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #  define M3_STATIC_ASSERT(COND, NAME)  _Static_assert((COND), #NAME)
 #elif defined(M3_COMPILER_MSVC) && defined(__cplusplus)
 #  define M3_STATIC_ASSERT(COND, NAME)  static_assert((COND), #NAME)
-#else
+#否则
 // Pre-C11: a negative array size is the portable stand-in. Suffixed with the
 // line number so several assertions can share a translation unit.
 #  define M3_STATIC_ASSERT(COND, NAME)  typedef char M3_CONCAT(NAME, __LINE__) [(COND) ? 1 : -1]
