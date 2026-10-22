@@ -12,16 +12,16 @@
 #include "m3_deterministic.h"
 #include "m3_exception.h"
 
-#if defined(d_m3HasWASI)
+#만약 defined(d_m3HasWASI)
 
 #  include <string.h>
 
 // The system underneath, of which exactly one is ever built. They are headers rather
 // than translation units of their own so that neither has to be added to a source
 // list - and most of those are build scripts outside this repository.
-#  if defined(_WIN32)
+#  만약 defined(_WIN32)
 #    include "m3_api_wasi_win32.h"
-#  else
+#  아니면
 #    include "m3_api_wasi_posix.h"
 #  endif
 
@@ -53,14 +53,14 @@ static const char* DEFAULT_ENVIRONMENT[] = {
 // Copies a path out of guest memory so it can be handed to the host NUL-terminated.
 // The caller has already bounds-checked (i_path, i_pathLen) against guest memory.
 static
-int copy_path (char* o_path, const char* i_path, __wasi_size_t i_pathLen)
+정수 copy_path (char* o_path, const char* i_path, __wasi_size_t i_pathLen)
 {
-    if (i_pathLen >= d_m3WasiMaxPath) {
-        return 0;
+    만약 (i_pathLen >= d_m3WasiMaxPath) {
+        반환 0;
     }
     memcpy(o_path, i_path, i_pathLen);
     o_path[i_pathLen] = '\0';
-    return 1;
+    반환 1;
 }
 
 // Writes a filestat out: dev 0, ino 8, filetype 16, nlink 24, size 32, atim 40,
@@ -92,7 +92,7 @@ const void* resolve_iovs (IM3Runtime runtime, void* _mem, m3_wasi_iovec_t* o_iov
 
     __wasi_size_t want = 0;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    위해 (__wasi_size_t i = 0; i < i_count; i++) {
         o_iovs[i].buf = m3ApiOffsetToPtr(m3ApiReadMem32(&i_wasiIovs[i].buf));
         o_iovs[i].len = m3ApiReadMem32(&i_wasiIovs[i].buf_len);
         m3ApiCheckMem(o_iovs[i].buf, o_iovs[i].len);
@@ -115,13 +115,13 @@ m3ApiRawFunction(m3_wasi_p1_args_get)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    만약 (context == NULL) {
         m3ApiReturn(__WASI_ERRNO_INVAL);
     }
 
     m3ApiCheckMem(argv, context->argc * sizeof(uint32_t));
 
-    for (u32 i = 0; i < context->argc; ++i) {
+    위해 (u32 i = 0; i < context->argc; ++i) {
         m3ApiWriteMem32(&argv[i], m3ApiPtrToOffset(argv_buf));
 
         size_t len = strlen(context->argv[i]);
@@ -146,12 +146,12 @@ m3ApiRawFunction(m3_wasi_p1_args_sizes_get)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context == NULL) {
+    만약 (context == NULL) {
         m3ApiReturn(__WASI_ERRNO_INVAL);
     }
 
     __wasi_size_t buf_len = 0;
-    for (u32 i = 0; i < context->argc; ++i) {
+    위해 (u32 i = 0; i < context->argc; ++i) {
         buf_len += (__wasi_size_t)strlen(context->argv[i]) + 1;
     }
 
@@ -168,13 +168,13 @@ m3ApiRawFunction(m3_wasi_p1_environ_get)
     m3ApiGetArgMem(char*, env_buf)
 
     __wasi_size_t count = 0;
-    for (const char** e = DEFAULT_ENVIRONMENT; *e; ++e) {
+    위해 (const char** e = DEFAULT_ENVIRONMENT; *e; ++e) {
         count++;
     }
 
     m3ApiCheckMem(env, count * sizeof(uint32_t));
 
-    for (u32 i = 0; i < count; ++i) {
+    위해 (u32 i = 0; i < count; ++i) {
         m3ApiWriteMem32(&env[i], m3ApiPtrToOffset(env_buf));
 
         size_t len = strlen(DEFAULT_ENVIRONMENT[i]);
@@ -198,7 +198,7 @@ m3ApiRawFunction(m3_wasi_p1_environ_sizes_get)
     m3ApiCheckMem(env_buf_size, sizeof(__wasi_size_t));
 
     __wasi_size_t count = 0, buf_len = 0;
-    for (const char** e = DEFAULT_ENVIRONMENT; *e; ++e) {
+    위해 (const char** e = DEFAULT_ENVIRONMENT; *e; ++e) {
         count++;
         buf_len += (__wasi_size_t)strlen(*e) + 1;
     }
@@ -218,7 +218,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_dir_name)
 
     m3ApiCheckMem(path, path_len);
 
-    if (fd < 3 || fd >= d_m3WasiPreopenCount) {
+    만약 (fd < 3 || fd >= d_m3WasiPreopenCount) {
         m3ApiReturn(__WASI_ERRNO_BADF);
     }
     size_t slen = strlen(m3_wasi_preopen[fd].path) + 1;
@@ -234,7 +234,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_prestat_get)
 
     m3ApiCheckMem(buf, 8);
 
-    if (fd < 3 || fd >= d_m3WasiPreopenCount) {
+    만약 (fd < 3 || fd >= d_m3WasiPreopenCount) {
         m3ApiReturn(__WASI_ERRNO_BADF);
     }
 
@@ -255,7 +255,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
     __wasi_fdflags_t  flags;
 
     __wasi_errno_t err = m3_wasi_host_fd_fdstat(fd, &filetype, &flags);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -265,7 +265,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_fdstat_get)
     fdstat->fs_rights_base = (uint64_t)-1; // all rights
 
     // Make descriptors 0,1,2 look like a TTY
-    if (fd <= 2) {
+    만약 (fd <= 2) {
         fdstat->fs_rights_base &= ~(__WASI_RIGHTS_FD_SEEK | __WASI_RIGHTS_FD_TELL);
     }
 
@@ -304,7 +304,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_filestat_get)
     m3_wasi_filestat_t fd_stat;
 
     __wasi_errno_t err = m3_wasi_host_fd_filestat(fd, &fd_stat);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -325,7 +325,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
     m3ApiCheckMem(buf, d_m3WasiFilestatSize);
 
     char host_path[d_m3WasiMaxPath];
-    if (!copy_path(host_path, path, path_len)) {
+    만약 (!copy_path(host_path, path, path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
 
@@ -333,7 +333,7 @@ m3ApiRawFunction(m3_wasi_p1_path_filestat_get)
     bool               follow = (dirflags & __WASI_LOOKUPFLAGS_SYMLINK_FOLLOW) != 0;
 
     __wasi_errno_t err = m3_wasi_host_path_filestat(dirfd, host_path, follow, &path_stat);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -377,7 +377,7 @@ m3ApiRawFunction(m3_wasi_p1_path_link)
 
     char host_old[d_m3WasiMaxPath];
     char host_new[d_m3WasiMaxPath];
-    if (!copy_path(host_old, old_path, old_path_len) ||
+    만약 (!copy_path(host_old, old_path, old_path_len) ||
         !copy_path(host_new, new_path, new_path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
@@ -397,7 +397,7 @@ m3ApiRawFunction(m3_wasi_p1_path_create_directory)
     m3ApiCheckMem(path, path_len);
 
     char host_path[d_m3WasiMaxPath];
-    if (!copy_path(host_path, path, path_len)) {
+    만약 (!copy_path(host_path, path, path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
 
@@ -414,7 +414,7 @@ m3ApiRawFunction(m3_wasi_p1_path_remove_directory)
     m3ApiCheckMem(path, path_len);
 
     char host_path[d_m3WasiMaxPath];
-    if (!copy_path(host_path, path, path_len)) {
+    만약 (!copy_path(host_path, path, path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
 
@@ -431,7 +431,7 @@ m3ApiRawFunction(m3_wasi_p1_path_unlink_file)
     m3ApiCheckMem(path, path_len);
 
     char host_path[d_m3WasiMaxPath];
-    if (!copy_path(host_path, path, path_len)) {
+    만약 (!copy_path(host_path, path, path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
 
@@ -453,7 +453,7 @@ m3ApiRawFunction(m3_wasi_p1_path_rename)
 
     char host_old[d_m3WasiMaxPath];
     char host_new[d_m3WasiMaxPath];
-    if (!copy_path(host_old, old_path, old_path_len) ||
+    만약 (!copy_path(host_old, old_path, old_path_len) ||
         !copy_path(host_new, new_path, new_path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
@@ -476,7 +476,7 @@ m3ApiRawFunction(m3_wasi_p1_path_symlink)
     // the target is stored as given, so it is a string rather than a path to resolve
     char host_old[d_m3WasiMaxPath];
     char host_new[d_m3WasiMaxPath];
-    if (!copy_path(host_old, old_path, old_path_len) ||
+    만약 (!copy_path(host_old, old_path, old_path_len) ||
         !copy_path(host_new, new_path, new_path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
@@ -499,14 +499,14 @@ m3ApiRawFunction(m3_wasi_p1_path_readlink)
     m3ApiCheckMem(bufused, sizeof(__wasi_size_t));
 
     char host_path[d_m3WasiMaxPath];
-    if (!copy_path(host_path, path, path_len)) {
+    만약 (!copy_path(host_path, path, path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
 
     __wasi_size_t used;
 
     __wasi_errno_t err = m3_wasi_host_path_readlink(dirfd, host_path, buf, buf_len, &used);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -525,7 +525,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_tell)
     __wasi_filesize_t pos;
 
     __wasi_errno_t err = m3_wasi_host_fd_seek(fd, 0, SEEK_CUR, &pos);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -543,7 +543,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_seek)
 
     m3ApiCheckMem(result, sizeof(__wasi_filesize_t));
 
-    int whence;
+    정수 whence;
 
     switch (wasi_whence) {
     case 0: whence = SEEK_SET; break;
@@ -555,7 +555,7 @@ m3ApiRawFunction(m3_wasi_p1_fd_seek)
     __wasi_filesize_t pos;
 
     __wasi_errno_t err = m3_wasi_host_fd_seek(fd, offset, whence, &pos);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -581,7 +581,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
     m3ApiCheckMem(fd, sizeof(__wasi_fd_t));
 
     char host_path[d_m3WasiMaxPath];
-    if (!copy_path(host_path, path, path_len)) {
+    만약 (!copy_path(host_path, path, path_len)) {
         m3ApiReturn(__WASI_ERRNO_NAMETOOLONG);
     }
 
@@ -589,7 +589,7 @@ m3ApiRawFunction(m3_wasi_p1_path_open)
 
     __wasi_errno_t err = m3_wasi_host_path_open(dirfd, host_path, oflags, fs_rights_base,
                                                 fs_flags, &host_fd);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -615,22 +615,22 @@ m3ApiRawFunction(m3_wasi_p1_fd_read)
     m3_wasi_iovec_t iovs[d_m3WasiMaxIovs];
     __wasi_size_t   total = 0;
 
-    for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
+    위해 (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
         __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
         const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
-        if (mem_check != m3Err_none) {
-            return mem_check;
+        만약 (mem_check != m3Err_none) {
+            반환 mem_check;
         }
 
         __wasi_errno_t err = m3_wasi_host_fd_read(fd, iovs, count, &done);
-        if (err != __WASI_ERRNO_SUCCESS) {
+        만약 (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
 
         total += done;
-        if (done < want) {
+        만약 (done < want) {
             break;
         }
     }
@@ -653,22 +653,22 @@ m3ApiRawFunction(m3_wasi_p1_fd_write)
     m3_wasi_iovec_t iovs[d_m3WasiMaxIovs];
     __wasi_size_t   total = 0;
 
-    for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
+    위해 (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
         __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
         const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
-        if (mem_check != m3Err_none) {
-            return mem_check;
+        만약 (mem_check != m3Err_none) {
+            반환 mem_check;
         }
 
         __wasi_errno_t err = m3_wasi_host_fd_write(fd, iovs, count, &done);
-        if (err != __WASI_ERRNO_SUCCESS) {
+        만약 (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
 
         total += done;
-        if (done < want) {
+        만약 (done < want) {
             break;
         }
     }
@@ -692,23 +692,23 @@ m3ApiRawFunction(m3_wasi_p1_fd_pread)
     m3_wasi_iovec_t iovs[d_m3WasiMaxIovs];
     __wasi_size_t   total = 0;
 
-    for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
+    위해 (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
         __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
         const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
-        if (mem_check != m3Err_none) {
-            return mem_check;
+        만약 (mem_check != m3Err_none) {
+            반환 mem_check;
         }
 
         // the offset walks with the data, so a short batch leaves no hole behind it
         __wasi_errno_t err = m3_wasi_host_fd_pread(fd, iovs, count, offset + total, &done);
-        if (err != __WASI_ERRNO_SUCCESS) {
+        만약 (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
 
         total += done;
-        if (done < want) {
+        만약 (done < want) {
             break;
         }
     }
@@ -732,22 +732,22 @@ m3ApiRawFunction(m3_wasi_p1_fd_pwrite)
     m3_wasi_iovec_t iovs[d_m3WasiMaxIovs];
     __wasi_size_t   total = 0;
 
-    for (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
+    위해 (__wasi_size_t i = 0; i < iovs_len; i += d_m3WasiMaxIovs) {
         __wasi_size_t count = M3_MIN(iovs_len - i, (__wasi_size_t)d_m3WasiMaxIovs);
         __wasi_size_t want, done;
 
         const void* mem_check = resolve_iovs(runtime, _mem, iovs, wasi_iovs + i, count, &want);
-        if (mem_check != m3Err_none) {
-            return mem_check;
+        만약 (mem_check != m3Err_none) {
+            반환 mem_check;
         }
 
         __wasi_errno_t err = m3_wasi_host_fd_pwrite(fd, iovs, count, offset + total, &done);
-        if (err != __WASI_ERRNO_SUCCESS) {
+        만약 (err != __WASI_ERRNO_SUCCESS) {
             m3ApiReturn(err);
         }
 
         total += done;
-        if (done < want) {
+        만약 (done < want) {
             break;
         }
     }
@@ -780,10 +780,10 @@ m3ApiRawFunction(m3_wasi_p1_random_get)
 
     m3ApiCheckMem(buf, buf_len);
 
-#  if d_m3DeterministicProfile
+#  만약 d_m3DeterministicProfile
     Deterministic_Random(runtime, buf, buf_len);
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
-#  else
+#  아니면
     m3ApiReturn(m3_wasi_host_random_get(buf, buf_len));
 #  endif
 }
@@ -796,15 +796,15 @@ m3ApiRawFunction(m3_wasi_p1_clock_res_get)
 
     m3ApiCheckMem(resolution, sizeof(__wasi_timestamp_t));
 
-#  if d_m3DeterministicProfile
+#  만약 d_m3DeterministicProfile
     // the deterministic clock's resolution is the step it moves in
     m3ApiWriteMem64(resolution, d_m3DeterministicTickNs);
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
-#  else
+#  아니면
     __wasi_timestamp_t res;
 
     __wasi_errno_t err = m3_wasi_host_clock_res_get(wasi_clk_id, &res);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -822,23 +822,23 @@ m3ApiRawFunction(m3_wasi_p1_clock_time_get)
 
     m3ApiCheckMem(time, sizeof(__wasi_timestamp_t));
 
-#  if d_m3DeterministicProfile
+#  만약 d_m3DeterministicProfile
     // Every clock the guest can name is the same underlying count - a runtime that is
     // not measuring the machine has nothing to tell process time and thread time apart
     // with - and only where it is counted from differs
     __wasi_timestamp_t now = Deterministic_Time(runtime);
 
-    if (wasi_clk_id == __WASI_CLOCKID_REALTIME) {
+    만약 (wasi_clk_id == __WASI_CLOCKID_REALTIME) {
         now += d_m3WasiDeterministicEpochNs;
     }
 
     m3ApiWriteMem64(time, now);
     m3ApiReturn(__WASI_ERRNO_SUCCESS);
-#  else
+#  아니면
     __wasi_timestamp_t now;
 
     __wasi_errno_t err = m3_wasi_host_clock_time_get(wasi_clk_id, &now);
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -853,7 +853,7 @@ m3ApiRawFunction(m3_wasi_p1_proc_exit)
 
     m3_wasi_context_t* context = (m3_wasi_context_t*)(_ctx->userdata);
 
-    if (context) {
+    만약 (context) {
         context->exit_code = code;
     }
 
@@ -880,11 +880,11 @@ m3_wasi_pollsub_t* read_subscriptions (const uint8_t* i_subs, __wasi_size_t i_co
     m3_wasi_pollsub_t* subs =
       (m3_wasi_pollsub_t*)m3_Malloc("WASI subscriptions", i_count * sizeof(m3_wasi_pollsub_t));
 
-    if (subs == NULL) {
-        return NULL;
+    만약 (subs == NULL) {
+        반환 NULL;
     }
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    위해 (__wasi_size_t i = 0; i < i_count; i++) {
         const uint8_t* s = i_subs + (size_t)i * d_m3WasiSubscriptionSize;
 
         memset(&subs[i], 0, sizeof(subs[i]));
@@ -892,17 +892,17 @@ m3_wasi_pollsub_t* read_subscriptions (const uint8_t* i_subs, __wasi_size_t i_co
         subs[i].userdata = m3ApiReadMem64(s + 0);
         subs[i].type     = m3ApiReadMem8(s + 8);
 
-        if (subs[i].type == __WASI_EVENTTYPE_CLOCK) {
+        만약 (subs[i].type == __WASI_EVENTTYPE_CLOCK) {
             subs[i].clockId = m3ApiReadMem32(s + 16);
             subs[i].timeout = m3ApiReadMem64(s + 24);
             subs[i].isAbsolute =
               (m3ApiReadMem16(s + 40) & __WASI_SUBCLOCKFLAGS_SUBSCRIPTION_CLOCK_ABSTIME) != 0;
-        } else {
+        } 아니면 {
             subs[i].fd = m3ApiReadMem32(s + 16);
         }
     }
 
-    return subs;
+    반환 subs;
 }
 
 // Writes one event back. This record is the same in both revisions: userdata 0,
@@ -922,7 +922,7 @@ void write_event (uint8_t* o_rec, const m3_wasi_pollevent_t* i_event)
     m3ApiWriteMem16(o_rec + 24, i_event->flags);
 }
 
-#  if d_m3DeterministicProfile
+#  만약 d_m3DeterministicProfile
 
 // poll_oneoff under the deterministic profile, which cannot wait on anything real. A
 // descriptor is reported ready at once - which is what the spec says a regular file
@@ -938,10 +938,10 @@ void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_s
     uint64_t      soonest = UINT64_MAX;
     uint64_t      now     = io_runtime->virtualTimeNs;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    위해 (__wasi_size_t i = 0; i < i_count; i++) {
         const m3_wasi_pollsub_t* sub = &i_subs[i];
 
-        if (sub->type != __WASI_EVENTTYPE_CLOCK) {
+        만약 (sub->type != __WASI_EVENTTYPE_CLOCK) {
             o_events[out].userdata = sub->userdata;
             o_events[out].error    = __WASI_ERRNO_SUCCESS;
             o_events[out].type     = sub->type;
@@ -958,27 +958,27 @@ void poll_deterministically (IM3Runtime io_runtime, const m3_wasi_pollsub_t* i_s
 
     // Something is ready already, so no time passes - which is what poll() would
     // have done too
-    if (out) {
+    만약 (out) {
         *o_numEvents = out;
-        return;
+        반환;
     }
 
-    if (soonest > now) {
+    만약 (soonest > now) {
         Deterministic_Advance(io_runtime, soonest - now);
     }
 
     now = io_runtime->virtualTimeNs;
 
-    for (__wasi_size_t i = 0; i < i_count; i++) {
+    위해 (__wasi_size_t i = 0; i < i_count; i++) {
         const m3_wasi_pollsub_t* sub = &i_subs[i];
 
-        if (sub->type != __WASI_EVENTTYPE_CLOCK) {
+        만약 (sub->type != __WASI_EVENTTYPE_CLOCK) {
             continue;
         }
 
         uint64_t deadline = sub->isAbsolute ? sub->timeout : soonest;
 
-        if (deadline <= now) {
+        만약 (deadline <= now) {
             o_events[out].userdata = sub->userdata;
             o_events[out].error    = __WASI_ERRNO_SUCCESS;
             o_events[out].type     = __WASI_EVENTTYPE_CLOCK;
@@ -1011,21 +1011,21 @@ __wasi_errno_t poll_subscriptions (IM3Runtime i_runtime, const m3_wasi_pollsub_t
     m3_wasi_pollevent_t* evts =
       (m3_wasi_pollevent_t*)m3_Malloc("WASI events", i_count * sizeof(m3_wasi_pollevent_t));
 
-    if (evts == NULL) {
-        return __WASI_ERRNO_NOMEM;
+    만약 (evts == NULL) {
+        반환 __WASI_ERRNO_NOMEM;
     }
 
     __wasi_size_t  numEvents = 0;
     __wasi_errno_t err       = __WASI_ERRNO_SUCCESS;
 
-#  if d_m3DeterministicProfile
+#  만약 d_m3DeterministicProfile
     poll_deterministically(i_runtime, i_subs, i_count, evts, &numEvents);
-#  else
+#  아니면
     err = m3_wasi_host_poll_oneoff(i_subs, i_count, evts, &numEvents);
 #  endif
 
-    if (err == __WASI_ERRNO_SUCCESS) {
-        for (__wasi_size_t i = 0; i < numEvents; i++) {
+    만약 (err == __WASI_ERRNO_SUCCESS) {
+        위해 (__wasi_size_t i = 0; i < numEvents; i++) {
             write_event(o_events + (size_t)i * d_m3WasiEventSize, &evts[i]);
         }
         *o_numEvents = numEvents;
@@ -1033,7 +1033,7 @@ __wasi_errno_t poll_subscriptions (IM3Runtime i_runtime, const m3_wasi_pollsub_t
 
     m3_Free(evts);
 
-    return err;
+    반환 err;
 }
 
 m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
@@ -1048,13 +1048,13 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
     m3ApiCheckMem(out, (uint64_t)nsubscriptions * d_m3WasiEventSize);
     m3ApiCheckMem(nevents, sizeof(__wasi_size_t));
 
-    if (nsubscriptions == 0) {
+    만약 (nsubscriptions == 0) {
         m3ApiReturn(__WASI_ERRNO_INVAL);
     }
 
     m3_wasi_pollsub_t* subs = read_subscriptions(in, nsubscriptions);
 
-    if (subs == NULL) {
+    만약 (subs == NULL) {
         m3ApiReturn(__WASI_ERRNO_NOMEM);
     }
 
@@ -1063,7 +1063,7 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 
     m3_Free(subs);
 
-    if (err != __WASI_ERRNO_SUCCESS) {
+    만약 (err != __WASI_ERRNO_SUCCESS) {
         m3ApiReturn(err);
     }
 
@@ -1075,16 +1075,16 @@ m3ApiRawFunction(m3_wasi_p1_poll_oneoff)
 static
 M3Result SuppressLookupFailure (M3Result i_result)
 {
-    if (i_result == m3Err_functionLookupFailed) {
-        return m3Err_none;
-    } else {
-        return i_result;
+    만약 (i_result == m3Err_functionLookupFailed) {
+        반환 m3Err_none;
+    } 아니면 {
+        반환 i_result;
     }
 }
 
 m3_wasi_context_t* m3_GetWasiContext ()
 {
-    return wasi_context;
+    반환 wasi_context;
 }
 
 void m3_FreeWasi (m3_wasi_context_t* wasi)
@@ -1103,7 +1103,7 @@ M3Result _linkWASI (IM3Module module, m3_wasi_context_t* wasi_context)
 
     // clang-format off
 
-    for (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
+    위해 (size_t i = 0; i < M3_COUNT_OF(namespaces); i++) {
         const char* wasi = namespaces[i];
 
 _       (SuppressLookupFailure(m3_LinkRawFunctionEx(module, wasi, "args_get",           "i(**)",   &m3_wasi_p1_args_get, wasi_context)));
@@ -1164,10 +1164,10 @@ _       (SuppressLookupFailure(m3_LinkRawFunction(module, wasi, "sched_yield",  
     // rather than per call. A module that linked none of the above imports has
     // no WASI to satisfy, so it is not asked for the export - link_all offers
     // WASI to every module, and most have neither the imports nor a memory.
-    if (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
+    만약 (Module_HasLinkedHostImport(module, "wasi_snapshot_preview1")) {
         u32 memoryIndex;
 
-        if (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
+        만약 (m3_FindExportedMemory(module, "memory", &memoryIndex)) {
             _throw("WASI requires the module to export its memory as \"memory\"");
         }
 
@@ -1175,14 +1175,14 @@ _       (m3_BindImportMemory(module, "wasi_snapshot_preview1", memoryIndex));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 M3Result m3_NewCustomWASI (M3WASI* wasi_p)
 {
     *wasi_p = m3_AllocStruct(m3_wasi_context_t);
 
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 void m3_FreeCustomWASI (M3WASI wasi)
@@ -1192,16 +1192,16 @@ void m3_FreeCustomWASI (M3WASI wasi)
 
 M3Result m3_LinkCustomWASI (IM3Module module, M3WASI wasi)
 {
-    return _linkWASI(module, wasi);
+    반환 _linkWASI(module, wasi);
 }
 
 M3Result m3_LinkWASI (IM3Module module)
 {
-    if (!wasi_context) {
+    만약 (!wasi_context) {
         wasi_context = m3_AllocStruct(m3_wasi_context_t);
     }
 
-    return _linkWASI(module, wasi_context);
+    반환 _linkWASI(module, wasi_context);
 }
 
 #endif // d_m3HasWASI

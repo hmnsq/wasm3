@@ -27,7 +27,7 @@
 
 #include <limits.h>
 
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
 
 //---------------------------------------------------------------------------------------------------------------------------------
 //  format
@@ -100,7 +100,7 @@ M3Result ModuleFingerprint (IM3Module i_module, u64* o_hash)
 
         Xxh64_Init(&hash, 0);
 
-        while (pos < end) {
+        동안 (pos < end) {
             bytes_t start     = pos;
             u8      sectionId = *pos++;
             u32     size      = 0;
@@ -109,7 +109,7 @@ _           (ReadLEB_u32(&size, &pos, end));
             _throwif(m3Err_wasmUnderrun, size > (size_t)(end - pos));
 
             pos += size;
-            if (sectionId != 0) {
+            만약 (sectionId != 0) {
                 Xxh64_Update(&hash, start, (size_t)(pos - start));
             }
         }
@@ -118,7 +118,7 @@ _           (ReadLEB_u32(&size, &pos, end));
     *o_hash = Xxh64_Digest(&hash);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 
@@ -131,15 +131,15 @@ const M3SafePoint* FindSafePoint (IM3Function i_function, pc_t i_pc, u8 i_kind)
 {
     const M3SnapshotMap* map = i_function->snapshotMap;
 
-    if (map) {
-        for (u32 i = 0; i < map->numSafePoints; ++i) {
-            if (map->safePoints[i].pc == i_pc and map->safePoints[i].kind == i_kind) {
-                return &map->safePoints[i];
+    만약 (map) {
+        위해 (u32 i = 0; i < map->numSafePoints; ++i) {
+            만약 (map->safePoints[i].pc == i_pc and map->safePoints[i].kind == i_kind) {
+                반환 &map->safePoints[i];
             }
         }
     }
 
-    return NULL;
+    반환 NULL;
 }
 
 // The safepoint of i_kind at the instruction at i_wasmOffset, and for a back
@@ -152,40 +152,40 @@ const M3SafePoint* FindSafePointAt (const M3SnapshotMap* i_map, u32 i_wasmOffset
     u32 low  = 0;
     u32 high = i_map->numSafePoints;
 
-    while (low < high) {
+    동안 (low < high) {
         u32 middle = low + (high - low) / 2;
 
-        if (i_map->safePoints[middle].wasmOffset < i_wasmOffset) {
+        만약 (i_map->safePoints[middle].wasmOffset < i_wasmOffset) {
             low = middle + 1;
-        } else {
+        } 아니면 {
             high = middle;
         }
     }
 
-    for (u32 i = low; i < i_map->numSafePoints and i_map->safePoints[i].wasmOffset == i_wasmOffset; ++i) {
+    위해 (u32 i = low; i < i_map->numSafePoints and i_map->safePoints[i].wasmOffset == i_wasmOffset; ++i) {
         const M3SafePoint* point = &i_map->safePoints[i];
 
-        if (point->kind != i_kind or (point->flags & d_m3SafePointTailCall)) {
+        만약 (point->kind != i_kind or (point->flags & d_m3SafePointTailCall)) {
             continue;
         }
-        if (i_kind != safepoint_op or i_map->blocks[point->aux].wasmOffset == i_targetLoop) {
-            return point;
+        만약 (i_kind != safepoint_op or i_map->blocks[point->aux].wasmOffset == i_targetLoop) {
+            반환 point;
         }
     }
 
-    return NULL;
+    반환 NULL;
 }
 
 static
 const M3BlockStart* FindBlockAt (const M3SnapshotMap* i_map, u8 i_opcode, u32 i_wasmOffset)
 {
-    for (u32 i = 0; i < i_map->numBlocks; ++i) {
-        if (i_map->blocks[i].opcode == i_opcode and i_map->blocks[i].wasmOffset == i_wasmOffset) {
-            return &i_map->blocks[i];
+    위해 (u32 i = 0; i < i_map->numBlocks; ++i) {
+        만약 (i_map->blocks[i].opcode == i_opcode and i_map->blocks[i].wasmOffset == i_wasmOffset) {
+            반환 &i_map->blocks[i];
         }
     }
 
-    return NULL;
+    반환 NULL;
 }
 
 // Whether a loop or try_table encloses the instruction at i_wasmOffset (see
@@ -193,7 +193,7 @@ const M3BlockStart* FindBlockAt (const M3SnapshotMap* i_map, u8 i_opcode, u32 i_
 static inline
 bool EnclosesOffset (const M3BlockStart* i_block, u32 i_wasmOffset)
 {
-    return i_block->wasmOffset < i_wasmOffset and i_wasmOffset < i_block->wasmEnd;
+    반환 i_block->wasmOffset < i_wasmOffset and i_wasmOffset < i_block->wasmEnd;
 }
 
 // Whether the handlers of a try_table around a safepoint are in force there.
@@ -202,7 +202,7 @@ bool EnclosesOffset (const M3BlockStart* i_block, u32 i_wasmOffset)
 static inline
 bool HandlersLiveAt (const M3SnapshotMap* i_map, const M3SafePoint* i_point, const M3BlockStart* i_try)
 {
-    return not (i_point->kind == safepoint_op and i_try->wasmOffset > i_map->blocks[i_point->aux].wasmOffset);
+    반환 not (i_point->kind == safepoint_op and i_try->wasmOffset > i_map->blocks[i_point->aux].wasmOffset);
 }
 
 // The type a call safepoint's instruction calls through, read back out of the
@@ -227,17 +227,17 @@ _   (ReadLEB_u32(&size, &pos, end));
 _   (Read_opcode(&opcode, &pos, end));
 _   (ReadLEB_u32(&index, &pos, end));
 
-    if (opcode == c_waOp_call) {
+    만약 (opcode == c_waOp_call) {
         _throwif(m3Err_wasmMalformed, index >= module->numFunctions);
         *o_type = module->functions[index].funcType;
-    } else {
+    } 아니면 {
         _throwif(m3Err_wasmMalformed, opcode != c_waOp_callIndirect and opcode != c_waOp_callRef);
         _throwif(m3Err_wasmMalformed, index >= module->numFuncTypes);
         *o_type = module->funcTypes[index];
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // Whether a function can stand where i_expected was called: it returns as
@@ -248,17 +248,17 @@ bool ReturnsWhat (IM3FuncType i_type, IM3FuncType i_expected)
 {
     u16 numResults = GetFuncTypeNumResults(i_expected);
 
-    if (not i_type or GetFuncTypeNumResults(i_type) != numResults) {
-        return false;
+    만약 (not i_type or GetFuncTypeNumResults(i_type) != numResults) {
+        반환 false;
     }
 
-    for (u16 i = 0; i < numResults; ++i) {
-        if (not IsSubTypeOf(GetFuncTypeResultType(i_type, i), GetFuncTypeResultType(i_expected, i))) {
-            return false;
+    위해 (u16 i = 0; i < numResults; ++i) {
+        만약 (not IsSubTypeOf(GetFuncTypeResultType(i_type, i), GetFuncTypeResultType(i_expected, i))) {
+            반환 false;
         }
     }
 
-    return true;
+    반환 true;
 }
 
 
@@ -270,7 +270,7 @@ bool ReturnsWhat (IM3FuncType i_type, IM3FuncType i_expected)
 // resume - has none, and a value the map puts in one cannot be there.
 typedef struct M3FrameRegisters {
     m3reg_t* r0;
-#  if d_m3HasFloat
+#  만약 d_m3HasFloat
     f64* fp0;
 #  endif
 } M3FrameRegisters;
@@ -279,15 +279,15 @@ typedef struct M3FrameRegisters {
 static
 M3Result ContinuationStack (IM3Runtime i_runtime, IM3Continuation i_cont, m3slot_t** o_base, u32* o_numSlots)
 {
-    if (i_cont == i_runtime->rootContinuation) {
+    만약 (i_cont == i_runtime->rootContinuation) {
         *o_base     = (m3slot_t*)i_runtime->originStack;
         *o_numSlots = i_runtime->numStackSlots;
-    } else {
+    } 아니면 {
         *o_base     = i_cont->valStack;
         *o_numSlots = i_cont->numStackSlots;
     }
 
-    return (*o_base) ? m3Err_none : "a suspended continuation has no stack";
+    반환 (*o_base) ? m3Err_none : "a suspended continuation has no stack";
 }
 
 // Where a value is kept, or NULL for a register; o_bytes is how much of the
@@ -305,7 +305,7 @@ M3Result LocateValue (m3slot_t* i_base, u32 i_numSlots, m3stack_t i_sp, const M3
     // no operation reads or writes one, so a v128 only ever sits in slots
     _throwif("a v128 value is kept in a register", type == c_m3Type_v128 and IsRegisterSlotAlias(i_value->slot));
 
-    if (not IsRegisterSlotAlias(i_value->slot)) {
+    만약 (not IsRegisterSlotAlias(i_value->slot)) {
         size_t size   = (type == c_m3Type_v128) ? 16
                                                 : (IsRefType(type) ? sizeof(void*)
                                                                    : (Is64BitType(type) ? sizeof(u64) : sizeof(u32)));
@@ -317,7 +317,7 @@ M3Result LocateValue (m3slot_t* i_base, u32 i_numSlots, m3stack_t i_sp, const M3
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // A value as the file holds it before a reference is named: a number's bits,
@@ -332,48 +332,48 @@ M3Result ReadValue (u8* i_where, const M3FrameRegisters* i_registers, const M3Sl
     *o_bits      = 0;
     *o_reference = NULL;
 
-    if (i_where) {
-        if (IsRefType(type)) {
+    만약 (i_where) {
+        만약 (IsRefType(type)) {
             memcpy(o_reference, i_where, sizeof(void*));
-        } else if (Is64BitType(type)) {
+        } 아니면 만약 (Is64BitType(type)) {
             memcpy(o_bits, i_where, sizeof(u64));
-        } else {
+        } 아니면 {
             u32 narrow;
             memcpy(&narrow, i_where, sizeof(narrow));
             *o_bits = narrow;
         }
-    } else if (IsFpRegisterSlotAlias(i_value->slot)) {
-#  if d_m3HasFloat
+    } 아니면 만약 (IsFpRegisterSlotAlias(i_value->slot)) {
+#  만약 d_m3HasFloat
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->fp0);
 
-        if (type == c_m3Type_f32) {
+        만약 (type == c_m3Type_f32) {
             f32 narrow = (f32)*i_registers->fp0;
             u32 bits;
             memcpy(&bits, &narrow, sizeof(bits));
             *o_bits = bits;
-        } else {
+        } 아니면 {
             _throwif(m3Err_wasmMalformed, type != c_m3Type_f64);
             memcpy(o_bits, i_registers->fp0, sizeof(u64));
         }
-#  else
+#  아니면
         _throw(m3Err_wasmMalformed);
 #  endif
-    } else {
+    } 아니면 {
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->r0);
 
         m3reg_t r0 = *i_registers->r0;
 
-        if (IsRefType(type)) {
+        만약 (IsRefType(type)) {
             *o_reference = (void*)(uintptr_t)r0;
-        } else if (Is64BitType(type)) {
+        } 아니면 만약 (Is64BitType(type)) {
             *o_bits = (u64)r0;
-        } else {
+        } 아니면 {
             *o_bits = (u32)r0;
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -383,43 +383,43 @@ M3Result WriteValue (u8* o_where, const M3FrameRegisters* i_registers, const M3S
     M3Result result = m3Err_none;
     u8       type   = BaseTypeOf(i_value->type);
 
-    if (o_where) {
-        if (IsRefType(type)) {
+    만약 (o_where) {
+        만약 (IsRefType(type)) {
             memcpy(o_where, &i_reference, sizeof(void*));
-        } else if (Is64BitType(type)) {
+        } 아니면 만약 (Is64BitType(type)) {
             memcpy(o_where, &i_bits, sizeof(u64));
-        } else {
+        } 아니면 {
             u32 narrow = (u32)i_bits;
             memcpy(o_where, &narrow, sizeof(narrow));
         }
-    } else if (IsFpRegisterSlotAlias(i_value->slot)) {
-#  if d_m3HasFloat
+    } 아니면 만약 (IsFpRegisterSlotAlias(i_value->slot)) {
+#  만약 d_m3HasFloat
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->fp0);
 
-        if (type == c_m3Type_f32) {
+        만약 (type == c_m3Type_f32) {
             u32 bits = (u32)i_bits;
             f32 narrow;
             memcpy(&narrow, &bits, sizeof(narrow));
             *i_registers->fp0 = narrow;
-        } else {
+        } 아니면 {
             _throwif(m3Err_wasmMalformed, type != c_m3Type_f64);
             memcpy(i_registers->fp0, &i_bits, sizeof(u64));
         }
-#  else
+#  아니면
         _throw(m3Err_wasmMalformed);
 #  endif
-    } else {
+    } 아니면 {
         _throwif("a value is kept in a register the frame does not hold", not i_registers or not i_registers->r0);
 
-        if (IsRefType(type)) {
+        만약 (IsRefType(type)) {
             *i_registers->r0 = (m3reg_t)(uintptr_t)i_reference;
-        } else {
+        } 아니면 {
             *i_registers->r0 = (m3reg_t)i_bits;
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The value a safepoint lists at i_index: the function's locals first, then
@@ -427,18 +427,18 @@ _catch:
 static
 const M3SlotValue* FrameValue (const M3SnapshotMap* i_map, const M3SafePoint* i_point, u32 i_index)
 {
-    if (i_index < i_map->numLocals) {
-        return i_point->firstLocalValue == UINT32_MAX ? &i_map->locals[i_index]
+    만약 (i_index < i_map->numLocals) {
+        반환 i_point->firstLocalValue == UINT32_MAX ? &i_map->locals[i_index]
                                                       : &i_map->values[i_point->firstLocalValue + i_index];
     }
-    return &i_map->values[i_point->firstValue + i_index - i_map->numLocals];
+    반환 &i_map->values[i_point->firstValue + i_index - i_map->numLocals];
 }
 
 // A frame's constants are copied in by op_Entry, and op_Entry already ran
 static
 void RestoreConstants (IM3Function i_function, m3stack_t i_sp)
 {
-    if (i_function->constants) {
+    만약 (i_function->constants) {
         u8* where = (u8*)((m3slot_t*)i_sp + i_function->numRetAndArgSlots) + i_function->numLocalBytes;
 
         memcpy(where, i_function->constants, i_function->numConstantBytes);
@@ -466,27 +466,27 @@ u32 PointerBucket (void* i_pointer, u32 i_capacity)
 {
     u64 bits = (u64)(uintptr_t)i_pointer;
 
-    return (u32)((bits * 0x9E3779B97F4A7C15ULL) >> 32) & (i_capacity - 1);
+    반환 (u32)((bits * 0x9E3779B97F4A7C15ULL) >> 32) & (i_capacity - 1);
 }
 
 static
 u32 PointerIds_Find (const M3PointerIds* i_ids, void* i_pointer)
 {
-    if (i_ids->indexCapacity) {
+    만약 (i_ids->indexCapacity) {
         u32 bucket = PointerBucket(i_pointer, i_ids->indexCapacity);
 
-        while (i_ids->index[bucket]) {
+        동안 (i_ids->index[bucket]) {
             u32 id = i_ids->index[bucket] - 1;
 
-            if (i_ids->items[id] == i_pointer) {
-                return id;
+            만약 (i_ids->items[id] == i_pointer) {
+                반환 id;
             }
 
             bucket = (bucket + 1) & (i_ids->indexCapacity - 1);
         }
     }
 
-    return d_m3SnapshotNone;
+    반환 d_m3SnapshotNone;
 }
 
 static
@@ -494,35 +494,35 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
 {
     u32 id = PointerIds_Find(io_ids, i_pointer);
 
-    if (id != d_m3SnapshotNone) {
+    만약 (id != d_m3SnapshotNone) {
         *o_id = id;
-        return m3Err_none;
+        반환 m3Err_none;
     }
 
-    if (io_ids->count == io_ids->capacity) {
+    만약 (io_ids->count == io_ids->capacity) {
         u32    capacity = io_ids->capacity ? io_ids->capacity * 2 : 16;
         void** items    = m3_ReallocArray(void*, io_ids->items, capacity, io_ids->capacity);
 
-        if (not items) {
-            return m3Err_mallocFailed;
+        만약 (not items) {
+            반환 m3Err_mallocFailed;
         }
 
         io_ids->items    = items;
         io_ids->capacity = capacity;
     }
 
-    if ((io_ids->count + 1) * 2 > io_ids->indexCapacity) {
+    만약 ((io_ids->count + 1) * 2 > io_ids->indexCapacity) {
         u32  capacity = io_ids->indexCapacity ? io_ids->indexCapacity * 2 : 32;
         u32* index    = m3_AllocArray(u32, capacity);
 
-        if (not index) {
-            return m3Err_mallocFailed;
+        만약 (not index) {
+            반환 m3Err_mallocFailed;
         }
 
-        for (u32 i = 0; i < io_ids->count; ++i) {
+        위해 (u32 i = 0; i < io_ids->count; ++i) {
             u32 bucket = PointerBucket(io_ids->items[i], capacity);
 
-            while (index[bucket]) {
+            동안 (index[bucket]) {
                 bucket = (bucket + 1) & (capacity - 1);
             }
 
@@ -539,7 +539,7 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
 
     u32 bucket = PointerBucket(i_pointer, io_ids->indexCapacity);
 
-    while (io_ids->index[bucket]) {
+    동안 (io_ids->index[bucket]) {
         bucket = (bucket + 1) & (io_ids->indexCapacity - 1);
     }
 
@@ -547,7 +547,7 @@ M3Result PointerIds_Add (M3PointerIds* io_ids, void* i_pointer, u32* o_id)
 
     *o_id = id;
 
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 static
@@ -574,25 +574,25 @@ M3Result BufferWriter_Write (const void* i_data, size_t i_size, void* i_userdata
 {
     M3BufferWriter* bw = (M3BufferWriter*)i_userdata;
 
-    if (bw->size + i_size > bw->capacity) {
+    만약 (bw->size + i_size > bw->capacity) {
         size_t newCap = bw->capacity ? bw->capacity * 2 : 4096;
-        while (bw->size + i_size > newCap) {
+        동안 (bw->size + i_size > newCap) {
             newCap *= 2;
         }
         u8* newBuf = m3_ReallocArray(u8, bw->buffer, newCap, bw->capacity);
-        if (!newBuf) {
-            return m3Err_mallocFailed;
+        만약 (!newBuf) {
+            반환 m3Err_mallocFailed;
         }
         bw->buffer   = newBuf;
         bw->capacity = newCap;
     }
 
-    if (i_size) {
+    만약 (i_size) {
         memcpy(bw->buffer + bw->size, i_data, i_size);
         bw->size += i_size;
     }
 
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 typedef struct M3BufferReader {
@@ -606,16 +606,16 @@ M3Result BufferReader_Read (void* o_buffer, size_t i_size, void* i_userdata)
 {
     M3BufferReader* br = (M3BufferReader*)i_userdata;
 
-    if (i_size > br->size - br->cursor) {
-        return m3Err_wasmMalformed;
+    만약 (i_size > br->size - br->cursor) {
+        반환 m3Err_wasmMalformed;
     }
 
-    if (i_size) {
+    만약 (i_size) {
         memcpy(o_buffer, br->buffer + br->cursor, i_size);
         br->cursor += i_size;
     }
 
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 
@@ -649,16 +649,16 @@ static inline
 u8 M3TypeToValType (m3type_t i_type)
 {
     switch (BaseTypeOf(i_type)) {
-    case c_m3Type_i32: return 0x7F;
-    case c_m3Type_i64: return 0x7E;
-    case c_m3Type_f32: return 0x7D;
-    case c_m3Type_f64: return 0x7C;
-    case c_m3Type_v128: return 0x7B;
-    case c_m3Type_funcref: return 0x70;
-    case c_m3Type_externref: return 0x6F;
-    case c_m3Type_exnref: return 0x69;
-    case c_m3Type_contref: return 0x68;
-    default: return 0x00;
+    case c_m3Type_i32: 반환 0x7F;
+    case c_m3Type_i64: 반환 0x7E;
+    case c_m3Type_f32: 반환 0x7D;
+    case c_m3Type_f64: 반환 0x7C;
+    case c_m3Type_v128: 반환 0x7B;
+    case c_m3Type_funcref: 반환 0x70;
+    case c_m3Type_externref: 반환 0x6F;
+    case c_m3Type_exnref: 반환 0x69;
+    case c_m3Type_contref: 반환 0x68;
+    default: 반환 0x00;
     }
 }
 
@@ -666,29 +666,29 @@ static inline
 m3type_t ValTypeToM3Type (u8 i_valtype)
 {
     switch (i_valtype) {
-    case 0x7F: return c_m3Type_i32;
-    case 0x7E: return c_m3Type_i64;
-    case 0x7D: return c_m3Type_f32;
-    case 0x7C: return c_m3Type_f64;
-    case 0x7B: return c_m3Type_v128;
-    case 0x70: return c_m3Type_funcref;
-    case 0x6F: return c_m3Type_externref;
-    case 0x69: return c_m3Type_exnref;
-    case 0x68: return c_m3Type_contref;
-    default: return c_m3Type_none;
+    case 0x7F: 반환 c_m3Type_i32;
+    case 0x7E: 반환 c_m3Type_i64;
+    case 0x7D: 반환 c_m3Type_f32;
+    case 0x7C: 반환 c_m3Type_f64;
+    case 0x7B: 반환 c_m3Type_v128;
+    case 0x70: 반환 c_m3Type_funcref;
+    case 0x6F: 반환 c_m3Type_externref;
+    case 0x69: 반환 c_m3Type_exnref;
+    case 0x68: 반환 c_m3Type_contref;
+    default: 반환 c_m3Type_none;
     }
 }
 
 static
 M3Result Put (M3SnapshotSave* s, const void* i_data, size_t i_size)
 {
-    return s->writing ? s->writer(i_data, i_size, s->userdata) : m3Err_none;
+    반환 s->writing ? s->writer(i_data, i_size, s->userdata) : m3Err_none;
 }
 
 static
 M3Result PutU8 (M3SnapshotSave* s, u8 i_value)
 {
-    return Put(s, &i_value, sizeof(i_value));
+    반환 Put(s, &i_value, sizeof(i_value));
 }
 
 
@@ -701,13 +701,13 @@ M3Result PutLEB_u32 (M3SnapshotSave* s, u32 i_value)
     do {
         u8 byte = i_value & 0x7F;
         i_value >>= 7;
-        if (i_value != 0) {
+        만약 (i_value != 0) {
             byte |= 0x80;
         }
         bytes[len++] = byte;
-    } while (i_value != 0);
+    } 동안 (i_value != 0);
 
-    return Put(s, bytes, len);
+    반환 Put(s, bytes, len);
 }
 
 static
@@ -719,13 +719,13 @@ M3Result PutLEB_u64 (M3SnapshotSave* s, u64 i_value)
     do {
         u8 byte = i_value & 0x7F;
         i_value >>= 7;
-        if (i_value != 0) {
+        만약 (i_value != 0) {
             byte |= 0x80;
         }
         bytes[len++] = byte;
-    } while (i_value != 0);
+    } 동안 (i_value != 0);
 
-    return Put(s, bytes, len);
+    반환 Put(s, bytes, len);
 }
 
 static
@@ -735,18 +735,18 @@ M3Result PutLEB_i64 (M3SnapshotSave* s, i64 i_value)
     u32  len  = 0;
     bool more = true;
 
-    while (more) {
+    동안 (more) {
         u8 byte = i_value & 0x7F;
         i_value >>= 7;
-        if ((i_value == 0 && !(byte & 0x40)) || (i_value == -1 && (byte & 0x40))) {
+        만약 ((i_value == 0 && !(byte & 0x40)) || (i_value == -1 && (byte & 0x40))) {
             more = false;
-        } else {
+        } 아니면 {
             byte |= 0x80;
         }
         bytes[len++] = byte;
     }
 
-    return Put(s, bytes, len);
+    반환 Put(s, bytes, len);
 }
 
 // What one section writes. Every section body takes the save state and nothing
@@ -774,12 +774,12 @@ M3Result SaveSection (M3SnapshotSave* s, u8 i_sectionId, M3SnapshotSectionFn i_b
     s->writer   = writer;
     s->userdata = userdata;
 
-    if (result) {
+    만약 (result) {
         goto _catch;
     }
 
     // a section with nothing in it is left out
-    if (bw.size) {
+    만약 (bw.size) {
         _throwif("snapshot section is too large", bw.size > UINT32_MAX);
 _       (PutU8(s, i_sectionId));
 _       (PutLEB_u32(s, (u32)bw.size));
@@ -789,32 +789,32 @@ _       (Put(s, bw.buffer, bw.size));
 _catch:
     m3_Free(bw.buffer);
 
-    return result;
+    반환 result;
 }
 
 static
 u32 FunctionIndex (IM3Module i_module, IM3Function i_function)
 {
-    if (i_function and i_function >= i_module->functions and i_function < i_module->functions + i_module->numFunctions) {
-        return (u32)(i_function - i_module->functions);
+    만약 (i_function and i_function >= i_module->functions and i_function < i_module->functions + i_module->numFunctions) {
+        반환 (u32)(i_function - i_module->functions);
     }
 
-    return d_m3SnapshotNone;
+    반환 d_m3SnapshotNone;
 }
 
 static
 u32 FuncTypeIndex (IM3Module i_module, IM3FuncType i_type)
 {
-    for (u32 i = 0; i < i_module->numFuncTypes; ++i) {
-        if (i_module->funcTypes[i] == i_type) {
-            return i;
+    위해 (u32 i = 0; i < i_module->numFuncTypes; ++i) {
+        만약 (i_module->funcTypes[i] == i_type) {
+            반환 i;
         }
     }
 
-    return d_m3SnapshotNone;
+    반환 d_m3SnapshotNone;
 }
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
 
 // Code refers to a tag as whatever it resolved to, so that is what an
 // exception holds
@@ -823,19 +823,19 @@ IM3Tag TagOfIndex (IM3Module i_module, u32 i_index)
 {
     IM3Tag tag = &i_module->tags[i_index];
 
-    return tag->resolved ? tag->resolved : tag;
+    반환 tag->resolved ? tag->resolved : tag;
 }
 
 static
 u32 TagIndex (IM3Module i_module, IM3Tag i_tag)
 {
-    for (u32 i = 0; i < i_module->numTags; ++i) {
-        if (TagOfIndex(i_module, i) == i_tag) {
-            return i;
+    위해 (u32 i = 0; i < i_module->numTags; ++i) {
+        만약 (TagOfIndex(i_module, i) == i_tag) {
+            반환 i;
         }
     }
 
-    return d_m3SnapshotNone;
+    반환 d_m3SnapshotNone;
 }
 
 #  endif
@@ -850,14 +850,14 @@ M3Result NameReference (M3SnapshotSave* s, u8 i_type, void* i_reference, u64* o_
 
     *o_word = d_m3SnapshotNullRef;
 
-    if (not i_reference) {
-        return m3Err_none;
+    만약 (not i_reference) {
+        반환 m3Err_none;
     }
 
-    if (i_type == c_m3Type_funcref) {
+    만약 (i_type == c_m3Type_funcref) {
         id = FunctionIndex(s->module, (IM3Function)i_reference);
         _throwif("a funcref names a function of another module", id == d_m3SnapshotNone);
-    } else if (i_type == c_m3Type_externref) {
+    } 아니면 만약 (i_type == c_m3Type_externref) {
         const M3SnapshotHooks* hooks = &s->runtime->snapshotHooks;
 
         _throwif("an externref belongs to the host, and cannot be saved", not hooks->nameExternRef);
@@ -869,8 +869,8 @@ _       (hooks->nameExternRef(hooks->userdata, i_reference, &name));
         *o_word = name;
         goto _catch;
     }
-#  if d_m3HasExceptionHandling
-    else if (i_type == c_m3Type_exnref) {
+#  만약 d_m3HasExceptionHandling
+    아니면 만약 (i_type == c_m3Type_exnref) {
         _throwif("an exnref names an exception that no longer exists",
                  PointerIds_Find(&s->liveExceptions, i_reference) == d_m3SnapshotNone);
 
@@ -879,21 +879,21 @@ _       (PointerIds_Add(&s->exceptions, i_reference, &id));
         _throwif("internal: an exception was found only while writing", s->writing and s->exceptions.count != count);
     }
 #  endif
-    else if (i_type == c_m3Type_contref) {
+    아니면 만약 (i_type == c_m3Type_contref) {
         _throwif("a contref names a continuation that no longer exists",
                  PointerIds_Find(&s->liveContinuations, i_reference) == d_m3SnapshotNone);
 
         u32 count = s->continuations.count;
 _       (PointerIds_Add(&s->continuations, i_reference, &id));
         _throwif("internal: a continuation was found only while writing", s->writing and s->continuations.count != count);
-    } else {
+    } 아니면 {
         _throw("a reference of an unknown type");
     }
 
     *o_word = id;
 
 _catch:
-    return result;
+    반환 result;
 }
 
 //// A value held in memory - a global's cell, a bound argument - as the file
@@ -907,25 +907,25 @@ M3Result PutRefValue (M3SnapshotSave* s, u8 i_type, void* i_reference)
 
 _   (NameReference(s, i_type, i_reference, &word));
 
-    if (not s->writing) {
-        return m3Err_none;
+    만약 (not s->writing) {
+        반환 m3Err_none;
     }
 
-    if (word == d_m3SnapshotNullRef) {
+    만약 (word == d_m3SnapshotNullRef) {
 _       (PutU8(s, 0x00));
-    } else {
+    } 아니면 {
         u8 kind = 0;
-        if (i_type == c_m3Type_funcref) {
+        만약 (i_type == c_m3Type_funcref) {
             kind = 0x01;
-        } else if (i_type == c_m3Type_externref) {
+        } 아니면 만약 (i_type == c_m3Type_externref) {
             kind = 0x02;
         }
-#  if d_m3HasExceptionHandling
-        else if (i_type == c_m3Type_exnref) {
+#  만약 d_m3HasExceptionHandling
+        아니면 만약 (i_type == c_m3Type_exnref) {
             kind = 0x03;
         }
 #  endif
-        else if (i_type == c_m3Type_contref) {
+        아니면 만약 (i_type == c_m3Type_contref) {
             kind = 0x04;
         }
 
@@ -934,7 +934,7 @@ _       (PutLEB_u64(s, word));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The fixed-width quantities: the container's version, and a float's bit
@@ -947,11 +947,11 @@ M3Result PutLE32 (M3SnapshotSave* s, u32 i_value)
 {
     u8 bytes[4];
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
+    위해 (u32 i = 0; i < sizeof(bytes); ++i) {
         bytes[i] = (u8)(i_value >> (8 * i));
     }
 
-    return Put(s, bytes, sizeof(bytes));
+    반환 Put(s, bytes, sizeof(bytes));
 }
 
 static
@@ -959,11 +959,11 @@ M3Result PutLE64 (M3SnapshotSave* s, u64 i_value)
 {
     u8 bytes[8];
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
+    위해 (u32 i = 0; i < sizeof(bytes); ++i) {
         bytes[i] = (u8)(i_value >> (8 * i));
     }
 
-    return Put(s, bytes, sizeof(bytes));
+    반환 Put(s, bytes, sizeof(bytes));
 }
 
 // The body of a value the caller already holds as bits, with a narrow type in
@@ -973,16 +973,16 @@ M3Result PutLE64 (M3SnapshotSave* s, u64 i_value)
 static
 M3Result PutValueBody (M3SnapshotSave* s, m3type_t i_type, u64 i_bits)
 {
-    if (IsRefType(i_type)) {
-        return PutRefValue(s, BaseTypeOf(i_type), (void*)(uintptr_t)i_bits);
+    만약 (IsRefType(i_type)) {
+        반환 PutRefValue(s, BaseTypeOf(i_type), (void*)(uintptr_t)i_bits);
     }
 
     switch (BaseTypeOf(i_type)) {
-    case c_m3Type_i32: return PutLEB_i64(s, (i32)(u32)i_bits);
-    case c_m3Type_i64: return PutLEB_i64(s, (i64)i_bits);
-    case c_m3Type_f32: return PutLE32(s, (u32)i_bits);
-    case c_m3Type_f64: return PutLE64(s, i_bits);
-    default: return "a snapshot cannot hold a value of this type as bits";
+    case c_m3Type_i32: 반환 PutLEB_i64(s, (i32)(u32)i_bits);
+    case c_m3Type_i64: 반환 PutLEB_i64(s, (i64)i_bits);
+    case c_m3Type_f32: 반환 PutLE32(s, (u32)i_bits);
+    case c_m3Type_f64: 반환 PutLE64(s, i_bits);
+    default: 반환 "a snapshot cannot hold a value of this type as bits";
     }
 }
 
@@ -991,11 +991,11 @@ M3Result PutValueTag (M3SnapshotSave* s, m3type_t i_type)
 {
     u8 valtype = M3TypeToValType(i_type);
 
-    if (not valtype) {
-        return "a snapshot has no tag for a value of this type";
+    만약 (not valtype) {
+        반환 "a snapshot has no tag for a value of this type";
     }
 
-    return PutU8(s, valtype);
+    반환 PutU8(s, valtype);
 }
 
 static
@@ -1007,7 +1007,7 @@ _   (PutValueTag(s, i_type));
 _   (PutValueBody(s, i_type, i_bits));
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // A value as a memory location holds it: a global's cell, a bound argument, a
@@ -1020,27 +1020,27 @@ M3Result PutValue (M3SnapshotSave* s, m3type_t i_type, const void* i_where)
 
 _   (PutValueTag(s, i_type));
 
-    if (IsRefType(i_type)) {
+    만약 (IsRefType(i_type)) {
         void* reference;
         memcpy(&reference, i_where, sizeof(reference));
 _       (PutValueBody(s, i_type, (u64)(uintptr_t)reference));
-    } else if (BaseTypeOf(i_type) == c_m3Type_v128) {
+    } 아니면 만약 (BaseTypeOf(i_type) == c_m3Type_v128) {
         // a v128 is a vector of bytes, and has no byte order of its own
         u8 bytes[16];
         memcpy(bytes, i_where, sizeof(bytes));
 _       (Put(s, bytes, sizeof(bytes)));
-    } else if (Is64BitType(i_type)) {
+    } 아니면 만약 (Is64BitType(i_type)) {
         u64 bits;
         memcpy(&bits, i_where, sizeof(bits));
 _       (PutValueBody(s, i_type, bits));
-    } else {
+    } 아니면 {
         u32 narrow;
         memcpy(&narrow, i_where, sizeof(narrow));
 _       (PutValueBody(s, i_type, narrow));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1049,18 +1049,18 @@ M3Result PutMemoryChunks (M3SnapshotSave* s, const u8* i_bytes, size_t i_size)
     M3Result result = m3Err_none;
     size_t   cursor = 0;
 
-    while (cursor < i_size) {
+    동안 (cursor < i_size) {
         u8     byte = i_bytes[cursor];
         size_t run  = 1;
 
-        while (cursor + run < i_size and i_bytes[cursor + run] == byte) {
+        동안 (cursor + run < i_size and i_bytes[cursor + run] == byte) {
             run++;
         }
 
-        if ((byte == 0x00 or byte == 0xFF) and run >= d_m3SnapshotRunThreshold) {
+        만약 ((byte == 0x00 or byte == 0xFF) and run >= d_m3SnapshotRunThreshold) {
             // the memory is zeroed before it is filled in, so a run of zeros
             // is written as nothing at all
-            if (byte == 0xFF) {
+            만약 (byte == 0xFF) {
 _               (PutU8(s, d_m3ChunkFillFF));
 _               (PutLEB_u32(s, (u32)cursor));
 _               (PutLEB_u32(s, (u32)run));
@@ -1072,15 +1072,15 @@ _               (PutLEB_u32(s, (u32)run));
 
         size_t rawStart = cursor;
 
-        while (cursor < i_size) {
+        동안 (cursor < i_size) {
             u8     b      = i_bytes[cursor];
             size_t length = 1;
 
-            while (cursor + length < i_size and i_bytes[cursor + length] == b) {
+            동안 (cursor + length < i_size and i_bytes[cursor + length] == b) {
                 length++;
             }
 
-            if ((b == 0x00 or b == 0xFF) and length >= d_m3SnapshotRunThreshold) {
+            만약 ((b == 0x00 or b == 0xFF) and length >= d_m3SnapshotRunThreshold) {
                 break;
             }
 
@@ -1096,7 +1096,7 @@ _       (Put(s, i_bytes + rawStart, cursor - rawStart));
 _   (PutU8(s, d_m3ChunkEnd));
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // Two imports can name the same memory or table, so one can stand at several
@@ -1106,20 +1106,20 @@ static
 u32 Memory_FirstIndex (IM3Module module, u32 index)
 {
     u32 j = 0;
-    while (module->memories[j] != module->memories[index]) {
+    동안 (module->memories[j] != module->memories[index]) {
         ++j;
     }
-    return j;
+    반환 j;
 }
 
 static
 u32 Table_FirstIndex (IM3Module module, u32 index)
 {
     u32 j = 0;
-    while (module->tables[j] != module->tables[index]) {
+    동안 (module->tables[j] != module->tables[index]) {
         ++j;
     }
-    return j;
+    반환 j;
 }
 
 static
@@ -1130,7 +1130,7 @@ M3Result SaveMemories (M3SnapshotSave* s)
 
 _   (PutLEB_u32(s, module->numMemories));
 
-    for (u32 m = 0; m < module->numMemories; ++m) {
+    위해 (u32 m = 0; m < module->numMemories; ++m) {
         IM3Memory memory   = module->memories[m];
         u32       first    = Memory_FirstIndex(module, m);
         bool      hasData  = memory and memory->mallocated;
@@ -1141,7 +1141,7 @@ _   (PutLEB_u32(s, module->numMemories));
 _       (PutLEB_u32(s, m));
 _       (PutLEB_u32(s, first));
 
-        if (first != m) {
+        만약 (first != m) {
             continue;
         }
 
@@ -1157,7 +1157,7 @@ _       (PutLEB_u32(s, first));
 
         // a page size is a power of two, written the way custom page sizes
         // writes one: as that power
-        while ((1u << pageBits) < pageSize) {
+        동안 ((1u << pageBits) < pageSize) {
             ++pageBits;
         }
 
@@ -1166,19 +1166,19 @@ _       (PutLEB_u32(s, memory ? (u32)memory->numPages : 0));
 
         // linear memory is little endian whatever the host is, and nothing in
         // it is a reference, so the discovery pass has no reason to read it
-        if (not s->writing) {
+        만약 (not s->writing) {
             continue;
         }
 
-        if (hasData) {
+        만약 (hasData) {
 _           (PutMemoryChunks(s, m3MemData(memory->mallocated), (size_t)bytes));
-        } else {
+        } 아니면 {
 _           (PutU8(s, d_m3ChunkEnd));
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1189,7 +1189,7 @@ M3Result SaveGlobals (M3SnapshotSave* s)
 
 _   (PutLEB_u32(s, module->numGlobals));
 
-    for (u32 g = 0; g < module->numGlobals; ++g) {
+    위해 (u32 g = 0; g < module->numGlobals; ++g) {
         M3Global* global = &module->globals[g];
         M3Global* cell   = global->resolved ? global->resolved : global;
 
@@ -1198,7 +1198,7 @@ _       (PutValue(s, global->type, &cell->i64Value));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1209,7 +1209,7 @@ M3Result SaveTables (M3SnapshotSave* s)
 
 _   (PutLEB_u32(s, module->numTables));
 
-    for (u32 t = 0; t < module->numTables; ++t) {
+    위해 (u32 t = 0; t < module->numTables; ++t) {
         IM3Table table = module->tables[t];
         u32      first = Table_FirstIndex(module, t);
 
@@ -1218,20 +1218,20 @@ _       (PutLEB_u32(s, first));
 
         // the first record holds the elements, and the discovery pass has
         // followed their references there
-        if (first != t) {
+        만약 (first != t) {
             continue;
         }
 
 _       (PutU8(s, M3TypeToValType(table->type)));
 _       (PutLEB_u32(s, table->size));
 
-        for (u32 e = 0; e < table->size; ++e) {
+        위해 (u32 e = 0; e < table->size; ++e) {
 _           (PutRefValue(s, BaseTypeOf(table->type), table->elements[e]));
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1242,21 +1242,21 @@ M3Result SaveSegments (M3SnapshotSave* s)
 
 _   (PutLEB_u32(s, module->numDataSegments));
 
-    for (u32 i = 0; i < module->numDataSegments; ++i) {
+    위해 (u32 i = 0; i < module->numDataSegments; ++i) {
 _       (PutU8(s, module->dataSegments[i].dropped));
     }
 
 _   (PutLEB_u32(s, module->numElementSegments));
 
-    for (u32 i = 0; i < module->numElementSegments; ++i) {
+    위해 (u32 i = 0; i < module->numElementSegments; ++i) {
 _       (PutU8(s, module->elementSegments[i].dropped));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
 
 static
 M3Result SaveExceptions (M3SnapshotSave* s)
@@ -1265,7 +1265,7 @@ M3Result SaveExceptions (M3SnapshotSave* s)
 
 _   (PutLEB_u32(s, s->exceptions.count));
 
-    for (u32 i = 0; i < s->exceptions.count; ++i) {
+    위해 (u32 i = 0; i < s->exceptions.count; ++i) {
         M3Exception* exn  = (M3Exception*)s->exceptions.items[i];
         IM3FuncType  type = exn->tag->type;
 
@@ -1274,14 +1274,14 @@ _   (PutLEB_u32(s, s->exceptions.count));
 _       (PutLEB_u32(s, i));
 _       (PutLEB_u32(s, exn->numArgs));
 
-        for (u32 a = 0; a < exn->numArgs; ++a) {
+        위해 (u32 a = 0; a < exn->numArgs; ++a) {
             m3type_t argType = GetFuncTypeParamType(type, (u16)a);
 _           (PutValueBits(s, argType, exn->args[a]));
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 #  endif
@@ -1308,14 +1308,14 @@ const M3SafePoint* FindFrameSafePoint (IM3Module i_module, IM3Function* io_funct
 {
     const M3SafePoint* point = *io_function ? FindSafePoint(*io_function, i_pc, i_kind) : NULL;
 
-    for (u32 i = 0; not point and i < i_module->numFunctions; ++i) {
+    위해 (u32 i = 0; not point and i < i_module->numFunctions; ++i) {
         point = FindSafePoint(&i_module->functions[i], i_pc, i_kind);
-        if (point) {
+        만약 (point) {
             *io_function = &i_module->functions[i];
         }
     }
 
-    return point;
+    반환 point;
 }
 
 // The activation that starts at frame i_first, walking inward: the loops, try
@@ -1338,21 +1338,21 @@ M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function
     _throwif("a suspended call does not say what it called", not i_function);
     _throwif("a function in the snapshot was compiled before the runtime was made suspendable", not i_function->snapshotMap);
 
-    for (; i >= 0; --i) {
+    위해 (; i >= 0; --i) {
         const M3Frame* frame = &i_cont->frames[i];
 
         _throwif("a suspended frame runs against another module's memory", frame->memory != Module_Memory0(i_module));
         _throwif("a suspended frame is not where its function's frame is", frame->sp != i_sp);
 
-        if (frame->kind == frame_call) {
+        만약 (frame->kind == frame_call) {
             o_act->pc           = frame->pc;
             o_act->kind         = safepoint_call;
             o_act->registers.r0 = (m3reg_t*)&frame->call.r0;
-#  if d_m3HasFloat
+#  만약 d_m3HasFloat
             o_act->registers.fp0 = (f64*)&frame->call.fp0;
 #  endif
             break;
-        } else if (frame->kind == frame_resume) {
+        } 아니면 만약 (frame->kind == frame_resume) {
             _throwif("a suspended resume is not the innermost frame", i != 0);
 
             o_act->pc     = frame->pc;
@@ -1362,13 +1362,13 @@ M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function
         }
     }
 
-    if (i < 0) {
+    만약 (i < 0) {
         _throwif("a suspended frame is not where its function's frame is", i_cont->sp != i_sp);
 
         o_act->pc           = i_cont->pc;
         o_act->kind         = i_cont->suspendPoint;
         o_act->registers.r0 = &i_cont->r0;
-#  if d_m3HasFloat
+#  만약 d_m3HasFloat
         o_act->registers.fp0 = &i_cont->fp0;
 #  endif
     }
@@ -1380,8 +1380,8 @@ M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function
     _throwif("a function in the snapshot was compiled before the runtime was made suspendable",
              not o_act->function->snapshotMap);
 
-#  if d_m3EntryKeepsFrame
-    for (i32 k = i_first; k > o_act->lastFrame; --k) {
+#  만약 d_m3EntryKeepsFrame
+    위해 (i32 k = i_first; k > o_act->lastFrame; --k) {
         const M3Frame* frame = &i_cont->frames[k];
         _throwif("a suspended frame is not the function it is entered with",
                  frame->kind == frame_entry and frame->entry.function != o_act->function);
@@ -1389,7 +1389,7 @@ M3Result NextActivation (IM3Module i_module, IM3Continuation i_cont, IM3Function
 #  endif
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // A function's frame: which function, the safepoint it waits at, and every
@@ -1410,7 +1410,7 @@ _   (PutLEB_u32(s, functionIndex));
 _   (PutU8(s, point->kind));
 _   (PutLEB_u32(s, point->wasmOffset));
 
-    if (point->kind == safepoint_op) {
+    만약 (point->kind == safepoint_op) {
 _       (PutLEB_u32(s, map->blocks[point->aux].wasmOffset));
     }
 
@@ -1418,7 +1418,7 @@ _       (PutLEB_u32(s, map->blocks[point->aux].wasmOffset));
 
 _   (PutLEB_u32(s, numValues));
 
-    for (u32 v = 0; v < numValues; ++v) {
+    위해 (u32 v = 0; v < numValues; ++v) {
         const M3SlotValue* value = FrameValue(map, point, v);
         u8*                where;
         u64                word;
@@ -1427,7 +1427,7 @@ _   (PutLEB_u32(s, numValues));
 _       (LocateValue(i_base, i_numSlots, i_act->sp, value, &where));
 
         // a v128 has no byte order of its own, and no bits path can carry it
-        if (BaseTypeOf(value->type) == c_m3Type_v128) {
+        만약 (BaseTypeOf(value->type) == c_m3Type_v128) {
 _           (PutValueTag(s, value->type));
 _           (Put(s, where, 16));
             continue;
@@ -1438,12 +1438,12 @@ _       (ReadValue(where, &i_act->registers, value, &word, &reference));
 _       (PutValueBits(s, value->type, IsRefType(value->type) ? (u64)(uintptr_t)reference : word));
     }
 
-    if (point->kind == safepoint_resume) {
+    만약 (point->kind == safepoint_resume) {
 _       (PutRefValue(s, c_m3Type_contref, i_act->resume->resume.cont));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // A suspended continuation, as the functions it is in the middle of, outermost
@@ -1474,19 +1474,19 @@ _   (ContinuationStack(s->runtime, i_cont, &base, &numSlots));
 
     sp = base;
 
-    while (true) {
+    동안 (true) {
         M3Activation* act = &acts[numActs];
 
 _       (NextActivation(s->module, i_cont, function, sp, first, act));
 
-        if (act->kind != safepoint_call) {
+        만약 (act->kind != safepoint_call) {
             numActs++;
             break;
         }
 
         _throwif("a suspended continuation stops at a call", act->lastFrame < 0);
 
-        if (not (act->point->flags & d_m3SafePointTailCall)) {
+        만약 (not (act->point->flags & d_m3SafePointTailCall)) {
             numActs++;
         }
 
@@ -1497,13 +1497,13 @@ _       (NextActivation(s->module, i_cont, function, sp, first, act));
 
 _   (PutLEB_u32(s, numActs));
 
-    for (u32 a = 0; a < numActs; ++a) {
+    위해 (u32 a = 0; a < numActs; ++a) {
 _       (SaveActivation(s, base, numSlots, &acts[a]));
     }
 
 _catch:
     m3_Free(acts);
-    return result;
+    반환 result;
 }
 
 static
@@ -1515,11 +1515,11 @@ M3Result SaveContinuation (M3SnapshotSave* s, u32 i_id, IM3Continuation i_cont)
     u8        state     = snapshot_contFinished;
     u32       typeIndex = isRoot ? d_m3SnapshotNone : FuncTypeIndex(module, i_cont->type);
 
-    if (i_cont->state == cont_allocated) {
+    만약 (i_cont->state == cont_allocated) {
         state = snapshot_contAllocated;
-    } else if (i_cont->state == cont_suspended) {
+    } 아니면 만약 (i_cont->state == cont_suspended) {
         state = snapshot_contSuspended;
-    } else if (i_cont->state == cont_running) {
+    } 아니면 만약 (i_cont->state == cont_running) {
         _throwif("a continuation is running", not s->postmortem);
     }
 
@@ -1533,18 +1533,18 @@ _   (PutU8(s, state));
 _   (PutU8(s, isRoot));
 _   (PutLEB_u32(s, typeIndex));
 _   (PutLEB_u32(s, FunctionIndex(module, i_cont->entryFunction)));
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
 _   (PutRefValue(s, c_m3Type_exnref, i_cont->resumeThrow));
-#  else
+#  아니면
 _   (PutRefValue(s, c_m3Type_exnref, NULL));
 #  endif
 
     // a postmortem has nothing to resume, so it does not say how
-    if (s->postmortem) {
+    만약 (s->postmortem) {
         goto _catch;
     }
 
-    if (state == snapshot_contAllocated) {
+    만약 (state == snapshot_contAllocated) {
         IM3FuncType inner   = i_cont->entryFunction ? i_cont->entryFunction->funcType : NULL;
         u16         numRets = inner ? GetFuncTypeNumResults(inner) : 0;
 
@@ -1552,20 +1552,20 @@ _   (PutRefValue(s, c_m3Type_exnref, NULL));
 
 _       (PutLEB_u32(s, i_cont->boundArgsCount));
 
-        for (u32 i = 0; i < i_cont->boundArgsCount; ++i) {
+        위해 (u32 i = 0; i < i_cont->boundArgsCount; ++i) {
             m3type_t type = GetFuncTypeParamType(inner, (u16)i);
 
 _           (PutValue(s, type, i_cont->valStack + (numRets + i) * c_ioSlotCount));
         }
-    } else if (state == snapshot_contSuspended) {
+    } 아니면 만약 (state == snapshot_contSuspended) {
 _       (PutLEB_u32(s, i_cont->boundArgsCount));
 _       (SaveSuspendedBody(s, i_cont));
-    } else {
+    } 아니면 {
 _       (PutLEB_u32(s, 0));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1575,12 +1575,12 @@ M3Result SaveContinuations (M3SnapshotSave* s)
 
 _   (PutLEB_u32(s, s->continuations.count));
 
-    for (u32 i = 0; i < s->continuations.count; ++i) {
+    위해 (u32 i = 0; i < s->continuations.count; ++i) {
 _       (SaveContinuation(s, i, (IM3Continuation)s->continuations.items[i]));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The embedder's own state: the whole section, whose length is where it ends.
@@ -1593,33 +1593,33 @@ M3Result SaveHostState (M3SnapshotSave* s)
     const M3SnapshotHooks* hooks  = &s->runtime->snapshotHooks;
     M3BufferWriter         bw     = { NULL, 0, 0 };
 
-    if (s->writing and hooks->saveHostState and not s->postmortem) {
+    만약 (s->writing and hooks->saveHostState and not s->postmortem) {
 _       (hooks->saveHostState(hooks->userdata, BufferWriter_Write, &bw));
     }
 
-    if (bw.size > 0) {
+    만약 (bw.size > 0) {
 _       (Put(s, bw.buffer, bw.size));
     }
 
 _catch:
     m3_Free(bw.buffer);
 
-    return result;
+    반환 result;
 }
 
 static
 void SnapshotResourceTotals (IM3Module module, u64* memoryBytes, u64* tableElements)
 {
     *memoryBytes = *tableElements = 0;
-    for (u32 i = 0; i < module->numMemories; ++i) {
+    위해 (u32 i = 0; i < module->numMemories; ++i) {
         IM3Memory memory = module->memories[i];
-        if (Memory_FirstIndex(module, i) == i and memory) {
+        만약 (Memory_FirstIndex(module, i) == i and memory) {
             *memoryBytes += memory->numPages * (u64)Memory_PageSize(memory);
         }
     }
-    for (u32 i = 0; i < module->numTables; ++i) {
+    위해 (u32 i = 0; i < module->numTables; ++i) {
         IM3Table table = module->tables[i];
-        if (Table_FirstIndex(module, i) == i and table) {
+        만약 (Table_FirstIndex(module, i) == i and table) {
             *tableElements += table->size;
         }
     }
@@ -1632,9 +1632,9 @@ M3Result SaveMeta (M3SnapshotSave* s)
     u64      hash   = 0;
     u64      memoryBytes, tableElements;
     u32      activeStacks = 0;
-    for (u32 i = 0; i < s->continuations.count; ++i) {
+    위해 (u32 i = 0; i < s->continuations.count; ++i) {
         IM3Continuation cont = (IM3Continuation)s->continuations.items[i];
-        if (cont != s->runtime->rootContinuation and
+        만약 (cont != s->runtime->rootContinuation and
             (cont->state == cont_allocated or cont->state == cont_suspended)) {
             activeStacks++;
         }
@@ -1652,10 +1652,10 @@ _   (PutLEB_u64(s, memoryBytes));
 _   (PutLEB_u64(s, tableElements));
 _   (PutLEB_u32(s, activeStacks));
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
     // each exception's tag before any of their payloads, so a reader can make
     // all of them before resolving a reference to one
-    for (u32 i = 0; i < s->exceptions.count; ++i) {
+    위해 (u32 i = 0; i < s->exceptions.count; ++i) {
         M3Exception* exception = (M3Exception*)s->exceptions.items[i];
         u32          tagIndex  = TagIndex(s->module, exception->tag);
 
@@ -1666,7 +1666,7 @@ _       (PutLEB_u32(s, tagIndex));
 #  endif
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The discovery pass. Reaching a continuation or an exception can find more of
@@ -1684,27 +1684,27 @@ _   (SaveGlobals(s));
 _   (SaveTables(s));
 _   (SaveSegments(s));
 
-    while (doneContinuations < s->continuations.count or doneExceptions < s->exceptions.count) {
-#  if d_m3HasExceptionHandling
-        while (doneExceptions < s->exceptions.count) {
+    동안 (doneContinuations < s->continuations.count or doneExceptions < s->exceptions.count) {
+#  만약 d_m3HasExceptionHandling
+        동안 (doneExceptions < s->exceptions.count) {
             M3Exception* exception = (M3Exception*)s->exceptions.items[doneExceptions++];
             IM3FuncType  type      = exception->tag->type;
 
             _throwif(m3Err_wasmMalformed, exception->numArgs != GetFuncTypeNumParams(type));
 
-            for (u32 a = 0; a < exception->numArgs; ++a) {
+            위해 (u32 a = 0; a < exception->numArgs; ++a) {
 _               (PutValueBits(s, GetFuncTypeParamType(type, (u16)a), exception->args[a]));
             }
         }
 #  endif
-        while (doneContinuations < s->continuations.count and doneExceptions == s->exceptions.count) {
+        동안 (doneContinuations < s->continuations.count and doneExceptions == s->exceptions.count) {
             u32 id = doneContinuations++;
 _           (SaveContinuation(s, id, (IM3Continuation)s->continuations.items[id]));
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1712,11 +1712,11 @@ M3Result SaveSections (M3SnapshotSave* s)
 {
     M3Result result = m3Err_none;
 
-    if (not s->writing) {
-        return DiscoverReferences(s);
+    만약 (not s->writing) {
+        반환 DiscoverReferences(s);
     }
 
-    if (not s->embedded) {
+    만약 (not s->embedded) {
 _       (Put(s, c_snapshotMagic, sizeof(c_snapshotMagic)));
 _       (PutLE32(s, c_snapshotVersion));
     }
@@ -1725,26 +1725,26 @@ _       (PutLE32(s, c_snapshotVersion));
     // no Memory section, rather than one that lists none
 _   (SaveSection(s, d_m3SnapshotSection_Meta, SaveMeta));
 
-    if (s->module->numMemories) {
+    만약 (s->module->numMemories) {
 _       (SaveSection(s, d_m3SnapshotSection_Memory, SaveMemories));
     }
-    if (s->module->numTables) {
+    만약 (s->module->numTables) {
 _       (SaveSection(s, d_m3SnapshotSection_Table, SaveTables));
     }
-    if (s->module->numGlobals) {
+    만약 (s->module->numGlobals) {
 _       (SaveSection(s, d_m3SnapshotSection_Global, SaveGlobals));
     }
-    if (s->module->numDataSegments or s->module->numElementSegments) {
+    만약 (s->module->numDataSegments or s->module->numElementSegments) {
 _       (SaveSection(s, d_m3SnapshotSection_Segment, SaveSegments));
     }
 
-#  if d_m3HasExceptionHandling
-    if (s->exceptions.count) {
+#  만약 d_m3HasExceptionHandling
+    만약 (s->exceptions.count) {
 _       (SaveSection(s, d_m3SnapshotSection_Exception, SaveExceptions));
     }
 #  endif
 
-    if (s->continuations.count) {
+    만약 (s->continuations.count) {
 _       (SaveSection(s, d_m3SnapshotSection_Continuation, SaveContinuations));
     }
 
@@ -1752,7 +1752,7 @@ _       (SaveSection(s, d_m3SnapshotSection_Continuation, SaveContinuations));
 _   (SaveSection(s, d_m3SnapshotSection_HostState, SaveHostState));
 
 _catch:
-    return result;
+    반환 result;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -1787,7 +1787,7 @@ typedef struct M3SnapshotLoad {
     u32                    loadedStacks;
     M3SnapshotSuspendSite* suspendSites;
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
     M3Exception** exceptions;
 #  endif
     u32 numExceptions;
@@ -1805,75 +1805,75 @@ typedef struct M3SnapshotLoad {
 static
 M3Result Get (M3SnapshotLoad* l, void* o_data, size_t i_size)
 {
-    if (not l->inSection) {
-        return l->reader(o_data, i_size, l->userdata);
+    만약 (not l->inSection) {
+        반환 l->reader(o_data, i_size, l->userdata);
     }
-    if (i_size > (size_t)(l->end - l->pos)) {
-        return m3Err_wasmUnderrun;
+    만약 (i_size > (size_t)(l->end - l->pos)) {
+        반환 m3Err_wasmUnderrun;
     }
-    if (i_size) {
+    만약 (i_size) {
         memcpy(o_data, l->pos, i_size);
         l->pos += i_size;
     }
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 static
 M3Result GetU8 (M3SnapshotLoad* l, u8* o_value)
 {
-    return Get(l, o_value, sizeof(*o_value));
+    반환 Get(l, o_value, sizeof(*o_value));
 }
 
 static
 M3Result GetBool (M3SnapshotLoad* l, u8* o_value)
 {
     M3Result result = GetU8(l, o_value);
-    return result ? result : (*o_value <= 1 ? m3Err_none : m3Err_wasmMalformed);
+    반환 result ? result : (*o_value <= 1 ? m3Err_none : m3Err_wasmMalformed);
 }
 
 static
 M3Result GetLEB_u32 (M3SnapshotLoad* l, u32* o_value)
 {
-    if (l->inSection) {
-        return ReadLEB_u32(o_value, &l->pos, l->end);
+    만약 (l->inSection) {
+        반환 ReadLEB_u32(o_value, &l->pos, l->end);
     }
 
     // Only the section envelope is streamed. Collect its length and let the
     // same decoder used for Wasm modules check its width and terminal bits.
     u8 encoded[5];
-    for (u32 i = 0; i < sizeof(encoded); ++i) {
+    위해 (u32 i = 0; i < sizeof(encoded); ++i) {
         M3Result result = GetU8(l, &encoded[i]);
-        if (result) {
-            return result;
+        만약 (result) {
+            반환 result;
         }
-        if (not (encoded[i] & 0x80)) {
+        만약 (not (encoded[i] & 0x80)) {
             bytes_t pos = encoded;
-            return ReadLEB_u32(o_value, &pos, encoded + i + 1);
+            반환 ReadLEB_u32(o_value, &pos, encoded + i + 1);
         }
     }
-    return m3Err_lebOverflow;
+    반환 m3Err_lebOverflow;
 }
 
 static
 M3Result GetLEB_u64 (M3SnapshotLoad* l, u64* o_value)
 {
-    return ReadLebUnsigned(o_value, 64, &l->pos, l->end);
+    반환 ReadLebUnsigned(o_value, 64, &l->pos, l->end);
 }
 
 static
 M3Result GetLEB_i64 (M3SnapshotLoad* l, i64* o_value)
 {
-    return ReadLEB_i64(o_value, &l->pos, l->end);
+    반환 ReadLEB_i64(o_value, &l->pos, l->end);
 }
 
 static
 M3Result SkipBytes (M3SnapshotLoad* l, size_t i_size)
 {
-    if (i_size > (size_t)(l->end - l->pos)) {
-        return m3Err_wasmUnderrun;
+    만약 (i_size > (size_t)(l->end - l->pos)) {
+        반환 m3Err_wasmUnderrun;
     }
     l->pos += i_size;
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 
@@ -1887,55 +1887,55 @@ M3Result GetRefValue (M3SnapshotLoad* l, m3type_t i_type, void** o_reference)
     *o_reference = NULL;
 
 _   (GetU8(l, &kind));
-    if (kind == 0x00) {
-        return (IsNullableRef(i_type) or l->allowUnfilledRef) ? m3Err_none : "null in a non-nullable snapshot reference";
+    만약 (kind == 0x00) {
+        반환 (IsNullableRef(i_type) or l->allowUnfilledRef) ? m3Err_none : "null in a non-nullable snapshot reference";
     }
 
 _   (GetLEB_u64(l, &id));
 
-    if (kind == 0x01) {
+    만약 (kind == 0x01) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_funcref);
         _throwif(m3Err_wasmMalformed, id >= l->module->numFunctions);
-#  if d_m3HasTypedRefs
+#  만약 d_m3HasTypedRefs
         _throwif("a snapshot function reference has the wrong type", not IsSubTypeOf(RefTypeOfFuncType(l->module->functions[id].funcType, true), i_type));
 #  endif
         *o_reference = &l->module->functions[id];
-    } else if (kind == 0x02) {
+    } 아니면 만약 (kind == 0x02) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_externref);
         const M3SnapshotHooks* hooks = &l->runtime->snapshotHooks;
         _throwif("the snapshot holds an externref, and nothing here can bind one", not hooks->bindExternRef);
-        if (not l->checking) {
+        만약 (not l->checking) {
 _           (hooks->bindExternRef(hooks->userdata, id, o_reference));
             _throwif(m3Err_wasmMalformed, not *o_reference and not IsNullableRef(i_type));
         }
     }
-#  if d_m3HasExceptionHandling
-    else if (kind == 0x03) {
+#  만약 d_m3HasExceptionHandling
+    아니면 만약 (kind == 0x03) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_exnref);
         _throwif(m3Err_wasmMalformed, id >= l->numExceptions);
         *o_reference = l->exceptions[id];
     }
 #  endif
-    else if (kind == 0x04) {
+    아니면 만약 (kind == 0x04) {
         _throwif(m3Err_wasmMalformed, BaseTypeOf(i_type) != c_m3Type_contref);
         _throwif(m3Err_wasmMalformed, id == 0 or id >= l->numContinuations);
         *o_reference = l->continuations[id];
-#  if d_m3HasTypedRefs
+#  만약 d_m3HasTypedRefs
         // The record may appear later, even in another section. Check its
         // concrete heap type once all continuation records have been read.
-        if (not l->checking and HeapTypeOf(i_type) != d_m3Type_heapAbstract) {
+        만약 (not l->checking and HeapTypeOf(i_type) != d_m3Type_heapAbstract) {
             m3type_t expected = i_type | d_m3Type_refNonNull;
             _throwif(m3Err_wasmMalformed, l->suspendSites[id].expectedType and
                                             l->suspendSites[id].expectedType != expected);
             l->suspendSites[id].expectedType = expected;
         }
 #  endif
-    } else {
+    } 아니면 {
         _throw(m3Err_wasmMalformed);
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -1946,11 +1946,11 @@ M3Result GetLE32 (M3SnapshotLoad* l, u32* o_value)
 
     *o_value = 0;
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
+    위해 (u32 i = 0; i < sizeof(bytes); ++i) {
         *o_value |= (u32)bytes[i] << (8 * i);
     }
 
-    return result;
+    반환 result;
 }
 
 static
@@ -1961,11 +1961,11 @@ M3Result GetLE64 (M3SnapshotLoad* l, u64* o_value)
 
     *o_value = 0;
 
-    for (u32 i = 0; i < sizeof(bytes); ++i) {
+    위해 (u32 i = 0; i < sizeof(bytes); ++i) {
         *o_value |= (u64)bytes[i] << (8 * i);
     }
 
-    return result;
+    반환 result;
 }
 
 // Reads the tag of a value and says what it holds, refusing one the file's
@@ -1983,12 +1983,12 @@ _   (GetU8(l, &valtype));
     _throwif(m3Err_wasmMalformed, *o_type == c_m3Type_none);
     _throwif(m3Err_wasmMalformed,
              i_expectedType != c_m3Type_none and BaseTypeOf(*o_type) != BaseTypeOf(i_expectedType));
-    if (i_expectedType != c_m3Type_none) {
+    만약 (i_expectedType != c_m3Type_none) {
         *o_type = i_expectedType;
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The mirror of PutValueBody: narrow types come back in the low bits
@@ -1999,30 +1999,30 @@ M3Result GetValueBody (M3SnapshotLoad* l, m3type_t i_type, u64* o_bits)
 
     *o_bits = 0;
 
-    if (IsRefType(i_type)) {
+    만약 (IsRefType(i_type)) {
         void* reference = NULL;
 _       (GetRefValue(l, i_type, &reference));
         *o_bits = (u64)(uintptr_t)reference;
-    } else if (BaseTypeOf(i_type) == c_m3Type_i32) {
+    } 아니면 만약 (BaseTypeOf(i_type) == c_m3Type_i32) {
         i32 value = 0;
 _       (ReadLEB_i32(&value, &l->pos, l->end));
         *o_bits = (u32)value;
-    } else if (BaseTypeOf(i_type) == c_m3Type_i64) {
+    } 아니면 만약 (BaseTypeOf(i_type) == c_m3Type_i64) {
         i64 value = 0;
 _       (GetLEB_i64(l, &value));
         *o_bits = (u64)value;
-    } else if (BaseTypeOf(i_type) == c_m3Type_f32) {
+    } 아니면 만약 (BaseTypeOf(i_type) == c_m3Type_f32) {
         u32 bits = 0;
 _       (GetLE32(l, &bits));
         *o_bits = bits;
-    } else if (BaseTypeOf(i_type) == c_m3Type_f64) {
+    } 아니면 만약 (BaseTypeOf(i_type) == c_m3Type_f64) {
 _       (GetLE64(l, o_bits));
-    } else {
+    } 아니면 {
         _throw(m3Err_wasmMalformed);
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2035,7 +2035,7 @@ _   (GetValueTag(l, i_expectedType, &type));
 _   (GetValueBody(l, type, o_bits));
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2044,34 +2044,34 @@ M3Result GetValue (M3SnapshotLoad* l, m3type_t i_expectedType, void* o_where)
     M3Result result = m3Err_none;
     m3type_t type;
     u8       scratch[16];
-    if (l->checking) {
+    만약 (l->checking) {
         o_where = scratch;
     }
 
 _   (GetValueTag(l, i_expectedType, &type));
 
-    if (IsRefType(type)) {
+    만약 (IsRefType(type)) {
         void* reference = NULL;
         u64   bits      = 0;
 _       (GetValueBody(l, type, &bits));
         reference = (void*)(uintptr_t)bits;
         memcpy(o_where, &reference, sizeof(reference));
-    } else if (BaseTypeOf(type) == c_m3Type_v128) {
+    } 아니면 만약 (BaseTypeOf(type) == c_m3Type_v128) {
 _       (Get(l, o_where, 16));
-    } else {
+    } 아니면 {
         u64 bits = 0;
 _       (GetValueBody(l, type, &bits));
 
-        if (Is64BitType(type)) {
+        만약 (Is64BitType(type)) {
             memcpy(o_where, &bits, sizeof(bits));
-        } else {
+        } 아니면 {
             u32 narrow = (u32)bits;
             memcpy(o_where, &narrow, sizeof(narrow));
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2086,7 +2086,7 @@ _   (GetLEB_u32(l, &index));
     *o_function = &l->module->functions[index];
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2094,13 +2094,13 @@ M3Result LoadMemoryChunks (M3SnapshotLoad* l, u8* o_bytes, size_t i_size)
 {
     M3Result result = m3Err_none;
 
-    for (;;) {
+    위해 (;;) {
         u8  chunkType = 0;
         u32 offset = 0, length = 0;
 
 _       (GetU8(l, &chunkType));
 
-        if (chunkType == d_m3ChunkEnd) {
+        만약 (chunkType == d_m3ChunkEnd) {
             break;
         }
 
@@ -2109,23 +2109,23 @@ _       (GetLEB_u32(l, &length));
 
         _throwif(m3Err_wasmMalformed, (size_t)offset > i_size or length > i_size - (size_t)offset);
 
-        if (chunkType == d_m3ChunkRaw) {
-            if (l->checking or length == 0) {
+        만약 (chunkType == d_m3ChunkRaw) {
+            만약 (l->checking or length == 0) {
 _               (SkipBytes(l, length));
-            } else {
+            } 아니면 {
 _               (Get(l, o_bytes + offset, length));
             }
-        } else if (chunkType == d_m3ChunkFillFF) {
-            if (not l->checking and length) {
+        } 아니면 만약 (chunkType == d_m3ChunkFillFF) {
+            만약 (not l->checking and length) {
                 memset(o_bytes + offset, 0xFF, length);
             }
-        } else {
+        } 아니면 {
             _throw(m3Err_wasmMalformed);
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2140,7 +2140,7 @@ _   (GetLEB_u32(l, &numMemories));
     // a section is present only when it has something to say
     _throwif(m3Err_wasmMalformed, numMemories == 0 or numMemories != module->numMemories);
 
-    for (u32 m = 0; m < numMemories; ++m) {
+    위해 (u32 m = 0; m < numMemories; ++m) {
         u32       memIndex = 0, firstIndex = 0, pageBits = 0, numPages = 0;
         IM3Memory memory;
 
@@ -2154,7 +2154,7 @@ _       (GetLEB_u32(l, &firstIndex));
         // module, so the instance restored into has to share the same ones
         _throwif("the snapshot shares memories between imports differently",
                  firstIndex != Memory_FirstIndex(module, m));
-        if (firstIndex != m) {
+        만약 (firstIndex != m) {
             continue;
         }
 
@@ -2167,7 +2167,7 @@ _       (GetLEB_u32(l, &numPages));
         size_t bytes = 0;
         u8*    data  = NULL;
 
-        if (memory) {
+        만약 (memory) {
             _throwif(m3Err_wasmMalformed, pageBits >= 32 or (1u << pageBits) != Memory_PageSize(memory));
             _throwif(m3Err_wasmMalformed, numPages < memory->numPages or numPages > memory->maxPages);
             _throwif(m3Err_wasmMalformed, numPages > SIZE_MAX / Memory_PageSize(memory));
@@ -2176,8 +2176,8 @@ _       (GetLEB_u32(l, &numPages));
             _throwif("shrunken memory cannot be restored from a snapshot",
                      l->runtime->memoryLimit and bytes > (size_t)l->runtime->memoryLimit);
 
-            if (not l->checking) {
-                if (memory->numPages < numPages) {
+            만약 (not l->checking) {
+                만약 (memory->numPages < numPages) {
 _                   (ResizeMemory(l->runtime, memory, numPages));
                 }
                 _throwif("shrunken memory cannot be restored from a snapshot",
@@ -2186,16 +2186,16 @@ _                   (ResizeMemory(l->runtime, memory, numPages));
 
             l->loadedMemoryBytes += bytes;
 
-            if (bytes and memory->mallocated) {
+            만약 (bytes and memory->mallocated) {
                 data = m3MemData(memory->mallocated);
             }
-        } else {
+        } 아니면 {
             _throwif(m3Err_wasmMalformed, numPages != 0);
         }
 
         // every memory carries a chunk stream, an unbacked one an empty stream,
         // so a memory this runtime does not hold still has to be read past
-        if (data and not l->checking) {
+        만약 (data and not l->checking) {
             memset(data, 0, bytes);
         }
 
@@ -2204,7 +2204,7 @@ _       (LoadMemoryChunks(l, data, bytes));
     _throwif(m3Err_wasmMalformed, l->loadedMemoryBytes != l->requiredMemoryBytes);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2217,7 +2217,7 @@ M3Result LoadGlobals (M3SnapshotLoad* l)
 _   (GetLEB_u32(l, &numGlobals));
     _throwif(m3Err_wasmMalformed, numGlobals == 0 or numGlobals != module->numGlobals);
 
-    for (u32 g = 0; g < numGlobals; ++g) {
+    위해 (u32 g = 0; g < numGlobals; ++g) {
         u32       globalIndex = 0;
         M3Global* global;
         M3Global* cell;
@@ -2232,7 +2232,7 @@ _       (GetValue(l, global->type, &cell->i64Value));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2246,7 +2246,7 @@ M3Result LoadTables (M3SnapshotLoad* l)
 _   (GetLEB_u32(l, &numTables));
     _throwif(m3Err_wasmMalformed, numTables == 0 or numTables != module->numTables);
 
-    for (u32 t = 0; t < numTables; ++t) {
+    위해 (u32 t = 0; t < numTables; ++t) {
         u32      tableIndex = 0, firstIndex = 0, size = 0;
         u8       valtype = 0;
         IM3Table table;
@@ -2257,7 +2257,7 @@ _       (GetLEB_u32(l, &firstIndex));
         _throwif(m3Err_wasmMalformed, tableIndex != t);
         _throwif("the snapshot shares tables between imports differently",
                  firstIndex != Table_FirstIndex(module, t));
-        if (firstIndex != t) {
+        만약 (firstIndex != t) {
             continue;
         }
 
@@ -2274,7 +2274,7 @@ _       (GetLEB_u32(l, &size));
 
         l->loadedTableElements += size;
 
-        if (not l->checking and size != table->size) {
+        만약 (not l->checking and size != table->size) {
             void** elements;
 
             _throwif(m3Err_tableLimitExceeded, l->runtime->tableElementsLimit and
@@ -2287,10 +2287,10 @@ _       (GetLEB_u32(l, &size));
             table->size     = size;
         }
 
-        for (u32 e = 0; e < size; ++e) {
+        위해 (u32 e = 0; e < size; ++e) {
             void* reference = NULL;
 _           (GetRefValue(l, table->type, &reference));
-            if (not l->checking) {
+            만약 (not l->checking) {
                 table->elements[e] = reference;
             }
         }
@@ -2298,7 +2298,7 @@ _           (GetRefValue(l, table->type, &reference));
     _throwif(m3Err_wasmMalformed, l->loadedTableElements != l->requiredTableElements);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2312,10 +2312,10 @@ _   (GetLEB_u32(l, &count));
     _throwif(m3Err_wasmMalformed, count != module->numDataSegments);
     _throwif(m3Err_wasmMalformed, module->numDataSegments == 0 and module->numElementSegments == 0);
 
-    for (u32 i = 0; i < count; ++i) {
+    위해 (u32 i = 0; i < count; ++i) {
         u8 dropped = 0;
 _       (GetBool(l, &dropped));
-        if (not l->checking) {
+        만약 (not l->checking) {
             module->dataSegments[i].dropped = dropped;
         }
     }
@@ -2323,24 +2323,24 @@ _       (GetBool(l, &dropped));
 _   (GetLEB_u32(l, &count));
     _throwif(m3Err_wasmMalformed, count != module->numElementSegments);
 
-    for (u32 i = 0; i < count; ++i) {
+    위해 (u32 i = 0; i < count; ++i) {
         u8 dropped = 0;
 _       (GetBool(l, &dropped));
-        if (not l->checking) {
+        만약 (not l->checking) {
             module->elementSegments[i].dropped = dropped;
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // A frame for the continuation being put together, outermost first
 static
 M3Result AddFrame (M3SnapshotLoad* l, u32* io_numFrames, M3FrameKind i_kind, m3stack_t i_sp, M3Frame** o_frame)
 {
-    if (*io_numFrames >= d_m3ContinuationMaxFrames) {
-        return "the snapshot's frames do not fit this build's";
+    만약 (*io_numFrames >= d_m3ContinuationMaxFrames) {
+        반환 "the snapshot's frames do not fit this build's";
     }
 
     M3Frame* frame = &l->frames[(*io_numFrames)++];
@@ -2352,7 +2352,7 @@ M3Result AddFrame (M3SnapshotLoad* l, u32* io_numFrames, M3FrameKind i_kind, m3s
 
     *o_frame = frame;
 
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 // Compiled, and with a snapshot map: where a function's frame in a snapshot is
@@ -2362,14 +2362,14 @@ M3Result PrepareFunction (IM3Function i_function)
 {
     M3Result result = m3Err_none;
 
-    if (not i_function->compiled) {
+    만약 (not i_function->compiled) {
 _       (CompileFunction(i_function));
     }
 
     _throwif("a function in the snapshot was compiled before the runtime was made suspendable", not i_function->snapshotMap);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The native frames the interpreter keeps for the loops and try_tables around
@@ -2381,20 +2381,20 @@ M3Result AddBlockFrames (M3SnapshotLoad* l, const M3SnapshotMap* i_map, const M3
 {
     M3Result result = m3Err_none;
 
-    for (u32 b = 0; b < i_map->numBlocks; ++b) {
+    위해 (u32 b = 0; b < i_map->numBlocks; ++b) {
         const M3BlockStart* block = &i_map->blocks[b];
         M3Frame*            frame;
 
-        if (not EnclosesOffset(block, i_point->wasmOffset)) {
+        만약 (not EnclosesOffset(block, i_point->wasmOffset)) {
             continue;
         }
 
-        if (block->opcode == c_waOp_loop) {
+        만약 (block->opcode == c_waOp_loop) {
 _           (AddFrame(l, io_numFrames, frame_loop, i_sp, &frame));
             frame->pc = block->pc;
         }
-#  if d_m3HasExceptionHandling
-        else {
+#  만약 d_m3HasExceptionHandling
+        아니면 {
 _           (AddFrame(l, io_numFrames, frame_try, i_sp, &frame));
             frame->pc                = block->pc;
             frame->try_.numClauses   = block->numClauses;
@@ -2404,7 +2404,7 @@ _           (AddFrame(l, io_numFrames, frame_try, i_sp, &frame));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // Puts a function's values where this build keeps them at the safepoint
@@ -2418,7 +2418,7 @@ M3Result LoadValues (M3SnapshotLoad* l, m3slot_t* i_base, u32 i_numSlots, m3stac
 _   (GetLEB_u32(l, &numValues));
     _throwif("the snapshot's frame does not match what this build compiled", numValues != i_map->numLocals + i_point->numValues);
 
-    for (u32 v = 0; v < numValues; ++v) {
+    위해 (u32 v = 0; v < numValues; ++v) {
         const M3SlotValue* value     = FrameValue(i_map, i_point, v);
         u64                word      = 0;
         void*              reference = NULL;
@@ -2427,12 +2427,12 @@ _   (GetLEB_u32(l, &numValues));
 _       (LocateValue(i_base, i_numSlots, i_sp, value, &where));
 
         // a v128 has no byte order of its own, and no bits path can carry it
-        if (BaseTypeOf(value->type) == c_m3Type_v128) {
+        만약 (BaseTypeOf(value->type) == c_m3Type_v128) {
             m3type_t type;
 _           (GetValueTag(l, value->type, &type));
-            if (l->checking) {
+            만약 (l->checking) {
 _               (SkipBytes(l, 16));
-            } else {
+            } 아니면 {
 _               (Get(l, where, 16));
             }
             continue;
@@ -2443,17 +2443,17 @@ _               (Get(l, where, 16));
 _       (GetValueBits(l, value->type, &word));
         l->allowUnfilledRef = false;
 
-        if (IsRefType(value->type)) {
+        만약 (IsRefType(value->type)) {
             reference = (void*)(uintptr_t)word;
         }
 
-        if (not l->checking) {
+        만약 (not l->checking) {
 _           (WriteValue(where, i_registers, value, word, reference));
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // The functions a suspended continuation is in the middle of, outermost first.
@@ -2482,13 +2482,13 @@ _   (GetLEB_u32(l, &numActivations));
     io_cont->r0                = 0;
     io_cont->numSuspendResults = 0;
     io_cont->suspendPoint      = safepoint_op;
-#  if d_m3HasFloat
+#  만약 d_m3HasFloat
     io_cont->fp0 = 0.;
 #  endif
 
     sp = base;
 
-    for (u32 a = 0; a < numActivations; ++a) {
+    위해 (u32 a = 0; a < numActivations; ++a) {
         bool                 isInnermost = (a + 1 == numActivations);
         const M3SafePoint*   point;
         M3FrameRegisters     registers;
@@ -2515,11 +2515,11 @@ _       (PrepareFunction(function));
                  (u32)(sp - base) + function->maxStackSlots > numSlots);
 
         // the call the frame outside this one is waiting on
-        if (callFrame) {
+        만약 (callFrame) {
             callFrame->call.function = function;
         }
 
-#  if d_m3EntryKeepsFrame
+#  만약 d_m3EntryKeepsFrame
         {
             M3Frame* entry;
 _           (AddFrame(l, &numFrames, frame_entry, sp, &entry));
@@ -2534,7 +2534,7 @@ _       (GetLEB_u32(l, &wasmOffset));
         // A back edge says which loop it goes to. That has to be a loop around
         // the instruction; one the instruction does not branch to has no
         // safepoint to match.
-        if (kind == safepoint_op) {
+        만약 (kind == safepoint_op) {
             const M3BlockStart* loop;
 
 _           (GetLEB_u32(l, &targetLoop));
@@ -2550,16 +2550,16 @@ _           (GetLEB_u32(l, &targetLoop));
 
 _       (AddBlockFrames(l, map, point, sp, &numFrames));
 
-        if (not isInnermost) {
+        만약 (not isInnermost) {
             _throwif(m3Err_wasmMalformed, kind != safepoint_call);
 
 _           (AddFrame(l, &numFrames, frame_call, sp, &callFrame));
             callFrame->pc = point->pc;
             registers.r0  = &callFrame->call.r0;
-#  if d_m3HasFloat
+#  만약 d_m3HasFloat
             registers.fp0 = &callFrame->call.fp0;
 #  endif
-        } else if (kind == safepoint_resume) {
+        } 아니면 만약 (kind == safepoint_resume) {
             M3Frame* frame;
             u32      numResults = point->numResults;
             pc_t     resultsPC  = point->pc - 2 * numResults;
@@ -2574,36 +2574,36 @@ _           (AddFrame(l, &numFrames, frame_resume, sp, &frame));
             // a replayed resume carries on with clear registers, so the frame
             // keeps nothing in them
             callFrame = frame;
-        } else {
+        } 아니면 {
             _throwif(m3Err_wasmMalformed, kind != safepoint_op and kind != safepoint_entry and kind != safepoint_suspend);
 
             io_cont->pc           = point->pc;
             io_cont->suspendPoint = kind;
             registers.r0          = &io_cont->r0;
-#  if d_m3HasFloat
+#  만약 d_m3HasFloat
             registers.fp0 = &io_cont->fp0;
 #  endif
         }
 
 _       (LoadValues(l, base, numSlots, sp, map, point, &registers));
 
-        if (not l->checking) {
+        만약 (not l->checking) {
             RestoreConstants(function, sp);
         }
 
-        if (not isInnermost) {
+        만약 (not isInnermost) {
             sp = sp + point->aux;
 _           (CallSiteType(function, point, &expected));
-        } else if (kind == safepoint_resume) {
+        } 아니면 만약 (kind == safepoint_resume) {
             void* cont = NULL;
 _           (GetRefValue(l, c_m3Type_contref, &cont));
             _throwif(m3Err_wasmMalformed, cont == NULL);
 
             callFrame->resume.cont = (IM3Continuation)cont;
-            if (not l->checking) {
+            만약 (not l->checking) {
                 l->suspendSites[i_id].point = point;
-                for (u32 i = 1; i < l->numContinuations; ++i) {
-                    if (l->continuations[i] == cont) {
+                위해 (u32 i = 1; i < l->numContinuations; ++i) {
+                    만약 (l->continuations[i] == cont) {
                         // a continuation runs under one resume at a time
                         _throwif("a snapshot continuation is resumed by two frames", l->suspendSites[i].resumed);
 
@@ -2613,26 +2613,26 @@ _           (GetRefValue(l, c_m3Type_contref, &cont));
                     }
                 }
             }
-        } else {
+        } 아니면 {
             // op_ContinueLoopIf suspends before it has branched, and goes on
             // by reading the condition again
-            if (point->flags & d_m3SafePointTakenBranch) {
+            만약 (point->flags & d_m3SafePointTakenBranch) {
                 io_cont->r0 = 1;
             }
 
             // a suspend waits for its results in the slots at the top of what
             // it holds, which is where whatever resumes it writes them
-            if (kind == safepoint_suspend) {
+            만약 (kind == safepoint_suspend) {
                 _throwif(m3Err_wasmMalformed, point->numResults > point->numValues or
                                                 point->numResults > d_m3MaxContinuationPayload);
 
                 io_cont->numSuspendResults = point->numResults;
-                if (not l->checking) {
+                만약 (not l->checking) {
                     l->suspendSites[i_id].map   = map;
                     l->suspendSites[i_id].point = point;
                 }
 
-                for (u32 i = 0; i < point->numResults; ++i) {
+                위해 (u32 i = 0; i < point->numResults; ++i) {
                     const M3SlotValue* value = &map->values[point->firstValue + point->numValues - point->numResults + i];
 
                     _throwif(m3Err_wasmMalformed, IsRegisterSlotAlias(value->slot));
@@ -2645,12 +2645,12 @@ _           (GetRefValue(l, c_m3Type_contref, &cont));
     }
 
     io_cont->sp = sp;
-    if (l->checking) {
-        return m3Err_none;
+    만약 (l->checking) {
+        반환 m3Err_none;
     }
 
     // held innermost first
-    if (numFrames > io_cont->framesCap) {
+    만약 (numFrames > io_cont->framesCap) {
         M3Frame* frames = m3_ReallocArray(M3Frame, io_cont->frames, numFrames, io_cont->framesCap);
         _throwifnull(frames);
 
@@ -2658,14 +2658,14 @@ _           (GetRefValue(l, c_m3Type_contref, &cont));
         io_cont->framesCap = numFrames;
     }
 
-    for (u32 k = 0; k < numFrames; ++k) {
+    위해 (u32 k = 0; k < numFrames; ++k) {
         io_cont->frames[numFrames - 1 - k] = l->frames[k];
     }
 
     io_cont->numFrames = numFrames;
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2675,10 +2675,10 @@ M3Result LoadContinuation (M3SnapshotLoad* l, u32 i_id)
     IM3Module       module = l->module;
     IM3Continuation cont   = l->continuations[i_id];
     M3Continuation  scratch;
-    if (l->checking) {
+    만약 (l->checking) {
         scratch          = *cont;
         scratch.valStack = l->checkStack;
-        if (i_id == 0) {
+        만약 (i_id == 0) {
             scratch.valStack = (m3slot_t*)l->runtime->originStack;
         }
         cont = &scratch;
@@ -2696,7 +2696,7 @@ _   (GetLEB_u32(l, &entryIndex));
     _throwif(m3Err_wasmMalformed, contId != i_id);
     _throwif(m3Err_wasmMalformed, (bool)isRoot != (i_id == 0));
     _throwif(m3Err_wasmMalformed, isRoot and state != snapshot_contSuspended);
-    if (not isRoot and (state == snapshot_contAllocated or state == snapshot_contSuspended)) {
+    만약 (not isRoot and (state == snapshot_contAllocated or state == snapshot_contSuspended)) {
         l->loadedStacks++;
     }
     _throwif(m3Err_wasmMalformed, typeIndex != d_m3SnapshotNone and typeIndex >= module->numFuncTypes);
@@ -2704,7 +2704,7 @@ _   (GetLEB_u32(l, &entryIndex));
     _throwif(m3Err_wasmMalformed, entryIndex >= module->numFunctions);
     _throwif(m3Err_wasmMalformed, isRoot ? typeIndex != d_m3SnapshotNone : (typeIndex == d_m3SnapshotNone or not module->funcTypes[typeIndex]->isContinuation));
 
-    if (not l->checking and not isRoot and state != snapshot_contFinished) {
+    만약 (not l->checking and not isRoot and state != snapshot_contFinished) {
 _       (Continuation_AcquireStack(l->runtime, cont));
     }
     cont->type          = (typeIndex != d_m3SnapshotNone) ? module->funcTypes[typeIndex] : NULL;
@@ -2714,7 +2714,7 @@ _       (Continuation_AcquireStack(l->runtime, cont));
     cont->parent        = NULL;
     cont->numFrames     = 0;
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
     {
         void* ref = NULL;
 _       (GetRefValue(l, c_m3Type_exnref, &ref));
@@ -2723,7 +2723,7 @@ _       (GetRefValue(l, c_m3Type_exnref, &ref));
     // the root was not resumed by anything, and a finished continuation has
     // nowhere left to raise an exception
     _throwif(m3Err_wasmMalformed, (isRoot or state == snapshot_contFinished) and cont->resumeThrow != NULL);
-#  else
+#  아니면
     {
         void* ref = NULL;
 _       (GetRefValue(l, c_m3Type_exnref, &ref));
@@ -2731,7 +2731,7 @@ _       (GetRefValue(l, c_m3Type_exnref, &ref));
     }
 #  endif
 
-    if (state == snapshot_contAllocated) {
+    만약 (state == snapshot_contAllocated) {
         IM3FuncType inner;
         u16         numRets;
 
@@ -2746,10 +2746,10 @@ _       (GetLEB_u32(l, &boundArgsCount));
             _throwif(m3Err_wasmMalformed, not remaining or
                                             GetFuncTypeNumParams(remaining) != GetFuncTypeNumParams(inner) - boundArgsCount or
                                             GetFuncTypeNumResults(remaining) != GetFuncTypeNumResults(inner));
-            for (u16 i = 0; i < GetFuncTypeNumResults(inner); ++i) {
+            위해 (u16 i = 0; i < GetFuncTypeNumResults(inner); ++i) {
                 _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(inner, i) != GetFuncTypeResultType(remaining, i));
             }
-            for (u16 i = 0; i < GetFuncTypeNumParams(remaining); ++i) {
+            위해 (u16 i = 0; i < GetFuncTypeNumParams(remaining); ++i) {
                 _throwif(m3Err_wasmMalformed, GetFuncTypeParamType(inner, (u16)(boundArgsCount + i)) != GetFuncTypeParamType(remaining, i));
             }
         }
@@ -2758,14 +2758,14 @@ _       (GetLEB_u32(l, &boundArgsCount));
 
         _throwif(m3Err_wasmMalformed, (numRets + boundArgsCount) * c_ioSlotCount > cont->numStackSlots);
 
-        for (u32 i = 0; i < boundArgsCount; ++i) {
+        위해 (u32 i = 0; i < boundArgsCount; ++i) {
 _           (GetValue(l, GetFuncTypeParamType(inner, (u16)i), cont->valStack + (numRets + i) * c_ioSlotCount));
         }
 
         cont->state = cont_allocated;
         cont->sp    = cont->valStack;
         cont->pc    = cont->entryFunction->compiled;
-    } else if (state == snapshot_contSuspended) {
+    } 아니면 만약 (state == snapshot_contSuspended) {
 _       (GetLEB_u32(l, &boundArgsCount));
         _throwif(m3Err_wasmMalformed, isRoot and boundArgsCount != 0);
         cont->boundArgsCount = boundArgsCount;
@@ -2773,21 +2773,21 @@ _       (GetLEB_u32(l, &boundArgsCount));
 _       (LoadSuspendedBody(l, cont, i_id));
 
         cont->state = cont_suspended;
-    } else if (state == snapshot_contFinished) {
+    } 아니면 만약 (state == snapshot_contFinished) {
 _       (GetLEB_u32(l, &boundArgsCount));
         _throwif(m3Err_wasmMalformed, boundArgsCount != 0);
         cont->boundArgsCount = 0;
         cont->state          = cont_consumed;
-    } else {
+    } 아니면 {
         _throw(m3Err_wasmMalformed);
     }
 
 _catch:
-    if (result) {
+    만약 (result) {
         cont->numFrames = 0;
     }
 
-    return result;
+    반환 result;
 }
 
 static
@@ -2800,13 +2800,13 @@ M3Result LoadContinuations (M3SnapshotLoad* l)
 _   (GetLEB_u32(l, &count));
     _throwif(m3Err_wasmMalformed, count == 0 or count != l->numContinuations);
 
-    for (u32 i = 0; i < count; ++i) {
+    위해 (u32 i = 0; i < count; ++i) {
 _       (LoadContinuation(l, i));
     }
     _throwif(m3Err_wasmMalformed, l->loadedStacks != l->requiredStacks);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // Cross-record constraints cannot be checked while reading a reference: both
@@ -2816,16 +2816,16 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
 {
     M3Result result = m3Err_none;
 
-    for (u32 id = 0; id < l->numContinuations; ++id) {
+    위해 (u32 id = 0; id < l->numContinuations; ++id) {
         IM3Continuation cont  = l->continuations[id];
         u32             leaf  = id;
         u32             depth = 0;
-#  if d_m3HasTypedRefs
+#  만약 d_m3HasTypedRefs
         m3type_t expectedType = l->suspendSites[id].expectedType;
         _throwif("a snapshot continuation reference has the wrong type", expectedType and
                                                                            (not cont->type or not IsSubTypeOf(RefTypeOfFuncType(cont->type, true), expectedType)));
 #  endif
-        if (l->suspendSites[id].target) {
+        만약 (l->suspendSites[id].target) {
             // The child may have switched to a different parameter signature
             // after this resume started. Its results must still fit this site.
             IM3FuncType     expected = Module_ContTypeOfRef(l->module, l->suspendSites[id].point->resumeType);
@@ -2834,23 +2834,23 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
             _throwif(m3Err_wasmMalformed, not expected or not actual);
             expected = expected->contFuncType;
             _throwif(m3Err_wasmMalformed, GetFuncTypeNumResults(actual) != GetFuncTypeNumResults(expected));
-            for (u16 i = 0; i < GetFuncTypeNumResults(expected); ++i) {
+            위해 (u16 i = 0; i < GetFuncTypeNumResults(expected); ++i) {
                 _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(actual, i) != GetFuncTypeResultType(expected, i));
             }
         }
-        while (l->suspendSites[leaf].target) {
+        동안 (l->suspendSites[leaf].target) {
             leaf = l->suspendSites[leaf].target;
             _throwif(m3Err_wasmMalformed, ++depth >= l->numContinuations or
                                             l->continuations[leaf]->state != cont_suspended);
         }
-        if (cont->state != cont_suspended or id == 0) {
+        만약 (cont->state != cont_suspended or id == 0) {
             continue;
         }
 
         // A continuation currently executing under a saved resume already
         // received its arguments. Only an independently captured suspension
         // (possibly containing nested resumes) still expects the tag's results.
-        if (l->suspendSites[id].resumed) {
+        만약 (l->suspendSites[id].resumed) {
             _throwif(m3Err_wasmMalformed, cont->boundArgsCount != 0);
             continue;
         }
@@ -2863,21 +2863,21 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
                                                                           GetFuncTypeNumParams(remaining) != inner->numSuspendResults - cont->boundArgsCount);
         _throwif(m3Err_wasmMalformed,
                  GetFuncTypeNumResults(remaining) != GetFuncTypeNumResults(cont->entryFunction->funcType));
-        for (u16 i = 0; i < GetFuncTypeNumResults(remaining); ++i) {
+        위해 (u16 i = 0; i < GetFuncTypeNumResults(remaining); ++i) {
             _throwif(m3Err_wasmMalformed, GetFuncTypeResultType(remaining, i) !=
                                             GetFuncTypeResultType(cont->entryFunction->funcType, i));
         }
 
-        for (u32 i = 0; i < inner->numSuspendResults; ++i) {
+        위해 (u32 i = 0; i < inner->numSuspendResults; ++i) {
             const M3SlotValue* value = &site->map->values[site->point->firstValue +
                                                           site->point->numValues - site->point->numResults + i];
-            if (i < cont->boundArgsCount) {
-                if (IsRefType(value->type) and not IsNullableRef(value->type)) {
+            만약 (i < cont->boundArgsCount) {
+                만약 (IsRefType(value->type) and not IsNullableRef(value->type)) {
                     void* ref = NULL;
                     memcpy(&ref, inner->sp + value->slot, sizeof(ref));
                     _throwif(m3Err_wasmMalformed, not ref);
                 }
-            } else {
+            } 아니면 {
                 _throwif("a captured continuation has the wrong parameter type", value->type !=
                                                                                    GetFuncTypeParamType(remaining, (u16)(i - cont->boundArgsCount)));
             }
@@ -2885,10 +2885,10 @@ M3Result CheckContinuationReferences (M3SnapshotLoad* l)
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
 
 static
 M3Result LoadExceptions (M3SnapshotLoad* l)
@@ -2899,7 +2899,7 @@ M3Result LoadExceptions (M3SnapshotLoad* l)
 _   (GetLEB_u32(l, &numExceptions));
     _throwif(m3Err_wasmMalformed, numExceptions == 0 or numExceptions != l->numExceptions);
 
-    for (u32 i = 0; i < numExceptions; ++i) {
+    위해 (u32 i = 0; i < numExceptions; ++i) {
         u32          exnId = 0, numArgs = 0;
         M3Exception* exn;
         IM3FuncType  type;
@@ -2914,18 +2914,18 @@ _       (GetLEB_u32(l, &numArgs));
 
         _throwif(m3Err_wasmMalformed, numArgs != exn->numArgs);
 
-        for (u32 a = 0; a < numArgs; ++a) {
+        위해 (u32 a = 0; a < numArgs; ++a) {
             m3type_t argType = GetFuncTypeParamType(type, (u16)a);
             u64      bits    = 0;
 _           (GetValueBits(l, argType, &bits));
-            if (not l->checking) {
+            만약 (not l->checking) {
                 exn->args[a] = bits;
             }
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 #  endif
@@ -2942,14 +2942,14 @@ M3Result BoundedReader_Read (void* o_buffer, size_t i_size, void* i_userdata)
 {
     M3BoundedReader* br = (M3BoundedReader*)i_userdata;
 
-    if (i_size > br->remaining) {
+    만약 (i_size > br->remaining) {
         br->error = "the host read past the end of its state";
-        return br->error;
+        반환 br->error;
     }
 
     br->remaining -= i_size;
 
-    return Get(br->load, o_buffer, i_size);
+    반환 Get(br->load, o_buffer, i_size);
 }
 
 static
@@ -2962,8 +2962,8 @@ M3Result LoadHostState (M3SnapshotLoad* l)
 
     _throwif("the snapshot carries host state, and nothing here restores it", not hooks->loadHostState);
 
-    if (l->checking) {
-        return SkipBytes(l, size);
+    만약 (l->checking) {
+        반환 SkipBytes(l, size);
     }
     reader.load      = l;
     reader.remaining = size;
@@ -2974,7 +2974,7 @@ _   (reader.error);
     _throwif("the host did not read all of its state", reader.remaining != 0);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -2991,7 +2991,7 @@ _   (GetLE32(l, &version));
     _throwif(m3Err_wasmMalformed, version != c_snapshotVersion);
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -3032,12 +3032,12 @@ _   (GetLEB_u32(l, &activeStacks));
 
     // the rest of Meta means the same thing in a postmortem, so it is read
     // whole and the refusal to resume comes after the section, not inside it
-    if (*o_flags & d_m3SnapshotFlagPostmortem) {
-        for (u32 i = 0; i < l->numExceptions; ++i) {
+    만약 (*o_flags & d_m3SnapshotFlagPostmortem) {
+        위해 (u32 i = 0; i < l->numExceptions; ++i) {
             u32 tagIndex = 0;
 _           (GetLEB_u32(l, &tagIndex));
         }
-        return m3Err_none;
+        반환 m3Err_none;
     }
 
     _throwif(m3Err_memoryLimitExceeded, l->runtime->memoryBytesLimit and
@@ -3048,19 +3048,19 @@ _           (GetLEB_u32(l, &tagIndex));
                                                 activeStacks > l->runtime->continuationsLimit - l->runtime->continuationsAllocated);
 
     _throwif(m3Err_wasmMalformed, l->numContinuations == 0 or activeStacks >= l->numContinuations);
-#  if !d_m3HasExceptionHandling
+#  만약 !d_m3HasExceptionHandling
     _throwif("the snapshot holds exceptions, and this build has none", l->numExceptions != 0);
 #  endif
 
-    if (l->checking) {
-        for (u32 i = 0; i < l->numExceptions; ++i) {
+    만약 (l->checking) {
+        위해 (u32 i = 0; i < l->numExceptions; ++i) {
             u32 tagIndex = 0;
 _           (GetLEB_u32(l, &tagIndex));
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
             _throwif(m3Err_wasmMalformed, tagIndex >= l->module->numTags);
 #  endif
         }
-        return m3Err_none;
+        반환 m3Err_none;
     }
 
     l->checkStack = m3_AllocArray(m3slot_t, d_m3ContinuationStackSlots + 4);
@@ -3073,7 +3073,7 @@ _           (GetLEB_u32(l, &tagIndex));
     l->suspendSites = m3_AllocArray(M3SnapshotSuspendSite, l->numContinuations);
     _throwifnull(l->suspendSites);
 
-    if (not l->runtime->rootContinuation) {
+    만약 (not l->runtime->rootContinuation) {
         IM3Continuation root = Continuation_New(l->runtime, NULL, NULL);
         _throwifnull(root);
 
@@ -3084,18 +3084,18 @@ _           (GetLEB_u32(l, &tagIndex));
 
     l->continuations[0] = l->runtime->rootContinuation;
 
-    for (u32 i = 1; i < l->numContinuations; ++i) {
+    위해 (u32 i = 1; i < l->numContinuations; ++i) {
         l->continuations[i] = Continuation_New(l->runtime, NULL, NULL);
         _throwifnull(l->continuations[i]);
     }
 
-#  if d_m3HasExceptionHandling
-    if (l->numExceptions) {
+#  만약 d_m3HasExceptionHandling
+    만약 (l->numExceptions) {
         l->exceptions = m3_AllocArray(M3Exception*, l->numExceptions);
         _throwifnull(l->exceptions);
     }
 
-    for (u32 i = 0; i < l->numExceptions; ++i) {
+    위해 (u32 i = 0; i < l->numExceptions; ++i) {
         u32    tagIndex = 0;
         IM3Tag tag;
         u32    numArgs;
@@ -3111,15 +3111,15 @@ _       (GetLEB_u32(l, &tagIndex));
 
         l->exceptions[i]->reified = true;
     }
-#  else
-    for (u32 i = 0; i < l->numExceptions; ++i) {
+#  아니면
+    위해 (u32 i = 0; i < l->numExceptions; ++i) {
         u32 tagIndex = 0;
 _       (GetLEB_u32(l, &tagIndex));
     }
 #  endif
 
 _catch:
-    return result;
+    반환 result;
 }
 
 // Each section is decoded once without changing guest state or calling the host,
@@ -3153,7 +3153,7 @@ _       (LoadGlobals(l));
 _       (LoadSegments(l));
         break;
 
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
     case d_m3SnapshotSection_Exception:
 _       (LoadExceptions(l));
         break;
@@ -3173,7 +3173,7 @@ _       (SkipBytes(l, (size_t)(l->end - l->pos)));
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 
 static
@@ -3182,17 +3182,17 @@ M3Result LoadSections (M3SnapshotLoad* l, bool i_embedded)
     M3Result result  = m3Err_none;
     u8*      payload = NULL;
 
-    if (not i_embedded) {
+    만약 (not i_embedded) {
 _       (LoadHeader(l));
     }
 
-    while (true) {
+    동안 (true) {
         u8  sectionId   = 0;
         u32 sectionSize = 0;
 
         // the last section ends the file, so the reader running out here is
         // the end of the snapshot rather than a truncated one
-        if (GetU8(l, &sectionId)) {
+        만약 (GetU8(l, &sectionId)) {
             break;
         }
 
@@ -3254,7 +3254,7 @@ _   (CheckContinuationReferences(l));
 
 _catch:
     m3_Free(payload);
-    return result;
+    반환 result;
 }
 
 #endif // d_m3HasSnapshots
@@ -3264,7 +3264,7 @@ _catch:
 //  API
 //---------------------------------------------------------------------------------------------------------------------------------
 
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
 
 static
 M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i_userdata,
@@ -3288,7 +3288,7 @@ M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i
 
     IM3Function entry = save.postmortem ? io_runtime->entered : root->entryFunction;
 
-    if (o_module) {
+    만약 (o_module) {
         *o_module = NULL;
     }
 
@@ -3299,23 +3299,23 @@ M3Result SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i
 
     _throwif("a snapshot failed to restore into the module, so it cannot be saved", save.module->isUnusable);
 
-    if (o_module) {
+    만약 (o_module) {
         *o_module = save.module;
     }
 
-    for (IM3Continuation cont = io_runtime->continuations; cont; cont = cont->next) {
+    위해 (IM3Continuation cont = io_runtime->continuations; cont; cont = cont->next) {
         u32 id;
 _       (PointerIds_Add(&save.liveContinuations, cont, &id));
     }
 
-#  if d_m3HasExceptionHandling
-    for (M3Exception* exception = io_runtime->exceptions; exception; exception = exception->next) {
+#  만약 d_m3HasExceptionHandling
+    위해 (M3Exception* exception = io_runtime->exceptions; exception; exception = exception->next) {
         u32 id;
 _       (PointerIds_Add(&save.liveExceptions, exception, &id));
     }
 #  endif
 
-    if (not save.postmortem) {
+    만약 (not save.postmortem) {
         u32 id;
 _       (PointerIds_Add(&save.continuations, root, &id));
     }
@@ -3332,22 +3332,22 @@ _catch:
     PointerIds_Free(&save.continuations);
     PointerIds_Free(&save.exceptions);
 
-    return result;
+    반환 result;
 }
 
 #endif
 
 M3Result m3_SaveSnapshot (IM3Runtime io_runtime, M3SnapshotWriter i_writer, void* i_userdata)
 {
-    if (not io_runtime or not i_writer) {
-        return m3Err_mallocFailed;
+    만약 (not io_runtime or not i_writer) {
+        반환 m3Err_mallocFailed;
     }
 
-#if d_m3HasSnapshots
-    return SaveSnapshot(io_runtime, i_writer, i_userdata, NULL, false);
-#else
+#만약 d_m3HasSnapshots
+    반환 SaveSnapshot(io_runtime, i_writer, i_userdata, NULL, false);
+#아니면
     (void)i_userdata;
-    return "snapshots are not available in this build of Wasm3";
+    반환 "snapshots are not available in this build of Wasm3";
 #endif
 }
 
@@ -3360,7 +3360,7 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
     _throwifnull(i_module);
     _throwifnull(i_reader);
 
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     // A snapshot is the whole of the module's state, and is checked against
     // what instantiation made: memories and tables no smaller than they were
     // declared, and nothing the module did since to account for
@@ -3385,19 +3385,19 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
 
         IM3Continuation root = io_runtime->rootContinuation;
 
-        if (result) {
-            if (load.changed) {
+        만약 (result) {
+            만약 (load.changed) {
                 // Part of the snapshot is in the module and part is not: a
                 // state the program was never in. It is not resumed, run or
                 // saved again; the embedder has to throw it away.
                 i_module->isUnusable = true;
 
-                if (root) {
+                만약 (root) {
                     root->state     = cont_returned;
                     root->numFrames = 0;
                 }
             }
-        } else {
+        } 아니면 {
             // A suspension is only ever reached with the start function run,
             // or under way in the invocation being restored, so the memories
             // and globals already hold what it did
@@ -3411,37 +3411,37 @@ M3Result LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotRead
         m3_Free(load.frames);
         m3_Free(load.suspendSites);
         m3_Free(load.continuations);
-#  if d_m3HasExceptionHandling
+#  만약 d_m3HasExceptionHandling
         m3_Free(load.exceptions);
 #  endif
     }
-#else
+#아니면
     (void)i_userdata;
     _throw("snapshots are not available in this build of Wasm3");
 #endif
 
 _catch:
-    return result;
+    반환 result;
 }
 
 
 M3Result m3_LoadSnapshot (IM3Runtime io_runtime, IM3Module i_module, M3SnapshotReader i_reader, void* i_userdata)
 {
-    return LoadSnapshot(io_runtime, i_module, i_reader, i_userdata, false);
+    반환 LoadSnapshot(io_runtime, i_module, i_reader, i_userdata, false);
 }
 
 
 void m3_SetSnapshotHooks (IM3Runtime io_runtime, const M3SnapshotHooks* i_hooks)
 {
-#if d_m3HasSnapshots
-    if (io_runtime) {
-        if (i_hooks) {
+#만약 d_m3HasSnapshots
+    만약 (io_runtime) {
+        만약 (i_hooks) {
             io_runtime->snapshotHooks = *i_hooks;
-        } else {
+        } 아니면 {
             memset(&io_runtime->snapshotHooks, 0, sizeof(io_runtime->snapshotHooks));
         }
     }
-#else
+#아니면
     (void)io_runtime;
     (void)i_hooks;
 #endif
@@ -3450,29 +3450,29 @@ void m3_SetSnapshotHooks (IM3Runtime io_runtime, const M3SnapshotHooks* i_hooks)
 
 M3Result m3_SaveSnapshotToBuffer (IM3Runtime io_runtime, void** o_bytes, size_t* o_size)
 {
-    if (!io_runtime || !o_bytes || !o_size) {
-        return m3Err_mallocFailed;
+    만약 (!io_runtime || !o_bytes || !o_size) {
+        반환 m3Err_mallocFailed;
     }
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     M3BufferWriter bw     = { NULL, 0, 0 };
     M3Result       result = m3_SaveSnapshot(io_runtime, BufferWriter_Write, &bw);
-    if (result) {
+    만약 (result) {
         m3_Free(bw.buffer);
         *o_bytes = NULL;
         *o_size  = 0;
-        return result;
+        반환 result;
     }
     *o_bytes = bw.buffer;
     *o_size  = bw.size;
-    return m3Err_none;
-#else
+    반환 m3Err_none;
+#아니면
     *o_bytes = NULL;
     *o_size  = 0;
-    return "snapshots are not available in this build of Wasm3";
+    반환 "snapshots are not available in this build of Wasm3";
 #endif
 }
 
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
 
 // Appends one LEB128-encoded u32 to a plain byte cursor
 static
@@ -3481,13 +3481,13 @@ u8* EmitLEB_u32 (u8* o_where, u32 i_value)
     do {
         u8 byte = i_value & 0x7F;
         i_value >>= 7;
-        if (i_value != 0) {
+        만약 (i_value != 0) {
             byte |= 0x80;
         }
         *o_where++ = byte;
-    } while (i_value != 0);
+    } 동안 (i_value != 0);
 
-    return o_where;
+    반환 o_where;
 }
 
 static
@@ -3498,9 +3498,9 @@ u32 SizeOfLEB_u32 (u32 i_value)
     do {
         i_value >>= 7;
         ++size;
-    } while (i_value != 0);
+    } 동안 (i_value != 0);
 
-    return size;
+    반환 size;
 }
 
 // Walks the custom sections of a Wasm binary and finds the one named
@@ -3518,23 +3518,23 @@ M3Result FindEmbeddedSnapshot (const u8* i_start, const u8* i_end, cstr_t i_secN
     bool     found  = false;
     cstr_t   name   = NULL;
 
-    if (o_secStart) {
+    만약 (o_secStart) {
         *o_secStart = NULL;
     }
-    if (o_secEnd) {
+    만약 (o_secEnd) {
         *o_secEnd = NULL;
     }
-    if (o_data) {
+    만약 (o_data) {
         *o_data = NULL;
     }
-    if (o_size) {
+    만약 (o_size) {
         *o_size = 0;
     }
 
     _throwif(m3Err_wasmMalformed, i_end - pos < 8 or memcmp(pos, "\0asm\1\0\0\0", 8) != 0);
     pos += 8;
 
-    while (pos < i_end) {
+    동안 (pos < i_end) {
         bytes_t secStart  = pos;
         u8      sectionId = *pos++;
         u32     size      = 0;
@@ -3543,21 +3543,21 @@ _       (ReadLEB_u32(&size, &pos, i_end));
         {
             bytes_t payload = pos;
             pos += size;
-            if (sectionId == 0) {
+            만약 (sectionId == 0) {
 _               (Read_utf8(&name, &payload, pos));
-                if (strcmp(name, i_secName) == 0) {
+                만약 (strcmp(name, i_secName) == 0) {
                     _throwif("duplicate embedded snapshot name", found);
                     found = true;
-                    if (o_secStart) {
+                    만약 (o_secStart) {
                         *o_secStart = secStart;
                     }
-                    if (o_secEnd) {
+                    만약 (o_secEnd) {
                         *o_secEnd = pos;
                     }
-                    if (o_data) {
+                    만약 (o_data) {
                         *o_data = payload;
                     }
-                    if (o_size) {
+                    만약 (o_size) {
                         *o_size = (u32)(pos - payload);
                     }
                 }
@@ -3567,23 +3567,23 @@ _               (Read_utf8(&name, &payload, pos));
     }
 _catch:
     m3_Free(name);
-    return result;
+    반환 result;
 }
 
 // Builds the custom section name a snapshot of i_name lives under
 static
 M3Result SnapshotSectionName (cstr_t i_name, char* o_secName, size_t i_size)
 {
-    if (i_name and *i_name) {
-        if (strlen(i_name) > d_m3MaxSnapshotNameLength) {
-            return "the snapshot name is too long";
+    만약 (i_name and *i_name) {
+        만약 (strlen(i_name) > d_m3MaxSnapshotNameLength) {
+            반환 "the snapshot name is too long";
         }
         snprintf(o_secName, i_size, "snapshot.%s", i_name);
-    } else {
+    } 아니면 {
         snprintf(o_secName, i_size, "snapshot");
     }
 
-    return m3Err_none;
+    반환 m3Err_none;
 }
 
 // The snapshot of this name the module was parsed with, or NULL. Parsing keeps
@@ -3596,132 +3596,132 @@ M3Result ModuleSnapshot (IM3Module i_module, cstr_t i_name, M3EmbeddedSnapshot**
 
     *o_snapshot = NULL;
 
-    for (M3EmbeddedSnapshot* snap = i_module->snapshots; snap; snap = snap->next) {
-        if (strcmp(snap->name, name) == 0) {
+    위해 (M3EmbeddedSnapshot* snap = i_module->snapshots; snap; snap = snap->next) {
+        만약 (strcmp(snap->name, name) == 0) {
             _throwif("duplicate embedded snapshot name", *o_snapshot);
             *o_snapshot = snap;
         }
     }
 
 _catch:
-    return result;
+    반환 result;
 }
 #endif
 
 M3Result m3_LoadSnapshotFromBuffer (IM3Runtime io_runtime, IM3Module i_module, const void* i_bytes, size_t i_size)
 {
-    if (!io_runtime || !i_module || !i_bytes) {
-        return m3Err_mallocFailed;
+    만약 (!io_runtime || !i_module || !i_bytes) {
+        반환 m3Err_mallocFailed;
     }
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     // A Wasm binary carries its snapshot in a custom section. It is taken from
     // the buffer that was handed over, which need not be the one i_module was
     // parsed from - the snapshot still restores into i_module.
-    if (i_size >= 8 && memcmp(i_bytes, "\0asm", 4) == 0) {
+    만약 (i_size >= 8 && memcmp(i_bytes, "\0asm", 4) == 0) {
         const u8* data   = NULL;
         u32       size   = 0;
         M3Result  result = FindEmbeddedSnapshot((const u8*)i_bytes, (const u8*)i_bytes + i_size,
                                                 "snapshot", NULL, NULL, &data, &size);
-        if (result) {
-            return result;
+        만약 (result) {
+            반환 result;
         }
-        if (not data) {
-            return "the Wasm binary holds no embedded snapshot";
+        만약 (not data) {
+            반환 "the Wasm binary holds no embedded snapshot";
         }
 
         {
             M3BufferReader br = { data, size, 0 };
-            return LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br, true);
+            반환 LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br, true);
         }
     }
     {
         M3BufferReader br = { (const u8*)i_bytes, i_size, 0 };
-        return LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br,
+        반환 LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br,
                             i_size < 4 or memcmp(i_bytes, c_snapshotMagic, 4) != 0);
     }
-#else
+#아니면
     (void)i_size;
-    return "snapshots are not available in this build of Wasm3";
+    반환 "snapshots are not available in this build of Wasm3";
 #endif
 }
 
 bool m3_HasSnapshot (IM3Module i_module, const char* i_name)
 {
-    if (not i_module) {
-        return false;
+    만약 (not i_module) {
+        반환 false;
     }
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     // two of that name are still one it carries: loading it is what fails
     M3EmbeddedSnapshot* snap = NULL;
     (void)ModuleSnapshot(i_module, i_name, &snap);
 
-    return snap != NULL;
-#else
+    반환 snap != NULL;
+#아니면
     (void)i_name;
-    return false;
+    반환 false;
 #endif
 }
 
 M3Result m3_GetEmbeddedSnapshot (IM3Module i_module, const char* i_name,
                                  const void** o_bytes, size_t* o_size)
 {
-    if (not i_module or not o_bytes or not o_size) {
-        return m3Err_mallocFailed;
+    만약 (not i_module or not o_bytes or not o_size) {
+        반환 m3Err_mallocFailed;
     }
 
     *o_bytes = NULL;
     *o_size  = 0;
 
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     {
         M3EmbeddedSnapshot* snap   = NULL;
         M3Result            result = ModuleSnapshot(i_module, i_name, &snap);
 
-        if (result) {
-            return result;
+        만약 (result) {
+            반환 result;
         }
-        if (not snap) {
-            return "the module holds no embedded snapshot of that name";
+        만약 (not snap) {
+            반환 "the module holds no embedded snapshot of that name";
         }
 
         *o_bytes = snap->data;
         *o_size  = snap->size;
 
-        return m3Err_none;
+        반환 m3Err_none;
     }
-#else
+#아니면
     (void)i_name;
-    return "snapshots are not available in this build of Wasm3";
+    반환 "snapshots are not available in this build of Wasm3";
 #endif
 }
 
 M3Result m3_LoadEmbeddedSnapshot (IM3Runtime io_runtime, IM3Module i_module, const char* i_name)
 {
-    if (not io_runtime or not i_module) {
-        return m3Err_mallocFailed;
+    만약 (not io_runtime or not i_module) {
+        반환 m3Err_mallocFailed;
     }
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     {
         M3EmbeddedSnapshot* snap   = NULL;
         M3Result            result = ModuleSnapshot(i_module, i_name, &snap);
         M3BufferReader      br;
 
-        if (result) {
-            return result;
+        만약 (result) {
+            반환 result;
         }
-        if (not snap) {
-            return "the module holds no embedded snapshot of that name";
+        만약 (not snap) {
+            반환 "the module holds no embedded snapshot of that name";
         }
 
         br.buffer = snap->data;
         br.size   = snap->size;
         br.cursor = 0;
 
-        return LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br, true);
+        반환 LoadSnapshot(io_runtime, i_module, BufferReader_Read, &br, true);
     }
-#else
+#아니면
     (void)i_name;
-    return "snapshots are not available in this build of Wasm3";
+    반환 "snapshots are not available in this build of Wasm3";
 #endif
 }
 
@@ -3729,7 +3729,7 @@ M3Result m3_LoadEmbeddedSnapshot (IM3Runtime io_runtime, IM3Module i_module, con
 M3Result m3_SaveSnapshotToModule (IM3Runtime io_runtime, IM3Module i_module, const char* i_name,
                                   void** o_bytes, size_t* o_size)
 {
-#if d_m3HasSnapshots
+#만약 d_m3HasSnapshots
     M3Result       result = m3Err_none;
     M3BufferWriter bw     = { NULL, 0, 0 };
     u8*            out    = NULL;
@@ -3742,8 +3742,8 @@ M3Result m3_SaveSnapshotToModule (IM3Runtime io_runtime, IM3Module i_module, con
     IM3Module saved     = NULL;
     u8*       p;
 
-    if (not io_runtime or not i_module or not o_bytes or not o_size) {
-        return m3Err_mallocFailed;
+    만약 (not io_runtime or not i_module or not o_bytes or not o_size) {
+        반환 m3Err_mallocFailed;
     }
 
     *o_bytes = NULL;
@@ -3785,7 +3785,7 @@ _   (FindEmbeddedSnapshot(i_module->wasmStart, i_module->wasmEnd, secName, &drop
 
     p = out;
 
-    if (dropStart) {
+    만약 (dropStart) {
         size_t before = (size_t)(dropStart - i_module->wasmStart);
         size_t after  = (size_t)(i_module->wasmEnd - dropEnd);
 
@@ -3793,7 +3793,7 @@ _   (FindEmbeddedSnapshot(i_module->wasmStart, i_module->wasmEnd, secName, &drop
         p += before;
         memcpy(p, dropEnd, after);
         p += after;
-    } else {
+    } 아니면 {
         memcpy(p, i_module->wasmStart, origSize);
         p += origSize;
     }
@@ -3813,13 +3813,13 @@ _catch:
     m3_Free(bw.buffer);
     m3_Free(out);
 
-    return result;
-#else
+    반환 result;
+#아니면
     (void)io_runtime;
     (void)i_module;
     (void)i_name;
     (void)o_bytes;
     (void)o_size;
-    return "snapshots are not available in this build of Wasm3";
+    반환 "snapshots are not available in this build of Wasm3";
 #endif
 }

@@ -17,38 +17,38 @@ IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
     IM3CodePage page;
 
     // check multiplication overflow
-    if (i_minNumLines > UINT_MAX / sizeof(code_t)) {
-        return NULL;
+    만약 (i_minNumLines > UINT_MAX / sizeof(code_t)) {
+        반환 NULL;
     }
     u32 pageSize = sizeof(M3CodePageHeader) + sizeof(code_t) * i_minNumLines;
 
     // check addition overflow
-    if (pageSize < sizeof(M3CodePageHeader)) {
-        return NULL;
+    만약 (pageSize < sizeof(M3CodePageHeader)) {
+        반환 NULL;
     }
 
     pageSize = (pageSize + (d_m3CodePageAlignSize - 1)) & ~(d_m3CodePageAlignSize - 1); // align
     // check alignment overflow
-    if (pageSize == 0) {
-        return NULL;
+    만약 (pageSize == 0) {
+        반환 NULL;
     }
 
     page = (IM3CodePage)m3_Malloc("M3CodePage", pageSize);
 
-    if (page) {
+    만약 (page) {
         page->info.sequence = ++i_runtime->newCodePageSequence;
         page->info.numLines = (pageSize - sizeof(M3CodePageHeader)) / sizeof(code_t);
 
-#if d_m3RecordBacktraces
+#만약 d_m3RecordBacktraces
         u32 pageSizeBt     = sizeof(M3CodeMappingPage) + sizeof(M3CodeMapEntry) * page->info.numLines;
         page->info.mapping = (M3CodeMappingPage*)m3_Malloc("M3CodeMappingPage", pageSizeBt);
 
-        if (page->info.mapping) {
+        만약 (page->info.mapping) {
             page->info.mapping->size     = 0;
             page->info.mapping->capacity = page->info.numLines;
-        } else {
+        } 아니면 {
             m3_Free(page);
-            return NULL;
+            반환 NULL;
         }
         page->info.mapping->basePC = GetPageStartPC(page);
 #endif // d_m3RecordBacktraces
@@ -56,7 +56,7 @@ IM3CodePage NewCodePage (IM3Runtime i_runtime, u32 i_minNumLines)
         m3log(runtime, "new page: %p; seq: %d; bytes: %d; lines: %d", GetPagePC(page), page->info.sequence, pageSize, page->info.numLines);
     }
 
-    return page;
+    반환 page;
 }
 
 
@@ -64,11 +64,11 @@ void FreeCodePages (IM3CodePage* io_list)
 {
     IM3CodePage page = *io_list;
 
-    while (page) {
+    동안 (page) {
         m3log(code, "free page: %d; %p; util: %3.1f%%", page->info.sequence, page, 100. * page->info.lineIndex / page->info.numLines);
 
         IM3CodePage next = page->info.next;
-#if d_m3RecordBacktraces
+#만약 d_m3RecordBacktraces
         m3_Free(page->info.mapping);
 #endif // d_m3RecordBacktraces
         m3_Free(page);
@@ -83,7 +83,7 @@ u32 NumFreeLines (IM3CodePage i_page)
 {
     d_m3Assert(i_page->info.lineIndex <= i_page->info.numLines);
 
-    return i_page->info.numLines - i_page->info.lineIndex;
+    반환 i_page->info.numLines - i_page->info.lineIndex;
 }
 
 
@@ -99,11 +99,11 @@ void EmitWord32 (IM3CodePage i_page, const u32 i_word)
 
 void EmitWord64 (IM3CodePage i_page, const u64 i_word)
 {
-#if M3_SIZEOF_PTR == 4
+#만약 M3_SIZEOF_PTR == 4
                                                                         d_m3Assert (i_page->info.lineIndex+2 <= i_page->info.numLines);
     memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
     i_page->info.lineIndex += 2;
-#else
+#아니면
                                                                         d_m3Assert (i_page->info.lineIndex+1 <= i_page->info.numLines);
     memcpy(&i_page->code[i_page->info.lineIndex], &i_word, sizeof(i_word));
     i_page->info.lineIndex += 1;
@@ -111,7 +111,7 @@ void EmitWord64 (IM3CodePage i_page, const u64 i_word)
 }
 
 
-#if d_m3RecordBacktraces
+#만약 d_m3RecordBacktraces
 void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
 {
     M3CodeMappingPage* page = i_page->info.mapping;
@@ -127,16 +127,16 @@ void EmitMappingEntry (IM3CodePage i_page, u32 i_moduleOffset)
 
 pc_t GetPageStartPC (IM3CodePage i_page)
 {
-    return &i_page->code[0];
+    반환 &i_page->code[0];
 }
 
 
 pc_t GetPagePC (IM3CodePage i_page)
 {
-    if (i_page) {
-        return &i_page->code[i_page->info.lineIndex];
-    } else {
-        return NULL;
+    만약 (i_page) {
+        반환 &i_page->code[i_page->info.lineIndex];
+    } 아니면 {
+        반환 NULL;
     }
 }
 
@@ -155,7 +155,7 @@ IM3CodePage PopCodePage (IM3CodePage* i_list)
     *i_list          = page->info.next;
     page->info.next  = NULL;
 
-    return page;
+    반환 page;
 }
 
 
@@ -164,20 +164,20 @@ u32 FindCodePageEnd (IM3CodePage i_list, IM3CodePage* o_end)
     u32 numPages = 0;
     *o_end       = NULL;
 
-    while (i_list) {
+    동안 (i_list) {
         *o_end = i_list;
         ++numPages;
         i_list = i_list->info.next;
     }
 
-    return numPages;
+    반환 numPages;
 }
 
 
 u32 CountCodePages (IM3CodePage i_list)
 {
     IM3CodePage unused;
-    return FindCodePageEnd(i_list, &unused);
+    반환 FindCodePageEnd(i_list, &unused);
 }
 
 
@@ -186,13 +186,13 @@ IM3CodePage GetEndCodePage (IM3CodePage i_list)
     IM3CodePage end;
     FindCodePageEnd(i_list, &end);
 
-    return end;
+    반환 end;
 }
 
-#if d_m3RecordBacktraces
+#만약 d_m3RecordBacktraces
 bool ContainsPC (IM3CodePage i_page, pc_t i_pc)
 {
-    return GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
+    반환 GetPageStartPC(i_page) <= i_pc && i_pc < GetPagePC(i_page);
 }
 
 
@@ -205,26 +205,26 @@ bool MapPCToOffset (IM3CodePage i_page, pc_t i_pc, u32* o_moduleOffset)
     u32 left  = 0;
     u32 right = mapping->size;
 
-    while (left < right) {
+    동안 (left < right) {
         u32 mid = left + (right - left) / 2;
 
-        if (mapping->entries[mid].pcOffset < pcOffset) {
+        만약 (mapping->entries[mid].pcOffset < pcOffset) {
             left = mid + 1;
-        } else if (mapping->entries[mid].pcOffset > pcOffset) {
+        } 아니면 만약 (mapping->entries[mid].pcOffset > pcOffset) {
             right = mid;
-        } else {
+        } 아니면 {
             *o_moduleOffset = mapping->entries[mid].moduleOffset;
-            return true;
+            반환 true;
         }
     }
 
     // Getting here means left is now one more than the element we want.
-    if (left > 0) {
+    만약 (left > 0) {
         left--;
         *o_moduleOffset = mapping->entries[left].moduleOffset;
-        return true;
-    } else {
-        return false;
+        반환 true;
+    } 아니면 {
+        반환 false;
     }
 }
 #endif // d_m3RecordBacktraces

@@ -23,7 +23,7 @@ void        log_emit (IM3Compilation o, IM3Operation i_operation);
 
 cstr_t      SPrintFuncTypeSignature (IM3FuncType i_funcType);
 
-#else // DEBUG
+#아니면 // DEBUG
 
 #  define   dump_type_stack(...)      {}
 #  define   log_opcode(...)           {}
