@@ -11,21 +11,21 @@
 #include "m3_info.h"
 
 
-u8 ConvertTypeCharToTypeId (char i_code)
+u8 ConvertTypeCharToTypeId (var_na i_code)
 {
     switch (i_code) {
-    case 'v': return c_m3Type_none;
-    case 'i': return c_m3Type_i32;
-    case 'I': return c_m3Type_i64;
-    case 'f': return c_m3Type_f32;
-    case 'F': return c_m3Type_f64;
-    case '*': return c_m3Type_i32;
+    pak_sa 'v': คืน c_m3Type_none;
+    pak_sa 'i': คืน c_m3Type_i32;
+    pak_sa 'I': คืน c_m3Type_i64;
+    pak_sa 'f': คืน c_m3Type_f32;
+    pak_sa 'F': คืน c_m3Type_f64;
+    pak_sa '*': คืน c_m3Type_i32;
     // same letters c_waCompactTypes uses for the reference types
-    case 'r': return c_m3Type_funcref;
-    case 'R': return c_m3Type_externref;
-    case 'c': return c_m3Type_contref;
+    pak_sa 'r': คืน c_m3Type_funcref;
+    pak_sa 'R': คืน c_m3Type_externref;
+    pak_sa 'c': คืน c_m3Type_contref;
     }
-    return c_m3Type_unknown;
+    คืน c_m3Type_unknown;
 }
 
 
@@ -34,11 +34,11 @@ M3Result SignatureToFuncType (IM3FuncType* o_functionType, ccstr_t i_signature)
     IM3FuncType funcType = NULL;
 
 _try {
-    if (not o_functionType) {
+    ถ้า (not o_functionType) {
         _throw("null function type");
     }
 
-    if (not i_signature) {
+    ถ้า (not i_signature) {
         _throw("null function signature");
     }
 
@@ -57,31 +57,31 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
     m3type_t* typelist = funcType->types;
 
     bool parsingRets = true;
-    while (*sig) {
-        char typeChar = *sig++;
+    ขณะ (*sig) {
+        var_na typeChar = *sig++;
 
-        if (typeChar == '(') {
+        ถ้า (typeChar == '(') {
             parsingRets = false;
             continue;
-        } else if (typeChar == ' ') {
+        } มิฉะนั้น ถ้า (typeChar == ' ') {
             continue;
-        } else if (typeChar == ')') {
-            break;
+        } มิฉะนั้น ถ้า (typeChar == ')') {
+            bha_nga;
         }
 
         u8 type = ConvertTypeCharToTypeId(typeChar);
 
         _throwif("unknown argument type char", c_m3Type_unknown == type);
 
-        if (type == c_m3Type_none) {
+        ถ้า (type == c_m3Type_none) {
             continue;
         }
 
-        if (parsingRets) {
+        ถ้า (parsingRets) {
             _throwif("malformed signature; return count overflow", funcType->numRets >= maxNumTypes);
             funcType->numRets++;
             *typelist++ = type;
-        } else {
+        } มิฉะนั้น {
             _throwif("malformed signature; arg count overflow", (u32)(funcType->numRets) + funcType->numArgs >= maxNumTypes);
             funcType->numArgs++;
             *typelist++ = type;
@@ -90,13 +90,13 @@ _   (AllocFuncType(&funcType, (u32)maxNumTypes));
 
 } _catch:
 
-    if (result) {
+    ถ้า (result) {
         m3_Free(funcType);
     }
 
     *o_functionType = funcType;
 
-    return result;
+    คืน result;
 }
 
 
@@ -108,7 +108,7 @@ M3Result ValidateSignature (IM3Function i_function, ccstr_t i_linkingSignature)
     IM3FuncType ftype = NULL;
 _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
-    if (not AreFuncTypesEqual(ftype, i_function->funcType)) {
+    ถ้า (not AreFuncTypesEqual(ftype, i_function->funcType)) {
         m3log(module, "expected: %s", SPrintFuncTypeSignature(ftype));
         m3log(module, "   found: %s", SPrintFuncTypeSignature(i_function->funcType));
 
@@ -119,7 +119,7 @@ _   (SignatureToFuncType(&ftype, i_linkingSignature));
 
     m3_Free(ftype);
 
-    return result;
+    คืน result;
 }
 
 
@@ -137,13 +137,13 @@ _try {
 
     result = m3Err_functionLookupFailed;
 
-    for (u32 i = 0; i < io_module->numFunctions; ++i) {
+    สำหรับ (u32 i = 0; i < io_module->numFunctions; ++i) {
         const IM3Function f = &io_module->functions[i];
 
-        if (f->import.moduleUtf8 and f->import.fieldUtf8) {
-            if (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
+        ถ้า (f->import.moduleUtf8 and f->import.fieldUtf8) {
+            ถ้า (strcmp(f->import.fieldUtf8, i_functionName) == 0 and
                 (wildcardModule or strcmp(f->import.moduleUtf8, i_moduleName) == 0)) {
-                if (i_signature) {
+                ถ้า (i_signature) {
 _                   (ValidateSignature(f, i_signature));
                 }
 _               (CompileRawFunction(io_module, f, i_function, i_userdata));
@@ -151,24 +151,24 @@ _               (CompileRawFunction(io_module, f, i_function, i_userdata));
         }
     }
 } _catch:
-    return result;
+    คืน result;
 }
 
 M3Result m3_LinkRawFunctionEx (IM3Module         io_module,
-                               const char* const i_moduleName,
-                               const char* const i_functionName,
-                               const char* const i_signature,
+                               const var_na* const i_moduleName,
+                               const var_na* const i_functionName,
+                               const var_na* const i_signature,
                                M3RawCall         i_function,
                                const void*       i_userdata)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
+    คืน FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, i_userdata);
 }
 
 M3Result m3_LinkRawFunction (IM3Module         io_module,
-                             const char* const i_moduleName,
-                             const char* const i_functionName,
-                             const char* const i_signature,
+                             const var_na* const i_moduleName,
+                             const var_na* const i_functionName,
+                             const var_na* const i_signature,
                              M3RawCall         i_function)
 {
-    return FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
+    คืน FindAndLinkFunction(io_module, i_moduleName, i_functionName, i_signature, (voidptr_t)i_function, NULL);
 }
